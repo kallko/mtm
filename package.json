@@ -1,0 +1,15 @@
+{
+  "name": "mtmonitor",
+  "version": "0.0.1",
+  "description": "Manager transport monitor",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aleksey Bielokonenko",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3",
+    "pg": "^4.4.1"
+  }
+}

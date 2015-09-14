@@ -1,0 +1,68 @@
+<!-- <table st-table="rowCollection" class="table table-striped">
+		<thead>
+		<tr>
+			<th st-sort="firstName">first name</th>
+			<th st-sort="lastName">last name</th>
+		</tr>
+		<tr>
+			<th colspan="2">
+				<input st-search placeholder="global search" class="input-sm form-control" type="search"/>
+			</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat="row in rowCollection">
+			<td>{{row.firstName | uppercase}}</td>
+			<td>{{row.lastName}}</td>
+		</tr>
+		</tbody>
+	</table> -->
+
+<table st-safe-src="rowCollection" st-table="displayCollection" st-set-filter="myStrictFilter" class="table table-striped">
+    <thead>
+        <tr>
+            <th st-sort="address">Адрес</th>
+            <th st-sort="factNum">Номер по порядку доставки</th>
+            <th st-sort="planNum">Номер по плану</th>
+            <th st-sort="transport">Транспорт</th>
+            <th st-sort="driver">Водитель</th>
+            <th st-sort="status">Статус</th>
+        </tr>
+        <tr>
+            <th>
+                <input st-search="address" placeholder="поиск по адресу" class="input-sm form-control" type="search"/>
+            </th>
+            <th>
+                <input st-search="factNum" placeholder="поиск по транспорту" class="input-sm form-control" type="search"/>
+            </th>
+            <th>
+                <input st-search="planNum" placeholder="поиск по транспорту" class="input-sm form-control" type="search"/>
+            </th>
+            <th>
+                <input st-search="transport" placeholder="поиск по транспорту" class="input-sm form-control" type="search"/>
+            </th>
+            <th>
+                <input st-search="driver" placeholder="поиск по водителю" class="input-sm form-control" type="search"/>
+            </th>
+            <th>
+                <select st-search="status">
+                    <option value="">Все</option>
+                    <option ng-repeat="row in rowCollection | unique:'status'" value="{{row.status}}">{{row.status}}</option>
+                </select>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in displayCollection"
+            ng-class="{'red-row': row.status == 'Не доставленно',
+                       'green-row' : row.status == 'Доставлено',
+                       'yellow-row' : row.status == 'Отменен'}" >
+            <td>{{row.address}}</td>
+            <td>{{row.factNum}}</td>
+            <td>{{row.planNum}}</td>
+            <td>{{row.transport}}</td>
+            <td>{{row.driver}}</td>
+            <td ng-class="{'red-cell': row.status == 'Не доставленно'}" >{{row.status}}</td>
+        </tr>
+    </tbody>
+</table>

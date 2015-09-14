@@ -1,0 +1,20 @@
+.red-row{
+  background-color: #F76A7D !important;
+}
+
+.red-cell{
+  background-color: red;
+  font-weight: bold;
+}
+.green-row{
+  background-color: #B4F2B1 !important;
+}
+
+.yellow-row{
+  background-color: #F0F2B1 !important;
+}
+
+.container-fluid .table tr td{
+  padding: 3px;
+  font-size: 12px;
+}

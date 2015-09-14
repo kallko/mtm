@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='MTMonitor' >
+  <head>
+    <meta charset="utf-8">
+    <title>Монитор диспетчера</title>
+    <link rel="stylesheet" href="./css/application.css" />
+    <link rel="stylesheet" href="./css/bootstrap.css" />
+  </head>
+
+  <body>
+    <div class="container-fluid" >
+      <div ng-view></div>
+    </div>
+
+    <script src="/js/vendor/jquery.js"></script>
+    <script src="/js/vendor/angular.js"></script>
+    <script src="/js/vendor/angular-route.js"></script>
+    <script src="/js/vendor/bootstrap.min.js"></script>
+    <script src="/bower_components/angular-smart-table/dist/smart-table.js"></script>
+
+
+    <script src="./js/app.js"></script>
+    <script src="./js/router.js"></script>
+
+    <script src="./js/controllers/point-index-controller.js"></script>
+  </body>
+</html>
