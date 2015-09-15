@@ -13,8 +13,24 @@
       <table st-safe-src="rowCollection" st-table="displayCollection"
              class="table table-striped point-table" >
           <thead>
-              <tr id="search-holder-tr" >
-                <th colspan="5"><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
+              <tr id="table-menu-holder-tr" >
+                <th><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
+                <th>
+                  <span class="input-label" >Статус:</span>
+                  <select st-search="status">
+                    <option value="">Все</option>
+                    <option ng-repeat="row in rowCollection | unique:'status'"
+                            value="{{row.status}}">{{getTextStatus(row.status, null)}}</option>
+                  </select>
+                </th>
+                <th>
+                  <span class="input-label" >Водитель:</span>
+                  <select st-search="driverName">
+                    <option value="">Все</option>
+                    <option ng-repeat="row in rowCollection | unique:'driverName'"
+                            value="{{row.driverName}}">{{row.driverName}}</option>
+                  </select>
+                </th>
               </tr>
               <tr id="titles-tr" >
                   <th st-sort="number" >#</th>

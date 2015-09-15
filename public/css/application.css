@@ -19,6 +19,7 @@ html, body {
 #point-table table{
   width: 100%;
   min-width: 3300px;
+  border-bottom: 1px solid grey;
 }
 
 #map{
@@ -49,11 +50,6 @@ html, body {
   border-bottom: 1px solid grey;
 }
 
-#point-table input{
-  height: 24px !important;
-  font-size: 13px;
-}
-
 .row-white{
   background-color: white !important;
 }
@@ -74,14 +70,30 @@ html, body {
   background-color: #90C3D4 !important;
 }
 
-#search-holder-tr, #search-holder-tr th{
+#table-menu-holder-tr, #table-menu-holder-tr th{
   border: 0 !important;
 }
 
-#search-holder-tr{
+#table-menu-holder-tr{
   position: fixed;
   top: 49px;
   left: 170px;
+}
+
+.input-label{
+  font-size: 13px;
+  margin: 0 5px 0 10px;
+}
+
+#table-menu-holder-tr input{
+  height: 24px !important;
+  font-size: 13px;
+  width: 200px;
+}
+
+#table-menu-holder-tr select{
+  font-size: 13px;
+  margin-bottom: 2px;
 }
 
 #titles-tr{

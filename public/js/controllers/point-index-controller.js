@@ -69,20 +69,27 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
     }
 
     scope.getTextStatus = function(statusCode, pointId) {
-      var row = $('#point-' + pointId);
+      var newClass,
+          text;
       if(statusCode == 0){
-        row.addClass('row-white');
-        return 'Запланирован';
+        newClass = 'row-white';
+        text = 'Запланирован';
       } else if(statusCode == 1) {
-        row.addClass('row-yellow');
-        return 'Выполняется';
+        newClass = 'row-yellow';
+        text = 'Выполняется';
       } else if(statusCode == 2) {
-        row.addClass('row-green');
-        return 'Выполнен';
+        newClass = 'row-green';
+        text = 'Выполнен';
       } else if (statusCode == 3) {
-        row.addClass('row-red');
-        return 'Отменен';
+        newClass = 'row-red';
+        text = 'Отменен';
       }
+
+      if(pointId != null){
+        $('#point-' + pointId).addClass(newClass);
+      }
+
+      return text;
     }
 
     function generateTestData() {
