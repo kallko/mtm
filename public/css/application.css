@@ -22,9 +22,21 @@ html, body {
   min-width: 3300px;
 }
 
+#map{
+  height: 700px;
+}
+
+/*#point-table table thead{
+  position: fixed;
+  top: 50px;
+  left: 3px;
+  min-width: 3300px;
+  border: 1px solid grey;
+}*/
+
 #point-table table tr td, #point-table table tr th{
   font-size: 11px;
-  padding: 3px 5px;
+  padding: 4px 5px;
   margin: 0;
   border-right: 1px solid grey;
 }
@@ -35,4 +47,8 @@ html, body {
 
 .selected-row{
   background-color: #90C3D4 !important;
+}
+
+#tab-selector{
+  
 }
