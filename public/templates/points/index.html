@@ -1,68 +1,64 @@
-<!-- <table st-table="rowCollection" class="table table-striped">
-		<thead>
-		<tr>
-			<th st-sort="firstName">first name</th>
-			<th st-sort="lastName">last name</th>
-		</tr>
-		<tr>
-			<th colspan="2">
-				<input st-search placeholder="global search" class="input-sm form-control" type="search"/>
-			</th>
-		</tr>
-		</thead>
-		<tbody>
-		<tr ng-repeat="row in rowCollection">
-			<td>{{row.firstName | uppercase}}</td>
-			<td>{{row.lastName}}</td>
-		</tr>
-		</tbody>
-	</table> -->
+<div id="menu-holder" >
+  menu panel
+</div>
 
-<table st-safe-src="rowCollection" st-table="displayCollection" st-set-filter="myStrictFilter" class="table table-striped">
-    <thead>
-        <tr>
-            <th st-sort="address">Адрес</th>
-            <th st-sort="factNum">Номер по порядку доставки</th>
-            <th st-sort="planNum">Номер по плану</th>
-            <th st-sort="transport">Транспорт</th>
-            <th st-sort="driver">Водитель</th>
-            <th st-sort="status">Статус</th>
-        </tr>
-        <tr>
-            <th>
-                <input st-search="address" placeholder="поиск по адресу" class="input-sm form-control" type="search"/>
-            </th>
-            <th>
-                <input st-search="factNum" placeholder="поиск по транспорту" class="input-sm form-control" type="search"/>
-            </th>
-            <th>
-                <input st-search="planNum" placeholder="поиск по транспорту" class="input-sm form-control" type="search"/>
-            </th>
-            <th>
-                <input st-search="transport" placeholder="поиск по транспорту" class="input-sm form-control" type="search"/>
-            </th>
-            <th>
-                <input st-search="driver" placeholder="поиск по водителю" class="input-sm form-control" type="search"/>
-            </th>
-            <th>
-                <select st-search="status">
-                    <option value="">Все</option>
-                    <option ng-repeat="row in rowCollection | unique:'status'" value="{{row.status}}">{{row.status}}</option>
-                </select>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="row in displayCollection"
-            ng-class="{'red-row': row.status == 'Не доставленно',
-                       'green-row' : row.status == 'Доставлено',
-                       'yellow-row' : row.status == 'Отменен'}" >
-            <td>{{row.address}}</td>
-            <td>{{row.factNum}}</td>
-            <td>{{row.planNum}}</td>
-            <td>{{row.transport}}</td>
-            <td>{{row.driver}}</td>
-            <td ng-class="{'red-cell': row.status == 'Не доставленно'}" >{{row.status}}</td>
-        </tr>
-    </tbody>
-</table>
+<div id="point-table" class="table-holder" >
+  <table st-safe-src="rowCollection" st-table="displayCollection" class="table table-striped">
+      <thead>
+          <tr>
+              <th>#</th>
+              <th>Статус заказа</th>
+              <th>Фактический номер доставки</th>
+              <th>Номер доставки по плану</th>
+              <th>ID точки</th>
+              <th>ID заказа</th>
+              <th>Название точки</th>
+              <th>Адрес</th>
+              <th>Временное окно</th>
+              <th>Плановое время прибытия</th>
+              <th>Плановое время обслуживания</th>
+              <th>Плановое время простоя</th>
+              <th>Плановое время отбытия</th>
+              <th>Расстояние до точки</th>
+              <th>Прогноз прибытия</th>
+              <th>Фактические прибытие</th>
+              <th>Соблюдение плана</th>
+              <th>Номер машины</th>
+              <th>Водитель</th>
+              <th>Телефон водителя</th>
+              <th>Комментарий водителя</th>
+              <th>Диспетчер</th>
+              <th>Комментарий диспетчера</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr ng-repeat="row in displayCollection" id="{{'point-' + row.pointID}}"
+              ng-click="rowClick(row.pointID)" >
+              <td>{{row.number}}</td>
+              <td>{{row.status}}</td>
+              <td>{{row.realOrder}}</td>
+              <td>{{row.planOrder}}</td>
+              <td>{{row.pointID}}</td>
+              <td>{{row.orderID}}</td>
+              <td>{{row.pointName}}</td>
+              <td>{{row.address}}</td>
+              <td>{{row.timeWindow.start | date: 'HH:mm'}} - {{row.timeWindow.finish | date: 'HH:mm'}}</td>
+              <td>{{row.planArrivalTime | date: 'HH:mm'}}</td>
+              <td>{{row.planServiceTime}}</td>
+              <td>{{row.planDowntime}}</td>
+              <td>{{row.planDeparture}}</td>
+              <td>{{row.distance}}</td>
+              <td>{{row.predictionArrivalTime | date: 'HH:mm'}}</td>
+              <td>{{row.factArrivalTime | date: 'HH:mm'}}</td>
+              <td>{{(row.serviceTime - 3600 * 2) * 1000 | date: 'HH:mm'}}</td>
+              <td>{{row.driverInPlan}}</td>
+              <td>{{row.carNumber}}</td>
+              <td>{{row.driverName}}</td>
+              <td>{{row.phone}}</td>
+              <td>{{row.driverComment}}</td>
+              <td>{{row.managerName}}</td>
+              <td>{{row.managerComment}}</td>
+          </tr>
+      </tbody>
+  </table>
+</div>

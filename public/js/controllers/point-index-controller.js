@@ -1,71 +1,66 @@
-angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$filter', function (scope, filter) {
+angular.module('MTMonitor').controller('PointIndexController', ['$scope', function (scope) {
 
-  // var
-  //     nameList = ['Pierre', 'Pol', 'Jacques', 'Robert', 'Elisa'],
-  //     familyName = ['Dupont', 'Germain', 'Delcourt', 'bjip', 'Menez'];
-  //
-  // function createRandomItem() {
-  //     var
-  //         firstName = nameList[Math.floor(Math.random() * 4)],
-  //         lastName = familyName[Math.floor(Math.random() * 4)];
-  //
-  //     return{
-  //         firstName: firstName,
-  //         lastName: lastName
-  //     };
-  // }
-  //
-  // scope.rowCollection = [];
-  // for (var j = 0; j < 50; j++) {
-  //     scope.rowCollection.push(createRandomItem());
-  // }
+    setListeners();
+    generateTestData();
 
-    function randomStr(len){
-      var text = "";
-      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-      for( var i=0; i < len; i++ )
-          text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-      return text;
+    function Point(){
+      this.number = 0;
+      this.status = 0;
+      this.realOrder = 0;
+      this.planOrder = 0;
+      this.pointID = 0;
+      this.orderID = 0;
+      this.pointName = 'test name';
+      this.address = 'test address';
+      this.timeWindow = {
+        start: 0,
+        finish: 0
+      };
+      this.planArrivalTime = 0;
+      this.planServiceTime = 0;
+      this.planDowntime = 0;
+      this.planDeparture = 0;
+      this.distance = 0;
+      this.predictionArrivalTime = 0;
+      this.factArrivalTime = 0;
+      this.driverInPlan = true;
+      this.carNumber = '0000';
+      this.driverName = 'Test Name';
+      this.phone = '0000';
+      this.driverComment = '';
+      this.managerName = '';
+      this.managerComment = '';
     }
 
-    var testData = []
-        tmpStatus = '';
-    for (var i = 0; i < 70; i++) {
-      tmpStatus = Math.round(Math.random() * 10) % 2 == 0 ? 'Доставлено' : 'Не доставленно';
-      tmpStatus = Math.round(Math.random() * 21) % 10 == 0 ? 'Отменен' : tmpStatus,
-      testData.push({address: 'address ' + i,
-                    factNum: i,
-                    planNum: i,
-                    transport: 'transport' + i,
-                    driver: 'driver' + i,
-                    status: tmpStatus,
-                    strictSelectValue: "ab"});
+    function setListeners(){
+      $(window).resize(resetHeight);
+      resetHeight();
     }
-    scope.rowCollection = testData;
 
-    scope.displayCollection = [].concat(scope.rowCollection);
+    function resetHeight(){
+      var tableHeight = $(window).height() - $("#menu-holder").height() - 10;
+      $('#point-table').height(tableHeight);
+    }
 
-    scope.predicates = ['address', 'factNum', 'planNum', 'transport', 'driver', 'balance', 'email'];
-    scope.selectedPredicate = scope.predicates[0];
+    scope.rowClick = function(id) {
+      console.log('click on ' + id);
+      $('.selected-row').removeClass('selected-row');
+      $('#point-' + id).addClass('selected-row');
+    }
+
+    function generateTestData(){
+      var testData = []
+          tmpPoint = null;
+      for (var i = 0; i < 77; i++) {
+        tmpPoint = new Point();
+        tmpPoint.number = i + 1;
+        tmpPoint.pointID = i + 1;
+        tmpPoint.status = i % 4;
+        tmpPoint.driverName = "Driver" + i % 3;
+        testData.push(tmpPoint);
+      }
+
+      scope.rowCollection = testData;
+      scope.displayCollection = [].concat(scope.rowCollection);
+    }
 }]);
-
-// angular.module('MTMonitor').filter('myStrictFilter', function($filter){
-//     return function(input, predicate){
-//         return $filter('filter')(input, predicate, true);
-//     }
-// });
-
-angular.module('MTMonitor').filter('unique', function() {
-    return function (arr, field) {
-        var o = {}, i, l = arr.length, r = [];
-        for(i=0; i<l;i+=1) {
-            o[arr[i][field]] = arr[i];
-        }
-        for(i in o) {
-            r.push(o[i]);
-        }
-        return r;
-    };
-  });

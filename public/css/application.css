@@ -1,20 +1,38 @@
-.red-row{
-  background-color: #F76A7D !important;
+html, body {
+  height: 100%;
 }
 
-.red-cell{
-  background-color: red;
-  font-weight: bold;
-}
-.green-row{
-  background-color: #B4F2B1 !important;
+.container-fluid{
+  padding: 4px !important;
 }
 
-.yellow-row{
-  background-color: #F0F2B1 !important;
+#menu-holder{
+  height: 70px;
 }
 
-.container-fluid .table tr td{
-  padding: 3px;
-  font-size: 12px;
+#point-table{
+  overflow-y: scroll;
+  width: 100%;
+  height: 500px;
+}
+
+#point-table table{
+  border: 1px solid grey;
+  width: 100%;
+  min-width: 2700px;
+}
+
+#point-table table tr td, #point-table table tr th{
+  font-size: 11px;
+  padding: 3px 5px;
+  margin: 0;
+  border-right: 1px solid grey;
+}
+
+#point-table table tr th{
+  border-bottom: 1px solid grey;
+}
+
+.selected-row{
+  background-color: #90C3D4 !important;
 }
