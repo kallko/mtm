@@ -47,7 +47,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
     }
 
     function resetHeight(){
-      var tableHeight = $(window).height() - $("#menu-holder").height() - 10;
+      var tableHeight = $(window).height() - $("#menu-holder").height()
+                                           - $("#tab-selector").height() - 12;
       $('#point-table').height(tableHeight);
     }
 
@@ -67,14 +68,31 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
       $('#point-' + id).addClass('selected-row');
     }
 
-    function generateTestData(){
+    scope.getTextStatus = function(statusCode, pointId) {
+      var row = $('#point-' + pointId);
+      if(statusCode == 0){
+        row.addClass('row-white');
+        return 'Запланирован';
+      } else if(statusCode == 1) {
+        row.addClass('row-yellow');
+        return 'Выполняется';
+      } else if(statusCode == 2) {
+        row.addClass('row-green');
+        return 'Выполнен';
+      } else if (statusCode == 3) {
+        row.addClass('row-red');
+        return 'Отменен';
+      }
+    }
+
+    function generateTestData() {
       var testData = []
           tmpPoint = null;
       for (var i = 0; i < 77; i++) {
         tmpPoint = new Point();
         tmpPoint.number = i + 1;
         tmpPoint.pointID = i + 1;
-        tmpPoint.status = i % 4;
+        tmpPoint.status = Math.floor(Math.random() * 4);
         tmpPoint.driverName = "Driver" + i % 3;
         testData.push(tmpPoint);
       }

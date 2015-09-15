@@ -44,7 +44,7 @@
               <tr ng-repeat="row in displayCollection" id="{{'point-' + row.pointID}}"
                   ng-click="rowClick(row.pointID)" >
                   <td>{{row.number}}</td>
-                  <td>{{row.status}}</td>
+                  <td>{{getTextStatus(row.status, row.pointID)}}</td>
                   <td>{{row.realOrder}}</td>
                   <td>{{row.planOrder}}</td>
                   <td>{{row.pointID}}</td>
