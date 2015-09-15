@@ -19,7 +19,7 @@ html, body {
 #point-table table{
   border: 1px solid grey;
   width: 100%;
-  min-width: 2700px;
+  min-width: 3300px;
 }
 
 #point-table table tr td, #point-table table tr th{
