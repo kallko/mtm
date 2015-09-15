@@ -44,11 +44,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
       $("#map-link").on('click', function() {
         map.invalidateSize(false);
       });
+
+      $('ul.nav-pills li a').click(function (e) {
+        $('ul.nav-pills li.active').removeClass('active')
+        $(this).parent('li').addClass('active')
+      });
     }
 
     function resetHeight(){
       var tableHeight = $(window).height() - $("#menu-holder").height()
-                                           - $("#tab-selector").height() - 12;
+                                           - $("#tab-selector").height() - 22;
       $('#point-table').height(tableHeight);
     }
 

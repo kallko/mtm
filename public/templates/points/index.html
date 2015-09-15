@@ -4,7 +4,7 @@
 
 <div id="tabs" >
   <ul id="tab-selector" class="nav nav-pills" >
-    <li><a href="#tabs-1">Таблица</a></li>
+    <li class="active" ><a href="#tabs-1">Таблица</a></li>
     <li><a href="#tabs-2" id="map-link" >Карта</a></li>
   </ul>
 
@@ -63,7 +63,7 @@
               <tr ng-repeat="row in displayCollection" id="{{'point-' + row.pointID}}"
                   ng-click="rowClick(row.pointID)" >
                   <td>{{row.number}}</td>
-                  <td>{{getTextStatus(row.status, row.pointID)}}</td>
+                  <td>{{getTextStatus(row.status, null)}}</td>
                   <td>{{row.realOrder}}</td>
                   <td>{{row.planOrder}}</td>
                   <td>{{row.pointID}}</td>

@@ -50,6 +50,14 @@ html, body {
   border-bottom: 1px solid grey;
 }
 
+.nav > li > a{
+  padding: 5px !important;
+}
+
+#tab-selector{
+  margin-bottom: 10px;
+}
+
 .row-white{
   background-color: white !important;
 }
@@ -76,8 +84,8 @@ html, body {
 
 #table-menu-holder-tr{
   position: fixed;
-  top: 49px;
-  left: 170px;
+  top: 43px;
+  left: 140px;
 }
 
 .input-label{
