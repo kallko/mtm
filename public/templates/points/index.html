@@ -13,7 +13,10 @@
       <table st-safe-src="rowCollection" st-table="displayCollection"
              class="table table-striped point-table" >
           <thead>
-              <tr>
+              <tr id="search-holder-tr" >
+                <th colspan="5"><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
+              </tr>
+              <tr id="titles-tr" >
                   <th st-sort="number" >#</th>
                   <th st-sort="status" >Статус заказа</th>
                   <th st-sort="realOrder" >Фактический номер доставки</th>
