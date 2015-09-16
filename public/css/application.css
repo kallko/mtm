@@ -27,7 +27,7 @@ html, body {
 }
 
 /*#point-table table thead{
-  position: fixed;
+  position: absolute;
   top: 50px;
   left: 3px;
   min-width: 3300px;
