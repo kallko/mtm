@@ -16,7 +16,7 @@
               <tr id="table-menu-holder-tr" >
                 <th><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
                 <th>
-                  <span class="input-label" >Статус:</span>
+                  <span class="input-label" >Статус заказа:</span>
                   <select st-search="status">
                     <option value="">Все</option>
                     <option ng-repeat="row in rowCollection | unique:'status'"
@@ -29,6 +29,14 @@
                     <option value="">Все</option>
                     <option ng-repeat="row in rowCollection | unique:'driverName'"
                             value="{{row.driverName}}">{{row.driverName}}</option>
+                  </select>
+                </th>
+                <th>
+                  <span class="input-label" >Соблюдение плана:</span>
+                  <select st-search="driverInPlan" >
+                    <option value="">Все</option>
+                    <option value="true">В плане</option>
+                    <option value="false">Вне плане</option>
                   </select>
                 </th>
               </tr>

@@ -106,6 +106,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
         tmpPoint.pointID = i + 1;
         tmpPoint.status = Math.floor(Math.random() * 4);
         tmpPoint.driverName = "Driver" + i % 3;
+        tmpPoint.driverInPlan = Math.floor(Math.random() * 3) != 0;
         testData.push(tmpPoint);
       }
 
