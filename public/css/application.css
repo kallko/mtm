@@ -37,10 +37,15 @@ template{
   position: absolute;
   top: 0px;
   left: 0px;
+  z-index: 0;
 }
 
 .lm_goldenlayout{
   background: none !important;
+}
+
+.lm_item{
+  z-index: 2;
 }
 
 #point-table table tr{

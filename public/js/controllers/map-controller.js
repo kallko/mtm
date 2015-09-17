@@ -1,9 +1,10 @@
-angular.module('MTMonitor').controller('MapTransparentController', ['$scope', function (scope) {
+angular.module('MTMonitor').controller('MapController', ['$scope', function (scope) {
   var map,
       position
       inside = false,
       windowEl = $(window),
-      holderEl = null;
+      holderEl = null,
+      changingWindow = false;
 
   initMap();
   addListeners();
@@ -23,9 +24,9 @@ angular.module('MTMonitor').controller('MapTransparentController', ['$scope', fu
     $(window).resize(resize);
     resize();
 
-    holderEl = $('#transparent-map-holder'),
+    holderEl = $('#transparent-map-holder');
     holderEl.parent().on('mouseenter', function(event){
-      if(!inside){
+      if(!inside && !changingWindow){
         position = holderEl.position();
         position.width = holderEl.width();
         position.height = holderEl.height();
@@ -35,13 +36,27 @@ angular.module('MTMonitor').controller('MapTransparentController', ['$scope', fu
 
         $('body').mousemove(function(event) {
           if(!checkMouseInRect(position, event.clientX, event.clientY)){
-            inside = false;
-            $('.lm_goldenlayout').css('pointer-events', 'auto');
-            $('body').off('mousemove');
+            disableMap();
           }
         });
+
+        $('.lm_drag_handle').on('mousedown', function(){
+          changingWindow = true;
+          disableMap();
+        });
+
+        $('.lm_drag_handle').on('mouseup', function(){
+          changingWindow = false;
+        });
+
       }
     });
+  }
+
+  function disableMap(){
+    inside = false;
+    $('.lm_goldenlayout').css('pointer-events', 'auto');
+    $('body').off('mousemove');
   }
 
   function setTransparent(){
@@ -66,6 +81,7 @@ angular.module('MTMonitor').controller('MapTransparentController', ['$scope', fu
   function resize(){
       $('#map').height($(window).height());
       $('#map').width($(window).width());
+      map.invalidateSize();
   }
 
 }]);
