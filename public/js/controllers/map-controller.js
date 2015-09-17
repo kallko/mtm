@@ -41,11 +41,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
     });
 
     myLayout.on( 'stateChanged', function(){
-        setTransparent();
-        disableMap();
-        changingWindow = false;
-        checkMapWindowRect();
+      setTransparent();
+      disableMap();
+      changingWindow = false;
+      checkMapWindowRect();
     });
+
+    $('body').on('mouseenter', checkMapWindowRect);
+    holderEl.on('mouseenter', checkMapWindowRect);
   }
 
   function checkMapWindowRect(){

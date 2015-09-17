@@ -121,3 +121,7 @@ template{
 #titles-tr{
   border-top: 1px solid grey;
 }
+
+.leaflet-top, .leaflet-bottom, .leaflet-left, .leaflet-right{
+  z-index: 0;
+}
