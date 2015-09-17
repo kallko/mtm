@@ -2,6 +2,10 @@ html, body {
   height: 100%;
 }
 
+template{
+  display:none;
+}
+
 .container-fluid{
   padding: 4px !important;
 }
@@ -83,9 +87,9 @@ html, body {
 }
 
 #table-menu-holder-tr{
-  position: fixed;
+  /*position: absolute;
   top: 43px;
-  left: 140px;
+  left: 140px;*/
 }
 
 .input-label{
