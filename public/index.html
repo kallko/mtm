@@ -29,7 +29,7 @@
              class="table table-striped point-table" >
           <thead>
               <tr id="table-menu-holder-tr" >
-                <th><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
+                <th colspan="2" ><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
                 <th>
                   <span class="input-label" >Статус заказа:</span>
                   <select st-search="status">
@@ -38,7 +38,7 @@
                             value="{{row.status}}">{{getTextStatus(row.status, null)}}</option>
                   </select>
                 </th>
-                <th>
+                <th colspan="2" >
                   <span class="input-label" >Водитель:</span>
                   <select st-search="driverName">
                     <option value="">Все</option>
@@ -46,7 +46,7 @@
                             value="{{row.driverName}}">{{row.driverName}}</option>
                   </select>
                 </th>
-                <th>
+                <th colspan="2" >
                   <span class="input-label" >Соблюдение плана:</span>
                   <select st-search="driverInPlan" >
                     <option value="">Все</option>

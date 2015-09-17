@@ -7,20 +7,22 @@ var myLayout = new GoldenLayout({
   content:[{
     type: 'row',
     content: [{
-              type: 'component',
-              componentName: 'template',
-              componentState: { templateId: 'transparent-map-window' }
-          },{
               type: 'column',
               content:[{
                   type: 'component',
                   componentName: 'template',
-                  componentState: { templateId: 'template-point-table' }
+                  componentState: { templateId: 'transparent-map-window' }
               },{
                   type: 'component',
+                  height: 30,
                   componentName: 'template',
                   componentState: { templateId: 'template2' }
               }]
+          },{
+              type: 'component',
+              width: 30,
+              componentName: 'template',
+              componentState: { templateId: 'template-point-table' }
           }]
   }]
 });

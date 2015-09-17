@@ -8,7 +8,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
 
   initMap();
   addListeners();
-  setTransparent();
+  // setTransparent();
 
   function checkMouseInRect(pos, x, y){
     if(pos.top < y && pos.left < x &&
@@ -41,6 +41,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
     });
 
     myLayout.on( 'stateChanged', function(){
+        setTransparent();
         disableMap();
         changingWindow = false;
         checkMapWindowRect();
@@ -75,6 +76,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
     var el = holderEl.parent();
 
     for (var i = 0; i < 4; i++) {
+      if(i == 3 && el[0] != undefined){
+        $(el[0].firstChild).hide();
+      }
+
       el.css('opacity', '0');
       el = el.parent();
     }
