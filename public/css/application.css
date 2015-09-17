@@ -37,7 +37,7 @@ template{
   position: absolute;
   top: 0px;
   left: 0px;
-  z-index: 0;
+  /*z-index: -1;*/
 }
 
 .lm_goldenlayout{
@@ -45,7 +45,7 @@ template{
 }
 
 .lm_item{
-  z-index: 2;
+  /*z-index: 0;*/
 }
 
 #point-table table tr{

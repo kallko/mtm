@@ -27,28 +27,40 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
     holderEl = $('#transparent-map-holder');
     holderEl.parent().on('mouseenter', function(event){
       if(!inside && !changingWindow){
-        position = holderEl.position();
-        position.width = holderEl.width();
-        position.height = holderEl.height();
-        inside = true;
-        $('.lm_goldenlayout').css('pointer-events', 'none');
-        // console.log(event);
+        checkMapWindowRect();
+      }
+    });
 
-        $('body').mousemove(function(event) {
-          if(!checkMouseInRect(position, event.clientX, event.clientY)){
-            disableMap();
-          }
-        });
+    $('.lm_drag_handle').on('mousedown', function(){
+      changingWindow = true;
+      disableMap();
+    });
 
-        $('.lm_drag_handle').on('mousedown', function(){
-          changingWindow = true;
-          disableMap();
-        });
+    $('.lm_drag_handle').on('mouseup', function(){
+      changingWindow = false;
+    });
 
-        $('.lm_drag_handle').on('mouseup', function(){
-          changingWindow = false;
-        });
+    myLayout.on( 'stateChanged', function(){
+        disableMap();
+        changingWindow = false;
+        checkMapWindowRect();
+    });
+  }
 
+  function checkMapWindowRect(){
+    if(holderEl == null){
+      holderEl = $('#transparent-map-holder');
+    }
+
+    position = holderEl.position();
+    position.width = holderEl.width();
+    position.height = holderEl.height();
+    inside = true;
+    $('.lm_goldenlayout').css('pointer-events', 'none');
+
+    $('body').mousemove(function(event) {
+      if(!checkMouseInRect(position, event.clientX, event.clientY)){
+        disableMap();
       }
     });
   }
