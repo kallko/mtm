@@ -8,6 +8,7 @@ template{
 
 #transparent-map-holder{
   opacity: 0;
+  height: 100%;
 }
 
 .container-fluid{
@@ -41,18 +42,6 @@ template{
 .lm_goldenlayout{
   background: none !important;
 }
-
-/*.leaflet-control-container{
-  z-index: 0;
-}*/
-
-/*#point-table table thead{
-  position: absolute;
-  top: 50px;
-  left: 3px;
-  min-width: 3300px;
-  border: 1px solid grey;
-}*/
 
 #point-table table tr{
   border-left: 1px solid grey;
