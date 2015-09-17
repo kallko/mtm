@@ -2,9 +2,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
 
     setListeners();
     generateTestData();
-    initMap();
-
-    var map;
 
     function Point(){
       this.number = 0;
@@ -55,19 +52,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
       var tableHeight = $(window).height() - $("#menu-holder").height()
                                            - $("#tab-selector").height() - 22;
       $('#point-table').height(tableHeight);
-    }
-
-    function initMap(){
-      var map = $('#map');
-      if($('#map').length == 0) return;
-
-      map = L.map('map').setView([50.4412776, 30.4671281], 11);
-      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-          attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-          maxZoom: 18,
-          id: 't4ddy.229f0f41',
-          accessToken: 'pk.eyJ1IjoidDRkZHkiLCJhIjoiZDJhZDRhM2E2NmMzZWNhZWM3YTlmMWZhOTYwNmJlMGUifQ.6GBanGLBka6DNFexeC3M6g'
-      }).addTo(map);
     }
 
     scope.rowClick = function(id) {

@@ -16,10 +16,12 @@
 
 <script src="./js/app.js"></script>
 <script src="./js/controllers/point-index-controller.js"></script>
+<script src="./js/controllers/map-transparent-controller.js"></script>
 <script src="./js/filters/mtm-unique.js"></script>
 
+<div id="map"></div>
 
-<template type="text/html" id="templatePointTable">
+<template type="text/html" id="template-point-table">
 	<div ng-controller="PointIndexController" class="section">
 
     <div id="point-table" class="table-holder" >
@@ -115,9 +117,9 @@
 	</div>
 </template>
 
-<template type="text/html" id="template1">
-	<div class="section">
-		EMPTY WINDOW template1
+<template type="text/html" id="transparent-map-window">
+	<div class="section" ng-controller="MapTransparentController" id="transparent-map-holder" >
+		transparent-map-window
 	</div>
 </template>
 

@@ -6,6 +6,10 @@ template{
   display:none;
 }
 
+#transparent-map-holder{
+  opacity: 0;
+}
+
 .container-fluid{
   padding: 4px !important;
 }
@@ -27,8 +31,20 @@ template{
 }
 
 #map{
-  height: 700px;
+  height: 800px;
+  width: 800px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
+
+.lm_goldenlayout{
+  background: none !important;
+}
+
+/*.leaflet-control-container{
+  z-index: 0;
+}*/
 
 /*#point-table table thead{
   position: absolute;
