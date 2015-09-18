@@ -35,9 +35,5 @@ SoapManager.prototype.getDailyPlan = function(){
           console.log(err.body);
         }
     });
-  });  
+  });
 };
-
-
-
-// GET_ITINERARY_NEW

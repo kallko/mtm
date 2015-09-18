@@ -23,6 +23,13 @@ function XMLConstructor(){
   };
 }
 
+XMLConstructor.prototype.getTodayStr = function(){
+  var date = new Date();
+  return ("0" + date.getDate()).slice(-2) + '.' +
+         ("0" + (date.getMonth() + 1)).slice(-2) + '.' +
+         date.getFullYear();
+}
+
 XMLConstructor.prototype.dailyPlanXML = function(){
   var str = '';
   str += this.xml.begin;
@@ -30,7 +37,7 @@ XMLConstructor.prototype.dailyPlanXML = function(){
   str += this.xml.instruction.daily_plan;
 
   str += this.xml.parameter.begin;
-  str += this.xml.setGetValue('DATE', '18.09.2015');
+  str += this.xml.setGetValue('DATE', this.getTodayStr());
   str += this.xml.slashEnd;
 
   str += this.xml.instruction.end;
@@ -38,3 +45,5 @@ XMLConstructor.prototype.dailyPlanXML = function(){
   str += this.xml.end;
   return str;
 };
+
+// GET_ITINERARY_NEW
