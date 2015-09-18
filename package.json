@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.13.3",
-    "pg": "^4.4.1"
+    "pg": "^4.4.1",
+    "soap": "^0.9.3"
   }
 }
