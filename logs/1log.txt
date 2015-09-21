@@ -1,0 +1,12 @@
+{
+  "MESSAGE": {
+    "$": {
+      "xmlns": "http://sngtrans.com.ua",
+      "xmlns:xs": "http://www.w3.org/2001/XMLSchema",
+      "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
+    },
+    "ITINERARIES": [
+      ""
+    ]
+  }
+}
