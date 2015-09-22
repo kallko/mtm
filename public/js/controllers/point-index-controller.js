@@ -1,4 +1,4 @@
-angular.module('MTMonitor').controller('PointIndexController', ['$scope', function (scope) {
+angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', function (scope, http) {
 
     setListeners();
     generateTestData();
@@ -34,7 +34,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
     }
 
     function loadDailyData() {
-      
+      http.get('/dailydata', {})
+        .success(function(data){
+         
+         console.log('loadDailyData success');
+         console.log(data);
+
+
+       });
     }
 
     function setListeners(){

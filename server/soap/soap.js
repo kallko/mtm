@@ -26,11 +26,11 @@ SoapManager.prototype.getFullUrl = function() {
   return 'https://' + this.login + ':' + this.password + this.url;
 };
 
-SoapManager.prototype.getAllDailyData = function(){
-  this.getDailyPlan();
+SoapManager.prototype.getAllDailyData = function(callback){
+  this.getDailyPlan(callback);
 };
 
-SoapManager.prototype.getDailyPlan = function(){
+SoapManager.prototype.getDailyPlan = function(callback){
   var me = this;
 
   soap.createClient(me.getFullUrl(), function(err, client) {
@@ -47,7 +47,7 @@ SoapManager.prototype.getDailyPlan = function(){
 
           var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
           for (var i = 0; i < itineraries.length; i++) {
-            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION);
+            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, callback);
           }
 
         });
@@ -59,7 +59,7 @@ SoapManager.prototype.getDailyPlan = function(){
   });
 };
 
-SoapManager.prototype.getItinerary = function(client, id, version) {
+SoapManager.prototype.getItinerary = function(client, id, version, callback) {
   var me = this;
   client.run({'input_data' : _xml.itineraryXML(id, version)}, function(err, result) {
     if (!err) {
@@ -76,7 +76,7 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
 
         var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
         me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data);
-        me.getTransportsAndDrivers(client, data);
+        me.getTransportsAndDrivers(client, data, callback);
 
       });
     } else {
@@ -102,7 +102,7 @@ SoapManager.prototype.prepareItinerary = function(routes, data) {
   }
 }
 
-SoapManager.prototype.getTransportsAndDrivers = function(client, data) {
+SoapManager.prototype.getTransportsAndDrivers = function(client, data, callback) {
   var me = this;
   log.l("getTransportsAndDrivers");
   log.l(_xml.transportsAndDriversXML());
@@ -128,6 +128,7 @@ SoapManager.prototype.getTransportsAndDrivers = function(client, data) {
         }
 
         log.toFLog("routes.js", data);
+        callback(data);
       });
       
     }

@@ -10,7 +10,9 @@ var router = require('./server/router'),
 
 // var soapManager = new soap('hd', 'QJQB8uxW');
 // var soapManager = new soap('k00056.0', 'As123456');
-// soapManager.getAllDailyData();
+// soapManager.getAllDailyData(function(data) {
+// 	console.log('=== getAllDailyData callback ===');
+// });
 
 app.use('/', router).listen(process.env.PORT || port);
 console.log('Listening on port ' + (process.env.PORT || port) + '...');
