@@ -76,7 +76,7 @@ SoapManager.prototype.getItinerary = function(client, id, version, callback) {
 
         var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
         me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data);
-        me.getTransportsAndDrivers(client, data, callback);
+        me.getAdditionalData(client, data, callback);
 
       });
     } else {
@@ -102,20 +102,20 @@ SoapManager.prototype.prepareItinerary = function(routes, data) {
   }
 }
 
-SoapManager.prototype.getTransportsAndDrivers = function(client, data, callback) {
+SoapManager.prototype.getAdditionalData = function(client, data, callback) {
   var me = this;
-  log.l("getTransportsAndDrivers");
-  log.l(_xml.transportsAndDriversXML());
-  client.run({'input_data' : _xml.transportsAndDriversXML()}, function(err, result) {
+  log.l("getAdditionalData");
+  log.l(_xml.additionalDataXML(data.ID));
+  client.run({'input_data' : _xml.additionalDataXML(data.ID)}, function(err, result) {
     if (!err) {
       parseXML(result.return, function(err, res) {
         log.toFLog("transports_driver.js", res);
         // return; // !!!!!!!!!!!!!!!!!!!!!!!
 
         var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,
-            drivers =  res.MESSAGE.DRIVERS[0].DRIVER;
-        //     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT;
-        // log.l('waypoints.length = ' + waypoints.length);
+            drivers =  res.MESSAGE.DRIVERS[0].DRIVER,
+            waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT;
+        log.l('waypoints.length = ' + waypoints.length);
 
         data.transports = [];
         for (var i = 0; i < transports.length; i++) {
@@ -125,6 +125,11 @@ SoapManager.prototype.getTransportsAndDrivers = function(client, data, callback)
         data.drivers = [];
         for (var i = 0; i < drivers.length; i++) {
           data.drivers.push(drivers[i].$);
+        }
+
+        data.waypoints = [];
+        for (var i = 0; i < waypoints.length; i++) {
+          data.waypoints.push(waypoints[i].$);
         }
 
         log.toFLog("routes.js", data);

@@ -75,7 +75,7 @@ XMLConstructor.prototype.itineraryXML = function(id, version) {
   return str;
 }
 
-XMLConstructor.prototype.transportsAndDriversXML = function() {
+XMLConstructor.prototype.additionalDataXML = function(routeid) {
   var str = '';
   str += this.xml.begin;
   str += this.xml.instructions.begin;
@@ -84,9 +84,11 @@ XMLConstructor.prototype.transportsAndDriversXML = function() {
   str += this.xml.instruction.end;
   str += this.xml.instruction.drivers;
   str += this.xml.instruction.end;
-  // str += this.xml.instruction.waypoints;
-  // str += '<PARAMETER KEY="ID" VALUE="4412000" />';
-  // str += this.xml.instruction.end;
+  str += this.xml.instruction.waypoints;
+  str += this.xml.parameter.begin;
+  str += this.xml.setGetValue('IDROUTE', routeid);
+  str += this.xml.slashEnd;
+  str += this.xml.instruction.end;
 
   str += this.xml.instructions.end;
   str += this.xml.end;
