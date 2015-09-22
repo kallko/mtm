@@ -105,7 +105,7 @@ SoapManager.prototype.prepareItinerary = function(routes, data) {
 SoapManager.prototype.getAdditionalData = function(client, data, callback) {
   var me = this;
   log.l("getAdditionalData");
-  log.l(_xml.additionalDataXML(data.ID));
+  log.l(_xml.additionalDataXML(data.ID) + '\n');
   client.run({'input_data' : _xml.additionalDataXML(data.ID)}, function(err, result) {
     if (!err) {
       parseXML(result.return, function(err, res) {

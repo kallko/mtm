@@ -50,6 +50,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     function linkDataParts(data) {
+      var startTime = Date.now();
+
+      var tmpPoints;
       scope.rowCollection = [];
       for (var i = 0; i < data.routes.length; i++) {
         for (var j = 0; j < data.transports.length; j++) {
@@ -66,12 +69,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
           }
         }
 
+        tmpPoints = data.routes[i].points;
+        for (var j = 0; j < tmpPoints.length; j++) {
+          for (var k = 0; k < data.waypoints.length; k++) {
+            if(tmpPoints[j].START_WAYPOINT == data.waypoints[k].ID){
+              tmpPoints[j].waypoint = data.waypoints[k];
+              break;
+            }
+          }
+        }
+
         scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
       }
       
+
+      console.log(Date.now() - startTime);
       console.log(data);
-      console.log(scope.rowCollection);
-      
+      // console.log(scope.rowCollection);
+
       scope.displayCollection = [].concat(scope.rowCollection);
     }
 
