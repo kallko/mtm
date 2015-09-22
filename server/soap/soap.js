@@ -5,8 +5,8 @@ var soap = require('soap'),
     fs = require('fs'),
     xmlConstructor = require('./xmlConstructor'),
     _xml = new xmlConstructor(),
-    // logging = require('./logging'),
-    // log = new logging(),
+    logging = require('../logging'),
+    log = new logging('./logs'),
     parseXML = require('xml2js').parseString
     logVer = 0;
 
@@ -27,6 +27,18 @@ SoapManager.prototype.getFullUrl = function() {
   return 'https://' + this.login + ':' + this.password + this.url;
 };
 
+SoapManager.prototype.getAllData = function(){
+  var dailyPlan = this.getDailyPlan(),
+      result = [],
+      tmpItinerary;
+  if(dailyPlan == null) return;
+
+  for (var i = 0; i < dailyPlan.length; i++) {
+    tmpItinerary = this.getItinerary(client, dailyPlan[i].$.ID, dailyPlan[i].$.VERSION);
+    if(tmpItinerary != null) result.push(tmpItinerary);
+  }
+};
+
 SoapManager.prototype.getDailyPlan = function(){
   var me = this;
 
@@ -41,13 +53,12 @@ SoapManager.prototype.getDailyPlan = function(){
         console.log();
         parseXML(result.return, function(err, res) {
           if(res.MESSAGE.PLANS == null) return;
-          // dump(res.MESSAGE.PLANS[0].ITINERARY);
-          var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
-          for (var i = 0; i < itineraries.length; i++) {
-            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION);
-            // console.log(_xml.itineraryXML(itineraries[i].$.ID, itineraries[i].$.VERSION));
-            // console.log();
-          }
+
+          return res.MESSAGE.PLANS[0].ITINERARY;
+          // var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
+          // for (var i = 0; i < itineraries.length; i++) {
+          //   me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION);
+          // }
 
         });
       } else {
@@ -63,24 +74,16 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
     if (!err) {
       console.log('DONE getItinerary for ');
       console.log(_xml.itineraryXML(id, version));
-      // console.log('RESULT ');
-      // console.log(result.return);
       console.log();
 
       parseXML(result.return, function(err, res) {
 
-        // console.log('getItinerary parseXML result');
-        if(res.MESSAGE.ITINERARIES[0].ITINERARY == null) return;
+        if(res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
+           res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
-        // dump(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
-        // dump(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE.length);
-        // dump(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE[0].$);
-        // dump(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE[0].SECTION.length);
-        // dump(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE[1].$);
-        // dump(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE[1].SECTION.length);
 
         logVer++;
-        toFLog("./logs/" + logVer + "_log.js", res);
+        log.toFLog(logVer + "_log.js", res);
 
 
         var routes = res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE,
@@ -88,11 +91,11 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
             tmpRoute,
             tmpSection;
 
-        toSendData.info = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
+        toSendData = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
         toSendData.routes = [];
         for (var i = 0; i < routes.length; i++) {
           tmpRoute = {};
-          tmpRoute.info = routes[i].$;
+          tmpRoute = routes[i].$;
           tmpRoute.points = [];
 
           for (var j = 0; j < routes[i].SECTION.length; j++) {
@@ -102,8 +105,8 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
           toSendData.routes.push(tmpRoute);
         }
 
-        // dump(toSendData);
-        toFLog("./logs/" + logVer + "_optimizedlog.js", toSendData);
+        log.toFLog(logVer + "_optimizedlog.js", toSendData);
+        return toSendData;
 
 
       });
@@ -111,19 +114,5 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
       console.log('getItinerary ERROR');
       console.log(err.body);
     }
-  });
-}
-
-function dump(obj) {
-  console.log(JSON.stringify(obj, null, 2));
-}
-
-function toFLog(path, data) {
-  fs.writeFile(path, JSON.stringify(data, null, 2), function(err) {
-      if(err) {
-          return console.log(err);
-      }
-
-      console.log("The file was saved to " + path + "!");
   });
 }
