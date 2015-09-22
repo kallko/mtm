@@ -20,3 +20,7 @@ Log.prototype.toFLog = function(name, data) {
   });
 }
 
+Log.prototype.l = function(obj) {
+	console.log(obj);
+} 
+

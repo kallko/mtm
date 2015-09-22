@@ -13,6 +13,7 @@ function XMLConstructor() {
         , daily_plan:   '<INSTRUCTION NAME="GET_DAILY_PLANS" >'
         // , itinerary:    '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
         , itinerary:    '<INSTRUCTION NAME="GET_ITINERARY" >'
+        , transports:   '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
         , end:          '</INSTRUCTION>'
       }
     , parameter : {
@@ -67,6 +68,19 @@ XMLConstructor.prototype.itineraryXML = function(id, version) {
   // str += this.xml.slashEnd;
 
   str += this.xml.instruction.end;
+  str += this.xml.instructions.end;
+  str += this.xml.end;
+  return str;
+}
+
+XMLConstructor.prototype.transportsXML = function() {
+  var str = '';
+  str += this.xml.begin;
+  str += this.xml.instructions.begin;
+
+  str += this.xml.instruction.transports;
+  str += this.xml.instruction.end;
+
   str += this.xml.instructions.end;
   str += this.xml.end;
   return str;

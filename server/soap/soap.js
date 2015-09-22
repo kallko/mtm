@@ -7,8 +7,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     logging = require('../logging'),
     log = new logging('./logs'),
-    parseXML = require('xml2js').parseString
-    logVer = 0;
+    parseXML = require('xml2js').parseString;
 
 // emitter.setMaxListeners(25);
 
@@ -27,16 +26,8 @@ SoapManager.prototype.getFullUrl = function() {
   return 'https://' + this.login + ':' + this.password + this.url;
 };
 
-SoapManager.prototype.getAllData = function(){
-  var dailyPlan = this.getDailyPlan(),
-      result = [],
-      tmpItinerary;
-  if(dailyPlan == null) return;
-
-  for (var i = 0; i < dailyPlan.length; i++) {
-    tmpItinerary = this.getItinerary(client, dailyPlan[i].$.ID, dailyPlan[i].$.VERSION);
-    if(tmpItinerary != null) result.push(tmpItinerary);
-  }
+SoapManager.prototype.getAllDailyData = function(){
+  this.getDailyPlan();
 };
 
 SoapManager.prototype.getDailyPlan = function(){
@@ -54,11 +45,10 @@ SoapManager.prototype.getDailyPlan = function(){
         parseXML(result.return, function(err, res) {
           if(res.MESSAGE.PLANS == null) return;
 
-          return res.MESSAGE.PLANS[0].ITINERARY;
-          // var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
-          // for (var i = 0; i < itineraries.length; i++) {
-          //   me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION);
-          // }
+          var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
+          for (var i = 0; i < itineraries.length; i++) {
+            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION);
+          }
 
         });
       } else {
@@ -70,6 +60,7 @@ SoapManager.prototype.getDailyPlan = function(){
 };
 
 SoapManager.prototype.getItinerary = function(client, id, version) {
+  var me = this;
   client.run({'input_data' : _xml.itineraryXML(id, version)}, function(err, result) {
     if (!err) {
       console.log('DONE getItinerary for ');
@@ -81,18 +72,15 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
         if(res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
            res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
-
-        logVer++;
-        log.toFLog(logVer + "_log.js", res);
-
+        log.toFLog("log.js", res);
 
         var routes = res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE,
-            toSendData = {},
+            data = {},
             tmpRoute,
             tmpSection;
 
-        toSendData = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
-        toSendData.routes = [];
+        data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
+        data.routes = [];
         for (var i = 0; i < routes.length; i++) {
           tmpRoute = {};
           tmpRoute = routes[i].$;
@@ -102,12 +90,11 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
             tmpRoute.points.push(routes[i].SECTION[j].$);
           }
 
-          toSendData.routes.push(tmpRoute);
+          data.routes.push(tmpRoute);
         }
 
-        log.toFLog(logVer + "_optimizedlog.js", toSendData);
-        return toSendData;
-
+        // log.toFLog("routes.js", data);
+        me.getTransports(client, data);
 
       });
     } else {
@@ -115,4 +102,28 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
       console.log(err.body);
     }
   });
-}
+};
+
+SoapManager.prototype.getTransports = function(client, data) {
+  log.l("getTransports");
+  log.l(_xml.transportsXML());
+  client.run({'input_data' : _xml.transportsXML()}, function(err, result) {
+    if (!err) {
+      // log.l(result.return);
+
+      parseXML(result.return, function(err, res) {
+        log.toFLog("transports.js", res);
+        var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT;
+
+        data.transports = [];
+        for (var i = 0; i < transports.length; i++) {
+          data.transports.push(transports[i].$);
+        }
+
+        log.toFLog("routes.js", data);
+
+      });
+      
+    }
+  });
+};
