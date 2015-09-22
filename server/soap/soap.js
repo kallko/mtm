@@ -74,27 +74,9 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
 
         log.toFLog("log.js", res);
 
-        var routes = res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE,
-            data = {},
-            tmpRoute,
-            tmpSection;
-
-        data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
-        data.routes = [];
-        for (var i = 0; i < routes.length; i++) {
-          tmpRoute = {};
-          tmpRoute = routes[i].$;
-          tmpRoute.points = [];
-
-          for (var j = 0; j < routes[i].SECTION.length; j++) {
-            tmpRoute.points.push(routes[i].SECTION[j].$);
-          }
-
-          data.routes.push(tmpRoute);
-        }
-
-        // log.toFLog("routes.js", data);
-        me.getTransports(client, data);
+        var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
+        me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data);
+        me.getTransportsAndDrivers(client, data);
 
       });
     } else {
@@ -104,26 +86,52 @@ SoapManager.prototype.getItinerary = function(client, id, version) {
   });
 };
 
-SoapManager.prototype.getTransports = function(client, data) {
-  log.l("getTransports");
-  log.l(_xml.transportsXML());
-  client.run({'input_data' : _xml.transportsXML()}, function(err, result) {
-    if (!err) {
-      // log.l(result.return);
+SoapManager.prototype.prepareItinerary = function(routes, data) {
+  var tmpRoute;
+  data.routes = [];
+  for (var i = 0; i < routes.length; i++) {
+    tmpRoute = {};
+    tmpRoute = routes[i].$;
+    tmpRoute.points = [];
 
+    for (var j = 0; j < routes[i].SECTION.length; j++) {
+      tmpRoute.points.push(routes[i].SECTION[j].$);
+    }
+
+    data.routes.push(tmpRoute);
+  }
+}
+
+SoapManager.prototype.getTransportsAndDrivers = function(client, data) {
+  var me = this;
+  log.l("getTransportsAndDrivers");
+  log.l(_xml.transportsAndDriversXML());
+  client.run({'input_data' : _xml.transportsAndDriversXML()}, function(err, result) {
+    if (!err) {
       parseXML(result.return, function(err, res) {
-        log.toFLog("transports.js", res);
-        var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT;
+        log.toFLog("transports_driver.js", res);
+        // return; // !!!!!!!!!!!!!!!!!!!!!!!
+
+        var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,
+            drivers =  res.MESSAGE.DRIVERS[0].DRIVER;
+        //     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT;
+        // log.l('waypoints.length = ' + waypoints.length);
 
         data.transports = [];
         for (var i = 0; i < transports.length; i++) {
           data.transports.push(transports[i].$);
         }
 
-        log.toFLog("routes.js", data);
+        data.drivers = [];
+        for (var i = 0; i < drivers.length; i++) {
+          data.drivers.push(drivers[i].$);
+        }
 
+        log.toFLog("routes.js", data);
       });
       
     }
   });
-};
+}
+
+// SoapManager.prototype.sendData()

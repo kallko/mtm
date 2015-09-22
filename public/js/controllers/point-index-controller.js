@@ -2,6 +2,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
 
     setListeners();
     generateTestData();
+    loadDailyData();
 
     function Point(){
       this.number = 0;
@@ -30,6 +31,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', functi
       this.driverComment = '';
       this.managerName = '';
       this.managerComment = '';
+    }
+
+    function loadDailyData() {
+      
     }
 
     function setListeners(){

@@ -14,6 +14,8 @@ function XMLConstructor() {
         // , itinerary:    '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
         , itinerary:    '<INSTRUCTION NAME="GET_ITINERARY" >'
         , transports:   '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
+        , drivers:      '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'
+        , waypoints:    '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="WAYPOINTS" />'
         , end:          '</INSTRUCTION>'
       }
     , parameter : {
@@ -73,17 +75,20 @@ XMLConstructor.prototype.itineraryXML = function(id, version) {
   return str;
 }
 
-XMLConstructor.prototype.transportsXML = function() {
+XMLConstructor.prototype.transportsAndDriversXML = function() {
   var str = '';
   str += this.xml.begin;
   str += this.xml.instructions.begin;
 
   str += this.xml.instruction.transports;
   str += this.xml.instruction.end;
+  str += this.xml.instruction.drivers;
+  str += this.xml.instruction.end;
+  // str += this.xml.instruction.waypoints;
+  // str += '<PARAMETER KEY="ID" VALUE="4412000" />';
+  // str += this.xml.instruction.end;
 
   str += this.xml.instructions.end;
   str += this.xml.end;
   return str;
 }
-
-// GET_ITINERARY_NEW
