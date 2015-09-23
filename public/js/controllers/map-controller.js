@@ -1,107 +1,107 @@
 angular.module('MTMonitor').controller('MapController', ['$scope', function (scope) {
-  var map,
-      position
-      inside = false,
-      windowEl = $(window),
-      holderEl = null,
-      changingWindow = false;
+    var map,
+        position,
+        inside = false,
+        windowEl = $(window),
+        holderEl = null,
+        changingWindow = false;
 
-  initMap();
-  addListeners();
-  // setTransparent();
+    initMap();
+    addListeners();
+    // setTransparent();
 
-  function checkMouseInRect(pos, x, y){
-    if(pos.top < y && pos.left < x &&
-        pos.top + pos.height > y && pos.left + pos.width > x){
-          // console.log('Inside!');
-          return true;
+    function checkMouseInRect(pos, x, y) {
+        if (pos.top < y && pos.left < x &&
+            pos.top + pos.height > y && pos.left + pos.width > x) {
+            // console.log('Inside!');
+            return true;
         }
-    // console.log('Outside!');
-    return false;
-  }
-
-  function addListeners(){
-    $(window).resize(resize);
-    resize();
-
-    holderEl = $('#transparent-map-holder');
-    holderEl.parent().on('mouseenter', function(event){
-      if(!inside && !changingWindow){
-        checkMapWindowRect();
-      }
-    });
-
-    $('.lm_drag_handle').on('mousedown', function(){
-      changingWindow = true;
-      disableMap();
-    });
-
-    $('.lm_drag_handle').on('mouseup', function(){
-      changingWindow = false;
-    });
-
-    myLayout.on( 'stateChanged', function(){
-      setTransparent();
-      disableMap();
-      changingWindow = false;
-      checkMapWindowRect();
-    });
-
-    $('body').on('mouseenter', checkMapWindowRect);
-    holderEl.on('mouseenter', checkMapWindowRect);
-  }
-
-  function checkMapWindowRect(){
-    if(holderEl == null){
-      holderEl = $('#transparent-map-holder');
+        // console.log('Outside!');
+        return false;
     }
 
-    position = holderEl.position();
-    position.width = holderEl.width();
-    position.height = holderEl.height();
-    inside = true;
-    $('.lm_goldenlayout').css('pointer-events', 'none');
+    function addListeners() {
+        $(window).resize(resize);
+        resize();
 
-    $('body').mousemove(function(event) {
-      if(!checkMouseInRect(position, event.clientX, event.clientY)){
-        disableMap();
-      }
-    });
-  }
+        holderEl = $('#transparent-map-holder');
+        holderEl.parent().on('mouseenter', function (event) {
+            if (!inside && !changingWindow) {
+                checkMapWindowRect();
+            }
+        });
 
-  function disableMap(){
-    inside = false;
-    $('.lm_goldenlayout').css('pointer-events', 'auto');
-    $('body').off('mousemove');
-  }
+        $('.lm_drag_handle').on('mousedown', function () {
+            changingWindow = true;
+            disableMap();
+        });
 
-  function setTransparent(){
-    var el = holderEl.parent();
+        $('.lm_drag_handle').on('mouseup', function () {
+            changingWindow = false;
+        });
 
-    for (var i = 0; i < 4; i++) {
-      if(i == 3 && el[0] != undefined){
-        $(el[0].firstChild).hide();
-      }
+        myLayout.on('stateChanged', function () {
+            setTransparent();
+            disableMap();
+            changingWindow = false;
+            checkMapWindowRect();
+        });
 
-      el.css('opacity', '0');
-      el = el.parent();
+        $('body').on('mouseenter', checkMapWindowRect);
+        holderEl.on('mouseenter', checkMapWindowRect);
     }
-  }
 
-  function initMap(){
-    map = L.map('map').setView([50.4412776, 30.4671281], 11);
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        maxZoom: 18,
-        id: 't4ddy.229f0f41',
-        accessToken: 'pk.eyJ1IjoidDRkZHkiLCJhIjoiZDJhZDRhM2E2NmMzZWNhZWM3YTlmMWZhOTYwNmJlMGUifQ.6GBanGLBka6DNFexeC3M6g'
-    }).addTo(map);
-  }
+    function checkMapWindowRect() {
+        if (holderEl == null) {
+            holderEl = $('#transparent-map-holder');
+        }
 
-  function resize(){
-      $('#map').height($(window).height());
-      $('#map').width($(window).width());
-      map.invalidateSize();
-  }
+        position = holderEl.position();
+        position.width = holderEl.width();
+        position.height = holderEl.height();
+        inside = true;
+        $('.lm_goldenlayout').css('pointer-events', 'none');
+
+        $('body').mousemove(function (event) {
+            if (!checkMouseInRect(position, event.clientX, event.clientY)) {
+                disableMap();
+            }
+        });
+    }
+
+    function disableMap() {
+        inside = false;
+        $('.lm_goldenlayout').css('pointer-events', 'auto');
+        $('body').off('mousemove');
+    }
+
+    function setTransparent() {
+        var el = holderEl.parent();
+
+        for (var i = 0; i < 4; i++) {
+            if (i == 3 && el[0] != undefined) {
+                $(el[0].firstChild).hide();
+            }
+
+            el.css('opacity', '0');
+            el = el.parent();
+        }
+    }
+
+    function initMap() {
+        map = L.map('map').setView([50.4412776, 30.4671281], 11);
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            maxZoom: 18,
+            id: 't4ddy.229f0f41',
+            accessToken: 'pk.eyJ1IjoidDRkZHkiLCJhIjoiZDJhZDRhM2E2NmMzZWNhZWM3YTlmMWZhOTYwNmJlMGUifQ.6GBanGLBka6DNFexeC3M6g'
+        }).addTo(map);
+    }
+
+    function resize() {
+        $('#map').height($(window).height());
+        $('#map').width($(window).width());
+        map.invalidateSize();
+    }
 
 }]);

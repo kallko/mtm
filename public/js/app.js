@@ -1,39 +1,39 @@
 angular.module('MTMonitor', ['smart-table']);
 
 var myLayout = new GoldenLayout({
-  settings:{
-    hasHeaders: true
-  },
-  content:[{
-    type: 'row',
+    settings: {
+        hasHeaders: true
+    },
     content: [{
-              type: 'column',
-              content:[{
-                  type: 'component',
-                  componentName: 'template',
-                  componentState: { templateId: 'transparent-map-window' }
-              },{
-                  type: 'component',
-                  height: 30,
-                  componentName: 'template',
-                  componentState: { templateId: 'template2' }
-              }]
-          },{
-              type: 'component',
-              width: 30,
-              componentName: 'template',
-              componentState: { templateId: 'template-point-table' }
-          }]
-  }]
+        type: 'row',
+        content: [{
+            type: 'column',
+            content: [{
+                type: 'component',
+                componentName: 'template',
+                componentState: {templateId: 'transparent-map-window'}
+            }, {
+                type: 'component',
+                height: 30,
+                componentName: 'template',
+                componentState: {templateId: 'template2'}
+            }]
+        }, {
+            type: 'component',
+            width: 30,
+            componentName: 'template',
+            componentState: {templateId: 'template-point-table'}
+        }]
+    }]
 });
 
-myLayout.registerComponent( 'template', function( container, state ){
-  var templateHtml = $( '#' + state.templateId ).html();
-  container.getElement().html( templateHtml );
+myLayout.registerComponent('template', function (container, state) {
+    var templateHtml = $('#' + state.templateId).html();
+    container.getElement().html(templateHtml);
 });
 
-myLayout.on( 'initialised', function(){
-  angular.bootstrap( document.body, [ 'MTMonitor' ]);
+myLayout.on('initialised', function () {
+    angular.bootstrap(document.body, ['MTMonitor']);
 });
 
 myLayout.init();
