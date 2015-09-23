@@ -28,87 +28,26 @@
       <table st-safe-src="rowCollection" st-table="displayCollection"
              class="table table-striped point-table" >
           <thead>
-              <tr id="table-menu-holder-tr" >
-                <th colspan="2" ><input st-search="" class="form-control" placeholder="поиск по всем полям ..." type="text"/></th>
-                <th>
-                  <span class="input-label" >Статус заказа:</span>
-                  <select st-search="status">
-                    <option value="">Все</option>
-                    <option ng-repeat="row in rowCollection | unique:'status'"
-                            value="{{row.status}}">{{getTextStatus(row.status, null)}}</option>
-                  </select>
-                </th>
-                <th colspan="2" >
-                  <span class="input-label" >Водитель:</span>
-                  <select st-search="driverName">
-                    <option value="">Все</option>
-                    <option ng-repeat="row in rowCollection | unique:'driverName'"
-                            value="{{row.driverName}}">{{row.driverName}}</option>
-                  </select>
-                </th>
-                <th colspan="2" >
-                  <span class="input-label" >Соблюдение плана:</span>
-                  <select st-search="driverInPlan" >
-                    <option value="">Все</option>
-                    <option value="true">В плане</option>
-                    <option value="false">Вне плане</option>
-                  </select>
-                </th>
-              </tr>
               <tr id="titles-tr" >
-                  <th st-sort="number" >#</th>
-                  <th st-sort="status" >Статус заказа</th>
-                  <th st-sort="realOrder" >Фактический номер доставки</th>
-                  <th st-sort="planOrder" >Номер доставки по плану</th>
-                  <th st-sort="pointID" >ID точки</th>
-                  <th st-sort="orderID" >ID заказа</th>
-                  <th st-sort="pointName" >Название точки</th>
-                  <th st-sort="address" >Адрес</th>
-                  <th st-sort="timeWindow.start" >Временное окно</th>
-                  <th st-sort="planArrivalTime" >Плановое время прибытия</th>
-                  <th st-sort="planServiceTime" >Плановое время обслуживания</th>
-                  <th st-sort="planDowntime" >Плановое время простоя</th>
-                  <th st-sort="planDeparture" >Плановое время отбытия</th>
-                  <th st-sort="distance" >Расстояние до точки</th>
-                  <th st-sort="predictionArrivalTime" >Прогноз прибытия</th>
-                  <th st-sort="factArrivalTime" >Фактические прибытие</th>
-                  <th st-sort="serviceTime" >Время обслуживания</th>
-                  <th st-sort="driverInPlan" >Соблюдение плана</th>
-                  <th st-sort="carNumber" >Номер машины</th>
-                  <th st-sort="driverName" >Водитель</th>
-                  <th st-sort="phone" >Телефон водителя</th>
-                  <th st-sort="driverComment" >Комментарий водителя</th>
-                  <th st-sort="managerName" >Диспетчер</th>
-                  <th st-sort="managerComment" >Комментарий диспетчера</th>
+                  <th>ID</th>
+                  <th>Адрес</th>
+                  <th>Название</th>
+                  <th>Водитель</th>
+                  <th>Телефон водителя</th>
+                  <th>Машина</th>
+                  <th>Номер машины</th>
               </tr>
           </thead>
           <tbody>
               <tr ng-repeat="row in displayCollection" id="{{'point-' + row.pointID}}"
                   ng-click="rowClick(row.pointID)" >
-                  <td>{{row.number}}</td>
-                  <td>{{getTextStatus(row.status, null)}}</td>
-                  <td>{{row.realOrder}}</td>
-                  <td>{{row.planOrder}}</td>
-                  <td>{{row.pointID}}</td>
-                  <td>{{row.orderID}}</td>
-                  <td>{{row.pointName}}</td>
-                  <td>{{row.address}}</td>
-                  <td>{{row.timeWindow.start | date: 'HH:mm'}} - {{row.timeWindow.finish | date: 'HH:mm'}}</td>
-                  <td>{{row.planArrivalTime | date: 'HH:mm'}}</td>
-                  <td>{{row.planServiceTime}}</td>
-                  <td>{{row.planDowntime}}</td>
-                  <td>{{row.planDeparture}}</td>
-                  <td>{{row.distance}}</td>
-                  <td>{{row.predictionArrivalTime | date: 'HH:mm'}}</td>
-                  <td>{{row.factArrivalTime | date: 'HH:mm'}}</td>
-                  <td>{{(row.serviceTime - 3600 * 2) * 1000 | date: 'HH:mm'}}</td>
-                  <td>{{row.driverInPlan}}</td>
-                  <td>{{row.carNumber}}</td>
-                  <td>{{row.driverName}}</td>
-                  <td>{{row.phone}}</td>
-                  <td>{{row.driverComment}}</td>
-                  <td>{{row.managerName}}</td>
-                  <td>{{row.managerComment}}</td>
+                  <td>{{row.waypoint.ID}}</td>
+                  <td>{{strMaxLength(row.waypoint.ADDRESS, 25)}}</td>
+                  <td>{{row.waypoint.NAME}}</td>
+                  <td>{{row.driver.NAME}}</td>
+                  <td>{{row.driver.PHONE}}</td>
+                  <td>{{row.transport.NAME}}</td>
+                  <td>{{row.transport.REGISTRATION_NUMBER}}</td>
               </tr>
           </tbody>
       </table>

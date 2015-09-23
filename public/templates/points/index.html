@@ -70,30 +70,30 @@
           <tbody>
               <tr ng-repeat="row in displayCollection" id="{{'point-' + row.pointID}}"
                   ng-click="rowClick(row.pointID)" >
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <td>{{row.number}}</td>
+                  <td>{{getTextStatus(row.status, null)}}</td>
+                  <td>{{row.realOrder}}</td>
+                  <td>{{row.planOrder}}</td>
+                  <td>{{row.pointID}}</td>
+                  <td>{{row.orderID}}</td>
+                  <td>{{row.pointName}}</td>
+                  <td>{{row.address}}</td>
+                  <td>{{row.timeWindow.start | date: 'HH:mm'}} - {{row.timeWindow.finish | date: 'HH:mm'}}</td>
+                  <td>{{row.planArrivalTime | date: 'HH:mm'}}</td>
+                  <td>{{row.planServiceTime}}</td>
+                  <td>{{row.planDowntime}}</td>
+                  <td>{{row.planDeparture}}</td>
+                  <td>{{row.distance}}</td>
+                  <td>{{row.predictionArrivalTime | date: 'HH:mm'}}</td>
+                  <td>{{row.factArrivalTime | date: 'HH:mm'}}</td>
+                  <td>{{(row.serviceTime - 3600 * 2) * 1000 | date: 'HH:mm'}}</td>
+                  <td>{{row.driverInPlan}}</td>
+                  <td>{{row.carNumber}}</td>
+                  <td>{{row.driverName}}</td>
+                  <td>{{row.phone}}</td>
+                  <td>{{row.driverComment}}</td>
+                  <td>{{row.managerName}}</td>
+                  <td>{{row.managerComment}}</td>
               </tr>
           </tbody>
       </table>

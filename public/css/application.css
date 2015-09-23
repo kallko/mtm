@@ -1,127 +1,128 @@
 html, body {
-  height: 100%;
+    height: 100%;
 }
 
-template{
-  display:none;
+template {
+    display: none;
 }
 
-#transparent-map-holder{
-  opacity: 0;
-  height: 100%;
+#transparent-map-holder {
+    opacity: 0;
+    height: 100%;
 }
 
-.container-fluid{
-  padding: 4px !important;
+.container-fluid {
+    padding: 4px !important;
 }
 
-#menu-holder{
-  height: 40px;
+#menu-holder {
+    height: 40px;
 }
 
-#point-table{
-  overflow-y: scroll;
-  width: 100%;
-  height: 500px;
+#point-table {
+    overflow-y: scroll;
+    width: 100%;
+    height: 500px;
 }
 
-#point-table table{
-  width: 100%;
-  min-width: 3300px;
-  border-bottom: 1px solid grey;
+#point-table table {
+    width: 100%;
+    min-width: 1200px;
+    border-bottom: 1px solid grey;
 }
 
-#map{
-  height: 800px;
-  width: 800px;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  /*z-index: -1;*/
+#map {
+    height: 800px;
+    width: 800px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    /*z-index: -1;*/
 }
 
-.lm_goldenlayout{
-  background: none !important;
+.lm_goldenlayout {
+    background: none !important;
 }
 
-.lm_item{
-  /*z-index: 0;*/
+.lm_item {
+    /*z-index: 0;*/
 }
 
-#point-table table tr{
-  border-left: 1px solid grey;
+#point-table table tr {
+    border-left: 1px solid grey;
 }
 
-#point-table table tr td, #point-table table tr th{
-  font-size: 11px;
-  padding: 4px 5px;
-  margin: 0;
-  border-right: 1px solid grey;
-  border-top: 0px !important;
+#point-table table tr td, #point-table table tr th {
+    font-size: 11px;
+    padding: 4px 5px;
+    margin: 0;
+    border-right: 1px solid grey;
+    border-top: 0px !important;
 }
 
-#point-table table tr th{
-  border-bottom: 1px solid grey;
+#point-table table tr th {
+    border-bottom: 1px solid grey;
+    background-color: whitesmoke;
 }
 
-.nav > li > a{
-  padding: 5px !important;
+.nav > li > a {
+    padding: 5px !important;
 }
 
-#tab-selector{
-  margin-bottom: 10px;
+#tab-selector {
+    margin-bottom: 10px;
 }
 
-.row-white{
-  background-color: white !important;
+.row-white {
+    background-color: white !important;
 }
 
-.row-yellow{
-  background-color: #E6F562 !important;
+.row-yellow {
+    background-color: #E6F562 !important;
 }
 
-.row-green{
-  background-color: #5BBA66 !important;
+.row-green {
+    background-color: #5BBA66 !important;
 }
 
-.row-red{
-  background-color: #ED8585 !important;
+.row-red {
+    background-color: #ED8585 !important;
 }
 
-.selected-row{
-  background-color: #90C3D4 !important;
+.selected-row {
+    background-color: #90C3D4 !important;
 }
 
-#table-menu-holder-tr, #table-menu-holder-tr th{
-  border: 0 !important;
+#table-menu-holder-tr, #table-menu-holder-tr th {
+    border: 0 !important;
 }
 
-#table-menu-holder-tr{
-  /*position: absolute;
-  top: 43px;
-  left: 140px;*/
+#table-menu-holder-tr {
+    /*position: absolute;
+    top: 43px;
+    left: 140px;*/
 }
 
-.input-label{
-  font-size: 13px;
-  margin: 0 5px 0 10px;
+.input-label {
+    font-size: 13px;
+    margin: 0 5px 0 10px;
 }
 
-#table-menu-holder-tr input{
-  height: 24px !important;
-  font-size: 13px;
-  width: 200px;
+#table-menu-holder-tr input {
+    height: 24px !important;
+    font-size: 13px;
+    width: 200px;
 }
 
-#table-menu-holder-tr select{
-  font-size: 13px;
-  margin-bottom: 2px;
+#table-menu-holder-tr select {
+    font-size: 13px;
+    margin-bottom: 2px;
 }
 
-#titles-tr{
-  border-top: 1px solid grey;
+#titles-tr {
+    border-top: 1px solid grey;
 }
 
-.leaflet-top, .leaflet-bottom, .leaflet-left, .leaflet-right{
-  z-index: 0;
+.leaflet-top, .leaflet-bottom, .leaflet-left, .leaflet-right {
+    z-index: 0;
 }
