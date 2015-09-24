@@ -110,7 +110,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
 
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,
-                    waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT;
+                    waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,
+                    tasks = res.MESSAGE.TASKS[0].TASK;
                 log.l('waypoints.length = ' + waypoints.length);
 
                 data.transports = [];
@@ -126,6 +127,13 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
                 data.waypoints = [];
                 for (i = 0; i < waypoints.length; i++) {
                     data.waypoints.push(waypoints[i].$);
+                }
+
+                data.tasks = [];
+                if (tasks != null) {
+                    for (i = 0; i < tasks.length; i++) {
+                        data.tasks.push(tasks[i].$);
+                    }
                 }
 
                 log.toFLog("routes.js", data);

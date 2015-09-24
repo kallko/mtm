@@ -16,6 +16,7 @@ function XMLConstructor() {
             , transports: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
             , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'
             , waypoints: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="WAYPOINTS" />'
+            , jobs: '<INSTRUCTION NAME="GET_STATUS_OF_TASK">'
             , end: '</INSTRUCTION>'
         }
         , parameter: {
@@ -61,14 +62,6 @@ XMLConstructor.prototype.itineraryXML = function (id, version) {
     str += this.xml.setGetValue('ID', id);
     str += this.xml.slashEnd;
 
-    // str += this.xml.parameter.begin;
-    // str += this.xml.setGetValue('VERSION', version);
-    // str += this.xml.slashEnd;
-
-    // str += this.xml.parameter.begin;
-    // str += this.xml.setGetValue('TRACK', 'TRUE');
-    // str += this.xml.slashEnd;
-
     str += this.xml.instruction.end;
     str += this.xml.instructions.end;
     str += this.xml.end;
@@ -88,6 +81,13 @@ XMLConstructor.prototype.additionalDataXML = function (routeid) {
     str += this.xml.parameter.begin;
     str += this.xml.setGetValue('IDROUTE', routeid);
     str += this.xml.slashEnd;
+    str += this.xml.instruction.end;
+    str += this.xml.instruction.jobs;
+    //str += '<PARAMETER KEY="NUMBER" VALUE="1563766" />';
+    //str += '<PARAMETER KEY="NUMBER" VALUE="1563663" />';
+    //str += '<PARAMETER KEY="DATA" VALUE="' + this.getTodayStr() + '" />';
+    //str += '<PARAMETER KEY="NUMBER" VALUE="1563611" />';
+    //str += '<PARAMETER KEY="NUMBER" VALUE="1563574" />';
     str += this.xml.instruction.end;
 
     str += this.xml.instructions.end;

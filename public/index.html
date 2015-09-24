@@ -29,25 +29,35 @@
              class="table table-striped point-table" >
           <thead>
               <tr id="titles-tr" >
-                  <th>ID</th>
+                  <th>ID точки</th>
+                  <th>ID заказа</th>
+                  <th>Номер</th>
+                  <th>Время прибытия</th>
+                  <th>Время отбытия</th>
                   <th>Адрес</th>
                   <th>Название</th>
                   <th>Водитель</th>
                   <th>Телефон водителя</th>
                   <th>Машина</th>
                   <th>Номер машины</th>
+                  <th>Комментарий к точке</th>
               </tr>
           </thead>
           <tbody>
-              <tr ng-repeat="row in displayCollection" id="{{'point-' + row.pointID}}"
-                  ng-click="rowClick(row.pointID)" >
+              <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
+                  ng-click="rowClick(row.row_id)" >
                   <td>{{row.waypoint.ID}}</td>
-                  <td>{{strMaxLength(row.waypoint.ADDRESS, 25)}}</td>
+                  <td>{{row.TASK_NUMBER}}</td>
+                  <td>{{row.NUMBER}}</td>
+                  <td>{{row.arrival_time_hhmm}}</td>
+                  <td>{{row.end_time_hhmm}}</td>
+                  <td>{{strMaxLength(row.waypoint.ADDRESS, 35)}}</td>
                   <td>{{row.waypoint.NAME}}</td>
                   <td>{{row.driver.NAME}}</td>
                   <td>{{row.driver.PHONE}}</td>
                   <td>{{row.transport.NAME}}</td>
                   <td>{{row.transport.REGISTRATION_NUMBER}}</td>
+                  <td>{{strMaxLength(row.waypoint.COMMENT, 80)}}</td>
               </tr>
           </tbody>
       </table>
