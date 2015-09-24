@@ -11,6 +11,10 @@ template {
     height: 100%;
 }
 
+#point-controller-container {
+    height: 100%;
+}
+
 .container-fluid {
     padding: 4px !important;
 }
@@ -22,7 +26,6 @@ template {
 #point-table {
     overflow-y: scroll;
     width: 100%;
-    height: 500px;
 }
 
 #point-table table {

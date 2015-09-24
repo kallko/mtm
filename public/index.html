@@ -1,9 +1,9 @@
-<link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css" />
-<link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-<link rel="stylesheet" href="./css/application.css" />
-<link rel="stylesheet" href="./css/columns.css" />
-<link rel="stylesheet" href="./css/bootstrap.css" />
+<link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css"/>
+<link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
+<link rel="stylesheet" href="./css/application.css"/>
+<link rel="stylesheet" href="./css/columns.css"/>
+<link rel="stylesheet" href="./css/bootstrap.css"/>
 
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="/js/vendor/jquery-ui.min.js"></script>
@@ -22,58 +22,58 @@
 <div id="map"></div>
 
 <template type="text/html" id="template-point-table">
-	<div ng-controller="PointIndexController" class="section">
+    <div ng-controller="PointIndexController" class="section" id="point-controller-container">
 
-    <div id="point-table" class="table-holder" >
-      <table st-safe-src="rowCollection" st-table="displayCollection"
-             class="table table-striped point-table" >
-          <thead>
-              <tr id="titles-tr" >
-                  <th>ID точки</th>
-                  <th>ID заказа</th>
-                  <th>Номер</th>
-                  <th>Время прибытия</th>
-                  <th>Время отбытия</th>
-                  <th>Адрес</th>
-                  <th>Название</th>
-                  <th>Водитель</th>
-                  <th>Телефон водителя</th>
-                  <th>Машина</th>
-                  <th>Номер машины</th>
-                  <th>Комментарий к точке</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
-                  ng-click="rowClick(row.row_id)" >
-                  <td>{{row.waypoint.ID}}</td>
-                  <td>{{row.TASK_NUMBER}}</td>
-                  <td>{{row.NUMBER}}</td>
-                  <td>{{row.arrival_time_hhmm}}</td>
-                  <td>{{row.end_time_hhmm}}</td>
-                  <td>{{strMaxLength(row.waypoint.ADDRESS, 35)}}</td>
-                  <td>{{row.waypoint.NAME}}</td>
-                  <td>{{row.driver.NAME}}</td>
-                  <td>{{row.driver.PHONE}}</td>
-                  <td>{{row.transport.NAME}}</td>
-                  <td>{{row.transport.REGISTRATION_NUMBER}}</td>
-                  <td>{{strMaxLength(row.waypoint.COMMENT, 80)}}</td>
-              </tr>
-          </tbody>
-      </table>
+        <div id="point-table" class="table-holder">
+            <table st-safe-src="rowCollection" st-table="displayCollection"
+                   class="table table-striped point-table">
+                <thead>
+                <tr id="titles-tr">
+                    <th>ID точки</th>
+                    <th>ID заказа</th>
+                    <th>Номер</th>
+                    <th>Время прибытия</th>
+                    <th>Время отбытия</th>
+                    <th>Адрес</th>
+                    <th>Название</th>
+                    <th>Водитель</th>
+                    <th>Телефон водителя</th>
+                    <th>Машина</th>
+                    <th>Номер машины</th>
+                    <th>Комментарий к точке</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
+                    ng-click="rowClick(row.row_id)">
+                    <td>{{row.waypoint.ID}}</td>
+                    <td>{{row.TASK_NUMBER}}</td>
+                    <td>{{row.NUMBER}}</td>
+                    <td>{{row.arrival_time_hhmm}}</td>
+                    <td>{{row.end_time_hhmm}}</td>
+                    <td>{{strMaxLength(row.waypoint.ADDRESS, 35)}}</td>
+                    <td>{{row.waypoint.NAME}}</td>
+                    <td>{{row.driver.NAME}}</td>
+                    <td>{{row.driver.PHONE}}</td>
+                    <td>{{row.transport.NAME}}</td>
+                    <td>{{row.transport.REGISTRATION_NUMBER}}</td>
+                    <td>{{strMaxLength(row.waypoint.COMMENT, 80)}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
-
-	</div>
 </template>
 
 <template type="text/html" id="transparent-map-window">
-	<div class="section" ng-controller="MapController" id="transparent-map-holder" >
-		transparent-map-window
-	</div>
+    <div class="section" ng-controller="MapController" id="transparent-map-holder">
+        transparent-map-window
+    </div>
 </template>
 
 <template type="text/html" id="template2">
-	<div class="section">
-		EMPTY WINDOW template2
-	</div>
+    <div class="section">
+        EMPTY WINDOW template2
+    </div>
 </template>

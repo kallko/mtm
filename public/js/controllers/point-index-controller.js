@@ -1,5 +1,8 @@
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', function (scope, http) {
 
+    var pointTable,
+        pointContainer;
+
     setListeners();
     init();
     // generateTestData();
@@ -109,6 +112,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         $(window).resize(resetHeight);
         resetHeight();
 
+        if (pointTable == null) {
+            pointTable = $('#point-table');
+            pointContainer = $('#point-controller-container');
+        }
+
         $("#tabs").tabs();
 
         $("#map-link").on('click', function () {
@@ -118,6 +126,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         $('ul.nav-pills li a').click(function (e) {
             $('ul.nav-pills li.active').removeClass('active')
             $(this).parent('li').addClass('active')
+        });
+
+        myLayout.on('stateChanged', function () {
+            console.log(pointTable.height());
+            pointTable.height(pointContainer.height() - 5);
         });
     }
 
