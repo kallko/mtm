@@ -129,8 +129,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         myLayout.on('stateChanged', function () {
-            console.log(pointTable.height());
-            pointTable.height(pointContainer.height() - 5);
+            pointTable.height(pointContainer.height() - 10);
+            pointTable.width(pointContainer.width() - 10);
         });
     }
 
