@@ -57,10 +57,11 @@ template {
 
 #point-table table tr td, #point-table table tr th {
     font-size: 11px;
-    padding: 4px 5px;
+    padding: 4px 5px !important;
     margin: 0;
     border-right: 1px solid grey;
     border-top: 0px !important;
+    white-space: nowrap;
 }
 
 #point-table table tr th {

@@ -128,8 +128,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (k = 0; k < data.tasks.length; k++) {
                     if (tmpPoints[j].TASK_NUMBER == data.tasks[k].NUMBER) {
                         //tmpPoints[j].task = data.tasks[k];
-                        tmpPoints[j].availability_windows = data.tasks[k].AVAILABILITY_WINDOWS;
-                        tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].availability_windows);
+                        tmpPoints[j].availability_windows_str = data.tasks[k].AVAILABILITY_WINDOWS;
+                        tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].availability_windows_str);
                         break;
                     }
                 }
@@ -144,6 +144,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.displayCollection = [].concat(scope.rowCollection);
 
         console.log('Finish linking ...');
+
+        setColResizable();
+    }
+
+    function setColResizable() {
+        $("#point-table-tbl").colResizable({
+            headerOnly: true
+            //fixed: false
+        });
     }
 
     function setListeners() {
@@ -170,6 +179,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTable.height(pointContainer.height() - 10);
             pointTable.width(pointContainer.width() - 10);
         });
+
+
     }
 
     function resetHeight() {

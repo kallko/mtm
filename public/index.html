@@ -12,6 +12,7 @@
 <script src="/js/vendor/goldenlayout.min.js"></script>
 <script src="/bower_components/angular-smart-table/dist/smart-table.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+<script src="/js/vendor/colResizable-1.5.min.js"></script>
 
 
 <script src="./js/app.js"></script>
@@ -25,13 +26,14 @@
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
 
         <div id="point-table" class="table-holder">
-            <table st-safe-src="rowCollection" st-table="displayCollection"
-                   class="table table-striped point-table">
+            <table class="table table-striped point-table" id="point-table-tbl"
+                   st-safe-src="rowCollection" st-table="displayCollection" >
                 <thead>
                 <tr id="titles-tr">
                     <th>ID точки</th>
                     <th>ID заказа</th>
                     <th>Номер</th>
+                    <th>Временное окно</th>
                     <th>Время прибытия</th>
                     <th>Время отбытия</th>
                     <th>Адрес</th>
@@ -49,15 +51,16 @@
                     <td>{{row.waypoint.ID}}</td>
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.NUMBER}}</td>
+                    <td>{{row.availability_windows_str}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
                     <td>{{row.end_time_hhmm}}</td>
-                    <td>{{strMaxLength(row.waypoint.ADDRESS, 35)}}</td>
+                    <td>{{row.waypoint.ADDRESS}}</td>
                     <td>{{row.waypoint.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
                     <td>{{row.driver.PHONE}}</td>
                     <td>{{row.transport.NAME}}</td>
                     <td>{{row.transport.REGISTRATION_NUMBER}}</td>
-                    <td>{{strMaxLength(row.waypoint.COMMENT, 80)}}</td>
+                    <td>{{row.waypoint.COMMENT}}</td>
                 </tr>
                 </tbody>
             </table>
