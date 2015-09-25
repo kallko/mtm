@@ -52,6 +52,40 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
     }
 
+    function strToTstamp(strDate) {
+        var parts = strDate.split(' '),
+            _date = parts[0].split('.'),
+            _time = parts[1].split(':');
+
+        return new Date(_date[2], _date[1], _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+    }
+
+    function getTstampAvailabilityWindow(strWindows) {
+        var windows = strWindows.split(' ; '),
+            resWindows = [];
+
+        for (var i = 0; i < windows.length; i++) {
+            var parts = windows[i].split(' '),
+                timeStart = parts[0].split(':'),
+                timeFinish = parts[2].split(':'),
+                startDate = new Date(),
+                finishDate = new Date();
+
+            startDate.setHours(timeStart[0]);
+            startDate.setMinutes(timeStart[1]);
+
+            finishDate.setHours(timeFinish[0]);
+            finishDate.setMinutes(timeFinish[1]);
+
+            resWindows.push({
+                start: startDate.getTime() / 1000,
+                finish: finishDate.getTime() / 1000
+            });
+        }
+
+        return resWindows;
+    }
+
     function linkDataParts(data) {
         console.log('Start linking ...');
 
@@ -78,7 +112,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].driver = data.routes[i].driver;
                 tmpPoints[j].transport = data.routes[i].transport;
                 tmpPoints[j].arrival_time_hhmm = tmpPoints[j].ARRIVAL_TIME.substr(11, 8);
+                tmpPoints[j].arrival_time_ts = strToTstamp(tmpPoints[j].ARRIVAL_TIME);
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
+                tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
                 rowId++;
 
@@ -91,7 +127,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (k = 0; k < data.tasks.length; k++) {
                     if (tmpPoints[j].TASK_NUMBER == data.tasks[k].NUMBER) {
-                        tmpPoints[j].task = data.tasks[k];
+                        //tmpPoints[j].task = data.tasks[k];
+                        tmpPoints[j].availability_windows = data.tasks[k].AVAILABILITY_WINDOWS;
+                        tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].availability_windows);
                         break;
                     }
                 }

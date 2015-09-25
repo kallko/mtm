@@ -5,7 +5,12 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     logging = require('../logging'),
     log = new logging('./logs'),
-    parseXML = require('xml2js').parseString;
+    parseXML = require('xml2js').parseString,
+    loadFromCache = true,
+
+    counter = 0,
+    starTime,
+    totalPoints = 0;
 
 // 144700:tarasenkog
 // hd:QJQB8uxW
@@ -23,7 +28,23 @@ SoapManager.prototype.getFullUrl = function () {
 };
 
 SoapManager.prototype.getAllDailyData = function (callback) {
-    this.getDailyPlan(callback);
+    if (!loadFromCache) {
+        this.getDailyPlan(callback);
+    } else {
+        this.loadFromCachedJson(callback);
+    }
+
+};
+
+SoapManager.prototype.loadFromCachedJson = function (callback) {
+    fs.readFile('./logs/final_data.js', 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+
+        console.log('The data loaded from the cache.');
+        callback(JSON.parse(data));
+    });
 };
 
 SoapManager.prototype.getDailyPlan = function (callback) {
@@ -71,6 +92,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                 log.toFLog("log.js", res);
 
                 var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
+                data.date = new Date();
                 me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data);
                 me.getAdditionalData(client, data, callback);
 
@@ -106,12 +128,12 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
     client.run({'input_data': _xml.additionalDataXML(data.ID)}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
-                log.toFLog("transports_driver.js", res);
+                //log.toFLog("transports_driver.js", res);
 
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,
-                    waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,
-                    tasks = res.MESSAGE.TASKS[0].TASK;
+                    waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT;
+                //tasks = res.MESSAGE.TASKS[0].TASK;
                 log.l('waypoints.length = ' + waypoints.length);
 
                 data.transports = [];
@@ -130,18 +152,65 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
                 }
 
                 data.tasks = [];
-                if (tasks != null) {
-                    for (i = 0; i < tasks.length; i++) {
-                        data.tasks.push(tasks[i].$);
+                //if (tasks != null) {
+                //    for (i = 0; i < tasks.length; i++) {
+                //        data.tasks.push(tasks[i].$);
+                //    }
+                //}
+
+                counter = 0;
+                totalPoints = 0;
+                for (i = 0; i < data.routes.length; i++) {
+                    for (var j = 0; j < data.routes[i].points.length; j++) {
+                        if (data.routes[i].points[j].TASK_NUMBER == '') continue;
+                        totalPoints++;
+                        me.getTask(client, data.routes[i].points[j].TASK_NUMBER,
+                            data.routes[i].points[j].TASK_DATE, data, callback);
                     }
                 }
 
-                log.toFLog("routes.js", data);
-                callback(data);
+                //log.toFLog("routes.js", data);
             });
 
         }
     });
+};
+
+SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, callback) {
+    //log.l("\ngetTask");
+    //log.l(_xml.taskXML(taskNumber, taskDate));
+    client.run({'input_data': _xml.taskXML(taskNumber, taskDate)}, function (err, result) {
+        if (!err) {
+
+            if (counter == 0) {
+                starTime = Date.now();
+                log.l('========= totalPoints = ' + totalPoints);
+            }
+
+            counter++;
+            if (counter % 10 == 0) {
+                log.l(taskNumber + ' OK: counter = ' + counter + '; totalPoints = ' + totalPoints);
+            }
+
+            if (counter == totalPoints) {
+                log.l('======== TOTAL TIME = ' + ((Date.now() - starTime) / 1000) + ' seconds');
+            }
+
+            parseXML(result.return, function (err, res) {
+                //if (counter == 2) {
+                //    log.dump(res);
+                //}
+
+                data.tasks.push(res.MESSAGE.TASKS[0].TASK[0].$);
+                if (counter == totalPoints) {
+                    callback(data);
+                    log.toFLog('final_data.js', data);
+                }
+            });
+        }
+    });
+
+
 };
 
 // SoapManager.prototype.sendData()

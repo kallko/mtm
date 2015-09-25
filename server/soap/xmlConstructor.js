@@ -82,12 +82,24 @@ XMLConstructor.prototype.additionalDataXML = function (routeid) {
     str += this.xml.setGetValue('IDROUTE', routeid);
     str += this.xml.slashEnd;
     str += this.xml.instruction.end;
+
+    str += this.xml.instructions.end;
+    str += this.xml.end;
+    return str;
+};
+
+XMLConstructor.prototype.taskXML = function (taskNumber, taskDate) {
+    var str = '';
+    str += this.xml.begin;
+    str += this.xml.instructions.begin;
+
     str += this.xml.instruction.jobs;
-    //str += '<PARAMETER KEY="NUMBER" VALUE="1563766" />';
-    //str += '<PARAMETER KEY="NUMBER" VALUE="1563663" />';
-    //str += '<PARAMETER KEY="DATA" VALUE="' + this.getTodayStr() + '" />';
-    //str += '<PARAMETER KEY="NUMBER" VALUE="1563611" />';
-    //str += '<PARAMETER KEY="NUMBER" VALUE="1563574" />';
+    str += this.xml.parameter.begin;
+    str += this.xml.setGetValue('NUMBER', taskNumber);
+    str += this.xml.slashEnd;
+    str += this.xml.parameter.begin;
+    str += this.xml.setGetValue('DATE', taskDate);
+    str += this.xml.slashEnd;
     str += this.xml.instruction.end;
 
     str += this.xml.instructions.end;
