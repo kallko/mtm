@@ -1,11 +1,19 @@
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', function (scope, http) {
 
     var pointTable,
-        pointContainer;
+        pointContainer,
+        _data,
+        STATUS = {
+            FINISHED: 0,
+            FOCUS_L1: 1,
+            FOCUS_L2: 2,
+            SCHEDULED: 3,
+            CANCELED: 4
+
+        };
 
     setListeners();
     init();
-    // generateTestData();
     loadDailyData();
 
     function Point() {
@@ -116,6 +124,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
+                tmpPoints[j].status = 0;
                 rowId++;
 
                 for (var k = 0; k < data.waypoints.length; k++) {
@@ -138,19 +147,58 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
         }
 
+        _data = data;
+        generateStops(data);
+        statusUpdate();
+
         console.log(data);
         console.log(scope.rowCollection);
-
         scope.displayCollection = [].concat(scope.rowCollection);
 
         console.log('Finish linking ...');
-
         setColResizable();
+    }
+
+    function randomInteger(min, max) {
+        var rand = min + Math.random() * (max - min)
+        rand = Math.round(rand);
+        return rand;
+    }
+
+    function generateStops(data) {
+        var tmpLength = 0;
+
+        for (var i = 0; i < data.routes.length; i++) {
+            tmpLength = randomInteger(0, data.routes[i].points.length - data.routes[i].points.length / 3);
+            //console.log(tmpLength);
+            data.routes[i].stops = data.routes[i].points.slice(0, tmpLength);
+        }
+    }
+
+    function statusUpdate() {
+        // TODO: get new real data from aggregator before update
+
+        for (var i = 0; i < _data.routes.length; i++) {
+            for (var j = 0; j < _data.routes[i].stops.length; j++) {
+
+                // TODO:    with real data create function for checking stops with radius
+                //          and time windows for hitting waypoints coordinates and time
+
+                for (var k = 0; k < _data.routes[i].points.length; k++) {
+                    if(_data.routes[i].stops[j].arrival_time_ts == _data.routes[i].points[k].arrival_time_ts &&
+                        _data.routes[i].stops[j].END_LAT == _data.routes[i].points[k].END_LAT &&
+                        _data.routes[i].stops[j].END_LAT == _data.routes[i].points[k].END_LAT) {
+                        _data.routes[i].points[k].status = STATUS.FINISHED;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     function setColResizable() {
         $("#point-table-tbl").colResizable({
-            headerOnly: true
+            //headerOnly: true
             //fixed: false
         });
     }
@@ -164,23 +212,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointContainer = $('#point-controller-container');
         }
 
-        $("#tabs").tabs();
-
-        $("#map-link").on('click', function () {
-            map.invalidateSize(false);
-        });
-
-        $('ul.nav-pills li a').click(function (e) {
-            $('ul.nav-pills li.active').removeClass('active')
-            $(this).parent('li').addClass('active')
-        });
-
         myLayout.on('stateChanged', function () {
             pointTable.height(pointContainer.height() - 10);
             pointTable.width(pointContainer.width() - 10);
         });
-
-
     }
 
     function resetHeight() {
@@ -220,8 +255,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     };
 
     function generateTestData() {
-        var testData = [];
-        tmpPoint = null;
+        var testData = [],
+            tmpPoint = null;
         for (var i = 0; i < 77; i++) {
             tmpPoint = new Point();
             tmpPoint.number = i + 1;

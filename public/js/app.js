@@ -14,13 +14,13 @@ var myLayout = new GoldenLayout({
                 componentState: {templateId: 'transparent-map-window'}
             }, {
                 type: 'component',
-                height: 20,
+                height: 30,
                 componentName: 'template',
                 componentState: {templateId: 'template2'}
             }]
         }, {
             type: 'component',
-            width: 70,
+            width: 60,
             componentName: 'template',
             componentState: {templateId: 'template-point-table'}
         }]
