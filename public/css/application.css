@@ -69,6 +69,7 @@ template {
     background-color: whitesmoke;
 }
 
+
 .nav > li > a {
     padding: 5px !important;
 }
@@ -77,8 +78,9 @@ template {
     margin: 10px;
 }
 
-#point-menu-panel #status-select {
+#point-menu-panel select {
     width: 100px;
+    margin-right: 10px;
 }
 
 #tab-selector {
@@ -131,10 +133,14 @@ template {
     margin-bottom: 2px;
 }
 
-#titles-tr {
+.titles-tr {
     border-top: 1px solid grey;
 }
 
 .leaflet-top, .leaflet-bottom, .leaflet-left, .leaflet-right {
     z-index: 0;
+}
+
+.header-copy {
+
 }

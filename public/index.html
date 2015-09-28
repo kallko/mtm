@@ -26,9 +26,13 @@
         <div id="point-menu-panel">
             <div>
                 <span>Статус: </span>
+                <select id="status-select" ng-model="filters.status"
+                        ng-options='option.value as option.name for option in filters.statuses'>
+                </select>
 
-                <select id="status-select" ng-model="filters.statusFilter"
-                        ng-options='option.value as option.name for option in filters.statusFilters'>
+                <span>Водитель: </span>
+                <select id="driver-select" ng-model="filters.driver"
+                        ng-options='option.value as option.name for option in filters.drivers'>
                 </select>
             </div>
         </div>
@@ -36,9 +40,9 @@
         <div id="point-table" class="table-holder">
             <table class="table table-striped point-table" id="point-table-tbl"
                    st-safe-src="rowCollection" st-table="displayCollection">
-                <thead>
-                <tr id="titles-tr">
-                    <th st-sort="status" >Статус</th>
+                <thead class="header" >
+                <tr class="titles-tr">
+                    <th st-sort="status">Статус</th>
                     <th>Время прибытия</th>
                     <th>ID точки</th>
                     <th>ID заказа</th>
@@ -57,7 +61,7 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-show="filters.statusFilter == -1 || row.status == filters.statusFilter">
+                    ng-show="statusFilter(row) && driverFilter(row)">
                     <td>{{getTextStatus(row.status)}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
                     <td>{{row.waypoint.ID}}</td>

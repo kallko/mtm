@@ -20,7 +20,7 @@ var myLayout = new GoldenLayout({
             }]
         }, {
             type: 'component',
-            width: 60,
+            width: 50,
             componentName: 'template',
             componentState: {templateId: 'template-point-table'}
         }]

@@ -19,7 +19,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.rowCollection = [];
         scope.displayCollection = [].concat(scope.rowCollection);
         scope.filters = {};
-        scope.filters.statusFilters = [
+        scope.filters.statuses = [
             {name: 'все', value: -1},
             {name: 'выполненные', value: 0},
             {name: 'под контролем', value: 1},
@@ -27,7 +27,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             {name: 'запланирован', value: 3},
             {name: 'отменен', value: 4}
         ];
-        scope.filters.statusFilter = scope.filters.statusFilters[0].value;
+        scope.filters.status = scope.filters.statuses[0].value;
+        scope.filters.drivers = [{name: 'все', value: -1}];
+        scope.filters.driver = scope.filters.drivers[0].value;
+    }
+
+    function prepareFixedHeader() {
+        var $header = $('.header');
+        $header.clone().removeClass('header').addClass('header-copy').insertAfter($header);
     }
 
     function loadDailyData() {
@@ -78,7 +85,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         console.log('Start linking ...');
 
         var tmpPoints,
-            rowId = 0;
+            rowId = 0,
+            driverId = 0;
         scope.rowCollection = [];
         for (var i = 0; i < data.routes.length; i++) {
             for (var j = 0; j < data.transports.length; j++) {
@@ -98,6 +106,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             tmpPoints = data.routes[i].points;
             for (j = 0; j < tmpPoints.length; j++) {
                 tmpPoints[j].driver = data.routes[i].driver;
+                if (data.routes[i].driver._id == null) {
+                    data.routes[i].driver._id = driverId;
+                    scope.filters.drivers.push({
+                        name: data.routes[i].driver.NAME,
+                        value: data.routes[i].driver._id
+                    });
+                    driverId++;
+                }
+
+                tmpPoints[j].driver_id = data.routes[i].driver._id;
                 tmpPoints[j].transport = data.routes[i].transport;
                 tmpPoints[j].arrival_time_hhmm = tmpPoints[j].ARRIVAL_TIME.substr(11, 8);
                 tmpPoints[j].arrival_time_ts = strToTstamp(tmpPoints[j].ARRIVAL_TIME);
@@ -130,6 +148,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         _data = data;
         generateStops(data);
         statusUpdate();
+        prepareFixedHeader();
 
         console.log(data);
         console.log(scope.rowCollection);
@@ -235,21 +254,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     };
 
     scope.getTextStatus = function (statusCode) {
-        for (var i = 0; i < scope.filters.statusFilters.length; i++) {
-            if(scope.filters.statusFilters[i].value == statusCode) {
-                return scope.filters.statusFilters[i].name;
+        for (var i = 0; i < scope.filters.statuses.length; i++) {
+            if (scope.filters.statuses[i].value == statusCode) {
+                return scope.filters.statuses[i].name;
             }
         }
 
         return 'неизвестный статус';
     };
 
-    scope.strMaxLength = function (str, lenght) {
-        if (str.length > lenght) {
-            return str.substr(0, lenght) + ' ...';
-        }
+    scope.statusFilter = function (row) {
+        return (scope.filters.status == -1 || row.status == scope.filters.status);
+    };
 
-        return str;
+    scope.driverFilter = function (row) {
+        return (scope.filters.driver == -1 || row.driver_id == scope.filters.driver);
+        ;
     };
 
 }]);
