@@ -48,6 +48,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     function init() {
         scope.rowCollection = [];
         scope.displayCollection = [].concat(scope.rowCollection);
+        scope.filters = {};
+        scope.filters.statusFilters = [
+            {name: 'Все', value: -1},
+            {name: 'Выполненные', value: 0},
+            {name: 'Под контролем', value: 1},
+            {name: 'Ожидают выполнения', value: 2},
+            {name: 'Запланирован', value: 3},
+            {name: 'Отменен', value: 4}
+        ];
+        scope.filters.statusFilter = scope.filters.statusFilters[0].value;
     }
 
     function loadDailyData() {
@@ -65,7 +75,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _date = parts[0].split('.'),
             _time = parts[1].split(':');
 
-        return new Date(_date[2], _date[1], _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+        return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
     }
 
     function getTstampAvailabilityWindow(strWindows) {
@@ -124,7 +134,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
-                tmpPoints[j].status = 0;
+                tmpPoints[j].status = STATUS.SCHEDULED;
                 rowId++;
 
                 for (var k = 0; k < data.waypoints.length; k++) {
@@ -170,13 +180,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         for (var i = 0; i < data.routes.length; i++) {
             tmpLength = randomInteger(0, data.routes[i].points.length - data.routes[i].points.length / 3);
-            //console.log(tmpLength);
             data.routes[i].stops = data.routes[i].points.slice(0, tmpLength);
         }
     }
 
     function statusUpdate() {
         // TODO: get new real data from aggregator before update
+
+        var now = parseInt(Date.now() / 1000),
+            tmpPoint,
+            focus_l1_time = 60 * 30,
+            focus_l2_time = 60 * 120;
+        console.log(new Date());
+        console.log('now = ' + now);
+        console.log('now + focus_l2_time = ' + (now + focus_l2_time));
 
         for (var i = 0; i < _data.routes.length; i++) {
             for (var j = 0; j < _data.routes[i].stops.length; j++) {
@@ -185,11 +202,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //          and time windows for hitting waypoints coordinates and time
 
                 for (var k = 0; k < _data.routes[i].points.length; k++) {
-                    if(_data.routes[i].stops[j].arrival_time_ts == _data.routes[i].points[k].arrival_time_ts &&
-                        _data.routes[i].stops[j].END_LAT == _data.routes[i].points[k].END_LAT &&
-                        _data.routes[i].stops[j].END_LAT == _data.routes[i].points[k].END_LAT) {
-                        _data.routes[i].points[k].status = STATUS.FINISHED;
+                    tmpPoint = _data.routes[i].points[k];
+                    if (_data.routes[i].stops[j].arrival_time_ts == tmpPoint.arrival_time_ts &&
+                        _data.routes[i].stops[j].END_LAT == tmpPoint.END_LAT &&
+                        _data.routes[i].stops[j].END_LAT == tmpPoint.END_LAT) {
+                        tmpPoint.status = STATUS.FINISHED;
                         break;
+                    }
+                }
+            }
+
+            for (j = 0; j < _data.routes[i].points.length; j++) {
+                tmpPoint = _data.routes[i].points[j];
+                if (tmpPoint.status != STATUS.FINISHED &&
+                    tmpPoint.status != STATUS.CANCELED) {
+                    //console.log(tmpPoint.arrival_time_ts);
+                    //console.log('arrival_time_ts = ' + tmpPoint.arrival_time_ts);
+                    if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+                        if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+                            tmpPoint.status = STATUS.FOCUS_L1;
+                        } else {
+                            tmpPoint.status = STATUS.FOCUS_L2;
+                        }
                     }
                 }
             }
@@ -213,7 +247,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         myLayout.on('stateChanged', function () {
-            pointTable.height(pointContainer.height() - 10);
+            pointTable.height(pointContainer.height() - 50);
             pointTable.width(pointContainer.width() - 10);
         });
     }
@@ -230,28 +264,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         $('#point-' + id).addClass('selected-row');
     };
 
-    scope.getTextStatus = function (statusCode, pointId) {
-        var newClass,
-            text;
-        if (statusCode == 0) {
-            newClass = 'row-white';
-            text = 'Запланирован';
-        } else if (statusCode == 1) {
-            newClass = 'row-yellow';
-            text = 'Выполняется';
-        } else if (statusCode == 2) {
-            newClass = 'row-green';
-            text = 'Выполнен';
-        } else if (statusCode == 3) {
-            newClass = 'row-red';
-            text = 'Отменен';
+    scope.getTextStatus = function (statusCode) {
+        for (var i = 0; i < scope.filters.statusFilters.length; i++) {
+            if(scope.filters.statusFilters[i].value == statusCode) {
+                return scope.filters.statusFilters[i].name;
+            }
         }
 
-        if (pointId != null) {
-            $('#point-' + pointId).addClass(newClass);
-        }
-
-        return text;
+        return 'неизвестный статус';
     };
 
     function generateTestData() {

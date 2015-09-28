@@ -14,7 +14,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 <script src="/js/vendor/colResizable-1.5.min.js"></script>
 
-
 <script src="./js/app.js"></script>
 <script src="./js/controllers/point-index-controller.js"></script>
 <script src="./js/controllers/map-controller.js"></script>
@@ -24,17 +23,27 @@
 
 <template type="text/html" id="template-point-table">
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
+        <div id="point-menu-panel">
+            <div>
+                <span>Статус: </span>
+
+                <select id="status-select" ng-model="filters.statusFilter"
+                        ng-options='option.value as option.name for option in filters.statusFilters'>
+                </select>
+            </div>
+        </div>
 
         <div id="point-table" class="table-holder">
             <table class="table table-striped point-table" id="point-table-tbl"
-                   st-safe-src="rowCollection" st-table="displayCollection" >
+                   st-safe-src="rowCollection" st-table="displayCollection">
                 <thead>
                 <tr id="titles-tr">
+                    <th>Статус</th>
+                    <th>Время прибытия</th>
                     <th>ID точки</th>
                     <th>ID заказа</th>
                     <th>Номер</th>
                     <th>Временное окно</th>
-                    <th>Время прибытия</th>
                     <th>Время отбытия</th>
                     <th>Адрес</th>
                     <th>Название</th>
@@ -47,20 +56,22 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
-                    ng-click="rowClick(row.row_id)">
+                    ng-click="rowClick(row.row_id)"
+                    ng-show="filters.statusFilter == -1 || row.status == filters.statusFilter">
+                    <td>{{getTextStatus(row.status)}}</td>
+                    <td>{{row.arrival_time_hhmm}}</td>
                     <td>{{row.waypoint.ID}}</td>
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.availability_windows_str}}</td>
-                    <td>{{row.arrival_time_hhmm}}</td>
                     <td>{{row.end_time_hhmm}}</td>
-                    <td title="{{row.waypoint.ADDRESS}}" >{{row.waypoint.ADDRESS}}</td>
-                    <td title="{{row.waypoint.NAME}}" >{{row.waypoint.NAME}}</td>
+                    <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
+                    <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
                     <td>{{row.driver.PHONE}}</td>
                     <td>{{row.transport.NAME}}</td>
                     <td>{{row.transport.REGISTRATION_NUMBER}}</td>
-                    <td title="{{row.waypoint.COMMENT}}" >{{row.waypoint.COMMENT}}</td>
+                    <td title="{{row.waypoint.COMMENT}}">{{row.waypoint.COMMENT}}</td>
                 </tr>
                 </tbody>
             </table>

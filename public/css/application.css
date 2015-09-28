@@ -73,6 +73,14 @@ template {
     padding: 5px !important;
 }
 
+#point-menu-panel {
+    margin: 10px;
+}
+
+#point-menu-panel #status-select {
+    width: 100px;
+}
+
 #tab-selector {
     margin-bottom: 10px;
 }
