@@ -9,53 +9,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             FOCUS_L2: 2,
             SCHEDULED: 3,
             CANCELED: 4
-
         };
 
     setListeners();
     init();
     loadDailyData();
 
-    function Point() {
-        this.number = 0;
-        this.status = 0;
-        this.realOrder = 0;
-        this.planOrder = 0;
-        this.pointID = 0;
-        this.orderID = 0;
-        this.pointName = 'test name';
-        this.address = 'test address';
-        this.timeWindow = {
-            start: 0,
-            finish: 0
-        };
-        this.planArrivalTime = 0;
-        this.planServiceTime = 0;
-        this.planDowntime = 0;
-        this.planDeparture = 0;
-        this.distance = 0;
-        this.predictionArrivalTime = 0;
-        this.factArrivalTime = 0;
-        this.driverInPlan = true;
-        this.carNumber = '0000';
-        this.driverName = 'Test Name';
-        this.phone = '0000';
-        this.driverComment = '';
-        this.managerName = '';
-        this.managerComment = '';
-    }
-
     function init() {
         scope.rowCollection = [];
         scope.displayCollection = [].concat(scope.rowCollection);
         scope.filters = {};
         scope.filters.statusFilters = [
-            {name: 'Все', value: -1},
-            {name: 'Выполненные', value: 0},
-            {name: 'Под контролем', value: 1},
-            {name: 'Ожидают выполнения', value: 2},
-            {name: 'Запланирован', value: 3},
-            {name: 'Отменен', value: 4}
+            {name: 'все', value: -1},
+            {name: 'выполненные', value: 0},
+            {name: 'под контролем', value: 1},
+            {name: 'ожидают выполнения', value: 2},
+            {name: 'запланирован', value: 3},
+            {name: 'отменен', value: 4}
         ];
         scope.filters.statusFilter = scope.filters.statusFilters[0].value;
     }
@@ -273,23 +243,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         return 'неизвестный статус';
     };
-
-    function generateTestData() {
-        var testData = [],
-            tmpPoint = null;
-        for (var i = 0; i < 77; i++) {
-            tmpPoint = new Point();
-            tmpPoint.number = i + 1;
-            tmpPoint.pointID = i + 1;
-            tmpPoint.status = Math.floor(Math.random() * 4);
-            tmpPoint.driverName = "Driver" + i % 3;
-            tmpPoint.driverInPlan = Math.floor(Math.random() * 3) != 0;
-            testData.push(tmpPoint);
-        }
-
-        scope.rowCollection = testData;
-        scope.displayCollection = [].concat(scope.rowCollection);
-    }
 
     scope.strMaxLength = function (str, lenght) {
         if (str.length > lenght) {
