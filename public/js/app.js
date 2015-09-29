@@ -1,32 +1,33 @@
 angular.module('MTMonitor', ['smart-table']);
 
-var myLayout = new GoldenLayout({
-    settings: {
-        hasHeaders: true
-    },
-    content: [{
-        type: 'row',
+var _map,
+    myLayout = new GoldenLayout({
+        settings: {
+            hasHeaders: true
+        },
         content: [{
-            type: 'column',
+            type: 'row',
             content: [{
-                type: 'component',
-                componentName: 'template',
-                componentState: {templateId: 'transparent-map-window'}
+                type: 'column',
+                content: [{
+                    type: 'component',
+                    componentName: 'template',
+                    componentState: {templateId: 'transparent-map-window'}
+                }, {
+                    type: 'component',
+                    height: 20,
+                    componentName: 'template',
+                    componentState: {templateId: 'template2'}
+                }]
             }, {
                 type: 'component',
-                height: 20,
+                width: 40,
                 componentName: 'template',
-                componentState: {templateId: 'template2'}
+                title: 'Точки маршрута',
+                componentState: {templateId: 'template-point-table'}
             }]
-        }, {
-            type: 'component',
-            width: 70,
-            componentName: 'template',
-            title: 'Точки маршрута',
-            componentState: {templateId: 'template-point-table'}
         }]
-    }]
-});
+    });
 
 myLayout.registerComponent('template', function (container, state) {
     var templateHtml = $('#' + state.templateId).html();

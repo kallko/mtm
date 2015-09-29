@@ -10,6 +10,22 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
     addListeners();
     // setTransparent();
 
+    //scope.$on('drawStops', function () {
+    //    console.log('!!!!!!!!!!!!!!  drawStops');
+    //});
+    //
+    //function onDrawMarkers() {
+    //    console.log('onDrawMarkers');
+    //    //console.log(event);
+    //    //console.log(args);
+    //}
+
+    //console.log('create scope.on.myCustomEvent')
+    //scope.$on('myCustomEvent', function (event, data) {
+    //    console.log('!!!!!!!! myCustomEvent !!!!!!!!!!!');
+    //    console.log(data);
+    //});
+
     function checkMouseInRect(pos, x, y) {
         if (pos.top < y && pos.left < x &&
             pos.top + pos.height > y && pos.left + pos.width > x) {
@@ -96,6 +112,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
             id: 't4ddy.229f0f41',
             accessToken: 'pk.eyJ1IjoidDRkZHkiLCJhIjoiZDJhZDRhM2E2NmMzZWNhZWM3YTlmMWZhOTYwNmJlMGUifQ.6GBanGLBka6DNFexeC3M6g'
         }).addTo(map);
+        L.control.scale({position: 'topleft', metric: true}).addTo(map);
+        _map = map;
     }
 
     function resize() {
