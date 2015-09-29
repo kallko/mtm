@@ -223,7 +223,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 resizeHead(pointTable);
             }
         });
-
     }
 
     scope.$on('ngRepeatFinished', function () {
@@ -265,11 +264,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
     function prepareFixedHeader() {
         var header = $('.header'),
-            table = $('#point-table > table');
-        header.clone().removeClass('header').addClass('header-copy').insertAfter(header);
+            table = $('#point-table > table'),
+            headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header),
+            protoStatusTH = header.find('.status-column');
 
-
-        //console.log(table.height());
+        headerCopy.find('.status-column').on('click', function () {
+            protoStatusTH.trigger('click');
+        });
 
         resizeHead(table);
         pointTableHolder.on("scroll", updateHeaderClip);
