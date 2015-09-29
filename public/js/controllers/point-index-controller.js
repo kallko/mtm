@@ -1,4 +1,4 @@
-angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', function (scope, http) {
+angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', function (scope, http, timeout) {
 
     var pointTableHolder,
         pointContainer,
@@ -224,21 +224,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         });
 
-        updateResizeGripHeight(true);
     }
 
-    function updateResizeGripHeight(first) {
-        var height = 0;
-        if (first) {
-            height = scope.displayCollection.length * 23 + 24;
-        } else {
-            height = pointTable.height();
-        }
+    scope.$on('ngRepeatFinished', function () {
+        updateResizeGripHeight();
+    });
 
-        console.log(height);
-        $('div.JCLRgrip').height(height);
-        $('div.jcolresizer').height(height);
-    }
+    scope.$watch(function () {
+        return scope.filters.driver;
+    }, function () {
+        timeout(function () {
+            updateResizeGripHeight();
+        }, 1);
+
+    });
 
     function setListeners() {
         $(window).resize(resetHeight);
@@ -255,10 +254,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTableHolder.width(pointContainer.width() - 10);
             updateFixedHeaderPos();
         });
+    }
 
-        $( ".group-select" ).change(function() {
-            updateResizeGripHeight(false);
-        });
+    function updateResizeGripHeight() {
+        var height = pointTable.height();
+        console.log(height);
+        $('div.JCLRgrip').height(height);
+        $('div.jcolresizer').height(height);
     }
 
     function prepareFixedHeader() {

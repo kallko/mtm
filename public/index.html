@@ -18,6 +18,7 @@
 <script src="./js/controllers/point-index-controller.js"></script>
 <script src="./js/controllers/map-controller.js"></script>
 <script src="./js/filters/mtm-unique.js"></script>
+<script src="./js/directives/finish-render.js"></script>
 
 <div id="map"></div>
 
@@ -40,7 +41,7 @@
         <div id="point-table" class="table-holder">
             <table class="table table-striped point-table" id="point-table-tbl"
                    st-safe-src="rowCollection" st-table="displayCollection">
-                <thead class="header" >
+                <thead class="header">
                 <tr class="titles-tr">
                     <th st-sort="status">Статус</th>
                     <th>Время прибытия</th>
@@ -61,7 +62,8 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-show="statusFilter(row) && driverFilter(row)">
+                    ng-show="statusFilter(row) && driverFilter(row)"
+                    on-finish-render="ngRepeatFinished">
                     <td>{{getTextStatus(row.status)}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
                     <td>{{row.waypoint.ID}}</td>
