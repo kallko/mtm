@@ -1,4 +1,4 @@
-angular.module('MTMonitor').controller('MapController', ['$scope', function (scope) {
+angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', function (scope, rootScope) {
     var map,
         position,
         inside = false,
@@ -10,21 +10,47 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
     addListeners();
     // setTransparent();
 
-    //scope.$on('drawStops', function () {
-    //    console.log('!!!!!!!!!!!!!!  drawStops');
-    //});
-    //
-    //function onDrawMarkers() {
-    //    console.log('onDrawMarkers');
-    //    //console.log(event);
-    //    //console.log(args);
-    //}
+    rootScope.$on('drawTracks', function (event, data) {
+        console.log('on drawTracks');
+        drawTracks(data);
+    });
 
-    //console.log('create scope.on.myCustomEvent')
-    //scope.$on('myCustomEvent', function (event, data) {
-    //    console.log('!!!!!!!! myCustomEvent !!!!!!!!!!!');
-    //    console.log(data);
-    //});
+    function drawTracks(tracks) {
+        var tmpVar,
+            polyline,
+            iconIndex = 14,
+            tmpTitle = '',
+            color = '';
+
+        for (var i = 0; i < tracks.length; i++) {
+            color = 'white';
+            if (tracks[i].state == 'MOVE') {
+                color = 'green';
+            } else if (tracks[i].state == 'ARRIVAL') {
+                color = 'red';
+            } else if (tracks[i].state == 'NO_SIGNAL') {
+                color = 'blue';
+            }
+
+            tmpTitle = 'Дистанция: ' + tracks[i].dist + '\n';
+            tmpTitle += 'Время прибытия: ' + new Date(tracks[i].t1 * 1000) + '\n';
+            tmpTitle += 'Длительность: ' + parseInt(tracks[i].time / 60) + ' минут';
+            tmpVar = L.marker([tracks[i].lat, tracks[i].lon],
+                {'title': tmpTitle});
+            tmpVar.setIcon(getIcon(i + 1, iconIndex, color, 'black'));
+            map.addLayer(tmpVar);
+
+            if (tracks[i].coords != null) {
+                polyline = new L.Polyline(tracks[i].coords, {
+                    color: color,
+                    weight: 3,
+                    opacity: 1,
+                    smoothFactor: 1
+                });
+                polyline.addTo(map);
+            }
+        }
+    }
 
     function checkMouseInRect(pos, x, y) {
         if (pos.top < y && pos.left < x &&
@@ -112,7 +138,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', function (sco
             id: 't4ddy.229f0f41',
             accessToken: 'pk.eyJ1IjoidDRkZHkiLCJhIjoiZDJhZDRhM2E2NmMzZWNhZWM3YTlmMWZhOTYwNmJlMGUifQ.6GBanGLBka6DNFexeC3M6g'
         }).addTo(map);
-        L.control.scale({position: 'topleft', metric: true}).addTo(map);
+
+        L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
         _map = map;
     }
 

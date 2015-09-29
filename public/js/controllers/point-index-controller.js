@@ -41,51 +41,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
         http.get('http://192.168.9.242:3001/states?login=admin&pass=admin321&gid=713&from=1443484800&to=1443571200', {}).
-            success(function (stops) {
-                console.log(stops);
-                drawStops(stops);
+            success(function (tracks) {
+                console.log({data: tracks});
+                scope.$emit('drawTracks', tracks);
             });
 
-        http.get('http://192.168.9.242:3001/messages?login=admin&pass=admin321&gid=713&from=1443484800&to=1443571200', {}).
-            success(function (tracks) {
-                console.log(tracks);
-                drawTracks(tracks)
-            });
+        //http.get('http://192.168.9.242:3001/messages?login=admin&pass=admin321&gid=713&from=1443484800&to=1443571200', {}).
+        //    success(function (tracks) {
+        //        console.log(tracks);
+        //        drawTracks(tracks)
+        //    });
 
         // [{"state":"ARRIVAL","t1":1413207066,"t2":1413208170,"lat":50.466892,"lon":30.377143,"dist":70,"time":1104},{"state":"MOVE","t1":1413208170,"t2":1413208240,"lat":50.46714,"lon":30.376225,"dist":358,"time":70},{"state":"ARRIVAL","t1":1413208240,"t2":1413211074,"lat":50.468735,"lon":30.37376,"dist":41,"time":2834},{"state":"MOVE","t1":1413211074,"t2":1413211182,"lat":50.468479,"lon":30.374182,"dist":1005,"time":108},{"state":"ARRIVAL","t1":1413211182,"t2":1413211272,"lat":50.465867,"lon":30.379187,"dist":8,"time":90},{"state":"MOVE","t1":1413211272,"t2":1413211342,"lat":50.465851,"lon":30.3793,"dist":1353,"time":70},{"state":"ARRIVAL","t1":1413211342,"t2":1413211720,"lat":50.466884,"lon":30.377234,"dist":57,"time":378},{"state":"MOVE","t1":1413211720,"t2":1413217292,"lat":50.467204,"lon":30.376598,"dist":94803,"time":5572},{"state":"ARRIVAL","t1":1413217292,"t2":1413266370,"lat":49.782428,"lon":30.178871,"dist":22,"time":49078},{"state":"MOVE","t1":1413266370,"t2":1413266528,"lat":49.78262,"lon":30.178795,"dist":95554,"time":158},{"state":"ARRIVAL","t1":1413266528,"t2":1413267256,"lat":49.784675,"lon":30.177585,"dist":15,"time":728},{"state":"MOVE","t1":1413267256,"t2":1413268848,"lat":49.784547,"lon":30.177517,"dist":114212,"time":1592},{"state":"ARRIVAL","t1":1413268848,"t2":1413270672,"lat":49.857379,"lon":30.112462,"dist":65,"time":1824},{"state":"MOVE","t1":1413270672,"t2":1413271764,"lat":49.857456,"lon":30.113367,"dist":134391,"time":1092},{"state":"ARRIVAL","t1":1413271764,"t2":1413272202,"lat":49.980645,"lon":30.005351,"dist":12,"time":438},{"state":"MOVE","t1":1413272202,"t2":1413272252,"lat":49.980632,"lon":30.005182,"dist":134737,"time":50},{"state":"ARRIVAL","t1":1413272252,"t2":1413272624,"lat":49.982697,"lon":30.005637,"dist":3,"time":372},{"state":"MOVE","t1":1413272624,"t2":1413272800,"lat":49.982726,"lon":30.005622,"dist":136536,"time":176},{"state":"ARRIVAL","t1":1413272800,"t2":1413272872,"lat":49.989578,"lon":30.01998,"dist":15,"time":72},{"state":"MOVE","t1":1413272872,"t2":1413273566,"lat":49.989587,"lon":30.020195,"dist":147045,"time":694},{"state":"ARRIVAL","t1":1413273566,"t2":1413274468,"lat":50.015819,"lon":30.119227,"dist":15,"time":902},{"state":"MOVE","t1":1413274468,"t2":1413274624,"lat":50.015861,"lon":30.11943,"dist":148978,"time":156},{"state":"ARRIVAL","t1":1413274624,"t2":1413274920,"lat":50.006298,"lon":30.124842,"dist":12,"time":296},{"state":"MOVE","t1":1413274920,"t2":1413275446,"lat":50.006236,"lon":30.124987,"dist":158055,"time":526},{"state":"ARRIVAL","t1":1413275446,"t2":1413276042,"lat":49.992167,"lon":30.017949,"dist":12,"time":596},{"state":"MOVE","t1":1413276042,"t2":1413276258,"lat":49.992077,"lon":30.018056,"dist":161029,"time":216},{"state":"ARRIVAL","t1":1413276258,"t2":1413277952,"lat":49.996257,"lon":29.996764,"dist":17,"time":1694},{"state":"MOVE","t1":1413277952,"t2":1413278012,"lat":49.996307,"lon":29.996529,"dist":161800,"time":60},{"state":"ARRIVAL","t1":1413278012,"t2":1413278444,"lat":49.997942,"lon":29.986451,"dist":19,"time":432},{"state":"MOVE","t1":1413278444,"t2":1413280434,"lat":49.998105,"lon":29.986343,"dist":191220,"time":1990},{"state":"ARRIVAL","t1":1413280434,"t2":1413281382,"lat":50.18095,"lon":30.10778,"dist":17,"time":948},{"state":"MOVE","t1":1413281382,"t2":1413282712,"lat":50.181061,"lon":30.107946,"dist":211999,"time":1330},{"state":"ARRIVAL","t1":1413282712,"t2":1413283222,"lat":50.073703,"lon":30.077546,"dist":19,"time":510},{"state":"MOVE","t1":1413283222,"t2":1413284838,"lat":50.073647,"lon":30.077282,"dist":237786,"time":1616},{"state":"ARRIVAL","t1":1413284838,"t2":1413286036,"lat":49.997925,"lon":29.986435,"dist":18,"time":1198},{"state":"MOVE","t1":1413286036,"t2":1413286262,"lat":49.997889,"lon":29.986681,"dist":0,"time":226}]
-        //scope.$emit('drawStops');
-    }
 
-    function drawStops(stops) {
-        var tmpVar,
-            iconIndex = 14,
-            tmpTitle = '';
-
-        for (var i = 0, k = 0; i < stops.length; i++) {
-            if (stops[i].state == "MOVE") {
-                continue;
-            }
-
-            k++;
-            tmpTitle = 'Дистанция: ' + stops[i].dist + '\n';
-            tmpTitle += 'Время прибытия: ' + new Date(stops[i].t1 * 1000) + '\n';
-            tmpTitle += 'Длительность: ' + parseInt(stops[i].time / 60) + ' минут';
-            //console.log('i = ' + i + '; ' + stops[i].state);
-            tmpVar = L.marker([stops[i].lat, stops[i].lon],
-                {'title': tmpTitle});
-            tmpVar.setIcon(getIcon(k, iconIndex, 'grey', 'black'));
-            _map.addLayer(tmpVar);
-        }
-    }
-
-    function drawTracks(tracks) {
-        var polyline = new L.Polyline(tracks, {
-            color: '#F00',
-            weight: 3,
-            opacity: 1,
-            smoothFactor: 1
-        });
-        polyline.addTo(_map);
     }
 
     function strToTstamp(strDate) {
