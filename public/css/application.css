@@ -111,12 +111,6 @@ template {
     border: 0 !important;
 }
 
-#table-menu-holder-tr {
-    /*position: absolute;
-    top: 43px;
-    left: 140px;*/
-}
-
 .input-label {
     font-size: 13px;
     margin: 0 5px 0 10px;
@@ -142,5 +136,11 @@ template {
 }
 
 .header-copy {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
 
+.header-copy th{
+    /*white-space: nowrap;*/
 }

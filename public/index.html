@@ -26,12 +26,12 @@
         <div id="point-menu-panel">
             <div>
                 <span>Статус: </span>
-                <select id="status-select" ng-model="filters.status"
+                <select id="status-select" ng-model="filters.status" class="group-select"
                         ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
                 <span>Водитель: </span>
-                <select id="driver-select" ng-model="filters.driver"
+                <select id="driver-select" ng-model="filters.driver" class="group-select"
                         ng-options='option.value as option.name for option in filters.drivers'>
                 </select>
             </div>

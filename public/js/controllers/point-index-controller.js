@@ -1,7 +1,8 @@
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', function (scope, http) {
 
-    var pointTable,
+    var pointTableHolder,
         pointContainer,
+        pointTable,
         _data,
         STATUS = {
             FINISHED: 0,
@@ -30,11 +31,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];
         scope.filters.driver = scope.filters.drivers[0].value;
-    }
-
-    function prepareFixedHeader() {
-        var $header = $('.header');
-        $header.clone().removeClass('header').addClass('header-copy').insertAfter($header);
     }
 
     function loadDailyData() {
@@ -148,14 +144,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         _data = data;
         generateStops(data);
         statusUpdate();
-        prepareFixedHeader();
 
         console.log(data);
-        console.log(scope.rowCollection);
+        console.log({'data': scope.rowCollection});
         scope.displayCollection = [].concat(scope.rowCollection);
 
         console.log('Finish linking ...');
         setColResizable();
+        prepareFixedHeader();
     }
 
     function randomInteger(min, max) {
@@ -180,9 +176,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             tmpPoint,
             focus_l1_time = 60 * 30,
             focus_l2_time = 60 * 120;
-        console.log(new Date());
-        console.log('now = ' + now);
-        console.log('now + focus_l2_time = ' + (now + focus_l2_time));
+        //console.log(new Date());
+        //console.log('now = ' + now);
+        //console.log('now + focus_l2_time = ' + (now + focus_l2_time));
 
         for (var i = 0; i < _data.routes.length; i++) {
             for (var j = 0; j < _data.routes[i].stops.length; j++) {
@@ -223,22 +219,85 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         $("#point-table-tbl").colResizable({
             //headerOnly: true
             //fixed: false
+            onResize: function () {
+                resizeHead(pointTable);
+            }
         });
+
+        updateResizeGripHeight(true);
+    }
+
+    function updateResizeGripHeight(first) {
+        var height = 0;
+        if (first) {
+            height = scope.displayCollection.length * 23 + 24;
+        } else {
+            height = pointTable.height();
+        }
+
+        console.log(height);
+        $('div.JCLRgrip').height(height);
+        $('div.jcolresizer').height(height);
     }
 
     function setListeners() {
         $(window).resize(resetHeight);
         resetHeight();
 
-        if (pointTable == null) {
-            pointTable = $('#point-table');
+        if (pointTableHolder == null) {
+            pointTableHolder = $('#point-table');
             pointContainer = $('#point-controller-container');
+            pointTable = $('#point-table > table');
         }
 
         myLayout.on('stateChanged', function () {
-            pointTable.height(pointContainer.height() - 50);
-            pointTable.width(pointContainer.width() - 10);
+            pointTableHolder.height(pointContainer.height() - 50);
+            pointTableHolder.width(pointContainer.width() - 10);
+            updateFixedHeaderPos();
         });
+
+        $( ".group-select" ).change(function() {
+            updateResizeGripHeight(false);
+        });
+    }
+
+    function prepareFixedHeader() {
+        var header = $('.header'),
+            table = $('#point-table > table');
+        header.clone().removeClass('header').addClass('header-copy').insertAfter(header);
+
+
+        //console.log(table.height());
+
+        resizeHead(table);
+        pointTableHolder.on("scroll", updateHeaderClip);
+        updateHeaderClip();
+        updateFixedHeaderPos();
+    }
+
+    function updateHeaderClip() {
+        var x = pointTableHolder.scrollLeft(),
+            width = pointContainer.width() - 24;
+
+        pointTableHolder.find('.header-copy').css({
+            'margin-left': -x - 1,
+            clip: 'rect(0, ' + (width + x) + 'px, auto, ' + x + 'px)'
+        });
+
+    }
+
+    function resizeHead($table) {
+        $table.find('thead.header > tr:first > th').each(function (i, h) {
+            $table.find('thead.header-copy > tr > th:eq(' + i + ')').css({
+                width: $(h).outerWidth(),
+                display: $(h).css('display')
+            });
+        });
+        $table.find('thead.header-copy').css('width', $table.outerWidth());
+    }
+
+    function updateFixedHeaderPos() {
+        $('.header-copy').offset(pointTableHolder.position());
     }
 
     function resetHeight() {
@@ -269,7 +328,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
     scope.driverFilter = function (row) {
         return (scope.filters.driver == -1 || row.driver_id == scope.filters.driver);
-        ;
     };
 
 }]);
