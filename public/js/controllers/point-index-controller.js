@@ -230,7 +230,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     });
 
     scope.$watch(function () {
-        return scope.filters.driver;
+        return scope.filters.driver + scope.filters.status;
     }, function () {
         timeout(function () {
             updateResizeGripHeight();
@@ -272,10 +272,39 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             protoStatusTH.trigger('click');
         });
 
+        setTitleListener();
         resizeHead(table);
         pointTableHolder.on("scroll", updateHeaderClip);
         updateHeaderClip();
         updateFixedHeaderPos();
+    }
+
+    function setTitleListener() {
+        // http://192.168.9.242:3001/states?login=admin&pass=admin321&gid=339&from=1413186262&to=1413286262
+
+        //$('.lm_title:contains("Точки маршрута")').on('mousedown', function () {
+        //    //headerCopy.hide();
+        //    //console.log(headerCopy);
+        //    console.log('Точки маршрута');
+        //
+        //});
+
+        //var body = $('body');
+        //scope.$watch(function() {
+        //    return body.attr('class');
+        //}, function(newValue, oldValue) {
+        //    if (newValue !== oldValue) { // Values will be equal on initialization
+        //        console.log('class has changed to: ' + newValue);
+        //    }
+        //});
+
+        //scope.$watch(function () {
+        //    return $('.lm_dragProxy').length;
+        //}, function(val) {
+        //    console.log('TEST');
+        //});
+
+        // lm_dragProxy
     }
 
     function updateHeaderClip() {
@@ -292,6 +321,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     function resizeHead($table) {
         $table.find('thead.header > tr:first > th').each(function (i, h) {
             $table.find('thead.header-copy > tr > th:eq(' + i + ')').css({
+                'max-width': $(h).outerWidth(),
                 width: $(h).outerWidth(),
                 display: $(h).css('display')
             });
