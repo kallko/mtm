@@ -261,9 +261,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTable = $('#point-table > table');
         }
 
-        myLayout.on('stateChanged', function () {
+        myLayout.on('stateChanged', function (e) {
             pointTableHolder.height(pointContainer.height() - 50);
             pointTableHolder.width(pointContainer.width() - 10);
+            //$('.header-copy').show();
+            //console.log('stateChanged', $('.lm_dragProxy').length);
+
+            if ($('.lm_dragProxy').length == 0) {
+                $('.header-copy').show();
+                updateHeaderClip();
+            } else {
+                $('.header-copy').hide();
+            }
+
             updateFixedHeaderPos();
         });
     }
@@ -285,38 +295,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             protoStatusTH.trigger('click');
         });
 
-        setTitleListener();
         resizeHead(table);
         pointTableHolder.on("scroll", updateHeaderClip);
         updateHeaderClip();
         updateFixedHeaderPos();
-    }
-
-    function setTitleListener() {
-
-        //$('.lm_title:contains("Точки маршрута")').on('mousedown', function () {
-        //    //headerCopy.hide();
-        //    //console.log(headerCopy);
-        //    console.log('Точки маршрута');
-        //
-        //});
-
-        //var body = $('body');
-        //scope.$watch(function() {
-        //    return body.attr('class');
-        //}, function(newValue, oldValue) {
-        //    if (newValue !== oldValue) { // Values will be equal on initialization
-        //        console.log('class has changed to: ' + newValue);
-        //    }
-        //});
-
-        //scope.$watch(function () {
-        //    return $('.lm_dragProxy').length;
-        //}, function(val) {
-        //    console.log('TEST');
-        //});
-
-        // lm_dragProxy
     }
 
     function updateHeaderClip() {

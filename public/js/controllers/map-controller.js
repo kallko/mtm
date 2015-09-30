@@ -25,22 +25,23 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         for (var i = 0; i < tracks.length; i++) {
             color = 'white';
             if (tracks[i].state == 'MOVE') {
-                color = 'green';
+                color = '#5cb85c';
             } else if (tracks[i].state == 'ARRIVAL') {
-                color = 'red';
+                color = '#c9302c';
+                //continue;
             } else if (tracks[i].state == 'NO_SIGNAL') {
-                color = 'blue';
+                color = '#5bc0de';
             }
 
-            tmpTitle = 'Дистанция: ' + tracks[i].dist + '\n';
-            tmpTitle += 'Время прибытия: ' + new Date(tracks[i].t1 * 1000) + '\n';
-            tmpTitle += 'Длительность: ' + parseInt(tracks[i].time / 60) + ' минут';
-            tmpVar = L.marker([tracks[i].lat, tracks[i].lon],
-                {'title': tmpTitle});
-            tmpVar.setIcon(getIcon(i + 1, iconIndex, color, 'black'));
-            map.addLayer(tmpVar);
-
             if (tracks[i].coords != null) {
+                tmpTitle = 'Дистанция: ' + tracks[i].dist + '\n';
+                tmpTitle += 'Время прибытия: ' + new Date(tracks[i].t1 * 1000) + '\n';
+                tmpTitle += 'Длительность: ' + parseInt(tracks[i].time / 60) + ' минут';
+                tmpVar = L.marker([tracks[i].coords[0].lat, tracks[i].coords[0].lon],
+                    {'title': tmpTitle});
+                tmpVar.setIcon(getIcon(i, iconIndex, color, 'black'));
+                map.addLayer(tmpVar);
+
                 polyline = new L.Polyline(tracks[i].coords, {
                     color: color,
                     weight: 3,
