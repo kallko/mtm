@@ -152,7 +152,7 @@ template {
 }
 
 .debug-panel input[type=range] {
-    width: 200px;
+    width: 250px;
     margin-right: 20px;
     float: left;
 }
@@ -164,5 +164,5 @@ template {
 .debug-panel span {
     float: left;
     margin-right: 15px;
-    width: 250px;
+    width: 230px;
 }

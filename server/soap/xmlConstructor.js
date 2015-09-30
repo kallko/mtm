@@ -16,6 +16,7 @@ function XMLConstructor() {
             , transports: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
             , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'
             , waypoints: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="WAYPOINTS" />'
+            , sensors: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="SENSORS" />'
             , jobs: '<INSTRUCTION NAME="GET_STATUS_OF_TASK">'
             , end: '</INSTRUCTION>'
         }
@@ -81,6 +82,8 @@ XMLConstructor.prototype.additionalDataXML = function (routeid) {
     str += this.xml.parameter.begin;
     str += this.xml.setGetValue('IDROUTE', routeid);
     str += this.xml.slashEnd;
+    str += this.xml.instruction.end;
+    str += this.xml.instruction.sensors;
     str += this.xml.instruction.end;
 
     str += this.xml.instructions.end;
