@@ -1,3 +1,11 @@
-/**
- * Created by t4ddy on 30.09.15.
- */
+angular.module('MTMonitor').directive('ngRightClick', function($parse) {
+    return function(scope, element, attrs) {
+        var fn = $parse(attrs.ngRightClick);
+        element.bind('contextmenu', function(event) {
+            scope.$apply(function() {
+                event.preventDefault();
+                fn(scope, {$event:event});
+            });
+        });
+    };
+});

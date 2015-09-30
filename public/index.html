@@ -16,10 +16,15 @@
 <script src="/js/vendor/divicon.js"></script>
 
 <script src="./js/app.js"></script>
+
 <script src="./js/controllers/point-index-controller.js"></script>
 <script src="./js/controllers/map-controller.js"></script>
+<script src="./js/controllers/debug-controller.js"></script>
+
 <script src="./js/filters/mtm-unique.js"></script>
+
 <script src="./js/directives/finish-render.js"></script>
+<script src="./js/directives/right-click.js"></script>
 
 <div id="map"></div>
 
@@ -63,6 +68,7 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
+                    ng-right-click="sortByDriver(row.driver_id)"
                     ng-show="statusFilter(row) && driverFilter(row)"
                     on-finish-render="ngRepeatFinished">
                     <td>{{getTextStatus(row.status)}}</td>
@@ -94,7 +100,40 @@
 </template>
 
 <template type="text/html" id="template2">
-    <div class="section">
-        EMPTY WINDOW template2
+    <div class="section debug-panel"  ng-controller="DebugController" >
+        <div>
+            <span>NO_SIGNAL время (undef_t)</span>
+            <input type="range" min="0" max="600" ng-model="params.undef_t" />
+            <input type="text" ng-model="params.undef_t" />
+        </div>
+        <div>
+            <span>NO_SIGNAL расстояние (undef_d)</span>
+            <input type="range" min="0" max="5000" ng-model="params.undef_d" />
+            <input type="text" ng-model="params.undef_d" />
+        </div>
+        <div>
+            <span>ARRIVAL скорость (stop_s)</span>
+            <input type="range" min="0" max="20" ng-model="params.stop_s" />
+            <input type="text" ng-model="params.stop_s" />
+        </div>
+        <div>
+            <span>ARRIVAL расстояние (stop_d)</span>
+            <input type="range" min="0" max="200" ng-model="params.stop_d" />
+            <input type="text" ng-model="params.stop_d" />
+        </div>
+        <div>
+            <span>MOVE скорость (move_s)</span>
+            <input type="range" min="0" max="20" ng-model="params.move_s" />
+            <input type="text" ng-model="params.move_s" />
+        </div>
+        <div>
+            <span>MOVE расстояние (move_d)</span>
+            <input type="range" min="0" max="200" ng-model="params.move_d" />
+            <input type="text" ng-model="params.move_d" />
+        </div>
+
+        <div>
+            <button ng-click="loadTracksWithParams()" >Получить трек</button>
+        </div>
     </div>
 </template>

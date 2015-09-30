@@ -4,15 +4,19 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         inside = false,
         windowEl = $(window),
         holderEl = null,
-        changingWindow = false;
+        changingWindow = false,
+        markersArr = [];
 
     initMap();
     addListeners();
     // setTransparent();
 
     rootScope.$on('drawTracks', function (event, data) {
-        console.log('on drawTracks');
         drawTracks(data);
+    });
+
+    rootScope.$on('clearTracks', function (event, data) {
+        clearMap();
     });
 
     function drawTracks(tracks) {
@@ -29,8 +33,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             } else if (tracks[i].state == 'ARRIVAL') {
                 color = '#c9302c';
                 //continue;
-            } else if (tracks[i].state == 'NO_SIGNAL') {
+            } else if (tracks[i].state == 'NO_SIGNAL' || tracks[i].state == 'NO SIGNAL') {
                 color = '#5bc0de';
+                //continue;
+            } else if (tracks[i].state == 'START') {
+                color = 'yellow';
+                //continue;
             }
 
             if (tracks[i].coords != null) {
@@ -41,6 +49,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     {'title': tmpTitle});
                 tmpVar.setIcon(getIcon(i, iconIndex, color, 'black'));
                 map.addLayer(tmpVar);
+                markersArr.push(tmpVar);
 
                 polyline = new L.Polyline(tracks[i].coords, {
                     color: color,
@@ -132,7 +141,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     }
 
     function initMap() {
-        map = L.map('map').setView([50.4412776, 30.4671281], 11);
+        map = L.map('map').setView([50.4412776, 30.5671281], 12);
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
             maxZoom: 18,
@@ -148,6 +157,24 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         $('#map').height($(window).height());
         $('#map').width($(window).width());
         map.invalidateSize();
+    }
+
+    function clearMap(){
+        var m = map;
+        for(i in m._layers) {
+            if(m._layers[i]._path != undefined) {
+                try {
+                    m.removeLayer(m._layers[i]);
+                }
+                catch(e) {
+                    console.log("problem with " + e + m._layers[i]);
+                }
+            }
+        }
+
+        for (var i = 0; i < markersArr.length; i++) {
+            map.removeLayer(markersArr[i]);
+        }
     }
 
 }]);

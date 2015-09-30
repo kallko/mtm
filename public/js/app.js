@@ -15,7 +15,8 @@ var _map,
                     componentState: {templateId: 'transparent-map-window'}
                 }, {
                     type: 'component',
-                    height: 20,
+                    height: 28,
+                    title: 'Параметры дебага',
                     componentName: 'template',
                     componentState: {templateId: 'template2'}
                 }]

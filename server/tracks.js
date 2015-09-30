@@ -1,3 +1,5 @@
-/**
- * Created by t4ddy on 30.09.15.
- */
+module.exports = TracksManager;
+
+function TracksManager(url) {
+
+}

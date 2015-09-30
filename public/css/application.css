@@ -144,3 +144,25 @@ template {
 .header-copy th{
     /*white-space: nowrap;*/
 }
+
+.debug-panel {
+    padding: 10px;
+    background-color: white;
+    height: 100%;
+}
+
+.debug-panel input[type=range] {
+    width: 200px;
+    margin-right: 20px;
+    float: left;
+}
+
+.debug-panel input[type=text] {
+     width: 50px;
+ }
+
+.debug-panel span {
+    float: left;
+    margin-right: 15px;
+    width: 250px;
+}
