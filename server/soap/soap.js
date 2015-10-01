@@ -3,8 +3,7 @@ var soap = require('soap'),
     fs = require('fs'),
     xmlConstructor = require('./xmlConstructor'),
     _xml = new xmlConstructor(),
-    logging = require('../logging'),
-    log = new logging('./logs'),
+    log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = true,
 
@@ -28,7 +27,6 @@ SoapManager.prototype.getAllDailyData = function (callback) {
     } else {
         this.loadFromCachedJson(callback);
     }
-
 };
 
 SoapManager.prototype.loadFromCachedJson = function (callback) {

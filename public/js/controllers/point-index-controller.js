@@ -39,18 +39,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('loadDailyData success');
                 linkDataParts(data);
             });
-
-        //http.get('http://192.168.9.242:3001/states?login=admin&pass=admin321&gid=631&from=1435708800&to=1437004800', {}).
-        //    success(function (tracks) {
-        //        console.log({data: tracks});
-        //        scope.$emit('drawTracks', tracks);
-        //    });
-        //
-        //http.get('http://192.168.9.242:3001/states?login=admin&pass=admin321&gid=713&from=1443484800&to=1443571200', {}).
-        //    success(function (tracks) {
-        //        console.log({data: tracks});
-        //        scope.$emit('drawTracks', tracks);
-        //    });
     }
 
     function strToTstamp(strDate) {
@@ -94,8 +82,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rowId = 0,
             driverId = 0;
         scope.rowCollection = [];
-        for (var i = 0; i < data.routes.length; i++) {
+
+        for (var i = 0; i < data.sensors.length; i++) {
             for (var j = 0; j < data.transports.length; j++) {
+                if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
+                    data.transports[j].gid = data.sensors[i].GID;
+                }
+            }
+        }
+
+        for (i = 0; i < data.routes.length; i++) {
+            for (j = 0; j < data.transports.length; j++) {
                 if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                     data.routes[i].transport = data.transports[j];
                     break;
@@ -149,6 +146,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
+
+            loadTrack(data.routes[i].transport.gid);
         }
 
         _data = data;
@@ -235,19 +234,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
     }
 
-    scope.$on('ngRepeatFinished', function () {
-        updateResizeGripHeight();
-    });
-
-    scope.$watch(function () {
-        return scope.filters.driver + scope.filters.status;
-    }, function () {
-        timeout(function () {
-            updateResizeGripHeight();
-        }, 1);
-
-    });
-
     function setListeners() {
         $(window).resize(resetHeight);
         resetHeight();
@@ -272,6 +258,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             updateFixedHeaderPos();
+        });
+
+        scope.$watch(function () {
+            return scope.filters.driver + scope.filters.status;
+        }, function () {
+            timeout(function () {
+                updateResizeGripHeight();
+            }, 1);
+
+        });
+
+        scope.$on('ngRepeatFinished', function () {
+            updateResizeGripHeight();
         });
 
         //document.oncontextmenu = function () {
@@ -365,4 +364,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
     }
 
+    function loadTrack(gid) {
+        var now = new Date(),
+            todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
+            tomorrowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000;
+
+        var query = '/tracks/' + gid + '&' + todayMidnight + '&' + tomorrowMidnight + '&60&1000&5&25&5&110';
+        console.log(query);
+
+        http.get(query, {}).
+            success(function (tracks) {
+                console.log({'track': tracks});
+                scope.$emit('drawTracks', tracks);
+            });
+    }
 }]);

@@ -25,7 +25,7 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
     .get(function (req, res) {
 
         console.log('=== load tracks ===');
-        var tracksManager = new tracks('http://192.168.9.242:3001/states', 'admin', 'admin321');
+        var tracksManager = new tracks('http://192.168.9.29:3001/states', 'admin', 'admin321');
         tracksManager.getTrack(
             req.params.gid,
             req.params.from,

@@ -1,8 +1,7 @@
-angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', function (scope, rootScope) {
+angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', '$http', function (scope, rootScope, http) {
     var map,
         position,
         inside = false,
-        windowEl = $(window),
         holderEl = null,
         changingWindow = false,
         markersArr = [];
