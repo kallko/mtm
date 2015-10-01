@@ -22,7 +22,7 @@ var _map,
                 }]
             }, {
                 type: 'component',
-                width: 40,
+                width: 50,
                 componentName: 'template',
                 title: 'Точки маршрута',
                 componentState: {templateId: 'template-point-table'}

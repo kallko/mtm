@@ -12,11 +12,6 @@ var soap = require('soap'),
     starTime,
     totalPoints = 0;
 
-// 144700:tarasenkog
-// hd:QJQB8uxW
-// k00056.0:As123456
-// meest.disp:dispmeest
-
 function SoapManager(login, password) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.login = login;

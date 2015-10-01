@@ -15,18 +15,18 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', fu
         var q1 = '/tracks/631&1435708800&1437004800&' + getParamsStr(),
             q2 = '/tracks/713&1443484800&1443571200&' + getParamsStr();
 
-        http.get(q1, {}).
-            success(function (tracks) {
-                console.log({'track': tracks});
-                scope.$emit('drawTracks', tracks);
-            });
-
-        http.get(q2, {}).
-            success(function (tracks) {
-                console.log({'track': tracks});
-                scope.$emit('drawTracks', tracks);
-            });
+        getTracks(q1);
+        getTracks(q2);
     };
+
+    function getTracks(query) {
+        console.log(query);
+        http.get(query, {}).
+            success(function (tracks) {
+                console.log({'track': tracks});
+                scope.$emit('drawTracks', tracks);
+            });
+    }
 
     function getParamsWithNameStr() {
         return "undef_t=" + scope.params.undef_t +
@@ -44,6 +44,13 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', fu
             "&" + scope.params.stop_d +
             "&" + scope.params.move_s +
             "&" + scope.params.move_d;
+    }
+
+    scope.test = function () {
+        http.post('/log', {test: 'Some data'}).
+            success(function (data) {
+                console.log(data);
+            });
     }
 
 }]);

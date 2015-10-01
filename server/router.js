@@ -35,9 +35,16 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
             req.params.stop_s,
             req.params.stop_d,
             req.params.move_s,
-            req.params.move_d, function(data) {
+            req.params.move_d, function (data) {
                 res.status(200).json(data);
             });
+    });
+
+router.route('/log')
+    .post(function (req, res) {
+        console.log(req.body);
+        console.log('req.body.test = ' + req.body.test);
+        res.status(200).json({status: 'ok', data: req.body.test});
     });
 
 module.exports = router;
