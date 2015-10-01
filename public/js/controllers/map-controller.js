@@ -22,6 +22,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         drawAllPoints(data);
     });
 
+    rootScope.$on('setMapCenter', function (event, data) {
+        setMapCenter(data.lat, data.lon);
+    });
+
     function drawTracks(tracks) {
         var tmpVar,
             polyline,
@@ -180,10 +184,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         var tmpVar;
         for (var i = 0; i < data.length; i++) {
             tmpVar = L.marker([data[i].END_LAT, data[i].END_LON],
-                {'title': (i + 1)});
-            tmpVar.setIcon(getIcon(i, 14, 'white', 'black'));
+                {'title': data[i].arrival_time_hhmm });
+            tmpVar.setIcon(getIcon(i + 1, 14, 'white', 'black'));
             map.addLayer(tmpVar);
             markersArr.push(tmpVar);
         }
+    }
+
+    function setMapCenter(lat, lon) {
+        if(map.getZoom() < 15){
+            map.setZoom(15);
+        }
+
+        map.panTo(new L.LatLng(lat, lon));
     }
 }]);

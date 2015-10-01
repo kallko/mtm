@@ -153,8 +153,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         _data = data;
         scope.$emit('saveForDebug', scope.rowCollection);
-        generateStops(data);
-        statusUpdate();
 
         console.log(data);
         console.log({'data': scope.rowCollection});
@@ -171,59 +169,46 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         return rand;
     }
 
-    function generateStops(data) {
-        var tmpLength = 0;
-
-        for (var i = 0; i < data.routes.length; i++) {
-            tmpLength = randomInteger(0, data.routes[i].points.length - data.routes[i].points.length / 3);
-            data.routes[i].stops = data.routes[i].points.slice(0, tmpLength);
-        }
-    }
-
-    function statusUpdate() {
-        // TODO: get new real data from aggregator before update
-
+    function statusUpdate(routeIndx) {
         var now = parseInt(Date.now() / 1000),
+            route = _data.routes[routeIndx],
             tmpPoint,
+            tmpArrival,
             focus_l1_time = 60 * 30,
-            focus_l2_time = 60 * 120;
-        //console.log(new Date());
-        //console.log('now = ' + now);
-        //console.log('now + focus_l2_time = ' + (now + focus_l2_time));
+            focus_l2_time = 60 * 120,
+            radiusOffset = 0.01,
+            timeOffset = 30;
 
-        for (var i = 0; i < _data.routes.length; i++) {
-            for (var j = 0; j < _data.routes[i].stops.length; j++) {
-
-                // TODO:    with real data create function for checking stops with radius
-                //          and time windows for hitting waypoints coordinates and time
-
-                for (var k = 0; k < _data.routes[i].points.length; k++) {
-                    tmpPoint = _data.routes[i].points[k];
-                    if (_data.routes[i].stops[j].arrival_time_ts == tmpPoint.arrival_time_ts &&
-                        _data.routes[i].stops[j].END_LAT == tmpPoint.END_LAT &&
-                        _data.routes[i].stops[j].END_LAT == tmpPoint.END_LAT) {
+        for (var j = 0; j < route.real_track.length; j++) {
+            if (route.real_track[j].state == "ARRIVAL") {
+                tmpArrival = route.real_track[j];
+                for (var k = 0; k < route.points.length; k++) {
+                    tmpPoint = route.points[k]; // END_LON
+                    if (parseFloat(tmpPoint.END_LAT) + radiusOffset > tmpArrival.lat &&
+                        parseFloat(tmpPoint.END_LAT) - radiusOffset < tmpArrival.lat) {
                         tmpPoint.status = STATUS.FINISHED;
                         break;
                     }
-                }
-            }
 
-            for (j = 0; j < _data.routes[i].points.length; j++) {
-                tmpPoint = _data.routes[i].points[j];
-                if (tmpPoint.status != STATUS.FINISHED &&
-                    tmpPoint.status != STATUS.CANCELED) {
-                    //console.log(tmpPoint.arrival_time_ts);
-                    //console.log('arrival_time_ts = ' + tmpPoint.arrival_time_ts);
-                    if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
-                        if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
-                            tmpPoint.status = STATUS.FOCUS_L1;
-                        } else {
-                            tmpPoint.status = STATUS.FOCUS_L2;
-                        }
-                    }
                 }
             }
         }
+
+        //for (j = 0; j < route.points.length; j++) {
+        //    tmpPoint = route.points[j];
+        //    if (tmpPoint.status != STATUS.FINISHED &&
+        //        tmpPoint.status != STATUS.CANCELED) {
+        //        //console.log(tmpPoint.arrival_time_ts);
+        //        //console.log('arrival_time_ts = ' + tmpPoint.arrival_time_ts);
+        //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+        //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+        //                tmpPoint.status = STATUS.FOCUS_L1;
+        //            } else {
+        //                tmpPoint.status = STATUS.FOCUS_L2;
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     function setColResizable() {
@@ -337,6 +322,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         console.log('click on ' + id);
         $('.selected-row').removeClass('selected-row');
         $('#point-' + id).addClass('selected-row');
+        scope.$emit('setMapCenter', {
+            lat: scope.displayCollection[id].END_LAT,
+            lon: scope.displayCollection[id].END_LON
+        });
     };
 
     scope.getTextStatus = function (statusCode) {
@@ -378,6 +367,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         http.get(query, {}).
             success(function (track) {
                 _data.routes[routeIndx].real_track = track;
+                statusUpdate(routeIndx);
                 //console.log({'track': tracks});
                 //scope.$emit('drawTracks', tracks);
             });

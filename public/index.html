@@ -51,9 +51,9 @@
                 <tr class="titles-tr">
                     <th st-sort="status" class="status-column" >Статус</th>
                     <th>Время прибытия</th>
+                    <th>Номер</th>
                     <th>ID точки</th>
                     <th>ID заказа</th>
-                    <th>Номер</th>
                     <th>Временное окно</th>
                     <th>Время отбытия</th>
                     <th>Адрес</th>
@@ -73,9 +73,9 @@
                     on-finish-render="ngRepeatFinished">
                     <td>{{getTextStatus(row.status)}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
-                    <td>{{row.waypoint.ID}}</td>
-                    <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.NUMBER}}</td>
+                    <td>{{row.TASK_NUMBER}}</td>
+                    <td>{{row.waypoint.ID}}</td>
                     <td>{{row.availability_windows_str}}</td>
                     <td>{{row.end_time_hhmm}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
