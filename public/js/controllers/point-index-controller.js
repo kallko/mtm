@@ -118,7 +118,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     driverId++;
                 }
 
-                tmpPoints[j].driver_id = data.routes[i].driver._id;
+                tmpPoints[j].driver_indx = data.routes[i].driver._id;
                 tmpPoints[j].transport = data.routes[i].transport;
                 tmpPoints[j].arrival_time_hhmm = tmpPoints[j].ARRIVAL_TIME.substr(11, 8);
                 tmpPoints[j].arrival_time_ts = strToTstamp(tmpPoints[j].ARRIVAL_TIME);
@@ -126,6 +126,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
                 tmpPoints[j].status = STATUS.SCHEDULED;
+                tmpPoints[j].route_id = i;
                 rowId++;
 
                 for (var k = 0; k < data.waypoints.length; k++) {
@@ -147,7 +148,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
 
-            loadTrack(data.routes[i].transport.gid);
+            loadTrack(data.routes[i].transport.gid, i);
         }
 
         _data = data;
@@ -266,7 +267,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             timeout(function () {
                 updateResizeGripHeight();
             }, 1);
-
         });
 
         scope.$on('ngRepeatFinished', function () {
@@ -353,29 +353,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     };
 
     scope.driverFilter = function (row) {
-        return (scope.filters.driver == -1 || row.driver_id == scope.filters.driver);
+        return (scope.filters.driver == -1 || row.driver_indx == scope.filters.driver);
     };
 
-    scope.sortByDriver = function (driver_id) {
-        if (scope.filters.driver == driver_id) {
+    scope.sortByDriver = function (indx) {
+        if (scope.filters.driver == indx) {
             scope.filters.driver = -1;
+            scope.$emit('clearMap');
         } else {
-            scope.filters.driver = driver_id;
+            scope.filters.driver = indx;
+            scope.$emit('drawTracks', _data.routes[indx].real_track);
         }
-    }
+    };
 
-    function loadTrack(gid) {
+    function loadTrack(gid, routeIndx) {
         var now = new Date(),
             todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
             tomorrowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000;
 
         var query = '/tracks/' + gid + '&' + todayMidnight + '&' + tomorrowMidnight + '&60&1000&5&25&5&110';
-        console.log(query);
+        //console.log(query);
 
         http.get(query, {}).
-            success(function (tracks) {
-                console.log({'track': tracks});
-                scope.$emit('drawTracks', tracks);
+            success(function (track) {
+                _data.routes[routeIndx].real_track = track;
+                //console.log({'track': tracks});
+                //scope.$emit('drawTracks', tracks);
             });
     }
 }]);

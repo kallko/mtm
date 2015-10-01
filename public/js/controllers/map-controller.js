@@ -14,7 +14,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         drawTracks(data);
     });
 
-    rootScope.$on('clearTracks', function (event, data) {
+    rootScope.$on('clearMap', function () {
         clearMap();
     });
 
@@ -140,7 +140,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     }
 
     function initMap() {
-        map = L.map('map').setView([50.4412776, 30.5671281], 12);
+        map = L.map('map').setView([50.4412776, 30.6671281], 11);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);

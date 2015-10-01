@@ -68,7 +68,7 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-right-click="sortByDriver(row.driver_id)"
+                    ng-right-click="sortByDriver(row.driver_indx)"
                     ng-show="statusFilter(row) && driverFilter(row)"
                     on-finish-render="ngRepeatFinished">
                     <td>{{getTextStatus(row.status)}}</td>
