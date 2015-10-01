@@ -18,6 +18,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         clearMap();
     });
 
+    rootScope.$on('drawAllPoints', function (event, data) {
+        drawAllPoints(data);
+    });
+
     function drawTracks(tracks) {
         var tmpVar,
             polyline,
@@ -146,7 +150,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }).addTo(map);
 
         L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
-        _map = map;
     }
 
     function resize() {
@@ -155,14 +158,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         map.invalidateSize();
     }
 
-    function clearMap(){
+    function clearMap() {
         var m = map;
-        for(i in m._layers) {
-            if(m._layers[i]._path != undefined) {
+        for (i in m._layers) {
+            if (m._layers[i]._path != undefined) {
                 try {
                     m.removeLayer(m._layers[i]);
                 }
-                catch(e) {
+                catch (e) {
                     console.log("problem with " + e + m._layers[i]);
                 }
             }
@@ -173,4 +176,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
     }
 
+    function drawAllPoints(data) {
+        var tmpVar;
+        for (var i = 0; i < data.length; i++) {
+            tmpVar = L.marker([data[i].END_LAT, data[i].END_LON],
+                {'title': (i + 1)});
+            tmpVar.setIcon(getIcon(i, 14, 'white', 'black'));
+            map.addLayer(tmpVar);
+            markersArr.push(tmpVar);
+        }
+    }
 }]);

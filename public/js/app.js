@@ -1,7 +1,6 @@
 angular.module('MTMonitor', ['smart-table']);
 
-var _map,
-    myLayout = new GoldenLayout({
+var myLayout = new GoldenLayout({
         settings: {
             hasHeaders: true
         },

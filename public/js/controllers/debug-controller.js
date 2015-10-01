@@ -1,5 +1,6 @@
-angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', function (scope, http) {
+angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$rootScope', function (scope, http, rootScope) {
 
+    var _data;
     scope.params = {
         undef_t: 60,
         undef_d: 1000,
@@ -46,11 +47,12 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', fu
             "&" + scope.params.move_d;
     }
 
+    rootScope.$on('saveForDebug', function(event, data){
+        _data = data;
+    });
+
     scope.test = function () {
-        http.post('/log', {test: 'Some data'}).
-            success(function (data) {
-                console.log(data);
-            });
-    }
+        scope.$emit('drawAllPoints', _data);
+    };
 
 }]);

@@ -152,6 +152,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         _data = data;
+        scope.$emit('saveForDebug', scope.rowCollection);
         generateStops(data);
         statusUpdate();
 
