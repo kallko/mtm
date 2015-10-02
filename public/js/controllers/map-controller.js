@@ -27,6 +27,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     function drawTracks(tracks) {
+        if (tracks == null) return;
+
         var tmpVar,
             polyline,
             iconIndex = 14,
@@ -184,7 +186,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         var tmpVar;
         for (var i = 0; i < data.length; i++) {
             tmpVar = L.marker([data[i].END_LAT, data[i].END_LON],
-                {'title': data[i].arrival_time_hhmm });
+                {'title': new Date(data[i].arrival_time_ts * 1000)});
             tmpVar.setIcon(getIcon(i + 1, 14, 'white', 'black'));
             map.addLayer(tmpVar);
             markersArr.push(tmpVar);
@@ -192,10 +194,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     }
 
     function setMapCenter(lat, lon) {
-        if(map.getZoom() < 15){
-            map.setZoom(15);
-        }
-
-        map.panTo(new L.LatLng(lat, lon));
+        var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
+        map.setView(new L.LatLng(lat, lon), zoom);
     }
 }]);

@@ -22,7 +22,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters = {};
         scope.filters.statuses = [
             {name: 'все', value: -1},
-            {name: 'выполненные', value: 0},
+            {name: 'выполненнен', value: 0},
             {name: 'под контролем', value: 1},
             {name: 'ожидают выполнения', value: 2},
             {name: 'запланирован', value: 3},
@@ -169,6 +169,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         return rand;
     }
 
+    function lineDistance(point1, point2) {
+        var xs = 0;
+        var ys = 0;
+
+        xs = point2.lat - point1.lat;
+        xs = xs * xs;
+
+        ys = point2.lon - point1.lon;
+        ys = ys * ys;
+
+        return Math.sqrt(xs + ys);
+    }
+
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+        var dLon = deg2rad(lon2 - lon1);
+        var a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+            ;
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c; // Distance in km
+        return d;
+    }
+
+    function deg2rad(deg) {
+        return deg * (Math.PI / 180)
+    }
+
     function statusUpdate(routeIndx) {
         var now = parseInt(Date.now() / 1000),
             route = _data.routes[routeIndx],
@@ -176,16 +207,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             tmpArrival,
             focus_l1_time = 60 * 30,
             focus_l2_time = 60 * 120,
-            radiusOffset = 0.01,
-            timeOffset = 30;
+            radius = 0.4,
+            timeOffset = 1800,
+            END_LAT,
+            END_LON,
+            lat,
+            lon;
 
         for (var j = 0; j < route.real_track.length; j++) {
             if (route.real_track[j].state == "ARRIVAL") {
                 tmpArrival = route.real_track[j];
                 for (var k = 0; k < route.points.length; k++) {
                     tmpPoint = route.points[k]; // END_LON
-                    if (parseFloat(tmpPoint.END_LAT) + radiusOffset > tmpArrival.lat &&
-                        parseFloat(tmpPoint.END_LAT) - radiusOffset < tmpArrival.lat) {
+                    END_LAT = parseFloat(tmpPoint.END_LAT);
+                    END_LON = parseFloat(tmpPoint.END_LON);
+                    lat = parseFloat(tmpArrival.lat);
+                    lon = parseFloat(tmpArrival.lon);
+
+                    //console.log();
+
+                    if (getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                        && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
+                        && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1
+                    ) {
+
+                        //if (route.ID == 3) {
+                        //    console.log(tmpPoint.arrival_time_ts - tmpArrival.t1);
+                        //}
+
                         tmpPoint.status = STATUS.FINISHED;
                         break;
                     }
@@ -193,22 +242,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
         }
-
-        //for (j = 0; j < route.points.length; j++) {
-        //    tmpPoint = route.points[j];
-        //    if (tmpPoint.status != STATUS.FINISHED &&
-        //        tmpPoint.status != STATUS.CANCELED) {
-        //        //console.log(tmpPoint.arrival_time_ts);
-        //        //console.log('arrival_time_ts = ' + tmpPoint.arrival_time_ts);
-        //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
-        //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
-        //                tmpPoint.status = STATUS.FOCUS_L1;
-        //            } else {
-        //                tmpPoint.status = STATUS.FOCUS_L2;
-        //            }
-        //        }
-        //    }
-        //}
     }
 
     function setColResizable() {
