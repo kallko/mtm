@@ -51,8 +51,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             if (tracks[i].coords != null) {
+
                 tmpTitle = 'Дистанция: ' + tracks[i].dist + '\n';
                 tmpTitle += 'Время прибытия: ' + new Date(tracks[i].t1 * 1000) + '\n';
+                //tmpTitle += 'lat: ' + tracks[i].lat + '\n';
+                //tmpTitle += 'lon: ' + tracks[i].lon + '\n';
                 tmpTitle += 'Длительность: ' + parseInt(tracks[i].time / 60) + ' минут';
                 tmpVar = L.marker([tracks[i].coords[0].lat, tracks[i].coords[0].lon],
                     {'title': tmpTitle});
@@ -66,7 +69,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     opacity: 1,
                     smoothFactor: 1
                 });
+
                 polyline.addTo(map);
+
+                if (i + 1 == tracks.length) {
+                    var indx = tracks[i].coords.length - 1;
+                    tmpVar = L.marker([tracks[i].coords[indx].lat, tracks[i].coords[indx].lon]);
+                    tmpVar.setIcon(getIcon(i, 7, color, 'black'));
+                    map.addLayer(tmpVar);
+                    markersArr.push(tmpVar);
+                }
             }
         }
     }
@@ -186,7 +198,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         var tmpVar;
         for (var i = 0; i < data.length; i++) {
             tmpVar = L.marker([data[i].END_LAT, data[i].END_LON],
-                {'title': new Date(data[i].arrival_time_ts * 1000)});
+                {
+                    'title': new Date(data[i].arrival_time_ts * 1000).toString() // + '\n' +
+                    //'lat = ' + data[i].END_LAT + '\n' +
+                    //'lon = ' + data[i].END_LON
+                });
             tmpVar.setIcon(getIcon(i + 1, 14, 'white', 'black'));
             map.addLayer(tmpVar);
             markersArr.push(tmpVar);

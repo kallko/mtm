@@ -125,7 +125,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
-                tmpPoints[j].status = STATUS.SCHEDULED;
+                if (j == 0) {
+                    tmpPoints[j].status = STATUS.FINISHED;
+                } else {
+                    tmpPoints[j].status = STATUS.SCHEDULED;
+                }
+
                 tmpPoints[j].route_id = i;
                 rowId++;
 
@@ -207,7 +212,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             tmpArrival,
             focus_l1_time = 60 * 30,
             focus_l2_time = 60 * 120,
-            radius = 0.4,
+            radius = 0.8,
             timeOffset = 1800,
             END_LAT,
             END_LON,
@@ -224,17 +229,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     lat = parseFloat(tmpArrival.lat);
                     lon = parseFloat(tmpArrival.lon);
 
-                    //console.log();
-
-                    if (getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                    if (tmpPoint.status != STATUS.FINISHED
+                        && tmpPoint.status != STATUS.CANCELED
+                        && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
                         && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
-                        && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1
-                    ) {
-
-                        //if (route.ID == 3) {
-                        //    console.log(tmpPoint.arrival_time_ts - tmpArrival.t1);
-                        //}
-
+                        && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
                         tmpPoint.status = STATUS.FINISHED;
                         break;
                     }
@@ -352,7 +351,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     scope.rowClick = function (id) {
-        console.log('click on ' + id);
+        //console.log(scope.displayCollection[id]);
         $('.selected-row').removeClass('selected-row');
         $('#point-' + id).addClass('selected-row');
         scope.$emit('setMapCenter', {
