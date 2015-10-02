@@ -22,7 +22,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters = {};
         scope.filters.statuses = [
             {name: 'все', value: -1},
-            {name: 'выполненнен', value: 0},
+            {name: 'доставленно', value: 0},
             {name: 'под контролем', value: 1},
             {name: 'ожидают выполнения', value: 2},
             {name: 'запланирован', value: 3},
@@ -125,6 +125,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
+                tmpPoints[j].arrival_prediction = 0;
                 if (j == 0) {
                     tmpPoints[j].status = STATUS.FINISHED;
                 } else {
@@ -206,13 +207,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     function statusUpdate(routeIndx) {
-        var now = parseInt(Date.now() / 1000),
-            route = _data.routes[routeIndx],
+        var route = _data.routes[routeIndx],
             tmpPoint,
             tmpArrival,
-            focus_l1_time = 60 * 30,
-            focus_l2_time = 60 * 120,
-            radius = 0.8,
+            radius = 0.5,
             timeOffset = 1800,
             END_LAT,
             END_LON,
@@ -384,7 +382,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$emit('clearMap');
         } else {
             scope.filters.driver = indx;
-            scope.$emit('drawTracks', _data.routes[indx].real_track);
+            scope.$emit('drawTracks', {
+                track: _data.routes[indx].real_track,
+                points: _data.routes[indx].points
+            });
         }
     };
 
@@ -400,8 +401,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             success(function (track) {
                 _data.routes[routeIndx].real_track = track;
                 statusUpdate(routeIndx);
-                //console.log({'track': tracks});
-                //scope.$emit('drawTracks', tracks);
             });
     }
 }]);

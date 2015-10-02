@@ -49,3 +49,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
         });
     }
 };
+
+TracksManager.prototype.getTimeMatrix = function () {
+
+};

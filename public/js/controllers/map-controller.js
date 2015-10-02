@@ -11,7 +11,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     // setTransparent();
 
     rootScope.$on('drawTracks', function (event, data) {
-        drawTracks(data);
+        drawTracks(data.track);
+        drawAllPoints(data.points);
     });
 
     rootScope.$on('clearMap', function () {
@@ -28,6 +29,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
     function drawTracks(tracks) {
         if (tracks == null) return;
+        console.log(tracks);
 
         var tmpVar,
             polyline,
@@ -59,7 +61,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpTitle += 'Длительность: ' + parseInt(tracks[i].time / 60) + ' минут';
                 tmpVar = L.marker([tracks[i].coords[0].lat, tracks[i].coords[0].lon],
                     {'title': tmpTitle});
-                tmpVar.setIcon(getIcon(i, iconIndex, color, 'black'));
+                tmpVar.setIcon(getIcon(parseInt(i / 2 + 0.5) - 1, iconIndex, color, 'black'));
                 map.addLayer(tmpVar);
                 markersArr.push(tmpVar);
 
