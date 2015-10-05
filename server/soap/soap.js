@@ -44,6 +44,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
             'admin', 'admin321');
         jsonData = JSON.parse(data);
 
+        jsonData.tasks_loaded = true;
         jsonData.sended = false;
         for (var i = 0; i < jsonData.routes.length; i++) {
             tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
@@ -55,16 +56,21 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 
 
 function checkBeforeSend(data, callback) {
-    if (data.sended) {
+    console.log('checkBeforeSend');
+    if (data.sended || !data.tasks_loaded) {
         return;
     }
 
-    console.log('checkBeforeSend');
     for (var i = 0; i < data.routes.length; i++) {
         if (!data.routes[i].time_matrix_loaded
             || !data.routes[i].plan_geometry_loaded) {
-            return false;
+            return;
         }
+    }
+
+    for (i = 0; i < data.routes.length; i++) {
+        delete data.routes[i].time_matrix_loaded;
+        delete data.routes[i].plan_geometry_loaded;
     }
 
     data.sended = true;
@@ -118,8 +124,9 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                 log.toFLog("log.js", res);
 
                 var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
+                data.sended = false;
                 data.date = new Date();
-                me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data);
+                me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
                 me.getAdditionalData(client, data, callback);
 
             });
@@ -130,8 +137,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
     });
 };
 
-
-SoapManager.prototype.prepareItinerary = function (routes, data) {
+SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
     var tmpRoute,
         tracksManager = new tracks('http://192.168.9.29:3001/',
             'http://sngtrans.com.ua:5201/',
@@ -150,9 +156,9 @@ SoapManager.prototype.prepareItinerary = function (routes, data) {
         data.routes.push(tmpRoute);
     }
 
-    //for (i = 0; i < data.routes.length; i++) {
-    //    tracksManager.getTimeMatrix(data.routes[i].points, data, index, checkAllRoutes);
-    //}
+    for (var i = 0; i < data.routes.length; i++) {
+        tracksManager.getRouterData(data, i, checkBeforeSend, callback);
+    }
 };
 
 SoapManager.prototype.getAdditionalData = function (client, data, callback) {
@@ -231,8 +237,9 @@ SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, ca
 
                 data.tasks.push(res.MESSAGE.TASKS[0].TASK[0].$);
                 if (counter == totalPoints) {
-                    callback(data);
-                    log.toFLog('final_data.js', data);
+                    data.tasks_loaded = true;
+                    console.log('all tasks DONE!');
+                    checkBeforeSend(data, callback);
                 }
             });
         }
