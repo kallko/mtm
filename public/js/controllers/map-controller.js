@@ -27,6 +27,31 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         setMapCenter(data.lat, data.lon);
     });
 
+    rootScope.$on('drawPlannedTracks', function (event, route) {
+        drawPlannedRoute(route.plan_geometry);
+    });
+
+    function drawPlannedRoute(track) {
+        if (track == null) return;
+
+        var tmp,
+            geometry = [];
+
+        for (var i = 0; i < track.length; i++) {
+            if (track[i] == null) continue;
+            tmp = track[i].split(",");
+            geometry.push(new L.LatLng(parseFloat(tmp[0]), parseFloat(tmp[1])));
+        }
+
+        var polyline = new L.Polyline(geometry, {
+            color: '#5cb85c',
+            weight: 3,
+            opacity: 1,
+            smoothFactor: 1
+        });
+        polyline.addTo(map);
+    }
+
     function drawTracks(tracks) {
         if (tracks == null) return;
 

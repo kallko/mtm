@@ -83,6 +83,12 @@ template {
     margin-right: 10px;
 }
 
+#point-menu-panel button {
+    padding: 0 3px;
+    margin-bottom: 3px;
+}
+
+
 #tab-selector {
     margin-bottom: 10px;
 }

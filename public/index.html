@@ -41,6 +41,9 @@
                 <select id="driver-select" ng-model="filters.driver" class="group-select"
                         ng-options='option.value as option.name for option in filters.drivers'>
                 </select>
+
+                <span></span>
+                <button class="btn btn-info btn-sm" ng-click="drawPlannedRoute()" >Плановый маршрут</button>
             </div>
         </div>
 

@@ -1,6 +1,8 @@
 angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$rootScope', function (scope, http, rootScope) {
 
-    var _data;
+    var _data,
+        rowCollection;
+
     scope.params = {
         undef_t: 60,
         undef_d: 1000,
@@ -48,10 +50,13 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
     }
 
     rootScope.$on('saveForDebug', function(event, data){
-        _data = data;
+        _data = data.data;
+        rowCollection = data.rowCollection;
     });
 
     scope.test = function () {
+        scope.$emit('drawPlannedTracks', _data.routes[1]);
+
         //scope.$emit('drawAllPoints', _data);
 
         // 50.507535
@@ -60,10 +65,10 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
         // 50.503997
         // 30.50207
 
-        http.get('findtime/50.507535&30.502585&50.503997&30.50207', {}).
-            success(function (data) {
-                console.log({'result': data});
-            });
+        //http.get('findtime/50.507535&30.502585&50.503997&30.50207', {}).
+        //    success(function (data) {
+        //        console.log({'result': data});
+        //    });
     };
 
 }]);
