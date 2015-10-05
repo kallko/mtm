@@ -52,7 +52,18 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
     });
 
     scope.test = function () {
-        scope.$emit('drawAllPoints', _data);
+        //scope.$emit('drawAllPoints', _data);
+
+        // 50.507535
+        // 30.502585
+
+        // 50.503997
+        // 30.50207
+
+        http.get('findtime/50.507535&30.502585&50.503997&30.50207', {}).
+            success(function (data) {
+                console.log({'result': data});
+            });
     };
 
 }]);

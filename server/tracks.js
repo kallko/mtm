@@ -114,8 +114,8 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, re
     request({
         url: this.routerUrl + 'viaroute?instructions=true&compression=false'
         + '&loc=' + points[startPos].END_LAT
-        + "," + points[startPos].END_LON +
-        '&loc=' + points[startPos + 1].END_LAT
+        + "," + points[startPos].END_LON
+        + '&loc=' + points[startPos + 1].END_LAT
         + "," + points[startPos + 1].END_LON,
         json: true
     }, function (error, response, body) {
@@ -165,6 +165,36 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
     }
 };
 
+TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
+    request({
+        url: this.routerUrl + 'viaroute?instructions=true&compression=false'
+        + '&loc=' + lat1
+        + "," + lon1
+        + '&loc=' + lat2
+        + "," + lon2,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            callback(body.route_geometry);
+        }
+    });
+};
+
+TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
+    request({
+        url: this.routerUrl + 'table?'
+        + '&loc=' + lat1
+        + "," + lon1
+        + '&loc=' + lat2
+        + "," + lon2,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            callback(body);
+        }
+    });
+};
+
 TracksManager.prototype.getTimeMatrix = function (data, index, checkBeforeSend, callback) {
     var url = this.routerUrl + 'table?',
         points = data[index];
@@ -208,7 +238,3 @@ TracksManager.prototype.getPlanGeometry = function (data, index, checkBeforeSend
         }
     });
 };
-
-//TracksManager.prototype.getGeometry
-// http://sngtrans.com.ua:5201/table?
-// "http://sngtrans.com.ua:5201/viaroute?instructions=true";

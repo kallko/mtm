@@ -2,7 +2,8 @@ var express = require('express'),
     app = express(),
     router = express.Router(),
     soap = require('./soap/soap'),
-    tracks = require('./tracks');
+    tracks = require('./tracks'),
+    log = new (require('./logging'))('./logs');
 
 router.route('/')
     .get(function (req, res) {
@@ -38,6 +39,32 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
             req.params.stop_d,
             req.params.move_s,
             req.params.move_d, function (data) {
+                res.status(200).json(data);
+            });
+    });
+
+router.route('/findpath/:lat1&:lon1&:lat2&:lon2')
+    .get(function (req, res) {
+        console.log('=== router.route findpath ===');
+        var tracksManager = new tracks('http://192.168.9.29:3001/',
+            'http://sngtrans.com.ua:5201/',
+            'admin', 'admin321');
+
+        tracksManager.findPath(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
+            function (data) {
+                res.status(200).json(data);
+            });
+    });
+
+router.route('/findtime/:lat1&:lon1&:lat2&:lon2')
+    .get(function (req, res) {
+        console.log('=== router.route findtime ===');
+        var tracksManager = new tracks('http://192.168.9.29:3001/',
+            'http://sngtrans.com.ua:5201/',
+            'admin', 'admin321');
+
+        tracksManager.findTime(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
+            function (data) {
                 res.status(200).json(data);
             });
     });
