@@ -6,6 +6,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = true,
+    tracks = require('../tracks'),
 
     counter = 0,
     starTime,
@@ -36,9 +37,40 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         }
 
         console.log('The data loaded from the cache.');
-        callback(JSON.parse(data));
+
+        // TODO: REMOVE
+        tracksManager = new tracks('http://192.168.9.29:3001/',
+            'http://sngtrans.com.ua:5201/',
+            'admin', 'admin321');
+        jsonData = JSON.parse(data);
+
+        jsonData.sended = false;
+        for (var i = 0; i < jsonData.routes.length; i++) {
+            tracksManager.getTimeMatrix(jsonData.routes[i].points, jsonData, i, checkBeforeSend, callback);
+        }
+
+        //callback(JSON.parse(data));
     });
 };
+
+
+function checkBeforeSend(data, callback) {
+    if (data.sended) {
+        return;
+    }
+
+    console.log('checkBeforeSend');
+    for (var i = 0; i < data.routes.length; i++) {
+        if (data.routes[i].time_matrix == undefined) {
+            return false;
+        }
+    }
+
+    data.sended = true;
+    console.log('DONE!');
+    log.toFLog('final_data.js', data);
+    callback(data);
+}
 
 SoapManager.prototype.getDailyPlan = function (callback) {
     var me = this;
@@ -99,7 +131,11 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
 
 
 SoapManager.prototype.prepareItinerary = function (routes, data) {
-    var tmpRoute;
+    var tmpRoute,
+        tracksManager = new tracks('http://192.168.9.29:3001/',
+            'http://sngtrans.com.ua:5201/',
+            'admin', 'admin321');
+
     data.routes = [];
     for (var i = 0; i < routes.length; i++) {
         tmpRoute = {};
@@ -112,6 +148,10 @@ SoapManager.prototype.prepareItinerary = function (routes, data) {
 
         data.routes.push(tmpRoute);
     }
+
+    //for (i = 0; i < data.routes.length; i++) {
+    //    tracksManager.getTimeMatrix(data.routes[i].points, data, index, checkAllRoutes);
+    //}
 };
 
 SoapManager.prototype.getAdditionalData = function (client, data, callback) {
@@ -151,11 +191,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
                 }
 
                 data.tasks = [];
-                //if (tasks != null) {
-                //    for (i = 0; i < tasks.length; i++) {
-                //        data.tasks.push(tasks[i].$);
-                //    }
-                //}
 
                 counter = 0;
                 totalPoints = 0;
@@ -167,8 +202,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
                             data.routes[i].points[j].TASK_DATE, data, callback);
                     }
                 }
-
-                //log.toFLog("routes.js", data);
             });
 
         }
@@ -176,8 +209,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
 };
 
 SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, callback) {
-    //log.l("\ngetTask");
-    //log.l(_xml.taskXML(taskNumber, taskDate));
     client.run({'input_data': _xml.taskXML(taskNumber, taskDate)}, function (err, result) {
         if (!err) {
 
@@ -196,9 +227,6 @@ SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, ca
             }
 
             parseXML(result.return, function (err, res) {
-                //if (counter == 2) {
-                //    log.dump(res);
-                //}
 
                 data.tasks.push(res.MESSAGE.TASKS[0].TASK[0].$);
                 if (counter == totalPoints) {

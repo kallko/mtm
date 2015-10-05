@@ -29,7 +29,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
     function drawTracks(tracks) {
         if (tracks == null) return;
-        console.log(tracks);
 
         var tmpVar,
             polyline,
