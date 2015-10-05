@@ -172,3 +172,7 @@ template {
     margin-right: 15px;
     width: 230px;
 }
+
+.point-checkbox {
+    width: 30px !important;
+}

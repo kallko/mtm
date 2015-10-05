@@ -164,8 +164,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         _data = data;
         scope.$emit('saveForDebug', {
-            'rowCollection' : scope.rowCollection,
-            'data' : data
+            'rowCollection': scope.rowCollection,
+            'data': data
         });
 
         console.log(data);
@@ -359,12 +359,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     scope.rowClick = function (id) {
         //console.log(scope.displayCollection[id]);
         $('.selected-row').removeClass('selected-row');
-        $('#point-' + id).addClass('selected-row');
-        scope.selectedRow = id;
-        scope.$emit('setMapCenter', {
-            lat: scope.displayCollection[id].END_LAT,
-            lon: scope.displayCollection[id].END_LON
-        });
+
+        if (scope.selectedRow == id) {
+            scope.selectedRow = -1;
+        } else {
+            scope.selectedRow = id;
+            $('#point-' + id).addClass('selected-row');
+            scope.$emit('setMapCenter', {
+                lat: scope.displayCollection[id].END_LAT,
+                lon: scope.displayCollection[id].END_LON
+            });
+        }
     };
 
     scope.getTextStatus = function (statusCode) {
@@ -399,7 +404,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     };
 
     scope.drawPlannedRoute = function () {
-        if (scope.selectedRow != -1){
+        if (scope.selectedRow != -1) {
             scope.$emit('drawPlannedTracks',
                 _data.routes[scope.displayCollection[scope.selectedRow].route_id]);
         } else if (scope.filters.driver != -1) {
