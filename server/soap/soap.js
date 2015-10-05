@@ -46,7 +46,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 
         jsonData.sended = false;
         for (var i = 0; i < jsonData.routes.length; i++) {
-            tracksManager.getTimeMatrix(jsonData.routes[i].points, jsonData, i, checkBeforeSend, callback);
+            tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
         }
 
         //callback(JSON.parse(data));
@@ -61,7 +61,8 @@ function checkBeforeSend(data, callback) {
 
     console.log('checkBeforeSend');
     for (var i = 0; i < data.routes.length; i++) {
-        if (data.routes[i].time_matrix == undefined) {
+        if (!data.routes[i].time_matrix_loaded
+            || !data.routes[i].plan_geometry_loaded) {
             return false;
         }
     }
@@ -70,7 +71,7 @@ function checkBeforeSend(data, callback) {
     console.log('DONE!');
     log.toFLog('final_data.js', data);
     callback(data);
-}
+};
 
 SoapManager.prototype.getDailyPlan = function (callback) {
     var me = this;

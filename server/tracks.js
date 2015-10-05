@@ -8,7 +8,7 @@ var request = require("request"),
 function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.aggregatorUrl = aggregatorUrl;
     this.routerUrl = routerUrl,
-    this.login = login;
+        this.login = login;
     this.password = password;
 }
 
@@ -52,11 +52,48 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
     }
 };
 
-TracksManager.prototype.getTimeMatrix = function (points, data, index, checkBeforeSend, callback) {
-    var url = this.routerUrl +  'table?';
+TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, callback) {
+    var loc_str = '',
+        points = data.routes[index].points;
+
+    console.log('getRouterData', index);
+    for (var i = 0; i < points.length; i++) {
+        if (points[i].END_LAT != null && points[i].END_LON != null) {
+            loc_str += "&loc=" + points[i].END_LAT + "," + points[i].END_LON;
+        }
+    }
+
+    //console.log(this.routerUrl + 'table?' + loc_str);
+    request({
+        url: this.routerUrl + 'table?' + loc_str,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            data.routes[index].time_matrix = body;
+            data.routes[index].time_matrix_loaded = true;
+            checkBeforeSend(data, callback);
+        }
+    });
+
+    //console.log(this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str);
+    request({
+        url: this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            data.routes[index].plan_geometry = body.route_geometry;
+            data.routes[index].plan_geometry_loaded = true;
+            checkBeforeSend(data, callback);
+        }
+    });
+};
+
+TracksManager.prototype.getTimeMatrix = function (data, index, checkBeforeSend, callback) {
+    var url = this.routerUrl + 'table?',
+        points = data[index];
 
     for (var i = 0; i < points.length; i++) {
-        if(points[i].END_LAT != null && points[i].END_LON != null){
+        if (points[i].END_LAT != null && points[i].END_LON != null) {
             url += "&loc=" + points[i].END_LAT + "," + points[i].END_LON;
         }
     }
@@ -69,6 +106,27 @@ TracksManager.prototype.getTimeMatrix = function (points, data, index, checkBefo
             //log.dump(body);
 
             data.routes[index].time_matrix = body;
+            checkBeforeSend(data, callback);
+        }
+    });
+};
+
+TracksManager.prototype.getPlanGeometry = function (data, index, checkBeforeSend, callback) {
+    var url = this.routerUrl + 'viaroute?instructions=true&compression=false',
+        points = data[index];
+
+    for (var i = 0; i < points.length; i++) {
+        if (points[i].END_LAT != null && points[i].END_LON != null) {
+            url += "&loc=" + points[i].END_LAT + "," + points[i].END_LON;
+        }
+    }
+
+    request({
+        url: url,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            data.routes[index].plan_geometry = body.route_geometry;
             checkBeforeSend(data, callback);
         }
     });
