@@ -49,6 +49,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         for (var i = 0; i < jsonData.routes.length; i++) {
             tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
         }
+        tracksManager.getRealTracks(jsonData, checkBeforeSend, callback);
 
         //callback(JSON.parse(data));
     });
@@ -68,9 +69,19 @@ function checkBeforeSend(data, callback) {
         }
     }
 
+    //for (i = 0; i < data.sensors.length; i++) {
+    //    if (!data.sensors[i].real_track_loaded) {
+    //        return;
+    //    }
+    //}
+
     for (i = 0; i < data.routes.length; i++) {
         delete data.routes[i].time_matrix_loaded;
         delete data.routes[i].plan_geometry_loaded;
+    }
+
+    for (i = 0; i < data.sensors.length; i++) {
+        delete data.sensors[i].real_track_loaded;
     }
 
     data.sended = true;
@@ -123,11 +134,12 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
 
                 log.toFLog("log.js", res);
 
-                var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$;
+                var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$,
+                    tracksManager;
                 data.sended = false;
                 data.date = new Date();
-                me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
-                me.getAdditionalData(client, data, callback);
+                tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
+                me.getAdditionalData(client, data, tracksManager, callback);
 
             });
         } else {
@@ -159,9 +171,11 @@ SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
     for (var i = 0; i < data.routes.length; i++) {
         tracksManager.getRouterData(data, i, checkBeforeSend, callback);
     }
+
+    return tracksManager;
 };
 
-SoapManager.prototype.getAdditionalData = function (client, data, callback) {
+SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, callback) {
     var me = this;
     log.l("getAdditionalData");
     log.l(_xml.additionalDataXML(data.ID) + '\n');
@@ -196,6 +210,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, callback) {
                 for (i = 0; i < sensors.length; i++) {
                     data.sensors.push(sensors[i].$);
                 }
+
+                tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
                 data.tasks = [];
 

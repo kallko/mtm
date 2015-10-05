@@ -10,6 +10,12 @@ function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.routerUrl = routerUrl,
         this.login = login;
     this.password = password;
+    this.undef_t = 60;
+    this.undef_d = 1000;
+    this.stop_s = 5;
+    this.stop_d = 25;
+    this.move_s = 5;
+    this.move_d = 110;
 }
 
 TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
@@ -25,19 +31,8 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
             callback(JSON.parse(data));
         });
     } else {
-        var url = this.aggregatorUrl
-            + 'states'
-            + '?login=' + this.login
-            + '&pass=' + this.password
-            + '&gid=' + gid
-            + '&from=' + from
-            + '&to=' + to
-            + '&undef_t=' + undef_t
-            + '&undef_d=' + undef_d
-            + '&stop_s=' + stop_s
-            + '&stop_d=' + stop_d
-            + '&move_s=' + move_s
-            + '&move_d=' + move_d;
+        var url = this.createParamsStr(from, to, undef_t, undef_d, stop_s, stop_d, move_s, move_d);
+        url += '&gid=' + gid;
         console.log(url);
 
         request({
@@ -50,6 +45,22 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
             }
         });
     }
+};
+
+TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
+                                                    stop_s, stop_d, move_s, move_d) {
+    return this.aggregatorUrl
+        + 'states'
+        + '?login=' + this.login
+        + '&pass=' + this.password
+        + '&from=' + from
+        + '&to=' + to
+        + '&undef_t=' + undef_t
+        + '&undef_d=' + undef_d
+        + '&stop_s=' + stop_s
+        + '&stop_d=' + stop_d
+        + '&move_s=' + move_s
+        + '&move_d=' + move_d;
 };
 
 TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, callback) {
@@ -112,7 +123,7 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, re
             res = res.concat(body.route_geometry);
             startPos++;
             //console.log('iteration #', startPos);
-            if(points.length > startPos + 1){
+            if (points.length > startPos + 1) {
                 me.getGeometryByParts(data, index, startPos, res, checkBeforeSend, callback);
             } else {
                 data.routes[index].plan_geometry = res;
@@ -121,6 +132,37 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, re
             }
         }
     });
+};
+
+TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callback) {
+    console.log('=== getRealTracks ===');
+
+    var now = new Date(),
+        url = this.createParamsStr(
+            new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
+            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,
+            this.undef_t, this.undef_d,
+            this.stop_s, this.stop_d, this.move_s, this.move_d);
+
+    for (var i = 0; i < data.sensors.length && i < 1; i++) {
+        console.log('request for sensor #', i, url + '&gid=' + data.sensors[i].GID);
+        request({
+            url: url + '&gid=' + data.sensors[i].GID,
+            json: true
+        }, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                //log.toFLog(gid + '_' + 'track.js', body);
+                //callback(body);
+                console.log('sensor loaded', i);
+                log.dump(data.sensors[i]);
+
+                data.sensors[i].real_track = body;
+                data.sensors[i].real_track_loaded = true;
+                checkBeforeSend(data, callback);
+
+            }
+        });
+    }
 };
 
 TracksManager.prototype.getTimeMatrix = function (data, index, checkBeforeSend, callback) {

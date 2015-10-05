@@ -87,6 +87,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var j = 0; j < data.transports.length; j++) {
                 if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
                     data.transports[j].gid = data.sensors[i].GID;
+                    data.transports[j].real_track = data.sensors[i].real_track;
                 }
             }
         }
@@ -95,6 +96,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (j = 0; j < data.transports.length; j++) {
                 if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                     data.routes[i].transport = data.transports[j];
+                    data.routes[i].real_track = data.transports[j].real_track;
                     break;
                 }
             }
@@ -155,6 +157,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
 
             loadTrack(data.routes[i].transport.gid, i);
+            //statusUpdate(i);
         }
 
         _data = data;
