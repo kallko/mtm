@@ -145,22 +145,20 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
             this.stop_s, this.stop_d, this.move_s, this.move_d);
 
     for (var i = 0; i < data.sensors.length; i++) {
-        console.log('request for sensor #', i, url + '&gid=' + data.sensors[i].GID);
-        request({
-            url: url + '&gid=' + data.sensors[i].GID,
-            json: true
-        }, function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                //log.toFLog(gid + '_' + 'track.js', body);
-                //callback(body);
-                console.log('sensor loaded', i);
-                log.dump(data.sensors[i]);
-
-                data.sensors[i].real_track = body;
-                data.sensors[i].real_track_loaded = true;
-                checkBeforeSend(data, callback);
-            }
-        });
+        (function (ii) {
+            console.log('request for sensor #', ii, url + '&gid=' + data.sensors[ii].GID);
+            request({
+                url: url + '&gid=' + data.sensors[ii].GID,
+                json: true
+            }, function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    console.log('sensor loaded', ii);
+                    data.sensors[ii].real_track = body;
+                    data.sensors[ii].real_track_loaded = true;
+                    checkBeforeSend(data, callback);
+                }
+            });
+        })(i);
     }
 };
 

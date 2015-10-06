@@ -68,11 +68,11 @@ function checkBeforeSend(data, callback) {
         }
     }
 
-    //for (var i = 0; i < data.sensors.length; i++) {
-    //    if (!data.sensors[i].real_track_loaded) {
-    //        return;
-    //    }
-    //}
+    for (i = 0; i < data.sensors.length; i++) {
+        if (!data.sensors[i].real_track_loaded) {
+            return;
+        }
+    }
 
     for (i = 0; i < data.routes.length; i++) {
         delete data.routes[i].time_matrix_loaded;
@@ -224,7 +224,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                             setTimeout(function () {
                                 me.getTask(client, data.routes[ii].points[jj].TASK_NUMBER,
                                     data.routes[ii].points[jj].TASK_DATE, data, callback);
-                            }, i * 250);
+                            }, (i + j) * 50);
                         })(i, j);
                     }
                 }

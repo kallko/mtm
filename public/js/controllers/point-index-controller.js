@@ -158,8 +158,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
 
-            loadTrack(data.routes[i].transport.gid, i);
-            //statusUpdate(i);
+            //loadTrack(data.routes[i].transport.gid, i);
+            statusUpdate(i, data);
         }
 
         _data = data;
@@ -214,12 +214,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         return deg * (Math.PI / 180)
     }
 
-    function statusUpdate(routeIndx) {
-        var route = _data.routes[routeIndx],
+    function statusUpdate(routeIndx, data) {
+        var route = data.routes[routeIndx],
             tmpPoint,
             tmpArrival,
             radius = 0.5,
-            timeOffset = 1800,
+            timeOffset = 3600,
             END_LAT,
             END_LON,
             lat,
