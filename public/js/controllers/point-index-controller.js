@@ -405,11 +405,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
     scope.drawPlannedRoute = function () {
         if (scope.selectedRow != -1) {
-            scope.$emit('drawPlannedTracks',
+            scope.$emit('drawPlannedTrack',
                 _data.routes[scope.displayCollection[scope.selectedRow].route_id]);
         } else if (scope.filters.driver != -1) {
-            scope.$emit('drawPlannedTracks', _data.routes[scope.filters.driver]);
+            scope.$emit('drawPlannedTrack', _data.routes[scope.filters.driver]);
         }
+    };
+
+    scope.checkPoint = function () {
+
     };
 
     function loadTrack(gid, routeIndx) {

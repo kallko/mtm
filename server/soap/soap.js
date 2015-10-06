@@ -38,12 +38,11 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 
         console.log('The data loaded from the cache.');
 
-        // TODO: REMOVE
         tracksManager = new tracks('http://192.168.9.29:3001/',
             'http://sngtrans.com.ua:5201/',
             'admin', 'admin321');
 
-        //jsonData = JSON.parse(data);
+        //var jsonData = JSON.parse(data);
         //jsonData.tasks_loaded = true;
         //jsonData.sended = false;
         //for (var i = 0; i < jsonData.routes.length; i++) {
@@ -69,7 +68,7 @@ function checkBeforeSend(data, callback) {
         }
     }
 
-    //for (i = 0; i < data.sensors.length; i++) {
+    //for (var i = 0; i < data.sensors.length; i++) {
     //    if (!data.sensors[i].real_track_loaded) {
     //        return;
     //    }
@@ -88,7 +87,7 @@ function checkBeforeSend(data, callback) {
     console.log('DONE!');
     log.toFLog('final_data.js', data);
     callback(data);
-};
+}
 
 SoapManager.prototype.getDailyPlan = function (callback) {
     var me = this;
@@ -211,7 +210,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                //tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
                 data.tasks = [];
 
@@ -221,8 +220,12 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     for (var j = 0; j < data.routes[i].points.length; j++) {
                         if (data.routes[i].points[j].TASK_NUMBER == '') continue;
                         totalPoints++;
-                        me.getTask(client, data.routes[i].points[j].TASK_NUMBER,
-                            data.routes[i].points[j].TASK_DATE, data, callback);
+                        (function (ii, jj) {
+                            setTimeout(function () {
+                                me.getTask(client, data.routes[ii].points[jj].TASK_NUMBER,
+                                    data.routes[ii].points[jj].TASK_DATE, data, callback);
+                            }, i * 250);
+                        })(i, j);
                     }
                 }
             });

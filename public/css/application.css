@@ -173,6 +173,6 @@ template {
     width: 230px;
 }
 
-.point-checkbox {
-    width: 30px !important;
+.point-checkbox-td {
+    width: 26px;
 }

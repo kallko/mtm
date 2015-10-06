@@ -144,7 +144,7 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
             this.undef_t, this.undef_d,
             this.stop_s, this.stop_d, this.move_s, this.move_d);
 
-    for (var i = 0; i < data.sensors.length && i < 1; i++) {
+    for (var i = 0; i < data.sensors.length; i++) {
         console.log('request for sensor #', i, url + '&gid=' + data.sensors[i].GID);
         request({
             url: url + '&gid=' + data.sensors[i].GID,
@@ -159,7 +159,6 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
                 data.sensors[i].real_track = body;
                 data.sensors[i].real_track_loaded = true;
                 checkBeforeSend(data, callback);
-
             }
         });
     }

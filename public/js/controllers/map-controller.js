@@ -27,9 +27,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         setMapCenter(data.lat, data.lon);
     });
 
-    rootScope.$on('drawPlannedTracks', function (event, route) {
+    rootScope.$on('drawPlannedTrack', function (event, route) {
         drawPlannedRoute(route.plan_geometry);
     });
+
+    rootScope.$on('drawCombinedTrack', function (event, route) {
+        drawPlannedRoute(route.plan_geometry);
+    });
+
+    function drawCombinedRoute(route) {
+
+    }
 
     function drawPlannedRoute(track) {
         if (track == null) return;

@@ -75,7 +75,7 @@
                     ng-right-click="sortByDriver(row.driver_indx)"
                     ng-show="statusFilter(row) && driverFilter(row)"
                     on-finish-render="ngRepeatFinished">
-                    <td class="point-checkbox-td"><input type="checkbox"  ng-click="" /></td>
+                    <td class="point-checkbox-td"><input type="checkbox"  ng-click="checkPoint()" /></td>
                     <td>{{getTextStatus(row.status)}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
                     <td>{{row.NUMBER}}</td>
