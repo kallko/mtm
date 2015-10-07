@@ -443,8 +443,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 break;
             case scope.draw_modes[3].value: // плановый + фактический
                 console.log(scope.draw_modes[3].name);
-                scope.$emit('drawRealTrack', _data.routes[indx]);
-                scope.$emit('drawPlannedTrack', _data.routes[indx]);
+                scope.$emit('drawRealAndPlannedTrack', _data.routes[indx]);
                 break;
         }
     };

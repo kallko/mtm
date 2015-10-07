@@ -29,7 +29,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     rootScope.$on('drawPlannedTrack', function (event, route) {
-        drawPlannedRoute(route);
+        drawPlannedRoute(route.plan_geometry);
+        drawAllPoints(route.points)
+    });
+
+    rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
+        drawPlannedRoute(route.plan_geometry);
+        drawRealRoute(route.real_track);
+        drawAllPoints(route.points)
     });
 
     function drawCombinedRoute(route) {
@@ -56,17 +63,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             smoothFactor: 1
         });
         polyline.addTo(map);
-
-        for (i = 0; i < route.points.length; i++) {
-            tmp = L.marker([route.points[i].END_LAT, route.points[i].END_LON], // availability_windows_str
-                {
-                    'title': 'Время прибытия: ' + route.points[i].arrival_time_hhmm + '\n' +
-                    'Временное окно: ' + route.points[i].availability_windows_str
-                });
-            tmp.setIcon(getIcon(i, 14, 'white', 'black'));
-            map.addLayer(tmp);
-            markersArr.push(tmp);
-        }
     }
 
     function drawRealRoute(track) {
@@ -95,9 +91,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 polyline.addTo(map);
                 //continue;
             } else if (track[i].state == 'ARRIVAL') {
-                stopIndx = '#' + (parseInt(i / 2 + 0.5) - 1);
-                stopTime = (parseInt(track[i].time / 60)).padLeft() + ':' + (track[i].time % 60).padLeft();
-                tmpTitle = 'Остановка ' + stopIndx + '\n';
+                stopIndx = (parseInt(i / 2 + 0.5) - 1);
+                stopTime = mmhh(track[i].time);
+                tmpTitle = 'Остановка #' + stopIndx + '\n';
                 tmpTitle += 'Время прибытия: ' + formatDate(new Date(track[i].t1 * 1000)) + '\n';
                 tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
                 tmpTitle += 'Длительность: ' + stopTime + '\n';
@@ -116,7 +112,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                     {'title': tmpTitle});
-                tmpVar.setIcon(getIcon(stopIndx + ' - ' + stopTime, iconIndex, color, 'black'));
+                tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
                 addMarker(tmpVar);
                 //continue;
             } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
@@ -144,18 +140,31 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if (points[i].TASK_NUMBER == '') {
                 title = 'Склад\n';
             } else {
-                title = 'Точка #' + (i + 1) + '\n';
+                title = 'Точка #' + (points[i].NUMBER) + '\n';
+                title += 'Статус: ' + (points[i].status == 0 ? 'выполнена' : 'НЕ выполнена') + '\n';
             }
 
-
-            title += 'Время прибытия: ' + points[i].arrival_time_hhmm;
+            title += 'Время прибытия: ' + points[i].arrival_time_hhmm + '\n';
+            title += 'Время отбытия: ' + points[i].end_time_hhmm + '\n';
+            title += 'Время выполнения задачи: ' + mmhh(points[i].TASK_TIME) + '\n';
+            title += 'Временное окно: ' + points[i].availability_windows_str + '\n';
+            title += 'Время простоя: ' + mmhh(points[i].DOWNTIME) + '\n';
+            title += 'Расстояние: ' + points[i].DISTANCE + ' метра(ов)\n';
+            title += 'Время на дорогу к точке: ' + mmhh(points[i].TRAVEL_TIME) + '\n';
+            title += 'Адрес: ' + points[i].waypoint.ADDRESS + '\n';
+            title += 'Клиент: ' + points[i].waypoint.NAME + '\n';
+            title += 'Комментарий: ' + points[i].waypoint.COMMENT + '\n';
 
             tmpVar = L.marker([points[i].END_LAT, points[i].END_LON], {
                 'title': title
             });
-            tmpVar.setIcon(getIcon(i + 1, 14, '#7EDDFC', 'black'));
+            tmpVar.setIcon(getIcon(points[i].NUMBER, 14, '#7EDDFC', 'black'));
             addMarker(tmpVar);
         }
+    }
+
+    function mmhh(time) {
+        return (parseInt(time / 60)).padLeft() + ':' + (time % 60).padLeft();
     }
 
     Number.prototype.padLeft = function (base, chr) {
