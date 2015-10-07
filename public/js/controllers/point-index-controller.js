@@ -32,12 +32,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.drivers = [{name: 'все', value: -1}];
         scope.filters.driver = scope.filters.drivers[0].value;
         scope.draw_modes = [
-            {name: 'комбинированный', value: 0},
-            {name: 'фактический', value: 1},
-            {name: 'плановый', value: 2},
-            {name: 'фактический + плановый', value: 3}
+            {name: 'комбинированный трек', value: 0},
+            {name: 'фактический трек', value: 1},
+            {name: 'плановый трек', value: 2},
+            {name: 'фактический + плановый трек', value: 3}
         ];
-        scope.draw_mode = scope.draw_modes[0].value;
+        scope.draw_mode = scope.draw_modes[1].value;
 
         scope.selectedRow = -1;
     }
@@ -427,24 +427,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         console.log('drawRoute', scope.draw_mode, indx);
+        console.log(_data.routes[indx]);
 
+        scope.$emit('clearMap');
         switch (scope.draw_mode) {
             case scope.draw_modes[0].value: // комбинированный
                 console.log(scope.draw_modes[0].name);
-                scope.$emit('drawCombinedTrack');
+                scope.$emit('drawCombinedTrack', _data.routes[indx]);
                 break;
             case scope.draw_modes[1].value: // фактический
                 console.log(scope.draw_modes[1].name);
-                scope.$emit('drawRealTrack');
+                scope.$emit('drawRealTrack', _data.routes[indx].real_track);
                 break;
             case scope.draw_modes[2].value: // плановый
                 console.log(scope.draw_modes[2].name);
-                scope.$emit('drawPlannedTrack');
+                scope.$emit('drawPlannedTrack', _data.routes[indx]);
                 break;
             case scope.draw_modes[3].value: // плановый + фактический
                 console.log(scope.draw_modes[3].name);
-                scope.$emit('drawRealTrack');
-                scope.$emit('drawPlannedTrack');
+                scope.$emit('drawRealTrack', _data.routes[indx]);
+                scope.$emit('drawPlannedTrack', _data.routes[indx]);
                 break;
         }
     };
