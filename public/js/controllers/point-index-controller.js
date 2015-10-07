@@ -37,7 +37,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             {name: 'плановый трек', value: 2},
             {name: 'фактический + плановый трек', value: 3}
         ];
-        scope.draw_mode = scope.draw_modes[1].value;
+        scope.draw_mode = scope.draw_modes[0].value;
 
         scope.selectedRow = -1;
     }

@@ -42,12 +42,12 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
             'http://sngtrans.com.ua:5201/',
             'admin', 'admin321');
 
-        //var jsonData = JSON.parse(data);
-        //jsonData.tasks_loaded = true;
-        //jsonData.sended = false;
-        //for (var i = 0; i < jsonData.routes.length; i++) {
-        //    tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
-        //}
+        var jsonData = JSON.parse(data);
+        jsonData.tasks_loaded = true;
+        jsonData.sended = false;
+        for (var i = 0; i < jsonData.routes.length; i++) {
+            tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
+        }
         //tracksManager.getRealTracks(jsonData, checkBeforeSend, callback);
 
         callback(JSON.parse(data));

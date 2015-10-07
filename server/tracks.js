@@ -112,7 +112,7 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, re
         me = this;
 
     request({
-        url: this.routerUrl + 'viaroute?instructions=true&compression=false'
+        url: this.routerUrl + 'viaroute?instructions=false&compression=false'
         + '&loc=' + points[startPos].END_LAT
         + "," + points[startPos].END_LON
         + '&loc=' + points[startPos + 1].END_LAT
@@ -164,7 +164,7 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
 
 TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
     request({
-        url: this.routerUrl + 'viaroute?instructions=true&compression=false'
+        url: this.routerUrl + 'viaroute?instructions=false&compression=false'
         + '&loc=' + lat1
         + "," + lon1
         + '&loc=' + lat2
