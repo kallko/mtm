@@ -1,5 +1,6 @@
 angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', '$http', function (scope, rootScope, http) {
     var map,
+        oms,
         position,
         inside = false,
         holderEl = null,
@@ -23,7 +24,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     rootScope.$on('drawRealTrack', function (event, route) {
-        drawRealRoute(route);
+        drawRealRoute(route.real_track);
+        drawAllPoints(route.points)
     });
 
     rootScope.$on('drawPlannedTrack', function (event, route) {
@@ -35,8 +37,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             planned_track = route.plan_geometry;
     }
 
-    function drawPlannedRoute(route) {
-        var track = route.plan_geometry;
+    function drawPlannedRoute(track) {
         if (track == null) return;
 
         var tmp,
@@ -101,7 +102,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
                 tmpTitle += 'Длительность: ' + stopTime + '\n';
 
-                if(i + 1 < track.length) {
+                if (i + 1 < track.length) {
                     tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
                     polyline = new L.Polyline([track[i].coords[0], track[i].coords[track[i].coords.length - 1]], {
                         color: color,
@@ -116,8 +117,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                     {'title': tmpTitle});
                 tmpVar.setIcon(getIcon(stopIndx + ' - ' + stopTime, iconIndex, color, 'black'));
-                map.addLayer(tmpVar);
-                markersArr.push(tmpVar);
+                addMarker(tmpVar);
                 //continue;
             } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                 color = '#5bc0de';
@@ -131,24 +131,51 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 var indx = track[i].coords.length - 1;
                 tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon]);
                 tmpVar.setIcon(getIcon(i, 7, color, 'black'));
-                map.addLayer(tmpVar);
-                markersArr.push(tmpVar);
+                addMarker(tmpVar);
             }
         }
     }
 
-    Number.prototype.padLeft = function(base,chr){
-        var  len = (String(base || 10).length - String(this).length)+1;
-        return len > 0? new Array(len).join(chr || '0')+this : this;
+    function drawAllPoints(points) {
+        var tmpVar,
+            title;
+        for (var i = 0; i < points.length; i++) {
+            title = '';
+            if (points[i].TASK_NUMBER == '') {
+                title = 'Склад\n';
+            } else {
+                title = 'Точка #' + (i + 1) + '\n';
+            }
+
+
+            title += 'Время прибытия: ' + points[i].arrival_time_hhmm;
+
+            tmpVar = L.marker([points[i].END_LAT, points[i].END_LON], {
+                'title': title
+            });
+            tmpVar.setIcon(getIcon(i + 1, 14, '#7EDDFC', 'black'));
+            addMarker(tmpVar);
+        }
     }
 
-    function formatDate(d){
+    Number.prototype.padLeft = function (base, chr) {
+        var len = (String(base || 10).length - String(this).length) + 1;
+        return len > 0 ? new Array(len).join(chr || '0') + this : this;
+    };
+
+    function addMarker(marker) {
+        map.addLayer(marker);
+        oms.addMarker(marker);
+        markersArr.push(marker);
+    }
+
+    function formatDate(d) {
         var dformat =
             //    [ d.getDate().padLeft(),
             //    (d.getMonth()+1).padLeft(),
             //    d.getFullYear()].join('/')+
             //' ' +
-            [ d.getHours().padLeft(),
+            [d.getHours().padLeft(),
                 d.getMinutes().padLeft(),
                 d.getSeconds().padLeft()].join(':');
         return dformat;
@@ -239,6 +266,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }).addTo(map);
 
         L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
+
+        oms = new OverlappingMarkerSpiderfier(map);
     }
 
     function resize() {
@@ -263,21 +292,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         for (var i = 0; i < markersArr.length; i++) {
             map.removeLayer(markersArr[i]);
         }
-    }
-
-    function drawAllPoints(data) {
-        var tmpVar;
-        for (var i = 0; i < data.length; i++) {
-            tmpVar = L.marker([data[i].END_LAT, data[i].END_LON],
-                {
-                    'title': new Date(data[i].arrival_time_ts * 1000).toString() // + '\n' +
-                    //'lat = ' + data[i].END_LAT + '\n' +
-                    //'lon = ' + data[i].END_LON
-                });
-            tmpVar.setIcon(getIcon(i + 1, 14, 'white', 'black'));
-            map.addLayer(tmpVar);
-            markersArr.push(tmpVar);
-        }
+        map.removeLayer(oms);
     }
 
     function setMapCenter(lat, lon) {

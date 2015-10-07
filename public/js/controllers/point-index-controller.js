@@ -427,8 +427,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         console.log('drawRoute', scope.draw_mode, indx);
-        console.log(_data.routes[indx]);
-
         scope.$emit('clearMap');
         switch (scope.draw_mode) {
             case scope.draw_modes[0].value: // комбинированный
@@ -437,7 +435,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 break;
             case scope.draw_modes[1].value: // фактический
                 console.log(scope.draw_modes[1].name);
-                scope.$emit('drawRealTrack', _data.routes[indx].real_track);
+                scope.$emit('drawRealTrack', _data.routes[indx]);
                 break;
             case scope.draw_modes[2].value: // плановый
                 console.log(scope.draw_modes[2].name);
