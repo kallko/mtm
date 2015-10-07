@@ -31,6 +31,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];
         scope.filters.driver = scope.filters.drivers[0].value;
+        scope.draw_modes = [
+            {name: 'комбинированный', value: 0},
+            {name: 'фактический', value: 1},
+            {name: 'плановый', value: 2},
+            {name: 'фактический + плановый', value: 3}
+        ];
+        scope.draw_mode = scope.draw_modes[0].value;
 
         scope.selectedRow = -1;
     }
@@ -396,10 +403,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$emit('clearMap');
         } else {
             scope.filters.driver = indx;
-            scope.$emit('drawTracks', {
-                track: _data.routes[indx].real_track,
-                points: _data.routes[indx].points
-            });
         }
     };
 
@@ -412,8 +415,50 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
     };
 
-    scope.checkPoint = function () {
+    scope.drawRoute = function () {
+        var indx;
 
+        if (scope.filters.driver != -1) {
+            indx = scope.filters.driver;
+        } else if(scope.selectedRow != -1) {
+            indx = scope.displayCollection[scope.selectedRow].route_id;
+        } else {
+            return;
+        }
+
+        console.log('drawRoute', scope.draw_mode, indx);
+
+        switch (scope.draw_mode) {
+            case scope.draw_modes[0].value: // комбинированный
+                console.log(scope.draw_modes[0].name);
+                scope.$emit('drawCombinedTrack');
+                break;
+            case scope.draw_modes[1].value: // фактический
+                console.log(scope.draw_modes[1].name);
+                scope.$emit('drawRealTrack');
+                break;
+            case scope.draw_modes[2].value: // плановый
+                console.log(scope.draw_modes[2].name);
+                scope.$emit('drawPlannedTrack');
+                break;
+            case scope.draw_modes[3].value: // плановый + фактический
+                console.log(scope.draw_modes[3].name);
+                scope.$emit('drawRealTrack');
+                scope.$emit('drawPlannedTrack');
+                break;
+        }
+    };
+
+    scope.checkPoint = function () {
+        var checkedObj = $('.point-checkbox:checked'),
+            checkedIdArr = [];
+
+        console.log(checkedObj.length);
+        for (var i = 0; i < checkedObj.length; i++) {
+            checkedIdArr.push(checkedObj[i].id);
+        }
+
+        //scope.$emit('drawCheckedPoints', {} );
     };
 
     function loadTrack(gid, routeIndx) {

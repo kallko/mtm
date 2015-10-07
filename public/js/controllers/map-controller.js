@@ -11,7 +11,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     // setTransparent();
 
     rootScope.$on('drawTracks', function (event, data) {
-        drawTracks(data.track);
+        drawTrack(data.track);
         drawAllPoints(data.points);
     });
 
@@ -28,18 +28,24 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     rootScope.$on('drawPlannedTrack', function (event, route) {
-        drawPlannedRoute(route.plan_geometry);
+        drawPlannedRoute(route);
     });
 
     rootScope.$on('drawCombinedTrack', function (event, route) {
-        drawPlannedRoute(route.plan_geometry);
+        drawCombinedRoute(route);
+    });
+
+    rootScope.$on('drawCheckedPoints', function (event, data) {
+        // TODO
     });
 
     function drawCombinedRoute(route) {
-
+        var real_track = route.plan_geometry,
+            planned_track = route.plan_geometry;
     }
 
-    function drawPlannedRoute(track) {
+    function drawPlannedRoute(route) {
+        var track = route.plan_geometry;
         if (track == null) return;
 
         var tmp,
@@ -52,16 +58,27 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         var polyline = new L.Polyline(geometry, {
-            color: '#5cb85c',
+            color: 'blue',
             weight: 3,
-            opacity: 1,
+            opacity: 0.5,
             smoothFactor: 1
         });
         polyline.addTo(map);
+
+        for (i = 0; i < route.points.length; i++) {
+            tmp = L.marker([route.points[i].END_LAT, route.points[i].END_LON], // availability_windows_str
+                {
+                    'title': 'Время прибытия: ' + route.points[i].arrival_time_hhmm + '\n' +
+                    'Временное окно: ' + route.points[i].availability_windows_str
+                });
+            tmp.setIcon(getIcon(i, 14, 'white', 'black'));
+            map.addLayer(tmp);
+            markersArr.push(tmp);
+        }
     }
 
-    function drawTracks(tracks) {
-        if (tracks == null) return;
+    function drawTrack(track) {
+        if (track == null) return;
 
         var tmpVar,
             polyline,
@@ -69,46 +86,46 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             tmpTitle = '',
             color = '';
 
-        for (var i = 0; i < tracks.length; i++) {
+        for (var i = 0; i < track.length; i++) {
             color = 'white';
-            if (tracks[i].state == 'MOVE') {
+            if (track[i].state == 'MOVE') {
                 color = '#5cb85c';
-            } else if (tracks[i].state == 'ARRIVAL') {
+            } else if (track[i].state == 'ARRIVAL') {
                 color = '#c9302c';
                 //continue;
-            } else if (tracks[i].state == 'NO_SIGNAL' || tracks[i].state == 'NO SIGNAL') {
+            } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                 color = '#5bc0de';
                 //continue;
-            } else if (tracks[i].state == 'START') {
+            } else if (track[i].state == 'START') {
                 color = 'yellow';
                 //continue;
             }
 
-            if (tracks[i].coords != null) {
+            if (track[i].coords != null) {
 
-                tmpTitle = 'Дистанция: ' + tracks[i].dist + '\n';
-                tmpTitle += 'Время прибытия: ' + new Date(tracks[i].t1 * 1000) + '\n';
+                tmpTitle = 'Дистанция: ' + track[i].dist + '\n';
+                tmpTitle += 'Время прибытия: ' + new Date(track[i].t1 * 1000) + '\n';
                 //tmpTitle += 'lat: ' + tracks[i].lat + '\n';
                 //tmpTitle += 'lon: ' + tracks[i].lon + '\n';
-                tmpTitle += 'Длительность: ' + parseInt(tracks[i].time / 60) + ' минут';
-                tmpVar = L.marker([tracks[i].coords[0].lat, tracks[i].coords[0].lon],
+                tmpTitle += 'Длительность: ' + parseInt(track[i].time / 60) + ' минут';
+                tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                     {'title': tmpTitle});
                 tmpVar.setIcon(getIcon(parseInt(i / 2 + 0.5) - 1, iconIndex, color, 'black'));
                 map.addLayer(tmpVar);
                 markersArr.push(tmpVar);
 
-                polyline = new L.Polyline(tracks[i].coords, {
+                polyline = new L.Polyline(track[i].coords, {
                     color: color,
                     weight: 3,
-                    opacity: 1,
+                    opacity: 0.5,
                     smoothFactor: 1
                 });
 
                 polyline.addTo(map);
 
-                if (i + 1 == tracks.length) {
-                    var indx = tracks[i].coords.length - 1;
-                    tmpVar = L.marker([tracks[i].coords[indx].lat, tracks[i].coords[indx].lon]);
+                if (i + 1 == track.length) {
+                    var indx = track[i].coords.length - 1;
+                    tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon]);
                     tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                     map.addLayer(tmpVar);
                     markersArr.push(tmpVar);

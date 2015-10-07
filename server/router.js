@@ -43,7 +43,7 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
             });
     });
 
-router.route('/findpath/:lat1&:lon1&:lat2&:lon2')
+router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
         console.log('=== router.route findpath ===');
         var tracksManager = new tracks('http://192.168.9.29:3001/',
@@ -56,7 +56,7 @@ router.route('/findpath/:lat1&:lon1&:lat2&:lon2')
             });
     });
 
-router.route('/findtime/:lat1&:lon1&:lat2&:lon2')
+router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
         console.log('=== router.route findtime ===');
         var tracksManager = new tracks('http://192.168.9.29:3001/',
@@ -68,6 +68,7 @@ router.route('/findtime/:lat1&:lon1&:lat2&:lon2')
                 res.status(200).json(data);
             });
     });
+
 
 router.route('/log')
     .post(function (req, res) {

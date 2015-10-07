@@ -55,7 +55,7 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
     });
 
     scope.test = function () {
-        scope.$emit('drawPlannedTracks', _data.routes[1]);
+        scope.$emit('drawCombinedTrack', _data.routes[1]);
 
         //scope.$emit('drawAllPoints', _data);
 
