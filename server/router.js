@@ -58,7 +58,6 @@ router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
 
 router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
-        console.log('=== router.route findtime ===');
         var tracksManager = new tracks('http://192.168.9.29:3001/',
             'http://sngtrans.com.ua:5201/',
             'admin', 'admin321');

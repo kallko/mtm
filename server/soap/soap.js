@@ -38,11 +38,14 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 
         console.log('The data loaded from the cache.');
 
+        var jsonData = JSON.parse(data);
+        jsonData.server_time = 1444304187 - 3600 * 3; // Date.now();
+        console.log(jsonData.server_time);
+
         //tracksManager = new tracks('http://192.168.9.29:3001/',
         //    'http://sngtrans.com.ua:5201/',
         //    'admin', 'admin321');
         //
-        //var jsonData = JSON.parse(data);
         //jsonData.tasks_loaded = true;
         //jsonData.sended = false;
         //for (var i = 0; i < jsonData.routes.length; i++) {
@@ -50,7 +53,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         //}
         //tracksManager.getRealTracks(jsonData, checkBeforeSend, callback);
 
-        callback(JSON.parse(data));
+        callback(jsonData);
     });
 };
 
@@ -137,6 +140,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                     tracksManager;
                 data.sended = false;
                 data.date = new Date();
+                data.server_time = Date.now();
                 tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
                 me.getAdditionalData(client, data, tracksManager, callback);
 
@@ -210,7 +214,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                //tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
                 data.tasks = [];
 

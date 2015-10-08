@@ -12,6 +12,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             CANCELED: 4
         };
 
+    // TEST
+    //var __TEST_NOWf = ;
+    //////////
+
     setListeners();
     init();
     loadDailyData();
@@ -136,7 +140,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
-                tmpPoints[j].arrival_prediction = 0;
+                tmpPoints[j].arrival_prediction = tmpPoints[j].arrival_time_ts;
                 if (j == 0) {
                     tmpPoints[j].status = STATUS.FINISHED;
                 } else {
@@ -170,6 +174,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         _data = data;
+        predicationArrivalUpdate();
         scope.$emit('saveForDebug', {
             'rowCollection': scope.rowCollection,
             'data': data
@@ -248,11 +253,52 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
                         && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
                         tmpPoint.status = STATUS.FINISHED;
+                        route.lastPointIndx = k;
                         break;
                     }
-
                 }
             }
+        }
+    }
+
+    function predicationArrivalUpdate() {
+        var lastPoint,
+            route,
+            url,
+            len,
+            point,
+            now = _data.server_time; //Date.now();
+
+        console.log(_data.server_time);
+        for (var i = 0; i < _data.routes.length; i++) {
+
+            route = _data.routes[i];
+            lastPoint = route.lastPointIndx + 1;
+            len = route.real_track.length - 1;
+            point = route.real_track[len].coords[route.real_track[len].coords.length - 1];
+            url = '/findtime2p/' + point.lat + '&' + point.lon + '&'
+                + route.points[lastPoint].END_LAT + '&' + route.points[lastPoint].END_LON;
+            //console.log(url);
+
+
+            (function(_route) {
+            http.get(url).
+                success(function (data) {
+                    //console.log(data);
+                    var nextPointTime = parseInt(data.time_table[0][1][0] / 10),
+                        totalWorkTime = 0;
+                    console.log(nextPointTime, _route.points.length);
+
+                    for (var j = lastPoint; j < _route.points.length; j++) {
+                        totalWorkTime += parseInt(_route.points[j].TASK_TIME);
+                        _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime
+                            + _route.time_matrix.time_table[0][lastPoint][j];
+                        //+ nextPointTime
+                        //+ parseInt(_route.points[j].TASK_TIME)
+                        //+ _route.time_matrix.time_table[0][lastPoint][j]
+                    }
+                });
+            })(route);
         }
     }
 
@@ -267,7 +313,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     function setListeners() {
-        $(window).resize(resetHeight);
+        $(window).resize(function() {
+            resetHeight();
+            if (pointTable == null) {
+                pointTableHolder = $('#point-table');
+            }
+            resizeHead(pointTable);
+        });
         resetHeight();
 
         if (pointTableHolder == null) {
@@ -420,7 +472,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         if (scope.filters.driver != -1) {
             indx = scope.filters.driver;
-        } else if(scope.selectedRow != -1) {
+        } else if (scope.selectedRow != -1) {
             indx = scope.displayCollection[scope.selectedRow].route_id;
         } else {
             return;

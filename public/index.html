@@ -59,6 +59,7 @@
                     <th class="point-checkbox-td"></th>
                     <th st-sort="status" class="status-column" >Статус</th>
                     <th>Время прибытия</th>
+                    <th>Прогноз прибытия</th>
                     <th>Номер</th>
                     <th>ID точки</th>
                     <th>ID заказа</th>
@@ -84,6 +85,7 @@
                     </td>
                     <td>{{getTextStatus(row.status)}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
+                    <td>{{ row.arrival_prediction * 1000 | date:'dd/MM/yy HH:mm:ss' }}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.waypoint.ID}}</td>

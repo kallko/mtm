@@ -89,7 +89,7 @@ TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, 
 
     //console.log(this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str);
     request({
-        url: this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str,
+        url: this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -216,7 +216,7 @@ TracksManager.prototype.getTimeMatrix = function (data, index, checkBeforeSend, 
 };
 
 TracksManager.prototype.getPlanGeometry = function (data, index, checkBeforeSend, callback) {
-    var url = this.routerUrl + 'viaroute?instructions=true&compression=false',
+    var url = this.routerUrl + 'viaroute?instructions=false&compression=false',
         points = data[index];
 
     for (var i = 0; i < points.length; i++) {
