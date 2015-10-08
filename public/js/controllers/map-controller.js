@@ -29,12 +29,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     rootScope.$on('drawPlannedTrack', function (event, route) {
-        drawPlannedRoute(route.plan_geometry, null);
+        drawPlannedRoute(route.plan_geometry, 0);
         drawAllPoints(route.points)
     });
 
     rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
-        drawPlannedRoute(route.plan_geometry, null);
+        drawPlannedRoute(route.plan_geometry, 0);
         drawRealRoute(route.real_track);
         drawAllPoints(route.points)
     });
@@ -51,58 +51,49 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         if (i != route.points.length - 1) {
-            var last_point =
+            var lastCoords = route.real_track[route.real_track.length - 1].coords;
+                carPos = lastCoords[lastCoords.length - 1],
+                url = '/findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i].END_LAT + '&' + route.points[i].END_LON;
+            console.log(url);
+            http.get(url).
+                success(function (data) {
+                    var geometry = getLatLonArr(data),
+                        polyline = new L.Polyline(geometry, {
+                        color: 'blue',
+                        weight: 3,
+                        opacity: 0.5,
+                        smoothFactor: 1
+                    });
+                    polyline.addTo(map);
+                });
 
-            // http.get('/findpath2p/:lat1&:lon1&:lat2&:lon2')
-
-            drawPlannedRoute(route.plan_geometry, route.points[i + 1]);
+            drawPlannedRoute(route.plan_geometry, i + 1);
         }
+
         drawAllPoints(route.points);
     }
 
-    function deg2rad(deg) {
-        return deg * (Math.PI / 180)
+    function getLatLonArr(data) {
+        var tmp,
+            geometry = [];
+
+        for (var i = 0; i < data.length; i++) {
+            if (data[i] == null) continue;
+            tmp = data[i].split(",");
+            geometry.push(new L.LatLng(parseFloat(tmp[0]), parseFloat(tmp[1])));
+        }
+
+        return geometry;
     }
 
-    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-        var R = 6371; // Radius of the earth in km
-        var dLat = deg2rad(lat2 - lat1);  // deg2rad below
-        var dLon = deg2rad(lon2 - lon1);
-        var a =
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2)
-            ;
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        var d = R * c; // Distance in km
-        return d;
-    }
-
-
-    function drawPlannedRoute(track, startPos) {
+    function drawPlannedRoute(track, startIndx) {
         if (track == null) return;
 
         var tmp,
-            geometry = [],
-            skipDraw = !(startPos == null),
-            tmpDist = 99999,
-            tmpPoint;
+            geometry = [];
 
-        for (var i = 0; i < track.length; i++) {
-            if (track[i] == null) continue;
-            tmp = track[i].split(",");
-
-            //if(skipDraw && tmpDist > getDistanceFromLatLonInKm(tmp[0], tmp[1], startPos.END_LAT, startPos.END_LON)){
-            //    tmpDist = getDistanceFromLatLonInKm(tmp[0], tmp[1], startPos.END_LAT, startPos.END_LON);
-            //    tmpPoint = tmp;
-            //    console.log(tmpDist, tmpPoint);
-            //}
-
-            if (!skipDraw) {
-                geometry.push(new L.LatLng(parseFloat(tmp[0]), parseFloat(tmp[1])));
-            } else if (tmp[0] === startPos.END_LAT && tmp[1] === startPos.END_LON) {
-                skipDraw = false;
-            }
+        for (var i = startIndx; i < track.length; i++) {
+            geometry = geometry.concat(getLatLonArr(track[i]));
         }
 
         var polyline = new L.Polyline(geometry, {

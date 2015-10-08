@@ -236,7 +236,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (route.real_track[j].state == "ARRIVAL") {
                 tmpArrival = route.real_track[j];
                 for (var k = 0; k < route.points.length; k++) {
-                    tmpPoint = route.points[k]; // END_LON
+                    tmpPoint = route.points[k];
                     END_LAT = parseFloat(tmpPoint.END_LAT);
                     END_LON = parseFloat(tmpPoint.END_LON);
                     lat = parseFloat(tmpArrival.lat);

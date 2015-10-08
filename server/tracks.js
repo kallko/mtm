@@ -96,10 +96,11 @@ TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, 
 
             if (body.route_geometry == null) {
                 console.log('body.route_geometry == null');
+                data.routes[index].plan_geometry = [];
                 data.routes[index].plan_geometry_loaded = false;
-                me.getGeometryByParts(data, index, 0, [], checkBeforeSend, callback);
+                me.getGeometryByParts(data, index, 0, checkBeforeSend, callback);
             } else {
-                data.routes[index].plan_geometry = body.route_geometry;
+                data.routes[index].plan_geometry = body.route_geometry_splited;
                 data.routes[index].plan_geometry_loaded = true;
                 checkBeforeSend(data, callback);
             }
@@ -107,7 +108,7 @@ TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, 
     });
 };
 
-TracksManager.prototype.getGeometryByParts = function (data, index, startPos, res, checkBeforeSend, callback) {
+TracksManager.prototype.getGeometryByParts = function (data, index, startPos, checkBeforeSend, callback) {
     var points = data.routes[index].points,
         me = this;
 
@@ -120,13 +121,12 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, re
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            res = res.concat(body.route_geometry);
+            data.routes[index].plan_geometry.push(body.route_geometry);
             startPos++;
             //console.log('iteration #', startPos);
             if (points.length > startPos + 1) {
-                me.getGeometryByParts(data, index, startPos, res, checkBeforeSend, callback);
+                me.getGeometryByParts(data, index, startPos, checkBeforeSend, callback);
             } else {
-                data.routes[index].plan_geometry = res;
                 data.routes[index].plan_geometry_loaded = true;
                 checkBeforeSend(data, callback);
             }
