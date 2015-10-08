@@ -38,10 +38,10 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 
         console.log('The data loaded from the cache.');
 
-        tracksManager = new tracks('http://192.168.9.29:3001/',
-            'http://sngtrans.com.ua:5201/',
-            'admin', 'admin321');
-
+        //tracksManager = new tracks('http://192.168.9.29:3001/',
+        //    'http://sngtrans.com.ua:5201/',
+        //    'admin', 'admin321');
+        //
         //var jsonData = JSON.parse(data);
         //jsonData.tasks_loaded = true;
         //jsonData.sended = false;

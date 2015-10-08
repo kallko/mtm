@@ -52,22 +52,31 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         if (i != route.points.length - 1) {
             var lastCoords = route.real_track[route.real_track.length - 1].coords;
-                carPos = lastCoords[lastCoords.length - 1],
-                url = '/findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i].END_LAT + '&' + route.points[i].END_LON;
+            carPos = lastCoords[lastCoords.length - 1],
+                url = '/findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].END_LAT
+                    + '&' + route.points[i + 1].END_LON;
             console.log(url);
             http.get(url).
                 success(function (data) {
                     var geometry = getLatLonArr(data),
                         polyline = new L.Polyline(geometry, {
+                            color: 'blue',
+                            weight: 3,
+                            opacity: 0.5,
+                            smoothFactor: 1
+                        });
+                    polyline.addTo(map);
+                    //console.log([[carPos.lat, carPos.lon], geometry[0]]);
+                    polyline = new L.Polyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], {
                         color: 'blue',
                         weight: 3,
                         opacity: 0.5,
                         smoothFactor: 1
                     });
                     polyline.addTo(map);
+                    drawPlannedRoute(route.plan_geometry, i + 1);
                 });
 
-            drawPlannedRoute(route.plan_geometry, i + 1);
         }
 
         drawAllPoints(route.points);
@@ -142,6 +151,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
                     polyline = new L.Polyline([track[i].coords[0], track[i].coords[track[i].coords.length - 1]], {
                         color: color,
+                        weight: 3,
+                        opacity: 0.8,
+                        smoothFactor: 1
+                    });
+
+                    polyline.addTo(map);
+                } else if (i + 1 == track.length) {
+                    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
+                    polyline = new L.Polyline(track[i].coords, {
+                        color: 'red',
                         weight: 3,
                         opacity: 0.8,
                         smoothFactor: 1
