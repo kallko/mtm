@@ -6,10 +6,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         _data,
         STATUS = {
             FINISHED: 0,
-            FOCUS_L1: 1,
-            FOCUS_L2: 2,
-            SCHEDULED: 3,
-            CANCELED: 4
+            ARRIVED_LATE: 1,
+            DELAY: 2,
+            FOCUS_L1: 3,
+            FOCUS_L2: 4,
+            SCHEDULED: 5,
+            CANCELED: 6
         };
 
     setListeners();
@@ -23,10 +25,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.statuses = [
             {name: 'все', value: -1},
             {name: 'доставленно', value: 0},
-            {name: 'под контролем', value: 1},
-            {name: 'ожидают выполнения', value: 2},
-            {name: 'запланирован', value: 3},
-            {name: 'отменен', value: 4}
+            {name: 'опоздал', value: 1},
+            {name: 'опаздывает', value: 2},
+            {name: 'под контролем', value: 3},
+            {name: 'ожидают выполнения', value: 4},
+            {name: 'запланирован', value: 5},
+            {name: 'отменен', value: 6}
         ];
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];
@@ -452,6 +456,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        console.log(statusCode);
         return 'неизвестный статус';
     };
 
