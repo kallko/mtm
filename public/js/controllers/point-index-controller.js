@@ -176,6 +176,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         _data = data;
         predicationArrivalUpdate();
+        //updateProblemIndex();
         scope.$emit('saveForDebug', {
             'rowCollection': scope.rowCollection,
             'data': data
@@ -279,6 +280,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
     }
 
+    function updateProblemIndex(route) {
+        var point,
+            clientStatusCoef = 0,
+            orderValueCoef = 0,
+            howSoonCoef = 0.1,
+            lateMinutesCoef = 1.0;
+
+        for (var j = 0; j < route.points.length; j++) {
+            point = route.points[j];
+            point.problemlIndex = parseInt(point.arrival_left_prediction * howSoonCoef);
+            //if (route.ID == '3') {
+            //    console.log(point.problemlIndex);
+            //}
+        }
+    }
+
     function predicationArrivalUpdate() {
         var route,
             url,
@@ -315,6 +332,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 totalWorkTime += parseInt(_route.points[j].TASK_TIME);
                             }
                         }
+
+                        updateProblemIndex(_route);
                     });
             })(route);
         }
@@ -389,9 +408,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var header = $('.header'),
             table = $('#point-table > table'),
             headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header),
-            protoStatusTH = header.find('.status-column');
+            protoStatusTH = header.find('.status-col');
 
-        headerCopy.find('.status-column').on('click', function () {
+        headerCopy.find('.status-col').on('click', function () {
             protoStatusTH.trigger('click');
         });
 

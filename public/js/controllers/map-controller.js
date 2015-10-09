@@ -367,5 +367,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     function setMapCenter(lat, lon) {
         var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
         map.setView(new L.LatLng(lat, lon), zoom);
+        // map.setView(new L.LatLng(parseFloat(lat) - 0.003, parseFloat(lon) + 0.009), zoom);
     }
 }]);
