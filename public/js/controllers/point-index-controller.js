@@ -12,10 +12,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             CANCELED: 4
         };
 
-    // TEST
-    //var __TEST_NOWf = ;
-    //////////
-
     setListeners();
     init();
     loadDailyData();
@@ -236,7 +232,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             END_LAT,
             END_LON,
             lat,
-            lon;
+            lon,
+            focus_l1_time = 60 * 30,
+            focus_l2_time = 60 * 120,
+            now = data.server_time;
 
         for (var j = 0; j < route.real_track.length; j++) {
             if (route.real_track[j].state == "ARRIVAL") {
@@ -256,6 +255,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpPoint.status = STATUS.FINISHED;
                         route.lastPointIndx = k;
                         break;
+                    }
+                }
+            }
+        }
+
+        for (j = 0; j < route.points.length; j++) {
+            tmpPoint = route.points[j];
+            if (tmpPoint.status != STATUS.FINISHED &&
+                tmpPoint.status != STATUS.CANCELED) {
+                if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+                    if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+                        tmpPoint.status = STATUS.FOCUS_L1;
+                    } else {
+                        tmpPoint.status = STATUS.FOCUS_L2;
                     }
                 }
             }
@@ -282,14 +295,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     success(function (data) {
                         var lastPoint = _route.lastPointIndx + 1,
                             nextPointTime = parseInt(data.time_table[0][1][0] / 10),
-                        //+ parseInt(_route.points[lastPoint - 1].TASK_TIME),
                             totalWorkTime = 0,
                             totalTravelTime = 0;
-
-                        //if (_route.ID == '3') {
-                        //    console.log(lastPoint);
-                        //    console.log(_route.time_matrix.time_table[0]);
-                        //}
 
                         for (var j = 0; j < _route.points.length; j++) {
                             if (j < lastPoint) {
