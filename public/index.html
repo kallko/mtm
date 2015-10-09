@@ -60,6 +60,7 @@
                     <th st-sort="status" class="status-column" >Статус</th>
                     <th>Время прибытия</th>
                     <th>Прогноз прибытия</th>
+                    <th>Осталось до прибытия</th>
                     <th>Номер</th>
                     <th>ID точки</th>
                     <th>ID заказа</th>
@@ -85,7 +86,16 @@
                     </td>
                     <td>{{getTextStatus(row.status)}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
-                    <td>{{ row.arrival_prediction * 1000 | date:'dd/MM/yy HH:mm:ss' }}</td>
+                    <td>
+                        <span ng-show="row.arrival_prediction > 0" >
+                            {{ row.arrival_prediction * 1000 | date:'HH:mm:ss' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span ng-show="row.arrival_prediction > 0" >
+                            {{ row.arrival_left_prediction * 1000 | date:'HH:mm:ss' : 'UTC' }}
+                        </span>
+                    </td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.waypoint.ID}}</td>

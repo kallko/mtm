@@ -140,7 +140,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
-                tmpPoints[j].arrival_prediction = tmpPoints[j].arrival_time_ts;
+                tmpPoints[j].arrival_prediction = 0;
+                tmpPoints[j].arrival_left_prediction = 0;
                 if (j == 0) {
                     tmpPoints[j].status = STATUS.FINISHED;
                 } else {
@@ -275,30 +276,33 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             point = route.real_track[len].coords[route.real_track[len].coords.length - 1];
             url = '/findtime2p/' + point.lat + '&' + point.lon + '&'
                 + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;
-            //console.log(url);
 
             (function (_route) {
                 http.get(url).
                     success(function (data) {
-                        //console.log(data);
                         var lastPoint = _route.lastPointIndx + 1,
                             nextPointTime = parseInt(data.time_table[0][1][0] / 10),
-                                //+ parseInt(_route.points[lastPoint - 1].TASK_TIME),
+                        //+ parseInt(_route.points[lastPoint - 1].TASK_TIME),
                             totalWorkTime = 0,
                             totalTravelTime = 0;
 
-                        if (_route.ID == '3') {
-                            console.log(lastPoint);
-                            console.log(_route.time_matrix.time_table[0]);
-                        }
+                        //if (_route.ID == '3') {
+                        //    console.log(lastPoint);
+                        //    console.log(_route.time_matrix.time_table[0]);
+                        //}
 
-                        for (var j = lastPoint; j < _route.points.length; j++) {
-                            totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
-                            if(_route.ID == '3') {
-                                console.log( _route.time_matrix.time_table[0][j - 1][j] / 10, totalTravelTime);
+                        for (var j = 0; j < _route.points.length; j++) {
+                            if (j < lastPoint) {
+                                _route.points[j].arrival_prediction = 0;
+                            } else {
+                                totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
+                                if (_route.ID == '3') {
+                                    // console.log(_route.time_matrix.time_table[0][j - 1][j] / 10, totalTravelTime);
+                                }
+                                _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
+                                _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
+                                totalWorkTime += parseInt(_route.points[j].TASK_TIME);
                             }
-                            _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
-                            totalWorkTime += parseInt(_route.points[j].TASK_TIME);
                         }
                     });
             })(route);
