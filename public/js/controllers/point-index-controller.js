@@ -271,9 +271,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // ШТЕЛЬМАХ
+        // проверки статуса выполняется по расстоянию
+        // последнее опоздание не имеет индекса проблемности
+
         lastPoint = route.points[route.lastPointIndx];
         if (lastPoint != null) {
-            if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now) {
+            if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
+                //&& getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON)
+            ) {
                 lastPoint.status = STATUS.IN_PROGRESS;
             }
         }
@@ -346,6 +352,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 _route.points[j].overdue_time = 0;
                                 if (_route.points[j].status == STATUS.SCHEDULED) {
                                     _route.points[j].status = STATUS.ARRIVED_LATE;
+                                    _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                 } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
                                     totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
                                 }
