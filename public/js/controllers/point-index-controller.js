@@ -263,6 +263,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
                         tmpPoint.status = STATUS.FINISHED;
                         route.lastPointIndx = k;
+                        tmpPoint.real_arrival_time = tmpArrival.t1;
                         break;
                     }
                 }
@@ -340,13 +341,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 _route.points[j].overdue_time = 0;
                                 if (_route.points[j].status == STATUS.SCHEDULED) {
                                     _route.points[j].status = STATUS.ARRIVED_LATE;
+                                } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
+                                    totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
                                 }
                             } else {
                                 totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
                                 _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
                                 _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
                                 if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
-                                    _route.points[j].overdue_time = _route.points[j].arrival_prediction - _route.points[j].arrival_time_ts;
+                                    _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction - _route.points[j].arrival_time_ts);
                                     if (_route.points[j].arrival_time_ts < now) {
                                         _route.points[j].status = STATUS.ARRIVED_LATE;
                                     } else {
