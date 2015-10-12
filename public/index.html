@@ -48,6 +48,8 @@
                         ng-options='option.value as option.name for option in draw_modes'>
                 </select>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
+
+                <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">только проблемные</button>
             </div>
         </div>
 
@@ -62,7 +64,7 @@
                     <th class="prediction-arrival-time-col">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col">Осталось до прибытия</th>
                     <th class="overdue-col">Размер опоздания</th>
-                    <th class="problem-index-col">Проблемность</th>
+                    <th class="problem-index-col" st-sort="problem_index">Проблемность</th>
                     <th class="number-col">Номер</th>
                     <th class="point-id-col">ID точки</th>
                     <th class="task-id-col">ID заказа</th>
@@ -81,7 +83,7 @@
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
                     ng-right-click="sortByDriver(row.driver_indx)"
-                    ng-show="statusFilter(row) && driverFilter(row)"
+                    ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row)"
                     on-finish-render="ngRepeatFinished">
                     <td class="point-checkbox-td">
                         <input type="checkbox" class="point-checkbox" id="{{'chk-' + row.row_id}}"

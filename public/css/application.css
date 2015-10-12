@@ -176,3 +176,7 @@ template {
 .point-checkbox-td {
     width: 26px;
 }
+
+#problem-index-btn{
+    margin-left: 10px;
+}

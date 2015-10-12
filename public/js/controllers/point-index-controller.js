@@ -37,6 +37,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];
         scope.filters.driver = scope.filters.drivers[0].value;
+        scope.filters.problem_index = -1;
         scope.draw_modes = [
             {name: 'комбинированный трек', value: 0},
             {name: 'фактический трек', value: 1},
@@ -420,7 +421,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         scope.$watch(function () {
-            return scope.filters.driver + scope.filters.status;
+            return scope.filters.driver + scope.filters.status + scope.filters.problem_index;
         }, function () {
             timeout(function () {
                 updateResizeGripHeight();
@@ -446,10 +447,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var header = $('.header'),
             table = $('#point-table > table'),
             headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header),
-            protoStatusTH = header.find('.status-col');
+            protoStatusTH = header.find('.status-col'),
+            protoProblemIndexTH = header.find('.problem-index-col');
 
         headerCopy.find('.status-col').on('click', function () {
             protoStatusTH.trigger('click');
+        });
+
+        headerCopy.find('.problem-index-col').on('click', function () {
+            protoProblemIndexTH.trigger('click');
         });
 
         resizeHead(table);
@@ -525,6 +531,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         return (scope.filters.driver == -1 || row.driver_indx == scope.filters.driver);
     };
 
+    scope.problemFilter = function (row) {
+        return (scope.filters.problem_index == -1 || row.problem_index > 0);
+    };
+
     scope.sortByDriver = function (indx) {
         if (scope.filters.driver == indx) {
             scope.filters.driver = -1;
@@ -587,18 +597,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //scope.$emit('drawCheckedPoints', {} );
     };
 
-    function loadTrack(gid, routeIndx) {
-        var now = new Date(),
-            todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
-            tomorrowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000;
+    scope.toggleProblemPoints = function () {
+        $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
+        if (scope.filters.problem_index == -1) {
+            scope.filters.problem_index = 1;
+        } else {
+            scope.filters.problem_index = -1;
+        }
 
-        var query = '/tracks/' + gid + '&' + todayMidnight + '&' + tomorrowMidnight + '&60&1000&5&25&5&110';
-        //console.log(query);
-
-        http.get(query, {}).
-            success(function (track) {
-                _data.routes[routeIndx].real_track = track;
-                statusUpdate(routeIndx);
-            });
     }
 }]);
