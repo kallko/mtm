@@ -6,12 +6,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         _data,
         STATUS = {
             FINISHED: 0,
-            ARRIVED_LATE: 1,
-            DELAY: 2,
-            FOCUS_L1: 3,
-            FOCUS_L2: 4,
-            SCHEDULED: 5,
-            CANCELED: 6
+            IN_PROGRESS: 1,
+            ARRIVED_LATE: 2,
+            DELAY: 3,
+            FOCUS_L1: 4,
+            FOCUS_L2: 5,
+            SCHEDULED: 6,
+            CANCELED: 7
         };
 
     setListeners();
@@ -25,12 +26,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.statuses = [
             {name: 'все', value: -1},
             {name: 'доставленно', value: 0},
-            {name: 'опоздал', value: 1},
-            {name: 'опаздывает', value: 2},
-            {name: 'под контролем', value: 3},
-            {name: 'ожидают выполнения', value: 4},
-            {name: 'запланирован', value: 5},
-            {name: 'отменен', value: 6}
+            {name: 'выполняется', value: 1},
+            {name: 'опоздал', value: 2},
+            {name: 'опаздывает', value: 3},
+            {name: 'под контролем', value: 4},
+            {name: 'ожидают выполнения', value: 5},
+            {name: 'запланирован', value: 6},
+            {name: 'отменен', value: 7}
         ];
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];
@@ -240,8 +242,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             lon,
             focus_l1_time = 60 * 30,
             focus_l2_time = 60 * 120,
-            now = data.server_time;
+            now = data.server_time,
+            lastPoint;
 
+        route.lastPointIndx = 0;
         for (var j = 0; j < route.real_track.length; j++) {
             if (route.real_track[j].state == "ARRIVAL") {
                 tmpArrival = route.real_track[j];
@@ -265,19 +269,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
-        for (j = 0; j < route.points.length; j++) {
-            tmpPoint = route.points[j];
-            if (tmpPoint.status != STATUS.FINISHED &&
-                tmpPoint.status != STATUS.CANCELED) {
-                if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
-                    if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
-                        tmpPoint.status = STATUS.FOCUS_L1;
-                    } else {
-                        tmpPoint.status = STATUS.FOCUS_L2;
-                    }
-                }
+        lastPoint = route.points[route.lastPointIndx];
+        if (lastPoint != null) {
+            if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now) {
+                lastPoint.status = STATUS.IN_PROGRESS;
             }
         }
+
+        //for (j = 0; j < route.points.length; j++) {
+        //    tmpPoint = route.points[j];
+        //    if (tmpPoint.status != STATUS.FINISHED &&
+        //        tmpPoint.status != STATUS.CANCELED) {
+        //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+        //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+        //                tmpPoint.status = STATUS.FOCUS_L1;
+        //            } else {
+        //                tmpPoint.status = STATUS.FOCUS_L2;
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     function updateProblemIndex(route) {
@@ -289,9 +300,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         for (var j = 0; j < route.points.length; j++) {
             point = route.points[j];
-            point.problemlIndex = parseInt(point.arrival_left_prediction * howSoonCoef);
+            if (point.arrival_time_ts - point.arrival_prediction) {
+
+            }
+
+            //point.problemlIndex = parseInt(point.arrival_left_prediction * howSoonCoef);
             //if (route.ID == '3') {
-            //    console.log(point.problemlIndex);
+            //    console.log(point.problemlIndeprox);
             //}
         }
     }
@@ -303,7 +318,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             point,
             now = _data.server_time; //Date.now();
 
-        console.log(_data.server_time);
+        console.log(new Date(_data.server_time * 1000));
         for (var i = 0; i < _data.routes.length; i++) {
             route = _data.routes[i];
             len = route.real_track.length - 1;
@@ -322,13 +337,29 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         for (var j = 0; j < _route.points.length; j++) {
                             if (j < lastPoint) {
                                 _route.points[j].arrival_prediction = 0;
+                                _route.points[j].overdue_time = 0;
+                                if (_route.points[j].status == STATUS.SCHEDULED) {
+                                    _route.points[j].status = STATUS.ARRIVED_LATE;
+                                }
                             } else {
                                 totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
-                                if (_route.ID == '3') {
-                                    // console.log(_route.time_matrix.time_table[0][j - 1][j] / 10, totalTravelTime);
-                                }
                                 _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
                                 _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
+                                if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
+                                    _route.points[j].overdue_time = _route.points[j].arrival_prediction - _route.points[j].arrival_time_ts;
+                                    if (_route.points[j].arrival_time_ts < now) {
+                                        _route.points[j].status = STATUS.ARRIVED_LATE;
+                                    } else {
+                                        _route.points[j].status = STATUS.DELAY;
+                                    }
+                                } else {
+                                    _route.points[j].overdue_time = 0;
+                                }
+
+                                //if (_route.ID == '3') {
+                                //    console.log(_route.points[j].overdue_time);
+                                //}
+
                                 totalWorkTime += parseInt(_route.points[j].TASK_TIME);
                             }
                         }
