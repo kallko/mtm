@@ -5,7 +5,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = false,
+    loadFromCache = true,
     tracks = require('../tracks'),
 
     counter = 0,

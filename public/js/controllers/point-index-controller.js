@@ -265,7 +265,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpPoint.status = STATUS.FINISHED;
                         route.lastPointIndx = k;
                         tmpPoint.real_arrival_time = tmpArrival.t1;
-                        break;
+                        // break;
                     }
                 }
             }
