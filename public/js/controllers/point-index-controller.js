@@ -448,7 +448,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             table = $('#point-table > table'),
             headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header),
             protoStatusTH = header.find('.status-col'),
-            protoProblemIndexTH = header.find('.problem-index-col');
+            protoProblemIndexTH = header.find('.problem-index-col'),
+            timeLeftTH = header.find('.prediction-arrival-left-col');
 
         headerCopy.find('.status-col').on('click', function () {
             protoStatusTH.trigger('click');
@@ -456,6 +457,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         headerCopy.find('.problem-index-col').on('click', function () {
             protoProblemIndexTH.trigger('click');
+        });
+
+        headerCopy.find('.prediction-arrival-left-col').on('click', function () {
+            timeLeftTH.trigger('click');
         });
 
         resizeHead(table);

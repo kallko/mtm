@@ -21,7 +21,7 @@ var myLayout = new GoldenLayout({
                 }]
             }, {
                 type: 'component',
-                width: 47,
+                width: 67,
                 componentName: 'template',
                 title: 'Точки маршрута',
                 componentState: {templateId: 'template-point-table'}
