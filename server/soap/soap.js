@@ -5,7 +5,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = true,
+    loadFromCache = false,
     tracks = require('../tracks'),
 
     counter = 0,
@@ -57,10 +57,9 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
     });
 };
 
-
 function checkBeforeSend(data, callback) {
     console.log('checkBeforeSend');
-    if (data.sended || !data.tasks_loaded) {
+    if (data.sended || data.sensors == null) { // || !data.tasks_loaded) {
         return;
     }
 
@@ -185,14 +184,13 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
     client.run({'input_data': _xml.additionalDataXML(data.ID)}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
-                //log.toFLog("transports_driver.js", res);
 
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,
                     sensors = res.MESSAGE.SENSORS[0].SENSOR;
-                //tasks = res.MESSAGE.TASKS[0].TASK;
                 log.l('waypoints.length = ' + waypoints.length);
+                //log.toFLog("additional_data.js", res);
 
                 data.transports = [];
                 for (var i = 0; i < transports.length; i++) {
@@ -214,24 +212,26 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                //tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
-                data.tasks = [];
+                //checkBeforeSend(data, callback);
 
-                counter = 0;
-                totalPoints = 0;
-                for (i = 0; i < data.routes.length; i++) {
-                    for (var j = 0; j < data.routes[i].points.length; j++) {
-                        if (data.routes[i].points[j].TASK_NUMBER == '') continue;
-                        totalPoints++;
-                        (function (ii, jj) {
-                            setTimeout(function () {
-                                me.getTask(client, data.routes[ii].points[jj].TASK_NUMBER,
-                                    data.routes[ii].points[jj].TASK_DATE, data, callback);
-                            }, (i + j) * 50);
-                        })(i, j);
-                    }
-                }
+                //data.tasks = [];
+                //
+                //counter = 0;
+                //totalPoints = 0;
+                //for (i = 0; i < data.routes.length; i++) {
+                //    for (var j = 0; j < data.routes[i].points.length; j++) {
+                //        if (data.routes[i].points[j].TASK_NUMBER == '') continue;
+                //        totalPoints++;
+                //        (function (ii, jj) {
+                //            setTimeout(function () {
+                //                me.getTask(client, data.routes[ii].points[jj].TASK_NUMBER,
+                //                    data.routes[ii].points[jj].TASK_DATE, data, callback);
+                //            }, (i + j) * 50);
+                //        })(i, j);
+                //    }
+                //}
             });
 
         }

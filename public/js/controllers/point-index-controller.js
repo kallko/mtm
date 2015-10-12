@@ -304,16 +304,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             point = route.points[j];
             if (point.overdue_time > 0) {
                 point.problem_index = parseInt(point.overdue_time * lateMinutesCoef);
-                if (route.ID == '3') {
-                    console.log(point.problem_index, point.arrival_left_prediction, -(parseInt(point.arrival_left_prediction * howSoonCoef)));
-                }
+                //if (route.ID == '3') {
+                //    console.log(point.problem_index, point.arrival_left_prediction, -(parseInt(point.arrival_left_prediction * howSoonCoef)));
+                //}
                 point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
                 point.problem_index = point.problem_index < 0 ? 0 : point.problem_index;
+
             } else {
                 point.problem_index = 0;
             }
-
-            //point.problem_index = parseInt(point.arrival_left_prediction * howSoonCoef);
         }
     }
 
@@ -322,6 +321,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             url,
             len,
             point,
+            controlledWindow = 600,
             now = _data.server_time; //Date.now();
 
         console.log(new Date(_data.server_time * 1000));
@@ -355,11 +355,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
                                 if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
                                     _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction - _route.points[j].arrival_time_ts);
-                                    if (_route.points[j].arrival_time_ts < now) {
-                                        _route.points[j].status = STATUS.ARRIVED_LATE;
-                                    } else {
-                                        _route.points[j].status = STATUS.DELAY;
+
+                                    if(_route.points[j].overdue_time > controlledWindow){
+                                        if (_route.points[j].arrival_time_ts < now) {
+                                            _route.points[j].status = STATUS.ARRIVED_LATE;
+                                        } else {
+                                            _route.points[j].status = STATUS.DELAY;
+                                        }
                                     }
+
                                 } else {
                                     _route.points[j].overdue_time = 0;
                                 }
