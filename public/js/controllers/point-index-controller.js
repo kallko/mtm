@@ -296,19 +296,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var point,
             clientStatusCoef = 0,
             orderValueCoef = 0,
-            howSoonCoef = 0.1,
-            lateMinutesCoef = 1.0;
+            howSoonCoef = 0.025,
+            lateMinutesCoef = 2.0;
 
         for (var j = 0; j < route.points.length; j++) {
             point = route.points[j];
-            if (point.arrival_time_ts - point.arrival_prediction) {
-
+            if (point.overdue_time > 0) {
+                point.problem_index = parseInt(point.overdue_time * lateMinutesCoef);
+                if (route.ID == '3') {
+                    console.log(point.problem_index, point.arrival_left_prediction, -(parseInt(point.arrival_left_prediction * howSoonCoef)));
+                }
+                point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
+                point.problem_index = point.problem_index < 0 ? 0 : point.problem_index;
+            } else {
+                point.problem_index = 0;
             }
 
-            //point.problemlIndex = parseInt(point.arrival_left_prediction * howSoonCoef);
-            //if (route.ID == '3') {
-            //    console.log(point.problemlIndeprox);
-            //}
+            //point.problem_index = parseInt(point.arrival_left_prediction * howSoonCoef);
         }
     }
 

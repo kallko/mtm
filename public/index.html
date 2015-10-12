@@ -62,6 +62,7 @@
                     <th class="prediction-arrival-time-col">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col">Осталось до прибытия</th>
                     <th class="overdue-col">Размер опоздания</th>
+                    <th class="problem-index-col">Проблемность</th>
                     <th class="number-col">Номер</th>
                     <th class="point-id-col">ID точки</th>
                     <th class="task-id-col">ID заказа</th>
@@ -103,6 +104,7 @@
                             {{row.overdue_time * 1000 | date:'HH:mm:ss' : 'UTC'}}
                         </span>
                     </td>
+                    <td>{{row.problem_index}}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.waypoint.ID}}</td>
