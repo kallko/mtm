@@ -131,6 +131,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             tmpPoints = data.routes[i].points;
             for (j = 0; j < tmpPoints.length; j++) {
                 tmpPoints[j].driver = data.routes[i].driver;
+                tmpPoints[j].in_plan = true;
                 if (data.routes[i].driver._id == null) {
                     data.routes[i].driver._id = driverId;
                     scope.filters.drivers.push({
@@ -254,6 +255,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         for (var j = 0; j < route.real_track.length; j++) {
             if (route.real_track[j].state == "ARRIVAL") {
                 tmpArrival = route.real_track[j];
+                lastIndex = 0;
                 for (var k = 0; k < route.points.length; k++) {
                     tmpPoint = route.points[k];
                     END_LAT = parseFloat(tmpPoint.END_LAT);
@@ -269,7 +271,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpPoint.status = STATUS.FINISHED;
                         route.lastPointIndx = k;
                         tmpPoint.real_arrival_time = tmpArrival.t1;
-                         //break;
+
+                        lastIndex = tmpPoint.NUMBER;
+
+                        //break;
                     }
                 }
             }
@@ -328,6 +333,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             len,
             point,
             controlledWindow = 600,
+            tmpPred,
             now = _data.server_time; //Date.now();
 
         console.log(new Date(_data.server_time * 1000));
@@ -357,7 +363,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 }
                             } else {
                                 totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
+                                tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime;
                                 _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
+
+                                _route.points[j].in_plan = true;
+                                if( _route.points[j].arrival_prediction == null) {
+                                    _route.points[j].arrival_prediction = tmpPred;
+                                } else  {
+                                    if (tmpPred + 300 < _route.points[j].arrival_prediction){
+                                        _route.points[j].in_plan = false;
+                                    }
+
+                                    _route.points[j].arrival_prediction = tmpPred;
+                                }
+
                                 _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
                                 if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
                                     _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction - _route.points[j].arrival_time_ts);
