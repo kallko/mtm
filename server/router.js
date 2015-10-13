@@ -3,7 +3,8 @@ var express = require('express'),
     router = express.Router(),
     soap = require('./soap/soap'),
     tracks = require('./tracks'),
-    log = new (require('./logging'))('./logs');
+    log = new (require('./logging'))('./logs'),
+    db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary');
 
 router.route('/')
     .get(function (req, res) {
@@ -68,12 +69,12 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
             });
     });
 
-
 router.route('/log')
     .post(function (req, res) {
-        console.log(req.body);
-        console.log('req.body.test = ' + req.body.test);
-        res.status(200).json({status: 'ok', data: req.body.test});
+        //db.testConnection();
+        db.logMessage(1, req.body.message, function(err, result) {
+            res.status(200).json({error: err, result: result});
+        });
     });
 
 module.exports = router;

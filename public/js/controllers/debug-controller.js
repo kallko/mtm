@@ -55,20 +55,14 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
     });
 
     scope.test = function () {
-        scope.$emit('drawCombinedTrack', _data.routes[1]);
-
-        //scope.$emit('drawAllPoints', _data);
-
-        // 50.507535
-        // 30.502585
-
-        // 50.503997
-        // 30.50207
-
-        //http.get('findtime/50.507535&30.502585&50.503997&30.50207', {}).
-        //    success(function (data) {
-        //        console.log({'result': data});
-        //    });
+        saveLogToDB('TEST! Message to log. Message to log. Message to log.');
     };
+
+    function saveLogToDB(message) {
+        http.post('log/', {message: message}).
+            success(function (data) {
+                console.log(data);
+            });
+    }
 
 }]);
