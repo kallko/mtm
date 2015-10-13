@@ -180,3 +180,38 @@ template {
 #problem-index-btn{
     margin-left: 10px;
 }
+
+.delivered-status,
+.performed-status,
+.arrived-late-status,
+.delay-status,
+.controlled-status,
+.awaiting-status,
+.scheduled-status,
+.canceled-status {
+    font-weight: bold;
+}
+
+.delivered-status {
+    color: #0A800A;
+}
+
+.performed-status {
+    color: blue;
+}
+
+.arrived-late-status, .delay-status {
+    color: red;
+}
+
+.scheduled-status {
+    color: #4482AB;
+}
+
+.canceled-status {
+    color: #969696;
+}
+
+/*.controlled-status*/
+/*.awaiting-status*/
+/*.scheduled-status*/

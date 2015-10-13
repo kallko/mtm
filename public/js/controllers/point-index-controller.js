@@ -24,15 +24,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.displayCollection = [].concat(scope.rowCollection);
         scope.filters = {};
         scope.filters.statuses = [
-            {name: 'все', value: -1},
-            {name: 'доставленно', value: 0},
-            {name: 'выполняется', value: 1},
-            {name: 'опоздал', value: 2},
-            {name: 'опаздывает', value: 3},
-            {name: 'под контролем', value: 4},
-            {name: 'ожидают выполнения', value: 5},
-            {name: 'запланирован', value: 6},
-            {name: 'отменен', value: 7}
+            {name: 'все', value: -1, class: 'all-status'},
+            {name: 'доставленно', value: 0, class: 'delivered-status'},
+            {name: 'выполняется', value: 1, class: 'performed-status'},
+            {name: 'опоздал', value: 2, class: 'arrived-late-status'},
+            {name: 'опаздывает', value: 3, class: 'delay-status'},
+            {name: 'под контролем', value: 4, class: 'controlled-status'},
+            {name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
+            {name: 'запланирован', value: 6, class: 'scheduled-status'},
+            {name: 'отменен', value: 7, class: 'canceled-status'}
         ];
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];
@@ -546,9 +546,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
     };
 
-    scope.getTextStatus = function (statusCode) {
+    scope.getTextStatus = function (statusCode, row_id) {
         for (var i = 0; i < scope.filters.statuses.length; i++) {
             if (scope.filters.statuses[i].value == statusCode) {
+                var object = $('#status-td-' + row_id);
+                object.removeClass();
+                object.addClass(scope.filters.statuses[i].class);
                 return scope.filters.statuses[i].name;
             }
         }

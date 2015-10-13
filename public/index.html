@@ -49,7 +49,9 @@
                 </select>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
 
-                <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">только проблемные</button>
+                <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">только
+                    проблемные
+                </button>
             </div>
         </div>
 
@@ -91,7 +93,7 @@
                         <input type="checkbox" class="point-checkbox" id="{{'chk-' + row.row_id}}"
                                ng-click="checkPoint()"/>
                     </td>
-                    <td>{{getTextStatus(row.status)}}</td>
+                    <td id="{{'status-td-' + row.row_id}}">{{getTextStatus(row.status, row.row_id)}}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.arrival_time_hhmm}}</td>
                     <td>
