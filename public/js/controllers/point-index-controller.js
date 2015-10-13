@@ -96,7 +96,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         var tmpPoints,
             rowId = 0,
-            driverId = 0;
+            driverId = 0,
+            len = 0;
         scope.rowCollection = [];
 
         for (var i = 0; i < data.sensors.length; i++) {
@@ -113,6 +114,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                     data.routes[i].transport = data.transports[j];
                     data.routes[i].real_track = data.transports[j].real_track;
+                    len = data.routes[i].real_track.length - 1;
+                    data.routes[i].car_position = data.routes[i].real_track[len].
+                        coords[data.routes[i].real_track[len].coords.length - 1];
                     break;
                 }
             }
@@ -265,7 +269,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpPoint.status = STATUS.FINISHED;
                         route.lastPointIndx = k;
                         tmpPoint.real_arrival_time = tmpArrival.t1;
-                        // break;
+                         //break;
                     }
                 }
             }
@@ -278,8 +282,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         lastPoint = route.points[route.lastPointIndx];
         if (lastPoint != null) {
             if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
-                //&& getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON)
-            ) {
+                && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
+                    lastPoint.END_LAT, lastPoint.END_LON) < radius) {
                 lastPoint.status = STATUS.IN_PROGRESS;
             }
         }
@@ -333,8 +337,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         console.log(new Date(_data.server_time * 1000));
         for (var i = 0; i < _data.routes.length; i++) {
             route = _data.routes[i];
-            len = route.real_track.length - 1;
-            point = route.real_track[len].coords[route.real_track[len].coords.length - 1];
+            point = route.car_position;
             url = '/findtime2p/' + point.lat + '&' + point.lon + '&'
                 + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;
 
@@ -363,7 +366,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
                                     _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction - _route.points[j].arrival_time_ts);
 
-                                    if(_route.points[j].overdue_time > controlledWindow){
+                                    if (_route.points[j].overdue_time > controlledWindow) {
                                         if (_route.points[j].arrival_time_ts < now) {
                                             _route.points[j].status = STATUS.ARRIVED_LATE;
                                         } else {
