@@ -239,7 +239,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var route = data.routes[routeIndx],
             tmpPoint,
             tmpArrival,
-            radius = 0.5,
+            radius = 0.3,
             timeOffset = 3600,
             END_LAT,
             END_LON,
@@ -274,10 +274,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
         }
-
-        // ШТЕЛЬМАХ
-        // проверки статуса выполняется по расстоянию
-        // последнее опоздание не имеет индекса проблемности
 
         lastPoint = route.points[route.lastPointIndx];
         if (lastPoint != null) {
