@@ -319,12 +319,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
     function updateProblemIndex(route) {
         var point,
-            howSoonCoef = 0.0015,
             lateMinutesCoef = 1.0,
             volumeCoef = 0,
             weightCoef = 0,
             valueCoef = 0,
-            clientStatusCoef = 0,
             timeThreshold = 3600 * 6,
             timeMin = 0.25,
             timeCoef;
@@ -336,20 +334,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point.problem_index = parseInt(point.overdue_time * lateMinutesCoef);
                 point.problem_index += parseInt(point.WEIGHT) * weightCoef;
                 point.problem_index += parseInt(point.VOLUME) * volumeCoef;
-                //point.problem_index += parseInt(point.VOLUME) * valueCoef;
+                point.problem_index += parseInt(point.VOLUME) * valueCoef;
 
-                timeCoef = (timeThreshold - point.arrival_left_prediction / 1000) / timeThreshold;
+                timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
                 timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
-                //point.problem_index *= timeCoef;
+                point.problem_index = parseInt(point.problem_index * timeCoef);
 
-                //if (route.ID == '8') {
-                //    console.log(point.arrival_left_prediction, timeCoef);
-                //}
-
-                //console.log(point.arrival_left_prediction);
-
-                //point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
-                //point.problem_index = point.problem_index < 0 ? 0 : point.problem_index;
+                if (route.ID == '11') {
+                    console.log('b: ' + point.problem_index);
+                    console.log('a: ' + parseInt(point.problem_index * timeCoef));
+                }
             } else {
                 point.problem_index = 0;
             }
@@ -387,10 +381,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                 } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
                                     totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
-                                    console.log('now - real_arrival_time', now - _route.points[j].real_arrival_time,
-                                        'TASK_TIME', _route.points[j].TASK_TIME);
-                                    console.log('now', new Date(now * 1000),
-                                        'real_arrival_time', new Date(_route.points[j].real_arrival_time * 1000));
+                                    //console.log('now - real_arrival_time', now - _route.points[j].real_arrival_time,
+                                    //    'TASK_TIME', _route.points[j].TASK_TIME);
+                                    //console.log('now', new Date(now * 1000),
+                                    //    'real_arrival_time', new Date(_route.points[j].real_arrival_time * 1000));
                                 }
                             } else {
                                 totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
