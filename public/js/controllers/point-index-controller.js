@@ -89,8 +89,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             finishDate.setMinutes(timeFinish[1]);
 
             resWindows.push({
-                start: startDate.getTime() / 1000,
-                finish: finishDate.getTime() / 1000
+                start: parseInt(startDate.getTime() / 1000),
+                finish: parseInt(finishDate.getTime() / 1000)
             });
         }
 
@@ -254,7 +254,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var route = data.routes[routeIndx],
             tmpPoint,
             tmpArrival,
-            timeOffset = 3600,
+            timeOffset = 3600 * 1.5,
             END_LAT,
             END_LON,
             lat,
@@ -323,6 +323,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             volumeCoef = 0,
             weightCoef = 0,
             valueCoef = 0,
+            outClientWindowCoef = 2.0,
             timeThreshold = 3600 * 6,
             timeMin = 0.25,
             timeCoef;
@@ -334,16 +335,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point.problem_index = parseInt(point.overdue_time * lateMinutesCoef);
                 point.problem_index += parseInt(point.WEIGHT) * weightCoef;
                 point.problem_index += parseInt(point.VOLUME) * volumeCoef;
-                point.problem_index += parseInt(point.VOLUME) * valueCoef;
+                point.problem_index += parseInt(point.VALUE) * valueCoef;
+
+                if (point.windows != undefined) {
+                    for (var k = 0; k < point.windows.length; k++) {
+                        if (point.windows[k].finish > point.arrival_time_ts &&
+                            point.windows[k].start < point.arrival_time_ts &&
+                            point.arrival_time_ts + point.overdue_time > point.windows[k].finish) {
+                            point.problem_index += ((point.arrival_time_ts + point.overdue_time) - point.windows[k].finish)
+                                * outClientWindowCoef;
+                            break;
+                        }
+                    }
+                }
 
                 timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
                 timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
                 point.problem_index = parseInt(point.problem_index * timeCoef);
 
-                if (route.ID == '11') {
-                    console.log('b: ' + point.problem_index);
-                    console.log('a: ' + parseInt(point.problem_index * timeCoef));
-                }
+                //if (route.ID == '11') {
+                //    console.log('b: ' + point.problem_index);
+                //    console.log('a: ' + parseInt(point.problem_index * timeCoef));
+                //}
             } else {
                 point.problem_index = 0;
             }

@@ -207,7 +207,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             title += 'Время прибытия: ' + points[i].arrival_time_hhmm + '\n';
             title += 'Время отбытия: ' + points[i].end_time_hhmm + '\n';
             title += 'Время выполнения задачи: ' + mmhh(points[i].TASK_TIME) + '\n';
-            title += 'Временное окно: ' + points[i].availability_windows_str + '\n';
+            title += 'Временное окно: ' + points[i].AVAILABILITY_WINDOWS + '\n';
             title += 'Время простоя: ' + mmhh(points[i].DOWNTIME) + '\n';
             title += 'Расстояние: ' + points[i].DISTANCE + ' метра(ов)\n';
             title += 'Время на дорогу к точке: ' + mmhh(points[i].TRAVEL_TIME) + '\n';
