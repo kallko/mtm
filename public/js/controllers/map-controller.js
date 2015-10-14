@@ -365,8 +365,32 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     }
 
     function setMapCenter(lat, lon) {
+        //var centerPoint = map.getSize().divideBy(2),
+        //    targetPoint = centerPoint.subtract([overlayWidth, 0]),
+        //    targetLatLng = map.containerPointToLatLng(centerPoint);
+        //
+        //map.setView(targetLatLng);
+
+
         var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
-        map.setView(new L.LatLng(lat, lon), zoom);
+
+
+        //map.setView(new L.LatLng(lat, lon), zoom);
+
+
+        var tmp = map.project(new L.LatLng(lat, lon), zoom).subtract([-100, 0]),
+            target = map.unproject(tmp, zoom);
+        map.setView(target, zoom);
+        //console.log();
+        //var offset = map.getSize().divideBy(2);
+
+        //var point = map.containerPointToLatLng(new L.Point(100, 0));
+        //offset.x *= 0.2;
+
+        //map.setView(point);
+        //map.panBy(new L.Point(100, 0), {animate: false});
+        //console.log(offset);
+
         // map.setView(new L.LatLng(parseFloat(lat) - 0.003, parseFloat(lon) + 0.009), zoom);
     }
 }]);
