@@ -4,6 +4,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         pointContainer,
         pointTable,
         _data,
+        radius = 0.3,
+        controlledWindow = 600,
         STATUS = {
             FINISHED: 0,
             IN_PROGRESS: 1,
@@ -145,6 +147,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints[j].transport = data.routes[i].transport;
                 tmpPoints[j].arrival_time_hhmm = tmpPoints[j].ARRIVAL_TIME.substr(11, 8);
                 tmpPoints[j].arrival_time_ts = strToTstamp(tmpPoints[j].ARRIVAL_TIME);
+                tmpPoints[j].controlled_window = {
+                    start: tmpPoints[j].arrival_time_ts - controlledWindow,
+                    finish: tmpPoints[j].arrival_time_ts + controlledWindow
+                };
                 tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
                 tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
                 tmpPoints[j].row_id = rowId;
@@ -240,7 +246,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var route = data.routes[routeIndx],
             tmpPoint,
             tmpArrival,
-            radius = 0.3,
             timeOffset = 3600,
             END_LAT,
             END_LON,
@@ -332,7 +337,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             url,
             len,
             point,
-            controlledWindow = 600,
             tmpPred,
             now = _data.server_time; //Date.now();
 

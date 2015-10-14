@@ -73,6 +73,7 @@
                     <th class="task-id-col">ID заказа</th>
                     <th class="in-plan-col">В плане</th>
                     <th class="time-window-col">Временное окно</th>
+                    <th class="controlled-window-col">Контролируемое окно</th>
                     <th class="departure-time-col">Время отбытия</th>
                     <th class="address-col">Адрес</th>
                     <th class="client-name-col">Название</th>
@@ -121,6 +122,10 @@
                     <td>{{row.waypoint.ID}}</td>
                     <td>{{ row.in_plan ? 'ДА' : 'НЕТ' }}</td>
                     <td>{{row.availability_windows_str}}</td>
+                    <td>
+                        {{row.controlled_window.start * 1000 | date:'HH:mm:ss'}} -
+                        {{row.controlled_window.finish * 1000 | date:'HH:mm:ss'}}
+                    </td>
                     <td>{{row.end_time_hhmm}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
