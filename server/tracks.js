@@ -144,22 +144,45 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
             this.undef_t, this.undef_d,
             this.stop_s, this.stop_d, this.move_s, this.move_d);
 
-    for (var i = 0; i < data.sensors.length; i++) {
-        (function (ii) {
-            console.log('request for sensor #', ii, url + '&gid=' + data.sensors[ii].GID);
-            request({
-                url: url + '&gid=' + data.sensors[ii].GID,
-                json: true
-            }, function (error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    console.log('sensor loaded', ii);
-                    data.sensors[ii].real_track = body;
-                    data.sensors[ii].real_track_loaded = true;
-                    checkBeforeSend(data, callback);
-                }
-            });
-        })(i);
+    for (var i = 0; i < data.routes.length; i++) {
+        for (var j = 0; j < data.sensors.length; j++) {
+            if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
+                data.sensors[j].loading = true;
+                (function (jj) {
+                    console.log('request for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
+                    request({
+                        url: url + '&gid=' + data.sensors[jj].GID,
+                        json: true
+                    }, function (error, response, body) {
+                        if (!error && response.statusCode === 200) {
+                            console.log('sensor loaded', jj);
+                            data.sensors[jj].real_track = body;
+                            data.sensors[jj].real_track_loaded = true;
+                            checkBeforeSend(data, callback);
+                        }
+                    });
+                })(j);
+                break;
+            }
+        }
     }
+
+    //for (i = 0; i < data.sensors.length; i++) {
+    //    (function (ii) {
+    //        console.log('request for sensor #', ii, url + '&gid=' + data.sensors[ii].GID);
+    //        request({
+    //            url: url + '&gid=' + data.sensors[ii].GID,
+    //            json: true
+    //        }, function (error, response, body) {
+    //            if (!error && response.statusCode === 200) {
+    //                console.log('sensor loaded', ii);
+    //                data.sensors[ii].real_track = body;
+    //                data.sensors[ii].real_track_loaded = true;
+    //                checkBeforeSend(data, callback);
+    //            }
+    //        });
+    //    })(i);
+    //}
 };
 
 TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {

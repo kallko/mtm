@@ -121,7 +121,7 @@
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.waypoint.ID}}</td>
                     <td>{{ row.in_plan ? 'ДА' : 'НЕТ' }}</td>
-                    <td>{{row.availability_windows_str}}</td>
+                    <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
                         {{row.controlled_window.start * 1000 | date:'HH:mm:ss'}} -
                         {{row.controlled_window.finish * 1000 | date:'HH:mm:ss'}}

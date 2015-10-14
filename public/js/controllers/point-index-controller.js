@@ -4,7 +4,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         pointContainer,
         pointTable,
         _data,
-        radius = 0.3,
+        radius = 0.15,
         controlledWindow = 600,
         STATUS = {
             FINISHED: 0,
@@ -68,6 +68,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     function getTstampAvailabilityWindow(strWindows) {
+        if (strWindows == '') { return; }
+
         var windows = strWindows.split(' ; '),
             resWindows = [];
 
@@ -172,14 +174,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
 
-                for (k = 0; k < data.tasks.length; k++) {
-                    if (tmpPoints[j].TASK_NUMBER == data.tasks[k].NUMBER) {
-                        //tmpPoints[j].task = data.tasks[k];
-                        tmpPoints[j].availability_windows_str = data.tasks[k].AVAILABILITY_WINDOWS;
-                        tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].availability_windows_str);
-                        break;
-                    }
-                }
+                //for (k = 0; k < data.tasks.length; k++) {
+                //    if (tmpPoints[j].TASK_NUMBER == data.tasks[k].NUMBER) {
+                //        //tmpPoints[j].task = data.tasks[k];
+                //        tmpPoints[j].availability_windows_str = data.tasks[k].AVAILABILITY_WINDOWS;
+                //        tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].availability_windows_str);
+                //        break;
+                //    }
+                //}
+
+                //tmpPoints[j].availability_windows_str = data.tasks[k].AVAILABILITY_WINDOWS;
+                tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].AVAILABILITY_WINDOWS);
+
             }
 
             scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
@@ -206,7 +212,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     function randomInteger(min, max) {
-        var rand = min + Math.random() * (max - min)
+        var rand = min + Math.random() * (max - min);
         rand = Math.round(rand);
         return rand;
     }
@@ -313,7 +319,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var point,
             clientStatusCoef = 0,
             orderValueCoef = 0,
-            howSoonCoef = 0.025,
+            howSoonCoef = 0.0015,
             lateMinutesCoef = 2.0;
 
         for (var j = 0; j < route.points.length; j++) {
@@ -323,7 +329,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //if (route.ID == '3') {
                 //    console.log(point.problem_index, point.arrival_left_prediction, -(parseInt(point.arrival_left_prediction * howSoonCoef)));
                 //}
-                point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
+                //point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
                 point.problem_index = point.problem_index < 0 ? 0 : point.problem_index;
 
             } else {
@@ -335,7 +341,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     function predicationArrivalUpdate() {
         var route,
             url,
-            len,
             point,
             tmpPred,
             now = _data.server_time; //Date.now();

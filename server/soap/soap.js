@@ -39,9 +39,9 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         console.log('The data loaded from the cache.');
 
         var jsonData = JSON.parse(data);
-        jsonData.server_time = 1444304187 - 3600 * 3; // Date.now();
-        console.log(jsonData.server_time);
-
+        //jsonData.server_time = 1444304187 - 3600 * 3; // Date.now();
+        //console.log(jsonData.server_time);
+        //
         //tracksManager = new tracks('http://192.168.9.29:3001/',
         //    'http://sngtrans.com.ua:5201/',
         //    'admin', 'admin321');
@@ -58,7 +58,6 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 };
 
 function checkBeforeSend(data, callback) {
-    console.log('checkBeforeSend');
     if (data.sended || data.sensors == null) { // || !data.tasks_loaded) {
         return;
     }
@@ -71,7 +70,7 @@ function checkBeforeSend(data, callback) {
     }
 
     for (i = 0; i < data.sensors.length; i++) {
-        if (!data.sensors[i].real_track_loaded) {
+        if (data.sensors[i].loading && !data.sensors[i].real_track_loaded) {
             return;
         }
     }
@@ -83,6 +82,7 @@ function checkBeforeSend(data, callback) {
 
     for (i = 0; i < data.sensors.length; i++) {
         delete data.sensors[i].real_track_loaded;
+        delete data.sensors[i].loading;
     }
 
     data.sended = true;
@@ -170,7 +170,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
         data.routes.push(tmpRoute);
     }
 
-    for (var i = 0; i < data.routes.length; i++) {
+    for (i = 0; i < data.routes.length; i++) {
         tracksManager.getRouterData(data, i, checkBeforeSend, callback);
     }
 
@@ -212,9 +212,9 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                //tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
-                //checkBeforeSend(data, callback);
+                checkBeforeSend(data, callback);
 
                 //data.tasks = [];
                 //
