@@ -4,7 +4,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         pointContainer,
         pointTable,
         _data,
-        radius = 0.15,
+        radius = 0.25,
         controlledWindow = 600,
         STATUS = {
             FINISHED: 0,
@@ -68,7 +68,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
     }
 
     function getTstampAvailabilityWindow(strWindows) {
-        if (strWindows == '') { return; }
+        if (strWindows == '') {
+            return;
+        }
 
         var windows = strWindows.split(' ; '),
             resWindows = [];
@@ -317,21 +319,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
     function updateProblemIndex(route) {
         var point,
-            clientStatusCoef = 0,
-            orderValueCoef = 0,
             howSoonCoef = 0.0015,
-            lateMinutesCoef = 2.0;
+            lateMinutesCoef = 1.0,
+            volumeCoef = 0,
+            weightCoef = 0,
+            valueCoef = 0,
+            clientStatusCoef = 0,
+            timeThreshold = 3600 * 6,
+            timeMin = 0.25,
+            timeCoef;
 
         for (var j = 0; j < route.points.length; j++) {
             point = route.points[j];
+
             if (point.overdue_time > 0) {
                 point.problem_index = parseInt(point.overdue_time * lateMinutesCoef);
-                //if (route.ID == '3') {
-                //    console.log(point.problem_index, point.arrival_left_prediction, -(parseInt(point.arrival_left_prediction * howSoonCoef)));
-                //}
-                //point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
-                point.problem_index = point.problem_index < 0 ? 0 : point.problem_index;
+                point.problem_index += parseInt(point.WEIGHT) * weightCoef;
+                point.problem_index += parseInt(point.VOLUME) * volumeCoef;
+                //point.problem_index += parseInt(point.VOLUME) * valueCoef;
 
+                timeCoef = (timeThreshold - point.arrival_left_prediction / 1000) / timeThreshold;
+                timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
+                //point.problem_index *= timeCoef;
+
+                //if (route.ID == '8') {
+                //    console.log(point.arrival_left_prediction, timeCoef);
+                //}
+
+                //console.log(point.arrival_left_prediction);
+
+                //point.problem_index -= parseInt(point.arrival_left_prediction * howSoonCoef);
+                //point.problem_index = point.problem_index < 0 ? 0 : point.problem_index;
             } else {
                 point.problem_index = 0;
             }
@@ -369,17 +387,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                 } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
                                     totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
+                                    console.log('now - real_arrival_time', now - _route.points[j].real_arrival_time,
+                                        'TASK_TIME', _route.points[j].TASK_TIME);
+                                    console.log('now', new Date(now * 1000),
+                                        'real_arrival_time', new Date(_route.points[j].real_arrival_time * 1000));
                                 }
                             } else {
                                 totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
                                 tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime;
                                 _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
+                                //console.log('now', now, 'nextPointTime', nextPointTime, 'totalWorkTime', totalWorkTime,
+                                //    'totalTravelTime', totalTravelTime);
 
                                 _route.points[j].in_plan = true;
-                                if( _route.points[j].arrival_prediction == null) {
+                                if (_route.points[j].arrival_prediction == null) {
                                     _route.points[j].arrival_prediction = tmpPred;
-                                } else  {
-                                    if (tmpPred + 300 < _route.points[j].arrival_prediction){
+                                } else {
+                                    if (tmpPred + 300 < _route.points[j].arrival_prediction) {
                                         _route.points[j].in_plan = false;
                                     }
 
