@@ -640,23 +640,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return;
         }
 
-        console.log('drawRoute', scope.draw_mode, indx);
         scope.$emit('clearMap');
         switch (scope.draw_mode) {
             case scope.draw_modes[0].value: // комбинированный
-                console.log(scope.draw_modes[0].name);
                 scope.$emit('drawCombinedTrack', _data.routes[indx]);
                 break;
             case scope.draw_modes[1].value: // фактический
-                console.log(scope.draw_modes[1].name);
                 scope.$emit('drawRealTrack', _data.routes[indx]);
                 break;
             case scope.draw_modes[2].value: // плановый
-                console.log(scope.draw_modes[2].name);
                 scope.$emit('drawPlannedTrack', _data.routes[indx]);
                 break;
             case scope.draw_modes[3].value: // плановый + фактический
-                console.log(scope.draw_modes[3].name);
                 scope.$emit('drawRealAndPlannedTrack', _data.routes[indx]);
                 break;
         }

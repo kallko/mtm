@@ -55,7 +55,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             carPos = lastCoords[lastCoords.length - 1],
                 url = '/findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].END_LAT
                     + '&' + route.points[i + 1].END_LON;
-            console.log(url);
             http.get(url).
                 success(function (data) {
                     var geometry = getLatLonArr(data),
@@ -299,6 +298,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         position = holderEl.position();
         position.width = holderEl.width();
         position.height = holderEl.height();
+        position.offset = holderEl.offset();
         inside = true;
         $('.lm_goldenlayout').css('pointer-events', 'none');
 
@@ -365,32 +365,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     }
 
     function setMapCenter(lat, lon) {
-        //var centerPoint = map.getSize().divideBy(2),
-        //    targetPoint = centerPoint.subtract([overlayWidth, 0]),
-        //    targetLatLng = map.containerPointToLatLng(centerPoint);
-        //
-        //map.setView(targetLatLng);
-
-
-        var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
-
-
-        //map.setView(new L.LatLng(lat, lon), zoom);
-
-
-        var tmp = map.project(new L.LatLng(lat, lon), zoom).subtract([-100, 0]),
+        var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
+            offset = map.getSize(),
+            tmp = map.project(new L.LatLng(lat, lon), zoom).subtract(
+                [
+                    position.width / 2 - offset.x / 2 + position.offset.left,
+                    position.height / 2 - offset.y / 2 + position.offset.top
+                ]),
             target = map.unproject(tmp, zoom);
         map.setView(target, zoom);
-        //console.log();
-        //var offset = map.getSize().divideBy(2);
-
-        //var point = map.containerPointToLatLng(new L.Point(100, 0));
-        //offset.x *= 0.2;
-
-        //map.setView(point);
-        //map.panBy(new L.Point(100, 0), {animate: false});
-        //console.log(offset);
-
-        // map.setView(new L.LatLng(parseFloat(lat) - 0.003, parseFloat(lon) + 0.009), zoom);
     }
 }]);
