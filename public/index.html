@@ -72,7 +72,8 @@
                     <th class="point-id-col">ID точки</th>
                     <th class="task-id-col">ID заказа</th>
                     <th class="in-plan-col">В плане</th>
-                    <th class="time-window-col">Временное окно</th>
+                    <th class="time-window-col">Заказанное окно</th>
+                    <th class="promised-window-col">Обещанное окно</th>
                     <th class="controlled-window-col">Контролируемое окно</th>
                     <th class="departure-time-col">Время отбытия</th>
                     <th class="address-col">Адрес</th>
@@ -122,6 +123,10 @@
                     <td>{{row.waypoint.ID}}</td>
                     <td>{{ row.in_plan ? 'ДА' : 'НЕТ' }}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
+                    <td>
+                        {{row.promised_window.start * 1000 | date:'HH:mm:ss'}} -
+                        {{row.promised_window.finish * 1000 | date:'HH:mm:ss'}}
+                    </td>
                     <td>
                         {{row.controlled_window.start * 1000 | date:'HH:mm:ss'}} -
                         {{row.controlled_window.finish * 1000 | date:'HH:mm:ss'}}

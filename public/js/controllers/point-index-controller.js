@@ -6,13 +6,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         _data,
         radius = 0.25,
         controlledWindow = 600,
+        promisedWindow = 3600,
         STATUS = {
             FINISHED: 0,
             IN_PROGRESS: 1,
             ARRIVED_LATE: 2,
             DELAY: 3,
-            FOCUS_L1: 4,
-            FOCUS_L2: 5,
+            //FOCUS_L1: 4,
+            //FOCUS_L2: 5,
             SCHEDULED: 6,
             CANCELED: 7
         };
@@ -31,8 +32,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             {name: 'выполняется', value: 1, class: 'performed-status'},
             {name: 'опоздал', value: 2, class: 'arrived-late-status'},
             {name: 'опаздывает', value: 3, class: 'delay-status'},
-            {name: 'под контролем', value: 4, class: 'controlled-status'},
-            {name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
+            //{name: 'под контролем', value: 4, class: 'controlled-status'},
+            //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
             {name: 'запланирован', value: 6, class: 'scheduled-status'},
             {name: 'отменен', value: 7, class: 'canceled-status'}
         ];
@@ -103,7 +104,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var tmpPoints,
             rowId = 0,
             driverId = 0,
-            len = 0;
+            len = 0,
+            tPoint;
         scope.rowCollection = [];
 
         for (var i = 0; i < data.sensors.length; i++) {
@@ -136,8 +138,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             tmpPoints = data.routes[i].points;
             for (j = 0; j < tmpPoints.length; j++) {
-                tmpPoints[j].driver = data.routes[i].driver;
-                tmpPoints[j].in_plan = true;
+                tPoint = tmpPoints[j];
+                tPoint.driver = data.routes[i].driver;
+                tPoint.in_plan = true;
                 if (data.routes[i].driver._id == null) {
                     data.routes[i].driver._id = driverId;
                     scope.filters.drivers.push({
@@ -147,46 +150,69 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     driverId++;
                 }
 
-                tmpPoints[j].driver_indx = data.routes[i].driver._id;
-                tmpPoints[j].transport = data.routes[i].transport;
-                tmpPoints[j].arrival_time_hhmm = tmpPoints[j].ARRIVAL_TIME.substr(11, 8);
-                tmpPoints[j].arrival_time_ts = strToTstamp(tmpPoints[j].ARRIVAL_TIME);
-                tmpPoints[j].controlled_window = {
-                    start: tmpPoints[j].arrival_time_ts - controlledWindow,
-                    finish: tmpPoints[j].arrival_time_ts + controlledWindow
+                tPoint.driver_indx = data.routes[i].driver._id;
+                tPoint.transport = data.routes[i].transport;
+                tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
+                tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
+                tPoint.controlled_window = {
+                    start: tPoint.arrival_time_ts - controlledWindow,
+                    finish: tPoint.arrival_time_ts + controlledWindow
                 };
-                tmpPoints[j].end_time_hhmm = tmpPoints[j].END_TIME.substr(11, 8);
-                tmpPoints[j].end_time_ts = strToTstamp(tmpPoints[j].END_TIME);
-                tmpPoints[j].row_id = rowId;
-                tmpPoints[j].arrival_prediction = 0;
-                tmpPoints[j].arrival_left_prediction = 0;
+
+                tPoint.end_time_hhmm = tPoint.END_TIME.substr(11, 8);
+                tPoint.end_time_ts = strToTstamp(tPoint.END_TIME);
+                tPoint.row_id = rowId;
+                tPoint.arrival_prediction = 0;
+                tPoint.arrival_left_prediction = 0;
                 if (j == 0) {
-                    tmpPoints[j].status = STATUS.FINISHED;
+                    tPoint.status = STATUS.FINISHED;
                 } else {
-                    tmpPoints[j].status = STATUS.SCHEDULED;
+                    tPoint.status = STATUS.SCHEDULED;
                 }
 
-                tmpPoints[j].route_id = i;
+                tPoint.route_id = i;
                 rowId++;
 
                 for (var k = 0; k < data.waypoints.length; k++) {
-                    if (tmpPoints[j].START_WAYPOINT == data.waypoints[k].ID) {
-                        tmpPoints[j].waypoint = data.waypoints[k];
+                    if (tPoint.START_WAYPOINT == data.waypoints[k].ID) {
+                        tPoint.waypoint = data.waypoints[k];
                         break;
                     }
                 }
 
-                //for (k = 0; k < data.tasks.length; k++) {
-                //    if (tmpPoints[j].TASK_NUMBER == data.tasks[k].NUMBER) {
-                //        //tmpPoints[j].task = data.tasks[k];
-                //        tmpPoints[j].availability_windows_str = data.tasks[k].AVAILABILITY_WINDOWS;
-                //        tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].availability_windows_str);
-                //        break;
-                //    }
-                //}
+                // 1444885230
+                // 1444896030
 
-                //tmpPoints[j].availability_windows_str = data.tasks[k].AVAILABILITY_WINDOWS;
-                tmpPoints[j].windows = getTstampAvailabilityWindow(tmpPoints[j].AVAILABILITY_WINDOWS);
+                // 1444798800
+
+                tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS);
+                if(tPoint.windows != undefined) {
+                    for (k = 0; k < tPoint.windows.length; k++) {
+                        if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                            tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                            if(tPoint.arrival_time_ts + promisedWindow / 2 > tPoint.windows[k].finish) {
+                                tPoint.promised_window = {
+                                    start: tPoint.windows[k].finish - promisedWindow,
+                                    finish: tPoint.windows[k].finish
+                                };
+                            } else if (tPoint.arrival_time_ts - promisedWindow / 2 < tPoint.windows[k].start) {
+                                tPoint.promised_window = {
+                                    start: tPoint.windows[k].start,
+                                    finish: tPoint.windows[k].start + promisedWindow
+                                };
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                if (tPoint.promised_window == undefined) {
+                    tPoint.promised_window = {
+                        start: tPoint.arrival_time_ts - promisedWindow / 2,
+                        finish: tPoint.arrival_time_ts + promisedWindow / 2
+                    };
+                }
 
             }
 
@@ -211,25 +237,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         console.log('Finish linking ...');
         setColResizable();
         prepareFixedHeader();
-    }
-
-    function randomInteger(min, max) {
-        var rand = min + Math.random() * (max - min);
-        rand = Math.round(rand);
-        return rand;
-    }
-
-    function lineDistance(point1, point2) {
-        var xs = 0;
-        var ys = 0;
-
-        xs = point2.lat - point1.lat;
-        xs = xs * xs;
-
-        ys = point2.lon - point1.lon;
-        ys = ys * ys;
-
-        return Math.sqrt(xs + ys);
     }
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
