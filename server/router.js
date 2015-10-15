@@ -18,8 +18,12 @@ router.route('/login')
 
 router.route('/dailydata')
     .get(function (req, res) {
-        // var soapManager = new soap('hd', 'QJQB8uxW');
-        var soapManager = new soap('k00056.0', 'As123456');
+        // !!! REMOVE !!!
+        if (req.session.login == null) {
+             req.session.login = 'k00056.0';
+        }
+
+        var soapManager = new soap(req.session.login);
         soapManager.getAllDailyData(dataReadyCallback);
 
         function dataReadyCallback(data) {

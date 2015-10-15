@@ -5,21 +5,24 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = true,
+    loadFromCache = false,
     tracks = require('../tracks'),
 
     counter = 0,
     starTime,
     totalPoints = 0;
 
-function SoapManager(login, password) {
+function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.login = login;
-    this.password = password;
+    this.admin_login = 'soap_admin';
+    this.password = '$o@p';
+    //this.admin_login = 'samogot';
+    //this.password = 'samogot123';
 }
 
 SoapManager.prototype.getFullUrl = function () {
-    return 'https://' + this.login + ':' + this.password + this.url;
+    return 'https://' + this.admin_login + ':' + this.password + this.url;
 };
 
 SoapManager.prototype.getAllDailyData = function (callback) {
@@ -96,8 +99,11 @@ SoapManager.prototype.getDailyPlan = function (callback) {
 
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
-        client.setSecurity(new soap.BasicAuthSecurity(me.login, me.password));
-        client.run({'input_data': _xml.dailyPlanXML()}, function (err, result) {
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        console.log(me.admin_login);
+        console.log(me.login);
+        console.log(_xml.dailyPlanXML());
+        client.runAsUser({'input_data': _xml.dailyPlanXML(), 'user': me.login}, function (err, result) {
             if (!err) {
                 console.log('DONE getDailyPlan');
                 console.log(result.return);
@@ -122,7 +128,7 @@ SoapManager.prototype.getDailyPlan = function (callback) {
 
 SoapManager.prototype.getItinerary = function (client, id, version, callback) {
     var me = this;
-    client.run({'input_data': _xml.itineraryXML(id, version)}, function (err, result) {
+    client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
         if (!err) {
             console.log('DONE getItinerary for ');
             console.log(_xml.itineraryXML(id, version));
@@ -181,7 +187,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
     var me = this;
     log.l("getAdditionalData");
     log.l(_xml.additionalDataXML(data.ID) + '\n');
-    client.run({'input_data': _xml.additionalDataXML(data.ID)}, function (err, result) {
+    client.runAsUser({'input_data': _xml.additionalDataXML(data.ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
 
@@ -239,7 +245,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
 };
 
 SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, callback) {
-    client.run({'input_data': _xml.taskXML(taskNumber, taskDate)}, function (err, result) {
+    client.runAsUser({'input_data': _xml.taskXML(taskNumber, taskDate), 'user': me.login}, function (err, result) {
         if (!err) {
 
             if (counter == 0) {

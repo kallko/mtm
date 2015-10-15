@@ -11,7 +11,7 @@ function XMLConstructor() {
         , instruction: {
             begin: '<INSTRUCTION>'
             , daily_plan: '<INSTRUCTION NAME="GET_DAILY_PLANS" >'
-            // , itinerary:    '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
+             //, itinerary:    '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
             , itinerary: '<INSTRUCTION NAME="GET_ITINERARY" >'
             , transports: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
             , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'
