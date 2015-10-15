@@ -28,14 +28,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters = {};
         scope.filters.statuses = [
             {name: 'все', value: -1, class: 'all-status'},
-            {name: 'доставленно', value: 0, class: 'delivered-status'},
-            {name: 'выполняется', value: 1, class: 'performed-status'},
-            {name: 'опоздал', value: 2, class: 'arrived-late-status'},
-            {name: 'опаздывает', value: 3, class: 'delay-status'},
+            {name: 'доставленно', value: STATUS.FINISHED, class: 'delivered-status'},
+            {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
+            {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
+            {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
             //{name: 'под контролем', value: 4, class: 'controlled-status'},
             //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
-            {name: 'запланирован', value: 6, class: 'scheduled-status'},
-            {name: 'отменен', value: 7, class: 'canceled-status'}
+            {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
+            {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
         ];
         scope.filters.status = scope.filters.statuses[0].value;
         scope.filters.drivers = [{name: 'все', value: -1}];

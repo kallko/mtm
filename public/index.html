@@ -97,25 +97,25 @@
                     </td>
                     <td id="{{'status-td-' + row.row_id}}">{{getTextStatus(row.status, row.row_id)}}</td>
                     <td>{{row.NUMBER}}</td>
-                    <td>{{row.arrival_time_hhmm}}</td>
+                    <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{ row.arrival_prediction * 1000 | date:'yyyy HH:mm:ss' }}
+                            {{ row.arrival_prediction * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.real_arrival_time > 0">
-                            {{ row.real_arrival_time * 1000 | date:'HH:mm:ss' }}
+                            {{ row.real_arrival_time * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{ row.arrival_left_prediction * 1000 | date:'HH:mm:ss' : 'UTC' }}
+                            {{ row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.overdue_time > 0">
-                            {{row.overdue_time * 1000 | date:'HH:mm:ss' : 'UTC'}}
+                            {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
                     <td>{{row.problem_index}}</td>
@@ -131,7 +131,7 @@
                         {{row.controlled_window.start * 1000 | date:'HH:mm'}} -
                         {{row.controlled_window.finish * 1000 | date:'HH:mm'}}
                     </td>
-                    <td>{{row.end_time_hhmm}}</td>
+                    <td>{{row.end_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
