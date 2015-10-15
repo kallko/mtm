@@ -1,5 +1,4 @@
 var express = require('express'),
-    app = express(),
     router = express.Router(),
     soap = require('./soap/soap'),
     tracks = require('./tracks'),
@@ -9,6 +8,12 @@ var express = require('express'),
 router.route('/')
     .get(function (req, res) {
         res.status(200);
+    });
+
+router.route('/login')
+    .get(function (req, res) {
+        req.session.login = req.query.curuser;
+        res.sendFile('index.html', {root: './public/'});
     });
 
 router.route('/dailydata')
@@ -75,6 +80,12 @@ router.route('/log')
         db.logMessage(1, req.body.message, function(err, result) {
             res.status(200).json({error: err, result: result});
         });
+    });
+
+router.route('/test')
+    .get(function (req, res) {
+        console.log(req.session.login);
+        res.status(200).json({sessionLogin: req.session.login});
     });
 
 module.exports = router;

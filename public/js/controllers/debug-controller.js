@@ -55,7 +55,12 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
     });
 
     scope.test = function () {
-        saveLogToDB('TEST! Message to log. Message to log. Message to log.');
+        //saveLogToDB('TEST! Message to log. Message to log. Message to log.');
+        http.get('test').
+            success(function (data) {
+                console.log(data);
+            });
+
     };
 
     function saveLogToDB(message) {
