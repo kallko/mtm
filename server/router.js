@@ -20,7 +20,7 @@ router.route('/dailydata')
     .get(function (req, res) {
         // !!! REMOVE !!!
         if (req.session.login == null) {
-             req.session.login = 'k00056.0';
+             // req.session.login = 'k00056.0';
         }
 
         var soapManager = new soap(req.session.login);

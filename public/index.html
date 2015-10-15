@@ -100,7 +100,7 @@
                     <td>{{row.arrival_time_hhmm}}</td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{ row.arrival_prediction * 1000 | date:'HH:mm:ss' }}
+                            {{ row.arrival_prediction * 1000 | date:'yyyy HH:mm:ss' }}
                         </span>
                     </td>
                     <td>

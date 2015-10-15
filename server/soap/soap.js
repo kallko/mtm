@@ -5,7 +5,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = false,
+    loadFromCache = true,
     tracks = require('../tracks'),
 
     counter = 0,
@@ -145,7 +145,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                     tracksManager;
                 data.sended = false;
                 data.date = new Date();
-                data.server_time = Date.now();
+                data.server_time = Date.now() / 1000;
                 tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
                 me.getAdditionalData(client, data, tracksManager, callback);
 

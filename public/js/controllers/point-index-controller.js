@@ -180,11 +180,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
 
-                // 1444885230
-                // 1444896030
-
-                // 1444798800
-
                 tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS);
                 if(tPoint.windows != undefined) {
                     for (k = 0; k < tPoint.windows.length; k++) {
