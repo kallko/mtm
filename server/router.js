@@ -21,15 +21,15 @@ router.route('/dailydata')
     .get(function (req, res) {
         // TODO: !!! REMOVE !!!
         if (req.session.login == null) {
-             req.session.login = 'k00056.0';
+            req.session.login = 'k00056.0';
         }
 
         var now = Date.now(),
             day = 86400000,
             today12am = now - (now % day);
-        console.log(new Date(today12am));
 
-        if (req.session.lastUpdate != null && req.session.lastUpdate == today12am) {
+        if (req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
+            req.query.force == null) {
             console.log('=== loaded from session === send data to client ===');
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {

@@ -22,7 +22,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         setListeners();
         init();
-        loadDailyData();
+        loadDailyData(false);
         setDynamicDataUpdate(intervalSeconds);
 
         function init() {
@@ -77,11 +77,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.forceLoad = function () {
             console.log('forceLoad');
-            loadDailyData();
+            loadDailyData(true);
         };
 
-        function loadDailyData() {
-            http.get('/dailydata', {})
+        function loadDailyData(force) {
+            var url = '/dailydata';
+            if (force) {
+                url += '?force=true';
+            }
+
+            http.get(url, {})
                 .success(function (data) {
                     console.log('loadDailyData success');
                     linkDataParts(data);
