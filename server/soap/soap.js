@@ -100,7 +100,6 @@ SoapManager.prototype.getDailyPlan = function (callback) {
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        console.log(me.admin_login);
         console.log(me.login);
         console.log(_xml.dailyPlanXML());
         client.runAsUser({'input_data': _xml.dailyPlanXML(), 'user': me.login}, function (err, result) {
@@ -130,16 +129,16 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
     var me = this;
     client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
         if (!err) {
-            console.log('DONE getItinerary for ');
-            console.log(_xml.itineraryXML(id, version));
-            console.log();
+            //console.log('DONE getItinerary for ');
+            //console.log(_xml.itineraryXML(id, version));
+            //console.log();
 
             parseXML(result.return, function (err, res) {
 
                 if (res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
                     res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
-                log.toFLog("log.js", res);
+                log.toFLog("log_" + id + ".js", res);
 
                 var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$,
                     tracksManager;
@@ -176,9 +175,9 @@ SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
         data.routes.push(tmpRoute);
     }
 
-    for (i = 0; i < data.routes.length; i++) {
-        tracksManager.getRouterData(data, i, checkBeforeSend, callback);
-    }
+    //for (i = 0; i < data.routes.length; i++) {
+    //    tracksManager.getRouterData(data, i, checkBeforeSend, callback);
+    //}
 
     return tracksManager;
 };
@@ -186,7 +185,8 @@ SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
 SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, callback) {
     var me = this;
     log.l("getAdditionalData");
-    log.l(_xml.additionalDataXML(data.ID) + '\n');
+    log.l("=== a_data; data.ID = " + data.ID + " === \n");
+    log.l(_xml.additionalDataXML(data.ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data.ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
@@ -218,7 +218,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                //tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
                 checkBeforeSend(data, callback);
 
@@ -240,6 +240,10 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                 //}
             });
 
+        } else {
+            //if (data.ID == '317') {
+                log.l(err.body);
+            //}
         }
     });
 };
