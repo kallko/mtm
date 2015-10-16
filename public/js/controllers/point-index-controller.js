@@ -5,7 +5,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointContainer,
             pointTable,
             _data,
-            intervalSeconds = 60,
+            intervalSeconds = 180,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -23,7 +23,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setListeners();
         init();
         loadDailyData();
-        setRefreshInterval(intervalSeconds);
+        setDynamicDataUpdate(intervalSeconds);
 
         function init() {
             scope.rowCollection = [];
@@ -55,15 +55,30 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.selectedRow = -1;
         }
 
-        function setRefreshInterval(seconds) {
-            //console.log('setRefreshInterval');
+        function setDynamicDataUpdate(seconds) {
             interval(function () {
-                console.log('setRefreshInterval()');
-                if(_data == null) return;
+                console.log('setDynamicDataUpdate()');
+                if (_data == null) return;
                 _data.server_time += seconds;
                 updateData();
             }, seconds * 1000);
         }
+
+        function setRealTrackUpdate(seconds) {
+            interval(function () {
+                console.log('setRealTrackUpdate()');
+                if (_data == null) return;
+
+                // TODO: UPDATE LAST PART OF REAL TRACKS
+
+                updateData();
+            }, seconds * 1000);
+        }
+
+        scope.forceLoad = function () {
+            console.log('forceLoad');
+            loadDailyData();
+        };
 
         function loadDailyData() {
             http.get('/dailydata', {})

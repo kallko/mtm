@@ -3,7 +3,8 @@ var express = require('express'),
     soap = require('./soap/soap'),
     tracks = require('./tracks'),
     log = new (require('./logging'))('./logs'),
-    db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary');
+    db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
+    cashedDataArr = [];
 
 router.route('/')
     .get(function (req, res) {
@@ -18,17 +19,29 @@ router.route('/login')
 
 router.route('/dailydata')
     .get(function (req, res) {
-        // !!! REMOVE !!!
+        // TODO: !!! REMOVE !!!
         if (req.session.login == null) {
-             // req.session.login = 'k00056.0';
+             req.session.login = 'k00056.0';
         }
 
-        var soapManager = new soap(req.session.login);
-        soapManager.getAllDailyData(dataReadyCallback);
+        var now = Date.now(),
+            day = 86400000,
+            today12am = now - (now % day);
+        console.log(new Date(today12am));
 
-        function dataReadyCallback(data) {
-            console.log('=== dataReadyCallback === send data to client ===');
-            res.status(200).json(data);
+        if (req.session.lastUpdate != null && req.session.lastUpdate == today12am) {
+            console.log('=== loaded from session === send data to client ===');
+            res.status(200).json(cashedDataArr[req.session.login]);
+        } else {
+            var soapManager = new soap(req.session.login);
+            soapManager.getAllDailyData(dataReadyCallback);
+
+            function dataReadyCallback(data) {
+                console.log('=== dataReadyCallback === send data to client ===');
+                req.session.lastUpdate = today12am;
+                cashedDataArr[req.session.login] = data;
+                res.status(200).json(data);
+            }
         }
     });
 
@@ -81,7 +94,7 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
 router.route('/log')
     .post(function (req, res) {
         //db.testConnection();
-        db.logMessage(1, req.body.message, function(err, result) {
+        db.logMessage(1, req.body.message, function (err, result) {
             res.status(200).json({error: err, result: result});
         });
     });

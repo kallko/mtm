@@ -5,7 +5,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = true,
+    loadFromCache = false,
     tracks = require('../tracks'),
 
     counter = 0,
@@ -138,7 +138,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                 if (res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
                     res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
-                log.toFLog("log_" + id + ".js", res);
+                log.toFLog("log_" + parseInt(id) + ".js", res);
 
                 var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$,
                     tracksManager;
@@ -175,9 +175,9 @@ SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
         data.routes.push(tmpRoute);
     }
 
-    //for (i = 0; i < data.routes.length; i++) {
-    //    tracksManager.getRouterData(data, i, checkBeforeSend, callback);
-    //}
+    for (i = 0; i < data.routes.length; i++) {
+        tracksManager.getRouterData(data, i, checkBeforeSend, callback);
+    }
 
     return tracksManager;
 };
@@ -218,7 +218,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                //tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                tracksManager.getRealTracks(data, checkBeforeSend, callback);
 
                 checkBeforeSend(data, callback);
 
