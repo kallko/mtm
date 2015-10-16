@@ -3,7 +3,7 @@ module.exports = TracksManager;
 var request = require("request"),
     fs = require('fs'),
     log = new (require('./logging'))('./logs'),
-    loadFromCache = false;
+    loadFromCache = true;
 
 function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.aggregatorUrl = aggregatorUrl;
@@ -45,6 +45,50 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
             }
         });
     }
+};
+
+TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) {
+    var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
+            this.stop_d, this.move_s, this.move_d),
+        counter = 0,
+        reqCounter = 0,
+        result = [];
+
+    for (var i = 0; i < data.routes.length; i++) {
+        for (var j = 0; j < data.sensors.length; j++) {
+            if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
+                counter++;
+                (function (jj) {
+                    console.log(url + '&gid=' + data.sensors[jj].GID);
+                    request({
+                        url: url + '&gid=' + data.sensors[jj].GID,
+                        json: true
+                    }, function (error, response, body) {
+                        if (!error && response.statusCode === 200) {
+                            result.push({
+                                'gid': data.sensors[jj].GID,
+                                'data': body
+                            });
+                            reqCounter++;
+                            if (counter == reqCounter) {
+                                callback(result);
+                                console.log('callback getRealTrackParts');
+                            }
+                        }
+                    });
+                })(j);
+            }
+        }
+    }
+
+    //request({
+    //    url: url,
+    //    json: true
+    //}, function (error, response, body) {
+    //    if (!error && response.statusCode === 200) {
+    //        callback(body);
+    //    }
+    //});
 };
 
 TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,

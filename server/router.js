@@ -4,7 +4,11 @@ var express = require('express'),
     tracks = require('./tracks'),
     log = new (require('./logging'))('./logs'),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
-    cashedDataArr = [];
+    cashedDataArr = [],
+    tracksManager = new tracks('http://192.168.9.29:3001/',
+        'http://sngtrans.com.ua:5201/',
+        'admin', 'admin321');
+;
 
 router.route('/')
     .get(function (req, res) {
@@ -49,9 +53,6 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
     .get(function (req, res) {
 
         //console.log('=== load tracks ===');
-        var tracksManager = new tracks('http://192.168.9.29:3001/',
-            'http://sngtrans.com.ua:5201/',
-            'admin', 'admin321');
         tracksManager.getTrack(
             req.params.gid,
             req.params.from,
@@ -66,13 +67,31 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
             });
     });
 
+router.route('/trackparts/:start/:end')
+    .get(function (req, res) {
+        console.log('trackparts', req.session.login);
+        if (req.session.login == undefined) {
+            res.status(401).json({status: 'Unauthorized'});
+            return;
+        }
+
+        var first = true;
+        tracksManager.getRealTrackParts(cashedDataArr[req.session.login], req.params.start, req.params.end,
+            function (data) {
+                if(!first) return;
+
+                console.log('getRealTrackParts DONE');
+                first = false;
+                res.status(200).json(data);
+            });
+    });
+
+// http://localhost:9020/trackparts/1445002662/1445001662
+// http://localhost:9020/login?curuser=k00056.0
+
 router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
         console.log('=== router.route findpath ===');
-        var tracksManager = new tracks('http://192.168.9.29:3001/',
-            'http://sngtrans.com.ua:5201/',
-            'admin', 'admin321');
-
         tracksManager.findPath(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
             function (data) {
                 res.status(200).json(data);
@@ -81,10 +100,6 @@ router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
 
 router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
-        var tracksManager = new tracks('http://192.168.9.29:3001/',
-            'http://sngtrans.com.ua:5201/',
-            'admin', 'admin321');
-
         tracksManager.findTime(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
             function (data) {
                 res.status(200).json(data);
