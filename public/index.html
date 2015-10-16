@@ -49,8 +49,12 @@
                 </select>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
 
-                <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">только
+                <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">
                     проблемные
+                </button>
+
+                <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
+                    15 минут
                 </button>
             </div>
         </div>
@@ -60,7 +64,6 @@
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
                 <tr class="titles-tr">
-                    <th class="point-checkbox-td"></th>
                     <th class="status-col" st-sort="status">Статус</th>
                     <th class="number-col">Номер</th>
                     <th class="plan-arrival-time-col">Время прибытия</th>
@@ -89,12 +92,8 @@
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
                     ng-right-click="sortByDriver(row.driver_indx)"
-                    ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row)"
+                    ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
                     on-finish-render="ngRepeatFinished">
-                    <td class="point-checkbox-td">
-                        <input type="checkbox" class="point-checkbox" id="{{'chk-' + row.row_id}}"
-                               ng-click="checkPoint()"/>
-                    </td>
                     <td id="{{'status-td-' + row.row_id}}">{{getTextStatus(row.status, row.row_id)}}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>

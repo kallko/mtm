@@ -42,7 +42,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         console.log('The data loaded from the cache.');
 
         var jsonData = JSON.parse(data);
-        //jsonData.server_time = Date.now() / 1000; // - 3600 * 3; // Date.now();
+        //jsonData.server_time = parseInt(Date.now() / 1000); // - 3600 * 3; // Date.now();
         //console.log(jsonData.server_time);
         //
         //tracksManager = new tracks('http://192.168.9.29:3001/',
@@ -145,7 +145,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                     tracksManager;
                 data.sended = false;
                 data.date = new Date();
-                data.server_time = Date.now() / 1000;
+                data.server_time = parseInt(Date.now() / 1000);
                 tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
                 me.getAdditionalData(client, data, tracksManager, callback);
 

@@ -2,6 +2,8 @@ angular.module('MTMonitor', ['smart-table']);
 
 var myLayout = new GoldenLayout({
         settings: {
+            showPopoutIcon: false,
+            showCloseIcon: false,
             hasHeaders: true
         },
         content: [{
@@ -21,7 +23,7 @@ var myLayout = new GoldenLayout({
                 }]
             }, {
                 type: 'component',
-                width: 48,
+                width: 60,
                 componentName: 'template',
                 title: 'Точки маршрута',
                 componentState: {templateId: 'template-point-table'}

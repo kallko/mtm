@@ -41,6 +41,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.filters.drivers = [{name: 'все', value: -1}];
         scope.filters.driver = scope.filters.drivers[0].value;
         scope.filters.problem_index = -1;
+        scope.filters.promised_15m = -1;
         scope.draw_modes = [
             {name: 'комбинированный трек', value: 0},
             {name: 'фактический трек', value: 1},
@@ -181,11 +182,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS);
-                if(tPoint.windows != undefined) {
+                if (tPoint.windows != undefined) {
                     for (k = 0; k < tPoint.windows.length; k++) {
                         if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
                             tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
-                            if(tPoint.arrival_time_ts + promisedWindow / 2 > tPoint.windows[k].finish) {
+                            if (tPoint.arrival_time_ts + promisedWindow / 2 > tPoint.windows[k].finish) {
                                 tPoint.promised_window = {
                                     start: tPoint.windows[k].finish - promisedWindow,
                                     finish: tPoint.windows[k].finish
@@ -219,7 +220,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         _data = data;
         predicationArrivalUpdate();
-        //updateProblemIndex();
+        promised15MUpdate();
         scope.$emit('saveForDebug', {
             'rowCollection': scope.rowCollection,
             'data': data
@@ -232,6 +233,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         console.log('Finish linking ...');
         setColResizable();
         prepareFixedHeader();
+    }
+
+    function promised15MUpdate() {
+        var now = _data.server_time;
+        for (var i = 0; i < _data.routes.length; i++) {
+            for (var j = 0; j < _data.routes[i].points.length; j++) {
+                if ((_data.routes[i].points[j].status == STATUS.SCHEDULED ||
+                    _data.routes[i].points[j].status == STATUS.ARRIVED_LATE ||
+                    _data.routes[i].points[j].status == STATUS.DELAY ||
+                    _data.routes[i].points[j].status == STATUS.IN_PROGRESS) &&
+                    _data.routes[i].points[j].promised_window.finish - 900 < now &&
+                    _data.routes[i].points[j].promised_window.finish > now) {
+                    _data.routes[i].points[j].promised_15m = true;
+                } else {
+                    _data.routes[i].points[j].promised_15m = false;
+                }
+            }
+        }
     }
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -548,7 +567,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             'margin-left': -x - 1,
             clip: 'rect(0, ' + (width + x) + 'px, auto, ' + x + 'px)'
         });
-
     }
 
     function resizeHead($table) {
@@ -612,6 +630,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
     scope.problemFilter = function (row) {
         return (scope.filters.problem_index == -1 || row.problem_index > 0);
+    };
+
+    scope.promise15MFilter = function (row) {
+        return (scope.filters.promised_15m == -1 || row.promised_15m);
     };
 
     scope.sortByDriver = function (indx) {
@@ -679,5 +701,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.problem_index = -1;
         }
 
-    }
+    };
+
+    scope.togglePromised15MPoints = function () {
+        $('#promised-15m-btn').toggleClass('btn-default').toggleClass('btn-success');
+        if (scope.filters.promised_15m == -1) {
+            scope.filters.promised_15m = 1;
+        } else {
+            scope.filters.promised_15m = -1;
+        }
+    };
 }]);

@@ -178,8 +178,8 @@ template {
     min-width: 26px;
 }
 
-#problem-index-btn{
-    margin-left: 10px;
+#problem-index-btn, #promised-15m-btn{
+    margin-left: 5px;
 }
 
 .delivered-status,
