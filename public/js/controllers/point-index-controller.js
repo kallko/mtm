@@ -5,7 +5,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointContainer,
             pointTable,
             _data,
-            intervalSeconds = 180,
+            dataUpdateInterval = 180,
+            trackUpdateInterval = 60,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -23,7 +24,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setListeners();
         init();
         loadDailyData(false);
-        setDynamicDataUpdate(intervalSeconds);
+        // setDynamicDataUpdate(dataUpdateInterval);
+        // setRealTrackUpdate(trackUpdateInterval);
 
         function init() {
             scope.rowCollection = [];
@@ -69,9 +71,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('setRealTrackUpdate()');
                 if (_data == null) return;
 
-                // TODO: UPDATE LAST PART OF REAL TRACKS
+                if (_data.trackUpdateTime == undefined) {
+                    _data.trackUpdateTime = _data.server_time;
+                }
 
-                updateData();
+                var _now = Date.now(),
+                    url = '/trackparts/' + _data.trackUpdateTime + '/' + _now;
+
+
+                http.get(url)
+                    .success(function(data) {
+                        console.log('trackparts');
+                        console.log(data);
+                        _data.trackUpdateTime = _now;
+                    });
+
+                // updateData();
             }, seconds * 1000);
         }
 
@@ -155,9 +170,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                         data.routes[i].transport = data.transports[j];
                         data.routes[i].real_track = data.transports[j].real_track;
-                        len = data.routes[i].real_track.length - 1;
-                        data.routes[i].car_position = data.routes[i].real_track[len].
-                            coords[data.routes[i].real_track[len].coords.length - 1];
+
+                        if(data.transports[j].real_track != undefined) {
+                            len = data.routes[i].real_track.length - 1;
+                            data.routes[i].car_position = data.routes[i].real_track[len].
+                                coords[data.routes[i].real_track[len].coords.length - 1];
+                        }
                         break;
                     }
                 }
@@ -332,56 +350,58 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 route.lastPointIndx = 0;
-                for (j = 0; j < route.real_track.length; j++) {
-                    if (route.real_track[j].state == "ARRIVAL") {
-                        tmpArrival = route.real_track[j];
-                        lastIndex = 0;
-                        for (var k = 0; k < route.points.length; k++) {
-                            tmpPoint = route.points[k];
-                            END_LAT = parseFloat(tmpPoint.END_LAT);
-                            END_LON = parseFloat(tmpPoint.END_LON);
-                            lat = parseFloat(tmpArrival.lat);
-                            lon = parseFloat(tmpArrival.lon);
+                if(route.real_track != undefined) {
+                    for (j = 0; j < route.real_track.length; j++) {
+                        if (route.real_track[j].state == "ARRIVAL") {
+                            tmpArrival = route.real_track[j];
+                            lastIndex = 0;
+                            for (var k = 0; k < route.points.length; k++) {
+                                tmpPoint = route.points[k];
+                                END_LAT = parseFloat(tmpPoint.END_LAT);
+                                END_LON = parseFloat(tmpPoint.END_LON);
+                                lat = parseFloat(tmpArrival.lat);
+                                lon = parseFloat(tmpArrival.lon);
 
-                            if (tmpPoint.status != STATUS.FINISHED
-                                && tmpPoint.status != STATUS.CANCELED
-                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                                && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
-                                && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
-                                tmpPoint.status = STATUS.FINISHED;
-                                route.lastPointIndx = k;
-                                tmpPoint.real_arrival_time = tmpArrival.t1;
+                                if (tmpPoint.status != STATUS.FINISHED
+                                    && tmpPoint.status != STATUS.CANCELED
+                                    && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                                    && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
+                                    && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
+                                    tmpPoint.status = STATUS.FINISHED;
+                                    route.lastPointIndx = k;
+                                    tmpPoint.real_arrival_time = tmpArrival.t1;
 
-                                lastIndex = tmpPoint.NUMBER;
+                                    lastIndex = tmpPoint.NUMBER;
 
-                                //break;
+                                    //break;
+                                }
                             }
                         }
                     }
-                }
 
-                lastPoint = route.points[route.lastPointIndx];
-                if (lastPoint != null) {
-                    if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
-                        && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
-                            lastPoint.END_LAT, lastPoint.END_LON) < radius) {
-                        lastPoint.status = STATUS.IN_PROGRESS;
+                    lastPoint = route.points[route.lastPointIndx];
+                    if (lastPoint != null) {
+                        if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
+                            && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
+                                lastPoint.END_LAT, lastPoint.END_LON) < radius) {
+                            lastPoint.status = STATUS.IN_PROGRESS;
+                        }
                     }
-                }
 
-                //for (j = 0; j < route.points.length; j++) {
-                //    tmpPoint = route.points[j];
-                //    if (tmpPoint.status != STATUS.FINISHED &&
-                //        tmpPoint.status != STATUS.CANCELED) {
-                //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
-                //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
-                //                tmpPoint.status = STATUS.FOCUS_L1;
-                //            } else {
-                //                tmpPoint.status = STATUS.FOCUS_L2;
-                //            }
-                //        }
-                //    }
-                //}
+                    //for (j = 0; j < route.points.length; j++) {
+                    //    tmpPoint = route.points[j];
+                    //    if (tmpPoint.status != STATUS.FINISHED &&
+                    //        tmpPoint.status != STATUS.CANCELED) {
+                    //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+                    //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+                    //                tmpPoint.status = STATUS.FOCUS_L1;
+                    //            } else {
+                    //                tmpPoint.status = STATUS.FOCUS_L2;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                }
             }
         }
 

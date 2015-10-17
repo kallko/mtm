@@ -3,7 +3,7 @@ module.exports = TracksManager;
 var request = require("request"),
     fs = require('fs'),
     log = new (require('./logging'))('./logs'),
-    loadFromCache = true;
+    loadFromCache = false;
 
 function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.aggregatorUrl = aggregatorUrl;
@@ -59,7 +59,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 counter++;
                 (function (jj) {
-                    console.log(url + '&gid=' + data.sensors[jj].GID);
+                    // console.log(url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true

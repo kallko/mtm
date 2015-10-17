@@ -5,7 +5,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = true,
+    loadFromCache = false,
     tracks = require('../tracks'),
 
     counter = 0,
@@ -158,7 +158,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
 
 SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
     var tmpRoute,
-        tracksManager = new tracks('http://192.168.9.29:3001/',
+        tracksManager = new tracks('http://62.205.137.118:9001/',
             'http://sngtrans.com.ua:5201/',
             'admin', 'admin321');
 

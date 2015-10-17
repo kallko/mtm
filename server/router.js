@@ -5,7 +5,9 @@ var express = require('express'),
     log = new (require('./logging'))('./logs'),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     cashedDataArr = [],
-    tracksManager = new tracks('http://192.168.9.29:3001/',
+    tracksManager = new tracks(
+        'http://62.205.137.118:9001/',
+        //'http://192.168.9.29:3001/',
         'http://sngtrans.com.ua:5201/',
         'admin', 'admin321');
 ;
@@ -33,7 +35,7 @@ router.route('/dailydata')
             today12am = now - (now % day);
 
         if (req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
-            req.query.force == null) {
+            req.query.force == null && req.session.login != null) {
             console.log('=== loaded from session === send data to client ===');
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
