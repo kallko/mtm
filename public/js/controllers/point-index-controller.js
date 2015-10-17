@@ -24,8 +24,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setListeners();
         init();
         loadDailyData(false);
-        // setDynamicDataUpdate(dataUpdateInterval);
-        // setRealTrackUpdate(trackUpdateInterval);
+        setDynamicDataUpdate(dataUpdateInterval);
+        setRealTrackUpdate(trackUpdateInterval);
 
         function init() {
             scope.rowCollection = [];
@@ -75,14 +75,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     _data.trackUpdateTime = _data.server_time;
                 }
 
-                var _now = Date.now(),
+                var _now = Date.now() / 1000,
                     url = '/trackparts/' + _data.trackUpdateTime + '/' + _now;
 
 
                 http.get(url)
-                    .success(function(data) {
+                    .success(function(trackParts) {
                         console.log('trackparts');
-                        console.log(data);
+                        console.log(new Date(_data.trackUpdateTime * 1000));
+                        console.log(new Date(_now * 1000));
+                        console.log(trackParts);  
+
+                        for (var i = 0; i < trackParts.length; i++) {
+                            for (var j = 0; j < _data.routes.length; j++) {
+                                if (_data.routes[j].transport.gid == trackParts[i].gid) {
+                                    if (trackParts[i].data.length > 0) {
+                                        trackParts[i].data[0].state = 'MOVE';
+                                        _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+
+                                        var len = _data.routes[j].real_track.length - 1;
+                                        _data.routes[j].car_position = _data.routes[j].real_track[len].
+                                            coords[_data.routes[j].real_track[len].coords.length - 1];
+                                    }
+                                    break;
+                                }
+                            };
+                        }
                         _data.trackUpdateTime = _now;
                     });
 
