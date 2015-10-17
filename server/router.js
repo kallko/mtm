@@ -35,7 +35,8 @@ router.route('/dailydata')
             today12am = now - (now % day);
 
         if (req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
-            req.query.force == null && req.session.login != null) {
+            req.query.force == null && req.session.login != null
+             && cashedDataArr[req.session.login] != null) {
             console.log('=== loaded from session === send data to client ===');
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {

@@ -350,58 +350,57 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 route.lastPointIndx = 0;
-                if(route.real_track != undefined) {
-                    for (j = 0; j < route.real_track.length; j++) {
-                        if (route.real_track[j].state == "ARRIVAL") {
-                            tmpArrival = route.real_track[j];
-                            lastIndex = 0;
-                            for (var k = 0; k < route.points.length; k++) {
-                                tmpPoint = route.points[k];
-                                END_LAT = parseFloat(tmpPoint.END_LAT);
-                                END_LON = parseFloat(tmpPoint.END_LON);
-                                lat = parseFloat(tmpArrival.lat);
-                                lon = parseFloat(tmpArrival.lon);
+                if(route.real_track == undefined) { continue; }
+                for (j = 0; j < route.real_track.length; j++) {
+                    if (route.real_track[j].state == "ARRIVAL") {
+                        tmpArrival = route.real_track[j];
+                        lastIndex = 0;
+                        for (var k = 0; k < route.points.length; k++) {
+                            tmpPoint = route.points[k];
+                            END_LAT = parseFloat(tmpPoint.END_LAT);
+                            END_LON = parseFloat(tmpPoint.END_LON);
+                            lat = parseFloat(tmpArrival.lat);
+                            lon = parseFloat(tmpArrival.lon);
 
-                                if (tmpPoint.status != STATUS.FINISHED
-                                    && tmpPoint.status != STATUS.CANCELED
-                                    && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                                    && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
-                                    && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
-                                    tmpPoint.status = STATUS.FINISHED;
-                                    route.lastPointIndx = k;
-                                    tmpPoint.real_arrival_time = tmpArrival.t1;
+                            if (tmpPoint.status != STATUS.FINISHED
+                                && tmpPoint.status != STATUS.CANCELED
+                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                                && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
+                                && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
+                                tmpPoint.status = STATUS.FINISHED;
+                                route.lastPointIndx = k;
+                                tmpPoint.real_arrival_time = tmpArrival.t1;
 
-                                    lastIndex = tmpPoint.NUMBER;
+                                lastIndex = tmpPoint.NUMBER;
 
-                                    //break;
-                                }
+                                //break;
                             }
                         }
                     }
-
-                    lastPoint = route.points[route.lastPointIndx];
-                    if (lastPoint != null) {
-                        if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
-                            && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
-                                lastPoint.END_LAT, lastPoint.END_LON) < radius) {
-                            lastPoint.status = STATUS.IN_PROGRESS;
-                        }
-                    }
-
-                    //for (j = 0; j < route.points.length; j++) {
-                    //    tmpPoint = route.points[j];
-                    //    if (tmpPoint.status != STATUS.FINISHED &&
-                    //        tmpPoint.status != STATUS.CANCELED) {
-                    //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
-                    //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
-                    //                tmpPoint.status = STATUS.FOCUS_L1;
-                    //            } else {
-                    //                tmpPoint.status = STATUS.FOCUS_L2;
-                    //            }
-                    //        }
-                    //    }
-                    //}
                 }
+
+                lastPoint = route.points[route.lastPointIndx];
+                if (lastPoint != null) {
+                    if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
+                        && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
+                            lastPoint.END_LAT, lastPoint.END_LON) < radius) {
+                        lastPoint.status = STATUS.IN_PROGRESS;
+                    }
+                }
+
+                //for (j = 0; j < route.points.length; j++) {
+                //    tmpPoint = route.points[j];
+                //    if (tmpPoint.status != STATUS.FINISHED &&
+                //        tmpPoint.status != STATUS.CANCELED) {
+                //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+                //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+                //                tmpPoint.status = STATUS.FOCUS_L1;
+                //            } else {
+                //                tmpPoint.status = STATUS.FOCUS_L2;
+                //            }
+                //        }
+                //    }
+                //}
             }
         }
 
@@ -461,6 +460,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(new Date(_data.server_time * 1000));
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
+                if(route.real_track == undefined) { continue; }
                 point = route.car_position;
                 url = '/findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;

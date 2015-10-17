@@ -50,7 +50,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if (route.points[i].status == 0) break;
         }
 
-        if (i != route.points.length - 1) {
+        if (route.real_track != undefined && i != route.points.length - 1) {
             var lastCoords = route.real_track[route.real_track.length - 1].coords;
             carPos = lastCoords[lastCoords.length - 1],
                 url = '/findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].END_LAT
