@@ -5,7 +5,7 @@ var soap = require('soap'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = false,
+    loadFromCache = true,
     tracks = require('../tracks'),
 
     counter = 0,
@@ -13,7 +13,7 @@ var soap = require('soap'),
     totalPoints = 0;
 
     // k00056.0
-    // 12101968
+    // 12101968 123
 
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";

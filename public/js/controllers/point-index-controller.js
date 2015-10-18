@@ -24,8 +24,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setListeners();
         init();
         loadDailyData(false);
-        setDynamicDataUpdate(dataUpdateInterval);
-        setRealTrackUpdate(trackUpdateInterval);
+        // setDynamicDataUpdate(dataUpdateInterval);
+        // setRealTrackUpdate(trackUpdateInterval);
 
         function init() {
             scope.rowCollection = [];
@@ -346,6 +346,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoint,
                 tmpArrival,
                 timeOffset = 3600 * 1.5,
+                buttonTimeOffset = 3600,
                 END_LAT,
                 END_LON,
                 lat,
@@ -368,26 +369,88 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 route.lastPointIndx = 0;
-                if(route.real_track == undefined) { continue; }
-                for (j = 0; j < route.real_track.length; j++) {
-                    if (route.real_track[j].state == "ARRIVAL") {
-                        tmpArrival = route.real_track[j];
-                        lastIndex = 0;
+                if(route.real_track != undefined) { 
+                    for (j = 0; j < route.real_track.length; j++) {
+                        if (route.real_track[j].state == "ARRIVAL") {
+                            tmpArrival = route.real_track[j];
+                            lastIndex = 0;
+                            for (var k = 0; k < route.points.length; k++) {
+                                tmpPoint = route.points[k];
+                                END_LAT = parseFloat(tmpPoint.END_LAT);
+                                END_LON = parseFloat(tmpPoint.END_LON);
+                                lat = parseFloat(tmpArrival.lat);
+                                lon = parseFloat(tmpArrival.lon);
+
+                                if (tmpPoint.status != STATUS.FINISHED
+                                    && tmpPoint.status != STATUS.CANCELED
+                                    && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                                    && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
+                                    && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
+                                    tmpPoint.status = STATUS.FINISHED;
+                                    route.lastPointIndx = k;
+                                    tmpPoint.real_arrival_time = tmpArrival.t1;
+
+                                    lastIndex = tmpPoint.NUMBER;
+
+                                    //break;
+                                }
+                            }
+                        }
+                    }
+
+                    lastPoint = route.points[route.lastPointIndx];
+                    if (lastPoint != null) {
+                        if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
+                            && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
+                                lastPoint.END_LAT, lastPoint.END_LON) < radius) {
+                            lastPoint.status = STATUS.IN_PROGRESS;
+                        }
+                    }
+
+                    //for (j = 0; j < route.points.length; j++) {
+                    //    tmpPoint = route.points[j];
+                    //    if (tmpPoint.status != STATUS.FINISHED &&
+                    //        tmpPoint.status != STATUS.CANCELED) {
+                    //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
+                    //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
+                    //                tmpPoint.status = STATUS.FOCUS_L1;
+                    //            } else {
+                    //                tmpPoint.status = STATUS.FOCUS_L2;
+                    //            }
+                    //        }
+                    //    }
+                    //}}
+                }
+
+                // route.mobile_buttons = [
+                //     {
+                //          'number' : 777,
+                //          'time': '10.10.2015 12:00:00',
+                //          'canceled': false,
+                //          'cancel_reason': 'cancel cancel_reason',
+                //          'lat': 50,
+                //          'lon': 50,
+                //          'gps_time': '10.10.2015 12:00:00'
+                //     }
+                // ];
+
+                if (route.mobile_buttons != undefined) {
+                    for (var j = 0; j < route.mobile_buttons.length; j++) {
                         for (var k = 0; k < route.points.length; k++) {
                             tmpPoint = route.points[k];
                             END_LAT = parseFloat(tmpPoint.END_LAT);
                             END_LON = parseFloat(tmpPoint.END_LON);
-                            lat = parseFloat(tmpArrival.lat);
-                            lon = parseFloat(tmpArrival.lon);
+                            lat = route.mobile_buttons[j].lat;
+                            lon = route.mobile_buttons[j].lon;
 
                             if (tmpPoint.status != STATUS.FINISHED
                                 && tmpPoint.status != STATUS.CANCELED
                                 && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                                && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
-                                && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
+                                && tmpPoint.arrival_time_ts + buttonTimeOffset > route.mobile_buttons[j].time
+                                && tmpPoint.arrival_time_ts - buttonTimeOffset < route.mobile_buttons[j].time) {
                                 tmpPoint.status = STATUS.FINISHED;
-                                route.lastPointIndx = k;
-                                tmpPoint.real_arrival_time = tmpArrival.t1;
+                                route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                                tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
 
                                 lastIndex = tmpPoint.NUMBER;
 
@@ -396,29 +459,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
                 }
-
-                lastPoint = route.points[route.lastPointIndx];
-                if (lastPoint != null) {
-                    if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
-                        && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
-                            lastPoint.END_LAT, lastPoint.END_LON) < radius) {
-                        lastPoint.status = STATUS.IN_PROGRESS;
-                    }
-                }
-
-                //for (j = 0; j < route.points.length; j++) {
-                //    tmpPoint = route.points[j];
-                //    if (tmpPoint.status != STATUS.FINISHED &&
-                //        tmpPoint.status != STATUS.CANCELED) {
-                //        if (now + focus_l2_time > tmpPoint.arrival_time_ts) {
-                //            if (now + focus_l1_time > tmpPoint.arrival_time_ts) {
-                //                tmpPoint.status = STATUS.FOCUS_L1;
-                //            } else {
-                //                tmpPoint.status = STATUS.FOCUS_L2;
-                //            }
-                //        }
-                //    }
-                //}
             }
         }
 
