@@ -438,10 +438,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //}}
                 }
 
-                route.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
-                route.mobile_buttons = route.mobile_buttons.Vi.substr(1, route.mobile_buttons.Vi.length - 2);
-                console.log(JSON.parse(route.mobile_buttons));
-
                 //if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
                 //    for (j = 0; j < route.mobile_buttons.length; j++) {
                 //        for (k = 0; k < route.points.length; k++) {
@@ -470,8 +466,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //}
             }
 
-
-
+            _data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+            _data.mobile_buttons = JSON.parse(_data.mobile_buttons.Vi.substr(1, _data.mobile_buttons.Vi.length - 2));
         }
 
         function updateProblemIndex(route) {
