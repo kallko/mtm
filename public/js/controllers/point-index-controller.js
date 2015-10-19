@@ -126,7 +126,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     console.log('loadDailyData success');
                     linkDataParts(data);
-                    loadTrackParts();
+                    //loadTrackParts();
                 });
         }
 

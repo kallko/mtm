@@ -61,7 +61,7 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
         //        console.log(data);
         //    });
 
-        console.log(parentForm._call('getDriversActions', "1509261/3"));
+        console.log(parentForm._call('getDriversActions', ["1509261/3"]));
 
     };
 
