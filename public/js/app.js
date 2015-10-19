@@ -1,35 +1,41 @@
 angular.module('MTMonitor', ['smart-table']);
 
 var myLayout = new GoldenLayout({
-        settings: {
-            showPopoutIcon: false,
-            showCloseIcon: false,
-            hasHeaders: true
-        },
-        content: [{
-            type: 'row',
-            content: [{
+    settings: {
+        showPopoutIcon: false,
+        showCloseIcon: false,
+        hasHeaders: true
+    },
+    content: [{
+        type: 'row',
+        content: [
+            {
                 type: 'column',
-                content: [{
-                    type: 'component',
-                    componentName: 'template',
-                    componentState: {templateId: 'transparent-map-window'}
-                }, {
-                    type: 'component',
-                    height: 28,
-                    title: 'Параметры дебага',
-                    componentName: 'template',
-                    componentState: {templateId: 'template2'}
-                }]
-            }, {
+                content: [
+                    {
+                        type: 'component',
+                        componentName: 'template',
+                        componentState: {templateId: 'transparent-map-window'}
+                    }
+                    //,
+                    //{
+                    //    type: 'component',
+                    //    height: 28,
+                    //    title: 'Параметры дебага',
+                    //    componentName: 'template',
+                    //    componentState: {templateId: 'template2'}
+                    //}
+                ]
+            },
+            {
                 type: 'component',
                 width: 60,
                 componentName: 'template',
                 title: 'Точки маршрута',
                 componentState: {templateId: 'template-point-table'}
             }]
-        }]
-    });
+    }]
+});
 
 myLayout.registerComponent('template', function (container, state) {
     var templateHtml = $('#' + state.templateId).html();

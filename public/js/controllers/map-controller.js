@@ -158,14 +158,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     polyline.addTo(map);
                 } else if (i + 1 == track.length) {
                     tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
-                    polyline = new L.Polyline(track[i].coords, {
-                        color: 'red',
-                        weight: 3,
-                        opacity: 0.8,
-                        smoothFactor: 1
-                    });
-
-                    polyline.addTo(map);
+                    //polyline = new L.Polyline(track[i].coords, {
+                    //    color: 'red',
+                    //    weight: 3,
+                    //    opacity: 0.8,
+                    //    smoothFactor: 1
+                    //});
+                    //
+                    //polyline.addTo(map);
                 }
 
                 tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],

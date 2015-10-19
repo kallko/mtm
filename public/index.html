@@ -5,6 +5,14 @@
 <link rel="stylesheet" href="./css/columns.css"/>
 <link rel="stylesheet" href="./css/bootstrap.css"/>
 
+<script type="text/javascript">
+    var parentForm;
+    function initialize(thisForm, thisRegion, strRectSel) {
+        parentForm = thisForm;
+        console.log('initialize complete');
+    }
+</script>
+
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="/js/vendor/jquery-ui.min.js"></script>
 <script src="/js/vendor/angular.js"></script>
@@ -196,11 +204,5 @@
     </div>
 </template>
 
-<script type="text/javascript">
-    var parentForm;
-    function initialize(thisForm, thisRegion, strRectSel) {
-                parentForm = thisForm;
-                console.log('initialize complete');
-    }    
-</script>
+
 

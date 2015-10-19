@@ -6,8 +6,8 @@ var express = require('express'),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     cashedDataArr = [],
     tracksManager = new tracks(
-        //'http://62.205.137.118:9001/',
-        'http://192.168.9.29:9001/',
+        'http://62.205.137.118:9001/',
+        //'http://192.168.9.29:9001/',
         'http://sngtrans.com.ua:5201/',
         'admin', 'admin321');
 ;
