@@ -2,8 +2,9 @@ module.exports = TracksManager;
 
 var request = require("request"),
     fs = require('fs'),
+    config = require('./config'),
     log = new (require('./logging'))('./logs'),
-    loadFromCache = false;
+    loadFromCache = config.cashing.tracks;
 
 function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.aggregatorUrl = aggregatorUrl;

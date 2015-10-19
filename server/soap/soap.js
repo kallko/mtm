@@ -1,11 +1,12 @@
 module.exports = SoapManager;
 var soap = require('soap'),
     fs = require('fs'),
+    config = require('../config'),
     xmlConstructor = require('./xmlConstructor'),
     _xml = new xmlConstructor(),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
-    loadFromCache = false,
+    loadFromCache = config.cashing.soap,
     tracks = require('../tracks'),
 
     counter = 0,
@@ -162,10 +163,10 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
 SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
     var tmpRoute,
         tracksManager = new tracks(
-            'http://62.205.137.118:9001/',
-            //'http://192.168.9.29:9001/',
-            'http://sngtrans.com.ua:5201/',
-            'admin', 'admin321');
+            config.aggregator.url,
+            config.router.url,
+            config.aggregator.login,
+            config.aggregator.password);
 
     data.routes = [];
     for (var i = 0; i < routes.length; i++) {
