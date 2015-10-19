@@ -118,7 +118,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         function loadDailyData(force) {
-            var url = '/dailydata';
+            var url = './dailydata';
             if (force) {
                 url += '?force=true';
             }

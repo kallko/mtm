@@ -5,8 +5,8 @@ var config = {
     },
 
     aggregator: {
-        //url: 'http://62.205.137.118:9001/', // outer
-        url: 'http://192.168.9.29:9001/', // local
+        url: 'http://62.205.137.118:9001/', // outer
+        //url: 'http://192.168.9.29:9001/', // local
         login: 'admin',
         password: 'admin321'
     },
