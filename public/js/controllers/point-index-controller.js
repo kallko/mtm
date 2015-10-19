@@ -477,9 +477,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            route.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
-
-            var res = route.mobile_button.Vi;
+            var _test = parentForm._call('getDriversActions', ["3684/5"]);
+            var res = _test.Vi;
             res = res.substr(1, res.length - 2);
             console.log(res);
             console.log(JSON.parse(res));
