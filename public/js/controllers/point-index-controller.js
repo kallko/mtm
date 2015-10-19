@@ -19,7 +19,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //FOCUS_L2: 5,
                 SCHEDULED: 6,
                 CANCELED: 7
-            };
+            },
+
+            aggregatorError = "invalid parameter 'gid'. ";
 
         setListeners();
         init();
@@ -91,7 +93,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log(trackParts);
 
                     for (var i = 0; i < trackParts.length; i++) {
+                        if (trackParts[i].data == undefined ||
+                            trackParts[i].data.length == 0 ||
+                            trackParts[i].data == aggregatorError) {
+                            continue;
+                        }
+
                         for (var j = 0; j < _data.routes.length; j++) {
+
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
                                     trackParts[i].data[0].state = 'MOVE';
@@ -195,7 +204,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         if (data.transports[j].real_track != undefined &&
                             data.routes[i].real_track.length > 0 &&
-                            data.routes[i].real_track != "invalid parameter 'gid'. ") {
+                            data.routes[i].real_track != aggregatorError) {
                             len = data.routes[i].real_track.length - 1;
                             //console.log('NOT NULL', data.routes[i].real_track.length);
                             data.routes[i].car_position = data.routes[i].real_track[len].
@@ -527,7 +536,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route = _data.routes[i];
                 if (route.real_track == undefined ||
                     route.real_track.length == 0 ||
-                    route.real_track == "invalid parameter 'gid'. ") {
+                    route.real_track == aggregatorError) {
                     route.real_track = undefined;
                     continue;
                 }
