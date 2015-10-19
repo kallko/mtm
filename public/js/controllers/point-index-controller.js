@@ -438,17 +438,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //}}
                 }
 
-                // route.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+                route.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+                route.mobile_buttons = route.mobile_buttons.Vi.substr(1, route.mobile_buttons.Vi.length - 2);
+                console.log(JSON.parse(route.mobile_buttons));
 
-
-                //route.mobile_buttons = {
-                //    Vi: JSON.parse("[{'number':1563413,'time':'25.09.2015 17:51:54','canceled':false,'cancel_reason':'','lat':0,'lat':0,'gps_time':''}]")
-                //};
-
-                //console.log(JSON.parse('[{"number":"1563413","time":"25.09.2015 17:51:54","canceled":false,"cancel_reason":"","lat":0,"lon":0,"gps_time":""},' +
-                //    '{"number":"1564249","time":"25.09.2015 04:43:39","canceled":false,"cancel_reason":"","lat":50,177414,"lon":30,663767,"gps_time":"24.09.2015 12:32:00"}]'));
-
-                //if (route.mobile_buttons != undefined) {
+                //if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
                 //    for (j = 0; j < route.mobile_buttons.length; j++) {
                 //        for (k = 0; k < route.points.length; k++) {
                 //            tmpPoint = route.points[k];
@@ -477,11 +471,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            var _test = parentForm._call('getDriversActions', ["3684/5"]);
-            var res = _test.Vi;
-            res = res.substr(1, res.length - 2);
-            console.log(res);
-            console.log(JSON.parse(res));
+
         }
 
         function updateProblemIndex(route) {
