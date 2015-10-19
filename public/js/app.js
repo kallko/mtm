@@ -17,14 +17,14 @@ var myLayout = new GoldenLayout({
                         componentName: 'template',
                         componentState: {templateId: 'transparent-map-window'}
                     }
-                    //,
-                    //{
-                    //    type: 'component',
-                    //    height: 28,
-                    //    title: 'Параметры дебага',
-                    //    componentName: 'template',
-                    //    componentState: {templateId: 'template2'}
-                    //}
+                    ,
+                    {
+                        type: 'component',
+                        height: 28,
+                        title: 'Параметры дебага',
+                        componentName: 'template',
+                        componentState: {templateId: 'template2'}
+                    }
                 ]
             },
             {

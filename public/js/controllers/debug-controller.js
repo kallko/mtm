@@ -56,10 +56,12 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
 
     scope.test = function () {
         //saveLogToDB('TEST! Message to log. Message to log. Message to log.');
-        http.get('test').
-            success(function (data) {
-                console.log(data);
-            });
+        //http.get('test').
+        //    success(function (data) {
+        //        console.log(data);
+        //    });
+
+        console.log(parentForm._call('getDriversActions', ["1509261/3"]));
 
     };
 

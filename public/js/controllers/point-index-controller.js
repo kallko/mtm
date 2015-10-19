@@ -76,7 +76,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 var _now = Date.now() / 1000,
-                    url = '/trackparts/' + _data.trackUpdateTime + '/' + _now;
+                    url = './trackparts/' + _data.trackUpdateTime + '/' + _now;
 
                 http.get(url)
                     .success(function (trackParts) {
@@ -534,7 +534,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 point = route.car_position;
                 //console.log({car: route.car_position, real_track: route.real_track});
-                url = '/findtime2p/' + point.lat + '&' + point.lon + '&'
+                url = './findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;
 
                 (function (_route) {
