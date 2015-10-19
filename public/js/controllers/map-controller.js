@@ -210,9 +210,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             title += 'Время простоя: ' + mmhh(points[i].DOWNTIME) + '\n';
             title += 'Расстояние: ' + points[i].DISTANCE + ' метра(ов)\n';
             title += 'Время на дорогу к точке: ' + mmhh(points[i].TRAVEL_TIME) + '\n';
-            title += 'Адрес: ' + points[i].waypoint.ADDRESS + '\n';
-            title += 'Клиент: ' + points[i].waypoint.NAME + '\n';
-            title += 'Комментарий: ' + points[i].waypoint.COMMENT + '\n';
+            if (points[i].waypoint != null) {
+                title += 'Адрес: ' + points[i].waypoint.ADDRESS + '\n';
+                title += 'Клиент: ' + points[i].waypoint.NAME + '\n';
+                title += 'Комментарий: ' + points[i].waypoint.COMMENT + '\n';
+            }
 
             tmpVar = L.marker([points[i].END_LAT, points[i].END_LON], {
                 'title': title

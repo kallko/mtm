@@ -200,7 +200,11 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
                     }, function (error, response, body) {
                         if (!error && response.statusCode === 200) {
                             console.log('sensor loaded', jj);
-                            data.sensors[jj].real_track = body;
+                            if (body == undefined || body == "invalid parameter 'gid'. ") {
+                                data.sensors[jj].real_track = undefined;
+                            } else {
+                                data.sensors[jj].real_track = body;
+                            }
                             data.sensors[jj].real_track_loaded = true;
                             checkBeforeSend(data, callback);
                         }

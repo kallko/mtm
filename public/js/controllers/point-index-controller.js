@@ -78,13 +78,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var _now = Date.now() / 1000,
                     url = '/trackparts/' + _data.trackUpdateTime + '/' + _now;
 
-
                 http.get(url)
-                    .success(function(trackParts) {
+                    .success(function (trackParts) {
                         console.log('trackparts');
                         console.log(new Date(_data.trackUpdateTime * 1000));
                         console.log(new Date(_now * 1000));
-                        console.log(trackParts);  
+                        console.log(trackParts);
 
                         for (var i = 0; i < trackParts.length; i++) {
                             for (var j = 0; j < _data.routes.length; j++) {
@@ -99,7 +98,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     }
                                     break;
                                 }
-                            };
+                            }
+                            ;
                         }
                         _data.trackUpdateTime = _now;
                     });
@@ -189,8 +189,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].transport = data.transports[j];
                         data.routes[i].real_track = data.transports[j].real_track;
 
-                        if(data.transports[j].real_track != undefined) {
+                        if (data.transports[j].real_track != undefined &&
+                            data.routes[i].real_track.length > 0 &&
+                            data.routes[i].real_track != "invalid parameter 'gid'. ") {
                             len = data.routes[i].real_track.length - 1;
+                            //console.log('NOT NULL', data.routes[i].real_track.length);
                             data.routes[i].car_position = data.routes[i].real_track[len].
                                 coords[data.routes[i].real_track[len].coords.length - 1];
                         }
@@ -369,7 +372,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 route.lastPointIndx = 0;
-                if(route.real_track != undefined) { 
+                if (route.real_track != undefined) {
                     for (j = 0; j < route.real_track.length; j++) {
                         if (route.real_track[j].state == "ARRIVAL") {
                             tmpArrival = route.real_track[j];
@@ -518,8 +521,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(new Date(_data.server_time * 1000));
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
-                if(route.real_track == undefined) { continue; }
+                if (route.real_track == undefined ||
+                    route.real_track.length == 0 ||
+                    route.real_track == "invalid parameter 'gid'. ") {
+                    route.real_track = undefined;
+                    continue;
+                }
+
                 point = route.car_position;
+                //console.log({car: route.car_position, real_track: route.real_track});
                 url = '/findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;
 
