@@ -60,7 +60,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 counter++;
                 (function (jj) {
-                    // console.log(url + '&gid=' + data.sensors[jj].GID);
+                    //console.log(url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true

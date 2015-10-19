@@ -69,47 +69,46 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function setRealTrackUpdate(seconds) {
             interval(function () {
                 console.log('setRealTrackUpdate()');
-                if (_data == null) return;
-
-                if (_data.trackUpdateTime == undefined) {
-                    _data.trackUpdateTime = _data.server_time;
-                }
-
-                var _now = Date.now() / 1000,
-                    url = './trackparts/' + _data.trackUpdateTime + '/' + _now;
-
-                http.get(url)
-                    .success(function (trackParts) {
-                        addTrackParts(trackParts);
-                    });
-
-                // updateData();
+                loadTrackParts();
             }, seconds * 1000);
         }
 
-        function addTrackParts(trackParts) {
-            console.log('trackparts');
-            console.log(new Date(_data.trackUpdateTime * 1000));
-            console.log(new Date(_now * 1000));
-            console.log(trackParts);
+        function loadTrackParts() {
+            if (_data == null) return;
 
-            for (var i = 0; i < trackParts.length; i++) {
-                for (var j = 0; j < _data.routes.length; j++) {
-                    if (_data.routes[j].transport.gid == trackParts[i].gid) {
-                        if (trackParts[i].data.length > 0) {
-                            trackParts[i].data[0].state = 'MOVE';
-                            _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
-
-                            var len = _data.routes[j].real_track.length - 1;
-                            _data.routes[j].car_position = _data.routes[j].real_track[len].
-                                coords[_data.routes[j].real_track[len].coords.length - 1];
-                        }
-                        break;
-                    }
-                }
-                ;
+            if (_data.trackUpdateTime == undefined) {
+                _data.trackUpdateTime = _data.server_time;
             }
-            _data.trackUpdateTime = _now;
+
+            var _now = Date.now() / 1000,
+                url = './trackparts/' + _data.trackUpdateTime + '/' + _now;
+
+            http.get(url)
+                .success(function (trackParts) {
+                    console.log('trackparts');
+                    console.log(new Date(_data.trackUpdateTime * 1000));
+                    console.log(new Date(_now * 1000));
+                    console.log(trackParts);
+
+                    for (var i = 0; i < trackParts.length; i++) {
+                        for (var j = 0; j < _data.routes.length; j++) {
+                            if (_data.routes[j].transport.gid == trackParts[i].gid) {
+                                if (trackParts[i].data.length > 0) {
+                                    trackParts[i].data[0].state = 'MOVE';
+                                    _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+
+                                    var len = _data.routes[j].real_track.length - 1;
+                                    _data.routes[j].car_position = _data.routes[j].real_track[len].
+                                        coords[_data.routes[j].real_track[len].coords.length - 1];
+                                }
+                                break;
+                            }
+                        }
+                        ;
+                    }
+                    _data.trackUpdateTime = _now;
+                    updateData();
+                });
         }
 
         scope.forceLoad = function () {
@@ -127,6 +126,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     console.log('loadDailyData success');
                     linkDataParts(data);
+                    loadTrackParts();
                 });
         }
 
