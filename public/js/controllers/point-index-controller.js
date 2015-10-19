@@ -113,7 +113,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 break;
                             }
                         }
-                        ;
                     }
                     _data.trackUpdateTime = _now;
                     updateData();
@@ -135,7 +134,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     console.log('loadDailyData success');
                     linkDataParts(data);
-                    //loadTrackParts();
+                    loadTrackParts();
                 });
         }
 
@@ -367,6 +366,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 END_LON,
                 lat,
                 lon,
+                _time,
                 focus_l1_time = 60 * 30,
                 focus_l2_time = 60 * 120,
                 now = _data.server_time,
@@ -438,44 +438,51 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //}}
                 }
 
-                // route.mobile_buttons = [
-                //     {
-                //          'number' : 777,
-                //          'time': '10.10.2015 12:00:00',
-                //          'canceled': false,
-                //          'cancel_reason': 'cancel cancel_reason',
-                //          'lat': 50,
-                //          'lon': 50,
-                //          'gps_time': '10.10.2015 12:00:00'
-                //     }
-                // ];
+                // route.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
 
-                if (route.mobile_buttons != undefined) {
-                    for (var j = 0; j < route.mobile_buttons.length; j++) {
-                        for (var k = 0; k < route.points.length; k++) {
-                            tmpPoint = route.points[k];
-                            END_LAT = parseFloat(tmpPoint.END_LAT);
-                            END_LON = parseFloat(tmpPoint.END_LON);
-                            lat = route.mobile_buttons[j].lat;
-                            lon = route.mobile_buttons[j].lon;
 
-                            if (tmpPoint.status != STATUS.FINISHED
-                                && tmpPoint.status != STATUS.CANCELED
-                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                                && tmpPoint.arrival_time_ts + buttonTimeOffset > route.mobile_buttons[j].time
-                                && tmpPoint.arrival_time_ts - buttonTimeOffset < route.mobile_buttons[j].time) {
-                                tmpPoint.status = STATUS.FINISHED;
-                                route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
-                                tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
+                //route.mobile_buttons = {
+                //    Vi: JSON.parse("[{'number':1563413,'time':'25.09.2015 17:51:54','canceled':false,'cancel_reason':'','lat':0,'lat':0,'gps_time':''}]")
+                //};
 
-                                lastIndex = tmpPoint.NUMBER;
+                //console.log(JSON.parse('[{"number":"1563413","time":"25.09.2015 17:51:54","canceled":false,"cancel_reason":"","lat":0,"lon":0,"gps_time":""},' +
+                //    '{"number":"1564249","time":"25.09.2015 04:43:39","canceled":false,"cancel_reason":"","lat":50,177414,"lon":30,663767,"gps_time":"24.09.2015 12:32:00"}]'));
 
-                                //break;
-                            }
-                        }
-                    }
-                }
+                //if (route.mobile_buttons != undefined) {
+                //    for (j = 0; j < route.mobile_buttons.length; j++) {
+                //        for (k = 0; k < route.points.length; k++) {
+                //            tmpPoint = route.points[k];
+                //            END_LAT = parseFloat(tmpPoint.END_LAT);
+                //            END_LON = parseFloat(tmpPoint.END_LON);
+                //            lat = route.mobile_buttons[j].lat;
+                //            lon = route.mobile_buttons[j].lon;
+                //            route.mobile_buttons[j].gps_time_ts = strToTstamp(route.mobile_buttons[j].gps_time);
+                //
+                //            if (tmpPoint.status != STATUS.FINISHED
+                //                && tmpPoint.status != STATUS.CANCELED
+                //                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                //                && tmpPoint.arrival_time_ts + buttonTimeOffset > route.mobile_buttons[j].gps_time_ts
+                //                && tmpPoint.arrival_time_ts - buttonTimeOffset < route.mobile_buttons[j].gps_time_ts) {
+                //                tmpPoint.status = STATUS.FINISHED;
+                //                route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                //                tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
+                //
+                //                lastIndex = tmpPoint.NUMBER;
+                //
+                //                //break;
+                //            }
+                //        }
+                //    }
+                //}
             }
+
+
+            route.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+
+            var res = route.mobile_button.Vi;
+            res = res.substr(1, res.length - 2);
+            console.log(res);
+            console.log(JSON.parse(res));
         }
 
         function updateProblemIndex(route) {
