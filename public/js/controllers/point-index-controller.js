@@ -446,32 +446,33 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
             //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
             _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
-            _data.mobile_buttons = JSON.parse(_data.mobile_buttons.Vi.substr(1, _data.mobile_buttons.Vi.length - 2));
-
-            if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
-                for (var i = 0; i < _data.mobile_buttons.length; i++) {
-                    for (var j = 0; j < _data.routes.length; j++) {
-                        for (var k = 0; k < _data.routes[i].points.length; k++) {
-                            tmpPoint = _data.routes[j].points[k];
-                            END_LAT = parseFloat(tmpPoint.END_LAT);
-                            END_LON = parseFloat(tmpPoint.END_LON);
-                            lat = _data.mobile_buttons[j].lat;
-                            lon = _data.mobile_buttons[j].lon;
-                            _data.mobile_buttons[j].gps_time_ts = strToTstamp(_data.mobile_buttons[j].gps_time);
-
-                            if (tmpPoint.status != STATUS.FINISHED
-                                && tmpPoint.status != STATUS.CANCELED
-                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                                && route.mobile_buttons[j].number == tmpPoint.TASK_NUMBER) {
-                                tmpPoint.status = STATUS.FINISHED;
-                                _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                                tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            console.log(_data.mobile_buttons);
+            //_data.mobile_buttons = JSON.parse(_data.mobile_buttons.Vi.substr(1, _data.mobile_buttons.Vi.length - 2));
+            //
+            //if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
+            //    for (var i = 0; i < _data.mobile_buttons.length; i++) {
+            //        for (var j = 0; j < _data.routes.length; j++) {
+            //            for (var k = 0; k < _data.routes[i].points.length; k++) {
+            //                tmpPoint = _data.routes[j].points[k];
+            //                END_LAT = parseFloat(tmpPoint.END_LAT);
+            //                END_LON = parseFloat(tmpPoint.END_LON);
+            //                lat = _data.mobile_buttons[j].lat;
+            //                lon = _data.mobile_buttons[j].lon;
+            //                _data.mobile_buttons[j].gps_time_ts = strToTstamp(_data.mobile_buttons[j].gps_time);
+            //
+            //                if (tmpPoint.status != STATUS.FINISHED
+            //                    && tmpPoint.status != STATUS.CANCELED
+            //                    && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+            //                    && route.mobile_buttons[j].number == tmpPoint.TASK_NUMBER) {
+            //                    tmpPoint.status = STATUS.FINISHED;
+            //                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+            //                    tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         function getTodayStrFor1C() {
