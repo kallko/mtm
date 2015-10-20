@@ -41,12 +41,10 @@
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
         <div id="point-menu-panel">
             <div>
-                <span>Статус: </span>
                 <select id="status-select" ng-model="filters.status" class="group-select"
                         ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
-                <span>Водитель: </span>
                 <select id="driver-select" ng-model="filters.driver" class="group-select"
                         ng-options='option.value as option.name for option in filters.drivers'>
                 </select>
@@ -57,16 +55,16 @@
                 </select>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
 
+                <button class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
+                    загрузить
+                </button>
+
                 <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">
                     проблемные
                 </button>
 
                 <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
                     15 минут
-                </button>
-
-                <button class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
-                    загрузить
                 </button>
             </div>
         </div>

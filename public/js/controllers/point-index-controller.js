@@ -34,7 +34,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.displayCollection = [].concat(scope.rowCollection);
             scope.filters = {};
             scope.filters.statuses = [
-                {name: 'все', value: -1, class: 'all-status'},
+                {name: 'все статусы', value: -1, class: 'all-status'},
                 {name: 'доставленно', value: STATUS.FINISHED, class: 'delivered-status'},
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
                 {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
@@ -45,7 +45,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
             ];
             scope.filters.status = scope.filters.statuses[0].value;
-            scope.filters.drivers = [{name: 'все', value: -1}];
+            scope.filters.drivers = [{name: 'все водители', value: -1}];
             scope.filters.driver = scope.filters.drivers[0].value;
             scope.filters.problem_index = -1;
             scope.filters.promised_15m = -1;
