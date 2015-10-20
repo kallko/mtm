@@ -12,6 +12,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             promisedWindow = 3600,
             STATUS = {
                 FINISHED: 0,
+                //FINISHED_LATE: -1,
                 IN_PROGRESS: 1,
                 ARRIVED_LATE: 2,
                 DELAY: 3,
@@ -875,16 +876,40 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        Array.prototype.move = function (old_index, new_index) {
+            if (new_index >= this.length) {
+                var k = new_index - this.length;
+                while ((k--) + 1) {
+                    this.push(undefined);
+                }
+            }
+            this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+            return this;
+        };
+
         scope.changePromisedWindow = function (row_id) {
             var start = $('#edit-promised-start-' + row_id).val().split(':'),
                 finish = $('#edit-promised-finish-' + row_id).val().split(':'),
-                oldStart = new Date(scope.displayCollection[row_id].promised_window.start * 1000),
+                point = scope.displayCollection[row_id],
+                tmpPoints = _data.routes[point.route_id].points,
+                oldStart = new Date(point.promised_window.start * 1000),
                 clearOldDate = new Date(oldStart.getFullYear(), oldStart.getMonth(), oldStart.getDate()).getTime();
 
-            scope.displayCollection[row_id].promised_window = {
+            point.promised_window = {
                 start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
                 finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
+
+            point.arrival_time_ts = (point.promised_window.start +
+                point.promised_window.finish) / 2;
+            for (var i = 0; i < tmpPoints.length; i++) {
+                if (tmpPoints[i].arrival_time_ts > point.arrival_time_ts) {
+                    // MOVE DAT
+                }
+            }
+
+            console.log(_data);
+            updateData();
         };
 
     }]);
