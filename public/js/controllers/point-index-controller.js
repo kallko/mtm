@@ -869,16 +869,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
-        scope.changePromisedWindow = function(row_id) {
-            var start = $('#edit-promised-start-' + row_id).val(),
-                finish = $('#edit-promised-finish-' + row_id).val();
-            console.log('changePromisedWindow', row_id, start, finish);
-
-
+        scope.changePromisedWindow = function (row_id) {
+            var start = $('#edit-promised-start-' + row_id).val().split(':'),
+                finish = $('#edit-promised-finish-' + row_id).val().split(':'),
+                oldStart = new Date(scope.displayCollection[row_id].promised_window.start * 1000),
+                clearOldDate = new Date(oldStart.getFullYear(), oldStart.getMonth(), oldStart.getDate()).getTime();
 
             scope.displayCollection[row_id].promised_window = {
-                start: 777,
-                finish: 777
+                start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
+                finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
         };
+
     }]);
