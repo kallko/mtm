@@ -439,7 +439,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            _data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+            console.log(getTodayStr());
+            if(parentForm == undefined) { return; }
+            //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+            _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStr()]);
             _data.mobile_buttons = JSON.parse(_data.mobile_buttons.Vi.substr(1, _data.mobile_buttons.Vi.length - 2));
 
             if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
@@ -466,6 +469,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             }
+        }
+
+        function getTodayStr() {
+            var date = new Date();
+            return ( ("0" + date.getDate())).slice(-2) + '.' +
+                ("0" + (date.getMonth() + 1)).slice(-2) + '.' +
+                date.getFullYear();
         }
 
         function updateProblemIndex(route) {
