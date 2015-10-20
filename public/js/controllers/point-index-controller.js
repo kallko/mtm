@@ -440,7 +440,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             console.log(getTodayStr());
-            if(parentForm == undefined) { return; }
+            if(parentForm == undefined) { console.log('parentForm == undefined'); return; }
             //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
             _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStr()]);
             _data.mobile_buttons = JSON.parse(_data.mobile_buttons.Vi.substr(1, _data.mobile_buttons.Vi.length - 2));
