@@ -64,7 +64,7 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
         //console.log(parentForm._call('getDriversActions', ["3684/5"]));
 
         // 1578403 taskID
-        parentForm._call('action1C', [1, '1578403']);
+        parentForm._call('action1C', [1, '1565180']);
     };
 
     function saveLogToDB(message) {
