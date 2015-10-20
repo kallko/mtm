@@ -212,3 +212,8 @@ template {
 .canceled-status {
     color: #969696;
 }
+
+.promised-text {
+    height: 15px;
+    width: 34px;
+}

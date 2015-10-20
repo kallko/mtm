@@ -868,4 +868,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 scope.filters.promised_15m = -1;
             }
         };
+
+        scope.changePromisedWindow = function(row_id) {
+            var start = $('#edit-promised-start-' + row_id).val(),
+                finish = $('#edit-promised-finish-' + row_id).val();
+            console.log('changePromisedWindow', row_id, start, finish);
+
+
+
+            scope.displayCollection[row_id].promised_window = {
+                start: 777,
+                finish: 777
+            };
+        };
     }]);
