@@ -228,7 +228,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.routes[i].driver._id == null) {
                         data.routes[i].driver._id = driverId;
                         scope.filters.drivers.push({
-                            name: data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].driver._id
                         });
                         driverId++;
