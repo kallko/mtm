@@ -1,12 +1,13 @@
 var config = {
     cashing: {
-        soap: false,
+        soap: true,
         tracks: false
     },
 
     aggregator: {
         //url: 'http://62.205.137.118:9001/', // outer
-        url: 'http://192.168.9.29:9001/', // local
+        //url: 'http://192.168.9.29:9001/', // local
+        url: 'http://127.1:20000/',
         login: 'admin',
         password: 'admin321'
     },

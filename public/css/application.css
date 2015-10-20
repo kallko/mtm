@@ -79,12 +79,12 @@ template {
 }
 
 #point-menu-panel select {
-    width: 102px;
-    margin-right: 2px;
+    width: 105px;
+    margin-right: 3px;
 }
 
 #point-menu-panel button {
-    padding: 0 2px;
+    padding: 0 3px;
     margin-bottom: 3px;
 }
 
@@ -179,7 +179,7 @@ template {
 }
 
 #problem-index-btn, #promised-15m-btn, #force-load-btn{
-    margin-left: 1px;
+    margin-left: 5px;
 }
 
 .delivered-status,

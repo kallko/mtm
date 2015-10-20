@@ -69,12 +69,12 @@ function checkBeforeSend(data, callback) {
         return;
     }
 
-    for (var i = 0; i < data.routes.length; i++) {
-        if (!data.routes[i].time_matrix_loaded
-            || !data.routes[i].plan_geometry_loaded) {
-            return;
-        }
-    }
+    //for (var i = 0; i < data.routes.length; i++) {
+    //    if (!data.routes[i].time_matrix_loaded
+    //        || !data.routes[i].plan_geometry_loaded) {
+    //        return;
+    //    }
+    //}
 
     for (i = 0; i < data.sensors.length; i++) {
         if (data.sensors[i].loading && !data.sensors[i].real_track_loaded) {
@@ -92,6 +92,8 @@ function checkBeforeSend(data, callback) {
         delete data.sensors[i].loading;
     }
 
+
+    console.log('5');
     data.sended = true;
     console.log('DONE!');
     log.toFLog('final_data.js', data);

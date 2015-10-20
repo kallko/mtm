@@ -21,13 +21,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 CANCELED: 7
             },
 
-            aggregatorError = "invalid parameter 'gid'. ";
+            aggregatorError = "invalid parameter 'gid'. ",
+            loadParts = false;
 
         setListeners();
         init();
         loadDailyData(false);
-        // setDynamicDataUpdate(dataUpdateInterval);
-        // setRealTrackUpdate(trackUpdateInterval);
+
+        if (loadParts) {
+            setDynamicDataUpdate(dataUpdateInterval);
+            setRealTrackUpdate(trackUpdateInterval);
+        }
 
         function init() {
             scope.rowCollection = [];
@@ -134,7 +138,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     console.log('loadDailyData success');
                     linkDataParts(data);
-                    loadTrackParts();
+                    if (loadParts) {
+                        loadTrackParts();
+                    }
                 });
         }
 
@@ -228,7 +234,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.routes[i].driver._id == null) {
                         data.routes[i].driver._id = driverId;
                         scope.filters.drivers.push({
-                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.REGISTRATION_NUMBER + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].driver._id
                         });
                         driverId++;
