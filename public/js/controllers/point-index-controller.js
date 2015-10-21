@@ -501,7 +501,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 //&& tmpPoint.status != STATUS.FINISHED
                                 //&& tmpPoint.status != STATUS.CANCELED
                                 //&& getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius)
-                            {
+                            ){
                                 console.log('detect by button push');
                                 tmpPoint.status = STATUS.FINISHED;
                                 _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
