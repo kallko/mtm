@@ -6,7 +6,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTable,
             _data,
             dataUpdateInterval = 180,
-            trackUpdateInterval = 60,
+            trackUpdateInterval = 1800,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -38,7 +38,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         loadDailyData(false);
 
         if (enableDynamicUpdate) {
-            setDynamicDataUpdate(dataUpdateInterval);
+            //setDynamicDataUpdate(dataUpdateInterval);
             setRealTrackUpdate(trackUpdateInterval);
         }
 
@@ -92,6 +92,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function setRealTrackUpdate(seconds) {
             interval(function () {
                 console.log('setRealTrackUpdate()');
+                if (_data == null) return;
+                _data.server_time += seconds;
                 loadTrackParts();
             }, seconds * 1000);
         }
