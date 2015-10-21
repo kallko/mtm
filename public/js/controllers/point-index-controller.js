@@ -887,6 +887,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return this;
         };
 
+        // http://192.168.122.247:20000/
         scope.changePromisedWindow = function (row_id) {
             var start = $('#edit-promised-start-' + row_id).val().split(':'),
                 finish = $('#edit-promised-finish-' + row_id).val().split(':'),
