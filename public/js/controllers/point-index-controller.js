@@ -486,7 +486,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
             console.log('_data.mobile_buttons array', _data.mobile_buttons);
 
-            if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
+            if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
                 for (var i = 0; i < _data.mobile_buttons.length; i++) {
                     for (var j = 0; j < _data.routes.length; j++) {
                         for (var k = 0; k < _data.routes[i].points.length; k++) {
@@ -495,9 +495,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             END_LON = parseFloat(tmpPoint.END_LON);
                             lat = _data.mobile_buttons[j].lat;
                             lon = _data.mobile_buttons[j].lon;
-                            _data.mobile_buttons[j].gps_time_ts = strToTstamp(_data.mobile_buttons[j].gps_time);
+                            _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
 
-                            if (route.mobile_buttons[j].number == tmpPoint.TASK_NUMBER
+                            if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                                 && tmpPoint.status != STATUS.FINISHED
                                 && tmpPoint.status != STATUS.CANCELED
                                 && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
