@@ -23,13 +23,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false;
+            loadParts = true,
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
         loadDailyData(false);
 
-        if (loadParts) {
+        if (enableDynamicUpdate) {
             setDynamicDataUpdate(dataUpdateInterval);
             setRealTrackUpdate(trackUpdateInterval);
         }
@@ -446,7 +447,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            console.log(getTodayStrFor1C());
+            console.log([_data.ID, getTodayStrFor1C()]);
             if (parentForm == undefined) {
                 console.log('parentForm == undefined');
                 return;
