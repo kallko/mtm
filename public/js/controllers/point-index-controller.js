@@ -120,7 +120,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             trackParts[i].data.length == 0 ||
                             trackParts[i].data == aggregatorError) {
                             continue;
-                        }
+
 
                         for (var j = 0; j < _data.routes.length; j++) {
 
