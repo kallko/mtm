@@ -22,6 +22,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 CANCELED: 7
             },
 
+            WINDOW_STATUSES = {
+                ALL: 0,
+                IN_CONTROLLED: 1,
+                IN_PROMISED: 2,
+                OUT_PROMISED: 3
+            },
+
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,
             enableDynamicUpdate = false;
@@ -50,6 +57,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
                 {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
             ];
+            scope.filter.window_statuses = [
+                {name: 'Все окна', value: WINDOW_STATUSES.ALL, class: 'all-windows'},
+                {name: 'В контролируемом', value: WINDOW_STATUSES.IN_CONTROLLED, class: 'in-controlled'},
+                {name: 'В обещанном', value: WINDOW_STATUSES.IN_PROMISED, class: 'in-promised'},
+                {name: 'Вне обещанного', value: WINDOW_STATUSES.OUT_PROMISED, class: 'out-promised'},
+            ];
+
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.drivers = [{name: 'все водители', value: -1}];
             scope.filters.driver = scope.filters.drivers[0].value;
@@ -455,6 +469,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
             _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
+            console.log('_data.mobile_buttons', _data.mobile_buttons);
             if (_data.mobile_buttons.Vi == "[]" || _data.mobile_buttons.Vi == undefined) {
                 console.log('no mobile buttons push');
                 return;
@@ -492,7 +507,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var date = new Date();
             return date.getFullYear() +
                 ("0" + (date.getMonth() + 1)).slice(-2) +
-                ( ("0" + (date.getDate() - 1)).slice(-2);
+                ( ("0" + date.getDate())).slice(-2);
         }
 
         function updateProblemIndex(route) {
