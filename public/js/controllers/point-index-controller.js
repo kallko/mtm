@@ -902,11 +902,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             point.arrival_time_ts = (point.promised_window.start +
                 point.promised_window.finish) / 2;
-            for (var i = 0; i < tmpPoints.length; i++) {
-                if (tmpPoints[i].arrival_time_ts > point.arrival_time_ts) {
-                    // MOVE DAT 
-                }
-            }
+
+            //for (var i = 0; i < tmpPoints.length; i++) {
+            //    if (tmpPoints[i].arrival_time_ts > point.arrival_time_ts) {
+            //        tmpPoints.move(parseInt(point.NUMBER) - 1, i - 1);
+            //    }
+            //}
 
             console.log(_data);
             updateData();
