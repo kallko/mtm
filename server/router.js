@@ -35,9 +35,10 @@ router.route('/dailydata')
             day = 86400000,
             today12am = now - (now % day);
 
-        if (req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
+        if (//req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
             req.query.force == null && req.session.login != null
-             && cashedDataArr[req.session.login] != null) {
+             && cashedDataArr[req.session.login] != null &&
+            cashedDataArr[req.session.login].lastUpdate == today12am) {
             console.log('=== loaded from session === send data to client ===');
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
@@ -46,7 +47,7 @@ router.route('/dailydata')
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
-                req.session.lastUpdate = today12am;
+                data.lastUpdate = today12am;
                 cashedDataArr[req.session.login] = data;
                 res.status(200).json(data);
             }

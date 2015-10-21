@@ -904,7 +904,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point.promised_window.finish) / 2;
             for (var i = 0; i < tmpPoints.length; i++) {
                 if (tmpPoints[i].arrival_time_ts > point.arrival_time_ts) {
-                    // MOVE DAT
+                    // MOVE DAT 
                 }
             }
 
