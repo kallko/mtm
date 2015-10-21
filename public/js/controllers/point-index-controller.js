@@ -424,9 +424,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                 if (tmpPoint.status != STATUS.FINISHED
                                     && tmpPoint.status != STATUS.CANCELED
+                                    && tmpPoint.status != STATUS.FINISHED_LATE
                                     && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
                                     && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
                                     && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
+
+                                    if (tmpPoint.arrival_time_ts > tmpPoint.promised_window.finish) {
+                                        tmpPoint.status = STATUS.FINISHED_LATE;
+                                    } else {
+                                        tmpPoint.status = STATUS.FINISHED;
+                                    }
+
                                     tmpPoint.status = STATUS.FINISHED;
                                     route.lastPointIndx = k;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
@@ -502,6 +510,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                                 && tmpPoint.status != STATUS.FINISHED
+                                && tmpPoint.status != STATUS.FINISHED_LATE
                                 && tmpPoint.status != STATUS.CANCELED
                                 && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
                             ){
