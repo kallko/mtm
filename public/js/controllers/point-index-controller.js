@@ -6,7 +6,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTable,
             _data,
             dataUpdateInterval = 180,
-            trackUpdateInterval = 1800,
+            trackUpdateInterval = 180,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
