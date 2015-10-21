@@ -470,12 +470,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
             _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
             console.log('_data.mobile_buttons', _data.mobile_buttons);
-            if (_data.mobile_buttons.Vi == "[]" || _data.mobile_buttons.Vi == undefined) {
+
+            if (_data.mobile_buttons == undefined
+                || Object.keys(_data.mobile_buttons).length == 0) {
                 console.log('no mobile buttons push');
                 return;
             }
 
-            _data.mobile_buttons = JSON.parse(_data.mobile_buttons.Vi.substr(1, _data.mobile_buttons.Vi.length - 2));
+            var buttonsStr = _data.mobile_buttons[Object.keys(_data.mobile_buttons)[0]];
+            if(buttonsStr == '[]') {
+                console.log('no mobile buttons push');
+                return;
+            }
+
+            _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
 
             if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
                 for (var i = 0; i < _data.mobile_buttons.length; i++) {
