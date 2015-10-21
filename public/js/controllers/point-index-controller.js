@@ -489,12 +489,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
                 for (var i = 0; i < _data.mobile_buttons.length; i++) {
                     for (var j = 0; j < _data.routes.length; j++) {
-                        for (var k = 0; k < _data.routes[i].points.length; k++) {
+                        for (var k = 0; k < _data.routes[j].points.length; k++) {
                             tmpPoint = _data.routes[j].points[k];
                             END_LAT = parseFloat(tmpPoint.END_LAT);
                             END_LON = parseFloat(tmpPoint.END_LON);
-                            lat = _data.mobile_buttons[j].lat;
-                            lon = _data.mobile_buttons[j].lon;
+                            lat = _data.mobile_buttons[i].lat;
+                            lon = _data.mobile_buttons[i].lon;
                             _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
 
                             if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
