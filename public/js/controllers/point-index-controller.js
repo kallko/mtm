@@ -484,6 +484,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
+            console.log('_data.mobile_buttons array', _data.mobile_buttons);
 
             if (route.mobile_buttons != undefined && route.mobile_buttons.length > 0) {
                 for (var i = 0; i < _data.mobile_buttons.length; i++) {
@@ -496,10 +497,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             lon = _data.mobile_buttons[j].lon;
                             _data.mobile_buttons[j].gps_time_ts = strToTstamp(_data.mobile_buttons[j].gps_time);
 
-                            if (tmpPoint.status != STATUS.FINISHED
+                            if (route.mobile_buttons[j].number == tmpPoint.TASK_NUMBER
+                                //&& tmpPoint.status != STATUS.FINISHED
                                 && tmpPoint.status != STATUS.CANCELED
-                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                                && route.mobile_buttons[j].number == tmpPoint.TASK_NUMBER) {
+                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius) {
+                                console.log('detect by button push');
                                 tmpPoint.status = STATUS.FINISHED;
                                 _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                                 tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
