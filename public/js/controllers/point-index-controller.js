@@ -203,6 +203,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function linkDataParts(data) {
             console.log('Start linking ...');
+            init();
 
             var tmpPoints,
                 rowId = 0,
