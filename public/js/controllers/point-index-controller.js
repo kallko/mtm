@@ -454,7 +454,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
             _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
-            if (_data.mobile_buttons.Vi == "[]") {
+            if (_data.mobile_buttons.Vi == "[]" || _data.mobile_buttons.Vi == undefined) {
                 console.log('no mobile buttons push');
                 return;
             }
