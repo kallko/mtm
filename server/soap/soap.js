@@ -72,6 +72,8 @@ function checkBeforeSend(data, callback) {
     for (var i = 0; i < data.routes.length; i++) {
         if (!data.routes[i].time_matrix_loaded
             || !data.routes[i].plan_geometry_loaded) {
+            console.log('matrix = ', data.routes[i].time_matrix_loaded);
+            console.log('geometry = ', data.routes[i].plan_geometry_loaded);
             return;
         }
     }
