@@ -189,7 +189,8 @@ template {
 .controlled-status,
 .awaiting-status,
 .scheduled-status,
-.canceled-status {
+.canceled-status,
+.delivered-late-status {
     font-weight: bold;
 }
 

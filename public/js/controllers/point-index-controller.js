@@ -429,15 +429,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
                                     && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
 
-                                    if (tmpPoint.arrival_time_ts > tmpPoint.promised_window.finish) {
+
+                                    route.lastPointIndx = k;
+                                    tmpPoint.real_arrival_time = tmpArrival.t1;
+                                    if (tmpPoint.real_arrival_time > tmpPoint.promised_window.finish) {
                                         tmpPoint.status = STATUS.FINISHED_LATE;
                                     } else {
                                         tmpPoint.status = STATUS.FINISHED;
                                     }
-
-                                    tmpPoint.status = STATUS.FINISHED;
-                                    route.lastPointIndx = k;
-                                    tmpPoint.real_arrival_time = tmpArrival.t1;
 
                                     lastIndex = tmpPoint.NUMBER;
 
