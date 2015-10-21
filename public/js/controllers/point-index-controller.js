@@ -57,7 +57,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
                 {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
             ];
-            scope.filter.window_statuses = [
+            scope.filters.window_statuses = [
                 {name: 'Все окна', value: WINDOW_STATUSES.ALL, class: 'all-windows'},
                 {name: 'В контролируемом', value: WINDOW_STATUSES.IN_CONTROLLED, class: 'in-controlled'},
                 {name: 'В обещанном', value: WINDOW_STATUSES.IN_PROMISED, class: 'in-promised'},
