@@ -12,14 +12,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             promisedWindow = 3600,
             STATUS = {
                 FINISHED: 0,
-                //FINISHED_LATE: -1,
-                IN_PROGRESS: 1,
-                ARRIVED_LATE: 2,
-                DELAY: 3,
-                //FOCUS_L1: 4,
-                //FOCUS_L2: 5,
-                SCHEDULED: 6,
-                CANCELED: 7
+                FINISHED_LATE: 1,
+                IN_PROGRESS: 2,
+                ARRIVED_LATE: 3,
+                DELAY: 4,
+                //FOCUS_L1: 5,
+                //FOCUS_L2: 6,
+                SCHEDULED: 7,
+                CANCELED: 8
             },
 
             WINDOW_STATUSES = {
@@ -31,7 +31,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,
-            enableDynamicUpdate = false;
+            enableDynamicUpdate = true;
 
         setListeners();
         init();
@@ -49,6 +49,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.statuses = [
                 {name: 'все статусы', value: -1, class: 'all-status'},
                 {name: 'доставленно', value: STATUS.FINISHED, class: 'delivered-status'},
+                {name: 'доставленно с опозданием', value: STATUS.FINISHED_LATE, class: 'delivered-late-status'},
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
                 {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
                 {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},

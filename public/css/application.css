@@ -197,6 +197,10 @@ template {
     color: #0A800A;
 }
 
+.delivered-late-status {
+    color: #0A800A;
+}
+
 .performed-status {
     color: blue;
 }
