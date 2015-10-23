@@ -1,0 +1,50 @@
+<div id="points-table-holder"  ng-controller="PointsTableController">
+    <table class="table table-striped"
+           st-safe-src="rowCollection"
+           st-table="displayCollection">
+        <thead>
+            <tr>
+                <th class="id-name" >Название</th>
+                <th class="id-center-lat" >Широта</th>
+                <th class="id-center-lon" >Долгота</th>
+                <th class="id-address" >Адрес</th>
+                <th class="id-col" >ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in displayCollection" ng-click="rowClick(row.row_id)"
+                    ng-show="row.id != ''" >
+                <td title="{{row.name}}" class="id-name" >{{row.name}}</td>
+                <td class="id-center-lat" >{{row.center_lat}}</td>
+                <td class="id-center-lon" >{{row.center_lon}}</td>
+                <td title="{{row.adress}}" class="id-address" >{{row.adress}}</td>
+                <td class="id-col" >{{row.id}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="setting-holder" ng-controller="SettingController" >
+    <div class="holder" >
+        <span class="input-label">Радиус (нажатия)</span>
+        <input type="range" min="40" max="150" ng-model="params.mobilePushRadius"/>
+        <span class="input-value">{{params.mobilePushRadius}}</span>
+
+        <span class="input-label">Радиус (стопы)</span>
+        <input type="range" min="40" max="150" ng-model="params.stopRadius"/>
+        <span class="input-value">{{params.stopRadius}}</span>
+
+        <span class="input-label">Период </span>
+        <input type="date" ng-model="params.fromDate"/>
+
+        <span class="input-label"> - </span>
+        <input type="date" ng-model="params.toDate"/>
+
+        <button ng-click="loadData()" class="btn btn-primary btn-sm" >загрузить</button>
+        <button ng-click="analyzeData()" class="btn btn-primary btn-sm" >анализировать</button>
+    </div>
+</div>
+
+<div id="map-holder" ng-controller="MapController" >
+    <div id="map" ></div>
+</div>

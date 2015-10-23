@@ -1,0 +1,82 @@
+#map, #points-table-holder, #setting-holder {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0 0 0 0;
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    z-index: 0;
+}
+
+#points-table-holder {
+    height: 400px;
+    width: 55%;
+    overflow-y: scroll;
+}
+
+#setting-holder {
+    height: 40px;
+    margin: 400px 0 0 0;
+}
+
+#points-table-holder table {
+    width: 100%;
+    min-width: 1200px;
+    table-layout: fixed;
+}
+
+#points-table-holder table tr td {
+    padding: 3px;
+    margin: 0;
+    font-size: 12px;
+}
+
+#setting-holder input[type=range] {
+    width: 100px;
+    float: left;
+    margin-right: 10px;
+}
+
+#setting-holder input[type=date] {
+    margin-top: -2px;
+    width: 135px;
+    float: left;
+    margin-right: 10px;
+}
+
+#setting-holder button {
+    margin-top: -2px;
+    height: 26px;
+    padding: 0 10px;
+}
+
+.holder {
+    padding: 10px;
+}
+
+.input-label {
+    float: left;
+    padding-right: 10px;
+}
+
+.input-value, .input-value-big {
+    float: left;
+    width: 50px;
+    min-width: 50px;
+}
+
+.input-value-big {
+    width: 100px;
+    min-width: 100px;
+}
+
+td, th {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.id-name { width: 200px;}
+.id-center-lat { width: 100px;}
+.id-center-lon { width: 100px;}
+.id-col { width: 270px;}

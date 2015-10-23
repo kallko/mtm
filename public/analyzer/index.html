@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='acp' >
+    <head>
+        <meta charset="utf-8">
+        <title>Аналитическая Консоль - Plannary</title>
+        <link rel="stylesheet" href="./css/application.css" />
+        <link rel="stylesheet" href="../bower_components/leaflet/dist/leaflet.css" />
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css" />
+    </head>
+    <body>
+        <div class="container-fluid" >
+            <div ng-view></div>
+        </div>
+
+        <script src="./data/input_test.js" ></script>
+
+        <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="../bower_components/angular/angular.min.js"></script>
+        <script src="../bower_components/angular-route/angular-route.min.js"></script>
+        <script src="../bower_components/angular-smart-table/dist/smart-table.min.js"></script>
+        <script src="../bower_components/leaflet/dist/leaflet.js"></script>
+
+        <script src="./js/vendor/divicon.js"></script>
+        <script src="./js/vendor/oms.min.js"></script>
+
+        <script src="./js/app.js"></script>
+        <script src="./js/router.js"></script>
+
+        <script src="./js/controllers/analyzer-index-controller.js"></script>
+        <script src="./js/controllers/map-controller.js"></script>
+        <script src="./js/controllers/points-table-controller.js"></script>
+        <script src="./js/controllers/setting-controller.js"></script>
+    </body>
+</html>

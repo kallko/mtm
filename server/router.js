@@ -24,6 +24,11 @@ router.route('/login')
         res.sendFile('index.html', {root: './public/'});
     });
 
+router.route('/analyzer-console')
+    .get(function (req, res) {
+        res.sendFile('index.html', {root: './analyzer/public/'});
+    });
+
 router.route('/dailydata')
     .get(function (req, res) {
         // TODO: !!! REMOVE !!!
