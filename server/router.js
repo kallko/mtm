@@ -26,7 +26,7 @@ router.route('/login')
 
 router.route('/acp')
     .get(function (req, res) {
-        res.sendFile('index.html', {root: './analyzer/public/'});
+        res.sendFile('index.html', {root: './public/acp/'});
     });
 
 router.route('/dailydata')
