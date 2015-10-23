@@ -76,7 +76,22 @@ td, th {
     overflow: hidden;
 }
 
-.id-name { width: 200px;}
-.id-center-lat { width: 100px;}
-.id-center-lon { width: 100px;}
-.id-col { width: 270px;}
+.selected-row {
+    background-color: #71d5d5 !important;
+}
+
+.id-name {
+    width: 200px;
+}
+
+.id-center-lat {
+    width: 100px;
+}
+
+.id-center-lon {
+    width: 100px;
+}
+
+.id-col {
+    width: 270px;
+}

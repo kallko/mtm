@@ -77,9 +77,11 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 
+/public/acp/data
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 
+/bower_components
 # node-waf configuration
 .lock-wscript
 

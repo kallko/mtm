@@ -13,7 +13,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="row in displayCollection" ng-click="rowClick(row.row_id)"
-                    ng-show="row.id != ''" >
+                    ng-show="row.id != ''" id="{{'row-' + row.row_id}}" >
                 <td title="{{row.name}}" class="id-name" >{{row.name}}</td>
                 <td class="id-center-lat" >{{row.center_lat}}</td>
                 <td class="id-center-lon" >{{row.center_lon}}</td>

@@ -85,7 +85,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         };
 
         scope.map.setCenter = function (point) {
-            var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
+            var zoom = map.getZoom() > 17 ? map.getZoom() : 17;
             map.setView(point, zoom);
         };
 
@@ -96,13 +96,21 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         }
 
         scope.map.drawPoint = function (point) {
-            var center = {lat: point.center_lat, lon: point.center_lon};
+            var center = {lat: point.center_lat, lon: point.center_lon},
+                title;
 
             for(var i = 0; i < point.coords.length; i++) {
-                scope.map.drawMarker(point.coords[i], i, '', 14, '#40CAF7', 'black');
+                title = 'Нажатие #' + (i + 1) + '\n';
+                title += point.coords[i].time;
+                scope.map.drawMarker(point.coords[i], i + 1, title, 14, '#40CAF7', 'black');
             }
 
+            title = 'Центральная точка\n';
+            title += 'Название: ' + point.name + '\n';
+            title += 'Адрес: ' + point.adress + '\n';
+            title += 'ID: ' + point.id + '\n';
+
             scope.map.setCenter(center);
-            scope.map.drawMarker(center, 'c', 'центральная точка', 14, 'yellow', 'black');
+            scope.map.drawMarker(center, 'c', title, 14, 'yellow', 'black');
         }
 }]);

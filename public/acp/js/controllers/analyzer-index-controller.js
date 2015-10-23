@@ -8,7 +8,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         scope.data = jsonData2;
         scope.map.clearMap();
         scope.points.reinit(scope.data);
-        //scope.map.drawButtonsPushes(scope.data);
     };
 
     scope.analyzeData = function () {
