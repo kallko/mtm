@@ -24,7 +24,7 @@ router.route('/login')
         res.sendFile('index.html', {root: './public/'});
     });
 
-router.route('/analyzer-console')
+router.route('/acp')
     .get(function (req, res) {
         res.sendFile('index.html', {root: './analyzer/public/'});
     });
