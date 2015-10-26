@@ -5,7 +5,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
     scope.loadData = function () {
         console.log('loadData');
-        scope.data = jsonData;
+        scope.data = jsonData3;
         scope.map.clearMap();
         scope.points.reinit(scope.data);
 
@@ -21,11 +21,19 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
     scope.analyzeData = function () {
         console.log('analyzeData');
+        groupButtonsByRadius();
+        scope.points.reinit(scope.data);
+    };
 
+    function groupButtonsByRadius() {
         var aBtn,
             bBtn,
             maxCount,
-            sum;
+            sum,
+            tmpLat,
+            tmpLon,
+            tmpLen,
+            coodsToSort = {};
         for (var i = 0; i < scope.data.length; i++) {
             for (var j = 0; j < scope.data[i].coords.length; j++) {
                 aBtn = scope.data[i].coords[j];
@@ -58,30 +66,60 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         lon: 0
                     };
 
+                    coodsToSort.lat = [];
+                    coodsToSort.lon = [];
+
                     for (k = 0; k < scope.data[i].coords.length; k++) {
                         bBtn = scope.data[i].coords[k];
                         bBtn.inRadius = getDistanceFromLatLonInKm(aBtn.lat, aBtn.lon, bBtn.lat, bBtn.lon) * 1000 <=
                             scope.params.mobilePushRadius;
                         if (bBtn.inRadius) {
+                            tmpLat = parseFloat(bBtn.lat);
+                            tmpLon = parseFloat(bBtn.lon);
+
                             sum.count++;
-                            sum.lat += parseFloat(bBtn.lat);
-                            sum.lon += parseFloat(bBtn.lon);
+                            sum.lat += tmpLat;
+                            sum.lon += tmpLon;
+
+                            coodsToSort.lat.push(tmpLat);
+                            coodsToSort.lon.push(tmpLon);
                         }
                     }
 
                     sum.lat /= sum.count;
                     sum.lon /= sum.count;
 
-                    //scope.map.drawMarker(sum, '!', 'CENTER', 14, 'white', 'black');
+                    coodsToSort.lat.sort();
+                    coodsToSort.lon.sort();
+
+                    tmpLen = coodsToSort.lat.length;
+                    if (tmpLen % 2 == 1) {
+                        tmpLen = parseInt(tmpLen / 2);
+                        scope.data[i].median_lat = coodsToSort.lat[tmpLen];
+                        scope.data[i].median_lon = coodsToSort.lon[tmpLen];
+                    } else if(tmpLen > 0) {
+                        tmpLen = parseInt(tmpLen / 2);
+                        scope.data[i].median_lat = (coodsToSort.lat[tmpLen - 1] + coodsToSort.lat[tmpLen]) / 2;
+                        scope.data[i].median_lon = (coodsToSort.lon[tmpLen - 1] + coodsToSort.lon[tmpLen]) / 2;
+                    }
+
+                    if(coodsToSort.lat.length > 0) {
+                        scope.data[i].median_lat = scope.data[i].median_lat.toFixed(5);
+                        scope.data[i].median_lon = scope.data[i].median_lon.toFixed(5);
+                    }
+                    scope.data[i].grouped_coords_length = coodsToSort.lat.length;
+
                     scope.data[i].center_lat = sum.lat.toFixed(5);
                     scope.data[i].center_lon = sum.lon.toFixed(5);
                     break;
                 }
             }
         }
+    }
 
-        scope.points.reinit(scope.data);
-    };
+    function bindStopsToButtons() {
+
+    }
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         var R = 6371; // Radius of the earth in km

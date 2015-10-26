@@ -6,7 +6,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         var idArr = [];
 
         for (var i = 0; i < data.length; i++) {
-            data[i].row_id = i;
+            scope.data[i].coords_length = scope.data[i].coords.length;
             scope.rowCollection.push(data[i]);
 
             //marker = false;

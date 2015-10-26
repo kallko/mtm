@@ -97,6 +97,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
 
         scope.map.drawPoint = function (point) {
             var center = {lat: point.center_lat, lon: point.center_lon},
+                median = {lat: point.median_lat, lon: point.median_lon},
                 title;
 
             for(var i = 0; i < point.coords.length; i++) {
@@ -112,5 +113,6 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
 
             scope.map.setCenter(center);
             scope.map.drawMarker(center, 'c', title, 14, 'yellow', 'black');
+            scope.map.drawMarker(median, 'm', title, 14, 'yellow', 'black');
         }
 }]);

@@ -27,7 +27,7 @@
 }
 
 #points-table-holder table tr td {
-    padding: 3px;
+    padding: 3px 3px 3px 10px;
     margin: 0;
     font-size: 12px;
 }
@@ -74,24 +74,33 @@
 td, th {
     white-space: nowrap;
     overflow: hidden;
+    font-weight: normal;
 }
 
 .selected-row {
     background-color: #71d5d5 !important;
 }
 
-.id-name {
+.col-name {
     width: 200px;
 }
 
-.id-center-lat {
+.col-center-lat {
     width: 100px;
 }
 
-.id-center-lon {
+.col-center-lon {
     width: 100px;
 }
 
-.id-col {
+.col-col {
     width: 270px;
+}
+
+.col-buttons {
+    width: 100px;
+}
+
+.col-grouped-buttons {
+    width: 120px;
 }

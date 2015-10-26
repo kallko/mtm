@@ -4,21 +4,25 @@
            st-table="displayCollection">
         <thead>
             <tr>
-                <th class="id-name" >Название</th>
-                <th class="id-center-lat" >Широта</th>
-                <th class="id-center-lon" >Долгота</th>
-                <th class="id-address" >Адрес</th>
-                <th class="id-col" >ID</th>
+                <th class="col-name" >Название</th>
+                <th class="col-center-lat" >Широта</th>
+                <th class="col-center-lon" >Долгота</th>
+                <th class="col-address" >Адрес</th>
+                <th class="col-buttons" >Нажатий</th>
+                <th class="col-grouped-buttons" >Группированных нажатий</th>
+                <th class="col-col" >ID</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="row in displayCollection" ng-click="rowClick(row.row_id)"
-                    ng-show="row.id != ''" id="{{'row-' + row.row_id}}" >
-                <td title="{{row.name}}" class="id-name" >{{row.name}}</td>
-                <td class="id-center-lat" >{{row.center_lat}}</td>
-                <td class="id-center-lon" >{{row.center_lon}}</td>
-                <td title="{{row.adress}}" class="id-address" >{{row.adress}}</td>
-                <td class="id-col" >{{row.id}}</td>
+            <tr ng-repeat="row in displayCollection" ng-click="rowClick($index)"
+                    ng-show="row.id != ''" id="{{'row-' + $index}}" >
+                <td title="{{row.name}}" class="col-name" >{{row.name}}</td>
+                <td class="col-center-lat" >{{row.center_lat}}</td>
+                <td class="col-center-lon" >{{row.center_lon}}</td>
+                <td title="{{row.adress}}" class="col-address" >{{row.adress}}</td>
+                <td class="col-buttons" >{{row.coords_length}}</td>
+                <td class="col-grouped-buttons" >{{row.grouped_coords_length}}</td>
+                <td class="col-col" >{{row.id}}</td>
             </tr>
         </tbody>
     </table>
