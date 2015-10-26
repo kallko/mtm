@@ -1,4 +1,5 @@
-angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', function (scope, http, Track) {
+angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor',
+    function (scope, http, Track, Sensor) {
     scope.params = {};
     scope.map = {};
     scope.points = {};
@@ -6,22 +7,64 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
     scope.loadData = function () {
         console.log('loadData');
         scope.data = jsonData3;
+        scope.stops = [];
         scope.map.clearMap();
         scope.points.reinit(scope.data);
 
         if (scope.params.fromDate != '' && scope.params.fromDate != null) {
-            var from = scope.params.fromDate.getTime() / 1000,
-                to = (scope.params.toDate == '' || scope.params.toDate == null) ? Date.now() / 1000
-                : scope.params.toDate.getTime() / 1000;
-            Track.stops(190, from, to).success(function (data) {
-                console.log(data);
+            var from = parseInt(scope.params.fromDate.getTime() / 1000),
+                to = (scope.params.toDate == '' || scope.params.toDate == null) ? parseInt(Date.now() / 1000)
+                    : parseInt(scope.params.toDate.getTime() / 1000);
+
+            Sensor.all().success(function (sensors) {
+                console.log({sensors: sensors});
+                for (var i = 0; i < scope.data.length; i++) {
+                    for (var j = 0; j < scope.data[i].coords.length; j++) {
+                        for (var k = 0; k < sensors.length; k++) {
+                            if (scope.data[i].coords[j].transportid == sensors[k].TRANSPORT) {
+                                scope.data[i].coords[j].gid = sensors[k].GID;
+                                sensors[k].need_data = true;
+                                console.log('connected');
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                scope.stopsCollection = [];
+                for (i = 0; i < sensors.length; i++) {
+                    if (sensors[i].need_data) {
+
+                        (function(ii) {
+                            Track.stops(sensors[ii].GID, from, to).success(function (stops) {
+                                scope.stops.push(stops);
+                                sensors[ii].need_data = false;
+                                scope.stopsCollection = scope.stopsCollection.concat(stops.data);
+
+                                var haveMore = false;
+                                for (j = 0; j < sensors.length; j++) {
+                                    if (sensors[j].need_data) {
+                                        haveMore = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!haveMore) {
+                                    console.log('all stops downloaded!');
+                                }
+                            });
+                        })(i);
+                    }
+                }
             });
         }
     };
 
     scope.analyzeData = function () {
         console.log('analyzeData');
+        console.log(scope.stopsCollection);
         groupButtonsByRadius();
+        bindStopsToButtons();
         scope.points.reinit(scope.data);
     };
 
@@ -118,7 +161,31 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
     }
 
     function bindStopsToButtons() {
+        var stop,
+            button,
+            haveStop,
+            lastStop;
 
+        for (var i = 0; i < scope.rowCollection.length; i++) {
+            haveStop = false;
+            lastStop = undefined;
+            for (var j = 0; j < scope.stopsCollection.length; j++) {
+                if (scope.stopsCollection[j].state == 'MOVE') continue;
+                stop = scope.stopsCollection[j];
+                button = scope.rowCollection[i];
+                if(getDistanceFromLatLonInKm(stop.lat, stop.lon, button.median_lat, button.median_lon) * 1000 <=
+                    scope.params.stopRadius && !haveStop) {
+                    haveStop = true;
+                    lastStop = stop;
+                } else if (haveStop) {
+                    lastStop = undefined;
+                }
+            }
+
+            if(lastStop != undefined) {
+                button.stop = stop;
+            }
+        }
     }
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {

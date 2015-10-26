@@ -109,3 +109,16 @@ XMLConstructor.prototype.taskXML = function (taskNumber, taskDate) {
     str += this.xml.end;
     return str;
 };
+
+XMLConstructor.prototype.allSensorsXML = function() {
+    var str = '';
+    str += this.xml.begin;
+    str += this.xml.instructions.begin;
+
+    str += this.xml.instruction.sensors;
+    str += this.xml.instruction.end;
+
+    str += this.xml.instructions.end;
+    str += this.xml.end;
+    return str;
+};

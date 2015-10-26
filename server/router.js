@@ -28,6 +28,13 @@ router.route('/acp')
         res.sendFile('index.html', {root: './public/acp/'});
     });
 
+router.route('/acp/login')
+    .get(function (req, res) {
+        req.session.login = req.query.curuser;
+        console.log(req.query.curuser);
+        res.sendFile('index.html', {root: './public/acp/'});
+    });
+
 router.route('/acp/getstops/:gid/:from/:to')
     .get(function (req, res) {
         console.log('getstops');
@@ -36,11 +43,26 @@ router.route('/acp/getstops/:gid/:from/:to')
         });
     });
 
+router.route('/acp/getsensors')
+    .get(function (req, res) {
+        console.log('getsensors');
+        // TODO: !!! REMOVE !!!
+        if (req.session.login == null) {
+            req.session.login = config.defaultSoapLogin;
+        }
+        var soapManager = new soap(req.session.login);
+        soapManager.getAllSensors(function (data) {
+            res.status(200).json(data);
+        });
+
+        //res.status(200).json({status: 'ok'});
+    });
+
 router.route('/dailydata')
     .get(function (req, res) {
         // TODO: !!! REMOVE !!!
         if (req.session.login == null) {
-            req.session.login = 'k00056.0';
+            req.session.login = config.defaultSoapLogin;
         }
 
         var now = Date.now(),

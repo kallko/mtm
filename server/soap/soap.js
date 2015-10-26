@@ -289,4 +289,31 @@ SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, ca
 
 };
 
+SoapManager.prototype.getAllSensors = function(callback) {
+    var me = this;
+
+    soap.createClient(me.getFullUrl(), function (err, client) {
+        if (err) throw err;
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        console.log('getAllSensors', me.login);
+        client.runAsUser({'input_data': _xml.allSensorsXML(), 'user': me.login}, function (err, result) {
+            if (!err) {
+                console.log('getAllSensors OK');
+                parseXML(result.return, function (err, res) {
+                    res = res.MESSAGE.SENSORS[0].SENSOR;
+                    var sensors = [];
+                    for (var i = 0; i < res.length; i++) {
+                        sensors.push(res[i].$);
+                    }
+
+                    callback(sensors);
+                });
+            } else {
+                console.log('getAllSensors ERROR');
+                console.log(err.body);
+            }
+        });
+    });
+};
+
 // SoapManager.prototype.sendData()
