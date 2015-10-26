@@ -1,13 +1,22 @@
-angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', function (scope, http) {
+angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', function (scope, http, Track) {
     scope.params = {};
     scope.map = {};
     scope.points = {};
 
     scope.loadData = function () {
         console.log('loadData');
-        scope.data = jsonData2;
+        scope.data = jsonData;
         scope.map.clearMap();
         scope.points.reinit(scope.data);
+
+        if (scope.params.fromDate != '' && scope.params.fromDate != null) {
+            var from = scope.params.fromDate.getTime() / 1000,
+                to = (scope.params.toDate == '' || scope.params.toDate == null) ? Date.now() / 1000
+                : scope.params.toDate.getTime() / 1000;
+            Track.stops(190, from, to).success(function (data) {
+                console.log(data);
+            });
+        }
     };
 
     scope.analyzeData = function () {

@@ -11,7 +11,6 @@ var express = require('express'),
         config.router.url,
         config.aggregator.login,
         config.aggregator.password);
-;
 
 router.route('/')
     .get(function (req, res) {
@@ -27,6 +26,14 @@ router.route('/login')
 router.route('/acp')
     .get(function (req, res) {
         res.sendFile('index.html', {root: './public/acp/'});
+    });
+
+router.route('/acp/getstops/:gid/:from/:to')
+    .get(function (req, res) {
+        console.log('getstops');
+        tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function(data) {
+            res.status(200).json({gid: req.params.gid, data: data});
+        });
     });
 
 router.route('/dailydata')

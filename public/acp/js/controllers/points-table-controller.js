@@ -8,6 +8,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         for (var i = 0; i < data.length; i++) {
             data[i].row_id = i;
             scope.rowCollection.push(data[i]);
+
             //marker = false;
             //for (var j = 0; j < idArr.length; j++) {
             //    if (data[i].id == idArr[j]) {
