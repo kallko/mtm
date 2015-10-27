@@ -11,6 +11,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             scope.map.clearMap();
             scope.points.reinit(scope.data);
 
+            var counter = 0;
+
             if (scope.params.fromDate != '' && scope.params.fromDate != null) {
                 var from = parseInt(scope.params.fromDate.getTime() / 1000),
                     to = (scope.params.toDate == '' || scope.params.toDate == null) ? parseInt(Date.now() / 1000)
@@ -36,20 +38,13 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         if (sensors[i].need_data) {
 
                             (function (ii) {
+                                counter++;
                                 Track.stops(sensors[ii].GID, from, to).success(function (stops) {
                                     scope.stops.push(stops);
-                                    sensors[ii].need_data = false;
                                     scope.stopsCollection = scope.stopsCollection.concat(stops.data);
+                                    counter--;
 
-                                    var haveMore = false;
-                                    for (j = 0; j < sensors.length; j++) {
-                                        if (sensors[j].need_data) {
-                                            haveMore = true;
-                                            break;
-                                        }
-                                    }
-
-                                    if (!haveMore) {
+                                    if (counter == 0) {
                                         console.log('all stops downloaded!');
                                     }
                                 });
@@ -62,9 +57,10 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         scope.analyzeData = function () {
             console.log('analyzeData');
-            console.log(scope.stopsCollection);
+            console.log({stops: scope.stopsCollection});
             groupButtonsByRadius();
             bindStopsToButtons();
+            getTracksForStops();
             scope.points.reinit(scope.data);
         };
 
@@ -76,7 +72,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 tmpLat,
                 tmpLon,
                 tmpLen,
-                coodsToSort = {};
+                coodsToSort;
             for (var i = 0; i < scope.data.length; i++) {
                 for (var j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];
@@ -109,8 +105,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                             lon: 0
                         };
 
-                        coodsToSort.lat = [];
-                        coodsToSort.lon = [];
+                        coodsToSort = [];
 
                         for (k = 0; k < scope.data[i].coords.length; k++) {
                             bBtn = scope.data[i].coords[k];
@@ -124,36 +119,19 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                                 sum.lat += tmpLat;
                                 sum.lon += tmpLon;
 
-                                coodsToSort.lat.push(tmpLat);
-                                coodsToSort.lon.push(tmpLon);
+                                coodsToSort.push(bBtn);
                             }
                         }
 
                         sum.lat /= sum.count;
                         sum.lon /= sum.count;
 
-                        coodsToSort.lat.sort();
-                        coodsToSort.lon.sort();
+                        scope.data[i].median = findMedianForPoints(coodsToSort);
+                        scope.data[i].grouped_coords_length = sum.count;
 
-                        tmpLen = coodsToSort.lat.length;
-                        if (tmpLen % 2 == 1) {
-                            tmpLen = parseInt(tmpLen / 2);
-                            scope.data[i].median_lat = coodsToSort.lat[tmpLen];
-                            scope.data[i].median_lon = coodsToSort.lon[tmpLen];
-                        } else if (tmpLen > 0) {
-                            tmpLen = parseInt(tmpLen / 2);
-                            scope.data[i].median_lat = (coodsToSort.lat[tmpLen - 1] + coodsToSort.lat[tmpLen]) / 2;
-                            scope.data[i].median_lon = (coodsToSort.lon[tmpLen - 1] + coodsToSort.lon[tmpLen]) / 2;
-                        }
-
-                        if (coodsToSort.lat.length > 0) {
-                            scope.data[i].median_lat = scope.data[i].median_lat.toFixed(5);
-                            scope.data[i].median_lon = scope.data[i].median_lon.toFixed(5);
-                        }
-                        scope.data[i].grouped_coords_length = coodsToSort.lat.length;
-
-                        scope.data[i].center_lat = sum.lat.toFixed(5);
-                        scope.data[i].center_lon = sum.lon.toFixed(5);
+                        scope.data[i].center = {};
+                        scope.data[i].center.lat = sum.lat.toFixed(5);
+                        scope.data[i].center.lon = sum.lon.toFixed(5);
                         break;
                     }
                 }
@@ -177,14 +155,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 timeShift = 120 * 60;
 
             for (var i = 0; i < scope.data.length; i++) {
-                haveStop = false;
-                lastStop = undefined;
                 button = scope.data[i];
                 button.stops = [];
                 for (var j = 0; j < scope.stopsCollection.length; j++) {
                     if (scope.stopsCollection[j].state == 'MOVE') continue;
                     stop = scope.stopsCollection[j];
-                    if (getDistanceFromLatLonInKm(stop.lat, stop.lon, button.median_lat, button.median_lon) * 1000 <=
+                    if (getDistanceFromLatLonInKm(stop.lat, stop.lon, button.median.lat, button.median.lon) * 1000 <=
                         scope.params.stopRadius) {
                         for (var k = 0; k < button.coords.length; k++) {
                             buttonPush = button.coords[k];
@@ -194,12 +170,69 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                             if (buttonPush.time_ts + timeShift > stop.t1 &&
                                 buttonPush.time_ts - timeShift < stop.t1) {
+                                stop.gid = buttonPush.gid;
                                 button.stops.push(stop);
                             }
                         }
                     }
                 }
             }
+        }
+
+        function getTracksForStops() {
+            var counter = 0;
+            for (var i = 0; i < scope.data.length; i++) {
+                for (var j = 0; j < scope.data[i].stops.length; j++) {
+                    (function(ii, jj) {
+                        var stop = scope.data[ii].stops[jj];
+                        counter++;
+                        Track.track(stop.gid, stop.t1, stop.t2).success(function (track) {
+                            stop.track = track.data;
+                            stop.median = findMedianForPoints(track.data);
+                            counter--;
+
+                            if (counter == 0) {
+                                console.log('all tracks downloaded!');
+                            }
+                        });
+                    })(i, j);
+                }
+            }
+        }
+
+        function findMedianForPoints(points) {
+            var coodsToSort = {
+                    lat: [],
+                    lon: []
+                },
+                tmpLen,
+                median= {};
+
+            for (var i = 0; i < points.length; i++) {
+                coodsToSort.lat.push(points[i].lat);
+                coodsToSort.lon.push(points[i].lon);
+            }
+
+            coodsToSort.lat.sort();
+            coodsToSort.lon.sort();
+
+            tmpLen = coodsToSort.lat.length;
+            if (tmpLen % 2 == 1) {
+                tmpLen = parseInt(tmpLen / 2);
+                median.lat = coodsToSort.lat[tmpLen];
+                median.lon = coodsToSort.lon[tmpLen];
+            } else if (tmpLen > 0) {
+                tmpLen = parseInt(tmpLen / 2);
+                median.lat = (coodsToSort.lat[tmpLen - 1] + coodsToSort.lat[tmpLen]) / 2;
+                median.lon = (coodsToSort.lon[tmpLen - 1] + coodsToSort.lon[tmpLen]) / 2;
+            }
+
+            if (coodsToSort.lat.length > 0) {
+                median.lat = median.lat.toFixed(5);
+                median.lon = median.lon.toFixed(5);
+            }
+
+            return median;
         }
 
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {

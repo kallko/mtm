@@ -43,6 +43,14 @@ router.route('/acp/getstops/:gid/:from/:to')
         });
     });
 
+router.route('/acp/gettracks/:gid/:from/:to')
+    .get(function (req, res) {
+        console.log('gettracks');
+        tracksManager.getTrack(req.params.gid, req.params.from, req.params.to, function(data) {
+            res.status(200).json({gid: req.params.gid, data: data});
+        });
+    });
+
 router.route('/acp/getsensors')
     .get(function (req, res) {
         console.log('getsensors');

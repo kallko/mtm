@@ -93,9 +93,11 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
 };
 
 TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
-                                                    stop_s, stop_d, move_s, move_d) {
+                                                    stop_s, stop_d, move_s, move_d, op) {
+    op = typeof op !== 'undefined' ?  op : 'states';
+
     return this.aggregatorUrl
-        + 'states'
+        + op
         + '?login=' + this.login
         + '&pass=' + this.password
         + '&from=' + from
@@ -320,6 +322,23 @@ TracksManager.prototype.getStops = function (gid, from, to, callback) {
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             console.log('callback get stops');
+            callback(body);
+        }
+    });
+};
+
+TracksManager.prototype.getTrack = function (gid, from, to, callback) {
+    var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
+        this.stop_d, this.move_s, this.move_d, 'messages');
+
+    console.log(url + '&gid=' + gid);
+
+    request({
+        url: url + '&gid=' + gid,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            console.log('callback get track');
             callback(body);
         }
     });
