@@ -152,7 +152,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             var stop,
                 button,
                 buttonPush,
-                timeShift = 120 * 60;
+                timeShift = 60 * 12 * 60;
 
             for (var i = 0; i < scope.data.length; i++) {
                 button = scope.data[i];
@@ -164,6 +164,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         scope.params.stopRadius) {
                         for (var k = 0; k < button.coords.length; k++) {
                             buttonPush = button.coords[k];
+                            if (!buttonPush.inRadius) continue;
+
                             if (buttonPush.time_ts == undefined) {
                                 buttonPush.time_ts = strToTstamp(buttonPush.time);
                             }
@@ -171,6 +173,10 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                             if (buttonPush.time_ts + timeShift > stop.t1 &&
                                 buttonPush.time_ts - timeShift < stop.t1) {
                                 stop.gid = buttonPush.gid;
+                                if(buttonPush.stops == null) {
+                                    buttonPush.stops = [];
+                                }
+                                buttonPush.stops.push(stop);
                                 button.stops.push(stop);
                             }
                         }

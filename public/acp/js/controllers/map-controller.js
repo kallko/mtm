@@ -28,6 +28,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
+            map.options.maxZoom = 20;
 
             L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
 
@@ -102,6 +103,18 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
                 title = 'Нажатие #' + (i + 1) + '\n';
                 title += point.coords[i].time;
                 scope.map.drawMarker(point.coords[i], i + 1, title, 14, '#40CAF7', 'black');
+
+                for(var j = 0; point.coords[i].stops != null && j < point.coords[i].stops.length; j++) {
+                    title = 'Стоп #' + (j + 1) + '\n';
+                    title += 'Точки #' + (i + 1) + '\n';
+                    title += new Date(point.coords[i].stops[j].t1 * 1000);
+                    scope.map.drawMarker(point.coords[i].stops[j], j + 1, title, 14, 'lightgreen', 'black');
+                    L.polyline([point.coords[i].stops[j], point.coords[i]], {
+                        color: 'black',
+                        weight: 1,
+                        opacity: 1
+                    }).addTo(map);
+                }
             }
 
             title = 'Центральная точка\n';
@@ -110,8 +123,8 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
             title += 'ID: ' + point.id + '\n';
 
             scope.map.setCenter(point.center);
-            scope.map.drawMarker(point.center, 'c', title, 14, 'yellow', 'black');
-            scope.map.drawMarker(point.median, 'm', title, 14, 'yellow', 'black');
+            //scope.map.drawMarker(point.center, 'c', title, 14, 'yellow', 'black');
+            //scope.map.drawMarker(point.median, 'm', title, 14, 'yellow', 'black');
             scope.map.drawMarker(point.new_position, 'r', title, 14, 'yellow', 'black');
         }
 }]);
