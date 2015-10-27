@@ -30,17 +30,15 @@
 
 <div id="setting-holder" ng-controller="SettingController" >
     <div class="holder" >
-        <span class="input-label">Радиус (нажатия)</span>
+        <span class="input-label">R нажатий</span>
         <input type="range" min="40" max="150" ng-model="params.mobilePushRadius"/>
         <span class="input-value">{{params.mobilePushRadius}}</span>
 
-        <span class="input-label">Радиус (стопы)</span>
+        <span class="input-label">R стопов</span>
         <input type="range" min="40" max="150" ng-model="params.stopRadius"/>
         <span class="input-value">{{params.stopRadius}}</span>
 
-        <span class="input-label">Период </span>
         <input type="date" ng-model="params.fromDate"/>
-
         <span class="input-label"> - </span>
         <input type="date" ng-model="params.toDate"/>
 

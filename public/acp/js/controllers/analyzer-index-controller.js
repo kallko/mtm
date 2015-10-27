@@ -160,33 +160,44 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
         }
 
+        function strToTstamp(strDate) {
+            var parts = strDate.split(' '),
+                _date = parts[0].split('.'),
+                _time = parts[1].split(':');
+
+            return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+        }
+
         function bindStopsToButtons() {
+            if (scope.stopsCollection == undefined) return;
+
             var stop,
                 button,
-                haveStop,
-                lastStop;
+                buttonPush,
+                timeShift = 120 * 60;
 
             for (var i = 0; i < scope.data.length; i++) {
                 haveStop = false;
                 lastStop = undefined;
+                button = scope.data[i];
+                button.stops = [];
                 for (var j = 0; j < scope.stopsCollection.length; j++) {
                     if (scope.stopsCollection[j].state == 'MOVE') continue;
                     stop = scope.stopsCollection[j];
-                    button = scope.data[i];
                     if (getDistanceFromLatLonInKm(stop.lat, stop.lon, button.median_lat, button.median_lon) * 1000 <=
-                        scope.params.stopRadius && !haveStop) {
-                        haveStop = true;
-                        lastStop = stop;
-                        console.log(i, 'Got one!');
-                    } else if (haveStop) {
-                        lastStop = undefined;
-                        console.log(i, 'More then one!');
-                    }
-                }
+                        scope.params.stopRadius) {
+                        for (var k = 0; k < button.coords.length; k++) {
+                            buttonPush = button.coords[k];
+                            if (buttonPush.time_ts == undefined) {
+                                buttonPush.time_ts = strToTstamp(buttonPush.time);
+                            }
 
-                if (lastStop != undefined) {
-                    button.stop = stop;
-                    console.log('button.stop = stop');
+                            if (buttonPush.time_ts + timeShift > stop.t1 &&
+                                buttonPush.time_ts - timeShift < stop.t1) {
+                                button.stops.push(stop);
+                            }
+                        }
+                    }
                 }
             }
         }

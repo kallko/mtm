@@ -4,7 +4,7 @@ var config = {
         tracks: false
     },
 
-    defaultSoapLogin: 'k00056.0',
+    defaultSoapLogin: 'ids.dsp',
 
     aggregator: {
         //url: 'http://62.205.137.118:9001/',
