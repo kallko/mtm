@@ -183,7 +183,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             var counter = 0;
             for (var i = 0; i < scope.data.length; i++) {
                 for (var j = 0; j < scope.data[i].stops.length; j++) {
-                    (function(ii, jj) {
+                    (function (ii, jj) {
                         var stop = scope.data[ii].stops[jj];
                         counter++;
                         Track.track(stop.gid, stop.t1, stop.t2).success(function (track) {
@@ -193,6 +193,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                             if (counter == 0) {
                                 console.log('all tracks downloaded!');
+                                findRealPointPosition();
                             }
                         });
                     })(i, j);
@@ -206,7 +207,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     lon: []
                 },
                 tmpLen,
-                median= {};
+                median = {};
 
             for (var i = 0; i < points.length; i++) {
                 coodsToSort.lat.push(points[i].lat);
@@ -223,16 +224,34 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 median.lon = coodsToSort.lon[tmpLen];
             } else if (tmpLen > 0) {
                 tmpLen = parseInt(tmpLen / 2);
-                median.lat = (coodsToSort.lat[tmpLen - 1] + coodsToSort.lat[tmpLen]) / 2;
-                median.lon = (coodsToSort.lon[tmpLen - 1] + coodsToSort.lon[tmpLen]) / 2;
+                median.lat = (parseFloat(coodsToSort.lat[tmpLen - 1]) + parseFloat(coodsToSort.lat[tmpLen])) / 2;
+                median.lon = (parseFloat(coodsToSort.lon[tmpLen - 1]) + parseFloat(coodsToSort.lon[tmpLen])) / 2;
             }
 
             if (coodsToSort.lat.length > 0) {
-                median.lat = median.lat.toFixed(5);
-                median.lon = median.lon.toFixed(5);
+                median.lat = parseFloat(median.lat).toFixed(5);
+                median.lon = parseFloat(median.lon).toFixed(5);
             }
 
             return median;
+        }
+
+        function findRealPointPosition() {
+            var points;
+            console.log('findRealPointPosition', scope.data);
+
+            for (var i = 0; i < scope.data.length; i++) {
+                points = [];
+                for (var j = 0; j < scope.data[i].stops.length; j++) {
+                    points.push(scope.data[i].stops[j].median);
+                }
+
+                for (j = 0; j < scope.data[i].coords.length; j++) {
+                    points.push( scope.data[i].coords[j]);
+                }
+
+                scope.data[i].new_position = findMedianForPoints(points);
+            }
         }
 
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {

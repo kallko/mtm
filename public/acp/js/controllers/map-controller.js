@@ -96,9 +96,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         }
 
         scope.map.drawPoint = function (point) {
-            var center = {lat: point.center.lat, lon: point.center.lon},
-                median = {lat: point.median.lat, lon: point.median.lon},
-                title;
+            var title;
 
             for(var i = 0; i < point.coords.length; i++) {
                 title = 'Нажатие #' + (i + 1) + '\n';
@@ -111,8 +109,9 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
             title += 'Адрес: ' + point.adress + '\n';
             title += 'ID: ' + point.id + '\n';
 
-            scope.map.setCenter(center);
-            scope.map.drawMarker(center, 'c', title, 14, 'yellow', 'black');
-            scope.map.drawMarker(median, 'm', title, 14, 'yellow', 'black');
+            scope.map.setCenter(point.center);
+            scope.map.drawMarker(point.center, 'c', title, 14, 'yellow', 'black');
+            scope.map.drawMarker(point.median, 'm', title, 14, 'yellow', 'black');
+            scope.map.drawMarker(point.new_position, 'r', title, 14, 'yellow', 'black');
         }
 }]);

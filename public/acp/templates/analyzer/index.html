@@ -17,8 +17,8 @@
             <tr ng-repeat="row in displayCollection" ng-click="rowClick($index)"
                     ng-show="row.id != ''" id="{{'row-' + $index}}" >
                 <td title="{{row.name}}" class="col-name" >{{row.name}}</td>
-                <td class="col-center-lat" >{{row.center_lat}}</td>
-                <td class="col-center-lon" >{{row.center_lon}}</td>
+                <td class="col-center-lat" >{{row.new_position.lat}}</td>
+                <td class="col-center-lon" >{{row.new_position.lon}}</td>
                 <td title="{{row.adress}}" class="col-address" >{{row.adress}}</td>
                 <td class="col-buttons" >{{row.coords_length}}</td>
                 <td class="col-grouped-buttons" >{{row.grouped_coords_length}}</td>

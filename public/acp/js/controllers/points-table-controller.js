@@ -40,7 +40,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         }
 
         var row = scope.rowCollection[row_id];
-        if (row == undefined || row.center_lat == undefined) return;
+        if (row == undefined || row.center.lat == undefined) return;
 
         scope.map.clearMap();
         scope.map.drawPoint(row);
