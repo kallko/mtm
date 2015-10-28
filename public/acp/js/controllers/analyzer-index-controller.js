@@ -7,7 +7,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         $('#log-div').text('Загружаем данные...');
         timeout(function() {
             loadData();
-        }, 2000);
+        }, 1200);
 
         function loadData () {
             console.log('loadData');
@@ -62,6 +62,11 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             //        }
             //    });
             //}
+        }
+
+        scope.saveData = function () {
+            // TODO json
+            console.log('saveData');
         };
 
         scope.analyzeData = function () {

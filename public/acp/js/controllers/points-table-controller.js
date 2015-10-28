@@ -3,7 +3,8 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
     scope.points.reinit = function (data) {
         scope.selectedRow = -1;
         scope.rowCollection = [];
-        var idArr = [];
+        var idArr = [],
+            lastRowId = -1;
 
         for (var i = 0; i < data.length; i++) {
             scope.data[i].coords_length = scope.data[i].coords.length;
@@ -29,7 +30,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
     };
 
     scope.rowClick = function (row_id) {
-        console.log(row_id);
+        lastRowId = row_id;
 
         $('.selected-row').removeClass('selected-row');
         if (scope.selectedRow == row_id) {
@@ -45,5 +46,18 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         scope.map.clearMap();
         scope.map.drawPoint(row);
     };
+
+    scope.points.setNewLatLon = function (latlon) {
+        console.log(latlon);
+        if (scope.selectedRow != -1) {
+            var row = scope.rowCollection[scope.selectedRow];
+            row.new_position.lat = parseFloat(latlon.lat.toFixed(5));
+            row.new_position.lon = parseFloat(latlon.lng.toFixed(5));
+
+            point = $('#row-' + lastRowId);
+            point.trigger('click');
+            point.trigger('click');
+        }
+    }
 
 }]);

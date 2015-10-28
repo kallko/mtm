@@ -86,11 +86,11 @@ td, th {
 }
 
 .col-center-lat {
-    width: 100px;
+    width: 70px;
 }
 
 .col-center-lon {
-    width: 100px;
+    width: 70px;
 }
 
 .id-col {
@@ -107,4 +107,8 @@ td, th {
 
 .prc-col {
     width: 120px;
+}
+
+button {
+    float: right;
 }
