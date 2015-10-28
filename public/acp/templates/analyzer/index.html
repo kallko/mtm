@@ -10,19 +10,22 @@
                 <th class="col-address" >Адрес</th>
                 <th class="col-buttons" >Нажатий</th>
                 <th class="col-grouped-buttons" >Группированных нажатий</th>
-                <th class="col-col" >ID</th>
+                <th class="id-col" >ID</th>
+                <th class="prc-col" >Вне группы</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="row in displayCollection" ng-click="rowClick($index)"
-                    ng-show="row.id != ''" id="{{'row-' + $index}}" >
+                    ng-show="row.id != '' && !row.solved"
+                id="{{'row-' + $index}}" >
                 <td title="{{row.name}}" class="col-name" >{{row.name}}</td>
                 <td class="col-center-lat" >{{row.new_position.lat}}</td>
                 <td class="col-center-lon" >{{row.new_position.lon}}</td>
                 <td title="{{row.adress}}" class="col-address" >{{row.adress}}</td>
                 <td class="col-buttons" >{{row.coords_length}}</td>
                 <td class="col-grouped-buttons" >{{row.grouped_coords_length}}</td>
-                <td class="col-col" >{{row.id}}</td>
+                <td class="id-col" >{{row.id}}</td>
+                <td class="prc-col" >{{row.outGroupPrc}}</td>
             </tr>
         </tbody>
     </table>
@@ -31,7 +34,7 @@
 <div id="setting-holder" ng-controller="SettingController" >
     <div class="holder" >
         <span class="input-label">R нажатий</span>
-        <input type="range" min="40" max="150" ng-model="params.mobilePushRadius"/>
+        <input type="range" min="50" max="350" ng-model="params.mobilePushRadius"/>
         <span class="input-value">{{params.mobilePushRadius}}   </span>
 
 

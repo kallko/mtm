@@ -11,7 +11,7 @@
 
 #points-table-holder {
     height: 400px;
-    width: 55%;
+    width: 100%;
     overflow-y: scroll;
 }
 
@@ -93,7 +93,7 @@ td, th {
     width: 100px;
 }
 
-.col-col {
+.id-col {
     width: 270px;
 }
 
@@ -102,5 +102,9 @@ td, th {
 }
 
 .col-grouped-buttons {
+    width: 120px;
+}
+
+.prc-col {
     width: 120px;
 }

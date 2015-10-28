@@ -7,6 +7,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         scope.loadData = function () {
             console.log('loadData');
             scope.data = jsonData2;
+            groupButtonsByRadius();
             scope.map.clearMap();
             scope.points.reinit(scope.data);
 
@@ -75,7 +76,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 tmpLat,
                 tmpLon,
                 tmpLen,
-                coodsToSort;
+                coodsToSort,
+                totalCount = 0;
             for (var i = 0; i < scope.data.length; i++) {
                 for (var j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];
@@ -109,7 +111,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         };
 
                         coodsToSort = [];
-
                         for (k = 0; k < scope.data[i].coords.length; k++) {
                             bBtn = scope.data[i].coords[k];
                             bBtn.inRadius = getDistanceFromLatLonInKm(aBtn.lat, aBtn.lon, bBtn.lat, bBtn.lon) * 1000 <=
@@ -131,6 +132,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                         scope.data[i].median = findMedianForPoints(coodsToSort);
                         scope.data[i].grouped_coords_length = sum.count;
+                        scope.data[i].outGroupPrc = parseFloat(((scope.data[i].coords.length - sum.count) / scope.data[i].coords.length * 100).toFixed(2));
+                        scope.data[i].solved = scope.data[i].grouped_coords_length > 1 && scope.data[i].outGroupPrc <= 50;
+
+                        if (!scope.data[i].solved) {
+                            totalCount++;
+                        }
 
                         scope.data[i].center = {};
                         scope.data[i].center.lat = sum.lat.toFixed(5);
@@ -140,6 +147,9 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     }
                 }
             }
+
+            console.log('Проблемных точек', totalCount);
+            console.log('Решенных точек', scope.data.length - totalCount);
         }
 
         function strToTstamp(strDate) {
