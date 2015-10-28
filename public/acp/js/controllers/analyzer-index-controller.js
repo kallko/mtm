@@ -1,10 +1,15 @@
-angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor',
-    function (scope, http, Track, Sensor) {
+angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor', '$timeout',
+    function (scope, http, Track, Sensor, timeout) {
         scope.params = {};
         scope.map = {};
         scope.points = {};
 
-        scope.loadData = function () {
+        $('#log-div').text('Загружаем данные...');
+        timeout(function() {
+            loadData();
+        }, 2000);
+
+        function loadData () {
             console.log('loadData');
             scope.data = jsonData2;
             groupButtonsByRadius();
@@ -168,8 +173,9 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 }
             }
 
-            console.log('Проблемных точек', totalCount);
-            console.log('Решенных точек', scope.data.length - totalCount);
+            //console.log('Проблемных точек', totalCount);
+            //console.log('Решенных точек', scope.data.length - totalCount);
+            $('#log-div').text('Данные загружены. Точек требующих вмешательства - ' +  totalCount + ', автоматически решенных точек - ' + (scope.data.length - totalCount));
         }
 
         function strToTstamp(strDate) {

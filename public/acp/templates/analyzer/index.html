@@ -33,13 +33,7 @@
 
 <div id="setting-holder" ng-controller="SettingController" >
     <div class="holder" >
-        <span class="input-label">R нажатий</span>
-        <input type="range" min="50" max="350" ng-model="params.mobilePushRadius"/>
-        <span class="input-value">{{params.mobilePushRadius}}   </span>
-
-
-        <button ng-click="loadData()" class="btn btn-primary btn-sm" >загрузить</button>
-        <button ng-click="analyzeData()" class="btn btn-primary btn-sm" >анализировать</button>
+        <div id="log-div" ></div>
     </div>
 </div>
 
