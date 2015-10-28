@@ -38,25 +38,17 @@ router.route('/acp/login')
 
 router.route('/acp/savesolution')
     .post(function (req, res) {
-        if (req.session.login == null) {
-            req.session.login = config.defaultSoapLogin;
-        }
-
         console.log('savesolution');
         console.log(req.body.solution.length);
-        log.toFLog(req.session.login + '_solution.json', req.body.solution);
+        log.toFLog(config.defaultMonitoringLogin + '_solution.json', req.body.solution);
         res.status(200).json({status: 'saved'});
     });
 
 router.route('/acp/loadsolution')
     .get(function (req, res) {
-        if (req.session.login == null) {
-            req.session.login = config.defaultSoapLogin;
-        }
+        console.log('loadsolution for ', config.defaultMonitoringLogin);
 
-        console.log('loadsolution for ', req.session.login);
-
-        fs.readFile('./logs/' + req.session.login + '_solution.json', 'utf8', function (err, data) {
+        fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
             if (err) {
                 console.log(err);
                 return err;
@@ -108,11 +100,7 @@ router.route('/acp/gettracks/:gid/:from/:to')
 router.route('/acp/getsensors')
     .get(function (req, res) {
         console.log('getsensors');
-        // TODO: !!! REMOVE !!!
-        if (req.session.login == null) {
-            req.session.login = config.defaultSoapLogin;
-        }
-        var soapManager = new soap(req.session.login);
+        var soapManager = new soap(config.defaultMonitoringLogin);
         soapManager.getAllSensors(function (data) {
             res.status(200).json(data);
         });
