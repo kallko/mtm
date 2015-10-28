@@ -4,6 +4,7 @@ var express = require('express'),
     soap = require('./soap/soap'),
     tracks = require('./tracks'),
     log = new (require('./logging'))('./logs'),
+    fs = require('fs'),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     cashedDataArr = [],
     tracksManager = new tracks(
@@ -35,12 +36,35 @@ router.route('/acp/login')
         res.sendFile('index.html', {root: './public/acp/'});
     });
 
+var counter = 0;
 router.route('/acp/getstops/:gid/:from/:to')
     .get(function (req, res) {
-        console.log('getstops');
-        tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function(data) {
-            res.status(200).json({gid: req.params.gid, data: data});
+        //console.log('getstops');
+
+        //fs.readFile('./logs/test.txt', 'utf8', function (err, data) {
+        //    console.log(err, data);
+        //});
+
+
+        fs.readFile('./logs/' + req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', 'utf8', function (err, data) {
+            if (err) {
+                console.log('new request for GID #' + req.params.gid);
+                tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function(data) {
+                    counter++;
+                    console.log('loaded for GID#' + req.params.gid + ', counter = ' + counter);
+                    log.toFLog(req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', data);
+                    res.status(200).json({gid: req.params.gid, data: data});
+                });
+            } else {
+                console.log('GID #' + req.params.gid + ' LOADED FROM CACHE!');
+                res.status(200).json({gid: req.params.gid, data: JSON.parse(data)});
+            }
         });
+
+        //tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function(data) {
+        //    log.toFLog(req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', data);
+        //    res.status(200).json({gid: req.params.gid, data: data});
+        //});
     });
 
 router.route('/acp/gettracks/:gid/:from/:to')

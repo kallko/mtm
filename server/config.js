@@ -4,6 +4,7 @@ var config = {
         tracks: false
     },
 
+    //defaultSoapLogin: 'k00056.0',
     defaultSoapLogin: 'ids.dsp',
 
     aggregator: {

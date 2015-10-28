@@ -7,7 +7,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         scope.loadData = function () {
             console.log('loadData');
             scope.data = jsonData3;
-            scope.stops = [];
             scope.map.clearMap();
             scope.points.reinit(scope.data);
 
@@ -39,8 +38,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                             (function (ii) {
                                 counter++;
+                                //console.log('GO #', ii);
                                 Track.stops(sensors[ii].GID, from, to).success(function (stops) {
-                                    scope.stops.push(stops);
+                                    for(var i = 0; i < stops.data.length; i++) {
+                                        stops.data[i].transportid = sensors[ii].TRANSPORT;
+                                    }
+
                                     scope.stopsCollection = scope.stopsCollection.concat(stops.data);
                                     counter--;
 
@@ -170,7 +173,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                                 buttonPush.time_ts = strToTstamp(buttonPush.time);
                             }
 
-                            if (buttonPush.time_ts + timeShift > stop.t1 &&
+                            if (stop.transportid == buttonPush.transportid &&
+                                buttonPush.time_ts + timeShift > stop.t1 &&
                                 buttonPush.time_ts - timeShift < stop.t1) {
                                 stop.gid = buttonPush.gid;
                                 if(buttonPush.stops == null) {
