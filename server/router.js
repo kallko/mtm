@@ -45,7 +45,6 @@ router.route('/acp/getstops/:gid/:from/:to')
         //    console.log(err, data);
         //});
 
-
         fs.readFile('./logs/' + req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', 'utf8', function (err, data) {
             if (err) {
                 console.log('new request for GID #' + req.params.gid);

@@ -6,64 +6,64 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         scope.loadData = function () {
             console.log('loadData');
-            scope.data = jsonData3;
+            scope.data = jsonData2;
             scope.map.clearMap();
             scope.points.reinit(scope.data);
 
             var counter = 0;
 
-            if (scope.params.fromDate != '' && scope.params.fromDate != null) {
-                var from = parseInt(scope.params.fromDate.getTime() / 1000),
-                    to = (scope.params.toDate == '' || scope.params.toDate == null) ? parseInt(Date.now() / 1000)
-                        : parseInt(scope.params.toDate.getTime() / 1000);
-
-                Sensor.all().success(function (sensors) {
-                    console.log({sensors: sensors});
-                    for (var i = 0; i < scope.data.length; i++) {
-                        for (var j = 0; j < scope.data[i].coords.length; j++) {
-                            for (var k = 0; k < sensors.length; k++) {
-                                if (scope.data[i].coords[j].transportid == sensors[k].TRANSPORT) {
-                                    scope.data[i].coords[j].gid = sensors[k].GID;
-                                    sensors[k].need_data = true;
-                                    console.log('connected');
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    scope.stopsCollection = [];
-                    for (i = 0; i < sensors.length; i++) {
-                        if (sensors[i].need_data) {
-
-                            (function (ii) {
-                                counter++;
-                                //console.log('GO #', ii);
-                                Track.stops(sensors[ii].GID, from, to).success(function (stops) {
-                                    for(var i = 0; i < stops.data.length; i++) {
-                                        stops.data[i].transportid = sensors[ii].TRANSPORT;
-                                    }
-
-                                    scope.stopsCollection = scope.stopsCollection.concat(stops.data);
-                                    counter--;
-
-                                    if (counter == 0) {
-                                        console.log('all stops downloaded!');
-                                    }
-                                });
-                            })(i);
-                        }
-                    }
-                });
-            }
+            //if (scope.params.fromDate != '' && scope.params.fromDate != null) {
+            //    var from = parseInt(scope.params.fromDate.getTime() / 1000),
+            //        to = (scope.params.toDate == '' || scope.params.toDate == null) ? parseInt(Date.now() / 1000)
+            //            : parseInt(scope.params.toDate.getTime() / 1000);
+            //
+            //    Sensor.all().success(function (sensors) {
+            //        console.log({sensors: sensors});
+            //        for (var i = 0; i < scope.data.length; i++) {
+            //            for (var j = 0; j < scope.data[i].coords.length; j++) {
+            //                for (var k = 0; k < sensors.length; k++) {
+            //                    if (scope.data[i].coords[j].transportid == sensors[k].TRANSPORT) {
+            //                        scope.data[i].coords[j].gid = sensors[k].GID;
+            //                        sensors[k].need_data = true;
+            //                        console.log('connected');
+            //                        break;
+            //                    }
+            //                }
+            //            }
+            //        }
+            //
+            //        scope.stopsCollection = [];
+            //        for (i = 0; i < sensors.length; i++) {
+            //            if (sensors[i].need_data) {
+            //
+            //                (function (ii) {
+            //                    counter++;
+            //                    //console.log('GO #', ii);
+            //                    Track.stops(sensors[ii].GID, from, to).success(function (stops) {
+            //                        for(var i = 0; i < stops.data.length; i++) {
+            //                            stops.data[i].transportid = sensors[ii].TRANSPORT;
+            //                        }
+            //
+            //                        scope.stopsCollection = scope.stopsCollection.concat(stops.data);
+            //                        counter--;
+            //
+            //                        if (counter == 0) {
+            //                            console.log('all stops downloaded!');
+            //                        }
+            //                    });
+            //                })(i);
+            //            }
+            //        }
+            //    });
+            //}
         };
 
         scope.analyzeData = function () {
             console.log('analyzeData');
-            console.log({stops: scope.stopsCollection});
+            //console.log({stops: scope.stopsCollection});
             groupButtonsByRadius();
-            bindStopsToButtons();
-            getTracksForStops();
+            //bindStopsToButtons();
+            //getTracksForStops();
             scope.points.reinit(scope.data);
         };
 
@@ -135,6 +135,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         scope.data[i].center = {};
                         scope.data[i].center.lat = sum.lat.toFixed(5);
                         scope.data[i].center.lon = sum.lon.toFixed(5);
+                        scope.data[i].new_position = scope.data[i].median;
                         break;
                     }
                 }

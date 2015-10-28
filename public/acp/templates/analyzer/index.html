@@ -34,13 +34,6 @@
         <input type="range" min="40" max="150" ng-model="params.mobilePushRadius"/>
         <span class="input-value">{{params.mobilePushRadius}}   </span>
 
-        <span class="input-label">R стопов</span>
-        <input type="range" min="40" max="150" ng-model="params.stopRadius"/>
-        <span class="input-value">{{params.stopRadius}}</span>
-
-        <input type="date" ng-model="params.fromDate"/>
-        <span class="input-label"> - </span>
-        <input type="date" ng-model="params.toDate"/>
 
         <button ng-click="loadData()" class="btn btn-primary btn-sm" >загрузить</button>
         <button ng-click="analyzeData()" class="btn btn-primary btn-sm" >анализировать</button>
