@@ -26,7 +26,6 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
 
         scope.displayCollection = [].concat(scope.rowCollection);
         console.log('reinit', {'scope.rowCollection': scope.rowCollection});
-        //console.log('idArr', {'idArr': idArr});
     };
 
     scope.rowClick = function (row_id) {
@@ -48,13 +47,13 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
     };
 
     scope.points.setNewLatLon = function (latlon) {
-        console.log(latlon);
         if (scope.selectedRow != -1) {
             var row = scope.rowCollection[scope.selectedRow];
             row.new_position.lat = parseFloat(latlon.lat.toFixed(5));
             row.new_position.lon = parseFloat(latlon.lng.toFixed(5));
+            row.changed = true;
 
-            point = $('#row-' + lastRowId);
+            var point = $('#row-' + lastRowId);
             point.trigger('click');
             point.trigger('click');
         }

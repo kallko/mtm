@@ -2,6 +2,10 @@ angular.module('acp').factory('Solution', ['$http', function SolutionFactory(htt
     return {
         save: function(solution) {
             return http.post('./savesolution', {solution: solution});
+        },
+
+        load: function() {
+            return http.get('./loadsolution');
         }
     };
 }]);

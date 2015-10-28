@@ -11,12 +11,15 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         function loadData () {
             console.log('loadData');
-            scope.data = jsonData2;
-            groupButtonsByRadius();
-            scope.map.clearMap();
-            scope.points.reinit(scope.data);
+            //scope.data = jsonData2;
+            Solution.load().success( function(data) {
+                scope.data = data;
+                groupButtonsByRadius();
+                scope.map.clearMap();
+                scope.points.reinit(scope.data);
 
-            var counter = 0;
+                var counter = 0;
+            });
 
             //if (scope.params.fromDate != '' && scope.params.fromDate != null) {
             //    var from = parseInt(scope.params.fromDate.getTime() / 1000),
@@ -66,7 +69,14 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         scope.saveData = function () {
             console.log('saveData');
-            Solution.save(scope.data);
+            var logdiv = $('#log-div');
+            logdiv.text(' Сохраняю...');
+
+            timeout(function() {
+                Solution.save(scope.data).success(function (data) {
+                    logdiv.text('Сохранено!');
+                });
+            }, 100);
         };
 
         scope.analyzeData = function () {
@@ -89,6 +99,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 coodsToSort,
                 totalCount = 0;
             for (var i = 0; i < scope.data.length; i++) {
+                if (scope.data[i].changed) continue;
+
                 for (var j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];
                     aBtn.closePointsCount = 0;
@@ -109,6 +121,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
 
             for (i = 0; i < scope.data.length; i++) {
+                if (scope.data[i].changed) continue;
                 maxCount = -1;
                 for (j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];

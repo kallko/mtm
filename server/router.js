@@ -48,6 +48,25 @@ router.route('/acp/savesolution')
         res.status(200).json({status: 'saved'});
     });
 
+router.route('/acp/loadsolution')
+    .get(function (req, res) {
+        if (req.session.login == null) {
+            req.session.login = config.defaultSoapLogin;
+        }
+
+        console.log('loadsolution for ', req.session.login);
+
+        fs.readFile('./logs/' + req.session.login + '_solution.json', 'utf8', function (err, data) {
+            if (err) {
+                console.log(err);
+                return err;
+            } else {
+                console.log('Done!');
+                res.status(200).json(JSON.parse(data));
+            }
+        });
+    });
+
 var counter = 0;
 router.route('/acp/getstops/:gid/:from/:to')
     .get(function (req, res) {
