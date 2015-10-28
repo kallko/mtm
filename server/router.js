@@ -36,6 +36,18 @@ router.route('/acp/login')
         res.sendFile('index.html', {root: './public/acp/'});
     });
 
+router.route('/acp/savesolution')
+    .post(function (req, res) {
+        if (req.session.login == null) {
+            req.session.login = config.defaultSoapLogin;
+        }
+
+        console.log('savesolution');
+        console.log(req.body.solution.length);
+        log.toFLog(req.session.login + '_solution.json', req.body.solution);
+        res.status(200).json({status: 'saved'});
+    });
+
 var counter = 0;
 router.route('/acp/getstops/:gid/:from/:to')
     .get(function (req, res) {

@@ -1,5 +1,5 @@
-angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor', '$timeout',
-    function (scope, http, Track, Sensor, timeout) {
+angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor', '$timeout', 'Solution',
+    function (scope, http, Track, Sensor, timeout, Solution) {
         scope.params = {};
         scope.map = {};
         scope.points = {};
@@ -65,8 +65,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         }
 
         scope.saveData = function () {
-            // TODO json
             console.log('saveData');
+            Solution.save(scope.data);
         };
 
         scope.analyzeData = function () {
