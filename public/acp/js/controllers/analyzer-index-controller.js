@@ -89,6 +89,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                             aBtn.closePointsCount++;
                         }
                     }
+
+                    bBtn = scope.data[i];
+                    if (getDistanceFromLatLonInKm(aBtn.lat, aBtn.lon, bBtn.lat, bBtn.lon) * 1000 <=
+                        scope.params.mobilePushRadius) {
+                        aBtn.closePointsCount++;
+                    }
                 }
             }
 
@@ -125,6 +131,20 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                                 coodsToSort.push(bBtn);
                             }
+                        }
+
+                        bBtn = scope.data[i];
+                        bBtn.inRadius = getDistanceFromLatLonInKm(aBtn.lat, aBtn.lon, bBtn.lat, bBtn.lon) * 1000 <=
+                            scope.params.mobilePushRadius;
+                        if (bBtn.inRadius) {
+                            tmpLat = parseFloat(bBtn.lat);
+                            tmpLon = parseFloat(bBtn.lon);
+
+                            sum.count++;
+                            sum.lat += tmpLat;
+                            sum.lon += tmpLon;
+
+                            coodsToSort.push(bBtn);
                         }
 
                         sum.lat /= sum.count;

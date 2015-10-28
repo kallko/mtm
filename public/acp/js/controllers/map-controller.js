@@ -117,7 +117,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
                 }
             }
 
-            title = 'Центральная точка\n';
+            title = 'Новый центр\n';
             title += 'Название: ' + point.name + '\n';
             title += 'Адрес: ' + point.adress + '\n';
             title += 'ID: ' + point.id + '\n';
