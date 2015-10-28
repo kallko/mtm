@@ -181,7 +181,7 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, ch
     });
 };
 
-TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callback) {
+TracksManager.prototype.getAllStops = function (data, checkBeforeSend, callback) {
     console.log('=== getRealTracks ===');
 
     var now = new Date(),
@@ -204,11 +204,11 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
                         if (!error && response.statusCode === 200) {
                             console.log('sensor loaded', jj);
                             if (body == undefined || body == "invalid parameter 'gid'. ") {
-                                data.sensors[jj].real_track = undefined;
+                                data.sensors[jj].stops = undefined;
                             } else {
-                                data.sensors[jj].real_track = body;
+                                data.sensors[jj].stops = body;
                             }
-                            data.sensors[jj].real_track_loaded = true;
+                            data.sensors[jj].stops_loaded = true;
                             checkBeforeSend(data, callback);
                         }
                     });
@@ -227,8 +227,8 @@ TracksManager.prototype.getRealTracks = function (data, checkBeforeSend, callbac
     //        }, function (error, response, body) {
     //            if (!error && response.statusCode === 200) {
     //                console.log('sensor loaded', ii);
-    //                data.sensors[ii].real_track = body;
-    //                data.sensors[ii].real_track_loaded = true;
+    //                data.sensors[ii].stops = body;
+    //                data.sensors[ii].stops_loaded = true;
     //                checkBeforeSend(data, callback);
     //            }
     //        });

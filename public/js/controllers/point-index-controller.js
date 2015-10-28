@@ -129,9 +129,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     trackParts[i].data[0].state = 'MOVE';
                                     _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
 
-                                    var len = _data.routes[j].real_track.length - 1;
-                                    _data.routes[j].car_position = _data.routes[j].real_track[len].
-                                        coords[_data.routes[j].real_track[len].coords.length - 1];
+                                    var len = _data.routes[j].stops.length - 1;
+                                    _data.routes[j].car_position = _data.routes[j].stops[len].
+                                        coords[_data.routes[j].stops[len].coords.length - 1];
                                 }
                                 break;
                             }
@@ -202,7 +202,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function linkDataParts(data) {
-            console.log('Start linking ...');
+            console.log('Start linking ...', data);
             init();
 
             var tmpPoints,
@@ -216,7 +216,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var j = 0; j < data.transports.length; j++) {
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
                         data.transports[j].gid = data.sensors[i].GID;
-                        data.transports[j].real_track = data.sensors[i].real_track;
+                        data.transports[j].stops = data.sensors[i].stops;
                     }
                 }
             }
@@ -225,15 +225,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (j = 0; j < data.transports.length; j++) {
                     if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                         data.routes[i].transport = data.transports[j];
-                        data.routes[i].real_track = data.transports[j].real_track;
+                        data.routes[i].stops = data.transports[j].stops;
 
-                        if (data.transports[j].real_track != undefined &&
-                            data.routes[i].real_track.length > 0 &&
-                            data.routes[i].real_track != aggregatorError) {
-                            len = data.routes[i].real_track.length - 1;
-                            //console.log('NOT NULL', data.routes[i].real_track.length);
-                            data.routes[i].car_position = data.routes[i].real_track[len].
-                                coords[data.routes[i].real_track[len].coords.length - 1];
+                        if (data.transports[j].stops != undefined &&
+                            data.routes[i].stops.length > 0 &&
+                            data.routes[i].stops != aggregatorError) {
+                            len = data.routes[i].stops.length - 1;
+                            //console.log('NOT NULL', data.routes[i].stops.length);
+
+                            // TODO: new track source
+                            data.routes[i].car_position = data.routes[i].stops[len];
                         }
                         break;
                     }
@@ -411,10 +412,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 route.lastPointIndx = 0;
-                if (route.real_track != undefined) {
-                    for (j = 0; j < route.real_track.length; j++) {
-                        if (route.real_track[j].state == "ARRIVAL") {
-                            tmpArrival = route.real_track[j];
+                if (route.stops != undefined) {
+                    for (j = 0; j < route.stops.length; j++) {
+                        if (route.stops[j].state == "ARRIVAL") {
+                            tmpArrival = route.stops[j];
                             lastIndex = 0;
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
@@ -589,15 +590,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(new Date(_data.server_time * 1000));
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
-                if (route.real_track == undefined ||
-                    route.real_track.length == 0 ||
-                    route.real_track == aggregatorError) {
-                    route.real_track = undefined;
+                if (route.stops == undefined ||
+                    route.stops.length == 0 ||
+                    route.stops == aggregatorError) {
+                    route.stops = undefined;
                     continue;
                 }
 
                 point = route.car_position;
-                //console.log({car: route.car_position, real_track: route.real_track});
+                //console.log({car: route.car_position, stops: route.stops});
                 url = './findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;
 

@@ -58,7 +58,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         //for (var i = 0; i < jsonData.routes.length; i++) {
         //    tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
         //}
-        //tracksManager.getRealTracks(jsonData, checkBeforeSend, callback);
+        //tracksManager.getAllStops(jsonData, checkBeforeSend, callback);
 
         callback(jsonData);
     });
@@ -77,7 +77,7 @@ function checkBeforeSend(data, callback) {
     //}
 
     for (i = 0; i < data.sensors.length; i++) {
-        if (data.sensors[i].loading && !data.sensors[i].real_track_loaded) {
+        if (data.sensors[i].loading && !data.sensors[i].stops_loaded) {
             return;
         }
     }
@@ -88,7 +88,7 @@ function checkBeforeSend(data, callback) {
     }
 
     for (i = 0; i < data.sensors.length; i++) {
-        delete data.sensors[i].real_track_loaded;
+        delete data.sensors[i].stops_loaded;
         delete data.sensors[i].loading;
     }
 
@@ -226,7 +226,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                tracksManager.getRealTracks(data, checkBeforeSend, callback);
+                tracksManager.getAllStops(data, checkBeforeSend, callback);
 
                 checkBeforeSend(data, callback);
 
