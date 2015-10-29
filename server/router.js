@@ -42,12 +42,12 @@ router.route('/acp/savesolution')
         console.log(req.body.solution.length);
 
         fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
+            log.toFLog(config.defaultMonitoringLogin + '_' + Date.now() + '_changes.json', req.body.solution);
             if (err) {
                 res.status(200).json({error: err});
                 console.log(err);
                 return err;
             } else {
-                log.toFLog(config.defaultMonitoringLogin + '_' + Date.now() + '_changes.json', jsonData);
                 var jsonData = JSON.parse(data),
                     toSave = req.body.solution,
                     savedCount = 0;
