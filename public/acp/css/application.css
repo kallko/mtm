@@ -47,8 +47,10 @@
 
 #setting-holder button {
     margin-top: -2px;
+    margin-left: 7px;
     height: 26px;
     padding: 0 10px;
+    float: right;
 }
 
 .holder {
@@ -109,6 +111,6 @@ td, th {
     width: 120px;
 }
 
-button {
-    float: right;
+#hide-row-btn {
+    width: 125px;
 }

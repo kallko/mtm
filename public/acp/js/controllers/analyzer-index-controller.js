@@ -11,15 +11,17 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         function loadData () {
             console.log('loadData');
-            //scope.data = jsonData2;
             Solution.load().success( function(data) {
                 scope.data = data;
                 groupButtonsByRadius();
                 scope.map.clearMap();
                 scope.points.reinit(scope.data);
-
-                var counter = 0;
             });
+
+            //scope.data = jsonData3;
+            //groupButtonsByRadius();
+            //scope.map.clearMap();
+            //scope.points.reinit(scope.data);
 
             //if (scope.params.fromDate != '' && scope.params.fromDate != null) {
             //    var from = parseInt(scope.params.fromDate.getTime() / 1000),
@@ -77,6 +79,11 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     logdiv.text('Сохранено!');
                 });
             }, 100);
+        };
+
+        scope.toggleChanged = function() {
+            $('#toggle-edited-btn').toggleClass('btn-default').toggleClass('btn-success');
+            scope.points.showHidden = !scope.points.showHidden;
         };
 
         scope.analyzeData = function () {

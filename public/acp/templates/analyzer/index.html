@@ -16,7 +16,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="row in displayCollection" ng-click="rowClick($index)"
-                    ng-show="row.id != '' && !row.solved"
+                    ng-show="row.id != '' && !row.solved && (!row.hide || points.showHidden)"
                 id="{{'row-' + $index}}" >
                 <td title="{{row.name}}" class="col-name" >{{row.name}}</td>
                 <td class="col-center-lat" >{{row.new_position.lat}}</td>
@@ -33,7 +33,9 @@
 
 <div id="setting-holder" ng-controller="SettingController" >
     <div class="holder" >
-        <button ng-click="saveData()" class="btn btn-primary btn-sm" >сохранить результат</button>
+        <button ng-click="saveData()" class="btn btn-primary btn-sm" >сохранить</button>
+        <button ng-click="points.hideRow()" id="hide-row-btn" class="btn btn-primary btn-sm" >скрыть строку</button>
+        <button ng-click="toggleChanged()" id="toggle-edited-btn" class="btn btn-default btn-sm" >отображать скрытые</button>
         <div id="log-div" ></div>
     </div>
 </div>

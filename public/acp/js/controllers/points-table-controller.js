@@ -42,9 +42,25 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         var row = scope.rowCollection[row_id];
         if (row == undefined || row.center.lat == undefined) return;
 
+        changeHideButtonText(row.hide);
         scope.map.clearMap();
         scope.map.drawPoint(row);
     };
+
+    scope.points.hideRow = function () {
+        var row = scope.rowCollection[scope.selectedRow];
+        row.hide = !row.hide;
+        changeHideButtonText(row.hide);
+    };
+
+    function changeHideButtonText(hidden) {
+        var btn = $('#hide-row-btn');
+        if (hidden) {
+            btn.text("отображать строку");
+        } else {
+            btn.text("скрыть строку");
+        }
+    }
 
     scope.points.setNewLatLon = function (latlon) {
         if (scope.selectedRow != -1) {
