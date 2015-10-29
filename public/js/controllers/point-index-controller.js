@@ -127,11 +127,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
                                     trackParts[i].data[0].state = 'MOVE';
-                                    _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+                                    _data.routes[j].stops = _data.routes[j].stops.concat(trackParts[i].data);
 
                                     var len = _data.routes[j].stops.length - 1;
-                                    _data.routes[j].car_position = _data.routes[j].stops[len].
-                                        coords[_data.routes[j].stops[len].coords.length - 1];
+                                    // TODO: new track source
+                                    _data.routes[j].car_position = _data.routes[j].stops[len];
                                 }
                                 break;
                             }
