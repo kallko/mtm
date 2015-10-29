@@ -13,6 +13,9 @@ var soap = require('soap'),
     starTime,
     totalPoints = 0;
 
+    // k00056.0
+    // 12101968 123
+
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.login = login;
@@ -55,14 +58,14 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         //for (var i = 0; i < jsonData.routes.length; i++) {
         //    tracksManager.getRouterData(jsonData, i, checkBeforeSend, callback);
         //}
-        //tracksManager.getAllStops(jsonData, checkBeforeSend, callback);
+        //tracksManager.getRealTracks(jsonData, checkBeforeSend, callback);
 
         callback(jsonData);
     });
 };
 
 function checkBeforeSend(data, callback) {
-    if (data.sended || !data.sensors || !data.tracks_started || !data.stops_started) { // || !data.tasks_loaded) {
+    if (data.sended || data.sensors == null) { // || !data.tasks_loaded) {
         return;
     }
 
@@ -73,14 +76,11 @@ function checkBeforeSend(data, callback) {
     //    }
     //}
 
-    for (var i = 0; i < data.sensors.length; i++) {
-        if ((data.sensors[i].stops_loading && !data.sensors[i].stops_loaded) ||
-            (data.sensors[i].track_loading && !data.sensors[i].track_loaded)) {
+    for (i = 0; i < data.sensors.length; i++) {
+        if (data.sensors[i].loading && !data.sensors[i].real_track_loaded) {
             return;
         }
     }
-
-    console.log(data.tracks_started, data.stops_started);
 
     for (i = 0; i < data.routes.length; i++) {
         delete data.routes[i].time_matrix_loaded;
@@ -88,14 +88,10 @@ function checkBeforeSend(data, callback) {
     }
 
     for (i = 0; i < data.sensors.length; i++) {
-        delete data.sensors[i].stops_loading;
-        delete data.sensors[i].track_loading;
-        delete data.sensors[i].stops_loaded;
-        delete data.sensors[i].track_loaded;
+        delete data.sensors[i].real_track_loaded;
+        delete data.sensors[i].loading;
     }
 
-    delete data.tracks_started;
-    delete data.stops_started;
 
     console.log('5');
     data.sended = true;
@@ -230,8 +226,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                tracksManager.getAllTracks(data, checkBeforeSend, callback);
-                tracksManager.getAllStops(data, checkBeforeSend, callback);
+                tracksManager.getTracksAndStops(data, checkBeforeSend, callback);
 
                 checkBeforeSend(data, callback);
 

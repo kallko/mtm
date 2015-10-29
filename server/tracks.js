@@ -181,6 +181,58 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, ch
     });
 };
 
+TracksManager.prototype.getTracksAndStops = function (data, checkBeforeSend, callback) {
+    console.log('=== getRealTracks ===');
+
+    var me = this,
+        now = new Date(),
+        url = this.createParamsStr(
+            new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
+            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,
+            this.undef_t, this.undef_d,
+            this.stop_s, this.stop_d, this.move_s, this.move_d);
+
+    for (var i = 0; i < data.routes.length; i++) {
+        for (var j = 0; j < data.sensors.length; j++) {
+            if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
+                data.sensors[j].loading = true;
+                data.stops_started = true;
+                (function (jj) {
+                    console.log('request STOPS for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
+                    request({
+                        url: url + '&gid=' + data.sensors[jj].GID,
+                        json: true
+                    }, function (error, response, body) {
+                        if (!error && response.statusCode === 200) {
+                            console.log('stops for sensor loaded', jj);
+                            if (body == undefined || body == "invalid parameter 'gid'. ") {
+                                data.sensors[jj].real_track = undefined;
+                            } else {
+                                var counter = 0;
+                                for (var k = 0; k < body.length; k++) {
+                                    (function(kk) {
+                                        me.getTrackPart(data.sensors[jj].GID, body[kk].t1, body[kk].t2, function(trackPart) {
+                                            body[kk].coords = trackPart;
+                                            counter++;
+                                            if (counter == body.length) {
+                                                data.sensors[jj].real_track = body;
+                                                data.sensors[jj].real_track_loaded = true;
+                                                console.log('track for sensor loaded', jj);
+                                                checkBeforeSend(data, callback);
+                                            }
+                                        });
+                                    })(k);
+                                }
+                            }
+                        }
+                    });
+                })(j);
+                break;
+            }
+        }
+    }
+};
+
 TracksManager.prototype.getAllStops = function (data, checkBeforeSend, callback) {
     console.log('=== getRealTracks ===');
 
@@ -349,7 +401,7 @@ TracksManager.prototype.getStops = function (gid, from, to, callback) {
     });
 };
 
-TracksManager.prototype.getTrack = function (gid, from, to, callback) {
+TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
