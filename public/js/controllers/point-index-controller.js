@@ -30,8 +30,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = true,
-            enableDynamicUpdate = true;
+            loadParts = false,
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -217,6 +217,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
                         data.transports[j].gid = data.sensors[i].GID;
                         data.transports[j].stops = data.sensors[i].stops;
+                        data.transports[j].track = data.sensors[i].track;
                     }
                 }
             }
@@ -226,6 +227,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                         data.routes[i].transport = data.transports[j];
                         data.routes[i].stops = data.transports[j].stops;
+                        data.routes[i].track = data.transports[j].track;
 
                         if (data.transports[j].stops != undefined &&
                             data.routes[i].stops.length > 0 &&

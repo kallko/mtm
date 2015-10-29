@@ -194,15 +194,16 @@ TracksManager.prototype.getAllStops = function (data, checkBeforeSend, callback)
     for (var i = 0; i < data.routes.length; i++) {
         for (var j = 0; j < data.sensors.length; j++) {
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
-                data.sensors[j].loading = true;
+                data.sensors[j].stops_loading = true;
+                data.stops_started = true;
                 (function (jj) {
-                    console.log('request for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
+                    console.log('request STOPS for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true
                     }, function (error, response, body) {
                         if (!error && response.statusCode === 200) {
-                            console.log('sensor loaded', jj);
+                            console.log('stops for sensor loaded', jj);
                             if (body == undefined || body == "invalid parameter 'gid'. ") {
                                 data.sensors[jj].stops = undefined;
                             } else {
@@ -217,23 +218,45 @@ TracksManager.prototype.getAllStops = function (data, checkBeforeSend, callback)
             }
         }
     }
+};
 
-    //for (i = 0; i < data.sensors.length; i++) {
-    //    (function (ii) {
-    //        console.log('request for sensor #', ii, url + '&gid=' + data.sensors[ii].GID);
-    //        request({
-    //            url: url + '&gid=' + data.sensors[ii].GID,
-    //            json: true
-    //        }, function (error, response, body) {
-    //            if (!error && response.statusCode === 200) {
-    //                console.log('sensor loaded', ii);
-    //                data.sensors[ii].stops = body;
-    //                data.sensors[ii].stops_loaded = true;
-    //                checkBeforeSend(data, callback);
-    //            }
-    //        });
-    //    })(i);
-    //}
+TracksManager.prototype.getAllTracks = function (data, checkBeforeSend, callback) {
+    console.log('=== getRealTracks ===');
+
+    var now = new Date(),
+        url = this.createParamsStr(
+            new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
+            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,
+            this.undef_t, this.undef_d,
+            this.stop_s, this.stop_d, this.move_s, this.move_d, 'messages');
+
+    for (var i = 0; i < data.routes.length; i++) {
+        for (var j = 0; j < data.sensors.length; j++) {
+            if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
+                data.sensors[j].track_loading = true;
+                data.tracks_started = true;
+                (function (jj) {
+                    console.log('request TRACK for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
+                    request({
+                        url: url + '&gid=' + data.sensors[jj].GID,
+                        json: true
+                    }, function (error, response, body) {
+                        if (!error && response.statusCode === 200) {
+                            console.log('track for sensor loaded', jj);
+                            if (body == undefined || body == "invalid parameter 'gid'. ") {
+                                data.sensors[jj].track = undefined;
+                            } else {
+                                data.sensors[jj].track = body;
+                            }
+                            data.sensors[jj].track_loaded = true;
+                            checkBeforeSend(data, callback);
+                        }
+                    });
+                })(j);
+                break;
+            }
+        }
+    }
 };
 
 TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
