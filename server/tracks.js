@@ -53,7 +53,8 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
             this.stop_d, this.move_s, this.move_d),
         counter = 0,
         reqCounter = 0,
-        result = [];
+        result = [],
+        me = this;
 
     for (var i = 0; i < data.routes.length; i++) {
         for (var j = 0; j < data.sensors.length; j++) {
@@ -72,8 +73,52 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                             });
                             reqCounter++;
                             if (counter == reqCounter) {
-                                callback(result);
-                                console.log('callback getRealTrackParts');
+                                console.log('Done, loading tracks!');
+                                for (var k = 0; k < result.length; k++) {
+                                    if(result[k].data.length == 0) {
+                                        result[k].ready = true;
+                                        var ready = true;
+                                        for (var b = 0; b < result.length; b++) {
+                                            if (!result[b].ready) {
+                                                ready = false;
+                                                break;
+                                            }
+                                        }
+                                        if (ready) {
+                                            callback(result);
+                                        }
+                                    }
+
+                                    console.log('length = ' + result[k].data.length);
+                                    for (var m = 0; m < result[k].data.length; m++) {
+
+                                        (function(kk, mm) {
+                                            var counter = 0;
+                                            me.getTrackPart(data.sensors[jj].GID, result[kk].data[mm].t1, result[kk].data[mm].t2,
+                                                function (trackPart) {
+                                                    console.log('part for ' + kk + ':' + mm + ' loaded ' + counter)
+                                                    counter++;
+                                                    result[kk].data[mm].coords = trackPart;
+                                                    if (counter == result[kk].data.length) {
+                                                        console.log('track ready!');
+                                                        result[kk].ready = true;
+                                                        var ready = true;
+                                                        for (var b = 0; b < result.length; b++) {
+                                                            if (!result[b].ready) {
+                                                                ready = false;
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        if (ready) {
+                                                            callback(result);
+                                                        }
+                                                }
+                                            });
+                                        })(k, m);
+                                    }
+                                }
+
                             }
                         }
                     });
@@ -216,6 +261,7 @@ TracksManager.prototype.getTracksAndStops = function (data, checkBeforeSend, cal
                                             counter++;
                                             if (counter == body.length) {
                                                 data.sensors[jj].real_track = body;
+                                                //log.toFLog(data.sensors[jj].GID + '_body.js', body);
                                                 data.sensors[jj].real_track_loaded = true;
                                                 console.log('track for sensor loaded', jj);
                                                 checkBeforeSend(data, callback);
@@ -405,7 +451,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    console.log(url + '&gid=' + gid);
+    //console.log(url + '&gid=' + gid);
 
     request({
         url: url + '&gid=' + gid,

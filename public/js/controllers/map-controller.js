@@ -101,6 +101,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             geometry = [];
 
         for (var i = startIndx; i < track.length; i++) {
+            if (track[i] == null) continue;
             geometry = geometry.concat(getLatLonArr(track[i]));
         }
 

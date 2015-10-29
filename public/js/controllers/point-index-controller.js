@@ -30,8 +30,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = true,
-            enableDynamicUpdate = true;
+            loadParts = false,
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -108,6 +108,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var _now = Date.now() / 1000,
                 url = './trackparts/' + _data.trackUpdateTime + '/' + _now;
 
+            console.log('load track parts');
             http.get(url)
                 .success(function (trackParts) {
                     console.log('trackparts');
@@ -130,8 +131,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
 
                                     var len = _data.routes[j].real_track.length - 1;
-                                    _data.routes[j].car_position = _data.routes[j].real_track[len]; //.
-                                        //coords[_data.routes[j].real_track[len].coords.length - 1];
+                                    _data.routes[j].car_position = _data.routes[j].real_track[len].
+                                        coords[_data.routes[j].real_track[len].coords.length - 1];
                                 }
                                 break;
                             }
@@ -232,8 +233,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             data.routes[i].real_track != aggregatorError) {
                             len = data.routes[i].real_track.length - 1;
                             //console.log('NOT NULL', data.routes[i].real_track.length);
-                            data.routes[i].car_position = data.routes[i].real_track[len]; //.
-                                //coords[data.routes[i].real_track[len].coords.length - 1];
+                            data.routes[i].car_position = data.routes[i].real_track[len].
+                                coords[data.routes[i].real_track[len].coords.length - 1];
                         }
                         break;
                     }
