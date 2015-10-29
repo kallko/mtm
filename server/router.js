@@ -40,8 +40,35 @@ router.route('/acp/savesolution')
     .post(function (req, res) {
         console.log('savesolution');
         console.log(req.body.solution.length);
-        log.toFLog(config.defaultMonitoringLogin + '_solution.json', req.body.solution);
-        res.status(200).json({status: 'saved'});
+
+        fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
+            if (err) {
+                res.status(200).json({error: err});
+                console.log(err);
+                return err;
+            } else {
+                log.toFLog(config.defaultMonitoringLogin + '_' + Date.now() + '_changes.json', jsonData);
+                var jsonData = JSON.parse(data),
+                    toSave = req.body.solution,
+                    savedCount = 0;
+                for (var i = 0; i < jsonData.length; i++) {
+                    for (var j = 0; j < toSave.length; j++) {
+                        if (jsonData[i].id == toSave[j].id) {
+                            //console.log(jsonData[i].id);
+                            //log.dump(toSave[j]);
+                            savedCount++;
+                            jsonData[i] = toSave[j];
+                            break;
+                        }
+                    }
+                }
+
+                log.toFLog(config.defaultMonitoringLogin + '_solution.json', jsonData);
+                res.status(200).json({status: 'saved'});
+            }
+        });
+
+
     });
 
 router.route('/acp/loadsolution')

@@ -68,6 +68,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
             row.new_position.lat = parseFloat(latlon.lat.toFixed(5));
             row.new_position.lon = parseFloat(latlon.lng.toFixed(5));
             row.changed = true;
+            row.needSave = true;
 
             var point = $('#row-' + lastRowId);
             point.trigger('click');

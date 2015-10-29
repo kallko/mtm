@@ -4,7 +4,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         scope.map = {};
         scope.points = {};
 
-        $('#log-div').text('Загружаем данные...');
+        toLogDiv('Загружаем данные...');
         timeout(function() {
             loadData();
         }, 1200);
@@ -18,7 +18,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 scope.points.reinit(scope.data);
             });
 
-            //scope.data = jsonData3;
+            //scope.data = jsonData2;
             //groupButtonsByRadius();
             //scope.map.clearMap();
             //scope.points.reinit(scope.data);
@@ -71,12 +71,19 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         scope.saveData = function () {
             console.log('saveData');
-            var logdiv = $('#log-div');
-            logdiv.text(' Сохраняю...');
+            var toSave = [];
+            toLogDiv(' Сохраняю...');
+
+            for(var i = 0; i < scope.data.length; i++) {
+                if(scope.data[i].needSave) {
+                    delete scope.data[i].needSave;
+                    toSave.push(scope.data[i]);
+                }
+            }
 
             timeout(function() {
-                Solution.save(scope.data).success(function (data) {
-                    logdiv.text('Сохранено!');
+                Solution.save(toSave).success(function (data) {
+                    toLogDiv('Сохранено!');
                 });
             }, 100);
         };
@@ -102,9 +109,10 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 sum,
                 tmpLat,
                 tmpLon,
-                tmpLen,
                 coodsToSort,
-                totalCount = 0;
+                totalCount = 0,
+                hiddenCount = 0,
+                changedCount = 0;
             for (var i = 0; i < scope.data.length; i++) {
                 if (scope.data[i].changed) continue;
 
@@ -128,7 +136,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
 
             for (i = 0; i < scope.data.length; i++) {
-                if (scope.data[i].changed) continue;
+                if (scope.data[i].changed) {
+                    if (scope.data[i].hide) hiddenCount++;
+                    changedCount++;
+                    continue;
+                }
+
                 maxCount = -1;
                 for (j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];
@@ -200,7 +213,14 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
             //console.log('Проблемных точек', totalCount);
             //console.log('Решенных точек', scope.data.length - totalCount);
-            $('#log-div').text('Данные загружены. Точек требующих вмешательства - ' +  totalCount + ', автоматически решенных точек - ' + (scope.data.length - totalCount));
+            toLogDiv('Данные загружены. Точек требующих вмешательства - ' +  totalCount
+                + ', автоматически решенных точек - ' + (scope.data.length - totalCount)
+                + ', скрыто - ' + hiddenCount);
+            console.log('изменено', changedCount);
+        }
+
+        function toLogDiv(msg) {
+            $('#log-div').text(msg);
         }
 
         function strToTstamp(strDate) {
