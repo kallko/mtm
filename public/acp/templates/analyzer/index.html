@@ -17,7 +17,7 @@
         <tbody>
             <tr ng-repeat="row in displayCollection" ng-click="rowClick($index)"
                     ng-show="row.id != '' && !row.solved && (!row.hide || points.showHidden)"
-                id="{{'row-' + $index}}" >
+                id="{{'row-' + $index}}" ng-class="row.changed ? 'changed-row' : 'unchanged-row'" >
                 <td title="{{row.name}}" class="col-name" >{{row.name}}</td>
                 <td class="col-center-lat" >{{row.new_position.lat}}</td>
                 <td class="col-center-lon" >{{row.new_position.lon}}</td>

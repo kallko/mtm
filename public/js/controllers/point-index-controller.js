@@ -128,7 +128,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
                                     for (var k = 0; k < trackParts[i].data.length; k++) {
-                                        if(trackParts[i].data[k].coords.length == 0) {
+                                        if (trackParts[i].data[k].coords.length == 0) {
                                             trackParts[i].data.splice(k, 1);
                                             k--;
                                         }
@@ -141,7 +141,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         var len = _data.routes[j].real_track.length - 1;
                                         _data.routes[j].car_position = _data.routes[j].real_track[len].
                                             coords[_data.routes[j].real_track[len].coords.length - 1];
-                                        console.log(_data.routes[j].car_position);
                                     }
                                 }
                                 break;
@@ -441,7 +440,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
                                     && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
 
-
                                     route.lastPointIndx = k;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
                                     if (tmpPoint.real_arrival_time > tmpPoint.promised_window.finish) {
@@ -500,7 +498,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             var buttonsStr = _data.mobile_buttons[Object.keys(_data.mobile_buttons)[0]];
-            if(buttonsStr == '[]') {
+            if (buttonsStr == '[]') {
                 console.log('no mobile buttons push');
                 return;
             }
@@ -524,7 +522,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 && tmpPoint.status != STATUS.FINISHED_LATE
                                 && tmpPoint.status != STATUS.CANCELED
                                 && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
-                            ){
+                            ) {
                                 console.log('detect by button push');
                                 tmpPoint.status = STATUS.FINISHED;
                                 _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
@@ -965,5 +963,81 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(_data);
             updateData();
         };
+
+        scope.recalculateRoute = function () {
+            var route;
+
+            if (scope.filters.driver != -1) {
+                route = _data.routes[scope.filters.driver];
+            } else if (scope.selectedRow != -1) {
+                route = _data.routes[scope.displayCollection[scope.selectedRow].route_id];
+            }
+
+            console.log('recalculateRoute', route);
+            if (route != undefined) {
+                var mathInput = {
+                        "margin_of_safety": 1,
+                        "garbage": false,
+                        "one_car_recalc": true,
+                        "etaps": 1,
+                        "parent_id": "",
+                        "points": [],
+                        "cargo_list": [],
+                        "jobList": [],
+                        "depotList": [],
+                        "inn_list": []
+                    },
+                    point,
+                    pt,
+                    job;
+
+                for (var i = 0; i < route.points.length; i++) {
+                    pt = route.points[i];
+                    point = {
+                        "lat": pt.waypoint.LAT,
+                        "lon": pt.waypoint.LON,
+                        "ID": pt.waypoint.ID,
+                        "servicetime": pt.waypoint.QUEUING_TIME,
+                        "add_servicetime": pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER,
+                        "max_height_transport": 0,
+                        "max_length_transport": 0,
+                        "only_pallets": false,
+                        "ramp": false,
+                        "need_refrigerator": false,
+                        "temperature_control": false,
+                        "ignore_cargo_incompatibility": false,
+                        "ignore_pallet_incompatibility": false,
+                        "region": "-1"
+                    };
+
+                    mathInput.points.push(point);
+
+                    //job = {
+                    //    "id": i,
+                    //    "weigth": 0,
+                    //    "volume": 0,
+                    //    "value": 0,
+                    //    "servicetime": 0,  // TASK_TIME
+                    //    "cargo_type": "-1", // as is
+                    //    "vehicle_required": "", // as is
+                    //    "penalty": 0, // as is
+                    //    "rest": false, // as is
+                    //    "backhaul": false, // as is
+                    //    "point": "0000205996", // waypoint id
+                    //    "windows": [
+                    //        {
+                    //            "start": 1443686400,
+                    //            "finish": 1443704400
+                    //        }
+                    //    ]
+                    //}
+                }
+
+                console.log(mathInput);
+
+            }
+
+
+        }
 
     }]);

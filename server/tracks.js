@@ -89,7 +89,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                         }
                                     }
 
-                                    console.log('length = ' + result[k].data.length);
+                                    //console.log('length = ' + result[k].data.length);
                                     for (var m = 0; m < result[k].data.length; m++) {
 
                                         (function(kk, mm) {
@@ -100,10 +100,10 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                                     } else {
                                                         result[kk].counter++;
                                                     }
-                                                    console.log('part for ' + kk + ':' + mm + ' loaded ' + result[kk].counter);
+                                                    //console.log('part for ' + kk + ':' + mm + ' loaded ' + result[kk].counter);
                                                     result[kk].data[mm].coords = trackPart;
                                                     if (result[kk].counter == result[kk].data.length) {
-                                                        console.log('track ready!');
+                                                        //console.log('track ready!');
                                                         delete result[kk].counter;
                                                         result[kk].ready = true;
                                                         var ready = true;

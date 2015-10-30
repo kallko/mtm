@@ -79,10 +79,6 @@ td, th {
     font-weight: normal;
 }
 
-.selected-row {
-    background-color: #71d5d5 !important;
-}
-
 .col-name {
     width: 200px;
 }
@@ -113,4 +109,16 @@ td, th {
 
 #hide-row-btn {
     width: 125px;
+}
+
+.changed-row {
+    background-color: #6BED7E !important;
+}
+
+.unchanged-row {
+
+}
+
+.selected-row {
+    background-color: #71d5d5 !important;
 }
