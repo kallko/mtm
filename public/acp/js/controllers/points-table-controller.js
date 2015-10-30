@@ -9,19 +9,6 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         for (var i = 0; i < data.length; i++) {
             scope.data[i].coords_length = scope.data[i].coords.length;
             scope.rowCollection.push(data[i]);
-
-            //marker = false;
-            //for (var j = 0; j < idArr.length; j++) {
-            //    if (data[i].id == idArr[j]) {
-            //        console.log('А я говорил!');
-            //        marker = true;
-            //        break;
-            //    }
-            //}
-            //
-            //if (!marker) {
-            //    idArr.push(data[i].id);
-            //}
         }
 
         scope.displayCollection = [].concat(scope.rowCollection);

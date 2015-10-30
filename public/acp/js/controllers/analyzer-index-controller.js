@@ -112,7 +112,9 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 coodsToSort,
                 totalCount = 0,
                 hiddenCount = 0,
-                changedCount = 0;
+                changedCount = 0,
+                doneCount = 0;
+
             for (var i = 0; i < scope.data.length; i++) {
                 if (scope.data[i].changed) continue;
 
@@ -136,8 +138,10 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
 
             for (i = 0; i < scope.data.length; i++) {
+                if (scope.data[i].hide) hiddenCount++;
+                if (scope.data[i].done) doneCount++;
+
                 if (scope.data[i].changed) {
-                    if (scope.data[i].hide) hiddenCount++;
                     changedCount++;
                     continue;
                 }
@@ -215,8 +219,11 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             //console.log('Решенных точек', scope.data.length - totalCount);
             toLogDiv('Данные загружены. Точек требующих вмешательства - ' +  totalCount
                 + ', автоматически решенных точек - ' + (scope.data.length - totalCount)
+                + ', готовых - ' + doneCount
+                + ', изменено - ' + changedCount
                 + ', скрыто - ' + hiddenCount);
             console.log('изменено', changedCount);
+            console.log('готово', doneCount);
         }
 
         function toLogDiv(msg) {
