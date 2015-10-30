@@ -1012,25 +1012,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     mathInput.points.push(point);
 
-                    //job = {
-                    //    "id": i,
-                    //    "weigth": 0,
-                    //    "volume": 0,
-                    //    "value": 0,
-                    //    "servicetime": 0,  // TASK_TIME
-                    //    "cargo_type": "-1", // as is
-                    //    "vehicle_required": "", // as is
-                    //    "penalty": 0, // as is
-                    //    "rest": false, // as is
-                    //    "backhaul": false, // as is
-                    //    "point": "0000205996", // waypoint id
-                    //    "windows": [
-                    //        {
-                    //            "start": 1443686400,
-                    //            "finish": 1443704400
-                    //        }
-                    //    ]
-                    //}
+                    job = {
+                        "id": i,
+                        "weigth": pt.WEIGHT,
+                        "volume": pt.VOLUME,
+                        "value": pt.VALUE,
+                        "servicetime": pt.TASK_TIME,
+                        "cargo_type": "-1",
+                        "vehicle_required": "",
+                        "penalty": 0,
+                        "rest": false,
+                        "backhaul": false,
+                        "point": pt.waypoint.ID,
+                        "windows": [
+                            {
+                                "start": pt.promised_window.start,
+                                "finish": pt.promised_window.finish
+                            }
+                        ]
+                    }
                 }
 
                 console.log(mathInput);

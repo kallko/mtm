@@ -50,6 +50,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
     scope.points.hideRow = function () {
         var row = scope.rowCollection[scope.selectedRow];
         row.hide = !row.hide;
+        row.needSave = true;
         changeHideButtonText(row.hide);
     };
 
@@ -61,6 +62,16 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
             btn.text("скрыть строку");
         }
     }
+
+    scope.points.doneRow = function () {
+        if (scope.selectedRow != -1) {
+            var row = scope.rowCollection[scope.selectedRow];
+            row.done = !row.done;
+            row.needSave = true;
+
+            console.log(row);
+        }
+    };
 
     scope.points.setNewLatLon = function (latlon) {
         if (scope.selectedRow != -1) {
@@ -74,6 +85,6 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
             point.trigger('click');
             point.trigger('click');
         }
-    }
+    };
 
 }]);

@@ -111,12 +111,16 @@ td, th {
     width: 125px;
 }
 
-.changed-row {
-    background-color: #6BED7E !important;
-}
-
 .unchanged-row {
 
+}
+
+.changed-row {
+    background-color: #e7eb58 !important;
+}
+
+.done-row {
+    background-color: #39ed5a !important;
 }
 
 .selected-row {
