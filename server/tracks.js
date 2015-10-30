@@ -93,14 +93,18 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                     for (var m = 0; m < result[k].data.length; m++) {
 
                                         (function(kk, mm) {
-                                            var counter = 0;
                                             me.getTrackPart(data.sensors[jj].GID, result[kk].data[mm].t1, result[kk].data[mm].t2,
                                                 function (trackPart) {
-                                                    console.log('part for ' + kk + ':' + mm + ' loaded ' + counter)
-                                                    counter++;
+                                                    if (result[kk].counter == undefined) {
+                                                        result[kk].counter = 1;
+                                                    } else {
+                                                        result[kk].counter++;
+                                                    }
+                                                    console.log('part for ' + kk + ':' + mm + ' loaded ' + result[kk].counter);
                                                     result[kk].data[mm].coords = trackPart;
-                                                    if (counter == result[kk].data.length) {
+                                                    if (result[kk].counter == result[kk].data.length) {
                                                         console.log('track ready!');
+                                                        delete result[kk].counter;
                                                         result[kk].ready = true;
                                                         var ready = true;
                                                         for (var b = 0; b < result.length; b++) {

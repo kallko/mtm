@@ -5,8 +5,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointContainer,
             pointTable,
             _data,
-            dataUpdateInterval = 60,
-            trackUpdateInterval = 60,
+            dataUpdateInterval = 180,
+            trackUpdateInterval = 180,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -30,8 +30,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false,
-            enableDynamicUpdate = false;
+            loadParts = true,
+            enableDynamicUpdate = true;
 
         setListeners();
         init();
@@ -127,12 +127,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
-                                    trackParts[i].data[0].state = 'MOVE';
-                                    _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+                                    for (var k = 0; k < trackParts[i].data.length; k++) {
+                                        if(trackParts[i].data[k].coords.length == 0) {
+                                            trackParts[i].data.splice(k, 1);
+                                            k--;
+                                        }
+                                    }
 
-                                    var len = _data.routes[j].real_track.length - 1;
-                                    _data.routes[j].car_position = _data.routes[j].real_track[len].
-                                        coords[_data.routes[j].real_track[len].coords.length - 1];
+                                    if (trackParts[i].data.length > 0) {
+                                        trackParts[i].data[0].state = 'MOVE';
+                                        _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+
+                                        var len = _data.routes[j].real_track.length - 1;
+                                        _data.routes[j].car_position = _data.routes[j].real_track[len].
+                                            coords[_data.routes[j].real_track[len].coords.length - 1];
+                                        console.log(_data.routes[j].car_position);
+                                    }
                                 }
                                 break;
                             }
