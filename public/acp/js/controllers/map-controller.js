@@ -24,10 +24,19 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
     setListeners();
 
     function initMap() {
-        map = L.map('map').setView([50.4412776, 30.6671281], 11);
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        map = new L.Map('map', {
+            center: new L.LatLng(50.4303429,30.5621329),
+            zoom: 12,
+            layers : [
+                new L.TileLayer('http://tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
+                    maxZoom: 19,
+                    tms : true,
+                    attribution : 'Данные карт © 2013 ЧАО «<a href="http://visicom.ua/">Визиком</a>»',
+                    subdomains : '123'
+                })
+            ]
+        });
+
         map.options.maxZoom = 20;
 
         L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
