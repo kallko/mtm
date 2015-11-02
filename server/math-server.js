@@ -26,18 +26,33 @@ MathServer.prototype.recalculate = function (route, callback) {
         if(error) {
             console.log(error);
         } else {
+            log.toFLog('math_res.js', body);
+            var queryID = body.query;
+
             var intervalID = setInterval(function() {
                 request({
-                    url: me.mathServerUrl + 'task?action=getAllStates&globalID=uniqGuid',
+                    url: me.mathServerUrl + 'task?action=getState&queryID=' + queryID + '&lastSID=0',
                     json: true
                 }, function (error, response, body) {
-                    if(!error) {
-                        console.log('Math ready!');
+                    if(error) {
+                        console.log(error);
+                        clearInterval(intervalID);
+                        callback({status: 'error'});
+                    } else {
+                        if(body.state.status == 3 || body.state.status == 4 || body.state.status == 5) {
+                            if(body.state.status == 4) {
+                                log.toFLog('math_res2.js', body);
+                                console.log('Math ready!');
+                                clearInterval(intervalID);
+                                callback(body);
+                            } else {
+                                clearInterval(intervalID);
+                                callback({status: 'error'});
+                            }
+                        }
                     }
                 });
-            }, 5000);
-
-            callback(body);
+            }, 10000);
         }
     });
 };

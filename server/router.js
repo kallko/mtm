@@ -226,8 +226,9 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
 router.route('/recalculate')
     .post( function(req, res) {
         math_server.recalculate(req.body.input, function(data) {
-            console.log(data);
+            //console.log(data);
             //log.toFLog(Date.now() + '_recalculate.json', data);
+            res.status(200).json(data);
         });
     });
 

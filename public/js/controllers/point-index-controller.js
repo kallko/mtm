@@ -1015,10 +1015,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     job = {
                         "id": i.toString(),
-                        "weigth": pt.WEIGHT,
-                        "volume": pt.VOLUME,
-                        "value": pt.VALUE,
-                        "servicetime": pt.TASK_TIME,
+                        "weigth": parseInt(pt.WEIGHT),
+                        "volume": parseInt(pt.VOLUME),
+                        "value": parseInt(pt.VALUE),
+                        "servicetime": parseInt(pt.TASK_TIME),
                         "cargo_type": "-1",
                         "vehicle_required": "",
                         "penalty": 0,
@@ -1051,7 +1051,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point = {
                     "lat": parseFloat(route.car_position.lat),
                     "lon": parseFloat(route.car_position.lon),
-                    "ID": -2,
+                    "ID": "-2",
                     "servicetime": 0,
                     "add_servicetime": 0,
                     "max_height_transport": 0,
@@ -1067,23 +1067,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 mathInput.points.push(point);
 
+                // 05:00 - 23:00
+                var trWindow = getTstampAvailabilityWindow(route.transport.START_OF_WORK.substr(0, 5) + ' - ' +
+                    route.transport.END_OF_WORK.substr(0, 5));
+                console.log(trWindow);
+
                 mathInput.trList.push({
-                    "id": route.transport.ID,
-                    "cost_per_hour": route.transport.COST_PER_HOUR,
-                    "cost_per_km": route.transport.COST_PER_KILOMETER,
-                    "cost_onTime": route.transport.COST_ONE_TIME,
-                    "maxweigth": route.transport.MAXIMUM_WEIGHT,
-                    "maxvolume": route.transport.MAXIMUM_VOLUME,
-                    "maxvalue": route.transport.MAXIMUM_VALUE,
+                    "id": "-1",
+                    "cost_per_hour": parseInt(route.transport.COST_PER_HOUR),
+                    "cost_per_km": parseInt(route.transport.COST_PER_KILOMETER),
+                    "cost_onTime": parseInt(route.transport.COST_ONE_TIME),
+                    "maxweigth": parseInt(route.transport.MAXIMUM_WEIGHT),
+                    "maxvolume": parseInt(route.transport.MAXIMUM_VOLUME),
+                    "maxvalue": parseInt(route.transport.MAXIMUM_VALUE),
                     "multi_use": true,
                     "amount_use": 1,
                     "proto": false,
                     "cycled": route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE",
-                    "time_load": route.transport.TIME_OF_LOAD,
+                    "time_load": parseInt(route.transport.TIME_OF_LOAD),
                     "time_min": 0,
                     "window": {
-                        "start": 1443657600, //START_OF_WORK: "05:00:00"
-                        "finish": 1443744000 //END_OF_WORK: "23:00:00"
+                        "start": trWindow[0].start,
+                        "finish": trWindow[0].finish
                     },
                     "weigth_nominal": 0,
                     "time_max": 0,
@@ -1092,7 +1097,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     "points_limit": 0,
                     "road_speed": 1,
                     "point_speed": 1,
-                    "add_servicetime": route.transport.TIME_OF_DISEMBARK,
+                    "add_servicetime": parseInt(route.transport.TIME_OF_DISEMBARK),
                     "number_of_pallets": 0,
                     "refrigerator": false,
                     "temperature_control": false,
@@ -1118,6 +1123,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 http.post('./recalculate/', {input: mathInput}).
                     success(function (data) {
                         console.log('recalculate success!');
+                        console.log(data);
                     });
 
             }
