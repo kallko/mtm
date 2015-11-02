@@ -21,4 +21,4 @@ var router = require('./server/router'),
 console.log(new Date());
 
 app.use('/', router).listen(process.env.PORT || port);
-console.log('Listening on port ' + (process.env.PORT || port) + '...');
+console.log('Listening on port ' + (process.env.PORT || port) + '...\n');

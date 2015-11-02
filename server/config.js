@@ -1,6 +1,6 @@
 var config = {
     cashing: {
-        soap: false,
+        soap: true,
         tracks: false
     },
 
@@ -20,6 +20,10 @@ var config = {
 
     router: {
         url: 'http://sngtrans.com.ua:5201/'
+    },
+
+    mathServer: {
+        url: 'http://192.168.9.29:9001/'
     }
 };
 

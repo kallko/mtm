@@ -31,7 +31,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,
-            enableDynamicUpdate = true;
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -973,7 +973,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route = _data.routes[scope.displayCollection[scope.selectedRow].route_id];
             }
 
-            console.log('recalculateRoute', route);
+            console.log('recalculateRoute');
             if (route != undefined) {
                 var mathInput = {
                         "margin_of_safety": 1,
@@ -983,6 +983,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         "parent_id": "",
                         "points": [],
                         "cargo_list": [],
+                        "trList": [],
                         "jobList": [],
                         "depotList": [],
                         "inn_list": []
@@ -994,11 +995,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var i = 0; i < route.points.length; i++) {
                     pt = route.points[i];
                     point = {
-                        "lat": pt.waypoint.LAT,
-                        "lon": pt.waypoint.LON,
+                        "lat": parseFloat(pt.waypoint.LAT),
+                        "lon": parseFloat(pt.waypoint.LON),
                         "ID": pt.waypoint.ID,
-                        "servicetime": pt.waypoint.QUEUING_TIME,
-                        "add_servicetime": pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER,
+                        "servicetime": parseInt(pt.waypoint.QUEUING_TIME),
+                        "add_servicetime": parseInt(pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER),
                         "max_height_transport": 0,
                         "max_length_transport": 0,
                         "only_pallets": false,
@@ -1013,7 +1014,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     mathInput.points.push(point);
 
                     job = {
-                        "id": i,
+                        "id": i.toString(),
                         "weigth": pt.WEIGHT,
                         "volume": pt.VOLUME,
                         "value": pt.VALUE,
@@ -1030,10 +1031,94 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 "finish": pt.promised_window.finish
                             }
                         ]
+                    };
+                    mathInput.jobList.push(job);
+
+                    if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
+                        var timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS);
+
+                        mathInput.depotList.push({
+                            "id": "1",
+                            "point": route.points[i].waypoint.ID,
+                            "window": {
+                                "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
+                                "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
+                            }
+                        });
                     }
                 }
 
+                point = {
+                    "lat": parseFloat(route.car_position.lat),
+                    "lon": parseFloat(route.car_position.lon),
+                    "ID": -2,
+                    "servicetime": 0,
+                    "add_servicetime": 0,
+                    "max_height_transport": 0,
+                    "max_length_transport": 0,
+                    "only_pallets": false,
+                    "ramp": false,
+                    "need_refrigerator": false,
+                    "temperature_control": false,
+                    "ignore_cargo_incompatibility": false,
+                    "ignore_pallet_incompatibility": false,
+                    "region": "-1"
+                };
+
+                mathInput.points.push(point);
+
+                mathInput.trList.push({
+                    "id": route.transport.ID,
+                    "cost_per_hour": route.transport.COST_PER_HOUR,
+                    "cost_per_km": route.transport.COST_PER_KILOMETER,
+                    "cost_onTime": route.transport.COST_ONE_TIME,
+                    "maxweigth": route.transport.MAXIMUM_WEIGHT,
+                    "maxvolume": route.transport.MAXIMUM_VOLUME,
+                    "maxvalue": route.transport.MAXIMUM_VALUE,
+                    "multi_use": true,
+                    "amount_use": 1,
+                    "proto": false,
+                    "cycled": route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE",
+                    "time_load": route.transport.TIME_OF_LOAD,
+                    "time_min": 0,
+                    "window": {
+                        "start": 1443657600, //START_OF_WORK: "05:00:00"
+                        "finish": 1443744000 //END_OF_WORK: "23:00:00"
+                    },
+                    "weigth_nominal": 0,
+                    "time_max": 0,
+                    "start_point": "-2",
+                    "finish_point": "-1",
+                    "points_limit": 0,
+                    "road_speed": 1,
+                    "point_speed": 1,
+                    "add_servicetime": route.transport.TIME_OF_DISEMBARK,
+                    "number_of_pallets": 0,
+                    "refrigerator": false,
+                    "temperature_control": false,
+                    "low_temperature": 0,
+                    "high_temperature": 0,
+                    "time_preserving": 0,
+                    "height": 0,
+                    "length": 0,
+                    "can_with_ramp": true,
+                    "can_without_ramp": true,
+                    "use_inn": false,
+                    "min_rest_time": 0,
+                    "region": "-1",
+                    "donor": false,
+                    "recipient": false,
+                    "points_acquaintances": [],
+                    "tr_constraints": [],
+                    "tr_permits": []
+                });
+
                 console.log(mathInput);
+
+                http.post('./recalculate/', {input: mathInput}).
+                    success(function (data) {
+                        console.log('recalculate success!');
+                    });
 
             }
 

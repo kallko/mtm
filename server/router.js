@@ -5,6 +5,7 @@ var express = require('express'),
     tracks = require('./tracks'),
     log = new (require('./logging'))('./logs'),
     fs = require('fs'),
+    math_server = new (require('./math-server'))(),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     cashedDataArr = [],
     tracksManager = new tracks(
@@ -220,6 +221,14 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
             function (data) {
                 res.status(200).json(data);
             });
+    });
+
+router.route('/recalculate')
+    .post( function(req, res) {
+        math_server.recalculate(req.body.input, function(data) {
+            console.log(data);
+            //log.toFLog(Date.now() + '_recalculate.json', data);
+        });
     });
 
 router.route('/log')
