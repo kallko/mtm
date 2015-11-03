@@ -167,6 +167,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get(url, {})
                 .success(function (data) {
                     console.log('loadDailyData success');
+
+                    for (var i = 0; i < data.routes.length; i++) {
+                        for (var j = 0; j < data.routes[i].points.length; j++) {
+                            data.routes[i].points[j].base_arrival = data.routes[i].points[j].ARRIVAL_TIME;
+                        }
+                    }
+
                     linkDataParts(data);
                     if (loadParts) {
                         loadTrackParts();
@@ -1176,7 +1183,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for(i = 0; i < tmpRawRoute.points.length; i++) {
                 tmpRawRoute.points[i].NUMBER = i + 1;
+                //tmpRawRoute.points[i].
             }
+
+            console.log('RAW POINTS', tmpRawRoute.points);
 
             //arrival: 1446541209
             //distance: 7513
@@ -1186,10 +1196,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //pointId: 4679100
             //servicetime: 403
 
-            linkDataParts(rawData);
-            if (loadParts) {
-                loadTrackParts();
-            }
+            //linkDataParts(rawData);
+            //if (loadParts) {
+            //    loadTrackParts();
+            //}
 
         }
 
