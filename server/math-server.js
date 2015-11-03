@@ -2,6 +2,7 @@ module.exports = MathServer;
 
 var request = require('request'),
     config = require('./config'),
+    fs = require('fs'),
     querystring = require('querystring'),
     log = new (require('./logging'))('./logs');
 
@@ -19,7 +20,7 @@ MathServer.prototype.recalculate = function (route, callback) {
 
     log.toFLog('query.js', this.mathServerUrl + 'task?action=add&globalID=uniqGuid&task=' + JSON.stringify(route));
     request({
-        url: this.mathServerUrl + 'task?action=add&globalID=uniqGuid&task=' + JSON.stringify(route),
+        url: this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route),
         json: true
     }, function(error, response, body) {
         console.log('recalculate callback!');

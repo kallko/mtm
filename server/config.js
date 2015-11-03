@@ -1,6 +1,6 @@
 var config = {
     cashing: {
-        soap: true,
+        soap: false,
         tracks: false
     },
 
@@ -23,7 +23,7 @@ var config = {
     },
 
     mathServer: {
-        url: 'http://192.168.9.29:9001/'
+        url: 'http://192.168.9.29:9000/'
     }
 };
 

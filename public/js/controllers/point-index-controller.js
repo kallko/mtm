@@ -5,6 +5,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointContainer,
             pointTable,
             _data,
+            rawData,
             dataUpdateInterval = 180,
             trackUpdateInterval = 180,
             radius = 0.25,
@@ -213,6 +214,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function linkDataParts(data) {
             console.log('Start linking ...', data);
+            rawData = JSON.parse(JSON.stringify(data));
             init();
 
             var tmpPoints,
@@ -993,53 +995,57 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     job;
 
                 for (var i = 0; i < route.points.length; i++) {
-                    pt = route.points[i];
-                    point = {
-                        "lat": parseFloat(pt.waypoint.LAT),
-                        "lon": parseFloat(pt.waypoint.LON),
-                        "ID": pt.waypoint.ID,
-                        "servicetime": parseInt(pt.waypoint.QUEUING_TIME),
-                        "add_servicetime": parseInt(pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER),
-                        "max_height_transport": 0,
-                        "max_length_transport": 0,
-                        "only_pallets": false,
-                        "ramp": false,
-                        "need_refrigerator": false,
-                        "temperature_control": false,
-                        "ignore_cargo_incompatibility": false,
-                        "ignore_pallet_incompatibility": false,
-                        "region": "-1"
-                    };
 
-                    mathInput.points.push(point);
+                    if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE) {
+                        pt = route.points[i];
+                        point = {
+                            "lat": parseFloat(pt.waypoint.LAT),
+                            "lon": parseFloat(pt.waypoint.LON),
+                            "ID": pt.waypoint.ID,
+                            "servicetime": 0, //parseInt(pt.waypoint.QUEUING_TIME),
+                            "add_servicetime": 0, // parseInt(pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER),
+                            "max_height_transport": 0,
+                            "max_length_transport": 0,
+                            "only_pallets": false,
+                            "ramp": false,
+                            "need_refrigerator": false,
+                            "temperature_control": false,
+                            "ignore_cargo_incompatibility": false,
+                            "ignore_pallet_incompatibility": false,
+                            "region": "-1"
+                        };
 
-                    job = {
-                        "id": i.toString(),
-                        "weigth": parseInt(pt.WEIGHT),
-                        "volume": parseInt(pt.VOLUME),
-                        "value": parseInt(pt.VALUE),
-                        "servicetime": parseInt(pt.TASK_TIME),
-                        "cargo_type": "-1",
-                        "vehicle_required": "",
-                        "penalty": 0,
-                        "rest": false,
-                        "backhaul": false,
-                        "point": pt.waypoint.ID,
-                        "windows": [
-                            {
-                                "start": pt.promised_window.start,
-                                "finish": pt.promised_window.finish
-                            }
-                        ]
-                    };
-                    mathInput.jobList.push(job);
+                        mathInput.points.push(point);
+
+                        job = {
+                            "id": i.toString(),
+                            "weigth": parseInt(pt.WEIGHT),
+                            "volume": parseInt(pt.VOLUME),
+                            "value": parseInt(pt.VALUE),
+                            "servicetime": parseInt(pt.TASK_TIME),
+                            "cargo_type": "-1",
+                            "vehicle_required": "",
+                            "penalty": 0,
+                            "rest": false,
+                            "backhaul": false,
+                            "point": pt.waypoint.ID,
+                            "windows": [
+                                {
+                                    "start": pt.promised_window.start,
+                                    "finish": pt.promised_window.finish
+                                }
+                            ]
+                        };
+                        mathInput.jobList.push(job);
+                    }
 
                     if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
                         var timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS);
+                        console.log(route.points[i].waypoint.AVAILABILITY_WINDOWS);
 
                         mathInput.depotList.push({
                             "id": "1",
-                            "point": route.points[i].waypoint.ID,
+                            "point": "-2",
                             "window": {
                                 "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
                                 "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
@@ -1083,21 +1089,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     "multi_use": true,
                     "amount_use": 1,
                     "proto": false,
-                    "cycled": route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE",
-                    "time_load": parseInt(route.transport.TIME_OF_LOAD),
+                    "cycled": false,
+                    "time_load": 0,
                     "time_min": 0,
                     "window": {
-                        "start": trWindow[0].start,
+                        "start": _data.server_time,
                         "finish": trWindow[0].finish
                     },
                     "weigth_nominal": 0,
                     "time_max": 0,
-                    "start_point": "-2",
-                    "finish_point": "-1",
+                    "start_point": "-1",
+                    "finish_point": route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE"
+                        ? route.points[route.points.length - 1].waypoint.ID : "-1",
                     "points_limit": 0,
                     "road_speed": 1,
                     "point_speed": 1,
-                    "add_servicetime": parseInt(route.transport.TIME_OF_DISEMBARK),
+                    "add_servicetime": 0, // parseInt(route.transport.TIME_OF_DISEMBARK),
                     "number_of_pallets": 0,
                     "refrigerator": false,
                     "temperature_control": false,
@@ -1122,12 +1129,67 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 http.post('./recalculate/', {input: mathInput}).
                     success(function (data) {
-                        console.log('recalculate success!');
-                        console.log(data);
+                        processModifiedPoints(route, data);
                     });
+            }
+        };
 
+        function processModifiedPoints(changedRoute, data) {
+            console.log('recalculate success!');
+            console.log(data);
+            //console.log(rawData);
+            //console.log(changedRoute);
+
+            var tmpRawRoute,
+                toMove = [],
+                newData = data.solutions[0].routes[0].deliveries;
+            for (var i = 0; i < rawData.routes.length; i++) {
+                if (_data.routes[i].ID == changedRoute.ID) {
+                    tmpRawRoute = rawData.routes[i];
+                    break;
+                }
             }
 
+            for (var i = 0, j = 0; i < changedRoute.points.length; i++, j++) {
+                if (changedRoute.points[i].status != STATUS.FINISHED &&
+                    changedRoute.points[i].status != STATUS.FINISHED_LATE) {
+
+                    for (var k = 0; k < newData.length; k++) {
+                        if (newData[k].pointId == changedRoute.points[i].START_WAYPOINT) {
+                            toMove.push(tmpRawRoute.points.splice(j, 1)[0]);
+                            j--;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //console.log(toMove);
+
+            for (i = 0; i < newData.length; i++) {
+                for(var j = 0; j < toMove.length; j++) {
+                    if (newData[i].pointId == toMove[j].START_WAYPOINT) {
+                        tmpRawRoute.points.push(JSON.parse(JSON.stringify(toMove[j])));
+                    }
+                }
+            }
+
+            for(i = 0; i < tmpRawRoute.points.length; i++) {
+                tmpRawRoute.points[i].NUMBER = i + 1;
+            }
+
+            //arrival: 1446541209
+            //distance: 7513
+            //downtime: 5789
+            //duration: 771
+            //jobID: 13
+            //pointId: 4679100
+            //servicetime: 403
+
+            linkDataParts(rawData);
+            if (loadParts) {
+                loadTrackParts();
+            }
 
         }
 
