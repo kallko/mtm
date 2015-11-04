@@ -6,6 +6,10 @@ angular.module('acp').factory('Solution', ['$http', function SolutionFactory(htt
 
         load: function() {
             return http.get('./loadsolution');
+        },
+
+        saveBig: function(bigSolution) {
+            return http.post('./savebigsol', {solution: bigSolution});
         }
     };
 }]);

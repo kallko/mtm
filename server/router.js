@@ -14,6 +14,9 @@ var express = require('express'),
         config.aggregator.login,
         config.aggregator.password);
 
+// TODO: REMOVE
+//tracksManager.sendDataToSolver();
+
 router.route('/')
     .get(function (req, res) {
         res.status(200);
@@ -70,6 +73,13 @@ router.route('/acp/savesolution')
         });
 
 
+    });
+
+router.route('/acp/savebigsol')
+    .post(function (req, res) {
+        console.log('savebigsol');
+        log.toFLog(config.defaultMonitoringLogin + '_BigSolution.json', req.body.solution);
+        res.status(200).json({status: 'saved'});
     });
 
 router.route('/acp/loadsolution')

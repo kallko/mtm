@@ -75,7 +75,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                             if (counter == reqCounter) {
                                 console.log('Done, loading tracks!');
                                 for (var k = 0; k < result.length; k++) {
-                                    if(result[k].data.length == 0) {
+                                    if (result[k].data.length == 0) {
                                         result[k].ready = true;
                                         var ready = true;
                                         for (var b = 0; b < result.length; b++) {
@@ -92,7 +92,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                     //console.log('length = ' + result[k].data.length);
                                     for (var m = 0; m < result[k].data.length; m++) {
 
-                                        (function(kk, mm) {
+                                        (function (kk, mm) {
                                             me.getTrackPart(data.sensors[jj].GID, result[kk].data[mm].t1, result[kk].data[mm].t2,
                                                 function (trackPart) {
                                                     if (result[kk].counter == undefined) {
@@ -117,8 +117,8 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                                         if (ready) {
                                                             callback(result);
                                                         }
-                                                }
-                                            });
+                                                    }
+                                                });
                                         })(k, m);
                                     }
                                 }
@@ -143,7 +143,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
 
 TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
                                                     stop_s, stop_d, move_s, move_d, op) {
-    op = typeof op !== 'undefined' ?  op : 'states';
+    op = typeof op !== 'undefined' ? op : 'states';
 
     return this.aggregatorUrl
         + op
@@ -259,8 +259,8 @@ TracksManager.prototype.getTracksAndStops = function (data, checkBeforeSend, cal
                             } else {
                                 var counter = 0;
                                 for (var k = 0; k < body.length; k++) {
-                                    (function(kk) {
-                                        me.getTrackPart(data.sensors[jj].GID, body[kk].t1, body[kk].t2, function(trackPart) {
+                                    (function (kk) {
+                                        me.getTrackPart(data.sensors[jj].GID, body[kk].t1, body[kk].t2, function (trackPart) {
                                             body[kk].coords = trackPart;
                                             counter++;
                                             if (counter == body.length) {
@@ -466,7 +466,57 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     });
 };
 
+TracksManager.prototype.sendDataToSolver = function () {
 
+    fs.readFile('./logs/' + config.defaultMonitoringLogin + '_BigSolution.json', 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+
+        data = JSON.parse(data);
+        var query;
+        var func = function (ii, _query) {
+            setTimeout(function () {
+                request({
+                    url: _query,
+                    json: true
+                }, function (error, response, body) {
+                    console.log(body, ii);
+                });
+
+            }, ii * 4);
+        };
+
+        for (var i = 2000; i < data.length; i++) {
+            if (i % 50 == 0) {
+                if (query != undefined) {
+                    func(i, query);
+                }
+
+                query = 'http://5.9.147.66:5500/visit?';
+            } else {
+                query += "&";
+            }
+
+            query += 'point=' + data[i].waypoint_id +
+                '&data=' + data[i].transport_id + ';'
+                + data[i].driver_id + ';'
+                + data[i].timestamp + ';'
+                + 'true;'
+                + data[i].duration + ';'
+                + data[i].weight + ';'
+                + data[i].volume + ';'
+                + '0;'
+                + '0;'
+                + '0;0;0;0';
+        }
+        func(i, query);
+
+
+        console.log(data.length);
+    });
+
+};
 
 
 

@@ -276,6 +276,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             } else {
                 console.log('All plans loaded!');
                 replaceDataID();
+
+                Solution.saveBig(scope.good_points)
+                    .success(function (data) {
+                        console.log(data);
+                    });
+
                 console.log({good_points: scope.good_points, pointsCounter: pointsCounter});
             }
         }
