@@ -111,13 +111,23 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         }
                     }
 
-                    //data.routes[i] = [];
+                    //data.routes[i].waypoints = [];
                     for (var j = 0; j < data.routes[i].points.length; j++) {
                         for (var k = 0; k < data.waypoints.length; k++) {
                             if (data.routes[i].points[j].END_WAYPOINT == data.waypoints[k].ID) {
                                 data.routes[i].points[j].waypoint = data.waypoints[k];
 
-
+                                //var idInArr = false;
+                                //for (var l = 0; l < data.routes[i].waypoints.length; l++) {
+                                //    if (data.routes[i].waypoints[l].ID == data.waypoints[k].ID) {
+                                //        idInArr = true;
+                                //        break;
+                                //    }
+                                //}
+                                //
+                                //if (!idInArr) {
+                                //    data.routes[i].waypoints.push(data.waypoints[k].ID);
+                                //}
 
                                 pointsCounter++;
                                 break;
@@ -162,6 +172,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 stop,
                 tmpKey,
                 tmpStopId = 0,
+                tmpTaskId,
                 stopsArr,
                 goodPoint;
 
@@ -172,7 +183,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     stop = route.stops[j];
                     if (stop.state == "ARRIVAL" &&
                         getDistanceFromLatLonInKm(parseFloat(point.waypoint.LAT), parseFloat(point.waypoint.LON),
-                            stop.lat, stop.lon) * 1000 <= 45) {
+                            stop.lat, stop.lon) * 1000 <= 60) {
 
                         // 120 - 41990
                         // 100 - 46502
@@ -229,10 +240,26 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     if (stopsArr.length == 1
                         && route.linked_stops['stop#' + stopsArr[0].id] != undefined
                         && route.linked_stops['stop#' + stopsArr[0].id].length == 1) {
+
+                        tmpTaskId = key.substr(5, key.length - 5);
+                        for (var i = 0; i < route.points.length; i++) {
+                            if (route.points[i].TASK_NUMBER == tmpTaskId) {
+                                point = route.points[i];
+                                break;
+                            }
+                        }
+
                         goodPoint = {
-                            task_id: key.substr(5, key.length - 5),
+                            task_id: tmpTaskId,
                             timestamp: stopsArr[0].t1,
-                            duration: stopsArr[0].time
+                            duration: stopsArr[0].time,
+                            waypoint_id: point.waypoint.ID,
+                            transport_id: route.TRANSPORT,
+                            driver_id: route.DRIVER,
+                            weight: point.WEIGHT,
+                            volume: point.VOLUME,
+                            packages: 1,
+                            scu: 1
                         };
                         route.good_points.push(goodPoint);
                         scope.good_points.push(goodPoint);
@@ -248,7 +275,38 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 loadPlans(from, to);
             } else {
                 console.log('All plans loaded!');
+                replaceDataID();
                 console.log({good_points: scope.good_points, pointsCounter: pointsCounter});
+            }
+        }
+
+        function replaceDataID() {
+            var point;
+
+            for (var i = 0; i < scope.good_points.length; i++) {
+                point = scope.good_points[i];
+
+                for (var j = 0; j < driversJson.length; j++) {
+                    if(driversJson[j].old_id == point.driver_id) {
+                        point.driver_id = driversJson[j].new_id;
+                        break;
+                    }
+                }
+
+                for (var j = 0; j < transportsJson.length; j++) {
+                    if(transportsJson[j].old_id == point.transport_id) {
+                        point.transport_id = transportsJson[j].new_id;
+                        break;
+                    }
+                }
+
+                for (var j = 0; j < jsonWaypoints.length; j++) {
+                    if(jsonWaypoints[j].old_id == point.waypoint_id) {
+                        point.waypoint_id = jsonWaypoints[j].new_id;
+                        break;
+                    }
+                }
+
             }
         }
 
