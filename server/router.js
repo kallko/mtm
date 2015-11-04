@@ -82,12 +82,26 @@ router.route('/acp/loadsolution')
                 return err;
             } else {
                 console.log('Done!');
+
+                //var newJson = [],
+                //    _json = JSON.parse(data);
+                //console.log(_json.length);
+                //for (var i = 0; i < _json.length; i++) {
+                //    if (_json[i].solved || _json[i].changed) {
+                //        newJson.push({
+                //            id: _json[i].id,
+                //            new_position: _json[i].new_position
+                //        });
+                //    }
+                //}
+                //
+                //log.toFLog('brand_new_json.json', newJson);
+
                 res.status(200).json(JSON.parse(data));
             }
         });
     });
 
-var counter = 0;
 router.route('/acp/getstops/:gid/:from/:to')
     .get(function (req, res) {
         //console.log('getstops');
@@ -100,13 +114,12 @@ router.route('/acp/getstops/:gid/:from/:to')
             if (err) {
                 console.log('new request for GID #' + req.params.gid);
                 tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function(data) {
-                    counter++;
-                    console.log('loaded for GID#' + req.params.gid + ', counter = ' + counter);
+                    console.log('loaded for GID#' + req.params.gid);
                     log.toFLog(req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', data);
                     res.status(200).json({gid: req.params.gid, data: data});
                 });
             } else {
-                console.log('GID #' + req.params.gid + ' LOADED FROM CACHE!');
+                //console.log('GID #' + req.params.gid + ' LOADED FROM CACHE!');
                 res.status(200).json({gid: req.params.gid, data: JSON.parse(data)});
             }
         });
@@ -132,8 +145,26 @@ router.route('/acp/getsensors')
         soapManager.getAllSensors(function (data) {
             res.status(200).json(data);
         });
+    });
 
-        //res.status(200).json({status: 'ok'});
+router.route('/acp/getplan/:timestamp')
+    .get(function (req, res) {
+        //console.log('getplans');
+
+        var fileName = './logs/' + config.defaultMonitoringLogin + '_' + req.params.timestamp + '.json';
+        fs.readFile(fileName, 'utf8', function (err, data) {
+            if (err) {
+                console.log('load plan for ' + config.defaultMonitoringLogin + ', date = ' + new Date(req.params.timestamp * 1000));
+                var soapManager = new soap(config.defaultMonitoringLogin);
+                soapManager.getPlanByDate(req.params.timestamp, function (plan) {
+                    log.toFLog(config.defaultMonitoringLogin + '_' + req.params.timestamp + '.json', plan);
+                    res.status(200).json(plan);
+                });
+            } else {
+                console.log('load plan FROM CACHE for ' + config.defaultMonitoringLogin + ', date = ' + new Date(req.params.timestamp * 1000));
+                res.status(200).json(JSON.parse(data));
+            }
+        });
     });
 
 router.route('/dailydata')

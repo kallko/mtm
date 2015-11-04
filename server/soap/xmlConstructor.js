@@ -30,21 +30,21 @@ function XMLConstructor() {
     };
 }
 
-XMLConstructor.prototype.getTodayStr = function () {
-    var date = new Date();
+XMLConstructor.prototype.getTodayStr = function (timestamp) {
+    var date = new Date(timestamp);
     return ( ("0" + date.getDate())).slice(-2) + '.' +
         ("0" + (date.getMonth() + 1)).slice(-2) + '.' +
         date.getFullYear();
 };
 
-XMLConstructor.prototype.dailyPlanXML = function () {
+XMLConstructor.prototype.dailyPlanXML = function (timestamp) {
     var str = '';
     str += this.xml.begin;
     str += this.xml.instructions.begin;
     str += this.xml.instruction.daily_plan;
 
     str += this.xml.parameter.begin;
-    str += this.xml.setGetValue('DATE', this.getTodayStr());
+    str += this.xml.setGetValue('DATE', this.getTodayStr(timestamp));
     str += this.xml.slashEnd;
 
     str += this.xml.instruction.end;
@@ -61,6 +61,10 @@ XMLConstructor.prototype.itineraryXML = function (id, version) {
 
     str += this.xml.parameter.begin;
     str += this.xml.setGetValue('ID', id);
+    str += this.xml.slashEnd;
+
+    str += this.xml.parameter.begin;
+    str += this.xml.setGetValue('ID_REQUEST', parseInt(id));
     str += this.xml.slashEnd;
 
     str += this.xml.instruction.end;

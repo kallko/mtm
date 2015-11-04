@@ -439,8 +439,7 @@ TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);
 
-    // console.log(url + '&gid=' + gid);
-
+    //console.log(url + '&gid=' + gid);
     request({
         url: url + '&gid=' + gid,
         json: true

@@ -92,34 +92,40 @@ function checkBeforeSend(data, callback) {
         delete data.sensors[i].loading;
     }
 
-
-    console.log('5');
     data.sended = true;
     console.log('DONE!');
     log.toFLog('final_data.js', data);
     callback(data);
 }
 
-SoapManager.prototype.getDailyPlan = function (callback) {
-    var me = this;
+SoapManager.prototype.getDailyPlan = function (callback, date) {
+    var me = this,
+        itIsToday = typeof date === 'undefined';
+    date = !itIsToday ? date : Date.now();
+    console.log('itIsToday', itIsToday);
 
+    console.log(new Date(date));
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
         console.log(me.login);
-        console.log(_xml.dailyPlanXML());
-        client.runAsUser({'input_data': _xml.dailyPlanXML(), 'user': me.login}, function (err, result) {
+        console.log(_xml.dailyPlanXML(date));
+        client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
                 console.log('DONE getDailyPlan');
                 console.log(result.return);
 
                 console.log();
                 parseXML(result.return, function (err, res) {
-                    if (res.MESSAGE.PLANS == null) return;
+                    if (res.MESSAGE.PLANS == null) {
+                        console.log('NO PLANS!');
+                        callback({status: 'no plan'});
+                        return;
+                    }
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
                     for (var i = 0; i < itineraries.length; i++) {
-                        me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, callback);
+                        me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, callback);
                     }
 
                 });
@@ -131,8 +137,9 @@ SoapManager.prototype.getDailyPlan = function (callback) {
     });
 };
 
-SoapManager.prototype.getItinerary = function (client, id, version, callback) {
+SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, callback) {
     var me = this;
+    console.log('getItinerary', _xml.itineraryXML(id, version));
     client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
         if (!err) {
             //console.log('DONE getItinerary for ');
@@ -144,15 +151,15 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
                 if (res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
                     res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
-                log.toFLog("log_" + parseInt(id) + ".js", res);
+                //log.toFLog("log_" + parseInt(id) + ".js", res);
 
                 var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$,
                     tracksManager;
                 data.sended = false;
                 data.date = new Date();
                 data.server_time = parseInt(Date.now() / 1000);
-                tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, callback);
-                me.getAdditionalData(client, data, tracksManager, callback);
+                tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, callback);
+                me.getAdditionalData(client, data, tracksManager, itIsToday, callback);
 
             });
         } else {
@@ -162,7 +169,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, callback) {
     });
 };
 
-SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
+SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, callback) {
     var tmpRoute,
         tracksManager = new tracks(
             config.aggregator.url,
@@ -183,14 +190,16 @@ SoapManager.prototype.prepareItinerary = function (routes, data, callback) {
         data.routes.push(tmpRoute);
     }
 
-    for (i = 0; i < data.routes.length; i++) {
-        tracksManager.getRouterData(data, i, checkBeforeSend, callback);
+    if (itIsToday) {
+        for (i = 0; i < data.routes.length; i++) {
+            tracksManager.getRouterData(data, i, checkBeforeSend, callback);
+        }
     }
 
     return tracksManager;
 };
 
-SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, callback) {
+SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, itIsToday, callback) {
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data.ID + " === \n");
@@ -226,9 +235,14 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     data.sensors.push(sensors[i].$);
                 }
 
-                tracksManager.getTracksAndStops(data, checkBeforeSend, callback);
-
-                checkBeforeSend(data, callback);
+                if (itIsToday) {
+                    tracksManager.getTracksAndStops(data, checkBeforeSend, callback);
+                    checkBeforeSend(data, callback);
+                } else {
+                    console.log('DONE!');
+                    //log.toFLog('acp_final_data.js', data);
+                    callback(data);
+                }
 
                 //data.tasks = [];
                 //
@@ -316,4 +330,17 @@ SoapManager.prototype.getAllSensors = function(callback) {
     });
 };
 
-// SoapManager.prototype.sendData()
+SoapManager.prototype.getPlanByDate = function(timestamp, callback) {
+    var me = this;
+
+    soap.createClient(me.getFullUrl(), function (err, client) {
+        if (err) throw err;
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        console.log('getPlansByTime', me.login);
+
+        timestamp *= 1000;
+        me.getDailyPlan(callback, timestamp);
+
+        //callback({status: 'working for ' + timestamp});
+    });
+};

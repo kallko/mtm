@@ -1,72 +1,255 @@
-angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor', '$timeout', 'Solution',
-    function (scope, http, Track, Sensor, timeout, Solution) {
+angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor',
+    '$timeout', 'Solution', 'Plan', function (scope, http, Track, Sensor, timeout, Solution, Plan) {
         scope.params = {};
         scope.map = {};
         scope.points = {};
 
+        var pointsCounter = 0;
+
         toLogDiv('Загружаем данные...');
-        timeout(function() {
+        timeout(function () {
             loadData();
         }, 1200);
 
-        function loadData () {
+        function loadData() {
             console.log('loadData');
-            Solution.load().success( function(data) {
-                scope.data = data;
-                groupButtonsByRadius();
-                scope.map.clearMap();
-                scope.points.reinit(scope.data);
-            });
+
+            //var from = 1444435200,
+            //    to = 1445385600;
+
+            var from = 1433116800,
+                to = 1446595200; //1446076800; //1439596800
+            scope.plans = [];
+            loadPlans(from, to);
+
+            //Solution.load().success( function(data) {
+            //    scope.data = data;
+            //    groupButtonsByRadius();
+            //    scope.map.clearMap();
+            //    scope.points.reinit(scope.data);
+            //    //loadSensorsAndStops();
+            //});
 
             //scope.data = jsonData2;
             //groupButtonsByRadius();
             //scope.map.clearMap();
             //scope.points.reinit(scope.data);
+        }
 
-            //if (scope.params.fromDate != '' && scope.params.fromDate != null) {
-            //    var from = parseInt(scope.params.fromDate.getTime() / 1000),
-            //        to = (scope.params.toDate == '' || scope.params.toDate == null) ? parseInt(Date.now() / 1000)
-            //            : parseInt(scope.params.toDate.getTime() / 1000);
-            //
-            //    Sensor.all().success(function (sensors) {
-            //        console.log({sensors: sensors});
-            //        for (var i = 0; i < scope.data.length; i++) {
-            //            for (var j = 0; j < scope.data[i].coords.length; j++) {
-            //                for (var k = 0; k < sensors.length; k++) {
-            //                    if (scope.data[i].coords[j].transportid == sensors[k].TRANSPORT) {
-            //                        scope.data[i].coords[j].gid = sensors[k].GID;
-            //                        sensors[k].need_data = true;
-            //                        console.log('connected');
-            //                        break;
-            //                    }
-            //                }
-            //            }
-            //        }
-            //
-            //        scope.stopsCollection = [];
-            //        for (i = 0; i < sensors.length; i++) {
-            //            if (sensors[i].need_data) {
-            //
-            //                (function (ii) {
-            //                    counter++;
-            //                    //console.log('GO #', ii);
-            //                    Track.stops(sensors[ii].GID, from, to).success(function (stops) {
-            //                        for(var i = 0; i < stops.data.length; i++) {
-            //                            stops.data[i].transportid = sensors[ii].TRANSPORT;
-            //                        }
-            //
-            //                        scope.stopsCollection = scope.stopsCollection.concat(stops.data);
-            //                        counter--;
-            //
-            //                        if (counter == 0) {
-            //                            console.log('all stops downloaded!');
-            //                        }
-            //                    });
-            //                })(i);
-            //            }
-            //        }
-            //    });
-            //}
+        function loadSensorsAndStops() {
+            var from = 1433116800,
+                to = 1446076800;
+
+            Sensor.all().success(function (sensors) {
+                console.log({sensors: sensors});
+                for (var i = 0; i < scope.data.length; i++) {
+                    for (var j = 0; j < scope.data[i].coords.length; j++) {
+                        for (var k = 0; k < sensors.length; k++) {
+                            if (scope.data[i].coords[j].transportid == sensors[k].TRANSPORT) {
+                                scope.data[i].coords[j].gid = sensors[k].GID;
+                                sensors[k].need_data = true;
+                                //console.log('connected');
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                scope.stopsCollection = {};
+                var counter = 0;
+                for (i = 0; i < sensors.length; i++) {
+                    if (sensors[i].need_data) {
+
+                        (function (ii) {
+                            counter++;
+                            //console.log('GO #', ii);
+                            Track.stops(sensors[ii].GID, from, to).success(function (stops) {
+                                for (var i = 0; i < stops.data.length; i++) {
+                                    stops.data[i].transportid = sensors[ii].TRANSPORT;
+                                }
+
+                                scope.stopsCollection[stops.gid] = stops.data;
+                                counter--;
+
+                                if (counter == 0) {
+                                    console.log('all stops downloaded!');
+                                    console.log({stops: scope.stopsCollection});
+                                    //loadPlans(from, to);
+                                }
+                            });
+                        })(i);
+                    }
+                }
+            });
+        }
+
+        function loadPlans(from, to) {
+            console.log('loadPlans');
+            Plan.all(from).success(function (data) {
+                console.log(data);
+                console.log(new Date(from * 1000));
+                scope.plans.push(data);
+
+                if (data.status == 'no plan') {
+                    startNewLoadCycle(from, to);
+                    return;
+                }
+
+                for (var i = 0; i < data.sensors.length; i++) {
+                    for (var j = 0; j < data.transports.length; j++) {
+                        if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
+                            data.transports[j].gid = data.sensors[i].GID;
+                        }
+                    }
+                }
+
+                for (i = 0; i < data.routes.length; i++) {
+                    for (j = 0; j < data.transports.length; j++) {
+                        if (data.routes[i].TRANSPORT == data.transports[j].ID) {
+                            data.routes[i].transport = data.transports[j];
+                            break;
+                        }
+                    }
+
+                    //data.routes[i] = [];
+                    for (var j = 0; j < data.routes[i].points.length; j++) {
+                        for (var k = 0; k < data.waypoints.length; k++) {
+                            if (data.routes[i].points[j].END_WAYPOINT == data.waypoints[k].ID) {
+                                data.routes[i].points[j].waypoint = data.waypoints[k];
+
+
+
+                                pointsCounter++;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                var counter = 0;
+                for (var i = 0; i < data.routes.length; i++) {
+                    if (data.routes[i].transport == undefined) {
+                        counter++;
+                        continue;
+                    }
+
+                    (function (ii) {
+                        Track.stops(data.routes[ii].transport.gid, from, from + 86400)
+                            .success(function (stops) {
+                                //console.log(stops);
+                                data.routes[ii].stops = stops.data;
+                                bindPlanStopsToPoints(data.routes[ii]);
+                                counter++;
+                                if (counter == data.routes.length) {
+                                    console.log('stops loaded!');
+                                    startNewLoadCycle(from, to);
+                                }
+                            });
+                    })(i);
+                }
+
+            });
+        }
+
+        function bindPlanStopsToPoints(route) {
+            var result = {
+                    jobs: {
+                        len: 0
+                    },
+                    stops: {}
+                },
+                point,
+                stop,
+                tmpKey,
+                tmpStopId = 0,
+                stopsArr,
+                goodPoint;
+
+            for (var i = 0; i < route.points.length; i++) {
+                point = route.points[i];
+                if (point.waypoint == undefined) continue;
+                for (var j = 0; j < route.stops.length; j++) {
+                    stop = route.stops[j];
+                    if (stop.state == "ARRIVAL" &&
+                        getDistanceFromLatLonInKm(parseFloat(point.waypoint.LAT), parseFloat(point.waypoint.LON),
+                            stop.lat, stop.lon) * 1000 <= 45) {
+
+                        // 120 - 41990
+                        // 100 - 46502
+                        // 80 - 50330
+                        // 70 - 51832
+                        // 60 - 52510
+                        // 55 - 52503
+                        // 50 - 52182
+                        // 45 - 51419
+
+                        tmpKey = 'task#' + point.TASK_NUMBER;
+                        if (result.jobs[tmpKey] == undefined) {
+                            result.jobs[tmpKey] = [];
+                            result.jobs.len++;
+                        }
+
+                        if (stop.id == undefined) {
+                            tmpStopId++;
+                            stop.id = tmpStopId;
+                        }
+
+                        result.jobs[tmpKey].push(stop);
+                    }
+                }
+            }
+
+            result.jobs.find_coef = result.jobs.len / route.points.length * 100;
+            route.linked_jobs = result.jobs;
+
+            for (var key in result.jobs) {
+                if (result.jobs.hasOwnProperty(key) && key.substr(0, 5) == 'task#') {
+
+                    stopsArr = result.jobs[key];
+                    for (var i = 0; i < stopsArr.length; i++) {
+                        tmpKey = 'stop#' + stopsArr[i].id;
+                        if (result.stops[tmpKey] == undefined) {
+                            result.stops[tmpKey] = [];
+                        }
+
+                        result.stops[tmpKey].push(key);
+                    }
+                }
+            }
+
+            route.linked_stops = result.stops;
+            route.good_points = [];
+            if (scope.good_points == undefined) {
+                scope.good_points = [];
+            }
+
+            for (var key in result.jobs) {
+                if (result.jobs.hasOwnProperty(key) && key.substr(0, 5) == 'task#') {
+                    stopsArr = result.jobs[key];
+                    if (stopsArr.length == 1
+                        && route.linked_stops['stop#' + stopsArr[0].id] != undefined
+                        && route.linked_stops['stop#' + stopsArr[0].id].length == 1) {
+                        goodPoint = {
+                            task_id: key.substr(5, key.length - 5),
+                            timestamp: stopsArr[0].t1,
+                            duration: stopsArr[0].time
+                        };
+                        route.good_points.push(goodPoint);
+                        scope.good_points.push(goodPoint);
+                    }
+                }
+            }
+
+        }
+
+        function startNewLoadCycle(from, to) {
+            from += 86400;
+            if (to > from) {
+                loadPlans(from, to);
+            } else {
+                console.log('All plans loaded!');
+                console.log({good_points: scope.good_points, pointsCounter: pointsCounter});
+            }
         }
 
         scope.saveData = function () {
@@ -74,21 +257,21 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             var toSave = [];
             toLogDiv(' Сохраняю...');
 
-            for(var i = 0; i < scope.data.length; i++) {
-                if(scope.data[i].needSave) {
+            for (var i = 0; i < scope.data.length; i++) {
+                if (scope.data[i].needSave) {
                     delete scope.data[i].needSave;
                     toSave.push(scope.data[i]);
                 }
             }
 
-            timeout(function() {
+            timeout(function () {
                 Solution.save(toSave).success(function (data) {
                     toLogDiv('Сохранено!');
                 });
             }, 100);
         };
 
-        scope.toggleChanged = function() {
+        scope.toggleChanged = function () {
             $('#toggle-edited-btn').toggleClass('btn-default').toggleClass('btn-success');
             scope.points.showHidden = !scope.points.showHidden;
         };
@@ -217,7 +400,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
             //console.log('Проблемных точек', totalCount);
             //console.log('Решенных точек', scope.data.length - totalCount);
-            toLogDiv('Данные загружены. Точек требующих вмешательства - ' +  totalCount
+            toLogDiv('Данные загружены. Точек требующих вмешательства - ' + totalCount
                 + ', автоматически решенных точек - ' + (scope.data.length - totalCount)
                 + ', готовых - ' + doneCount
                 + ', изменено - ' + changedCount
@@ -240,38 +423,53 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         function bindStopsToButtons() {
             if (scope.stopsCollection == undefined) return;
+            console.log({scopedata: scope.data})
 
             var stop,
+                stopsArr,
                 button,
                 buttonPush,
-                timeShift = 60 * 12 * 60;
+                timeShift = 1 * 60 * 60,
+                stopRadius = 150,
+                undefCounter = 0;
 
             for (var i = 0; i < scope.data.length; i++) {
+                if (i % 100 == 0) console.log("I: " + i + " out of " + scope.data.length + ", undef = " + undefCounter);
+
                 button = scope.data[i];
                 button.stops = [];
-                for (var j = 0; j < scope.stopsCollection.length; j++) {
-                    if (scope.stopsCollection[j].state == 'MOVE') continue;
-                    stop = scope.stopsCollection[j];
-                    if (getDistanceFromLatLonInKm(stop.lat, stop.lon, button.median.lat, button.median.lon) * 1000 <=
-                        scope.params.stopRadius) {
-                        for (var k = 0; k < button.coords.length; k++) {
-                            buttonPush = button.coords[k];
-                            if (!buttonPush.inRadius) continue;
+                for (var j = 0; j < scope.data[i].coords.length; j++) {
+                    //if(j % 500 == 0) console.log("J: " + j + " out of " + scope.data[i].coords.length);
+                    buttonPush = scope.data[i].coords[j];
+                    stopsArr = scope.stopsCollection[buttonPush.gid];
 
-                            if (buttonPush.time_ts == undefined) {
-                                buttonPush.time_ts = strToTstamp(buttonPush.time);
-                            }
+                    if (stopsArr == undefined) {
+                        //console.log("buttonPush", buttonPush);
+                        //console.log("buttonPush.gid", buttonPush.gid);
+                        //console.log("buttonPush.gid = undefined ");
+                        undefCounter++;
+                        continue;
+                    }
 
-                            if (stop.transportid == buttonPush.transportid &&
-                                buttonPush.time_ts + timeShift > stop.t1 &&
-                                buttonPush.time_ts - timeShift < stop.t1) {
-                                stop.gid = buttonPush.gid;
-                                if(buttonPush.stops == null) {
-                                    buttonPush.stops = [];
-                                }
-                                buttonPush.stops.push(stop);
-                                button.stops.push(stop);
-                            }
+                    for (var k = 0; k < stopsArr.length; k++) {
+                        //if(k % 100 == 0) console.log("K: " + k + " out of " + stopsArr.length);
+                        stop = stopsArr[k];
+
+                        if (buttonPush.time_ts == undefined) {
+                            buttonPush.time_ts = strToTstamp(buttonPush.time);
+                        }
+
+                        if (buttonPush.time_ts + timeShift > stop.t1 &&
+                            buttonPush.time_ts - timeShift < stop.t1 &&
+                            getDistanceFromLatLonInKm(stop.lat, stop.lon,
+                                button.new_position.lat, button.new_position.lon) * 1000 <= stopRadius) {
+
+                            if (buttonPush.stops == null) buttonPush.stops = [];
+                            if (stop.pushes == null) stop.pushes = [];
+
+                            buttonPush.stops.push(stop);
+                            button.stops.push(stop);
+                            stop.pushes.push(buttonPush);
                         }
                     }
                 }
@@ -346,7 +544,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 }
 
                 for (j = 0; j < scope.data[i].coords.length; j++) {
-                    points.push( scope.data[i].coords[j]);
+                    points.push(scope.data[i].coords[j]);
                 }
 
                 scope.data[i].new_position = findMedianForPoints(points);
