@@ -125,7 +125,9 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
                     for (var i = 0; i < itineraries.length; i++) {
-                        me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, callback);
+                        //if (i == 0) {
+                            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, callback);
+                        //}
                     }
 
                 });
@@ -139,19 +141,16 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
 SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, callback) {
     var me = this;
-    console.log('getItinerary', _xml.itineraryXML(id, version));
+
     client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
         if (!err) {
-            //console.log('DONE getItinerary for ');
-            //console.log(_xml.itineraryXML(id, version));
-            //console.log();
-
             parseXML(result.return, function (err, res) {
 
                 if (res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
                     res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
                 //log.toFLog("log_" + parseInt(id) + ".js", res);
+                console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
 
                 var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$,
                     tracksManager;
@@ -203,7 +202,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data.ID + " === \n");
-    log.l(_xml.additionalDataXML(data.ID));
+    //log.l(_xml.additionalDataXML(data.ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data.ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {

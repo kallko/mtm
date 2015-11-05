@@ -1,5 +1,5 @@
-angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval',
-    function (scope, http, timeout, interval) {
+angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval', '$filter',
+    function (scope, http, timeout, interval, filter) {
 
         var pointTableHolder,
             pointContainer,
@@ -220,7 +220,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function linkDataParts(data) {
-            console.log('Start linking ...', data);
+            console.log('Start linking ...');
             rawData = JSON.parse(JSON.stringify(data));
             init();
 
@@ -283,6 +283,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint.transport = data.routes[i].transport;
                     tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
                     tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
+                    tPoint.base_arrival_ts = strToTstamp(tPoint.base_arrival);
                     tPoint.controlled_window = {
                         start: tPoint.arrival_time_ts - controlledWindow,
                         finish: tPoint.arrival_time_ts + controlledWindow
@@ -310,7 +311,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS);
-                    if (tPoint.windows != undefined) {
+                    if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
                         for (k = 0; k < tPoint.windows.length; k++) {
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
                                 tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
@@ -336,6 +337,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             start: tPoint.arrival_time_ts - promisedWindow / 2,
                             finish: tPoint.arrival_time_ts + promisedWindow / 2
                         };
+                    }
+
+                    if(tPoint.promised_window_changed == undefined) {
+                        tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
                     }
 
                 }
@@ -951,23 +956,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var start = $('#edit-promised-start-' + row_id).val().split(':'),
                 finish = $('#edit-promised-finish-' + row_id).val().split(':'),
                 point = scope.displayCollection[row_id],
-                tmpPoints = _data.routes[point.route_id].points,
-                oldStart = new Date(point.promised_window.start * 1000),
+                oldStart = new Date(point.promised_window_changed.start * 1000),
                 clearOldDate = new Date(oldStart.getFullYear(), oldStart.getMonth(), oldStart.getDate()).getTime();
 
-            point.promised_window = {
+            point.promised_window_changed = {
                 start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
                 finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
 
-            point.arrival_time_ts = (point.promised_window.start +
-                point.promised_window.finish) / 2;
+            var rawPoints = rawData.routes[point.route_id].points;
+            for (var i = 0; i < rawPoints.length; i++) {
+                if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
+                    console.log('Change promised window in rawData');
+                    rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
+                    rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
+                    break;
+                }
+            }
 
-            //for (var i = 0; i < tmpPoints.length; i++) {
-            //    if (tmpPoints[i].arrival_time_ts > point.arrival_time_ts) {
-            //        tmpPoints.move(parseInt(point.NUMBER) - 1, i - 1);
-            //    }
-            //}
+            //point.arrival_time_ts = (point.promised_window.start +
+            //    point.promised_window.finish) / 2;
 
             console.log(_data);
             updateData();
@@ -1038,8 +1046,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             "point": pt.waypoint.ID,
                             "windows": [
                                 {
-                                    "start": pt.promised_window.start,
-                                    "finish": pt.promised_window.finish
+                                    "start": pt.promised_window_changed.start,
+                                    "finish": pt.promised_window_changed.finish
                                 }
                             ]
                         };
@@ -1149,7 +1157,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             var tmpRawRoute,
                 toMove = [],
-                newData = data.solutions[0].routes[0].deliveries;
+                newData = data.solutions[0].routes[0].deliveries,
+                tmpPoint;
             for (var i = 0; i < rawData.routes.length; i++) {
                 if (_data.routes[i].ID == changedRoute.ID) {
                     tmpRawRoute = rawData.routes[i];
@@ -1163,7 +1172,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     for (var k = 0; k < newData.length; k++) {
                         if (newData[k].pointId == changedRoute.points[i].START_WAYPOINT) {
-                            toMove.push(tmpRawRoute.points.splice(j, 1)[0]);
+                            tmpPoint = tmpRawRoute.points.splice(j, 1)[0];
+                            // 05.11.2015 09:23:09      05.11.2015 13:11:56
+                            tmpPoint.ARRIVAL_TIME = filter('date')((newData[k].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+                            toMove.push(tmpPoint);
                             j--;
                             break;
                         }
@@ -1183,7 +1195,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for(i = 0; i < tmpRawRoute.points.length; i++) {
                 tmpRawRoute.points[i].NUMBER = i + 1;
-                //tmpRawRoute.points[i].
             }
 
             console.log('RAW POINTS', tmpRawRoute.points);
@@ -1196,11 +1207,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //pointId: 4679100
             //servicetime: 403
 
-            //linkDataParts(rawData);
-            //if (loadParts) {
-            //    loadTrackParts();
-            //}
-
+            linkDataParts(rawData);
+            if (loadParts) {
+                loadTrackParts();
+            }
         }
 
     }]);

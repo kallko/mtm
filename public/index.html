@@ -92,8 +92,8 @@
                     <th class="in-plan-col">В очередности</th>
                     <th class="time-window-col">Заказанное окно</th>
                     <th class="promised-window-col">Обещанное окно</th>
+                    <th class="promised-window-changed-col">Изменяемое окно</th>
                     <th class="controlled-window-col">Контролируемое окно</th>
-                    <th class="departure-time-col">Время отбытия</th>
                     <th class="address-col">Адрес</th>
                     <th class="client-name-col">Название</th>
                     <th class="driver-name-col">Водитель</th>
@@ -138,12 +138,16 @@
                     <td>{{ row.in_plan ? 'ДА' : 'НЕТ' }}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
+                        {{row.promised_window.start * 1000 | date:'HH:mm'}} -
+                        {{row.promised_window.finish * 1000 | date:'HH:mm'}}
+                    </td>
+                    <td>
                         <input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"
-                               value="{{row.promised_window.start * 1000 | date:'HH:mm'}}"
+                               value="{{row.promised_window_changed.start * 1000 | date:'HH:mm'}}"
                                enter-event="changePromisedWindow(row.row_id)" >
                         </input> -
                         <input type="text" class="promised-text" id="{{'edit-promised-finish-' + row.row_id}}"
-                               value="{{row.promised_window.finish * 1000 | date:'HH:mm'}}"
+                               value="{{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}"
                                enter-event="changePromisedWindow(row.row_id)" >
                         </input>
                     </td>
@@ -151,7 +155,6 @@
                         {{row.controlled_window.start * 1000 | date:'HH:mm'}} -
                         {{row.controlled_window.finish * 1000 | date:'HH:mm'}}
                     </td>
-                    <td>{{row.end_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
