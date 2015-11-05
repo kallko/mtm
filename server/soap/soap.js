@@ -64,38 +64,46 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
     });
 };
 
-function checkBeforeSend(data, callback) {
-    if (data.sended || data.sensors == null) { // || !data.tasks_loaded) {
-        return;
-    }
+function checkBeforeSend(_data, callback) {
 
-    //for (var i = 0; i < data.routes.length; i++) {
-    //    if (!data.routes[i].time_matrix_loaded
-    //        || !data.routes[i].plan_geometry_loaded) {
-    //        return;
-    //    }
-    //}
+    for (var k = 0; k < _data.length; k++) {
+        data = _data[k];
 
-    for (i = 0; i < data.sensors.length; i++) {
-        if (data.sensors[i].loading && !data.sensors[i].real_track_loaded) {
+        if (data.sensors == null) { // || !data.tasks_loaded) {
             return;
+        }
+
+        for (var i = 0; i < data.routes.length; i++) {
+            if (!data.routes[i].time_matrix_loaded
+                || !data.routes[i].plan_geometry_loaded) {
+                return;
+            }
+        }
+
+        for (var i = 0; i < data.sensors.length; i++) {
+            if (data.sensors[i].loading && !data.sensors[i].stops_loaded) {
+                return;
+            }
         }
     }
 
-    for (i = 0; i < data.routes.length; i++) {
-        delete data.routes[i].time_matrix_loaded;
-        delete data.routes[i].plan_geometry_loaded;
+    for (k = 0; k < _data.length; k++) {
+        data = _data[k];
+
+        for (i = 0; i < data.routes.length; i++) {
+            delete data.routes[i].time_matrix_loaded;
+            delete data.routes[i].plan_geometry_loaded;
+        }
+
+        for (i = 0; i < data.sensors.length; i++) {
+            delete data.sensors[i].real_track_loaded;
+            delete data.sensors[i].loading;
+        }
     }
 
-    for (i = 0; i < data.sensors.length; i++) {
-        delete data.sensors[i].real_track_loaded;
-        delete data.sensors[i].loading;
-    }
-
-    data.sended = true;
     console.log('DONE!');
-    log.toFLog('final_data.js', data);
-    callback(data);
+    log.toFLog('final_data.js', _data);
+    callback(_data);
 }
 
 SoapManager.prototype.getDailyPlan = function (callback, date) {
@@ -123,11 +131,12 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         return;
                     }
 
-                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
+                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
+                        data = [];
                     for (var i = 0; i < itineraries.length; i++) {
-                        if (i == 0) {
-                            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, callback);
-                        }
+                        //if (i == 0) {
+                            me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, data, callback);
+                        //}
                     }
 
                 });
@@ -139,7 +148,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     });
 };
 
-SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, callback) {
+SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, callback) {
     var me = this;
 
     client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
@@ -149,16 +158,16 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, c
                 if (res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
                     res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
-                //log.toFLog("log_" + parseInt(id) + ".js", res);
                 console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
-
-                var data = res.MESSAGE.ITINERARIES[0].ITINERARY[0].$,
+                var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$),
                     tracksManager;
-                data.sended = false;
-                data.date = new Date();
-                data.server_time = parseInt(Date.now() / 1000);
-                tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, callback);
-                me.getAdditionalData(client, data, tracksManager, itIsToday, callback);
+
+                nIndx--;
+                data[nIndx].sended = false;
+                data[nIndx].date = new Date();
+                data[nIndx].server_time = parseInt(Date.now() / 1000);
+                tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
+                me.getAdditionalData(client, data, tracksManager, itIsToday, nIndx, callback);
 
             });
         } else {
@@ -168,7 +177,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, c
     });
 };
 
-SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, callback) {
+SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nIndx, callback) {
     var tmpRoute,
         tracksManager = new tracks(
             config.aggregator.url,
@@ -176,7 +185,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, call
             config.aggregator.login,
             config.aggregator.password);
 
-    data.routes = [];
+    data[nIndx].routes = [];
     for (var i = 0; i < routes.length; i++) {
         tmpRoute = {};
         tmpRoute = routes[i].$;
@@ -186,24 +195,24 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, call
             tmpRoute.points.push(routes[i].SECTION[j].$);
         }
 
-        data.routes.push(tmpRoute);
+        data[nIndx].routes.push(tmpRoute);
     }
 
     if (itIsToday) {
-        for (i = 0; i < data.routes.length; i++) {
-            tracksManager.getRouterData(data, i, checkBeforeSend, callback);
+        for (i = 0; i < data[nIndx].routes.length; i++) {
+            tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
         }
     }
 
     return tracksManager;
 };
 
-SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, itIsToday, callback) {
+SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, itIsToday, nIndx, callback) {
     var me = this;
     log.l("getAdditionalData");
-    log.l("=== a_data; data.ID = " + data.ID + " === \n");
+    log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     //log.l(_xml.additionalDataXML(data.ID));
-    client.runAsUser({'input_data': _xml.additionalDataXML(data.ID), 'user': me.login}, function (err, result) {
+    client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
 
@@ -212,30 +221,29 @@ SoapManager.prototype.getAdditionalData = function (client, data, tracksManager,
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,
                     sensors = res.MESSAGE.SENSORS[0].SENSOR;
                 log.l('waypoints.length = ' + waypoints.length);
-                //log.toFLog("additional_data.js", res);
 
-                data.transports = [];
+                data[nIndx].transports = [];
                 for (var i = 0; i < transports.length; i++) {
-                    data.transports.push(transports[i].$);
+                    data[nIndx].transports.push(transports[i].$);
                 }
 
-                data.drivers = [];
+                data[nIndx].drivers = [];
                 for (i = 0; i < drivers.length; i++) {
-                    data.drivers.push(drivers[i].$);
+                    data[nIndx].drivers.push(drivers[i].$);
                 }
 
-                data.waypoints = [];
+                data[nIndx].waypoints = [];
                 for (i = 0; i < waypoints.length; i++) {
-                    data.waypoints.push(waypoints[i].$);
+                    data[nIndx].waypoints.push(waypoints[i].$);
                 }
 
-                data.sensors = [];
+                data[nIndx].sensors = [];
                 for (i = 0; i < sensors.length; i++) {
-                    data.sensors.push(sensors[i].$);
+                    data[nIndx].sensors.push(sensors[i].$);
                 }
 
                 if (itIsToday) {
-                    tracksManager.getTracksAndStops(data, checkBeforeSend, callback);
+                    tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback);
                     checkBeforeSend(data, callback);
                 } else {
                     console.log('DONE!');

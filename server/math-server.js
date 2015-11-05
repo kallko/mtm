@@ -53,7 +53,7 @@ MathServer.prototype.recalculate = function (route, callback) {
                         }
                     }
                 });
-            }, 10000);
+            }, 1000);
         }
     });
 };

@@ -125,7 +125,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
 
                         for (var j = 0; j < _data.routes.length; j++) {
-
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
                                     for (var k = 0; k < trackParts[i].data.length; k++) {
@@ -167,14 +166,36 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get(url, {})
                 .success(function (data) {
                     console.log('loadDailyData success');
+                    console.log(data);
+                    var allData = JSON.parse(JSON.stringify(data[0]));
 
-                    for (var i = 0; i < data.routes.length; i++) {
-                        for (var j = 0; j < data.routes[i].points.length; j++) {
-                            data.routes[i].points[j].base_arrival = data.routes[i].points[j].ARRIVAL_TIME;
+                    for (var i = 1; i < data.length; i++) {
+                        allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
+                        allData.DISTANCE = parseInt(allData.NUMBER_OF_ORPHANS) + parseInt(data[i].NUMBER_OF_ORPHANS);
+                        allData.DISTANCE = parseInt(allData.NUMBER_OF_TASKS) + parseInt(data[i].NUMBER_OF_TASKS);
+                        allData.DISTANCE = parseInt(allData.TIME) + parseInt(data[i].TIME);
+                        allData.DISTANCE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
+                        allData.DISTANCE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
+                        allData.routes = allData.routes.concat(data[i].routes);
+                        allData.waypoints = allData.waypoints.concat(data[i].waypoints);
+                    }
+
+                    for (var j = 1; j < data.length; j++) {
+                        for (var k = 0; k < data[j].sensors.length; k++) {
+                            if (data[j].sensors[k].real_track != undefined) {
+                                allData.sensors[k].real_track = data[j].sensors[k].real_track;
+                                console.log('save real_track!');
+                            }
                         }
                     }
 
-                    linkDataParts(data);
+                    for (i = 0; i < allData.routes.length; i++) {
+                        for (j = 0; j < allData.routes[i].points.length; j++) {
+                            allData.routes[i].points[j].base_arrival = allData.routes[i].points[j].ARRIVAL_TIME;
+                        }
+                    }
+
+                    linkDataParts(allData);
                     if (loadParts) {
                         loadTrackParts();
                     }
@@ -251,8 +272,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             data.routes[i].real_track != aggregatorError) {
                             len = data.routes[i].real_track.length - 1;
                             //console.log('NOT NULL', data.routes[i].real_track.length);
-                            data.routes[i].car_position = data.routes[i].real_track[len].
-                                coords[data.routes[i].real_track[len].coords.length - 1];
+                            data.routes[i].car_position = data.routes[i].real_track[len];
                         }
                         break;
                     }
@@ -1164,8 +1184,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 newData = data.solutions[0].routes[0].deliveries,
                 tmpPoint;
 
-            if (data.solutions[0].routes.length > 1) {
-                console.log('Second route, len = ' + data.solutions[0].routes[1].length);
+            if (data.solutions[0].routes.length != 1) {
+                console.log('Second route, len = ' + data.solutions[0].routes.length);
+                return;
             }
 
             for (var i = 0; i < rawData.routes.length; i++) {

@@ -159,10 +159,11 @@ TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
         + '&move_d=' + move_d;
 };
 
-TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, callback) {
-    var loc_str = '',
-        points = data.routes[index].points
-    me = this;
+TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBeforeSend, callback) {
+    var data = _data[nIndx],
+        loc_str = '',
+        points = data.routes[index].points,
+        me = this;
 
     //console.log('getRouterData', index);
     for (var i = 0; i < points.length; i++) {
@@ -179,7 +180,7 @@ TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, 
         if (!error && response.statusCode === 200) {
             data.routes[index].time_matrix = body;
             data.routes[index].time_matrix_loaded = true;
-            checkBeforeSend(data, callback);
+            checkBeforeSend(_data, callback);
         }
     });
 
@@ -194,18 +195,19 @@ TracksManager.prototype.getRouterData = function (data, index, checkBeforeSend, 
                 console.log('body.route_geometry == null');
                 data.routes[index].plan_geometry = [];
                 data.routes[index].plan_geometry_loaded = false;
-                me.getGeometryByParts(data, index, 0, checkBeforeSend, callback);
+                me.getGeometryByParts(_data, nIndx, index, 0, checkBeforeSend, callback);
             } else {
                 data.routes[index].plan_geometry = body.route_geometry_splited;
                 data.routes[index].plan_geometry_loaded = true;
-                checkBeforeSend(data, callback);
+                checkBeforeSend(_data, callback);
             }
         }
     });
 };
 
-TracksManager.prototype.getGeometryByParts = function (data, index, startPos, checkBeforeSend, callback) {
-    var points = data.routes[index].points,
+TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, startPos, checkBeforeSend, callback) {
+    var data = _data[nIndx],
+        points = data.routes[index].points,
         me = this;
 
     request({
@@ -221,19 +223,20 @@ TracksManager.prototype.getGeometryByParts = function (data, index, startPos, ch
             startPos++;
             //console.log('iteration #', startPos);
             if (points.length > startPos + 1) {
-                me.getGeometryByParts(data, index, startPos, checkBeforeSend, callback);
+                me.getGeometryByParts(_data, nIndx, index, startPos, checkBeforeSend, callback);
             } else {
                 data.routes[index].plan_geometry_loaded = true;
-                checkBeforeSend(data, callback);
+                checkBeforeSend(_data, callback);
             }
         }
     });
 };
 
-TracksManager.prototype.getTracksAndStops = function (data, checkBeforeSend, callback) {
+TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback) {
     console.log('=== getRealTracks ===');
 
     var me = this,
+        data = _data[nIndx],
         now = new Date(),
         url = this.createParamsStr(
             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
@@ -245,35 +248,36 @@ TracksManager.prototype.getTracksAndStops = function (data, checkBeforeSend, cal
         for (var j = 0; j < data.sensors.length; j++) {
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 data.sensors[j].loading = true;
-                data.stops_started = true;
                 (function (jj) {
-                    console.log('request STOPS for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true
                     }, function (error, response, body) {
                         if (!error && response.statusCode === 200) {
                             console.log('stops for sensor loaded', jj);
-                            if (body == undefined || body == "invalid parameter 'gid'. ") {
-                                data.sensors[jj].real_track = undefined;
-                            } else {
-                                var counter = 0;
-                                for (var k = 0; k < body.length; k++) {
-                                    (function (kk) {
-                                        me.getTrackPart(data.sensors[jj].GID, body[kk].t1, body[kk].t2, function (trackPart) {
-                                            body[kk].coords = trackPart;
-                                            counter++;
-                                            if (counter == body.length) {
-                                                data.sensors[jj].real_track = body;
-                                                //log.toFLog(data.sensors[jj].GID + '_body.js', body);
-                                                data.sensors[jj].real_track_loaded = true;
-                                                console.log('track for sensor loaded', jj);
-                                                checkBeforeSend(data, callback);
-                                            }
-                                        });
-                                    })(k);
-                                }
-                            }
+                            data.sensors[jj].stops_loaded = true;
+                            data.sensors[jj].real_track = body;
+                            checkBeforeSend(_data, callback);
+                            //if (body == undefined || body == "invalid parameter 'gid'. ") {
+                            //    data.sensors[jj].real_track = undefined;
+                            //} else {
+                            //    var counter = 0;
+                            //    for (var k = 0; k < body.length; k++) {
+                            //        (function (kk) {
+                            //            me.getTrackPart(data.sensors[jj].GID, body[kk].t1, body[kk].t2, function (trackPart) {
+                            //                body[kk].coords = trackPart;
+                            //                counter++;
+                            //                if (counter == body.length) {
+                            //                    data.sensors[jj].real_track = body;
+                            //                    //log.toFLog(data.sensors[jj].GID + '_body.js', body);
+                            //                    data.sensors[jj].real_track_loaded = true;
+                            //                    console.log('track for sensor loaded', jj);
+                            //                    checkBeforeSend(_data, callback);
+                            //                }
+                            //            });
+                            //        })(k);
+                            //    }
+                            //}
                         }
                     });
                 })(j);
