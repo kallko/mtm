@@ -125,9 +125,9 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
                     for (var i = 0; i < itineraries.length; i++) {
-                        //if (i == 0) {
+                        if (i == 0) {
                             me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, callback);
-                        //}
+                        }
                     }
 
                 });

@@ -31,7 +31,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = true,
+            loadParts = false,
             enableDynamicUpdate = false;
 
         setListeners();
@@ -50,7 +50,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.statuses = [
                 {name: 'все статусы', value: -1, class: 'all-status'},
                 {name: 'доставленно', value: STATUS.FINISHED, class: 'delivered-status'},
-                {name: 'доставленно с опозданием', value: STATUS.FINISHED_LATE, class: 'delivered-late-status'},
+                {name: 'доставленно с опозданием', table_name: 'доставленно', value: STATUS.FINISHED_LATE, class: 'delivered-late-status'},
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
                 {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
                 {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
@@ -840,6 +840,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     var object = $('#status-td-' + row_id);
                     object.removeClass();
                     object.addClass(scope.filters.statuses[i].class);
+                    if(scope.filters.statuses[i].table_name != undefined) {
+                        return scope.filters.statuses[i].table_name;
+                    }
+
                     return scope.filters.statuses[i].name;
                 }
             }
@@ -1159,6 +1163,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 toMove = [],
                 newData = data.solutions[0].routes[0].deliveries,
                 tmpPoint;
+
+            if (data.solutions[0].routes.length > 1) {
+                console.log('Second route, len = ' + data.solutions[0].routes[1].length);
+            }
+
             for (var i = 0; i < rawData.routes.length; i++) {
                 if (_data.routes[i].ID == changedRoute.ID) {
                     tmpRawRoute = rawData.routes[i];
