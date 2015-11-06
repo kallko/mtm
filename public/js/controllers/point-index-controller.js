@@ -926,6 +926,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     .success(function (data) {
                         console.log({data: data});
                         route.real_track = data;
+                        route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
+
+                        console.log('before', route.real_track.length);
+                        for (var k = 0; k < route.real_track.length; k++) {
+                            if (route.real_track[k].coords == undefined ||
+                                route.real_track[k].coords.length == 0) {
+                                route.real_track.splice(k, 1);
+                                k--;
+                            }
+                        }
+                        console.log('after', route.real_track.length);
+
                         draw(route);
                     });
             } else {
