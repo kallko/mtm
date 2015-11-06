@@ -66,6 +66,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 
 function checkBeforeSend(_data, callback) {
 
+    var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
 
@@ -101,9 +102,44 @@ function checkBeforeSend(_data, callback) {
         }
     }
 
+    for (var i = 0; i < data.length; i++) {
+        for (var j = 0; j < data[i].routes.length; j++) {
+            data[i].routes[j].itineraryID = data[i].ID;
+        }
+    }
+
+
+    data = _data;
+    var allData = JSON.parse(JSON.stringify(data[0]));
+
+    for (i = 1; i < data.length; i++) {
+        allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
+        allData.NUMBER_OF_ORPHANS = parseInt(allData.NUMBER_OF_ORPHANS) + parseInt(data[i].NUMBER_OF_ORPHANS);
+        allData.NUMBER_OF_TASKS = parseInt(allData.NUMBER_OF_TASKS) + parseInt(data[i].NUMBER_OF_TASKS);
+        allData.TIME = parseInt(allData.TIME) + parseInt(data[i].TIME);
+        allData.VALUE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
+        allData.routes = allData.routes.concat(data[i].routes);
+        allData.waypoints = allData.waypoints.concat(data[i].waypoints);
+    }
+
+    for (j = 1; j < data.length; j++) {
+        for (var k = 0; k < data[j].sensors.length; k++) {
+            if (data[j].sensors[k].real_track != undefined) {
+                allData.sensors[k].real_track = data[j].sensors[k].real_track;
+                //console.log('save real_track!');
+            }
+        }
+    }
+
+    for (i = 0; i < allData.routes.length; i++) {
+        for (j = 0; j < allData.routes[i].points.length; j++) {
+            allData.routes[i].points[j].base_arrival = allData.routes[i].points[j].ARRIVAL_TIME;
+        }
+    }
+
     console.log('DONE!');
-    log.toFLog('final_data.js', _data);
-    callback(_data);
+    log.toFLog('final_data.js', allData);
+    callback(allData);
 }
 
 SoapManager.prototype.getDailyPlan = function (callback, date) {

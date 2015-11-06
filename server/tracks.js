@@ -91,56 +91,56 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                             });
                             reqCounter++;
                             if (counter == reqCounter) {
-                                console.log('Done, loading tracks!');
-                                for (var k = 0; k < result.length; k++) {
-                                    if (result[k].data.length == 0) {
-                                        result[k].ready = true;
-                                        var ready = true;
-                                        for (var b = 0; b < result.length; b++) {
-                                            if (!result[b].ready) {
-                                                ready = false;
-                                                break;
-                                            }
-                                        }
-                                        if (ready) {
-                                            callback(result);
-                                        }
-                                    }
-
-                                    //console.log('length = ' + result[k].data.length);
-                                    for (var m = 0; m < result[k].data.length; m++) {
-
-                                        (function (kk, mm) {
-                                            me.getTrackPart(data.sensors[jj].GID, result[kk].data[mm].t1, result[kk].data[mm].t2,
-                                                function (trackPart) {
-                                                    if (result[kk].counter == undefined) {
-                                                        result[kk].counter = 1;
-                                                    } else {
-                                                        result[kk].counter++;
-                                                    }
-                                                    //console.log('part for ' + kk + ':' + mm + ' loaded ' + result[kk].counter);
-                                                    result[kk].data[mm].coords = trackPart;
-                                                    if (result[kk].counter == result[kk].data.length) {
-                                                        //console.log('track ready!');
-                                                        delete result[kk].counter;
-                                                        result[kk].ready = true;
-                                                        var ready = true;
-                                                        for (var b = 0; b < result.length; b++) {
-                                                            if (!result[b].ready) {
-                                                                ready = false;
-                                                                break;
-                                                            }
-                                                        }
-
-                                                        if (ready) {
-                                                            callback(result);
-                                                        }
-                                                    }
-                                                });
-                                        })(k, m);
-                                    }
-                                }
-
+                                console.log('Done, loading stops!');
+                                callback(result);
+                                //for (var k = 0; k < result.length; k++) {
+                                //    if (result[k].data.length == 0) {
+                                //        result[k].ready = true;
+                                //        var ready = true;
+                                //        for (var b = 0; b < result.length; b++) {
+                                //            if (!result[b].ready) {
+                                //                ready = false;
+                                //                break;
+                                //            }
+                                //        }
+                                //        if (ready) {
+                                //            callback(result);
+                                //        }
+                                //    }
+                                //
+                                //    //console.log('length = ' + result[k].data.length);
+                                //    for (var m = 0; m < result[k].data.length; m++) {
+                                //
+                                //        (function (kk, mm) {
+                                //            me.getTrackPart(data.sensors[jj].GID, result[kk].data[mm].t1, result[kk].data[mm].t2,
+                                //                function (trackPart) {
+                                //                    if (result[kk].counter == undefined) {
+                                //                        result[kk].counter = 1;
+                                //                    } else {
+                                //                        result[kk].counter++;
+                                //                    }
+                                //                    //console.log('part for ' + kk + ':' + mm + ' loaded ' + result[kk].counter);
+                                //                    result[kk].data[mm].coords = trackPart;
+                                //                    if (result[kk].counter == result[kk].data.length) {
+                                //                        //console.log('track ready!');
+                                //                        delete result[kk].counter;
+                                //                        result[kk].ready = true;
+                                //                        var ready = true;
+                                //                        for (var b = 0; b < result.length; b++) {
+                                //                            if (!result[b].ready) {
+                                //                                ready = false;
+                                //                                break;
+                                //                            }
+                                //                        }
+                                //
+                                //                        if (ready) {
+                                //                            callback(result);
+                                //                        }
+                                //                    }
+                                //                });
+                                //        })(k, m);
+                                //    }
+                                //}
                             }
                         }
                     });
