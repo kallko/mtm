@@ -48,6 +48,24 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
     }
 };
 
+TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
+    var counter = 0,
+        me = this;
+
+    for (var i = 0; i < states.length; i++) {
+        (function (ii) {
+            me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
+                states[ii].coords = data;
+                counter++;
+                if (counter == states.length) {
+                    callback(states);
+                }
+            });
+        })(i);
+    }
+
+};
+
 TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
             this.stop_d, this.move_s, this.move_d),

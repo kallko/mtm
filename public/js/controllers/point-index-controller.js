@@ -144,8 +144,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
 
                                         var len = _data.routes[j].real_track.length - 1;
-                                        _data.routes[j].car_position = _data.routes[j].real_track[len].
-                                            coords[_data.routes[j].real_track[len].coords.length - 1];
+                                        _data.routes[j].car_position = _data.routes[j].real_track[len];
                                     }
                                 }
                                 break;
@@ -918,7 +917,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.drawRoute = function () {
-            var indx;
+            var indx,
+                route;
 
             if (scope.filters.driver != -1) {
                 indx = scope.filters.driver;
@@ -928,21 +928,31 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            scope.$emit('clearMap');
-            switch (scope.draw_mode) {
-                case scope.draw_modes[0].value: // комбинированный
-                    scope.$emit('drawCombinedTrack', _data.routes[indx]);
-                    break;
-                case scope.draw_modes[1].value: // фактический
-                    scope.$emit('drawRealTrack', _data.routes[indx]);
-                    break;
-                case scope.draw_modes[2].value: // плановый
-                    scope.$emit('drawPlannedTrack', _data.routes[indx]);
-                    break;
-                case scope.draw_modes[3].value: // плановый + фактический
-                    scope.$emit('drawRealAndPlannedTrack', _data.routes[indx]);
-                    break;
-            }
+            route = _data.routes[indx];
+            http.post('gettracksbystates', {
+                states: route.real_track,
+                gid: route.transport.gid
+            })
+                .success(function (data) {
+                    console.log({data: data});
+                    route.real_track = data;
+
+                    scope.$emit('clearMap');
+                    switch (scope.draw_mode) {
+                        case scope.draw_modes[0].value: // комбинированный
+                            scope.$emit('drawCombinedTrack', route);
+                            break;
+                        case scope.draw_modes[1].value: // фактический
+                            scope.$emit('drawRealTrack', route);
+                            break;
+                        case scope.draw_modes[2].value: // плановый
+                            scope.$emit('drawPlannedTrack', route);
+                            break;
+                        case scope.draw_modes[3].value: // плановый + фактический
+                            scope.$emit('drawRealAndPlannedTrack', route);
+                            break;
+                    }
+                });
         };
 
         scope.checkPoint = function () {

@@ -241,6 +241,16 @@ router.route('/trackparts/:start/:end')
             });
     });
 
+router.route('/gettracksbystates/')
+    .post(function(req, res) {
+        console.log('gettracksbystates');
+
+        tracksManager.getTrackByStates(req.body.states, req.body.gid, function(data) {
+            console.log('get tracks by states DONE!');
+            res.status(200).json(data);
+        });
+    });
+
 // http://localhost:9020/trackparts/1445002662/1445001662
 // http://localhost:9020/login?curuser=k00056.0
 

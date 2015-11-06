@@ -126,7 +126,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             stopTime;
 
         for (var i = 0; i < track.length; i++) {
-            if (track[i].coords == null) continue;
+            if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
 
             color = '#5cb85c';
             if (track[i].state == 'MOVE') {
