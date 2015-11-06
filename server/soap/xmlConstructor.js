@@ -27,6 +27,11 @@ function XMLConstructor() {
         , setGetValue: function (key, value) {
             return ' KEY="' + key + '" VALUE="' + value + '" ';
         }
+        , addParameter: function(key, value) {
+            return this.parameter.begin +
+                this.setGetValue(key, value) +
+                this.slashEnd;
+        }
     };
 }
 
@@ -124,5 +129,42 @@ XMLConstructor.prototype.allSensorsXML = function() {
 
     str += this.xml.instructions.end;
     str += this.xml.end;
+    return str;
+};
+
+XMLConstructor.prototype.routesXML = function(routes) {
+    var str = '',
+        point;
+    str += this.xml.begin;
+
+    str += '<ROUTES>';
+    for (var i = 0; i < routes.length; i++) {
+        str += '<ROUTE>';
+        str += this.xml.addParameter('itineraryID', routes[i].itineraryID);
+        str += this.xml.addParameter('routesID', routes[i].routesID);
+        str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
+
+        str += '<SECTIONS>';
+        for (var j = 0; j < routes[i].points.length; j++) {
+            point = routes[i].points[j];
+            str += '<SECTION>';
+            str += this.xml.addParameter('taskNumber', point.taskNumber);
+            str += this.xml.addParameter('stepNumber', point.stepNumber);
+            str += this.xml.addParameter('arrivalTime', point.arrivalTime);
+            str += this.xml.addParameter('startWaypointId', point.startWaypointId);
+            str += this.xml.addParameter('endWaypointId', point.endWaypointId);
+            str += this.xml.addParameter('taskTime', point.taskTime);
+            str += this.xml.addParameter('downtime', point.downtime);
+            str += this.xml.addParameter('travelTime', point.travelTime);
+            str += this.xml.addParameter('distance', point.distance);
+            str += '</SECTION>';
+        }
+        str += '</SECTIONS>';
+        str += '</ROUTE>';
+    }
+    str += '</ROUTES>';
+
+    str += this.xml.end;
+
     return str;
 };

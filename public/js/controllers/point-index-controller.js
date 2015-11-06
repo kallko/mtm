@@ -50,7 +50,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.statuses = [
                 {name: 'все статусы', value: -1, class: 'all-status'},
                 {name: 'доставленно', value: STATUS.FINISHED, class: 'delivered-status'},
-                {name: 'доставленно с опозданием', table_name: 'доставленно', value: STATUS.FINISHED_LATE, class: 'delivered-late-status'},
+                {
+                    name: 'доставленно с опозданием',
+                    table_name: 'доставленно',
+                    value: STATUS.FINISHED_LATE,
+                    class: 'delivered-late-status'
+                },
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
                 {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
                 {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
@@ -167,9 +172,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     console.log('loadDailyData success');
                     console.log(data);
+
+                    for (var i = 0; i < data.length; i++) {
+                        for (var j = 0; j < data[i].routes.length; j++) {
+                            data[i].routes[j].itineraryID = data[i].ID;
+                        }
+                    }
+
                     var allData = JSON.parse(JSON.stringify(data[0]));
 
-                    for (var i = 1; i < data.length; i++) {
+                    for (i = 1; i < data.length; i++) {
                         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
                         allData.DISTANCE = parseInt(allData.NUMBER_OF_ORPHANS) + parseInt(data[i].NUMBER_OF_ORPHANS);
                         allData.DISTANCE = parseInt(allData.NUMBER_OF_TASKS) + parseInt(data[i].NUMBER_OF_TASKS);
@@ -180,7 +192,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
                     }
 
-                    for (var j = 1; j < data.length; j++) {
+                    for (j = 1; j < data.length; j++) {
                         for (var k = 0; k < data[j].sensors.length; k++) {
                             if (data[j].sensors[k].real_track != undefined) {
                                 allData.sensors[k].real_track = data[j].sensors[k].real_track;
@@ -359,7 +371,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         };
                     }
 
-                    if(tPoint.promised_window_changed == undefined) {
+                    if (tPoint.promised_window_changed == undefined) {
                         tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
                     }
 
@@ -860,7 +872,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     var object = $('#status-td-' + row_id);
                     object.removeClass();
                     object.addClass(scope.filters.statuses[i].class);
-                    if(scope.filters.statuses[i].table_name != undefined) {
+                    if (scope.filters.statuses[i].table_name != undefined) {
                         return scope.filters.statuses[i].table_name;
                     }
 
@@ -1179,15 +1191,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(rawData);
             //console.log(changedRoute);
 
+            if (data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
+                console.log('Bad data');
+                return;
+            }
+
             var tmpRawRoute,
                 toMove = [],
                 newData = data.solutions[0].routes[0].deliveries,
                 tmpPoint;
-
-            if (data.solutions[0].routes.length != 1) {
-                console.log('Second route, len = ' + data.solutions[0].routes.length);
-                return;
-            }
 
             for (var i = 0; i < rawData.routes.length; i++) {
                 if (_data.routes[i].ID == changedRoute.ID) {
@@ -1203,7 +1215,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     for (var k = 0; k < newData.length; k++) {
                         if (newData[k].pointId == changedRoute.points[i].START_WAYPOINT) {
                             tmpPoint = tmpRawRoute.points.splice(j, 1)[0];
-                            // 05.11.2015 09:23:09      05.11.2015 13:11:56
                             tmpPoint.ARRIVAL_TIME = filter('date')((newData[k].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
                             toMove.push(tmpPoint);
                             j--;
@@ -1216,26 +1227,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(toMove);
 
             for (i = 0; i < newData.length; i++) {
-                for(var j = 0; j < toMove.length; j++) {
+                for (var j = 0; j < toMove.length; j++) {
                     if (newData[i].pointId == toMove[j].START_WAYPOINT) {
                         tmpRawRoute.points.push(JSON.parse(JSON.stringify(toMove[j])));
                     }
                 }
             }
 
-            for(i = 0; i < tmpRawRoute.points.length; i++) {
+            for (i = 0; i < tmpRawRoute.points.length; i++) {
                 tmpRawRoute.points[i].NUMBER = i + 1;
             }
 
+            tmpRawRoute.toSave = true;
             console.log('RAW POINTS', tmpRawRoute.points);
-
-            //arrival: 1446541209
-            //distance: 7513
-            //downtime: 5789
-            //duration: 771
-            //jobID: 13
-            //pointId: 4679100
-            //servicetime: 403
 
             linkDataParts(rawData);
             if (loadParts) {
@@ -1243,4 +1247,75 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        scope.saveRoutes = function () {
+            console.log('saveRoutes');
+
+            var routes = [],
+                route,
+                point;
+            for (var i = 0; i < _data.routes.length; i++) {
+                if (_data.routes[i].toSave || i == 0) {
+                    route = {
+                        itineraryID: _data.routes[i].itineraryID,
+                        routesID: _data.routes[i].ID,
+                        routeNumber: _data.routes[i].NUMBER,
+                        points: []
+                    };
+
+                    for (var j = 0; j < _data.routes[i].points.length; j++) {
+                        point = _data.routes[i].points[j];
+                        route.points.push({
+                            taskNumber: point.TASK_NUMBER,
+                            stepNumber: point.NUMBER,
+                            arrivalTime: point.arrival_time_ts,
+                            startWaypointId: point.START_WAYPOINT,
+                            endWaypointId: point.END_WAYPOINT,
+                            taskTime: point.TASK_TIME,
+                            downtime: point.DOWNTIME,
+                            travelTime: point.TRAVEL_TIME,
+                            distance: point.DISTANCE
+                        });
+                    }
+
+                    routes.push(route);
+                }
+            }
+
+            if (routes.length == 0) return;
+
+            console.log('sending routes to save', routes);
+            http.post('./saveroute/', {routes: routes}).
+                success(function (data) {
+                    console.log(data);
+                    for (var i = 0; i < _data.routes.length; i++) {
+                        delete _data.routes[i].toSave;
+                    }
+                });
+        }
+
+
+
     }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

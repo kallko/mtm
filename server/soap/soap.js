@@ -351,3 +351,9 @@ SoapManager.prototype.getPlanByDate = function(timestamp, callback) {
         //callback({status: 'working for ' + timestamp});
     });
 };
+
+SoapManager.prototype.saveRoutesTo1C = function (routes) {
+    console.log('saveRoutesTo1C');
+    var resXml = _xml.routesXML(routes);
+    log.toFLog('saveChanges.xml', resXml, false);
+};

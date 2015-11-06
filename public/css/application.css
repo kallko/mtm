@@ -178,10 +178,6 @@ template {
     min-width: 26px;
 }
 
-#problem-index-btn, #promised-15m-btn, #force-load-btn, #recalculateRoute{
-    margin-left: 5px;
-}
-
 .delivered-status,
 .performed-status,
 .arrived-late-status,
