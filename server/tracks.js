@@ -50,18 +50,34 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
 
 TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
     var counter = 0,
-        me = this;
+        me = this,
+        started = 0,
+        updateTime = states[0].lastTrackUpdate == undefined ? 0 : states[0].lastTrackUpdate;
 
+    console.log('last update time,', updateTime);
     for (var i = 0; i < states.length; i++) {
+        if (states[i].t1 < updateTime) continue;
+
+        started++;
         (function (ii) {
+            console.log('load part #', ii);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
+                console.log('done loading part #', ii);
+                if (ii == 0) {
+                    states[ii].lastTrackUpdate = parseInt(Date.now() / 1000);
+                }
+
                 counter++;
-                if (counter == states.length) {
+                if (counter == started) {
                     callback(states);
                 }
             });
         })(i);
+    }
+
+    if (started == 0) {
+        callback(states);
     }
 
 };

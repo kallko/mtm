@@ -6,8 +6,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTable,
             _data,
             rawData,
-            dataUpdateInterval = 180,
-            trackUpdateInterval = 180,
+            dataUpdateInterval = 120,
+            trackUpdateInterval = 120,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -32,7 +32,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,
-            enableDynamicUpdate = false;
+            enableDynamicUpdate = true;
 
         setListeners();
         init();
@@ -886,25 +886,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.drawRoute = function () {
             var indx,
-                route;
-
-            if (scope.filters.driver != -1) {
-                indx = scope.filters.driver;
-            } else if (scope.selectedRow != -1) {
-                indx = scope.displayCollection[scope.selectedRow].route_id;
-            } else {
-                return;
-            }
-
-            route = _data.routes[indx];
-            http.post('gettracksbystates', {
-                states: route.real_track,
-                gid: route.transport.gid
-            })
-                .success(function (data) {
-                    console.log({data: data});
-                    route.real_track = data;
-
+                route,
+                draw = function (route) {
                     scope.$emit('clearMap');
                     switch (scope.draw_mode) {
                         case scope.draw_modes[0].value: // комбинированный
@@ -920,7 +903,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             scope.$emit('drawRealAndPlannedTrack', route);
                             break;
                     }
-                });
+                    ;
+                };
+
+            if (scope.filters.driver != -1) {
+                indx = scope.filters.driver;
+            } else if (scope.selectedRow != -1) {
+                indx = scope.displayCollection[scope.selectedRow].route_id;
+            } else {
+                return;
+            }
+
+            route = _data.routes[indx];
+
+            if (route.real_track[0].lastTrackUpdate == undefined ||
+                route.real_track[0].lastTrackUpdate + 60 < Date.now() / 1000) {
+                console.log('donwload tracks');
+                http.post('gettracksbystates', {
+                    states: route.real_track,
+                    gid: route.transport.gid
+                })
+                    .success(function (data) {
+                        console.log({data: data});
+                        route.real_track = data;
+                        draw(route);
+                    });
+            } else {
+                console.log('load tracks from cache');
+                draw(route);
+            }
         };
 
         scope.checkPoint = function () {
@@ -1270,7 +1281,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 });
         }
-
 
 
     }]);
