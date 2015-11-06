@@ -56,7 +56,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
 
     console.log('last update time,', updateTime);
     for (var i = 0; i < states.length; i++) {
-        if (states[i].t1 < updateTime + 600 && states[i].coords != undefined) continue;
+        if (states[i].t1 < updateTime + 10 && states[i].coords != undefined) continue;
 
         started++;
         (function (ii) {
