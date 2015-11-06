@@ -60,11 +60,10 @@ TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
 
         started++;
         (function (ii) {
-            console.log('load part #', ii);
+            //console.log('load part #', ii);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
-                console.log('done loading part #', ii);
-
+                //console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
                     callback(states);

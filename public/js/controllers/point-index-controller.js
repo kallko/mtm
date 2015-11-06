@@ -8,6 +8,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rawData,
             dataUpdateInterval = 120,
             trackUpdateInterval = 120,
+            updateTrackInterval = 60,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -142,6 +143,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     if (trackParts[i].data.length > 0) {
                                         trackParts[i].data[0].state = 'MOVE';
                                         _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+                                        if (_data.routes[j].real_track[0].lastTrackUpdate != undefined) {
+                                            _data.routes[j].real_track[0].lastTrackUpdate -= updateTrackInterval;
+                                        }
 
                                         var len = _data.routes[j].real_track.length - 1;
                                         _data.routes[j].car_position = _data.routes[j].real_track[len];
@@ -903,7 +907,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             scope.$emit('drawRealAndPlannedTrack', route);
                             break;
                     }
-                    ;
                 };
 
             if (scope.filters.driver != -1) {
@@ -917,7 +920,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             route = _data.routes[indx];
 
             if (route.real_track[0].lastTrackUpdate == undefined ||
-                route.real_track[0].lastTrackUpdate + 60 < Date.now() / 1000) {
+                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
                 console.log('donwload tracks');
                 http.post('gettracksbystates', {
                     states: route.real_track,
