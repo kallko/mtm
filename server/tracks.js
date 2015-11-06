@@ -174,7 +174,8 @@ TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
         + '&stop_s=' + stop_s
         + '&stop_d=' + stop_d
         + '&move_s=' + move_s
-        + '&move_d=' + move_d;
+        + '&move_d=' + move_d
+        + '&current=true';
 };
 
 TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBeforeSend, callback) {

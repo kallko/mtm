@@ -31,7 +31,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false,
+            loadParts = true,
             enableDynamicUpdate = false;
 
         setListeners();
@@ -112,7 +112,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             var _now = Date.now() / 1000,
-                url = './trackparts/' + _data.trackUpdateTime + '/' + _now;
+                url = './trackparts/' + _data.trackUpdateTime + '/' + parseInt(_now);
 
             console.log('load track parts');
             http.get(url)
@@ -132,12 +132,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         for (var j = 0; j < _data.routes.length; j++) {
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
-                                    for (var k = 0; k < trackParts[i].data.length; k++) {
-                                        if (trackParts[i].data[k].coords.length == 0) {
-                                            trackParts[i].data.splice(k, 1);
-                                            k--;
-                                        }
-                                    }
+                                    //for (var k = 0; k < trackParts[i].data.length; k++) {
+                                    //    if (trackParts[i].data[k].coords.length == 0) {
+                                    //        trackParts[i].data.splice(k, 1);
+                                    //        k--;
+                                    //    }
+                                    //}
 
                                     if (trackParts[i].data.length > 0) {
                                         trackParts[i].data[0].state = 'MOVE';
@@ -145,6 +145,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                         var len = _data.routes[j].real_track.length - 1;
                                         _data.routes[j].car_position = _data.routes[j].real_track[len];
+                                        _data.routes[i].real_track.splice(len, 1);
                                     }
                                 }
                                 break;
@@ -284,6 +285,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             len = data.routes[i].real_track.length - 1;
                             //console.log('NOT NULL', data.routes[i].real_track.length);
                             data.routes[i].car_position = data.routes[i].real_track[len];
+                            data.routes[i].real_track.splice(len, 1);
                         }
                         break;
                     }
