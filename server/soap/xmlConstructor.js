@@ -133,16 +133,19 @@ XMLConstructor.prototype.allSensorsXML = function() {
 };
 
 XMLConstructor.prototype.routesXML = function(routes) {
+    if (routes.length == 0) return;
+
     var str = '',
         point;
     str += this.xml.begin;
 
+    str += this.xml.addParameter('itineraryID', routes[0].itineraryID);
     str += '<ROUTES>';
     for (var i = 0; i < routes.length; i++) {
         str += '<ROUTE>';
-        str += this.xml.addParameter('itineraryID', routes[i].itineraryID);
         str += this.xml.addParameter('routesID', routes[i].routesID);
         str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
+        str += this.xml.addParameter('changeTime', routes[i].change_timestamp);
 
         str += '<SECTIONS>';
         for (var j = 0; j < routes[i].points.length; j++) {
@@ -157,6 +160,13 @@ XMLConstructor.prototype.routesXML = function(routes) {
             str += this.xml.addParameter('downtime', point.downtime);
             str += this.xml.addParameter('travelTime', point.travelTime);
             str += this.xml.addParameter('distance', point.distance);
+
+            str += '<GEOMETRY>';
+            for (var k = 0; k < point.geometry.length; k++) {
+                str += '<POINT>' + point.geometry[k] + '</POINT>';
+            }
+            str += '</GEOMETRY>';
+            
             str += '</SECTION>';
         }
         str += '</SECTIONS>';

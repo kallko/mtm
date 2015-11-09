@@ -239,6 +239,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
                         data.transports[j].gid = data.sensors[i].GID;
                         data.transports[j].real_track = data.sensors[i].real_track;
+
                     }
                 }
             }
@@ -309,6 +310,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     for (var k = 0; k < data.waypoints.length; k++) {
                         if (tPoint.START_WAYPOINT == data.waypoints[k].ID) {
                             tPoint.waypoint = data.waypoints[k];
+                            tPoint.LAT = data.waypoints[k].LAT;
+                            tPoint.LON = data.waypoints[k].LON;
                             break;
                         }
                     }
@@ -1243,6 +1246,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             tmpRawRoute.toSave = true;
+            tmpRawRoute.change_timestamp = data.timestamp;
             console.log('RAW POINTS', tmpRawRoute.points);
 
             linkDataParts(rawData);
@@ -1262,7 +1266,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     route = {
                         itineraryID: _data.routes[i].itineraryID,
                         routesID: _data.routes[i].ID,
-                        routeNumber: _data.routes[i].NUMBER,
+                        routeNumber: '',
+                        change_timestamp: _data.routes[i].change_timestamp,
                         points: []
                     };
 
@@ -1274,6 +1279,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             arrivalTime: point.arrival_time_ts,
                             startWaypointId: point.START_WAYPOINT,
                             endWaypointId: point.END_WAYPOINT,
+                            startLatLon: {
+                                lat: point.LAT,
+                                lon: point.LON
+                            },
+                            endLatLon: {
+                                lat: point.END_LAT,
+                                lon: point.END_LON
+                            },
                             taskTime: point.TASK_TIME,
                             downtime: point.DOWNTIME,
                             travelTime: point.TRAVEL_TIME,

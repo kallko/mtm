@@ -470,6 +470,25 @@ TracksManager.prototype.getPlanGeometry = function (data, index, checkBeforeSend
     });
 };
 
+TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
+    if (points.length < 2) return;
+
+    var loc_str = "&loc=" + points[0].lat + "," + points[0].lon;
+    for (var i = 1; i < points.length; i++) {
+        loc_str += "&loc=" + points[i].lat + "," + points[i].lon;
+    }
+
+    request({
+        url: this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            callback(body);
+        }
+    });
+
+};
+
 TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);

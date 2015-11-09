@@ -8,6 +8,11 @@ var soap = require('soap'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
     tracks = require('../tracks'),
+    tracksManager = new tracks(
+        config.aggregator.url,
+        config.router.url,
+        config.aggregator.login,
+        config.aggregator.password),
 
     counter = 0,
     starTime,
@@ -48,10 +53,6 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         var jsonData = JSON.parse(data);
         //jsonData.server_time = parseInt(Date.now() / 1000); // - 3600 * 3; // Date.now();
         //console.log(jsonData.server_time);
-        //
-        //tracksManager = new tracks('http://192.168.9.29:3001/',
-        //    'http://sngtrans.com.ua:5201/',
-        //    'admin', 'admin321');
         //
         //jsonData.tasks_loaded = true;
         //jsonData.sended = false;
@@ -110,6 +111,12 @@ function checkBeforeSend(_data, callback) {
 
 
     data = _data;
+    for (i = 0; i < data.length; i++) {
+        for (j = 0; j < data[i].routes.length; j++) {
+            data[i].routes[j].itineraryID = data[i].ID;
+        }
+    }
+
     var allData = JSON.parse(JSON.stringify(data[0]));
 
     for (i = 1; i < data.length; i++) {
@@ -195,15 +202,14 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
                     res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
 
                 console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
-                var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$),
-                    tracksManager;
+                var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
 
                 nIndx--;
                 data[nIndx].sended = false;
                 data[nIndx].date = new Date();
                 data[nIndx].server_time = parseInt(Date.now() / 1000);
-                tracksManager = me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
-                me.getAdditionalData(client, data, tracksManager, itIsToday, nIndx, callback);
+                me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
+                me.getAdditionalData(client, data, itIsToday, nIndx, callback);
 
             });
         } else {
@@ -214,12 +220,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 };
 
 SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nIndx, callback) {
-    var tmpRoute,
-        tracksManager = new tracks(
-            config.aggregator.url,
-            config.router.url,
-            config.aggregator.login,
-            config.aggregator.password);
+    var tmpRoute;
 
     data[nIndx].routes = [];
     for (var i = 0; i < routes.length; i++) {
@@ -239,11 +240,9 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
             tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
         }
     }
-
-    return tracksManager;
 };
 
-SoapManager.prototype.getAdditionalData = function (client, data, tracksManager, itIsToday, nIndx, callback) {
+SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback) {
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
@@ -390,6 +389,32 @@ SoapManager.prototype.getPlanByDate = function(timestamp, callback) {
 
 SoapManager.prototype.saveRoutesTo1C = function (routes) {
     console.log('saveRoutesTo1C');
-    var resXml = _xml.routesXML(routes);
-    log.toFLog('saveChanges.xml', resXml, false);
+    var counter = 0,
+        loadGeometry = function (ii, jj, callback) {
+        tracksManager.getRouteBetweenPoints([routes[ii].points[jj].startLatLon, routes[ii].points[jj].endLatLon],
+            function (data) {
+                routes[ii].points[jj].geometry = data.route_geometry;
+                routes[ii].counter++;
+                //console.log('part ready', jj, routes[ii].counter, routes[ii].points.length);
+                if (routes[ii].counter == routes[ii].points.length) {
+                    counter++;
+                    console.log('route ready', ii);
+                    if (routes.length == counter) {
+                        callback();
+                    }
+                }
+            });
+        };
+
+    for (var i = 0; i < routes.length; i++) {
+        routes[i].counter = 0;
+        for (var j = 0; j < routes[i].points.length; j++) {
+            loadGeometry(i, j, function () {
+                var resXml = _xml.routesXML(routes);
+                log.toFLog('saveChanges.xml', resXml, false);
+            });
+        }
+    }
+
+
 };
