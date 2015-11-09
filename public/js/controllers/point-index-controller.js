@@ -231,7 +231,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 rowId = 0,
                 driverId = 0,
                 len = 0,
-                tPoint;
+                tPoint,
+                roundingNumb = 300;
             scope.rowCollection = [];
 
             for (var i = 0; i < data.sensors.length; i++) {
@@ -343,6 +344,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             start: tPoint.arrival_time_ts - promisedWindow / 2,
                             finish: tPoint.arrival_time_ts + promisedWindow / 2
                         };
+
+                        tPoint.promised_window.start -= tPoint.promised_window.start % roundingNumb - roundingNumb;
+                        tPoint.promised_window.finish = tPoint.promised_window.start + promisedWindow;
+                        for (k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                            if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                                tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                                if (tPoint.windows[k].finish < tPoint.promised_window.finish) {
+                                    tPoint.windows[k].finish -= roundingNumb;
+                                }
+                            }
+                        }
+
                     }
 
                     if (tPoint.promised_window_changed == undefined) {

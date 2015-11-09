@@ -56,7 +56,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
 
     console.log('last update time,', updateTime);
     for (var i = 0; i < states.length; i++) {
-        if (states[i].t1 < updateTime + 10 && states[i].coords != undefined) continue;
+        if (states[i].t1 < updateTime + 1800) continue;
 
         started++;
         (function (ii) {
@@ -198,10 +198,12 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
 
     //console.log('getRouterData', index);
     for (var i = 0; i < points.length; i++) {
-        if (points[i].LAT != null && points[i].LON != null) {
-            loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
+        if (points[i].END_LAT != null && points[i].END_LON != null) {
+            loc_str += "&loc=" + points[i].END_LAT + "," + points[i].END_LON;
         }
     }
+
+    // TODO: real START LAT, LON
 
     //console.log(this.routerUrl + 'table?' + loc_str);
     request({
@@ -212,6 +214,8 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
             data.routes[index].time_matrix = body;
             data.routes[index].time_matrix_loaded = true;
             checkBeforeSend(_data, callback);
+        } else {
+            console.log(body);
         }
     });
 
@@ -221,7 +225,6 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-
             if (body.route_geometry == null) {
                 console.log('body.route_geometry == null');
                 data.routes[index].plan_geometry = [];
@@ -232,6 +235,8 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
                 data.routes[index].plan_geometry_loaded = true;
                 checkBeforeSend(_data, callback);
             }
+        } else {
+            console.log(body);
         }
     });
 };
@@ -243,10 +248,10 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
 
     request({
         url: this.routerUrl + 'viaroute?instructions=false&compression=false'
-        + '&loc=' + points[startPos].LAT
-        + "," + points[startPos].LON
-        + '&loc=' + points[startPos + 1].LAT
-        + "," + points[startPos + 1].LON,
+        + '&loc=' + points[startPos].END_LAT
+        + "," + points[startPos].END_LON
+        + '&loc=' + points[startPos + 1].END_LAT
+        + "," + points[startPos + 1].END_LON,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -280,6 +285,7 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 data.sensors[j].loading = true;
                 (function (jj) {
+                    //console.log('request for stops ', jj);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true

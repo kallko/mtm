@@ -237,6 +237,26 @@ router.route('/trackparts/:start/:end')
 
                 console.log('getRealTrackParts DONE');
                 first = false;
+                var cached = cashedDataArr[req.session.login];
+
+                for (var i = 0; i < cached.sensors.length; i++) {
+                    for (var j = 0; j < data.length; j++) {
+                        if (cached.sensors[i].GID == data[j].gid) {
+                            if (data[j].data.length > 0) {
+                                //console.log('Cached for gid ' + data[j].gid + ', length = ' + data[j].data.length);
+                                cached.sensors[i].real_track = cached.sensors[i].real_track.concat();
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                console.log(new Date(cashedDataArr[req.session.login].server_time * 1000));
+                cached.server_time = parseInt(Date.now() / 1000);
+                console.log(new Date(cashedDataArr[req.session.login].server_time * 1000));
+
+                log.toFLog('final_data.js', cached);
+
                 res.status(200).json(data);
             });
     });
