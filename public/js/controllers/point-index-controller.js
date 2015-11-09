@@ -418,8 +418,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpArrival,
                 timeOffset = 3600 * 1.5,
                 buttonTimeOffset = 3600,
-                END_LAT,
-                END_LON,
+                LAT,
+                LON,
                 lat,
                 lon,
                 _time,
@@ -448,15 +448,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             lastIndex = 0;
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
-                                END_LAT = parseFloat(tmpPoint.END_LAT);
-                                END_LON = parseFloat(tmpPoint.END_LON);
+                                LAT = parseFloat(tmpPoint.LAT);
+                                LON = parseFloat(tmpPoint.LON);
                                 lat = parseFloat(tmpArrival.lat);
                                 lon = parseFloat(tmpArrival.lon);
 
                                 if (tmpPoint.status != STATUS.FINISHED
                                     && tmpPoint.status != STATUS.CANCELED
                                     && tmpPoint.status != STATUS.FINISHED_LATE
-                                    && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                                    && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
                                     && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
                                     && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
 
@@ -480,7 +480,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (lastPoint != null) {
                         if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
                             && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
-                                lastPoint.END_LAT, lastPoint.END_LON) < radius) {
+                                lastPoint.LAT, lastPoint.LON) < radius) {
                             lastPoint.status = STATUS.IN_PROGRESS;
                         }
                     }
@@ -531,8 +531,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     for (var j = 0; j < _data.routes.length; j++) {
                         for (var k = 0; k < _data.routes[j].points.length; k++) {
                             tmpPoint = _data.routes[j].points[k];
-                            END_LAT = parseFloat(tmpPoint.END_LAT);
-                            END_LON = parseFloat(tmpPoint.END_LON);
+                            LAT = parseFloat(tmpPoint.LAT);
+                            LON = parseFloat(tmpPoint.LON);
                             lat = _data.mobile_buttons[i].lat;
                             lon = _data.mobile_buttons[i].lon;
                             _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
@@ -541,7 +541,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 && tmpPoint.status != STATUS.FINISHED
                                 && tmpPoint.status != STATUS.FINISHED_LATE
                                 && tmpPoint.status != STATUS.CANCELED
-                                && getDistanceFromLatLonInKm(lat, lon, END_LAT, END_LON) < radius
+                                && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
                             ) {
                                 console.log('detect by button push');
                                 tmpPoint.status = STATUS.FINISHED;
@@ -628,7 +628,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point = route.car_position;
                 //console.log({car: route.car_position, real_track: route.real_track});
                 url = './findtime2p/' + point.lat + '&' + point.lon + '&'
-                    + route.points[route.lastPointIndx].END_LAT + '&' + route.points[route.lastPointIndx].END_LON;
+                    + route.points[route.lastPointIndx].LAT + '&' + route.points[route.lastPointIndx].LON;
 
                 (function (_route) {
                     http.get(url).
@@ -834,8 +834,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 scope.selectedRow = id;
                 $('#point-' + id).addClass('selected-row');
                 scope.$emit('setMapCenter', {
-                    lat: scope.displayCollection[id].END_LAT,
-                    lon: scope.displayCollection[id].END_LON
+                    lat: scope.displayCollection[id].LAT,
+                    lon: scope.displayCollection[id].LON
                 });
             }
         };

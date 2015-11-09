@@ -53,8 +53,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         if (route.real_track != undefined && i != route.points.length - 1) {
             var lastCoords = route.real_track[route.real_track.length - 1].coords,
             carPos = lastCoords[lastCoords.length - 1],
-                url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].END_LAT
-                    + '&' + route.points[i + 1].END_LON;
+                url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
+                    + '&' + route.points[i + 1].LON;
             http.get(url).
                 success(function (data) {
                     var geometry = getLatLonArr(data),
@@ -217,7 +217,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 title += 'Комментарий: ' + points[i].waypoint.COMMENT + '\n';
             }
 
-            tmpVar = L.marker([points[i].END_LAT, points[i].END_LON], {
+            tmpVar = L.marker([points[i].LAT, points[i].LON], {
                 'title': title
             });
             tmpVar.setIcon(getIcon(points[i].NUMBER, 14, '#7EDDFC', 'black'));
