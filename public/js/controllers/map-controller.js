@@ -73,7 +73,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         smoothFactor: 1
                     });
                     polyline.addTo(map);
-                    drawPlannedRoute(route.plan_geometry, i + 1);
+                    drawPlannedRoute(route.plan_geometry, i);
                 });
 
         }

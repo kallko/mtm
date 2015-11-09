@@ -136,45 +136,60 @@ XMLConstructor.prototype.routesXML = function(routes) {
     if (routes.length == 0) return;
 
     var str = '',
-        point;
-    str += this.xml.begin;
+        point,
+        itineraries = {};
 
-    str += this.xml.addParameter('itineraryID', routes[0].itineraryID);
-    str += '<ROUTES>';
     for (var i = 0; i < routes.length; i++) {
-        str += '<ROUTE>';
-        str += this.xml.addParameter('routesID', routes[i].routesID);
-        str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
-        str += this.xml.addParameter('changeTime', routes[i].change_timestamp);
-
-        str += '<SECTIONS>';
-        for (var j = 0; j < routes[i].points.length; j++) {
-            point = routes[i].points[j];
-            str += '<SECTION>';
-            str += this.xml.addParameter('taskNumber', point.taskNumber);
-            str += this.xml.addParameter('stepNumber', point.stepNumber);
-            str += this.xml.addParameter('arrivalTime', point.arrivalTime);
-            str += this.xml.addParameter('startWaypointId', point.startWaypointId);
-            str += this.xml.addParameter('endWaypointId', point.endWaypointId);
-            str += this.xml.addParameter('taskTime', point.taskTime);
-            str += this.xml.addParameter('downtime', point.downtime);
-            str += this.xml.addParameter('travelTime', point.travelTime);
-            str += this.xml.addParameter('distance', point.distance);
-
-            str += '<GEOMETRY>';
-            for (var k = 0; k < point.geometry.length; k++) {
-                str += '<POINT>' + point.geometry[k] + '</POINT>';
-            }
-            str += '</GEOMETRY>';
-            
-            str += '</SECTION>';
+        if (!itineraries[routes[i].itineraryID]) {
+            itineraries[routes[i].itineraryID] = [];
         }
-        str += '</SECTIONS>';
-        str += '</ROUTE>';
-    }
-    str += '</ROUTES>';
 
+        itineraries[routes[i].itineraryID].push(routes[i]);
+    }
+
+    str += this.xml.begin;
+    for (var key in itineraries){
+        if (!itineraries.hasOwnProperty(key)) continue;
+
+        routes = itineraries[key];
+        str += '<ITINERARY>';
+        str += this.xml.addParameter('ID', key);
+        str += '<ROUTES>';
+        for (i = 0; i < routes.length; i++) {
+            str += '<ROUTE>';
+            str += this.xml.addParameter('routesID', routes[i].routesID);
+            str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
+            str += this.xml.addParameter('changeTime', routes[i].change_timestamp);
+
+            str += '<SECTIONS>';
+            for (var j = 0; j < routes[i].points.length; j++) {
+                point = routes[i].points[j];
+                str += '<SECTION>';
+                str += this.xml.addParameter('taskNumber', point.taskNumber);
+                str += this.xml.addParameter('stepNumber', point.stepNumber);
+                str += this.xml.addParameter('arrivalTime', point.arrivalTime);
+                str += this.xml.addParameter('startWaypointId', point.startWaypointId);
+                str += this.xml.addParameter('endWaypointId', point.endWaypointId);
+                str += this.xml.addParameter('taskTime', point.taskTime);
+                str += this.xml.addParameter('downtime', point.downtime);
+                str += this.xml.addParameter('travelTime', point.travelTime);
+                str += this.xml.addParameter('distance', point.distance);
+
+                str += '<GEOMETRY>';
+                str += point.geometry.join(';');
+                str += '</GEOMETRY>';
+
+                str += '</SECTION>';
+            }
+            str += '</SECTIONS>';
+            str += '</ROUTE>';
+        }
+        str += '</ROUTES>';
+        str += '</ITINERARY>';
+
+    }
     str += this.xml.end;
+
 
     return str;
 };
