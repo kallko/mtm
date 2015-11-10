@@ -93,7 +93,6 @@
                     <th class="problem-index-col" st-sort="problem_index">Проблемность</th>
                     <th class="point-id-col">ID точки</th>
                     <th class="task-id-col">ID заказа</th>
-                    <th class="in-plan-col">В очередности</th>
                     <th class="time-window-col">Заказанное окно</th>
                     <th class="promised-window-col">Обещанное окно</th>
                     <th class="promised-window-changed-col">Изменяемое окно</th>
@@ -139,7 +138,6 @@
                     <td>{{row.problem_index}}</td>
                     <td>{{row.TASK_NUMBER}}</td>
                     <td>{{row.waypoint.ID}}</td>
-                    <td>{{ row.in_plan ? 'ДА' : 'НЕТ' }}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
                         {{row.promised_window.start * 1000 | date:'HH:mm'}} -

@@ -738,10 +738,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             myLayout.on('stateChanged', function (e) {
-                pointTableHolder.height(pointContainer.height() - 50);
+                var pointMenuPanel = $('#point-menu-panel');
+                console.log('stateChanged', pointMenuPanel.height());
+                pointTableHolder.height(pointContainer.height() - 27 - pointMenuPanel.height());
                 pointTableHolder.width(pointContainer.width() - 10);
-                //$('.header-copy').show();
-                //console.log('stateChanged', $('.lm_dragProxy').length);
 
                 if ($('.lm_dragProxy').length == 0) {
                     $('.header-copy').show();

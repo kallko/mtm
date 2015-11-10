@@ -1,6 +1,6 @@
 var config = {
     cashing: {
-        soap: false,
+        soap: true,
         tracks: false
     },
 
