@@ -196,6 +196,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 
     client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
         if (!err) {
+            //console.log(result.return);
             parseXML(result.return, function (err, res) {
 
                 if (res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
@@ -203,6 +204,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 
                 console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
                 var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
+
 
                 nIndx--;
                 data[nIndx].sended = false;

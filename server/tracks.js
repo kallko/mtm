@@ -190,19 +190,24 @@ TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
         + '&current=true';
 };
 
-TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBeforeSend, callback) {
-    var data = _data[nIndx],
+TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBeforeSend, callback, onlyOne) {
+
+    var data = onlyOne ? _data : _data[nIndx],
         loc_str = '',
         points = data.routes[index].points,
         me = this;
+    console.log('getRouterData', index);
 
-    //console.log('getRouterData', index);
     for (var i = 0; i < points.length; i++) {
         if (points[i].LAT != null && points[i].LON != null) {
             loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
         }
     }
 
+    //if (onlyOne) {
+    //    console.log(this.routerUrl + 'table?' + loc_str);
+    //    console.log(this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str);
+    //}
     //console.log(this.routerUrl + 'table?' + loc_str);
     request({
         url: this.routerUrl + 'table?' + loc_str,
@@ -227,7 +232,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
                 console.log('body.route_geometry == null');
                 data.routes[index].plan_geometry = [];
                 data.routes[index].plan_geometry_loaded = false;
-                me.getGeometryByParts(_data, nIndx, index, 0, checkBeforeSend, callback);
+                me.getGeometryByParts(_data, nIndx, index, 0, checkBeforeSend, callback, onlyOne);
             } else {
                 data.routes[index].plan_geometry = body.route_geometry_splited;
                 data.routes[index].plan_geometry_loaded = true;
@@ -239,8 +244,8 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
     });
 };
 
-TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, startPos, checkBeforeSend, callback) {
-    var data = _data[nIndx],
+TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne) {
+    var data = onlyOne ? _data : _data[nIndx],
         points = data.routes[index].points,
         me = this;
 
@@ -257,7 +262,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
             startPos++;
             //console.log('iteration #', startPos);
             if (points.length > startPos + 1) {
-                me.getGeometryByParts(_data, nIndx, index, startPos, checkBeforeSend, callback);
+                me.getGeometryByParts(_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne);
             } else {
                 data.routes[index].plan_geometry_loaded = true;
                 checkBeforeSend(_data, callback);

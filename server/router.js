@@ -117,12 +117,12 @@ router.route('/acp/getstops/:gid/:from/:to')
         //    console.log(err, data);
         //});
 
-        fs.readFile('./logs/' + req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', 'utf8', function (err, data) {
+        fs.readFile('./logs/' + req.params.gid + '_' + req.params.from + '_' + req.params.to + '.json', 'utf8', function (err, data) {
             if (err) {
                 console.log('new request for GID #' + req.params.gid);
-                tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function(data) {
+                tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function (data) {
                     console.log('loaded for GID#' + req.params.gid);
-                    log.toFLog(req.params.gid + '_' +  req.params.from + '_' + req.params.to + '.json', data);
+                    log.toFLog(req.params.gid + '_' + req.params.from + '_' + req.params.to + '.json', data);
                     res.status(200).json({gid: req.params.gid, data: data});
                 });
             } else {
@@ -140,7 +140,7 @@ router.route('/acp/getstops/:gid/:from/:to')
 router.route('/acp/gettracks/:gid/:from/:to')
     .get(function (req, res) {
         console.log('gettracks');
-        tracksManager.getTrackPart(req.params.gid, req.params.from, req.params.to, function(data) {
+        tracksManager.getTrackPart(req.params.gid, req.params.from, req.params.to, function (data) {
             res.status(200).json({gid: req.params.gid, data: data});
         });
     });
@@ -186,9 +186,9 @@ router.route('/dailydata')
             today12am = now - (now % day);
 
         if (//req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
-            req.query.force == null && req.session.login != null
-             && cashedDataArr[req.session.login] != null &&
-            cashedDataArr[req.session.login].lastUpdate == today12am) {
+        req.query.force == null && req.session.login != null
+        && cashedDataArr[req.session.login] != null &&
+        cashedDataArr[req.session.login].lastUpdate == today12am) {
             console.log('=== loaded from session === send data to client ===');
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
@@ -233,7 +233,7 @@ router.route('/trackparts/:start/:end')
         var first = true;
         tracksManager.getRealTrackParts(cashedDataArr[req.session.login], req.params.start, req.params.end,
             function (data) {
-                if(!first) return;
+                if (!first) return;
 
                 console.log('getRealTrackParts DONE');
                 first = false;
@@ -251,9 +251,9 @@ router.route('/trackparts/:start/:end')
                     }
                 }
 
-                console.log(new Date(cashedDataArr[req.session.login].server_time * 1000));
+                console.log('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
                 cached.server_time = parseInt(Date.now() / 1000);
-                console.log(new Date(cashedDataArr[req.session.login].server_time * 1000));
+                console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
 
                 log.toFLog('final_data.js', cached);
 
@@ -262,10 +262,10 @@ router.route('/trackparts/:start/:end')
     });
 
 router.route('/gettracksbystates/')
-    .post(function(req, res) {
+    .post(function (req, res) {
         console.log('gettracksbystates');
 
-        tracksManager.getTrackByStates(req.body.states, req.body.gid, function(data) {
+        tracksManager.getTrackByStates(req.body.states, req.body.gid, function (data) {
             console.log('get tracks by states DONE!');
             res.status(200).json(data);
         });
@@ -292,8 +292,8 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
     });
 
 router.route('/recalculate')
-    .post( function(req, res) {
-        math_server.recalculate(req.body.input, function(data) {
+    .post(function (req, res) {
+        math_server.recalculate(req.body.input, function (data) {
             //console.log(data);
             //log.toFLog(Date.now() + '_recalculate.json', data);
             res.status(200).json(data);
@@ -301,11 +301,38 @@ router.route('/recalculate')
     });
 
 router.route('/saveroute/')
-    .post( function(req, res) {
+    .post(function (req, res) {
         console.log('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
         soapManager.saveRoutesTo1C(req.body.routes);
         res.status(200).json({status: 'ok'});
+    });
+
+router.route('/routerdata')
+    .get(function (req, res) {
+        var routeIndx = req.query.routeIndx,
+            cData = cashedDataArr[req.session.login],
+            sended = false,
+            checkFunc = function (data, callback) {
+                console.log('checkFunc', cData.routes[routeIndx].plan_geometry_loaded,
+                    cData.routes[routeIndx].time_matrix_loaded, !sended);
+                if (cData.routes[routeIndx].plan_geometry_loaded && cData.routes[routeIndx].time_matrix_loaded && !sended) {
+                    callback(data);
+                }
+            },
+            callback = function (data) {
+                sended = true;
+                console.log('routerdata callback');
+                res.status(200).json({
+                    geometry: data.routes[routeIndx].plan_geometry,
+                    time_matrix: data.routes[routeIndx].time_matrix
+                });
+            };
+
+        console.log('routerdata', routeIndx);
+        tracksManager.getRouterData(cData, routeIndx, -1, checkFunc, callback, true);
+
+
     });
 
 router.route('/log')

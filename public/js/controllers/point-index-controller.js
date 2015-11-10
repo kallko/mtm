@@ -652,6 +652,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 totalTravelTime = 0,
                                 tmpTime;
 
+                            //console.log(_route.driver.NAME);
+                            //if (_route.driver.NAME == 'ШТЕЛЬМАХ СЕРГІЙ ОЛЕКСАНДРОВИЧ') {
+                            //    var asd = 777;
+                            //}
                             for (var j = 0; j < _route.points.length; j++) {
                                 if (j < lastPoint) {
                                     _route.points[j].arrival_prediction = 0;
@@ -1215,11 +1219,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var tmpRawRoute,
                 toMove = [],
                 newData = data.solutions[0].routes[0].deliveries,
-                tmpPoint;
+                tmpPoint,
+                routeIndx;
 
             for (var i = 0; i < rawData.routes.length; i++) {
                 if (_data.routes[i].ID == changedRoute.ID) {
                     tmpRawRoute = rawData.routes[i];
+                    routeIndx = i;
                     break;
                 }
             }
@@ -1256,12 +1262,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             tmpRawRoute.toSave = true;
             tmpRawRoute.change_timestamp = data.timestamp;
-            console.log('RAW POINTS', tmpRawRoute.points);
 
-            linkDataParts(rawData);
-            if (loadParts) {
-                loadTrackParts();
-            }
+            http.get('./routerdata?routeIndx=' + routeIndx).
+                success(function (data) {
+                    console.log('routerdata DONE!');
+                    console.log(data);
+                    tmpRawRoute.plan_geometry = data.geometry;
+                    tmpRawRoute.time_matrix = data.time_matrix;
+
+                    linkDataParts(rawData);
+                    if (loadParts) {
+                        loadTrackParts();
+                    }
+                });
         }
 
         scope.saveRoutes = function () {
@@ -1310,6 +1323,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (routes.length == 0) return;
 
             console.log('sending routes to save', routes);
+
             http.post('./saveroute/', {routes: routes}).
                 success(function (data) {
                     console.log(data);
