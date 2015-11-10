@@ -203,8 +203,6 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         }
     }
 
-    // TODO: real START LAT, LON
-
     //console.log(this.routerUrl + 'table?' + loc_str);
     request({
         url: this.routerUrl + 'table?' + loc_str,
@@ -215,7 +213,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
             data.routes[index].time_matrix_loaded = true;
             checkBeforeSend(_data, callback);
         } else {
-            console.log(body);
+            console.log('table', points.length, body);
         }
     });
 
@@ -236,7 +234,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
                 checkBeforeSend(_data, callback);
             }
         } else {
-            console.log(body);
+            console.log('viaroute', points.length, body);
         }
     });
 };

@@ -649,7 +649,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             var lastPoint = _route.lastPointIndx + 1,
                                 nextPointTime = parseInt(data.time_table[0][1][0] / 10),
                                 totalWorkTime = 0,
-                                totalTravelTime = 0;
+                                totalTravelTime = 0,
+                                tmpTime;
 
                             for (var j = 0; j < _route.points.length; j++) {
                                 if (j < lastPoint) {
@@ -660,17 +661,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                     } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
                                         totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
-                                        //console.log('now - real_arrival_time', now - _route.points[j].real_arrival_time,
-                                        //    'TASK_TIME', _route.points[j].TASK_TIME);
-                                        //console.log('now', new Date(now * 1000),
-                                        //    'real_arrival_time', new Date(_route.points[j].real_arrival_time * 1000));
                                     }
                                 } else {
-                                    totalTravelTime += _route.time_matrix.time_table[0][j - 1][j] / 10;
+                                    tmpTime = _route.time_matrix.time_table[0][j - 1][j];
+                                    totalTravelTime += tmpTime == 2147483647 ? 0 : tmpTime / 10;
                                     tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime;
                                     _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
-                                    //console.log('now', now, 'nextPointTime', nextPointTime, 'totalWorkTime', totalWorkTime,
-                                    //    'totalTravelTime', totalTravelTime);
 
                                     _route.points[j].in_plan = true;
                                     if (_route.points[j].arrival_prediction == null) {
