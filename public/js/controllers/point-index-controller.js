@@ -1288,6 +1288,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     route = {
                         itineraryID: _data.routes[i].itineraryID,
                         routesID: _data.routes[i].ID,
+                        transportID: _data.routes[i].transport.ID,
                         routeNumber: '',
                         change_timestamp: _data.routes[i].change_timestamp,
                         points: []

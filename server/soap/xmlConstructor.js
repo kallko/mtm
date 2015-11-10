@@ -148,6 +148,7 @@ XMLConstructor.prototype.routesXML = function(routes) {
     }
 
     str += this.xml.begin;
+    str += '<ITINERARIES>';
     for (var key in itineraries){
         if (!itineraries.hasOwnProperty(key)) continue;
 
@@ -160,6 +161,7 @@ XMLConstructor.prototype.routesXML = function(routes) {
             str += this.xml.addParameter('routesID', routes[i].routesID);
             str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
             str += this.xml.addParameter('changeTime', routes[i].change_timestamp);
+            str += this.xml.addParameter('transportID', routes[i].transportID);
 
             str += '<SECTIONS>';
             for (var j = 0; j < routes[i].points.length; j++) {
@@ -188,6 +190,7 @@ XMLConstructor.prototype.routesXML = function(routes) {
         str += '</ITINERARY>';
 
     }
+    str += '</ITINERARIES>';
     str += this.xml.end;
 
 
