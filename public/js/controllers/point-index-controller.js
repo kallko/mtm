@@ -1331,8 +1331,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         delete _data.routes[i].toSave;
                     }
                 });
-        }
+        };
 
+
+        function cancelPoint (row_id) {
+            var point = scope.displayCollection[row_id];
+            point.status = STATUS.CANCELED;
+        }
 
     }]);
 

@@ -18,7 +18,7 @@ Log.prototype.toFLog = function (name, data, toJson) {
                 return console.log(err);
             }
 
-            console.log("The " + name + " was saved to " + me.folder + "!");
+            console.log("The " + name + " was saved to " + me.folder + "!\n");
         });
 };
 

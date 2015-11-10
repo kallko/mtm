@@ -196,8 +196,8 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         loc_str = '',
         points = data.routes[index].points,
         me = this;
-    console.log('getRouterData', index);
 
+    //console.log('getRouterData', index);
     for (var i = 0; i < points.length; i++) {
         if (points[i].LAT != null && points[i].LON != null) {
             loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
