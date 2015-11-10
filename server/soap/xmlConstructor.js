@@ -176,7 +176,7 @@ XMLConstructor.prototype.routesXML = function(routes) {
                 str += this.xml.addParameter('distance', point.distance);
 
                 str += '<GEOMETRY>';
-                str += point.geometry.join(';');
+                str += JSON.stringify(point.geometry);
                 str += '</GEOMETRY>';
 
                 str += '</SECTION>';

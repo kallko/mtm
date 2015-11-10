@@ -285,7 +285,7 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 data.sensors[j].loading = true;
                 (function (jj) {
-                    //console.log('request for stops ', jj);
+                    //console.log('request for stops ', jj, url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true
