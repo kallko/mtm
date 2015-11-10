@@ -234,12 +234,6 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
 
         data[nIndx].routes.push(tmpRoute);
     }
-
-    if (itIsToday) {
-        for (i = 0; i < data[nIndx].routes.length; i++) {
-            tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
-        }
-    }
 };
 
 SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback) {
@@ -272,12 +266,29 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     data[nIndx].waypoints.push(waypoints[i].$);
                 }
 
+                for (var j = 0; j < data[nIndx].routes.length; j++) {
+                    for (i = 0; i < data[nIndx].routes[j].points.length; i++) {
+                        var tPoint = data[nIndx].routes[j].points[i];
+                        for (var k = 0; k < data[nIndx].waypoints.length; k++) {
+                            if (tPoint.START_WAYPOINT == data[nIndx].waypoints[k].ID) {
+                                tPoint.waypoint = data[nIndx].waypoints[k];
+                                tPoint.LAT = tPoint.waypoint.LAT;
+                                tPoint.LON = tPoint.waypoint.LON;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 data[nIndx].sensors = [];
                 for (i = 0; i < sensors.length; i++) {
                     data[nIndx].sensors.push(sensors[i].$);
                 }
 
                 if (itIsToday) {
+                    for (i = 0; i < data[nIndx].routes.length; i++) {
+                        tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
+                    }
                     tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback);
                     checkBeforeSend(data, callback);
                 } else {

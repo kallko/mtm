@@ -198,8 +198,8 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
 
     //console.log('getRouterData', index);
     for (var i = 0; i < points.length; i++) {
-        if (points[i].END_LAT != null && points[i].END_LON != null) {
-            loc_str += "&loc=" + points[i].END_LAT + "," + points[i].END_LON;
+        if (points[i].LAT != null && points[i].LON != null) {
+            loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
         }
     }
 
@@ -248,10 +248,10 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
 
     request({
         url: this.routerUrl + 'viaroute?instructions=false&compression=false'
-        + '&loc=' + points[startPos].END_LAT
-        + "," + points[startPos].END_LON
-        + '&loc=' + points[startPos + 1].END_LAT
-        + "," + points[startPos + 1].END_LON,
+        + '&loc=' + points[startPos].LAT
+        + "," + points[startPos].LON
+        + '&loc=' + points[startPos + 1].LAT
+        + "," + points[startPos + 1].LON,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {

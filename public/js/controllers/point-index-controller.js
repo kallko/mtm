@@ -32,8 +32,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false,
-            enableDynamicUpdate = false;
+            loadParts = true,
+            enableDynamicUpdate = true;
 
         setListeners();
         init();
@@ -308,14 +308,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint.route_id = i;
                     rowId++;
 
-                    for (var k = 0; k < data.waypoints.length; k++) {
-                        if (tPoint.START_WAYPOINT == data.waypoints[k].ID) {
-                            tPoint.waypoint = data.waypoints[k];
-                            tPoint.LAT = data.waypoints[k].LAT;
-                            tPoint.LON = data.waypoints[k].LON;
-                            break;
-                        }
-                    }
+                    //for (var k = 0; k < data.waypoints.length; k++) {
+                    //    if (tPoint.START_WAYPOINT == data.waypoints[k].ID) {
+                    //        tPoint.waypoint = data.waypoints[k];
+                    //        tPoint.LAT = data.waypoints[k].LAT;
+                    //        tPoint.LON = data.waypoints[k].LON;
+                    //        break;
+                    //    }
+                    //}
 
                     tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS);
                     if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
