@@ -10,7 +10,6 @@ var config = {
     //
     //loadOnlyItineraryNew: false,
 
-
     cashing: {
         soap: false,
         tracks: false

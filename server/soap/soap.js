@@ -242,6 +242,10 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
         tmpRoute.points = [];
 
         for (var j = 0; j < routes[i].SECTION.length; j++) {
+            if (j == 0 && routes[i].SECTION[j].$.START_WAYPOINT == "") {
+                routes[i].SECTION[j].$.START_WAYPOINT = routes[i].SECTION[j].$.END_WAYPOINT;
+            }
+
             tmpRoute.points.push(routes[i].SECTION[j].$);
         }
 
@@ -290,6 +294,13 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                                 break;
                             }
                         }
+                    }
+                }
+
+                // 258e90fa-f181-11e4-a872-005056a77794
+                for (k = 0; k < data[nIndx].waypoints.length; k++) {
+                    if ('9ae1cbb3-4944-11e2-802b-52540027e502' == data[nIndx].waypoints[k].ID) {
+                        console.log(data[nIndx].waypoints[k]);
                     }
                 }
 
