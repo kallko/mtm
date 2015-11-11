@@ -13,7 +13,7 @@
     }
 
     window.setTimeout(function () {
-        console.log('parentForm._call',  JSON.parse(parentForm._call('getDriversActions', ['15', '20151111'])));
+        $('body').append($('<div id="log-div">' + parentForm._call('getDriversActions', ['15', '20151111']) + '</div>'));
     }, 5000);
 </script>
 
