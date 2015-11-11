@@ -253,7 +253,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
-    //log.l(_xml.additionalDataXML(data.ID));
+    //log.l(_xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
