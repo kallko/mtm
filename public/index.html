@@ -24,9 +24,7 @@
     }
 
     window.setTimeout(function () {
-        $('#log-div').text(
-                (parentForm._call('getDriversActions', ['15', '20151111'])).m_value
-        );
+        JSON.parse((parentForm._call('getDriversActions', ['15', '20151111'])).m_value);
     }, 5000);
 </script>
 
@@ -42,7 +40,6 @@
 <script src="./js/directives/right-click.js"></script>
 <script src="./js/directives/enter-event.js"></script>
 
-<div id="log-div" ></div>
 <div id="map"></div>
 
 <template type="text/html" id="template-point-table">
