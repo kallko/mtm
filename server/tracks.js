@@ -197,6 +197,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         points = data.routes[index].points,
         me = this;
 
+    //log.toFLog('points_' + nIndx + '_' + index, points);
     //console.log('getRouterData', index);
     //console.log('points.length', points.length);
     for (var i = 0; i < points.length; i++) {
@@ -252,8 +253,14 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
             + '&loc=' + points[startPos + 1].LAT
             + "," + points[startPos + 1].LON;
 
-    console.log(points.length, startPos);
-    log.toFLog('points', points);
+    //console.log(startPos, points[startPos], points[startPos + 1]);
+    //log.toFLog('points', points);
+
+    if(points[startPos].LAT == undefined || points[startPos + 1].LAT == undefined) {
+        startPos++;
+        me.getGeometryByParts(_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne);
+        return;
+    }
 
     request({
         url: query,

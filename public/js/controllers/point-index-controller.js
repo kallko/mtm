@@ -189,7 +189,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function getTstampAvailabilityWindow(strWindows) {
-            if (strWindows == '') {
+            if (!strWindows) {
+                console.log('Invalid strWindows!');
                 return;
             }
 
@@ -1024,6 +1025,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateData();
         };
 
+        function showPopup(text) {
+            scope.$emit('showNotification', text);
+        }
+
         scope.recalculateRoute = function () {
             var route;
 
@@ -1053,9 +1058,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     },
                     point,
                     pt,
-                    job;
+                    job,
+                    timeWindow;
 
                 for (var i = 0; i < route.points.length; i++) {
+                    if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
+                        timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS);
+                        mathInput.depotList.push({
+                            "id": "1",
+                            "point": "-2",
+                            "window": {
+                                "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
+                                "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
+                            }
+                        });
+                        break;
+                    }
+                }
+
+                for (i = 0; i < route.points.length; i++) {
 
                     if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE) {
                         pt = route.points[i];
@@ -1098,19 +1119,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             ]
                         };
                         mathInput.jobList.push(job);
-                    }
-
-                    if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
-                        var timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS);
-
-                        mathInput.depotList.push({
-                            "id": "1",
-                            "point": "-2",
-                            "window": {
-                                "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
-                                "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
-                            }
-                        });
                     }
                 }
 

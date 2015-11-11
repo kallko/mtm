@@ -219,3 +219,9 @@ template {
     height: 15px;
     width: 34px;
 }
+
+#notification {
+    background-color: #D5DBD8;
+    border: 2px solid grey;
+    padding: 20px;
+}

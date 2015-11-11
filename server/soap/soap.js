@@ -198,6 +198,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
         });
     }
 
+    //console.log("_xml.itineraryXML(id, version, true) >>>>>", _xml.itineraryXML(id, version, true));
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
         itineraryCallback(err, result, me, client, itIsToday, data, callback);
     });
@@ -206,6 +207,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 function itineraryCallback(err, result, me, client, itIsToday, data, callback) {
     if (!err) {
         //console.log(result.return);
+        //log.toFLog('itinerary', result.return, false);
         parseXML(result.return, function (err, res) {
 
             if (res.MESSAGE.ITINERARIES == null ||

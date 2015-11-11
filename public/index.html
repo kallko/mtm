@@ -12,6 +12,7 @@
 <script src="./js/vendor/goldenlayout.js"></script>
 <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+<script src="https://cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
 <script src="./js/vendor/colResizable-1.5.min.js"></script>
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
@@ -37,12 +38,16 @@
 <script src="./js/controllers/point-index-controller.js"></script>
 <script src="./js/controllers/map-controller.js"></script>
 <script src="./js/controllers/debug-controller.js"></script>
+<script src="./js/controllers/notification-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
 <script src="./js/directives/finish-render.js"></script>
 <script src="./js/directives/right-click.js"></script>
 <script src="./js/directives/enter-event.js"></script>
+
+
+
 
 <div id="map"></div>
 
@@ -225,6 +230,12 @@
         </div>
     </div>
 </template>
+
+<div id="notification" ng-controller="NotificationController" >
+    <div>
+        Текст оповещения
+    </div>
+</div>
 
 
 
