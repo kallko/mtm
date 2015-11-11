@@ -24,7 +24,7 @@
     }
 
     window.setTimeout(function () {
-        $('#log-div').text(parentForm._call('getDriversActions', ['15', '20151111']));
+        $('#log-div').text(JSON.stringify(parentForm._call('getDriversActions', ['15', '20151111'])));
     }, 5000);
 </script>
 
