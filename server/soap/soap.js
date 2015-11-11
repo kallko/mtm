@@ -208,6 +208,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, callback) {
     if (!err) {
         //console.log(result.return);
         //log.toFLog('itinerary', result.return, false);
+        log.toFLog('itinerary', result.return, false);
         parseXML(result.return, function (err, res) {
 
             if (res.MESSAGE.ITINERARIES == null ||
@@ -216,7 +217,6 @@ function itineraryCallback(err, result, me, client, itIsToday, data, callback) {
 
             console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
             var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
-
 
             nIndx--;
             data[nIndx].sended = false;
