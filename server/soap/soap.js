@@ -298,11 +298,11 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 }
 
                 // 258e90fa-f181-11e4-a872-005056a77794
-                for (k = 0; k < data[nIndx].waypoints.length; k++) {
-                    if ('9ae1cbb3-4944-11e2-802b-52540027e502' == data[nIndx].waypoints[k].ID) {
-                        console.log(data[nIndx].waypoints[k]);
-                    }
-                }
+                //for (k = 0; k < data[nIndx].waypoints.length; k++) {
+                //    if ('9ae1cbb3-4944-11e2-802b-52540027e502' == data[nIndx].waypoints[k].ID) {
+                //        console.log(data[nIndx].waypoints[k]);
+                //    }
+                //}
 
                 data[nIndx].sensors = [];
                 for (i = 0; i < sensors.length; i++) {

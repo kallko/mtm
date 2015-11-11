@@ -155,25 +155,25 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
 
     str += this.xml.begin;
     str += this.xml.addParameter('login', login);
-    str += '<ITINERARIES>';
+    str += '<ITINERARIES_N>';
     for (var key in itineraries){
         if (!itineraries.hasOwnProperty(key)) continue;
 
         routes = itineraries[key].routes;
-        str += '<ITINERARY>';
+        str += '<ITINERARY_N>';
         str += this.xml.addParameter('ID', key);
         str += this.xml.addParameter('changeTime', itineraries[key].change_timestamp);
-        str += '<ROUTES>';
+        str += '<ROUTES_N>';
         for (i = 0; i < routes.length; i++) {
-            str += '<ROUTE>';
+            str += '<ROUTE_N>';
             str += this.xml.addParameter('routesID', routes[i].routesID);
             str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
             str += this.xml.addParameter('transportID', routes[i].transportID);
 
-            str += '<SECTIONS>';
+            str += '<SECTIONS_N>';
             for (var j = 0; j < routes[i].points.length; j++) {
                 point = routes[i].points[j];
-                str += '<SECTION>';
+                str += '<SECTION_N>';
                 str += this.xml.addParameter('taskNumber', point.taskNumber);
                 str += this.xml.addParameter('stepNumber', point.stepNumber);
                 str += this.xml.addParameter('arrivalTime', point.arrivalTime);
@@ -184,20 +184,20 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
                 str += this.xml.addParameter('travelTime', point.travelTime);
                 str += this.xml.addParameter('distance', point.distance);
 
-                str += '<GEOMETRY>';
+                str += '<GEOMETRY_N>';
                 str += JSON.stringify(point.geometry);
-                str += '</GEOMETRY>';
+                str += '</GEOMETRY_N>';
 
-                str += '</SECTION>';
+                str += '</SECTION_N>';
             }
-            str += '</SECTIONS>';
-            str += '</ROUTE>';
+            str += '</SECTIONS_N>';
+            str += '</ROUTE_N>';
         }
-        str += '</ROUTES>';
-        str += '</ITINERARY>';
+        str += '</ROUTES_N>';
+        str += '</ITINERARY_N>';
 
     }
-    str += '</ITINERARIES>';
+    str += '</ITINERARIES_N>';
     str += this.xml.end;
 
 
