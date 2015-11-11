@@ -331,8 +331,6 @@ router.route('/routerdata')
 
         console.log('routerdata', routeIndx);
         tracksManager.getRouterData(cData, routeIndx, -1, checkFunc, callback, true);
-
-
     });
 
 router.route('/log')

@@ -1284,7 +1284,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route,
                 point;
             for (var i = 0; i < _data.routes.length; i++) {
-                if (_data.routes[i].toSave || i == 0 || i == 1 || i == 2) {
+                if (_data.routes[i].toSave) { // || i == 0 || i == 1 || i == 2) {
                     route = {
                         itineraryID: _data.routes[i].itineraryID,
                         routesID: _data.routes[i].ID,

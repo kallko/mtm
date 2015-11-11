@@ -1,12 +1,14 @@
 var config = {
     cashing: {
-        soap: true,
+        soap: false,
         tracks: false
     },
 
     //defaultSoapLogin: 'ids.dsp',
     defaultSoapLogin: 'k00056.0',
     defaultMonitoringLogin: 'ids.dsp',
+
+    loadOnlyItineraryNew: false,
 
     aggregator: {
         //url: 'http://62.205.137.118:9001/',

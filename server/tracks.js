@@ -198,16 +198,13 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         me = this;
 
     //console.log('getRouterData', index);
+    //console.log('points.length', points.length);
     for (var i = 0; i < points.length; i++) {
         if (points[i].LAT != null && points[i].LON != null) {
             loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
         }
     }
 
-    //if (onlyOne) {
-    //    console.log(this.routerUrl + 'table?' + loc_str);
-    //    console.log(this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str);
-    //}
     //console.log(this.routerUrl + 'table?' + loc_str);
     request({
         url: this.routerUrl + 'table?' + loc_str,

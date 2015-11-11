@@ -11,7 +11,7 @@ function XMLConstructor() {
         , instruction: {
             begin: '<INSTRUCTION>'
             , daily_plan: '<INSTRUCTION NAME="GET_DAILY_PLANS" >'
-            //, itinerary:    '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
+            , itinerary_new: '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
             , itinerary: '<INSTRUCTION NAME="GET_ITINERARY" >'
             , transports: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
             , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'
@@ -58,11 +58,11 @@ XMLConstructor.prototype.dailyPlanXML = function (timestamp) {
     return str;
 };
 
-XMLConstructor.prototype.itineraryXML = function (id, version) {
+XMLConstructor.prototype.itineraryXML = function (id, version, newItinerary) {
     var str = '';
     str += this.xml.begin;
     str += this.xml.instructions.begin;
-    str += this.xml.instruction.itinerary;
+    str += newItinerary ? this.xml.instruction.itinerary_new : this.xml.instruction.itinerary;
 
     str += this.xml.parameter.begin;
     str += this.xml.setGetValue('ID', id);
@@ -132,35 +132,42 @@ XMLConstructor.prototype.allSensorsXML = function() {
     return str;
 };
 
-XMLConstructor.prototype.routesXML = function(routes) {
+XMLConstructor.prototype.routesXML = function(routes, login) {
     if (routes.length == 0) return;
 
+    console.log(login);
     var str = '',
         point,
         itineraries = {};
 
     for (var i = 0; i < routes.length; i++) {
         if (!itineraries[routes[i].itineraryID]) {
-            itineraries[routes[i].itineraryID] = [];
+            itineraries[routes[i].itineraryID] = {
+                routes: [],
+                change_timestamp: 0
+            };
         }
 
-        itineraries[routes[i].itineraryID].push(routes[i]);
+        itineraries[routes[i].itineraryID].routes.push(routes[i]);
+        itineraries[routes[i].itineraryID].change_timestamp = itineraries[routes[i].itineraryID].change_timestamp < routes[i].change_timestamp ?
+            routes[i].change_timestamp : itineraries[routes[i].itineraryID].change_timestamp;
     }
 
     str += this.xml.begin;
+    str += this.xml.addParameter('login', login);
     str += '<ITINERARIES>';
     for (var key in itineraries){
         if (!itineraries.hasOwnProperty(key)) continue;
 
-        routes = itineraries[key];
+        routes = itineraries[key].routes;
         str += '<ITINERARY>';
         str += this.xml.addParameter('ID', key);
+        str += this.xml.addParameter('changeTime', itineraries[key].change_timestamp);
         str += '<ROUTES>';
         for (i = 0; i < routes.length; i++) {
             str += '<ROUTE>';
             str += this.xml.addParameter('routesID', routes[i].routesID);
             str += this.xml.addParameter('routeNumber', routes[i].routeNumber);
-            str += this.xml.addParameter('changeTime', routes[i].change_timestamp);
             str += this.xml.addParameter('transportID', routes[i].transportID);
 
             str += '<SECTIONS>';
