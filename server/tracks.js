@@ -225,6 +225,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
+            //console.log('Viaroute READY!', index);
             if (body.route_geometry == null) {
                 console.log('body.route_geometry == null');
                 data.routes[index].plan_geometry = [];
@@ -244,14 +245,18 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
 TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne) {
     var data = onlyOne ? _data : _data[nIndx],
         points = data.routes[index].points,
-        me = this;
+        me = this,
+        query = this.routerUrl + 'viaroute?instructions=false&compression=false'
+            + '&loc=' + points[startPos].LAT
+            + "," + points[startPos].LON
+            + '&loc=' + points[startPos + 1].LAT
+            + "," + points[startPos + 1].LON;
+
+    console.log(points.length, startPos);
+    log.toFLog('points', points);
 
     request({
-        url: this.routerUrl + 'viaroute?instructions=false&compression=false'
-        + '&loc=' + points[startPos].LAT
-        + "," + points[startPos].LON
-        + '&loc=' + points[startPos + 1].LAT
-        + "," + points[startPos + 1].LON,
+        url: query,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -264,6 +269,8 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
                 data.routes[index].plan_geometry_loaded = true;
                 checkBeforeSend(_data, callback);
             }
+        } else {
+            console.log('getGeometryByParts ERROR', body, error, query);
         }
     });
 };

@@ -4,8 +4,8 @@ var config = {
         tracks: false
     },
 
-    //defaultSoapLogin: 'ids.dsp',
-    defaultSoapLogin: 'k00056.0',
+    defaultSoapLogin: 'ids.dsp',
+    //defaultSoapLogin: 'k00056.0',
     defaultMonitoringLogin: 'ids.dsp',
 
     loadOnlyItineraryNew: false,

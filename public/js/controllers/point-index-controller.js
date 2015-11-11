@@ -115,13 +115,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var _now = Date.now() / 1000,
                 url = './trackparts/' + _data.trackUpdateTime + '/' + parseInt(_now);
 
-            console.log('load track parts');
             http.get(url)
                 .success(function (trackParts) {
-                    console.log('trackparts');
-                    console.log(new Date(_data.trackUpdateTime * 1000));
-                    console.log(new Date(_now * 1000));
-                    console.log(trackParts);
+                    console.log('loaded track parts');
+                    //console.log(new Date(_data.trackUpdateTime * 1000));
+                    //console.log(new Date(_now * 1000));
+                    //console.log(trackParts);
 
                     for (var i = 0; i < trackParts.length; i++) {
                         if (trackParts[i].data == undefined ||
@@ -174,9 +173,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
-                    console.log('loadDailyData success');
-                    console.log(data);
-
                     linkDataParts(data);
                     if (loadParts) {
                         loadTrackParts();
@@ -374,11 +370,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 'data': data
             });
 
-            console.log(data);
-            console.log({'data': scope.rowCollection});
+            console.log('Finish linking', data);
+            //console.log({'data': scope.rowCollection});
             scope.displayCollection = [].concat(scope.rowCollection);
 
-            console.log('Finish linking ...');
             setColResizable();
             prepareFixedHeader();
         }
@@ -514,9 +509,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            console.log([_data.ID, getTodayStrFor1C()]);
             if (parentForm == undefined) {
-                console.log('parentForm == undefined');
                 return;
             }
 
@@ -628,7 +621,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPred,
                 now = _data.server_time; //Date.now();
 
-            console.log(new Date(_data.server_time * 1000));
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 if (route.real_track == undefined ||
@@ -652,10 +644,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 totalTravelTime = 0,
                                 tmpTime;
 
-                            //console.log(_route.driver.NAME);
-                            //if (_route.driver.NAME == 'ШТЕЛЬМАХ СЕРГІЙ ОЛЕКСАНДРОВИЧ') {
-                            //    var asd = 777;
-                            //}
                             for (var j = 0; j < _route.points.length; j++) {
                                 if (j < lastPoint) {
                                     _route.points[j].arrival_prediction = 0;
@@ -743,7 +731,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             myLayout.on('stateChanged', function (e) {
                 var pointMenuPanel = $('#point-menu-panel');
-                console.log('stateChanged', pointMenuPanel.height());
                 pointTableHolder.height(pointContainer.height() - 27 - pointMenuPanel.height());
                 pointTableHolder.width(pointContainer.width() - 10);
 
@@ -1046,8 +1033,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route = _data.routes[scope.displayCollection[scope.selectedRow].route_id];
             }
 
-            console.log('recalculateRoute');
             if (route != undefined) {
+                route.recalcIter = route.recalcIter || 0;
+                route.recalcIter++;
+                console.log('route.recalcIter', route.recalcIter);
+
                 var mathInput = {
                         "margin_of_safety": 1,
                         "garbage": false,
@@ -1112,7 +1102,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
                         var timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS);
-                        console.log(route.points[i].waypoint.AVAILABILITY_WINDOWS);
 
                         mathInput.depotList.push({
                             "id": "1",
@@ -1146,8 +1135,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 // 05:00 - 23:00
                 var trWindow = getTstampAvailabilityWindow(route.transport.START_OF_WORK.substr(0, 5) + ' - ' +
-                    route.transport.END_OF_WORK.substr(0, 5));
-                console.log(trWindow);
+                        route.transport.END_OF_WORK.substr(0, 5));
 
                 mathInput.trList.push({
                     "id": "-1",
@@ -1211,6 +1199,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(rawData);
             //console.log(changedRoute);
 
+            if (data.status == 'error') {
+                console.log('nodejs error');
+                return;
+            }
+
             if (data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
                 console.log('Bad data');
                 return;
@@ -1225,6 +1218,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < rawData.routes.length; i++) {
                 if (_data.routes[i].ID == changedRoute.ID) {
                     tmpRawRoute = rawData.routes[i];
+                    tmpRawRoute.recalcIter = _data.routes[i].recalcIter;
                     routeIndx = i;
                     break;
                 }

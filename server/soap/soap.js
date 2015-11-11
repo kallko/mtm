@@ -66,7 +66,6 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 };
 
 function checkBeforeSend(_data, callback) {
-
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -78,11 +77,12 @@ function checkBeforeSend(_data, callback) {
         for (var i = 0; i < data.routes.length; i++) {
             if (!data.routes[i].time_matrix_loaded
                 || !data.routes[i].plan_geometry_loaded) {
+                //console.log(i, data.routes[i].time_matrix_loaded, data.routes[i].plan_geometry_loaded);
                 return;
             }
         }
 
-        for (var i = 0; i < data.sensors.length; i++) {
+        for (i = 0; i < data.sensors.length; i++) {
             if (data.sensors[i].loading && !data.sensors[i].stops_loaded) {
                 return;
             }
@@ -103,7 +103,7 @@ function checkBeforeSend(_data, callback) {
         }
     }
 
-    for (var i = 0; i < data.length; i++) {
+    for (i = 0; i < data.length; i++) {
         for (var j = 0; j < data[i].routes.length; j++) {
             data[i].routes[j].itineraryID = data[i].ID;
         }
@@ -130,7 +130,7 @@ function checkBeforeSend(_data, callback) {
     }
 
     for (j = 1; j < data.length; j++) {
-        for (var k = 0; k < data[j].sensors.length; k++) {
+        for (k = 0; k < data[j].sensors.length; k++) {
             if (data[j].sensors[k].real_track != undefined) {
                 allData.sensors[k].real_track = data[j].sensors[k].real_track;
                 //console.log('save real_track!');
@@ -177,9 +177,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
                         data = [];
                     for (var i = 0; i < itineraries.length; i++) {
-                        //if (i == 0) {
                         me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, data, callback);
-                        //}
                     }
 
                 });
