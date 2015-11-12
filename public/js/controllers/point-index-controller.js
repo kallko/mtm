@@ -533,33 +533,33 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
             console.log('_data.mobile_buttons array', _data.mobile_buttons);
 
-            if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
-                for (var i = 0; i < _data.mobile_buttons.length; i++) {
-                    for (var j = 0; j < _data.routes.length; j++) {
-                        for (var k = 0; k < _data.routes[j].points.length; k++) {
-                            tmpPoint = _data.routes[j].points[k];
-                            LAT = parseFloat(tmpPoint.LAT);
-                            LON = parseFloat(tmpPoint.LON);
-                            lat = _data.mobile_buttons[i].lat;
-                            lon = _data.mobile_buttons[i].lon;
-                            _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
-
-                            if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
-                                && tmpPoint.status != STATUS.FINISHED
-                                && tmpPoint.status != STATUS.FINISHED_LATE
-                                && tmpPoint.status != STATUS.CANCELED
-                                && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
-                            ) {
-                                console.log('detect by button push');
-                                tmpPoint.status = STATUS.FINISHED;
-                                _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                                tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            //if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
+            //    for (var i = 0; i < _data.mobile_buttons.length; i++) {
+            //        for (var j = 0; j < _data.routes.length; j++) {
+            //            for (var k = 0; k < _data.routes[j].points.length; k++) {
+            //                tmpPoint = _data.routes[j].points[k];
+            //                LAT = parseFloat(tmpPoint.LAT);
+            //                LON = parseFloat(tmpPoint.LON);
+            //                lat = _data.mobile_buttons[i].lat;
+            //                lon = _data.mobile_buttons[i].lon;
+            //                _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
+            //
+            //                if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
+            //                    && tmpPoint.status != STATUS.FINISHED
+            //                    && tmpPoint.status != STATUS.FINISHED_LATE
+            //                    && tmpPoint.status != STATUS.CANCELED
+            //                    && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
+            //                ) {
+            //                    console.log('detect by button push');
+            //                    tmpPoint.status = STATUS.FINISHED;
+            //                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+            //                    tmpPoint.real_arrival_time = route.mobile_buttons[j].time;
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         function getTodayStrFor1C() {
@@ -1286,12 +1286,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route,
                 point;
             for (var i = 0; i < _data.routes.length; i++) {
-                if (_data.routes[i].toSave) { // || i == 0 || i == 1 || i == 2) {
+                if (_data.routes[i].toSave || i == 0 || i == 1) {
                     route = {
                         itineraryID: _data.routes[i].itineraryID,
                         routesID: _data.routes[i].ID,
                         transportID: _data.routes[i].transport.ID,
-                        routeNumber: '',
+                        routeNumber: _data.routes[i].NUMBER,
                         change_timestamp: _data.routes[i].change_timestamp,
                         points: []
                     };

@@ -143,7 +143,8 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
     console.log(login);
     var str = '',
         point,
-        itineraries = {};
+        itineraries = {},
+        tmpGeometry;
 
     for (var i = 0; i < routes.length; i++) {
         if (!itineraries[routes[i].itineraryID]) {
@@ -175,25 +176,44 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
             str += this.xml.addAttribute('ID', routes[i].routesID);
             str += this.xml.addAttribute('NUMBER', routes[i].routeNumber);
             str += this.xml.addAttribute('TRANSPORT', routes[i].transportID);
+            str += this.xml.addAttribute('DRIVER', '');
+            str += this.xml.addAttribute('START_TIME', '');
+            str += this.xml.addAttribute('END_TIME', '');
+            str += this.xml.addAttribute('VALUE', '');
+            str += this.xml.addAttribute('DISTANCE', '');
+            str += this.xml.addAttribute('TIME', '');
+            str += this.xml.addAttribute('NUMBER_OF_TASKS', '');
             str += ' >';
 
             str += '<SECTIONS>';
             for (var j = 0; j < routes[i].points.length; j++) {
                 point = routes[i].points[j];
                 str += '<SECTION ';
-                str += this.xml.addParameter('TASK_NUMBER', point.taskNumber);
-                str += this.xml.addParameter('NUMBER', point.stepNumber);
-                str += this.xml.addParameter('ARRIVAL_TIME', point.arrivalTime);
-                str += this.xml.addParameter('START_WAYPOINT', point.startWaypointId);
-                str += this.xml.addParameter('END_WAYPOINT', point.endWaypointId);
-                str += this.xml.addParameter('TASK_TIME', point.taskTime);
-                str += this.xml.addParameter('DOWNTIME', point.downtime);
-                str += this.xml.addParameter('TRAVEL_TIME', point.travelTime);
-                str += this.xml.addParameter('DISTANCE', point.distance);
+                str += this.xml.addAttribute('TASK_NUMBER', point.taskNumber);
+                str += this.xml.addAttribute('NUMBER', point.stepNumber);
+                str += this.xml.addAttribute('ARRIVAL_TIME', point.arrivalTime);
+                str += this.xml.addAttribute('START_WAYPOINT', point.startWaypointId);
+                str += this.xml.addAttribute('END_WAYPOINT', point.endWaypointId);
+                str += this.xml.addAttribute('TASK_TIME', point.taskTime);
+                str += this.xml.addAttribute('DOWNTIME', point.downtime);
+                str += this.xml.addAttribute('TRAVEL_TIME', point.travelTime);
+                str += this.xml.addAttribute('DISTANCE', point.distance);
+                str += this.xml.addAttribute('START_TIME', '');
+                str += this.xml.addAttribute('END_TIME', '');
+                str += this.xml.addAttribute('TASK_DATE', '');
+                str += this.xml.addAttribute('WEIGHT', '');
+                str += this.xml.addAttribute('VOLUME', '');
                 str += ' >';
 
+
+                tmpGeometry = [];
+                for (var k = 0; k < point.geometry.length; k++) {
+                    tmpGeometry.push([point.geometry[k], point.geometry[k + 1]]);
+                    k++
+                }
+                
                 str += '<GEOMETRY>';
-                str += JSON.stringify(point.geometry);
+                str += JSON.stringify(tmpGeometry);
                 str += '</GEOMETRY>';
 
                 str += '</SECTION>';
