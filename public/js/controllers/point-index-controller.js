@@ -532,6 +532,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
             console.log('_data.mobile_buttons array', _data.mobile_buttons);
+            console.log({pushes: JSON.stringify(_data.mobile_buttons)});
 
             //if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
             //    for (var i = 0; i < _data.mobile_buttons.length; i++) {

@@ -205,7 +205,6 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
                 str += this.xml.addAttribute('VOLUME', '');
                 str += ' >';
 
-
                 tmpGeometry = [];
                 for (var k = 0; k < point.geometry.length; k++) {
                     tmpGeometry.push([point.geometry[k], point.geometry[k + 1]]);
