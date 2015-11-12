@@ -52,7 +52,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         if (route.real_track != undefined && i != route.points.length - 1) {
             var lastCoords = route.real_track[route.real_track.length - 1].coords,
-            carPos = lastCoords[lastCoords.length - 1],
+                carPos = lastCoords[lastCoords.length - 1],
                 url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
                     + '&' + route.points[i + 1].LON;
             http.get(url).
@@ -66,13 +66,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         });
                     polyline.addTo(map);
                     //console.log([[carPos.lat, carPos.lon], geometry[0]]);
-                    polyline = new L.Polyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], {
-                        color: 'blue',
-                        weight: 3,
-                        opacity: 0.5,
-                        smoothFactor: 1
-                    });
-                    polyline.addTo(map);
+                    if (carPos != null && geometry[0] != null) {
+                        polyline = new L.Polyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], {
+                            color: 'blue',
+                            weight: 3,
+                            opacity: 0.5,
+                            smoothFactor: 1
+                        });
+                        polyline.addTo(map);
+                    }
                     drawPlannedRoute(route.plan_geometry, i);
                 });
 

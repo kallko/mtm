@@ -244,7 +244,8 @@ router.route('/trackparts/:start/:end')
                         if (cached.sensors[i].GID == data[j].gid) {
                             if (data[j].data.length > 0) {
                                 //console.log('Cached for gid ' + data[j].gid + ', length = ' + data[j].data.length);
-                                cached.sensors[i].real_track = cached.sensors[i].real_track.concat();
+                                cached.sensors[i].real_track = cached.sensors[i].real_track || [];
+                                cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                             }
                             break;
                         }

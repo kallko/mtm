@@ -7,8 +7,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data,
             rawData,
             dataUpdateInterval = 120,
-            trackUpdateInterval = 120,
-            updateTrackInterval = 60,
+            stopUpdateInterval = 60,
+            updateTrackInterval = 30,
             radius = 0.25,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -41,7 +41,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         if (enableDynamicUpdate) {
             //setDynamicDataUpdate(dataUpdateInterval);
-            setRealTrackUpdate(trackUpdateInterval);
+            setRealTrackUpdate(stopUpdateInterval);
         }
 
         function init() {
@@ -141,6 +141,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                     if (trackParts[i].data.length > 0) {
                                         trackParts[i].data[0].state = 'MOVE';
+                                        _data.routes[j].real_track = _data.routes[j].real_track || [];
                                         _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
                                         if (_data.routes[j].real_track[0].lastTrackUpdate != undefined) {
                                             _data.routes[j].real_track[0].lastTrackUpdate -= updateTrackInterval * 2;
@@ -148,7 +149,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                         var len = _data.routes[j].real_track.length - 1;
                                         _data.routes[j].car_position = _data.routes[j].real_track[len];
-                                        _data.routes[i].real_track.splice(len, 1);
+
+                                        if (_data.routes[i] != undefined && _data.routes[i].real_track != undefined &&
+                                            _data.routes[i].real_track.length > 0) {
+                                            _data.routes[i].real_track.splice(len, 1);
+                                        }
                                     }
                                 }
                                 break;
@@ -923,6 +928,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             route = _data.routes[indx];
+
+            if (route.real_track == undefined) return;
 
             if (route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
