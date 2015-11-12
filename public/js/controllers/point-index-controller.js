@@ -563,7 +563,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 console.log('detect by button push');
                                 tmpPoint.status = STATUS.FINISHED;
                                 _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                                tmpPoint.real_arrival_time = route.mobile_buttons[i].time;
+                                tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
                                 break;
                             }
                         }
