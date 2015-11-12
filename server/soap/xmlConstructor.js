@@ -1,3 +1,4 @@
+var log = new (require('../logging'))('./logs');
 module.exports = XMLConstructor;
 
 function XMLConstructor() {
@@ -135,8 +136,6 @@ XMLConstructor.prototype.allSensorsXML = function() {
     return str;
 };
 
-XMLConstructor.prototype.add
-
 XMLConstructor.prototype.routesXML = function(routes, login) {
     if (routes.length == 0) return;
 
@@ -144,7 +143,8 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
     var str = '',
         point,
         itineraries = {},
-        tmpGeometry;
+        tmpGeometry,
+        coords;
 
     for (var i = 0; i < routes.length; i++) {
         if (!itineraries[routes[i].itineraryID]) {
@@ -160,13 +160,13 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
     }
 
     str += this.xml.begin;
-    str += this.xml.addParameter('login', login);
     str += '<ITINERARIES_UPDATE>';
     for (var key in itineraries){
         if (!itineraries.hasOwnProperty(key)) continue;
 
         routes = itineraries[key].routes;
         str += '<ITINERARY_UPDATE ';
+        str += this.xml.addAttribute('USER', login);
         str += this.xml.addAttribute('ID', key);
         str += this.xml.addAttribute('UPDATE_TIME', itineraries[key].change_timestamp);
         str += ' >';
@@ -176,16 +176,15 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
             str += this.xml.addAttribute('ID', routes[i].routesID);
             str += this.xml.addAttribute('NUMBER', routes[i].routeNumber);
             str += this.xml.addAttribute('TRANSPORT', routes[i].transportID);
-            str += this.xml.addAttribute('DRIVER', '');
-            str += this.xml.addAttribute('START_TIME', '');
-            str += this.xml.addAttribute('END_TIME', '');
-            str += this.xml.addAttribute('VALUE', '');
-            str += this.xml.addAttribute('DISTANCE', '');
-            str += this.xml.addAttribute('TIME', '');
-            str += this.xml.addAttribute('NUMBER_OF_TASKS', '');
+            str += this.xml.addAttribute('DRIVER', routes[i].driver);
+            str += this.xml.addAttribute('START_TIME', routes[i].startTime);
+            str += this.xml.addAttribute('END_TIME', routes[i].endTime);
+            str += this.xml.addAttribute('VALUE', routes[i].value);
+            str += this.xml.addAttribute('DISTANCE', routes[i].distance);
+            str += this.xml.addAttribute('TIME', routes[i].time);
+            str += this.xml.addAttribute('NUMBER_OF_TASKS', routes[i].numberOfTasks);
             str += ' >';
 
-            str += '<SECTIONS>';
             for (var j = 0; j < routes[i].points.length; j++) {
                 point = routes[i].points[j];
                 str += '<SECTION ';
@@ -198,26 +197,25 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
                 str += this.xml.addAttribute('DOWNTIME', point.downtime);
                 str += this.xml.addAttribute('TRAVEL_TIME', point.travelTime);
                 str += this.xml.addAttribute('DISTANCE', point.distance);
-                str += this.xml.addAttribute('START_TIME', '');
-                str += this.xml.addAttribute('END_TIME', '');
-                str += this.xml.addAttribute('TASK_DATE', '');
-                str += this.xml.addAttribute('WEIGHT', '');
-                str += this.xml.addAttribute('VOLUME', '');
-                str += ' >';
+                str += this.xml.addAttribute('START_TIME', point.startTime);
+                str += this.xml.addAttribute('END_TIME', point.endTime);
+                str += this.xml.addAttribute('TASK_DATE', point.taskDate);
+                str += this.xml.addAttribute('WEIGHT', point.weight);
+                str += this.xml.addAttribute('VOLUME', point.volume);
 
                 tmpGeometry = [];
-                for (var k = 0; k < point.geometry.length; k++) {
-                    tmpGeometry.push([point.geometry[k], point.geometry[k + 1]]);
-                    k++
+                if (point.geometry != undefined) {
+                    for (var k = 0; k < point.geometry.length; k++) {
+                        coords = point.geometry[k].split(',');
+                        coords[0] = parseFloat(coords[0]);
+                        coords[1] = parseFloat(coords[1]);
+                        tmpGeometry.push(coords);
+                    }
                 }
-                
-                str += '<GEOMETRY>';
-                str += JSON.stringify(tmpGeometry);
-                str += '</GEOMETRY>';
 
-                str += '</SECTION>';
+                str += this.xml.addAttribute('TRACK', JSON.stringify(tmpGeometry));
+                str += ' />';
             }
-            str += '</SECTIONS>';
             str += '</ROUTE>';
         }
         str += '</ROUTES>';

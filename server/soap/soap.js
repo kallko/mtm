@@ -117,7 +117,8 @@ function checkBeforeSend(_data, callback) {
         }
     }
 
-    var allData = JSON.parse(JSON.stringify(data[0]));
+    var allData = JSON.parse(JSON.stringify(data[0]))
+        gIndex = 0;
 
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
@@ -126,6 +127,7 @@ function checkBeforeSend(_data, callback) {
         allData.TIME = parseInt(allData.TIME) + parseInt(data[i].TIME);
         allData.VALUE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
         allData.routes = allData.routes.concat(data[i].routes);
+
         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
     }
 
@@ -139,8 +141,10 @@ function checkBeforeSend(_data, callback) {
     }
 
     for (i = 0; i < allData.routes.length; i++) {
-        for (j = 0; j < allData.routes[i].points.length; j++) {
+        for (var j = 0; j < allData.routes[i].points.length; j++) {
             allData.routes[i].points[j].base_arrival = allData.routes[i].points[j].ARRIVAL_TIME;
+            allData.routes[i].points[j].waypoint.gIndex = gIndex;
+            gIndex++;
         }
     }
 
@@ -152,10 +156,14 @@ function checkBeforeSend(_data, callback) {
 SoapManager.prototype.getDailyPlan = function (callback, date) {
     var me = this,
         itIsToday = typeof date === 'undefined';
-    date = !itIsToday ? date : Date.now();
-    console.log('itIsToday', itIsToday);
 
-    console.log(new Date(date));
+    // ONLY FOR TEST
+    date = !itIsToday ? date : Date.now();
+    //date = date - 86400000 * 5;
+
+    console.log('itIsToday', itIsToday);
+    console.log('Date >>>', new Date(date));
+
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));

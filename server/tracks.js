@@ -9,7 +9,7 @@ var request = require("request"),
 function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.aggregatorUrl = aggregatorUrl;
     this.routerUrl = routerUrl;
-    this.login = login
+    this.login = login;
     this.password = password;
     this.undef_t = 60;
     this.undef_d = 1000;

@@ -35,8 +35,8 @@ MathServer.prototype.recalculate = function (route, callback) {
                     url: me.mathServerUrl + 'task?action=getState&queryID=' + queryID + '&lastSID=0',
                     json: true
                 }, function (error, response, body) {
-                    if(error) {
-                        console.log(error);
+                    if(error || body.error) {
+                        console.log(error, body.error);
                         clearInterval(intervalID);
                         callback({status: 'error'});
                     } else {
