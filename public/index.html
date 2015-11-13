@@ -81,6 +81,10 @@
                     15 минут
                 </button>
 
+                <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
+                        ng-options='option.value as option.name for option in recalc_modes'>
+                </select>
+
                 <button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">
                     пересчитать
                 </button>

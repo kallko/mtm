@@ -31,9 +31,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 OUT_PROMISED: 3
             },
 
+
+
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,
-            enableDynamicUpdate = true;
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -83,14 +85,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'плановый трек', value: 2},
                 {name: 'фактический + плановый трек', value: 3}
             ];
+            scope.draw_mode = scope.draw_modes[0].value;
 
-            scope.recalcMode = [
-                {name: 'большие окна', value: 0},
-                {name: 'заданные окна', value: 1},
+            scope.recalc_modes = [
+                {name: 'по большим окнам', value: 0},
+                {name: 'по заданным окнам', value: 1},
                 {name: 'рекурсивное увеличение окон', value: 2}
             ];
+            scope.recalc_mode = scope.recalc_modes[0].value;
 
-            scope.draw_mode = scope.draw_modes[0].value;
             scope.selectedRow = -1;
         }
 
@@ -202,7 +205,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function getTstampAvailabilityWindow(strWindows) {
             if (!strWindows) {
-                console.log('Invalid strWindows!');
+                //console.log('Invalid strWindows!');
                 return;
             }
 
@@ -1097,7 +1100,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 var trWindow = getTstampAvailabilityWindow('03:00 - ' +
-                    route.transport.END_OF_WORK.substr(0, 5));
+                    route.transport.END_OF_WORK.substr(0, 5)),
+                    jobWindows;
                 console.log(trWindow);
 
                 for (i = 0; i < route.points.length; i++) {
@@ -1126,6 +1130,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         late = route.points[i].status == STATUS.ARRIVED_LATE ||
                             route.points[i].status == STATUS.DELAY;
 
+                        jobWindows = [];
+                        switch (scope.recalc_mode) {
+                            case scope.recalc_modes[0].value:   // пересчет по большим окнам
+                                jobWindows = [
+                                    {
+                                        "start": late ? _data.server_time : pt.promised_window_changed.start,
+                                        "finish": late ? trWindow[0].finish : pt.promised_window_changed.finish
+                                    }
+                                ];
+                                break;
+                            case scope.recalc_modes[1].value:   // пересчет по заданным окнам
+                                jobWindows = [
+                                    {
+                                        "start": pt.promised_window_changed.start,
+                                        "finish": pt.promised_window_changed.finish
+                                    }
+                                ];
+                                break;
+                            case scope.recalc_modes[2].value:   // пересчетпри рекрусивном увелечении окон
+                                break;
+                        }
+
                         job = {
                             "id": i.toString(),
                             "weigth": parseInt(pt.WEIGHT),
@@ -1138,12 +1164,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             "rest": false,
                             "backhaul": false,
                             "point": pt.waypoint.gIndex + '',
-                            "windows": [
-                                {
-                                    "start": late ? _data.server_time : pt.promised_window_changed.start,
-                                    "finish": late ? trWindow[0].finish : pt.promised_window_changed.finish
-                                }
-                            ]
+                            "windows": jobWindows
                         };
                         mathInput.jobList.push(job);
                     }
@@ -1379,26 +1400,3 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
     }]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
