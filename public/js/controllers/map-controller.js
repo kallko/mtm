@@ -334,10 +334,23 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     }
 
     function initMap() {
-        map = L.map('map').setView([50.4412776, 30.6671281], 11);
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        //map = L.map('map').setView([50.4412776, 30.6671281], 11);
+        //L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        //    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        //}).addTo(map);
+
+        map = new L.Map('map', {
+            center: new L.LatLng(50.4412776, 30.6671281),
+            zoom: 11,
+            layers : [
+                new L.TileLayer('http://tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
+                    maxZoom: 19,
+                    tms : true,
+                    attribution : 'Данные карт © 2013 ЧАО «<a href="http://visicom.ua/">Визиком</a>»',
+                    subdomains : '123'
+                })
+            ]
+        });
 
         L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
 

@@ -71,7 +71,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'Все окна', value: WINDOW_STATUSES.ALL, class: 'all-windows'},
                 {name: 'В контролируемом', value: WINDOW_STATUSES.IN_CONTROLLED, class: 'in-controlled'},
                 {name: 'В обещанном', value: WINDOW_STATUSES.IN_PROMISED, class: 'in-promised'},
-                {name: 'Вне обещанного', value: WINDOW_STATUSES.OUT_PROMISED, class: 'out-promised'},
+                {name: 'Вне обещанного', value: WINDOW_STATUSES.OUT_PROMISED, class: 'out-promised'}
             ];
 
             scope.filters.status = scope.filters.statuses[0].value;
@@ -90,7 +90,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.recalc_modes = [
                 {name: 'по большим окнам', value: 0},
                 {name: 'по заданным окнам', value: 1},
-                {name: 'рекурсивное увеличение окон', value: 2}
+                {name: 'рекурсивное увеличение заданных окон', value: 2}
             ];
             scope.recalc_mode = scope.recalc_modes[0].value;
 
