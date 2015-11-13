@@ -35,6 +35,7 @@ var config = {
 
     mathServer: {
         url: 'http://192.168.9.29:9000/'
+        //url: 'http://62.205.137.118:9000/'
     }
 };
 

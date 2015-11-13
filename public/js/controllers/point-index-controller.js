@@ -90,7 +90,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.recalc_modes = [
                 {name: 'по большим окнам', value: 0},
                 {name: 'по заданным окнам', value: 1},
-                {name: 'рекурсивное увеличение заданных окон', value: 2}
+                {name: 'по увеличенному заданному окну', value: 2}
             ];
             scope.recalc_mode = scope.recalc_modes[0].value;
 
@@ -1101,7 +1101,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 var trWindow = getTstampAvailabilityWindow('03:00 - ' +
                     route.transport.END_OF_WORK.substr(0, 5)),
-                    jobWindows;
+                    jobWindows,
+                    timeStep = 600;
+
                 console.log(trWindow);
 
                 for (i = 0; i < route.points.length; i++) {
@@ -1149,6 +1151,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 ];
                                 break;
                             case scope.recalc_modes[2].value:   // пересчетпри рекрусивном увелечении окон
+                                jobWindows = [
+                                    {
+                                        "start": pt.promised_window_changed.start - timeStep,
+                                        "finish": pt.promised_window_changed.finish + timeStep
+                                    }
+                                ];
+                                pt.promised_window_changed = jobWindows[0];
                                 break;
                         }
 
@@ -1251,12 +1260,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(rawData);
             //console.log(changedRoute);
 
-            if (data.status == 'error') {
-                console.log('nodejs error');
-                return;
-            }
-
-            if (data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
+            if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
                 console.log('Bad data');
                 showPopup('Автоматический пересчет не удался.');
                 return;
