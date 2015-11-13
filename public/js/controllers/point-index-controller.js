@@ -50,10 +50,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters = {};
             scope.filters.statuses = [
                 {name: 'все статусы', value: -1, class: 'all-status'},
-                {name: 'доставленно', value: STATUS.FINISHED, class: 'delivered-status'},
+                {name: 'доставлено', value: STATUS.FINISHED, class: 'delivered-status'},
                 {
-                    name: 'доставленно с опозданием',
-                    table_name: 'доставленно',
+                    name: 'доставлено с опозданием',
+                    table_name: 'доставлено',
                     value: STATUS.FINISHED_LATE,
                     class: 'delivered-late-status'
                 },
@@ -73,7 +73,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ];
 
             scope.filters.status = scope.filters.statuses[0].value;
-            scope.filters.drivers = [{name: 'все водители', value: -1}];
+            scope.filters.drivers = [{name: 'все машины', value: -1}];
             scope.filters.driver = scope.filters.drivers[0].value;
             scope.filters.problem_index = -1;
             scope.filters.promised_15m = -1;
@@ -83,6 +83,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'плановый трек', value: 2},
                 {name: 'фактический + плановый трек', value: 3}
             ];
+
+            scope.recalcMode = [
+                {name: 'большие окна', value: 0},
+                {name: 'заданные окна', value: 1},
+                {name: 'рекурсивное увеличение окон', value: 2}
+            ];
+
             scope.draw_mode = scope.draw_modes[0].value;
             scope.selectedRow = -1;
         }
@@ -113,7 +120,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             var _now = Date.now() / 1000,
-                url = './trackparts/' + _data.trackUpdateTime + '/' + parseInt(_now);
+                url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
 
             http.get(url)
                 .success(function (trackParts) {
@@ -280,7 +287,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.routes[i].driver._id == null) {
                         data.routes[i].driver._id = driverId;
                         scope.filters.drivers.push({
-                            name: data.routes[i].transport.REGISTRATION_NUMBER + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].driver._id
                         });
                         driverId++;
