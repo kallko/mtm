@@ -1266,6 +1266,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
+            console.log('MATH DATE >> ', new Date(_data.server_time * 1000));
+
             var tmpRawRoute,
                 toMove = [],
                 newData = data.solutions[0].routes[0].deliveries,
