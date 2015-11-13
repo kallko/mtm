@@ -249,6 +249,8 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
         tmpRoute = routes[i].$;
         tmpRoute.points = [];
 
+        if (routes[i].SECTION == undefined) continue;
+
         for (var j = 0; j < routes[i].SECTION.length; j++) {
             if (j == 0 && routes[i].SECTION[j].$.START_WAYPOINT == "") {
                 routes[i].SECTION[j].$.START_WAYPOINT = routes[i].SECTION[j].$.END_WAYPOINT;
