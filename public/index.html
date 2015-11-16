@@ -101,6 +101,7 @@
                 <thead class="header">
                 <tr class="titles-tr">
                     <th class="status-col" st-sort="status">Статус</th>
+                    <th class="number-col">Стоп</th>
                     <th class="number-col">Моб.нажатие</th>
                     <th class="number-col">Номер</th>
                     <th class="plan-arrival-time-col">Время прибытия</th>
@@ -130,8 +131,11 @@
                     ng-right-click="sortByDriver(row.driver_indx)"
                     ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
                     on-finish-render="ngRepeatFinished">
-                    <td id="{{'status-td-' + row.row_id}}">{{getTextStatus(row.status, row.row_id)}}</td>
-                    <td>{{row.mobile_push == null ? '' : 'Есть'}}</td>
+                    <td id="{{'status-td-' + row.row_id}}" >
+                        {{getTextStatus(row.status, row.row_id, row.confirmed)}}
+                    </td>
+                    <td>{{row.haveStop ? 'Есть' : ''}}</td>
+                    <td>{{row.havePush ? 'Есть' : ''}}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>

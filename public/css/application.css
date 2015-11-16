@@ -225,3 +225,7 @@ template {
     border: 2px solid grey;
     padding: 20px;
 }
+
+.yellow-status {
+    color: #95A932 !important;
+}
