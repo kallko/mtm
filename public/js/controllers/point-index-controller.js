@@ -553,33 +553,39 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(_data.mobile_buttons);
             // return;
 
-            //if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
-            //    for (var i = 0; i < _data.mobile_buttons.length; i++) {
-            //        for (var j = 0; j < _data.routes.length; j++) {
-            //            for (var k = 0; k < _data.routes[j].points.length; k++) {
-            //                tmpPoint = _data.routes[j].points[k];
-            //                LAT = parseFloat(tmpPoint.LAT);
-            //                LON = parseFloat(tmpPoint.LON);
-            //                lat = _data.mobile_buttons[i].lat;
-            //                lon = _data.mobile_buttons[i].lon;
-            //                _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
-            //
-            //                if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
-            //                    && tmpPoint.status != STATUS.FINISHED
-            //                    && tmpPoint.status != STATUS.FINISHED_LATE
-            //                    && tmpPoint.status != STATUS.CANCELED
-            //                    && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
-            //                ) {
-            //                    console.log('detect by button push');
-            //                    tmpPoint.status = STATUS.FINISHED;
-            //                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-            //                    tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
-            //                    break;
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
+            // TODO FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
+
+            if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
+                for (var i = 0; i < _data.mobile_buttons.length; i++) {
+                    for (var j = 0; j < _data.routes.length; j++) {
+                        for (var k = 0; k < _data.routes[j].points.length; k++) {
+                            tmpPoint = _data.routes[j].points[k];
+                            LAT = parseFloat(tmpPoint.LAT);
+                            LON = parseFloat(tmpPoint.LON);
+                            lat = _data.mobile_buttons[i].lat;
+                            lon = _data.mobile_buttons[i].lon;
+                            _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
+
+                            if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
+                                && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
+                            ) {
+                                tmpPoint.mobile_push = _data.mobile_buttons[i];
+                                if (tmpPoint.status != STATUS.FINISHED
+                                    && tmpPoint.status != STATUS.FINISHED_LATE
+                                    && tmpPoint.status != STATUS.CANCELED) {
+
+                                    console.log('detect by button push');
+                                    tmpPoint.status = STATUS.FINISHED;
+                                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                                    tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
+
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         function getTodayStrFor1C() {
