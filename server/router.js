@@ -37,6 +37,41 @@ router.route('/acp/login')
         res.sendFile('index.html', {root: './public/acp/'});
     });
 
+
+router.route('/acp/mergesolution')
+    .post(function (req, res) {
+        console.log('mergesolution');
+        //log.toFLog(config.defaultMonitoringLogin + '_BigSolution.json', req.body.solution);
+
+        fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
+            var oldJson = JSON.parse(data),
+                newJson = req.body.newData,
+                newPoints = [],
+                toSaveArr;
+            console.log(oldJson.length);
+            console.log(newJson.length);
+
+            for (var i = 0; i < newJson.length; i++) {
+                if (i % 100 == 0) console.log('i = ', i);
+                for (var j = 0; j < oldJson.length; j++) {
+                    if (newJson[i].id == oldJson[j].id) {
+                        break;
+                    }
+
+                    if (j == oldJson.length - 1) {
+                        newPoints.push(newJson[i]);
+                    }
+                }
+            }
+
+            console.log('newPoints.length = ', newPoints.length);
+
+            toSaveArr = oldJson.concat(newPoints);
+            log.toFLog('sol.js', toSaveArr);
+            res.status(200).json({status: 'merged'});
+        });
+    });
+
 router.route('/acp/savesolution')
     .post(function (req, res) {
         console.log('savesolution');

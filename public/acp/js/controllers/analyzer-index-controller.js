@@ -17,21 +17,28 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             //var from = 1444435200,
             //    to = 1445385600;
 
-            var from = 1433116800,
-                to = 1446595200; //1446076800; //1439596800
-            scope.plans = [];
-            loadPlans(from, to);
+            //var from = 1433116800,
+            //    to = 1446595200; //1446076800; //1439596800
+            //scope.plans = [];
+            //loadPlans(from, to);
 
-            //Solution.load().success( function(data) {
-            //    scope.data = data;
-            //    groupButtonsByRadius();
-            //    scope.map.clearMap();
-            //    scope.points.reinit(scope.data);
-            //    //loadSensorsAndStops();
-            //});
+            if (false) {
+                Solution.load().success( function(data) {
+                    scope.data = data;
+                    groupButtonsByRadius();
+                    scope.map.clearMap();
+                    scope.points.reinit(scope.data);
+                    //loadSensorsAndStops();
+                });
+            } else {
+                scope.data = jsonData2;
+                groupButtonsByRadius();
+                Solution.merge(jsonData2).success(function(data) {
+                    console.log('Merge complete!');
+                });
+            }
 
-            //scope.data = jsonData2;
-            //groupButtonsByRadius();
+
             //scope.map.clearMap();
             //scope.points.reinit(scope.data);
         }

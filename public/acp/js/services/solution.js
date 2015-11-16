@@ -10,6 +10,10 @@ angular.module('acp').factory('Solution', ['$http', function SolutionFactory(htt
 
         saveBig: function(bigSolution) {
             return http.post('./savebigsol', {solution: bigSolution});
+        },
+
+        merge: function(newData) {
+            return http.post('./mergesolution',  {newData: newData});
         }
     };
 }]);

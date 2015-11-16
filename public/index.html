@@ -132,6 +132,8 @@
                     ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
                     on-finish-render="ngRepeatFinished">
                     <td id="{{'status-td-' + row.row_id}}" >
+                        <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-ok"></span></button>-->
+                        <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-remove"></span></button>-->
                         {{getTextStatus(row.status, row.row_id, row.confirmed)}}
                     </td>
                     <td>{{row.haveStop ? 'Есть' : ''}}</td>
