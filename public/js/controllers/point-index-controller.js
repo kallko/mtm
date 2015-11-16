@@ -9,7 +9,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             dataUpdateInterval = 120,
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
-            radius = 0.25,
+            radius = 0.5,
             controlledWindow = 600,
             promisedWindow = 3600,
             STATUS = {
@@ -525,67 +525,71 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            if (parentForm == undefined) {
-                return;
-            }
+            //if (parentForm == undefined) {
+            //    return;
+            //}
 
             //_data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
-            _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
-            console.log('_data.mobile_buttons', _data.mobile_buttons);
+            //_data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
+            //console.log('_data.mobile_buttons', _data.mobile_buttons);
+            //
+            //if (_data.mobile_buttons == undefined
+            //    || Object.keys(_data.mobile_buttons).length == 0) {
+            //    console.log('no mobile buttons push');
+            //    return;
+            //}
+            //
+            //var buttonsStr = _data.mobile_buttons[Object.keys(_data.mobile_buttons)[0]];
+            //if (buttonsStr == '[]') {
+            //    console.log('no mobile buttons push');
+            //    return;
+            //}
+            //
+            //_data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
+            //console.log('_data.mobile_buttons array', _data.mobile_buttons);
+            //console.log({pushes: JSON.stringify(_data.mobile_buttons)});
 
-            if (_data.mobile_buttons == undefined
-                || Object.keys(_data.mobile_buttons).length == 0) {
-                console.log('no mobile buttons push');
-                return;
-            }
-
-            var buttonsStr = _data.mobile_buttons[Object.keys(_data.mobile_buttons)[0]];
-            if (buttonsStr == '[]') {
-                console.log('no mobile buttons push');
-                return;
-            }
-
-            _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
-            console.log('_data.mobile_buttons array', _data.mobile_buttons);
-            console.log({pushes: JSON.stringify(_data.mobile_buttons)});
-
-            //_data.mobile_buttons = [{"number":"4400462689","time":"12.11.2015 04:28:01","canceled":false,"cancel_reason":"","lat":50.48195,"lon":30.458046,"gps_time":"12.11.2015 04:28:01"},{"number":"4400462200","time":"12.11.2015 04:17:57","canceled":false,"cancel_reason":"","lat":50.484104,"lon":30.452456,"gps_time":"12.11.2015 04:17:57"},{"number":"4400459459","time":"12.11.2015 04:41:45","canceled":false,"cancel_reason":"","lat":50.4718,"lon":30.434654,"gps_time":"12.11.2015 04:41:44"},{"number":"4400461918","time":"12.11.2015 04:52:13","canceled":false,"cancel_reason":"","lat":50.46571,"lon":30.444815,"gps_time":"12.11.2015 04:52:12"},{"number":"4400460992","time":"12.11.2015 05:03:23","canceled":false,"cancel_reason":"","lat":50.46495,"lon":30.440662,"gps_time":"12.11.2015 05:03:23"},{"number":"4400462656","time":"12.11.2015 05:18:43","canceled":false,"cancel_reason":"","lat":50.471786,"lon":30.465078,"gps_time":"12.11.2015 05:18:43"},{"number":"4400462177","time":"12.11.2015 05:29:21","canceled":false,"cancel_reason":"","lat":50.462032,"lon":30.465609,"gps_time":"12.11.2015 05:29:20"},{"number":"4400460908","time":"12.11.2015 05:41:33","canceled":false,"cancel_reason":"","lat":50.4597,"lon":30.464863,"gps_time":"12.11.2015 05:41:32"},{"number":"4400461552","time":"12.11.2015 06:36:31","canceled":false,"cancel_reason":"","lat":50.454227,"lon":30.48689,"gps_time":"12.11.2015 06:34:19"},{"number":"4400462533","time":"12.11.2015 05:36:19","canceled":false,"cancel_reason":"","lat":50.459736,"lon":30.465023,"gps_time":"12.11.2015 05:36:19"},{"number":"4400462617","time":"12.11.2015 06:21:48","canceled":false,"cancel_reason":"","lat":50.446472,"lon":30.506687,"gps_time":"12.11.2015 06:21:32"},{"number":"4400461320","time":"12.11.2015 06:21:55","canceled":false,"cancel_reason":"","lat":50.446472,"lon":30.506687,"gps_time":"12.11.2015 06:21:38"},{"number":"4400461284","time":"12.11.2015 05:55:03","canceled":false,"cancel_reason":"","lat":50.45998,"lon":30.450476,"gps_time":"12.11.2015 05:55:03"},{"number":"4400462601","time":"12.11.2015 06:22:03","canceled":false,"cancel_reason":"","lat":50.446472,"lon":30.506704,"gps_time":"12.11.2015 06:21:46"},{"number":"4400461004","time":"12.11.2015 06:06:41","canceled":false,"cancel_reason":"","lat":50.476692,"lon":30.445694,"gps_time":"12.11.2015 06:06:40"},{"number":"4400460198","time":"12.11.2015 06:17:15","canceled":false,"cancel_reason":"","lat":50.47688,"lon":30.435413,"gps_time":"12.11.2015 06:17:14"},{"number":"4400462513","time":"12.11.2015 06:22:10","canceled":false,"cancel_reason":"","lat":50.44645,"lon":30.506735,"gps_time":"12.11.2015 06:21:53"},{"number":"4400462572","time":"12.11.2015 06:33:59","canceled":false,"cancel_reason":"","lat":50.473125,"lon":30.446377,"gps_time":"12.11.2015 06:33:58"},{"number":"4400461157","time":"12.11.2015 06:31:23","canceled":false,"cancel_reason":"","lat":50.454403,"lon":30.515415,"gps_time":"12.11.2015 06:31:06"},{"number":"4400462035","time":"12.11.2015 06:22:45","canceled":false,"cancel_reason":"","lat":50.446434,"lon":30.506773,"gps_time":"12.11.2015 06:22:29"},{"number":"4400460376","time":"12.11.2015 06:22:55","canceled":false,"cancel_reason":"","lat":50.44633,"lon":30.506845,"gps_time":"12.11.2015 06:22:39"},{"number":"4400461637","time":"12.11.2015 06:23:36","canceled":false,"cancel_reason":"","lat":50.446224,"lon":30.506826,"gps_time":"12.11.2015 06:23:20"},{"number":"4400462459","time":"12.11.2015 06:23:43","canceled":false,"cancel_reason":"","lat":50.446224,"lon":30.506826,"gps_time":"12.11.2015 06:23:26"}];
-            //console.log(_data.mobile_buttons);
+            _data.mobile_buttons = [{"number":"4400465536","time":"16.11.2015 05:07:10","canceled":false,"cancel_reason":"","lat":50.52071,"lon":30.493614,"gps_time":"16.11.2015 05:07:01"},{"number":"4400468048","time":"16.11.2015 05:19:39","canceled":false,"cancel_reason":"","lat":50.508354,"lon":30.497778,"gps_time":"16.11.2015 05:19:36"},{"number":"4400468393","time":"16.11.2015 04:52:43","canceled":false,"cancel_reason":"","lat":50.51783,"lon":30.485174,"gps_time":"16.11.2015 04:52:34"},{"number":"4400468058","time":"16.11.2015 05:19:46","canceled":false,"cancel_reason":"","lat":50.50838,"lon":30.49784,"gps_time":"16.11.2015 05:19:43"},{"number":"4400468496","time":"16.11.2015 05:18:34","canceled":false,"cancel_reason":"","lat":50.52127,"lon":30.497011,"gps_time":"16.11.2015 05:18:25"},{"number":"4400468596","time":"16.11.2015 05:23:46","canceled":false,"cancel_reason":"","lat":50.504387,"lon":30.494738,"gps_time":"16.11.2015 05:23:42"},{"number":"4400468280","time":"16.11.2015 06:02:38","canceled":false,"cancel_reason":"","lat":50.526035,"lon":30.491737,"gps_time":"16.11.2015 06:02:30"},{"number":"4400467851","time":"16.11.2015 05:26:38","canceled":false,"cancel_reason":"","lat":50.527355,"lon":30.516329,"gps_time":"16.11.2015 05:26:29"},{"number":"4400468624","time":"16.11.2015 06:27:54","canceled":false,"cancel_reason":"","lat":50.52405,"lon":30.498234,"gps_time":"16.11.2015 06:27:46"},{"number":"4400467817","time":"16.11.2015 06:12:39","canceled":false,"cancel_reason":"","lat":50.49105,"lon":30.506496,"gps_time":"16.11.2015 06:12:35"},{"number":"4400467025","time":"16.11.2015 07:11:31","canceled":false,"cancel_reason":"","lat":50.511326,"lon":30.508133,"gps_time":"16.11.2015 07:11:21"},{"number":"4400468256","time":"16.11.2015 05:42:38","canceled":false,"cancel_reason":"","lat":50.52036,"lon":30.511639,"gps_time":"16.11.2015 05:42:29"},{"number":"4400468187","time":"16.11.2015 04:45:43","canceled":false,"cancel_reason":"","lat":50.497673,"lon":30.519863,"gps_time":"16.11.2015 04:45:40"},{"number":"4400468333","time":"16.11.2015 07:25:17","canceled":false,"cancel_reason":"","lat":50.5242,"lon":30.51775,"gps_time":"16.11.2015 07:25:07"},{"number":"4400467829","time":"16.11.2015 07:08:11","canceled":false,"cancel_reason":"","lat":50.50965,"lon":30.512205,"gps_time":"16.11.2015 07:08:02"},{"number":"4400467801","time":"16.11.2015 06:35:47","canceled":false,"cancel_reason":"","lat":50.49708,"lon":30.520111,"gps_time":"16.11.2015 06:32:02"},{"number":"4400467797","time":"16.11.2015 07:11:44","canceled":false,"cancel_reason":"","lat":50.51132,"lon":30.508112,"gps_time":"16.11.2015 07:11:35"},{"number":"4400467654","time":"16.11.2015 04:38:56","canceled":false,"cancel_reason":"","lat":50.496716,"lon":30.517195,"gps_time":"16.11.2015 04:38:53"},{"number":"4400467144","time":"16.11.2015 06:55:34","canceled":false,"cancel_reason":"","lat":50.513657,"lon":30.51047,"gps_time":"16.11.2015 06:55:25"},{"number":"4400468190","time":"16.11.2015 06:02:36","canceled":false,"cancel_reason":"","lat":50.492165,"lon":30.521233,"gps_time":"16.11.2015 06:02:32"},{"number":"4400467787","time":"16.11.2015 07:11:50","canceled":false,"cancel_reason":"","lat":50.51128,"lon":30.50809,"gps_time":"16.11.2015 07:11:41"},{"number":"4400468491","time":"16.11.2015 05:53:31","canceled":false,"cancel_reason":"","lat":50.492607,"lon":30.520077,"gps_time":"16.11.2015 05:53:27"},{"number":"4400468163","time":"16.11.2015 05:53:40","canceled":false,"cancel_reason":"","lat":50.4926,"lon":30.520267,"gps_time":"16.11.2015 05:53:36"},{"number":"4400467810","time":"16.11.2015 07:11:57","canceled":false,"cancel_reason":"","lat":50.51125,"lon":30.50809,"gps_time":"16.11.2015 07:11:47"},{"number":"4400467821","time":"16.11.2015 05:52:24","canceled":false,"cancel_reason":"","lat":50.49325,"lon":30.51844,"gps_time":"16.11.2015 05:52:19"},{"number":"4400467606","time":"16.11.2015 07:12:03","canceled":false,"cancel_reason":"","lat":50.511234,"lon":30.508078,"gps_time":"16.11.2015 07:11:54"},{"number":"4400468528","time":"16.11.2015 04:19:19","canceled":false,"cancel_reason":"","lat":50.49086,"lon":30.508877,"gps_time":"16.11.2015 04:19:16"},{"number":"4400468407","time":"16.11.2015 07:12:09","canceled":false,"cancel_reason":"","lat":50.511265,"lon":30.50802,"gps_time":"16.11.2015 07:12:00"},{"number":"4400468136","time":"16.11.2015 04:10:07","canceled":false,"cancel_reason":"","lat":50.494083,"lon":30.506413,"gps_time":"16.11.2015 04:10:03"},{"number":"4400468287","time":"16.11.2015 07:56:24","canceled":false,"cancel_reason":"","lat":50.517715,"lon":30.50039,"gps_time":"16.11.2015 07:56:15"},{"number":"4400468144","time":"16.11.2015 04:24:20","canceled":false,"cancel_reason":"","lat":50.497505,"lon":30.50747,"gps_time":"16.11.2015 04:24:16"},{"number":"4400468191","time":"16.11.2015 08:05:30","canceled":false,"cancel_reason":"","lat":50.521446,"lon":30.499674,"gps_time":"16.11.2015 08:05:20"},{"number":"4400465114","time":"16.11.2015 05:41:43","canceled":false,"cancel_reason":"","lat":50.504284,"lon":30.5054,"gps_time":"16.11.2015 05:41:40"},{"number":"4400467910","time":"16.11.2015 06:14:56","canceled":false,"cancel_reason":"","lat":50.520653,"lon":30.486189,"gps_time":"16.11.2015 06:14:48"},{"number":"4400468233","time":"16.11.2015 05:36:49","canceled":false,"cancel_reason":"","lat":50.50245,"lon":30.500797,"gps_time":"16.11.2015 05:36:45"},{"number":"4400467249","time":"16.11.2015 05:30:38","canceled":false,"cancel_reason":"","lat":50.503002,"lon":30.500732,"gps_time":"16.11.2015 05:30:35"},{"number":"4400467827","time":"16.11.2015 06:14:36","canceled":false,"cancel_reason":"","lat":50.520584,"lon":30.486115,"gps_time":"16.11.2015 06:14:27"},{"number":"4400468369","time":"16.11.2015 06:17:45","canceled":false,"cancel_reason":"","lat":50.52059,"lon":30.486074,"gps_time":"16.11.2015 06:17:37"},{"number":"4400467214","time":"16.11.2015 08:20:52","canceled":false,"cancel_reason":"","lat":50.511127,"lon":30.487156,"gps_time":"16.11.2015 08:20:43"},{"number":"4400468594","time":"16.11.2015 07:24:59","canceled":false,"cancel_reason":"","lat":50.503193,"lon":30.49967,"gps_time":"16.11.2015 07:24:56"},{"number":"4400468375","time":"16.11.2015 07:13:31","canceled":false,"cancel_reason":"","lat":50.49891,"lon":30.51024,"gps_time":"16.11.2015 07:13:28"},{"number":"4400467080","time":"16.11.2015 05:11:18","canceled":false,"cancel_reason":"","lat":50.52091,"lon":30.493633,"gps_time":"16.11.2015 05:11:10"},{"number":"4400467853","time":"16.11.2015 07:04:52","canceled":false,"cancel_reason":"","lat":50.50484,"lon":30.508207,"gps_time":"16.11.2015 07:04:49"},{"number":"4400468443","time":"16.11.2015 06:53:44","canceled":false,"cancel_reason":"","lat":50.49968,"lon":30.517368,"gps_time":"16.11.2015 06:53:40"},{"number":"4400468081","time":"16.11.2015 07:25:30","canceled":false,"cancel_reason":"","lat":50.524143,"lon":30.517706,"gps_time":"16.11.2015 07:25:21"},{"number":"4400467766","time":"16.11.2015 06:42:48","canceled":false,"cancel_reason":"","lat":50.52335,"lon":30.521683,"gps_time":"16.11.2015 06:42:38"},{"number":"4400468402","time":"16.11.2015 06:27:00","canceled":false,"cancel_reason":"","lat":50.496017,"lon":30.521841,"gps_time":"16.11.2015 06:26:56"},{"number":"4400468399","time":"16.11.2015 06:18:00","canceled":false,"cancel_reason":"","lat":50.495464,"lon":30.522156,"gps_time":"16.11.2015 06:17:56"},{"number":"4400468382","time":"16.11.2015 07:32:00","canceled":false,"cancel_reason":"","lat":50.52568,"lon":30.513088,"gps_time":"16.11.2015 07:31:50"},{"number":"4400468486","time":"16.11.2015 08:21:51","canceled":false,"cancel_reason":"","lat":50.49477,"lon":30.522402,"gps_time":"16.11.2015 08:21:47"},{"number":"4400468529","time":"16.11.2015 05:42:17","canceled":false,"cancel_reason":"","lat":50.52032,"lon":30.511679,"gps_time":"16.11.2015 05:42:08"},{"number":"4400468177","time":"16.11.2015 08:21:05","canceled":false,"cancel_reason":"","lat":50.51112,"lon":30.48716,"gps_time":"16.11.2015 08:20:56"},{"number":"4400465386","time":"16.11.2015 08:16:29","canceled":false,"cancel_reason":"","lat":50.49316,"lon":30.524307,"gps_time":"16.11.2015 08:16:26"},{"number":"4400467422","time":"16.11.2015 06:41:28","canceled":false,"cancel_reason":"","lat":50.497475,"lon":30.518923,"gps_time":"16.11.2015 06:39:36"},{"number":"4400468050","time":"16.11.2015 06:36:02","canceled":false,"cancel_reason":"","lat":50.49708,"lon":30.520111,"gps_time":"16.11.2015 06:32:02"},{"number":"4400467973","time":"16.11.2015 08:09:15","canceled":false,"cancel_reason":"","lat":50.499977,"lon":30.517548,"gps_time":"16.11.2015 08:09:11"},{"number":"4400468211","time":"16.11.2015 07:45:13","canceled":false,"cancel_reason":"","lat":50.5142,"lon":30.493261,"gps_time":"16.11.2015 07:45:04"},{"number":"4400468324","time":"16.11.2015 06:54:04","canceled":false,"cancel_reason":"","lat":50.49968,"lon":30.517368,"gps_time":"16.11.2015 06:53:40"},{"number":"4400465518","time":"16.11.2015 07:41:22","canceled":true,"cancel_reason":"никого нет дома","lat":50.518673,"lon":30.502995,"gps_time":"16.11.2015 07:41:18"},{"number":"4400467996","time":"16.11.2015 07:51:21","canceled":false,"cancel_reason":"","lat":50.52196,"lon":30.505692,"gps_time":"16.11.2015 07:51:18"},{"number":"4400465730","time":"16.11.2015 07:58:38","canceled":false,"cancel_reason":"","lat":50.519238,"lon":30.513428,"gps_time":"16.11.2015 07:58:35"}];
+            console.log(_data.mobile_buttons);
             // return;
 
             // TODO FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
 
-            if (_data.mobile_buttons != undefined && _data.mobile_buttons.length > 0) {
-                for (var i = 0; i < _data.mobile_buttons.length; i++) {
-                    for (var j = 0; j < _data.routes.length; j++) {
-                        for (var k = 0; k < _data.routes[j].points.length; k++) {
-                            tmpPoint = _data.routes[j].points[k];
-                            LAT = parseFloat(tmpPoint.LAT);
-                            LON = parseFloat(tmpPoint.LON);
-                            lat = _data.mobile_buttons[i].lat;
-                            lon = _data.mobile_buttons[i].lon;
-                            _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
+            if (_data.mobile_buttons == undefined) return;
 
-                            if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
-                                && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
-                            ) {
-                                tmpPoint.mobile_push = _data.mobile_buttons[i];
-                                if (tmpPoint.status != STATUS.FINISHED
-                                    && tmpPoint.status != STATUS.FINISHED_LATE
-                                    && tmpPoint.status != STATUS.CANCELED) {
+            for (var i = 0; i < _data.mobile_buttons.length; i++) {
+                for (var j = 0; j < _data.routes.length; j++) {
+                    for (var k = 0; k < _data.routes[j].points.length; k++) {
+                        tmpPoint = _data.routes[j].points[k];
+                        LAT = parseFloat(tmpPoint.LAT);
+                        LON = parseFloat(tmpPoint.LON);
+                        lat = _data.mobile_buttons[i].lat;
+                        lon = _data.mobile_buttons[i].lon;
+                        _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
 
-                                    console.log('detect by button push');
-                                    tmpPoint.status = STATUS.FINISHED;
-                                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                                    tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
+                        if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
+                            && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
+                        ) {
+                            //console.log('detect by button push', tmpPoint.row_id);
+                            tmpPoint.mobile_push = _data.mobile_buttons[i];
+                            if (tmpPoint.status != STATUS.FINISHED
+                                && tmpPoint.status != STATUS.FINISHED_LATE
+                                && tmpPoint.status != STATUS.CANCELED) {
 
-                                }
-                                break;
+                                //console.log('detect NEW point by button push');
+                                tmpPoint.status = STATUS.FINISHED;
+                                _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                                tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
+
                             }
+                            break;
                         }
                     }
                 }
             }
+
+            //console.log(_data, scope.rowCollection);
+
         }
 
         function getTodayStrFor1C() {

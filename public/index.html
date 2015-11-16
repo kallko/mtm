@@ -131,7 +131,7 @@
                     ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
                     on-finish-render="ngRepeatFinished">
                     <td id="{{'status-td-' + row.row_id}}">{{getTextStatus(row.status, row.row_id)}}</td>
-                    <td>{{row.mobile_buttons != null ? 'Есть' : 'Нет'}}</td>
+                    <td>{{row.mobile_push == null ? '' : 'Есть'}}</td>
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>
