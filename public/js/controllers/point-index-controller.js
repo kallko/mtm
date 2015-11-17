@@ -532,8 +532,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            console.log([_data.ID, getTodayStrFor1C()]);
-            _data.mobile_buttons = parentForm._call('getDriversActions', ["3684/5"]);
+            //console.log([_data.ID, getTodayStrFor1C()]);
             _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
             console.log('_data.mobile_buttons', _data.mobile_buttons);
 
