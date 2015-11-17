@@ -53,6 +53,7 @@ template {
 
 #point-table table tr {
     border-left: 1px solid grey;
+    position: relative;
 }
 
 #point-table table tr td, #point-table table tr th {

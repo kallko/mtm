@@ -129,9 +129,8 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-right-click="sortByDriver(row.driver_indx)"
                     ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
-                    on-finish-render="ngRepeatFinished">
+                    on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row" >
                     <td id="{{'status-td-' + row.row_id}}" >
                         <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-ok"></span></button>-->
                         <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-remove"></span></button>-->
@@ -193,8 +192,16 @@
                 </tr>
                 </tbody>
             </table>
-        </div>
 
+            <div id="context-menu">
+                <ul class="dropdown-menu" role="menu">
+                    <li><a tabindex="-1" data-menu-option="sort" >Вкл/Выкл сортировку по машине</a></li>
+                    <li class="divider"></li>
+                    <li><a tabindex="-1" data-menu-option="confirm-status" >Подтвердить статус</a></li>
+                    <li><a tabindex="-1" data-menu-option="cancel-status" >Отменить статус</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </template>
 

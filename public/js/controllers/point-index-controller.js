@@ -1283,11 +1283,40 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.$on('ngRepeatFinished', function () {
                 updateResizeGripHeight();
-            });
 
-            //document.oncontextmenu = function () {
-            //    return false;
-            //};
+                $('.delivery-point-row').contextmenu({
+                    target: '#context-menu',
+                    onItem: deliveryRowConextMenu
+                });
+            });
+        }
+
+        function deliveryRowConextMenu(context, e) {
+            var option = $(e.target).data("menuOption");
+            console.log(option);
+
+            switch (option) {
+                case 'sort':
+                    var row_indx = parseInt($(context)[0].id.substr(6));
+                    sortByDriver(scope.rowCollection[row_indx].driver_indx);
+                    break;
+                case 'confirm-status':
+                    console.log(2);
+                    break;
+                case 'cancel-status':
+                    console.log(3);
+                    break;
+            }
+        }
+
+        function sortByDriver(indx) {
+            if (scope.filters.driver == indx) {
+                scope.filters.driver = -1;
+            } else {
+                scope.filters.driver = indx;
+            }
+
+            scope.$apply();
         }
 
         function updateResizeGripHeight() {
@@ -1405,14 +1434,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.promise15MFilter = function (row) {
             return (scope.filters.promised_15m == -1 || row.promised_15m);
-        };
-
-        scope.sortByDriver = function (indx) {
-            if (scope.filters.driver == indx) {
-                scope.filters.driver = -1;
-            } else {
-                scope.filters.driver = indx;
-            }
         };
 
         scope.drawPlannedRoute = function () {
