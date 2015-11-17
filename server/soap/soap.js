@@ -254,6 +254,9 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
         for (var j = 0; j < routes[i].SECTION.length; j++) {
             if (j == 0 && routes[i].SECTION[j].$.START_WAYPOINT == "") {
                 routes[i].SECTION[j].$.START_WAYPOINT = routes[i].SECTION[j].$.END_WAYPOINT;
+                //routes[i].SECTION.shift();
+                //j--;
+                //continue;
             }
 
             tmpRoute.points.push(routes[i].SECTION[j].$);
@@ -299,7 +302,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     for (i = 0; i < data[nIndx].routes[j].points.length; i++) {
                         var tPoint = data[nIndx].routes[j].points[i];
                         for (var k = 0; k < data[nIndx].waypoints.length; k++) {
-                            if (tPoint.START_WAYPOINT == data[nIndx].waypoints[k].ID) {
+                            if (tPoint.END_WAYPOINT == data[nIndx].waypoints[k].ID) {
                                 tPoint.waypoint = data[nIndx].waypoints[k];
                                 tPoint.LAT = tPoint.waypoint.LAT;
                                 tPoint.LON = tPoint.waypoint.LON;

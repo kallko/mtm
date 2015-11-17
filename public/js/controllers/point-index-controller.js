@@ -251,7 +251,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
                         data.transports[j].gid = data.sensors[i].GID;
                         data.transports[j].real_track = data.sensors[i].real_track;
-
                     }
                 }
             }
