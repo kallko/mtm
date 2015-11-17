@@ -17,6 +17,7 @@
     "leaflet": "~0.7.5",
     "jquery": "~2.1.4",
     "angular-route": "~1.4.7",
-    "bootstrap": "~3.3.5"
+    "bootstrap": "~3.3.5",
+    "bootstrap-contextmenu": "~0.3.3"
   }
 }
