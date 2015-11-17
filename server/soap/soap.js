@@ -276,6 +276,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,
                     sensors = res.MESSAGE.SENSORS[0].SENSOR;
+                if (waypoints == undefined) return;
+
                 log.l('waypoints.length = ' + waypoints.length);
 
                 data[nIndx].transports = [];

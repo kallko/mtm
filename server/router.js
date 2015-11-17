@@ -67,7 +67,7 @@ router.route('/acp/mergesolution')
             console.log('newPoints.length = ', newPoints.length);
 
             toSaveArr = oldJson.concat(newPoints);
-            log.toFLog('sol.js', toSaveArr);
+            log.toFLog(config.defaultMonitoringLogin + '_solution.json', toSaveArr);
             res.status(200).json({status: 'merged'});
         });
     });
