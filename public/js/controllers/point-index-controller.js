@@ -1294,19 +1294,39 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function deliveryRowConextMenu(context, e) {
             var option = $(e.target).data("menuOption");
             console.log(option);
+            var contextJ = $(context)[0],
+                row = scope.rowCollection[parseInt(contextJ.id.substr(6))],
+                point = rawData.routes[row.route_id].points[row.NUMBER - 1],
+                needChanges = !(row.confirmed && (row.status == STATUS.FINISHED || row.status == STATUS.FINISHED_LATE));
 
+            //console.log(point);
+            //console.log(row);
+
+            console.log(row.confirmed);
             switch (option) {
                 case 'sort':
-                    var row_indx = parseInt($(context)[0].id.substr(6));
-                    sortByDriver(scope.rowCollection[row_indx].driver_indx);
-                    break;
+                    sortByDriver(row.driver_indx);
+                    return;
                 case 'confirm-status':
-                    console.log(2);
+                    if (!needChanges) return;
+                    row.confirmed = true;
+                    point.rawConfirmed = true;
                     break;
-                case 'cancel-status':
-                    console.log(3);
+                case 'not-delivered-status':
+                    if (!needChanges) return;
+                    row.status = STATUS.DELAY;
+                    break;
+                case 'cancel-point':
+                    row.status = STATUS.CANCELED;
                     break;
             }
+
+            point.checkedStatus = row.status;
+            scope.$apply();
+
+
+            // TODO: посчитать реальный статус
+            // TODO: подсветить строку под меню
         }
 
         function sortByDriver(indx) {
