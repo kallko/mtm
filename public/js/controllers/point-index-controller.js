@@ -488,15 +488,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
-                                    if (tmpPoint.real_arrival_time > tmpPoint.promised_window.finish) {
-                                        tmpPoint.status = STATUS.FINISHED_LATE;
-                                    } else {
-                                        tmpPoint.status = STATUS.FINISHED;
+
+                                    if (route.points[j].rawConfirmed !== -1) {
+                                        if (tmpPoint.real_arrival_time > tmpPoint.promised_window.finish) {
+                                            tmpPoint.status = STATUS.FINISHED_LATE;
+                                        } else {
+                                            tmpPoint.status = STATUS.FINISHED;
+                                        }
+                                        lastIndex = tmpPoint.NUMBER;
                                     }
 
                                     tmpPoint.haveStop = true;
-                                    lastIndex = tmpPoint.NUMBER;
-
                                     //break;
                                 }
                             }
@@ -1066,16 +1068,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].time;
-                            tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+                            tmpPoint.confirmed =  tmpPoint.confirmed || tmpPoint.haveStop;
 
                             if (tmpPoint.status != STATUS.FINISHED
                                 && tmpPoint.status != STATUS.FINISHED_LATE
                                 && tmpPoint.status != STATUS.CANCELED) {
                                 //console.log('detect NEW point by button push');
-                                if (tmpPoint.mobile_arrival_time > tmpPoint.promised_window.finish) {
-                                    tmpPoint.status = STATUS.FINISHED_LATE;
-                                } else {
-                                    tmpPoint.status = STATUS.FINISHED;
+                                if (tmpPoint.rawConfirmed !== -1) {
+                                    if (tmpPoint.mobile_arrival_time > tmpPoint.promised_window.finish) {
+                                        tmpPoint.status = STATUS.FINISHED_LATE;
+                                    } else {
+                                        tmpPoint.status = STATUS.FINISHED;
+                                    }
                                 }
                                 _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                             }
@@ -1309,11 +1313,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 case 'confirm-status':
                     if (!needChanges) return;
                     row.confirmed = true;
-                    point.rawConfirmed = true;
+                    point.rawConfirmed = 1;
                     break;
                 case 'not-delivered-status':
                     if (!needChanges) return;
                     row.status = STATUS.DELAY;
+                    point.rawConfirmed = -1;
                     break;
                 case 'cancel-point':
                     row.status = STATUS.CANCELED;
