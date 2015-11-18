@@ -409,8 +409,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         _data.routes[i].points[j].status == STATUS.ARRIVED_LATE ||
                         _data.routes[i].points[j].status == STATUS.DELAY ||
                         _data.routes[i].points[j].status == STATUS.IN_PROGRESS) &&
-                        _data.routes[i].points[j].promised_window.finish - 900 < now &&
-                        _data.routes[i].points[j].promised_window.finish > now) {
+                        _data.routes[i].points[j].promised_window_changed.finish - 900 < now &&
+                        _data.routes[i].points[j].promised_window_changed.finish > now) {
                         _data.routes[i].points[j].promised_15m = true;
                     } else {
                         _data.routes[i].points[j].promised_15m = false;
@@ -490,7 +490,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
 
                                     if (tmpPoint.rawConfirmed !== -1) {
-                                        if (tmpPoint.real_arrival_time > tmpPoint.promised_window.finish) {
+                                        if (tmpPoint.real_arrival_time > tmpPoint.promised_window_changed.finish) {
                                             tmpPoint.status = STATUS.FINISHED_LATE;
                                         } else {
                                             tmpPoint.status = STATUS.FINISHED;
@@ -1075,7 +1075,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 && tmpPoint.status != STATUS.CANCELED) {
                                 //console.log('detect NEW point by button push');
                                 if (tmpPoint.rawConfirmed !== -1) {
-                                    if (tmpPoint.mobile_arrival_time > tmpPoint.promised_window.finish) {
+                                    if (tmpPoint.mobile_arrival_time > tmpPoint.promised_window_changed.finish) {
                                         tmpPoint.status = STATUS.FINISHED_LATE;
                                     } else {
                                         tmpPoint.status = STATUS.FINISHED;
@@ -1181,7 +1181,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
-                                        if (now > _route.points[j].arrival_time_ts) {
+                                        if (now > _route.points[j].promised_window_changed.finish) {
                                             _route.points[j].status = STATUS.ARRIVED_LATE;
                                         }
 
@@ -1208,10 +1208,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                     _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
                                     if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
-                                        _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction - _route.points[j].arrival_time_ts);
+                                        _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction -
+                                            _route.points[j].promised_window_changed.finish);
 
-                                        if (_route.points[j].overdue_time > controlledWindow) {
-                                            if (_route.points[j].arrival_time_ts < now) {
+                                        if (_route.points[j].overdue_time > 0) {
+                                            if (_route.points[j].promised_window_changed.finish < now) {
                                                 _route.points[j].status = STATUS.ARRIVED_LATE;
                                             } else {
                                                 _route.points[j].status = STATUS.DELAY;

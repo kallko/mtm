@@ -116,7 +116,6 @@
                     <th class="time-window-col">Заказанное окно</th>
                     <th class="promised-window-col">Обещанное окно</th>
                     <th class="promised-window-changed-col">Изменяемое окно</th>
-                    <th class="controlled-window-col">Контролируемое окно</th>
                     <th class="address-col">Адрес</th>
                     <th class="client-name-col">Название</th>
                     <th class="driver-name-col">Водитель</th>
@@ -177,10 +176,6 @@
                                value="{{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}"
                                enter-event="changePromisedWindow(row.row_id)" >
                         </input>
-                    </td>
-                    <td>
-                        {{row.controlled_window.start * 1000 | date:'HH:mm'}} -
-                        {{row.controlled_window.finish * 1000 | date:'HH:mm'}}
                     </td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
