@@ -1052,6 +1052,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (_data.mobile_buttons == undefined) return;
 
             for (var i = 0; i < _data.mobile_buttons.length; i++) {
+                if (_data.mobile_buttons[i].canceled) continue;
+
                 for (var j = 0; j < _data.routes.length; j++) {
                     for (var k = 0; k < _data.routes[j].points.length; k++) {
                         tmpPoint = _data.routes[j].points[k];
