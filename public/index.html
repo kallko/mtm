@@ -102,6 +102,7 @@
                 <thead class="header">
                 <tr class="titles-tr">
                     <th class="status-col" st-sort="status">Статус</th>
+                    <th class="status-col">Окно</th>
                     <th class="stop-col">Стоп</th>
                     <th class="mobile-push-col">Моб.нажатие</th>
                     <th class="number-col">Номер</th>
@@ -135,6 +136,7 @@
                         <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-remove"></span></button>-->
                         {{getTextStatus(row.status, row.row_id, row.confirmed)}}
                     </td>
+                    <td id="{{'window-td-' + row.row_id}}" >{{getTextWindow(row.windowType, row.row_id)}}</td>
                     <td>{{row.haveStop ? 'Есть' : ''}}</td>
                     <td>{{row.havePush ? 'Есть' : ''}}</td>
                     <td>{{row.NUMBER}}</td>

@@ -24,11 +24,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 CANCELED: 8
             },
 
-            WINDOW_STATUSES = {
-                ALL: 0,
-                IN_CONTROLLED: 1,
-                IN_PROMISED: 2,
-                OUT_PROMISED: 3
+            WINDOW_TYPE = {
+                OUT_WINDOWS: 0,
+                IN_ORDERED: 1,
+                IN_PROMISED: 2
             },
 
 
@@ -66,11 +65,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
                 {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
             ];
-            scope.filters.window_statuses = [
-                {name: 'Все окна', value: WINDOW_STATUSES.ALL, class: 'all-windows'},
-                {name: 'В контролируемом', value: WINDOW_STATUSES.IN_CONTROLLED, class: 'in-controlled'},
-                {name: 'В обещанном', value: WINDOW_STATUSES.IN_PROMISED, class: 'in-promised'},
-                {name: 'Вне обещанного', value: WINDOW_STATUSES.OUT_PROMISED, class: 'out-promised'}
+
+            scope.filters.window_types = [
+                {name: 'Вне окон', value: WINDOW_TYPE.OUT_WINDOWS, class: 'out-windows'},
+                {name: 'В заказанном', value: WINDOW_TYPE.IN_ORDERED, class: 'in-ordered'},
+                {name: 'В обещанном', value: WINDOW_TYPE.IN_PROMISED, class: 'in-promised'}
             ];
 
             scope.filters.status = scope.filters.statuses[0].value;
@@ -482,9 +481,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (tmpPoint.status != STATUS.FINISHED
                                     && tmpPoint.status != STATUS.CANCELED
                                     && tmpPoint.status != STATUS.FINISHED_LATE
-                                    && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
-                                    && tmpPoint.arrival_time_ts + timeOffset > tmpArrival.t1
-                                    && tmpPoint.arrival_time_ts - timeOffset < tmpArrival.t1) {
+                                    && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius) {
+
+                                    tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
+                                    if (tmpPoint.promised_window_changed.start < tmpArrival.t1
+                                        && tmpPoint.promised_window_changed.finish > tmpArrival.t1) {
+                                        tmpPoint.windowType = WINDOW_TYPE.IN_PROMISED;
+                                    } else {
+                                        for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
+                                            if (tmpPoint.windows[l].start < tmpArrival.t1
+                                                && tmpPoint.windows[l].finish > tmpArrival.t1) {
+                                                tmpPoint.windowType = WINDOW_TYPE.IN_ORDERED;
+                                                break;
+                                            }
+                                        }
+                                    }
 
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
@@ -1070,7 +1081,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].time;
-                            tmpPoint.confirmed =  tmpPoint.confirmed || tmpPoint.haveStop;
+                            tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
 
                             if (tmpPoint.status != STATUS.FINISHED
                                 && tmpPoint.status != STATUS.FINISHED_LATE
@@ -1448,6 +1459,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             console.log(statusCode);
             return 'неизвестный статус';
+        };
+
+        scope.getTextWindow = function (windowCode, row_id) {
+            for (var i = 0; i < scope.filters.window_types.length; i++) {
+                if (scope.filters.window_types[i].value == windowCode) {
+                    var object = $('#window-td-' + row_id);
+                    object.removeClass();
+                    object.addClass(scope.filters.window_types[i].class);
+                    if (scope.filters.window_types[i].table_name != undefined) {
+                        return scope.filters.window_types[i].table_name;
+                    }
+
+                    return scope.filters.window_types[i].name;
+                }
+            }
+
+            return '';
         };
 
         scope.statusFilter = function (row) {
