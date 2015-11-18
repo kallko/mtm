@@ -15,9 +15,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             STATUS = {
                 FINISHED: 0,
                 FINISHED_LATE: 1,
-                IN_PROGRESS: 2,
-                ARRIVED_LATE: 3,
-                DELAY: 4,
+                FINISHED_TOO_EARLY: 2,
+                IN_PROGRESS: 3,
+                ARRIVED_LATE: 4,
+                DELAY: 5,
                 //FOCUS_L1: 5,
                 //FOCUS_L2: 6,
                 SCHEDULED: 7,
@@ -56,6 +57,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     table_name: 'доставлено',
                     value: STATUS.FINISHED_LATE,
                     class: 'delivered-late-status'
+                },
+                {
+                    name: 'доставлено слишком рано',
+                    table_name: 'доставлено',
+                    value: STATUS.FINISHED_TOO_EARLY,
+                    class: 'delivered-too-early-status'
                 },
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
                 {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
@@ -481,6 +488,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (tmpPoint.status != STATUS.FINISHED
                                     && tmpPoint.status != STATUS.CANCELED
                                     && tmpPoint.status != STATUS.FINISHED_LATE
+                                    && tmpPoint.status != STATUS.FINISHED_TOO_EARLY
                                     && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius) {
 
                                     tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
@@ -503,6 +511,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     if (tmpPoint.rawConfirmed !== -1) {
                                         if (tmpPoint.real_arrival_time > tmpPoint.promised_window_changed.finish) {
                                             tmpPoint.status = STATUS.FINISHED_LATE;
+                                        } else if (tmpPoint.real_arrival_time < tmpPoint.promised_window_changed.start) {
+                                            tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
                                         } else {
                                             tmpPoint.status = STATUS.FINISHED;
                                         }
@@ -1059,6 +1069,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // return;
 
             // TODO FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
+            // TODO перенести сюда логику проверки типа окна
 
             if (_data.mobile_buttons == undefined) return;
 
@@ -1084,6 +1095,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
 
                             if (tmpPoint.status != STATUS.FINISHED
+                                && tmpPoint.status != STATUS.FINISHED_TOO_EARLY
                                 && tmpPoint.status != STATUS.FINISHED_LATE
                                 && tmpPoint.status != STATUS.CANCELED) {
                                 //console.log('detect NEW point by button push');
@@ -1317,7 +1329,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var contextJ = $(context)[0],
                 row = scope.rowCollection[parseInt(contextJ.id.substr(6))],
                 point = rawData.routes[row.route_id].points[row.NUMBER - 1],
-                needChanges = !(row.confirmed && (row.status == STATUS.FINISHED || row.status == STATUS.FINISHED_LATE));
+                needChanges = !(row.confirmed && (row.status == STATUS.FINISHED
+                || row.status == STATUS.FINISHED_LATE || row.status == STATUS.FINISHED_TOO_EARLY));
 
             //console.log(point);
             //console.log(row);
@@ -1444,7 +1457,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (scope.filters.statuses[i].value == statusCode) {
                     var object = $('#status-td-' + row_id);
                     object.removeClass();
-                    var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED || statusCode == STATUS.FINISHED_LATE);
+                    var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
+                        statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
                     if (unconfirmed) {
                         object.addClass('yellow-status');
                     }
@@ -1699,7 +1713,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (i = 0; i < route.points.length; i++) {
 
-                    if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE) {
+                    if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE
+                        && route.points[i].status != STATUS.FINISHED_TOO_EARLY) {
                         pt = route.points[i];
                         point = {
                             "lat": parseFloat(pt.waypoint.LAT),
@@ -1876,7 +1891,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (var i = 0, j = 0; i < changedRoute.points.length; i++, j++) {
                 if (changedRoute.points[i].status != STATUS.FINISHED &&
-                    changedRoute.points[i].status != STATUS.FINISHED_LATE) {
+                    changedRoute.points[i].status != STATUS.FINISHED_LATE &&
+                    changedRoute.points[i].status != STATUS.FINISHED_TOO_EARLY) {
 
                     for (var k = 0; k < newData.length; k++) {
                         if (newData[k].pointId == changedRoute.points[i].waypoint.gIndex) {

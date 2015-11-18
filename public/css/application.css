@@ -187,7 +187,8 @@ template {
 .awaiting-status,
 .scheduled-status,
 .canceled-status,
-.delivered-late-status {
+.delivered-late-status,
+.delivered-too-early-status {
     font-weight: bold;
 }
 
@@ -198,6 +199,11 @@ template {
 .delivered-late-status {
     color: red;
     text-decoration: underline;
+}
+
+.delivered-too-early-status {
+    color: red;
+    text-decoration: overline;
 }
 
 .performed-status {
