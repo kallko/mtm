@@ -459,7 +459,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 now = _data.server_time,
                 lastPoint,
                 lastIndex,
-                tmpDistance;
+                tmpDistance,
+                tmpTime;
 
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
@@ -486,13 +487,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 lat = parseFloat(tmpArrival.lat);
                                 lon = parseFloat(tmpArrival.lon);
 
-                                // TODO переопределять ближайшую по времени и по расстоянию
+                                tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
+                                tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
 
                                 tmpDistance = getDistanceFromLatLonInKm(lat, lon, LAT, LON);
-                                tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
-                                if (tmpDistance < radius && tmpPoint.distanceToStop > tmpDistance) {
+                                tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
+                                if (tmpDistance < radius && (tmpPoint.distanceToStop > tmpDistance &&
+                                    tmpPoint.timeToStop > tmpTime)) {
 
                                     tmpPoint.distanceToStop = tmpDistance;
+                                    tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
                                     if (tmpPoint.promised_window_changed.start < tmpArrival.t1
                                         && tmpPoint.promised_window_changed.finish > tmpArrival.t1) {
