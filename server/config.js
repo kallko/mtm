@@ -12,7 +12,8 @@ var config = {
 
     cashing: {
         soap: false,
-        tracks: false
+        tracks: false,
+        session: false
     },
 
     defaultSoapLogin: 'ids.dsp',

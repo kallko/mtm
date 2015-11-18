@@ -220,8 +220,7 @@ router.route('/dailydata')
             day = 86400000,
             today12am = now - (now % day);
 
-        if (//req.session.lastUpdate != null && req.session.lastUpdate == today12am &&
-        req.query.force == null && req.session.login != null
+        if (config.cashing.session && req.query.force == null && req.session.login != null
         && cashedDataArr[req.session.login] != null &&
         cashedDataArr[req.session.login].lastUpdate == today12am) {
             console.log('=== loaded from session === send data to client ===');
