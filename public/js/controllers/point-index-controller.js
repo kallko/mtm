@@ -9,7 +9,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             dataUpdateInterval = 120,
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
-            radius = 0.5,
+            radius = 0.15,
             controlledWindow = 600,
             promisedWindow = 3600,
             STATUS = {
@@ -33,7 +33,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = true,
+            loadParts = false,
             enableDynamicUpdate = false;
 
         setListeners();
@@ -234,7 +234,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function linkDataParts(data) {
-            console.log('Start linking ...');
+            console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
             init();
 
@@ -489,7 +489,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
 
-                                    if (route.points[j].rawConfirmed !== -1) {
+                                    if (tmpPoint.rawConfirmed !== -1) {
                                         if (tmpPoint.real_arrival_time > tmpPoint.promised_window.finish) {
                                             tmpPoint.status = STATUS.FINISHED_LATE;
                                         } else {
@@ -1181,7 +1181,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
-                                        _route.points[j].status = STATUS.ARRIVED_LATE;
+                                        if (now > _route.points[j].arrival_time_ts) {
+                                            _route.points[j].status = STATUS.ARRIVED_LATE;
+                                        }
+
                                         _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                     } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
                                         totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
