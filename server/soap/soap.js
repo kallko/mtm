@@ -309,6 +309,14 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                                 break;
                             }
                         }
+
+                        for (var k = 0; k < data[nIndx].waypoints.length; k++) {
+                            if (tPoint.START_WAYPOINT == data[nIndx].waypoints[k].ID) {
+                                tPoint.START_LAT = data[nIndx].waypoints[k].LAT;
+                                tPoint.START_LON = data[nIndx].waypoints[k].LON;
+                                break;
+                            }
+                        }
                     }
                 }
 
