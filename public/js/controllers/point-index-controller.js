@@ -581,7 +581,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (j == 0) {
                                 console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
                                 console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
-                                console.log('_data.mobile_buttons[i].time', _data.mobile_buttons[i].gps_time_ts);
+                                console.log('_data.mobile_buttons[i].gps_time_ts', _data.mobile_buttons[i].gps_time_ts);
+                                console.log(_data.mobile_buttons[i].gps_time);
+                                console.log(new Date(_data.mobile_buttons[i].gps_time_ts * 1000));
                                 console.log();
                             }
 
