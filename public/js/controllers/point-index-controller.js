@@ -1061,6 +1061,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             route = _data.routes[indx];
 
+            if (scope.draw_mode == scope.draw_modes[2].value) {
+                scope.$emit('drawPlannedTrack', route);
+                return;
+            }
+
             if (route.real_track == undefined) return;
 
             if (route.real_track[0].lastTrackUpdate == undefined ||
