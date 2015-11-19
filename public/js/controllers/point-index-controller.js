@@ -495,7 +495,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
 
-                                    findStatusAndWindowForPoint(tmpPoint, tmpPoint.real_arrival_time);
+                                    findStatusAndWindowForPoint(tmpPoint);
                                     //break;
                                 }
                             }
@@ -577,26 +577,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                             && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
                         ) {
-
-                            if (j == 0) {
-                                console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
-                                console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
-                                console.log('_data.mobile_buttons[i].gps_time_ts', _data.mobile_buttons[i].gps_time_ts);
-                                console.log(_data.mobile_buttons[i].gps_time);
-                                console.log(new Date(_data.mobile_buttons[i].gps_time_ts * 1000));
-                                console.log();
-                            }
+                            //if (j == 0) {
+                            //    console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
+                            //    console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
+                            //    console.log('_data.mobile_buttons[i].gps_time_ts', _data.mobile_buttons[i].gps_time_ts);
+                            //    console.log(_data.mobile_buttons[i].gps_time);
+                            //    console.log(new Date(_data.mobile_buttons[i].gps_time_ts * 1000));
+                            //    console.log();
+                            //}
 
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].gps_time_ts;
-                            tmpPoint.real_arrival_time = _data.mobile_buttons[i].gps_time_ts;
+                            tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || _data.mobile_buttons[i].gps_time_ts;
                             tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
                             _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                            findStatusAndWindowForPoint(tmpPoint, tmpPoint.mobile_arrival_time);
-
-
-
+                            findStatusAndWindowForPoint(tmpPoint);
                             break;
                         }
                     }
@@ -607,15 +603,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-        function findStatusAndWindowForPoint(tmpPoint, arrival) {
+        function findStatusAndWindowForPoint(tmpPoint) {
             tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
-            if (tmpPoint.promised_window_changed.start < arrival
-                && tmpPoint.promised_window_changed.finish > arrival) {
+            if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
+                && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
                 tmpPoint.windowType = WINDOW_TYPE.IN_PROMISED;
             } else {
                 for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
-                    if (tmpPoint.windows[l].start < arrival
-                        && tmpPoint.windows[l].finish > arrival) {
+                    if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time
+                        && tmpPoint.windows[l].finish > tmpPoint.real_arrival_time) {
                         tmpPoint.windowType = WINDOW_TYPE.IN_ORDERED;
                         break;
                     }
