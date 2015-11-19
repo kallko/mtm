@@ -10,6 +10,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
             radius = 0.15,
+            mobileRadius = 0.5,
             controlledWindow = 600,
             promisedWindow = 3600,
             STATUS = {
@@ -100,6 +101,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.recalc_mode = scope.recalc_modes[0].value;
 
             scope.selectedRow = -1;
+
+            if (localStorage['confirmed'] == undefined) {
+                localStorage['confirmed'] = {};
+            }
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -315,14 +320,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint.row_id = rowId;
                     tPoint.arrival_prediction = 0;
                     tPoint.arrival_left_prediction = 0;
-                    if (j == 0) {
-                        tPoint.status = STATUS.FINISHED;
-                        tPoint.confirmed = true;
-                        tPoint.havePush = true;
-                        tPoint.haveStop = true;
-                    } else {
-                        tPoint.status = STATUS.SCHEDULED;
-                    }
+                    tPoint.status = STATUS.SCHEDULED;
 
                     tPoint.route_id = i;
                     rowId++;
@@ -458,11 +456,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
-                    if (j == 0) {
-                        _data.routes[i].points[j].status = STATUS.FINISHED;
-                    } else {
-                        _data.routes[i].points[j].status = STATUS.SCHEDULED;
-                    }
+                    _data.routes[i].points[j].status = STATUS.SCHEDULED;
                 }
             }
 
@@ -528,6 +522,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             if (parentForm == undefined) {
+                checkConfirmedFromLocalStorage();
                 return;
             }
 
@@ -576,7 +571,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
 
                         if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
-                            && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
+                            && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius
                         ) {
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
@@ -591,8 +586,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            //console.log(_data, scope.rowCollection);
+            checkConfirmedFromLocalStorage();
+        }
 
+        function checkConfirmedFromLocalStorage() {
+            for (var i = 0; i < scope.rowCollection.length; i++) {
+                scope.rowCollection[i].rawConfirmed = localStorage['confirmed'][scope.rowCollection[i].TASK_NUMBER];
+                if (scope.rowCollection[i].rawConfirmed === 1) {
+
+                }
+            }
         }
 
         function findStatusAndWindowForPoint(tmpPoint) {
@@ -618,6 +621,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 } else {
                     tmpPoint.status = STATUS.FINISHED;
                 }
+            } else {
+
             }
         }
 
@@ -847,11 +852,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (!needChanges) return;
                     row.confirmed = true;
                     point.rawConfirmed = 1;
+                    localStorage['confirmed'][point.TASK_NUMBER] = point.rawConfirmed;
                     break;
                 case 'not-delivered-status':
                     if (!needChanges) return;
-                    row.status = STATUS.DELAY;
+
+                    if (_data.server_time > row.promised_window_changed.finish) {
+                        row.status = STATUS.ARRIVED_LATE;
+                    } else {
+                        row.status = STATUS.DELAY;
+                    }
                     point.rawConfirmed = -1;
+                    localStorage['confirmed'][point.TASK_NUMBER] = point.rawConfirmed;
                     break;
                 case 'cancel-point':
                     row.status = STATUS.CANCELED;
@@ -861,8 +873,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             point.checkedStatus = row.status;
             scope.$apply();
 
-
-            // TODO: посчитать реальный статус
             // TODO: подсветить строку под меню
         }
 
