@@ -101,10 +101,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.recalc_mode = scope.recalc_modes[0].value;
 
             scope.selectedRow = -1;
-
-            if (localStorage['confirmed'] == undefined) {
-                localStorage['confirmed'] = {};
-            }
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -590,11 +586,36 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function checkConfirmedFromLocalStorage() {
-            for (var i = 0; i < scope.rowCollection.length; i++) {
-                scope.rowCollection[i].rawConfirmed = localStorage['confirmed'][scope.rowCollection[i].TASK_NUMBER];
-                if (scope.rowCollection[i].rawConfirmed === 1) {
+            if (!localStorage['confirmed']) {
+                localStorage['confirmed'] = '{}';
+                return;
+            }
 
+            var confirmedObj = JSON.parse(localStorage['confirmed']),
+                point,
+                row,
+                confirmed;
+
+            for (var i = 0; i < scope.rowCollection.length; i++) {
+                confirmed = confirmedObj[scope.rowCollection[i].TASK_NUMBER];
+                if (confirmed == undefined) continue;
+
+                row = scope.rowCollection[i];
+                row.rawConfirmed = confirmed;
+                point = rawData.routes[row.route_id].points[row.NUMBER - 1];
+                point.rawConfirmed = row.rawConfirmed;
+
+                if (scope.rowCollection[i].rawConfirmed === 1) {
+                    row.confirmed = true;
+                } else if (scope.rowCollection[i].rawConfirmed === -1) {
+                    if (_data.server_time > row.promised_window_changed.finish) {
+                        row.status = STATUS.ARRIVED_LATE;
+                    } else {
+                        row.status = STATUS.DELAY;
+                    }
                 }
+
+                point.checkedStatus = row.status;
             }
         }
 
@@ -831,6 +852,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         }
 
+        function addToConfirmed(id, code) {
+            if (localStorage['confirmed'] == undefined) {
+                localStorage['confirmed'] = '{}';
+            }
+
+            var obj = JSON.parse(localStorage['confirmed']);
+            obj[id] = code;
+            localStorage['confirmed'] = JSON.stringify(obj);
+            console.log(obj);
+        }
+
         function deliveryRowConextMenu(context, e) {
             var option = $(e.target).data("menuOption");
             console.log(option);
@@ -840,10 +872,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 needChanges = !(row.confirmed && (row.status == STATUS.FINISHED
                 || row.status == STATUS.FINISHED_LATE || row.status == STATUS.FINISHED_TOO_EARLY));
 
-            //console.log(point);
-            //console.log(row);
-
-            console.log(row.confirmed);
             switch (option) {
                 case 'sort':
                     sortByDriver(row.driver_indx);
@@ -852,7 +880,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (!needChanges) return;
                     row.confirmed = true;
                     point.rawConfirmed = 1;
-                    localStorage['confirmed'][point.TASK_NUMBER] = point.rawConfirmed;
+                    addToConfirmed(point.TASK_NUMBER, point.rawConfirmed);
                     break;
                 case 'not-delivered-status':
                     if (!needChanges) return;
@@ -863,7 +891,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         row.status = STATUS.DELAY;
                     }
                     point.rawConfirmed = -1;
-                    localStorage['confirmed'][point.TASK_NUMBER] = point.rawConfirmed;
+                    addToConfirmed(point.TASK_NUMBER, point.rawConfirmed);
                     break;
                 case 'cancel-point':
                     row.status = STATUS.CANCELED;
