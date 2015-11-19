@@ -492,6 +492,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                                    tmpPoint.stop_arrival_time = tmpArrival.t1;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
 
                                     findStatusAndWindowForPoint(tmpPoint, tmpPoint.real_arrival_time);
@@ -573,6 +574,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].time;
+                            tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
                             tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
                             _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                             findStatusAndWindowForPoint(tmpPoint, tmpPoint.mobile_arrival_time);
