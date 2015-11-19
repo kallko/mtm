@@ -575,6 +575,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                             && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
                         ) {
+
+                            if (j == 0) {
+                                console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
+                                console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
+                                console.log('_data.mobile_buttons[i].time', _data.mobile_buttons[i].time);
+                                console.log();
+                            }
+
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].time;
@@ -584,12 +592,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             findStatusAndWindowForPoint(tmpPoint, tmpPoint.mobile_arrival_time);
 
 
-                            if (j == 0) {
-                                console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
-                                console.log('tmpPoint.mobile_arrival_time', tmpPoint.mobile_arrival_time);
-                                console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
-                                console.log();
-                            }
 
                             break;
                         }
