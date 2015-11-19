@@ -566,7 +566,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         LON = parseFloat(tmpPoint.LON);
                         lat = _data.mobile_buttons[i].lat;
                         lon = _data.mobile_buttons[i].lon;
-                        _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
+                        if (_data.mobile_buttons[i].gps_time == undefined) {
+                            _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
+                        }
 
                         if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                             && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
