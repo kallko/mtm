@@ -567,7 +567,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         LON = parseFloat(tmpPoint.LON);
                         lat = _data.mobile_buttons[i].lat;
                         lon = _data.mobile_buttons[i].lon;
-                        if (_data.mobile_buttons[i].gps_time == undefined) {
+                        if (_data.mobile_buttons[i].gps_time != undefined) {
                             _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
                         } else {
                             _data.mobile_buttons[i].gps_time_ts = 0;
