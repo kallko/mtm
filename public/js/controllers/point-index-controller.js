@@ -569,6 +569,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         lon = _data.mobile_buttons[i].lon;
                         if (_data.mobile_buttons[i].gps_time == undefined) {
                             _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
+                        } else {
+                            _data.mobile_buttons[i].gps_time_ts = 0;
                         }
 
 
@@ -579,14 +581,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (j == 0) {
                                 console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
                                 console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
-                                console.log('_data.mobile_buttons[i].time', _data.mobile_buttons[i].time);
+                                console.log('_data.mobile_buttons[i].time', _data.mobile_buttons[i].gps_time_ts);
                                 console.log();
                             }
 
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
-                            tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].time;
-                            tmpPoint.real_arrival_time = _data.mobile_buttons[i].time;
+                            tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].gps_time_ts;
+                            tmpPoint.real_arrival_time = _data.mobile_buttons[i].gps_time_ts;
                             tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
                             _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                             findStatusAndWindowForPoint(tmpPoint, tmpPoint.mobile_arrival_time);
