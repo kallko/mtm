@@ -568,28 +568,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         lat = _data.mobile_buttons[i].lat;
                         lon = _data.mobile_buttons[i].lon;
                         if (_data.mobile_buttons[i].gps_time_ts == undefined) {
-                            console.log(_data.mobile_buttons[i].gps_time);
                             if (_data.mobile_buttons[i].gps_time) {
-                                console.log('_data.mobile_buttons[i].gps_time != undefined');
                                 _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
                             } else {
                                 _data.mobile_buttons[i].gps_time_ts = 0;
                             }
                         }
 
-
                         if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                             && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
                         ) {
-                            //if (j == 0) {
-                            //    console.log('tmpPoint.NUMBER', tmpPoint.NUMBER);
-                            //    console.log('tmpPoint.real_arrival_time', tmpPoint.real_arrival_time);
-                            //    console.log('_data.mobile_buttons[i].gps_time_ts', _data.mobile_buttons[i].gps_time_ts);
-                            //    console.log(_data.mobile_buttons[i].gps_time);
-                            //    console.log(new Date(_data.mobile_buttons[i].gps_time_ts * 1000));
-                            //    console.log();
-                            //}
-
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].gps_time_ts;
