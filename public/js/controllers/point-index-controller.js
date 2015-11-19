@@ -1031,10 +1031,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.drawRoute = function () {
+            scope.$emit('clearMap');
+
             var indx,
                 route,
                 draw = function (route) {
-                    scope.$emit('clearMap');
                     switch (scope.draw_mode) {
                         case scope.draw_modes[0].value: // комбинированный
                             scope.$emit('drawCombinedTrack', route);
