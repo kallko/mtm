@@ -447,18 +447,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var route,
                 tmpPoint,
                 tmpArrival,
-                timeOffset = 3600 * 1.5,
-                buttonTimeOffset = 3600,
                 LAT,
                 LON,
                 lat,
                 lon,
-                _time,
-                focus_l1_time = 60 * 30,
-                focus_l2_time = 60 * 120,
                 now = _data.server_time,
                 lastPoint,
-                lastIndex,
                 tmpDistance,
                 tmpTime;
 
@@ -479,7 +473,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     for (j = 0; j < route.real_track.length; j++) {
                         if (route.real_track[j].state == "ARRIVAL") {
                             tmpArrival = route.real_track[j];
-                            lastIndex = 0;
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
                                 LAT = parseFloat(tmpPoint.LAT);
@@ -497,35 +490,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
-                                    tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
-                                    if (tmpPoint.promised_window_changed.start < tmpArrival.t1
-                                        && tmpPoint.promised_window_changed.finish > tmpArrival.t1) {
-                                        tmpPoint.windowType = WINDOW_TYPE.IN_PROMISED;
-                                    } else {
-                                        for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
-                                            if (tmpPoint.windows[l].start < tmpArrival.t1
-                                                && tmpPoint.windows[l].finish > tmpArrival.t1) {
-                                                tmpPoint.windowType = WINDOW_TYPE.IN_ORDERED;
-                                                break;
-                                            }
-                                        }
-                                    }
-
+                                    tmpPoint.haveStop = true;
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
 
-                                    if (tmpPoint.rawConfirmed !== -1) {
-                                        if (tmpPoint.real_arrival_time > tmpPoint.promised_window_changed.finish) {
-                                            tmpPoint.status = STATUS.FINISHED_LATE;
-                                        } else if (tmpPoint.real_arrival_time < tmpPoint.promised_window_changed.start) {
-                                            tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
-                                        } else {
-                                            tmpPoint.status = STATUS.FINISHED;
-                                        }
-                                        lastIndex = tmpPoint.NUMBER;
-                                    }
-
-                                    tmpPoint.haveStop = true;
+                                    findStatusAndWindowForPoint(tmpPoint, tmpPoint.real_arrival_time);
                                     //break;
                                 }
                             }
@@ -601,26 +570,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
                             && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < radius
                         ) {
-                            //console.log('detect by button push', tmpPoint.row_id);
                             tmpPoint.mobile_push = _data.mobile_buttons[i];
                             tmpPoint.havePush = true;
                             tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].time;
                             tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
-
-                            if (tmpPoint.status != STATUS.FINISHED
-                                && tmpPoint.status != STATUS.FINISHED_TOO_EARLY
-                                && tmpPoint.status != STATUS.FINISHED_LATE
-                                && tmpPoint.status != STATUS.CANCELED) {
-                                //console.log('detect NEW point by button push');
-                                if (tmpPoint.rawConfirmed !== -1) {
-                                    if (tmpPoint.mobile_arrival_time > tmpPoint.promised_window_changed.finish) {
-                                        tmpPoint.status = STATUS.FINISHED_LATE;
-                                    } else {
-                                        tmpPoint.status = STATUS.FINISHED;
-                                    }
-                                }
-                                _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                            }
+                            _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                            findStatusAndWindowForPoint(tmpPoint, tmpPoint.mobile_arrival_time);
                             break;
                         }
                     }
@@ -629,6 +584,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //console.log(_data, scope.rowCollection);
 
+        }
+
+        function findStatusAndWindowForPoint(tmpPoint, arrival) {
+            tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
+            if (tmpPoint.promised_window_changed.start < arrival
+                && tmpPoint.promised_window_changed.finish > arrival) {
+                tmpPoint.windowType = WINDOW_TYPE.IN_PROMISED;
+            } else {
+                for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
+                    if (tmpPoint.windows[l].start < arrival
+                        && tmpPoint.windows[l].finish > arrival) {
+                        tmpPoint.windowType = WINDOW_TYPE.IN_ORDERED;
+                        break;
+                    }
+                }
+            }
+
+            if (tmpPoint.rawConfirmed !== -1) {
+                if (tmpPoint.real_arrival_time > tmpPoint.promised_window_changed.finish) {
+                    tmpPoint.status = STATUS.FINISHED_LATE;
+                } else if (tmpPoint.real_arrival_time < tmpPoint.promised_window_changed.start) {
+                    tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
+                } else {
+                    tmpPoint.status = STATUS.FINISHED;
+                }
+            }
         }
 
         function getTodayStrFor1C() {
