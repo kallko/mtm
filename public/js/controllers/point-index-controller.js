@@ -592,6 +592,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
+            console.log(localStorage['confirmed']);
             var confirmedObj = JSON.parse(localStorage['confirmed']),
                 point,
                 row,
