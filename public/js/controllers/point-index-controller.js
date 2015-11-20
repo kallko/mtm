@@ -587,7 +587,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function checkConfirmedFromLocalStorage() {
-            if (!localStorage['confirmed']) {
+            if (!localStorage['confirmed'] || localStorage['confirmed'] == '[object Object]') {
                 localStorage['confirmed'] = '{}';
                 return;
             }
