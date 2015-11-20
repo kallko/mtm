@@ -95,6 +95,11 @@
                 <button class="btn btn-info btn-sm" id="save-btn" ng-click="saveRoutes()">
                     сохранить
                 </button>
+
+                <input id="search-input" type="text" size="15" />
+                <button class="btn btn-info btn-sm" id="save-btn" ng-click="setTextFilter()">
+                    фильтровать
+                </button>
             </div>
         </div>
 
@@ -132,7 +137,8 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
+                    ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row)
+                            && promise15MFilter(row) && textFilter(row)"
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row" >
 
                     <td>{{row.NUMBER}}</td>

@@ -236,3 +236,9 @@ template {
 .yellow-status {
     color: #95A932 !important;
 }
+
+#search-input {
+    margin: 0;
+    padding: 0;
+    height: 22px;
+}

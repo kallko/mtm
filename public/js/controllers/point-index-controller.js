@@ -102,6 +102,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.recalc_mode = scope.recalc_modes[0].value;
 
             scope.selectedRow = -1;
+            scope.filters.text = "";
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -857,9 +858,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
             });
 
-            $('.header .problem-index-col').on('click', function() {
+            $('.header .problem-index-col').on('click', function () {
                 problemSortType++;
-                problemSortType = problemSortType %  3;
+                problemSortType = problemSortType % 3;
                 console.log(problemSortType);
             });
         }
@@ -1168,7 +1169,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         function setProblemIndexSortMode(mode) {
-            timeout(function() {
+            timeout(function () {
                 if (mode != problemSortType) {
                     $('.header .problem-index-col').trigger('click');
                     setProblemIndexSortMode(mode);
@@ -1580,10 +1581,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
         };
 
-
         function cancelPoint(row_id) {
             var point = scope.displayCollection[row_id];
             point.status = STATUS.CANCELED;
+        }
+
+        scope.setTextFilter = function () {
+            scope.filters.text = $("#search-input").val();
+            console.log(scope.filters.text);
+        };
+
+        scope.textFilter = function (row) {
+            if (scope.filters.text === "") return true;
+            if (row.waypoint == undefined) return false;
+
+            return row.waypoint.NAME.indexOf(scope.filters.text) >= 0
+                || row.driver.NAME.indexOf(scope.filters.text) >= 0
+                || row.waypoint.ADDRESS.indexOf(scope.filters.text) >= 0
+                || row.waypoint.COMMENT.indexOf(scope.filters.text) >= 0;
+
+            // TODO: FIX поиск не всегда работает корректно
         }
 
     }]);
