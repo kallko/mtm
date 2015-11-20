@@ -57,23 +57,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     + '&' + route.points[i + 1].LON;
             http.get(url).
                 success(function (data) {
-                    var geometry = getLatLonArr(data),
-                        polyline = new L.Polyline(geometry, {
-                            color: 'blue',
-                            weight: 3,
-                            opacity: 0.5,
-                            smoothFactor: 1
-                        });
-                    polyline.addTo(map);
-                    //console.log([[carPos.lat, carPos.lon], geometry[0]]);
+                    var geometry = getLatLonArr(data);
+                    addPolyline(geometry, 'blue', 3, 0.5, 1, true);
                     if (carPos != null && geometry[0] != null) {
-                        polyline = new L.Polyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], {
-                            color: 'blue',
-                            weight: 3,
-                            opacity: 0.5,
-                            smoothFactor: 1
-                        });
-                        polyline.addTo(map);
+                        addPolyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], 'blue', 3, 0.5, 1, true);
                     }
                     drawPlannedRoute(route.plan_geometry, i);
                 });
@@ -107,13 +94,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             geometry = geometry.concat(getLatLonArr(track[i]));
         }
 
-        var polyline = new L.Polyline(geometry, {
-            color: 'blue',
-            weight: 3,
-            opacity: 0.5,
-            smoothFactor: 1
-        });
-        polyline.addTo(map);
+        addPolyline(geometry, 'blue', 3, 0.5, 1, true);
     }
 
     function drawRealRoute(track) {
@@ -240,6 +221,26 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         map.addLayer(marker);
         oms.addMarker(marker);
         markersArr.push(marker);
+    }
+
+    function addPolyline(geometry, color, weight, opacity, smoothFactor, decorator) {
+        var polyline = new L.Polyline(geometry, {
+                color: color,
+                weight: weight,
+                opacity: opacity,
+                smoothFactor: smoothFactor
+            });
+
+        polyline.addTo(map);
+
+        //if (decorator) {
+        //    L.polylineDecorator(geometry, {
+        //        opacity: 1,
+        //        patterns: [
+        //            {offset: 125, repeat: 250, symbol: L.Symbol.arrowHead({pixelSize: 14, pathOptions: {fillOpacity: 1, weight: 0, color: color}})}
+        //        ]
+        //    }).addTo(map);
+        //}
     }
 
     function formatDate(d) {
