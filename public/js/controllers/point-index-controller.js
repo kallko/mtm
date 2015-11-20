@@ -13,6 +13,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             mobileRadius = 0.5,
             controlledWindow = 600,
             promisedWindow = 3600,
+            problemSortType = 0,
             STATUS = {
                 FINISHED: 0,
                 FINISHED_LATE: 1,
@@ -789,6 +790,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         });
                 })(route);
             }
+
+            for (i = 0; i < scope.rowCollection.length; i++) {
+                scope.rowCollection[i].problem_index = scope.rowCollection[i].problem_index || 0;
+            }
         }
 
         function setColResizable() {
@@ -849,6 +854,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     target: '#context-menu',
                     onItem: deliveryRowConextMenu
                 });
+            });
+
+            $('.header .problem-index-col').on('click', function() {
+                problemSortType++;
+                problemSortType = problemSortType %  3;
+                console.log(problemSortType);
             });
         }
 
@@ -1143,10 +1154,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
             if (scope.filters.problem_index == -1) {
                 scope.filters.problem_index = 1;
+
+                timeout(function () {
+                    setProblemIndexSortMode(2);
+                }, 100);
             } else {
                 scope.filters.problem_index = -1;
+                timeout(function () {
+                    setProblemIndexSortMode(0);
+                }, 100);
             }
         };
+
+        function setProblemIndexSortMode(mode) {
+            timeout(function() {
+                if (mode != problemSortType) {
+                    $('.header .problem-index-col').trigger('click');
+                    setProblemIndexSortMode(mode);
+                }
+            }, 10);
+        }
 
         scope.togglePromised15MPoints = function () {
             $('#promised-15m-btn').toggleClass('btn-default').toggleClass('btn-success');
