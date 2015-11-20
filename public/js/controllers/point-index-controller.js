@@ -66,8 +66,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     class: 'delivered-too-early-status'
                 },
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
-                {name: 'опоздал', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
-                {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
+                {name: 'время вышло', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
+                {name: 'время на исходе', value: STATUS.DELAY, class: 'delay-status'},
                 //{name: 'под контролем', value: 4, class: 'controlled-status'},
                 //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
                 {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
@@ -1146,7 +1146,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             } else {
                 scope.filters.problem_index = -1;
             }
-
         };
 
         scope.togglePromised15MPoints = function () {

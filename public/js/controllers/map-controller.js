@@ -106,7 +106,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             tmpTitle = '',
             color = '',
             stopIndx,
-            stopTime;
+            stopTime,
+            drawStops = $('#draw-stops').is(':checked');
 
         for (var i = 0; i < track.length; i++) {
             if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
@@ -155,7 +156,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                     {'title': tmpTitle});
                 tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
-                addMarker(tmpVar);
+                if (drawStops) addMarker(tmpVar);
                 //continue;
             } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                 color = '#5bc0de';

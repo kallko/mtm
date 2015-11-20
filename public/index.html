@@ -69,6 +69,7 @@
                 <select id="draw-mode-select" ng-model="draw_mode" class="group-select"
                         ng-options='option.value as option.name for option in draw_modes'>
                 </select>
+                <input id="draw-stops" type="checkbox" checked title="Отображать стопы при отрисовке" />
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
 
                 <button class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
@@ -103,7 +104,7 @@
                 <thead class="header">
                 <tr class="titles-tr">
                     <th class="status-col" st-sort="status">Статус</th>
-                    <th class="status-col">Окно</th>
+                    <th class="window-type-col">Окно</th>
                     <th class="stop-col">Стоп</th>
                     <th class="mobile-push-col">Моб.нажатие</th>
                     <th class="number-col">Номер</th>
