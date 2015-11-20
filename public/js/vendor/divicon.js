@@ -68,7 +68,7 @@ function getIcon(numberIcon, typeIcon, colorIcon, colorText) {
         anchorIcon = [8, 16];
     } else if (typeIcon == 4) {
         pathIcon = 'http://sngtrans.com.ua/img/'+colorIcon+'/flag.png';
-        anchorIcon = [8, 16];
+        anchorIcon = [28, 26];
     } else if (typeIcon == 5) {
         pathIcon = 'http://sngtrans.com.ua/img/google/new/stop_blue.png';
         anchorIcon = [15, 13];
@@ -133,5 +133,10 @@ function getIcon(numberIcon, typeIcon, colorIcon, colorText) {
         pathIcon = 'http://sngtrans.com.ua/img/'+colorIcon+fileMarker;
         anchorIcon = [0, 13];
     };
-    return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon});
+
+    if (typeIcon == 7) {
+        return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon, iconSize: [45, 30]});
+    } else {
+        return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon});
+    }
 }
