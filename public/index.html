@@ -103,27 +103,28 @@
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
                 <tr class="titles-tr">
+                    <th class="number-col">Номер</th>
+                    <th class="car-type-col">Маршрут</th>
+                    <th class="driver-name-col">Водитель</th>
+                    <th class="client-name-col">Название</th>
+                    <th class="address-col">Адрес</th>
                     <th class="status-col" st-sort="status">Статус</th>
                     <th class="window-type-col">Окно</th>
                     <th class="stop-col">Стоп</th>
                     <th class="mobile-push-col">Моб.нажатие</th>
-                    <th class="number-col">Номер</th>
-                    <th class="plan-arrival-time-col">Время прибытия</th>
+                    <th class="plan-arrival-time-col">План. прибытие</th>
+                    <th class="time-window-col">Заказанное окно</th>
                     <th class="prediction-arrival-time-col">Прогноз прибытия</th>
-                    <th class="real-arrival-time-col">Фактическое прибытие</th>
                     <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction">Осталось до прибытия</th>
+                    <th class="real-arrival-time-col">Фактическое прибытие</th>
+
                     <th class="overdue-col">Размер опоздания</th>
                     <th class="problem-index-col" st-sort="problem_index">Проблемность</th>
-                    <th class="point-id-col">ID точки</th>
-                    <th class="task-id-col">ID заказа</th>
-                    <th class="time-window-col">Заказанное окно</th>
+                    <!--<th class="point-id-col">ID точки</th>-->
+                    <!--<th class="task-id-col">ID заказа</th>-->
                     <th class="promised-window-col">Обещанное окно</th>
                     <th class="promised-window-changed-col">Изменяемое окно</th>
-                    <th class="address-col">Адрес</th>
-                    <th class="client-name-col">Название</th>
-                    <th class="driver-name-col">Водитель</th>
                     <th class="driver-phone-col">Телефон водителя</th>
-                    <th class="car-type-col">Машина</th>
                     <th class="car-number-col">Номер машины</th>
                     <th>Комментарий к точке</th>
                 </tr>
@@ -133,24 +134,23 @@
                     ng-click="rowClick(row.row_id)"
                     ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row) && promise15MFilter(row)"
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row" >
+
+                    <td>{{row.NUMBER}}</td>
+                    <td>{{row.transport.NAME}}</td>
+                    <td>{{row.driver.NAME}}</td>
+                    <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
+                    <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td id="{{'status-td-' + row.row_id}}" >
-                        <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-ok"></span></button>-->
-                        <!--<button ng-show="!row.confirmed && (row.haveStop || row.havePush)" ><span class="glyphicon glyphicon-remove"></span></button>-->
                         {{getTextStatus(row.status, row.row_id, row.confirmed)}}
                     </td>
                     <td id="{{'window-td-' + row.row_id}}" >{{getTextWindow(row.windowType, row.row_id)}}</td>
                     <td>{{row.haveStop ? 'Есть' : ''}}</td>
                     <td>{{row.havePush ? 'Есть' : ''}}</td>
-                    <td>{{row.NUMBER}}</td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+                    <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
                             {{ row.arrival_prediction * 1000 | date:'HH:mm' }}
-                        </span>
-                    </td>
-                    <td>
-                        <span ng-show="row.real_arrival_time > 0">
-                            {{ row.real_arrival_time * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
@@ -159,14 +159,22 @@
                         </span>
                     </td>
                     <td>
+                        <span ng-show="row.real_arrival_time > 0">
+                            {{ row.real_arrival_time * 1000 | date:'HH:mm' }}
+                        </span>
+                    </td>
+
+
+
+
+                    <td>
                         <span ng-show="row.overdue_time > 0">
                             {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
                     <td>{{row.problem_index}}</td>
-                    <td>{{row.TASK_NUMBER}}</td>
-                    <td>{{row.waypoint.ID}}</td>
-                    <td>{{row.AVAILABILITY_WINDOWS}}</td>
+                    <!--<td>{{row.TASK_NUMBER}}</td>-->
+                    <!--<td>{{row.waypoint.ID}}</td>-->
                     <td>
                         {{row.promised_window.start * 1000 | date:'HH:mm'}} -
                         {{row.promised_window.finish * 1000 | date:'HH:mm'}}
@@ -181,11 +189,7 @@
                                enter-event="changePromisedWindow(row.row_id)" >
                         </input>
                     </td>
-                    <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
-                    <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
-                    <td>{{row.driver.NAME}}</td>
                     <td>{{row.driver.PHONE}}</td>
-                    <td>{{row.transport.NAME}}</td>
                     <td>{{row.transport.REGISTRATION_NUMBER}}</td>
                     <td title="{{row.waypoint.COMMENT}}">{{row.waypoint.COMMENT}}</td>
                 </tr>

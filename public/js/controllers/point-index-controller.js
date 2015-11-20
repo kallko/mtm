@@ -82,7 +82,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ];
 
             scope.filters.status = scope.filters.statuses[0].value;
-            scope.filters.drivers = [{name: 'все машины', value: -1}];
+            scope.filters.drivers = [{name: 'все маршруты', value: -1}];
             scope.filters.driver = scope.filters.drivers[0].value;
             scope.filters.problem_index = -1;
             scope.filters.promised_15m = -1;
