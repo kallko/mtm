@@ -808,8 +808,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function setListeners() {
             $(window).resize(function () {
-                console.log('height', $(window).height());
-                console.log('width', $(window).width());
                 resetHeight();
                 if (pointTable == null) {
                     pointTableHolder = $('#point-table');
