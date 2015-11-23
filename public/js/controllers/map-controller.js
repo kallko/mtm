@@ -5,7 +5,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         inside = false,
         holderEl = null,
         changingWindow = false,
-        markersArr = [];
+        markersArr = [],
+        highlightedPoint;
 
     initMap();
     addListeners();
@@ -38,6 +39,21 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         drawRealRoute(route.real_track);
         drawAllPoints(route.points)
     });
+
+    rootScope.$on('highlightPointMarker', function (event, point) {
+        highlightPointMarker(point);
+    });
+
+    function highlightPointMarker(point) {
+        console.log('highlightPointMarker');
+        console.log(point);
+
+        highlightedPoint = L.marker([point.LAT, point.LON],
+            {'title': 'title'});
+        highlightedPoint.setIcon(getIcon('TEST', 14, 'white', 'black'));
+        map.addLayer(highlightedPoint);
+        oms.addMarker(highlightedPoint);
+    }
 
     function drawCombinedRoute(route) {
         //var real_track = route.plan_geometry,
@@ -204,7 +220,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             tmpVar = L.marker([points[i].LAT, points[i].LON], {
                 'title': title
             });
+            //tmpVar.pointIndx = i;
             tmpVar.setIcon(getIcon(points[i].NUMBER, 14, '#7EDDFC', 'black'));
+
             addMarker(tmpVar);
         }
     }

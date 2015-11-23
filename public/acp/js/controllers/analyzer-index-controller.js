@@ -323,6 +323,28 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
         }
 
+        //scope.saveData = function () {
+        //    console.log('saveData');
+        //    var toSave = [];
+        //    toLogDiv(' Сохраняю...');
+        //
+        //    for (var i = 0; i < scope.data.length; i++) {
+        //        if (scope.data[i].needSave) {
+        //            toSave.push(scope.data[i]);
+        //        }
+        //    }
+        //
+        //    console.log('toSave.length', toSave.length);
+        //    timeout(function () {
+        //        Solution.save(toSave).success(function (data) {
+        //            toLogDiv('Сохранено!');
+        //            for (var i = 0; i < toSave.length; i++) {
+        //                delete toSave[i].needSave;
+        //            }
+        //        });
+        //    }, 100);
+        //};
+
         scope.saveData = function () {
             console.log('saveData');
             var toSave = [];
@@ -330,17 +352,14 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
             for (var i = 0; i < scope.data.length; i++) {
                 if (scope.data[i].needSave) {
+                    delete scope.data[i].needSave;
                     toSave.push(scope.data[i]);
                 }
             }
 
-            console.log('toSave.length', toSave.length);
             timeout(function () {
                 Solution.save(toSave).success(function (data) {
                     toLogDiv('Сохранено!');
-                    for (var i = 0; i < toSave.length; i++) {
-                        delete toSave[i].needSave;
-                    }
                 });
             }, 100);
         };

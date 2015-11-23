@@ -993,12 +993,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (scope.selectedRow == id) {
                 scope.selectedRow = -1;
             } else {
-                scope.selectedRow = id;
-                $('#point-' + id).addClass('selected-row');
                 scope.$emit('setMapCenter', {
                     lat: scope.displayCollection[id].LAT,
                     lon: scope.displayCollection[id].LON
                 });
+
+                scope.selectedRow = id;
+                $('#point-' + id).addClass('selected-row');
+                scope.$emit('highlightPointMarker', scope.displayCollection[id]);
             }
         };
 
