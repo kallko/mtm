@@ -82,8 +82,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ];
 
             scope.filters.status = scope.filters.statuses[0].value;
-            scope.filters.drivers = [{name: 'все маршруты', value: -1}];
-            scope.filters.driver = scope.filters.drivers[0].value;
+            scope.filters.routes = [{name: 'все маршруты', value: -1}];
+            scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = -1;
             scope.filters.promised_15m = -1;
             scope.draw_modes = [
@@ -249,7 +249,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             var tmpPoints,
                 rowId = 0,
-                driverId = 0,
+                routeId = 0,
                 len = 0,
                 tPoint,
                 roundingNumb = 300;
@@ -294,16 +294,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint = tmpPoints[j];
                     tPoint.driver = data.routes[i].driver;
                     tPoint.in_plan = true;
-                    if (data.routes[i].driver._id == null) {
-                        data.routes[i].driver._id = driverId;
-                        scope.filters.drivers.push({
+                    if (data.routes[i].filterId == null) {
+                        data.routes[i].filterId = routeId;
+                        scope.filters.routes.push({
                             name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
-                            value: data.routes[i].driver._id
+                            value: data.routes[i].filterId
                         });
-                        driverId++;
+                        routeId++;
                     }
 
-                    tPoint.driver_indx = data.routes[i].driver._id;
+                    tPoint.route_indx = data.routes[i].filterId;
                     tPoint.transport = data.routes[i].transport;
                     tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
                     tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
@@ -545,8 +545,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('_data.mobile_buttons array', _data.mobile_buttons);
             console.log({pushes: JSON.stringify(_data.mobile_buttons)});
 
-            // TODO FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
-            // TODO перенести сюда логику проверки типа окна
+            // TODO: FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
 
             if (_data.mobile_buttons == undefined) return;
 
@@ -593,7 +592,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            console.log(localStorage['confirmed']);
             var confirmedObj = JSON.parse(localStorage['confirmed']),
                 point,
                 row,
@@ -842,7 +840,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             scope.$watch(function () {
-                return scope.filters.driver + scope.filters.status + scope.filters.problem_index;
+                return scope.filters.route + scope.filters.status + scope.filters.problem_index;
             }, function () {
                 timeout(function () {
                     updateResizeGripHeight();
@@ -887,7 +885,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             switch (option) {
                 case 'sort':
-                    sortByDriver(row.driver_indx);
+                    sortByRoute(row.route_indx);
                     return;
                 case 'confirm-status':
                     if (!needChanges) return;
@@ -917,11 +915,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // TODO: подсветить строку под меню
         }
 
-        function sortByDriver(indx) {
-            if (scope.filters.driver == indx) {
-                scope.filters.driver = -1;
+        function sortByRoute(indx) {
+            if (scope.filters.route == indx) {
+                scope.filters.route = -1;
             } else {
-                scope.filters.driver = indx;
+                scope.filters.route = indx;
             }
 
             scope.$apply();
@@ -1050,8 +1048,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return (scope.filters.status == -1 || row.status == scope.filters.status);
         };
 
-        scope.driverFilter = function (row) {
-            return (scope.filters.driver == -1 || row.driver_indx == scope.filters.driver);
+        scope.routeFilter = function (row) {
+            return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
         };
 
         scope.problemFilter = function (row) {
@@ -1066,8 +1064,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (scope.selectedRow != -1) {
                 scope.$emit('drawPlannedTrack',
                     _data.routes[scope.displayCollection[scope.selectedRow].route_id]);
-            } else if (scope.filters.driver != -1) {
-                scope.$emit('drawPlannedTrack', _data.routes[scope.filters.driver]);
+            } else if (scope.filters.route != -1) {
+                scope.$emit('drawPlannedTrack', _data.routes[scope.filters.route]);
             }
         };
 
@@ -1093,8 +1091,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 };
 
-            if (scope.filters.driver != -1) {
-                indx = scope.filters.driver;
+            if (scope.filters.route != -1) {
+                indx = scope.filters.route;
             } else if (scope.selectedRow != -1) {
                 indx = scope.displayCollection[scope.selectedRow].route_id;
             } else {
@@ -1234,8 +1232,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.recalculateRoute = function () {
             var route;
 
-            if (scope.filters.driver != -1) {
-                route = _data.routes[scope.filters.driver];
+            if (scope.filters.route != -1) {
+                route = _data.routes[scope.filters.route];
             } else if (scope.selectedRow != -1) {
                 route = _data.routes[scope.displayCollection[scope.selectedRow].route_id];
             }
@@ -1603,8 +1601,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || row.driver.NAME.indexOf(scope.filters.text) >= 0
                 || row.waypoint.ADDRESS.indexOf(scope.filters.text) >= 0
                 || row.waypoint.COMMENT.indexOf(scope.filters.text) >= 0;
-
-            // TODO: FIX поиск не всегда работает корректно
         }
 
     }]);

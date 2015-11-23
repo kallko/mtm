@@ -61,8 +61,8 @@
                         ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
-                <select id="driver-select" ng-model="filters.driver" class="group-select"
-                        ng-options='option.value as option.name for option in filters.drivers'>
+                <select id="route-select" ng-model="filters.route" class="group-select"
+                        ng-options='option.value as option.name for option in filters.routes'>
                 </select>
 
                 <span></span>
@@ -140,7 +140,7 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-show="statusFilter(row) && driverFilter(row) && problemFilter(row)
+                    ng-show="statusFilter(row) && routeFilter(row) && problemFilter(row)
                             && promise15MFilter(row) && textFilter(row)"
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row" >
 
