@@ -75,10 +75,15 @@ router.route('/acp/mergesolution')
 router.route('/acp/savesolution')
     .post(function (req, res) {
         console.log('savesolution');
+        if (!req.body.solution || req.body.solution.length == 0) {
+            res.status(200).json({status: 'nothing to save'});
+            return;
+        }
         console.log(req.body.solution.length);
 
         fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
             log.toFLog(config.defaultMonitoringLogin + '_' + Date.now() + '_changes.json', req.body.solution);
+
             if (err) {
                 res.status(200).json({error: err});
                 console.log(err);
@@ -90,9 +95,8 @@ router.route('/acp/savesolution')
                 for (var i = 0; i < jsonData.length; i++) {
                     for (var j = 0; j < toSave.length; j++) {
                         if (jsonData[i].id == toSave[j].id) {
-                            //console.log(jsonData[i].id);
-                            //log.dump(toSave[j]);
                             savedCount++;
+                            delete toSave[j].needSave;
                             jsonData[i] = toSave[j];
                             break;
                         }
@@ -100,10 +104,10 @@ router.route('/acp/savesolution')
                 }
 
                 log.toFLog(config.defaultMonitoringLogin + '_solution.json', jsonData);
+
                 res.status(200).json({status: 'saved'});
             }
         });
-
 
     });
 

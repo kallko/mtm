@@ -4,7 +4,8 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         scope.map = {};
         scope.points = {};
 
-        var pointsCounter = 0;
+        var pointsCounter = 0,
+            saving = false;
 
         toLogDiv('Загружаем данные...');
         timeout(function () {
@@ -23,7 +24,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             //loadPlans(from, to);
 
             if (true) {
-                Solution.load().success( function(data) {
+                Solution.load().success(function (data) {
                     scope.data = data;
                     groupButtonsByRadius();
                     scope.map.clearMap();
@@ -33,7 +34,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             } else {
                 scope.data = jsonData2;
                 groupButtonsByRadius();
-                Solution.merge(jsonData2).success(function(data) {
+                Solution.merge(jsonData2).success(function (data) {
                     console.log('Merge complete!');
                 });
             }
@@ -300,21 +301,21 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 point = scope.good_points[i];
 
                 for (var j = 0; j < driversJson.length; j++) {
-                    if(driversJson[j].old_id == point.driver_id) {
+                    if (driversJson[j].old_id == point.driver_id) {
                         point.driver_id = driversJson[j].new_id;
                         break;
                     }
                 }
 
                 for (var j = 0; j < transportsJson.length; j++) {
-                    if(transportsJson[j].old_id == point.transport_id) {
+                    if (transportsJson[j].old_id == point.transport_id) {
                         point.transport_id = transportsJson[j].new_id;
                         break;
                     }
                 }
 
                 for (var j = 0; j < jsonWaypoints.length; j++) {
-                    if(jsonWaypoints[j].old_id == point.waypoint_id) {
+                    if (jsonWaypoints[j].old_id == point.waypoint_id) {
                         point.waypoint_id = jsonWaypoints[j].new_id;
                         break;
                     }
@@ -323,6 +324,45 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
         }
 
+        scope.saveData = function () {
+            if (saving) {
+                toLogDiv('Всё ещё сохраняю...');
+                return;
+            }
+
+            console.log('saveData');
+            var toSave = [];
+
+            for (var i = 0; i < scope.data.length; i++) {
+                if (scope.data[i].needSave) {
+                    toSave.push(scope.data[i]);
+                }
+            }
+
+            if (toSave.length == 0) {
+                toLogDiv('Последняя версия данных уже сохранена.');
+                return;
+            }
+            toLogDiv(' Сохраняю...');
+            saving = true;
+
+            console.log('toSave.length', toSave.length);
+            timeout(function () {
+                Solution.save(toSave)
+                    .success(function (data) {
+                        saving = false;
+                        toLogDiv('Сохранено!');
+                        for (var i = 0; i < toSave.length; i++) {
+                            delete toSave[i].needSave;
+                        }
+                    })
+                    .error(function (data) {
+                        console.log('Error while saving.')
+                        saving = false;
+                    });
+            }, 100);
+        };
+
         //scope.saveData = function () {
         //    console.log('saveData');
         //    var toSave = [];
@@ -330,39 +370,17 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         //
         //    for (var i = 0; i < scope.data.length; i++) {
         //        if (scope.data[i].needSave) {
+        //            delete scope.data[i].needSave;
         //            toSave.push(scope.data[i]);
         //        }
         //    }
         //
-        //    console.log('toSave.length', toSave.length);
         //    timeout(function () {
         //        Solution.save(toSave).success(function (data) {
         //            toLogDiv('Сохранено!');
-        //            for (var i = 0; i < toSave.length; i++) {
-        //                delete toSave[i].needSave;
-        //            }
         //        });
         //    }, 100);
         //};
-
-        scope.saveData = function () {
-            console.log('saveData');
-            var toSave = [];
-            toLogDiv(' Сохраняю...');
-
-            for (var i = 0; i < scope.data.length; i++) {
-                if (scope.data[i].needSave) {
-                    delete scope.data[i].needSave;
-                    toSave.push(scope.data[i]);
-                }
-            }
-
-            timeout(function () {
-                Solution.save(toSave).success(function (data) {
-                    toLogDiv('Сохранено!');
-                });
-            }, 100);
-        };
 
         scope.toggleChanged = function () {
             $('#toggle-edited-btn').toggleClass('btn-default').toggleClass('btn-success');
