@@ -68,7 +68,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 },
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
                 {name: 'время вышло', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
-                {name: 'время на исходе', value: STATUS.DELAY, class: 'delay-status'},
+                {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
                 //{name: 'под контролем', value: 4, class: 'controlled-status'},
                 //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
                 {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
@@ -1588,7 +1588,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.setTextFilter = function () {
             scope.filters.text = $("#search-input").val();
-            console.log(scope.filters.text);
+        };
+
+        scope.cancelTextFilter = function () {
+            $("#search-input").val('');
+            scope.filters.text = '';
         };
 
         scope.textFilter = function (row) {
