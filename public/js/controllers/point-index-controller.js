@@ -55,13 +55,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'все статусы', value: -1, class: 'all-status'},
                 {name: 'доставлено', value: STATUS.FINISHED, class: 'delivered-status'},
                 {
-                    name: 'доставлено с опозданием',
+                    name: 'доставлено поздно',
                     table_name: 'доставлено',
                     value: STATUS.FINISHED_LATE,
                     class: 'delivered-late-status'
                 },
                 {
-                    name: 'доставлено слишком рано',
+                    name: 'доставлено рано',
                     table_name: 'доставлено',
                     value: STATUS.FINISHED_TOO_EARLY,
                     class: 'delivered-too-early-status'
