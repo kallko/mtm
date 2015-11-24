@@ -143,7 +143,19 @@ router.route('/acp/loadsolution')
                 //
                 //log.toFLog('brand_new_json.json', newJson);
 
-                res.status(200).json(JSON.parse(data));
+                var json = JSON.parse(data),
+                    toSend = [];
+
+                for (var i = 0; i < json.length; i++) {
+                    if (!json[i].solved) {
+                        if(json[i].changed || json[i].done){
+                            json[i].hide = true;
+                        }
+                        toSend.push(json[i]);
+                    }
+                }
+
+                res.status(200).json(toSend);
             }
         });
     });

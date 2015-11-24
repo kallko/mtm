@@ -512,7 +512,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             //console.log('Проблемных точек', totalCount);
             //console.log('Решенных точек', scope.data.length - totalCount);
             toLogDiv('Данные загружены. Точек требующих вмешательства - ' + totalCount
-                + ', автоматически решенных точек - ' + (scope.data.length - totalCount)
+                //+ ', автоматически решенных точек - ' + (scope.data.length - totalCount)
                 + ', готовых - ' + doneCount
                 + ', изменено - ' + changedCount
                 + ', скрыто - ' + hiddenCount);
