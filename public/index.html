@@ -49,8 +49,6 @@
 <script src="./js/directives/enter-event.js"></script>
 
 
-
-
 <div id="map"></div>
 
 <template type="text/html" id="template-point-table">
@@ -96,10 +94,7 @@
                     сохранить
                 </button>
 
-                <input id="search-input" type="text" size="15" />
-                <button class="btn btn-info btn-sm" id="filter-btn" ng-click="setTextFilter()">
-                    фильтровать
-                </button>
+                <input id="search-input" type="text" size="15" enter-event="setTextFilter()" />
                 <button class="btn btn-info btn-sm" id="cancel-filter-btn"  ng-click="cancelTextFilter()">
                     x
                 </button>

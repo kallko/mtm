@@ -1613,7 +1613,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return row.waypoint.NAME.indexOf(scope.filters.text) >= 0
                 || row.driver.NAME.indexOf(scope.filters.text) >= 0
                 || row.waypoint.ADDRESS.indexOf(scope.filters.text) >= 0
-                || row.waypoint.COMMENT.indexOf(scope.filters.text) >= 0;
+                || row.waypoint.COMMENT.indexOf(scope.filters.text) >= 0
+                || row.NUMBER.indexOf(scope.filters.text) >= 0
+                || row.transport.NAME.indexOf(scope.filters.text) >= 0
+                || row.driver.PHONE.indexOf(scope.filters.text) >= 0
+                || row.transport.REGISTRATION_NUMBER.indexOf(scope.filters.text) >= 0;
         };
 
     }]);
