@@ -284,6 +284,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (j = 0; j < data.drivers.length; j++) {
                     if (data.routes[i].DRIVER == data.drivers[j].ID) {
+                        data.drivers[j].NAME = cutFIO(data.drivers[j].NAME);
                         data.routes[i].driver = data.drivers[j];
                         break;
                     }
@@ -396,6 +397,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             setColResizable();
             prepareFixedHeader();
         }
+
+
+        function cutFIO(fioStr) {
+            var parts = fioStr.split(' ');
+            return parts[0] + ' ' + parts[1];
+        }
+
 
         function updateData() {
             statusUpdate();
@@ -1606,6 +1614,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || row.driver.NAME.indexOf(scope.filters.text) >= 0
                 || row.waypoint.ADDRESS.indexOf(scope.filters.text) >= 0
                 || row.waypoint.COMMENT.indexOf(scope.filters.text) >= 0;
-        }
+        };
 
     }]);
