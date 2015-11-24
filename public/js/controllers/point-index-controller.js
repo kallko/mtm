@@ -525,7 +525,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             //TODO REMOVE
-            //console.log([_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
+            console.log([_data.ID, getTodayStrFor1C()]);
             //_data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
             //console.log('_data.mobile_buttons', _data.mobile_buttons);
             //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
