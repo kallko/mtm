@@ -48,11 +48,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         console.log('highlightPointMarker');
         console.log(point);
 
-        highlightedPoint = L.marker([point.LAT, point.LON],
-            {'title': 'title'});
-        highlightedPoint.setIcon(getIcon('TEST', 14, 'white', 'black'));
-        map.addLayer(highlightedPoint);
-        oms.addMarker(highlightedPoint);
+        //highlightedPoint = L.marker([point.LAT, point.LON],
+        //    {'title': 'title'});
+        //highlightedPoint.setIcon(getIcon('TEST', 14, 'white', 'black'));
+        //map.addLayer(highlightedPoint);
+        //oms.addMarker(highlightedPoint);
     }
 
     function drawCombinedRoute(route) {

@@ -33,7 +33,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 IN_PROMISED: 2
             },
 
-
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,
             enableDynamicUpdate = false;
