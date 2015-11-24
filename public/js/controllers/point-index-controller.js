@@ -852,9 +852,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$watch(function () {
                 return scope.filters.route + scope.filters.status + scope.filters.problem_index;
             }, function () {
-                timeout(function () {
-                    updateResizeGripHeight();
-                }, 1);
+                updateResizeGripHeight();
             });
 
             scope.$on('ngRepeatFinished', function () {
@@ -936,9 +934,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function updateResizeGripHeight() {
-            var height = pointTable.height();
-            $('div.JCLRgrip').height(height);
-            $('div.jcolresizer').height(height);
+            timeout(function () {
+                var height = pointTable.height();
+                $('div.JCLRgrip').height(height);
+                $('div.jcolresizer').height(height);
+            }, 1);
         }
 
         function prepareFixedHeader() {
@@ -1598,11 +1598,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.setTextFilter = function () {
             scope.filters.text = $("#search-input").val();
+            updateResizeGripHeight();
         };
 
         scope.cancelTextFilter = function () {
             $("#search-input").val('');
             scope.filters.text = '';
+            updateResizeGripHeight();
         };
 
         scope.textFilter = function (row) {
