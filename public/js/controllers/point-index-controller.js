@@ -102,6 +102,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.selectedRow = -1;
             scope.filters.text = "";
+
+            scope.params = {
+                predictMinutes: 100,
+                factMinutes: 100,
+                volume: 0,
+                weight: 0,
+                value: 0
+            };
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -390,7 +398,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             console.log('Finish linking', data);
-            //console.log({'data': scope.rowCollection});
             scope.displayCollection = [].concat(scope.rowCollection);
 
             setColResizable();
@@ -862,6 +869,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     target: '#context-menu',
                     onItem: deliveryRowConextMenu
                 });
+            });
+
+            scope.$on('settingChanged', function(params) {
+                scope.params = params;
             });
 
             $('.header .problem-index-col').on('click', function () {

@@ -152,26 +152,44 @@ template {
     /*white-space: nowrap;*/
 }
 
-.debug-panel {
+.setting-panel {
     padding: 10px;
     background-color: white;
     height: 100%;
+    overflow-x: scroll;
 }
 
-.debug-panel input[type=range] {
-    width: 250px;
-    margin-right: 20px;
-    float: left;
+.setting-panel input[type=range] {
+    width: 50%;
+    float: right;
 }
 
-.debug-panel input[type=text] {
-     width: 50px;
+.setting-panel input[type=text] {
+    width: 50px;
+    height: 20px;
  }
 
-.debug-panel span {
+.setting-panel .param-title  {
     float: left;
     margin-right: 15px;
-    width: 230px;
+    width: 42%;
+}
+
+.setting-panel .title {
+    padding: 0 0 5px 0;
+    font-weight: bold;
+}
+
+.setting-panel .setting-row {
+    padding: 4px 0;
+    border-top: 1px solid #b9b9b9;
+}
+
+.setting-panel .block {
+    border: 1px solid #b9b9b9;
+    padding: 7px 7px 4px 7px;
+    width: 100%;
+    min-width: 570px;
 }
 
 .point-checkbox-td {

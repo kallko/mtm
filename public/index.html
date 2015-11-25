@@ -41,6 +41,7 @@
 <script src="./js/controllers/map-controller.js"></script>
 <script src="./js/controllers/debug-controller.js"></script>
 <script src="./js/controllers/notification-controller.js"></script>
+<script src="./js/controllers/setting-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -220,41 +221,34 @@
 </template>
 
 <template type="text/html" id="template2">
-    <div class="section debug-panel" ng-controller="DebugController">
-        <div>
-            <span>NO_SIGNAL время (undef_t)</span>
-            <input type="range" min="1" max="600" ng-model="params.undef_t"/>
-            <input type="text" ng-model="params.undef_t"/>
-        </div>
-        <div>
-            <span>NO_SIGNAL расстояние (undef_d)</span>
-            <input type="range" min="1" max="5000" ng-model="params.undef_d"/>
-            <input type="text" ng-model="params.undef_d"/>
-        </div>
-        <div>
-            <span>ARRIVAL скорость (stop_s)</span>
-            <input type="range" min="1" max="20" ng-model="params.stop_s"/>
-            <input type="text" ng-model="params.stop_s"/>
-        </div>
-        <div>
-            <span>ARRIVAL расстояние (stop_d)</span>
-            <input type="range" min="1" max="200" ng-model="params.stop_d"/>
-            <input type="text" ng-model="params.stop_d"/>
-        </div>
-        <div>
-            <span>MOVE скорость (move_s)</span>
-            <input type="range" min="1" max="20" ng-model="params.move_s"/>
-            <input type="text" ng-model="params.move_s"/>
-        </div>
-        <div>
-            <span>MOVE расстояние (move_d)</span>
-            <input type="range" min="1" max="200" ng-model="params.move_d"/>
-            <input type="text" ng-model="params.move_d"/>
-        </div>
-
-        <div>
-            <button ng-click="loadTracksWithParams()">Получить трек</button>
-            <button ng-click="test()">Тест</button>
+    <div class="section setting-panel" ng-controller="SettingController">
+        <div class="block" >
+            <div class="title" >Настройки коэффициентов индекса проблемности</div>
+            <div class="setting-row" >
+                <span class="param-title" >Влияние прогнозного опоздания</span>
+                <input type="range" min="0" max="100" ng-model="params.predictMinutes" />
+                {{params.predictMinutes / 10}}
+            </div>
+            <div class="setting-row" >
+                <span class="param-title" >Влияние фактического опоздания</span>
+                <input type="range" min="0" max="100" ng-model="params.factMinutes" />
+                {{params.factMinutes / 10}}
+            </div>
+            <div class="setting-row" >
+                <span class="param-title" >Влияние объема</span>
+                <input type="range" min="0" max="100" ng-model="params.volume" />
+                {{params.volume / 10}}
+            </div>
+            <div class="setting-row" >
+                <span class="param-title" >Влияние веса</span>
+                <input type="range" min="0" max="100" ng-model="params.weight" />
+                {{params.weight / 10}}
+            </div>
+            <div class="setting-row" >
+                <span class="param-title" >Влияние стоимости</span>
+                <input type="range" min="0" max="100" ng-model="params.value" />
+                {{params.value / 10}}
+            </div>
         </div>
     </div>
 </template>
