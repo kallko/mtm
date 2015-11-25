@@ -80,7 +80,7 @@
                 </button>
 
                 <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
-                    15 минут
+                    {{params.endWindowSize * 5}} минут
                 </button>
 
                 <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
@@ -237,7 +237,7 @@
         </div>
 
         <div class="block" >
-            <div class="title">Настройка фильтра невыполненных доставок на краю указанного окна</div>
+            <div class="title">Настройка фильтра невыполненных доставок на краю рабочего окна</div>
             <div class="setting-row" >
                 <span class="param-title" >Размер фильтра (минуты)</span>
                 <input type="range" min="1" max="24" ng-model="params.endWindowSize" />

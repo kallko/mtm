@@ -104,11 +104,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.text = "";
 
             scope.params = {
-                predictMinutes: 100,
-                factMinutes: 100,
+                predictMinutes: 10,
+                factMinutes: 10,
                 volume: 0,
                 weight: 0,
-                value: 0
+                value: 0,
+                workingWindowType: 1,
+                endWindowSize: 3
             };
         }
 
@@ -425,7 +427,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         _data.routes[i].points[j].status == STATUS.ARRIVED_LATE ||
                         _data.routes[i].points[j].status == STATUS.DELAY ||
                         _data.routes[i].points[j].status == STATUS.IN_PROGRESS) &&
-                        _data.routes[i].points[j].promised_window_changed.finish - 900 < now &&
+                        _data.routes[i].points[j].promised_window_changed.finish - scope.params.endWindowSize * 300 < now &&
                         _data.routes[i].points[j].promised_window_changed.finish > now) {
                         _data.routes[i].points[j].promised_15m = true;
                     } else {
@@ -676,11 +678,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function updateProblemIndex(route) {
             var point,
-                lateMinutesCoef = 1.0,
-                volumeCoef = 0,
-                weightCoef = 0,
-                valueCoef = 0,
-                outClientWindowCoef = 2.0,
+                lateMinutesCoef = scope.params.predictMinutes, // scope.params.,
+                volumeCoef =  scope.params.volume,
+                weightCoef = scope.params.weight,
+                valueCoef = scope.params.value,
+                outWorkingWindowCoef = scope.params.value,
                 timeThreshold = 3600 * 6,
                 timeMin = 0.25,
                 timeCoef;
@@ -700,7 +702,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 point.windows[k].start < point.arrival_time_ts &&
                                 point.arrival_time_ts + point.overdue_time > point.windows[k].finish) {
                                 point.problem_index += ((point.arrival_time_ts + point.overdue_time) - point.windows[k].finish)
-                                    * outClientWindowCoef;
+                                    * outWorkingWindowCoef;
                                 break;
                             }
                         }
@@ -872,8 +874,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             rootScope.$on('settingChanged', function(event, params) {
-                console.log(params);
-                scope.params = params;
+
+                if (params.workingWindowType !== scope.params.workingWindowType) {
+                    console.log('workingWindowType was changed!');
+                    scope.params = JSON.parse(JSON.stringify(params));
+                }
+
+                if (params.endWindowSize !== scope.params.endWindowSize) {
+                    console.log('endWindowSize was changed!');
+                    scope.params = JSON.parse(JSON.stringify(params));
+                }
+
+                if (params.predictMinutes !== scope.params.predictMinutes
+                    && params.factMinutes !== scope.params.factMinutes
+                    && params.volume !== scope.params.volume
+                    && params.weight !== scope.params.weight
+                    && params.value !== scope.params.value) {
+                    console.log('problem index parameter was changed!');
+                    scope.params = JSON.parse(JSON.stringify(params));
+                }
             });
 
             $('.header .problem-index-col').on('click', function () {

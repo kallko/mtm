@@ -9,15 +9,13 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', function 
     function init() {
         scope.params = {
             predictMinutes: 10,
-            factMinutes: 10,
+            factMinutes: 15,
             volume: 0,
             weight: 0,
             value: 0,
-            workingWindowType: 0,
+            workingWindowType: 1,
             endWindowSize: 3
         };
-
-        scope.$emit('settingChanged', scope.params);
 
         scope.workingWindowTypes = [
             {name: 'Обещанное окно', value: 0},
