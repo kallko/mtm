@@ -1,5 +1,5 @@
-angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval', '$filter',
-    function (scope, http, timeout, interval, filter) {
+angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval', '$filter', '$rootScope',
+    function (scope, http, timeout, interval, filter, rootScope) {
 
         var pointTableHolder,
             pointContainer,
@@ -871,7 +871,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
             });
 
-            scope.$on('settingChanged', function(params) {
+            rootScope.$on('settingChanged', function(event, params) {
+                console.log(params);
                 scope.params = params;
             });
 

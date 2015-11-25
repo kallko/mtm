@@ -12,18 +12,32 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', function 
             factMinutes: 10,
             volume: 0,
             weight: 0,
-            value: 0
+            value: 0,
+            workingWindowType: 0,
+            endWindowSize: 3
         };
 
-        scope.$watch(function () {
-            return scope.params.predictMinutes
-                + scope.params.factMinutes
-                + scope.params.volume
-                + scope.params.weight
-                + scope.params.value;
-        }, function () {
-            scope.$emit('settingChanged', scope.params);
-        });
+        scope.$emit('settingChanged', scope.params);
+
+        scope.workingWindowTypes = [
+            {name: 'Обещанное окно', value: 0},
+            {name: 'Заказанное окно', value: 1}
+        ];
+
+        //scope.$watch(function () {
+        //    return scope.params.predictMinutes
+        //        + scope.params.factMinutes
+        //        + scope.params.volume
+        //        + scope.params.weight
+        //        + scope.params.value;
+        //}, function () {
+        //    //console.log('some params changed', scope.params);
+        //    scope.$emit('settingChanged', scope.params);
+        //});
     }
+
+    scope.saveAllParams = function () {
+        scope.$emit('settingChanged', scope.params);
+    };
 
 }]);

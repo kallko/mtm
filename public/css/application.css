@@ -159,9 +159,13 @@ template {
     overflow-x: scroll;
 }
 
-.setting-panel input[type=range] {
+.setting-panel input[type=range]{
     width: 50%;
     float: right;
+}
+
+.setting-panel select {
+    width: 150px;
 }
 
 .setting-panel input[type=text] {
@@ -188,8 +192,14 @@ template {
 .setting-panel .block {
     border: 1px solid #b9b9b9;
     padding: 7px 7px 4px 7px;
+    margin-bottom: 6px;
     width: 100%;
     min-width: 570px;
+}
+
+.setting-panel .button-row {
+    text-align: right;
+    padding-bottom: 5px;
 }
 
 .point-checkbox-td {
