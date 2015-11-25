@@ -143,6 +143,8 @@ function checkBeforeSend(_data, callback) {
     for (i = 0; i < allData.routes.length; i++) {
         for (var j = 0; j < allData.routes[i].points.length; j++) {
             allData.routes[i].points[j].base_arrival = allData.routes[i].points[j].ARRIVAL_TIME;
+            if (allData.routes[i].points[j].waypoint == undefined) continue;
+
             allData.routes[i].points[j].waypoint.gIndex = gIndex;
             gIndex++;
         }
