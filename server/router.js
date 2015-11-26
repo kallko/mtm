@@ -23,7 +23,6 @@ router.route('/')
 router.route('/demo')
     .get(function (req, res) {
         req.session.login = demoLogin;
-        console.log('demo login: ' + demoLogin);
         res.sendFile('index.html', {root: './public/'});
     });
 
@@ -236,7 +235,7 @@ router.route('/acp/getplan/:timestamp')
 router.route('/dailydata')
     .get(function (req, res) {
 
-        if (req.session.login == demoLogin) {
+        if (req.session.login !== demoLogin) {
             var soapManager = new soap(req.session.login);
             soapManager.loadDemoData(function (data) {
                 console.log('Demo data loaded!');
