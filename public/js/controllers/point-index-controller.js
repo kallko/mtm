@@ -557,7 +557,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
                 mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
-                console.log('result for ', _data.idArr[m], mobilePushes);
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {
@@ -583,6 +582,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var i = 0; i < mobilePushes.length; i++) {
                     if (mobilePushes[i].canceled) continue;
 
+                    if (mobilePushes[i].gps_time_ts == undefined) {
+                        if (mobilePushes[i].gps_time) {
+                            mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);
+                        } else {
+                            mobilePushes[i].gps_time_ts = 0;
+                        }
+                    }
+
+                    if (mobilePushes[i].gps_time_ts > _data.server_time) continue;
+
                     for (var j = 0; j < _data.routes.length; j++) {
                         for (var k = 0; k < _data.routes[j].points.length; k++) {
                             tmpPoint = _data.routes[j].points[k];
@@ -590,13 +599,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             LON = parseFloat(tmpPoint.LON);
                             lat = mobilePushes[i].lat;
                             lon = mobilePushes[i].lon;
-                            if (mobilePushes[i].gps_time_ts == undefined) {
-                                if (mobilePushes[i].gps_time) {
-                                    mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);
-                                } else {
-                                    mobilePushes[i].gps_time_ts = 0;
-                                }
-                            }
 
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER
                                 && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius
