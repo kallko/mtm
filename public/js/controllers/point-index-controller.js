@@ -548,16 +548,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             var mobilePushes,
                 allPushes = [];
-            for (var j = 0; j < _data.idArr.length; j++) {
+            for (var m = 0; m < _data.idArr.length; m++) {
                 //TODO REMOVE
-                console.log([_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
+                console.log([_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                 //mobilePushes = parentForm._call('getDriversActions', [_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
                 //console.log('mobilePushes', mobilePushes);
                 //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
                 //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
-                mobilePushes = parentForm._call('getDriversActions', [_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
-                console.log('result for ', _data.idArr[j], mobilePushes);
+                mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
+                console.log('result for ', _data.idArr[m], mobilePushes);
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {
