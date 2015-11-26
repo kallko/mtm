@@ -485,7 +485,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route.lastPointIndx = 0;
                 if (route.real_track != undefined) {
                     for (j = 0; j < route.real_track.length; j++) {
-                        if (route.real_track[j].state == "ARRIVAL") {
+                        if (route.real_track[j].t1 < _data.server_time && route.real_track[j].state == "ARRIVAL") {
                             tmpArrival = route.real_track[j];
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
@@ -557,6 +557,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
                 mobilePushes = parentForm._call('getDriversActions', [_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
+                console.log('result for ', _data.idArr[j], mobilePushes);
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {
