@@ -8,6 +8,7 @@ var express = require('express'),
     math_server = new (require('./math-server'))(),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     cashedDataArr = [],
+    demoLogin = 'demo',
     tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
@@ -17,6 +18,13 @@ var express = require('express'),
 router.route('/')
     .get(function (req, res) {
         res.status(200);
+    });
+
+router.route('/demo')
+    .get(function (req, res) {
+        req.session.login = demoLogin;
+        console.log('demo login: ' + demoLogin);
+        res.sendFile('index.html', {root: './public/'});
     });
 
 router.route('/login')
@@ -227,6 +235,18 @@ router.route('/acp/getplan/:timestamp')
 
 router.route('/dailydata')
     .get(function (req, res) {
+
+        if (req.session.login == demoLogin) {
+            var soapManager = new soap(req.session.login);
+            soapManager.loadDemoData(function (data) {
+                console.log('Demo data loaded!');
+                data.demoMode = true;
+                res.status(200).json(data);
+            });
+            return;
+        }
+
+        console.log('NO demo mode');
         // TODO: !!! REMOVE !!!
         if (req.session.login == null) {
             req.session.login = config.defaultSoapLogin;

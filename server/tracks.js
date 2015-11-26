@@ -287,7 +287,7 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
 
     var me = this,
         data = _data[nIndx],
-        now = new Date(),
+        now = new Date(data.server_time * 1000),
         url = this.createParamsStr(
             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
             new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,

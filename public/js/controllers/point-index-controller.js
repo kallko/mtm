@@ -35,7 +35,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,
-            enableDynamicUpdate = false;
+            enableDynamicUpdate = false,
+            demoMode = false;
 
         setListeners();
         init();
@@ -254,6 +255,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function linkDataParts(data) {
             console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
+            demoMode = data.demoMode;
+            if (demoMode) {
+                console.log('DEMO MODE');
+            }
+
             init();
 
             var tmpPoints,
@@ -541,13 +547,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             //TODO REMOVE
-            console.log([_data.ID, getTodayStrFor1C()]);
+            console.log([_data.ID, getDateStrFor1C(_data.server_time * 1000)]);
             //_data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
             //console.log('_data.mobile_buttons', _data.mobile_buttons);
             //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
             //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
-            _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getTodayStrFor1C()]);
+            _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getDateStrFor1C(_data.server_time * 1000)]);
 
             if (_data.mobile_buttons == undefined
                 || Object.keys(_data.mobile_buttons).length == 0) {
@@ -669,7 +675,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
-        function getTodayStrFor1C() {
+        function getDateStrFor1C(timestamp) {
             var date = new Date();
             return date.getFullYear() +
                 ("0" + (date.getMonth() + 1)).slice(-2) +
@@ -886,10 +892,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 if (params.predictMinutes !== scope.params.predictMinutes
-                    && params.factMinutes !== scope.params.factMinutes
-                    && params.volume !== scope.params.volume
-                    && params.weight !== scope.params.weight
-                    && params.value !== scope.params.value) {
+                    || params.factMinutes !== scope.params.factMinutes
+                    || params.volume !== scope.params.volume
+                    || params.weight !== scope.params.weight
+                    || params.value !== scope.params.value) {
                     console.log('problem index parameter was changed!');
                     scope.params = JSON.parse(JSON.stringify(params));
                 }

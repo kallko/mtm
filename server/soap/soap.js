@@ -65,6 +65,16 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
     });
 };
 
+SoapManager.prototype.loadDemoData = function (callback) {
+    fs.readFile('./data/demoDay.js', 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+
+        callback(JSON.parse(data));
+    });
+};
+
 function checkBeforeSend(_data, callback) {
     var data;
     for (var k = 0; k < _data.length; k++) {
@@ -161,7 +171,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
     // ONLY FOR TEST
     date = !itIsToday ? date : Date.now();
-    //date = date - 86400000 * 5;
+    //date = date - 86400000 * 2;
 
     console.log('itIsToday', itIsToday);
     console.log('Date >>>', new Date(date));
@@ -187,7 +197,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
                         data = [];
                     for (var i = 0; i < itineraries.length; i++) {
-                        me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, data, callback);
+                        me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, data, date, callback);
                     }
 
                 });
@@ -199,22 +209,22 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     });
 };
 
-SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, callback) {
+SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
     var me = this;
 
     if (!config.loadOnlyItineraryNew) {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
-            itineraryCallback(err, result, me, client, itIsToday, data, callback);
+            itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
         });
     }
 
     //console.log("_xml.itineraryXML(id, version, true) >>>>>", _xml.itineraryXML(id, version, true));
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
-        itineraryCallback(err, result, me, client, itIsToday, data, callback);
+        itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
     });
 };
 
-function itineraryCallback(err, result, me, client, itIsToday, data, callback) {
+function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
     if (!err) {
         //console.log(result.return);
         //log.toFLog('itinerary', result.return, false);
@@ -230,8 +240,8 @@ function itineraryCallback(err, result, me, client, itIsToday, data, callback) {
 
             nIndx--;
             data[nIndx].sended = false;
-            data[nIndx].date = new Date();
-            data[nIndx].server_time = parseInt(Date.now() / 1000);
+            data[nIndx].date = new Date(date);
+            data[nIndx].server_time = parseInt(date / 1000);
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
             me.getAdditionalData(client, data, itIsToday, nIndx, callback);
 
@@ -322,13 +332,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     }
                 }
 
-                // 258e90fa-f181-11e4-a872-005056a77794
-                //for (k = 0; k < data[nIndx].waypoints.length; k++) {
-                //    if ('9ae1cbb3-4944-11e2-802b-52540027e502' == data[nIndx].waypoints[k].ID) {
-                //        console.log(data[nIndx].waypoints[k]);
-                //    }
-                //}
-
                 data[nIndx].sensors = [];
                 for (i = 0; i < sensors.length; i++) {
                     data[nIndx].sensors.push(sensors[i].$);
@@ -342,7 +345,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     checkBeforeSend(data, callback);
                 } else {
                     console.log('DONE!');
-                    //log.toFLog('acp_final_data.js', data);
                     callback(data);
                 }
 
