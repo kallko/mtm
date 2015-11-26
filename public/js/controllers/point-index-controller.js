@@ -546,68 +546,74 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            //TODO REMOVE
-            console.log([_data.ID, getDateStrFor1C(_data.server_time * 1000)]);
-            //_data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
-            //console.log('_data.mobile_buttons', _data.mobile_buttons);
-            //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
-            //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
+            var mobilePushes,
+                allPushes = [];
+            for (var j = 0; j < _data.idArr.length; j++) {
+                //TODO REMOVE
+                console.log([_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
+                //mobilePushes = parentForm._call('getDriversActions', [_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
+                //console.log('mobilePushes', mobilePushes);
+                //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
+                //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
-            _data.mobile_buttons = parentForm._call('getDriversActions', [_data.ID, getDateStrFor1C(_data.server_time * 1000)]);
+                pushes = parentForm._call('getDriversActions', [_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
 
-            if (_data.mobile_buttons == undefined
-                || Object.keys(_data.mobile_buttons).length == 0) {
-                console.log('no mobile buttons push');
-                return;
-            }
+                if (mobilePushes == undefined
+                    || Object.keys(mobilePushes).length == 0) {
+                    console.log('no mobile buttons push');
+                    continue;
+                }
 
-            var buttonsStr = _data.mobile_buttons[Object.keys(_data.mobile_buttons)[0]];
-            if (buttonsStr == '[]') {
-                console.log('no mobile buttons push');
-                return;
-            }
+                var buttonsStr = mobilePushes[Object.keys(mobilePushes)[0]];
+                if (buttonsStr == '[]') {
+                    console.log('no mobile buttons push');
+                    continue;
+                }
 
-            _data.mobile_buttons = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
+                mobilePushes = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
 
-            console.log('_data.mobile_buttons array', _data.mobile_buttons);
-            console.log({pushes: JSON.stringify(_data.mobile_buttons)});
+                console.log('mobilePushes array', mobilePushes);
+                console.log({pushes: JSON.stringify(mobilePushes)});
 
-            // TODO: FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
+                // TODO: FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
 
-            if (_data.mobile_buttons == undefined) return;
+                if (mobilePushes == undefined) continue;
 
-            for (var i = 0; i < _data.mobile_buttons.length; i++) {
-                if (_data.mobile_buttons[i].canceled) continue;
+                for (var i = 0; i < mobilePushes.length; i++) {
+                    if (mobilePushes[i].canceled) continue;
 
-                for (var j = 0; j < _data.routes.length; j++) {
-                    for (var k = 0; k < _data.routes[j].points.length; k++) {
-                        tmpPoint = _data.routes[j].points[k];
-                        LAT = parseFloat(tmpPoint.LAT);
-                        LON = parseFloat(tmpPoint.LON);
-                        lat = _data.mobile_buttons[i].lat;
-                        lon = _data.mobile_buttons[i].lon;
-                        if (_data.mobile_buttons[i].gps_time_ts == undefined) {
-                            if (_data.mobile_buttons[i].gps_time) {
-                                _data.mobile_buttons[i].gps_time_ts = strToTstamp(_data.mobile_buttons[i].gps_time);
-                            } else {
-                                _data.mobile_buttons[i].gps_time_ts = 0;
+                    for (var j = 0; j < _data.routes.length; j++) {
+                        for (var k = 0; k < _data.routes[j].points.length; k++) {
+                            tmpPoint = _data.routes[j].points[k];
+                            LAT = parseFloat(tmpPoint.LAT);
+                            LON = parseFloat(tmpPoint.LON);
+                            lat = mobilePushes[i].lat;
+                            lon = mobilePushes[i].lon;
+                            if (mobilePushes[i].gps_time_ts == undefined) {
+                                if (mobilePushes[i].gps_time) {
+                                    mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);
+                                } else {
+                                    mobilePushes[i].gps_time_ts = 0;
+                                }
                             }
-                        }
 
-                        if (_data.mobile_buttons[i].number == tmpPoint.TASK_NUMBER
-                            && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius
-                        ) {
-                            tmpPoint.mobile_push = _data.mobile_buttons[i];
-                            tmpPoint.havePush = true;
-                            tmpPoint.mobile_arrival_time = _data.mobile_buttons[i].gps_time_ts;
-                            tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || _data.mobile_buttons[i].gps_time_ts;
-                            tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
-                            _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                            findStatusAndWindowForPoint(tmpPoint);
-                            break;
+                            if (mobilePushes[i].number == tmpPoint.TASK_NUMBER
+                                && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius
+                            ) {
+                                tmpPoint.mobile_push = mobilePushes[i];
+                                tmpPoint.havePush = true;
+                                tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
+                                tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+                                tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+                                _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                                findStatusAndWindowForPoint(tmpPoint);
+                                break;
+                            }
                         }
                     }
                 }
+
+                allPushes = allPushes.concat(pushes);
             }
 
             checkConfirmedFromLocalStorage();

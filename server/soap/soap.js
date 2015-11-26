@@ -127,8 +127,11 @@ function checkBeforeSend(_data, callback) {
         }
     }
 
-    var allData = JSON.parse(JSON.stringify(data[0]))
+    var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
+
+    allData.idArr = [];
+    allData.idArr.push(data[0].ID);
 
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
@@ -137,6 +140,7 @@ function checkBeforeSend(_data, callback) {
         allData.TIME = parseInt(allData.TIME) + parseInt(data[i].TIME);
         allData.VALUE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
         allData.routes = allData.routes.concat(data[i].routes);
+        allData.idArr.push(data[i].ID);
 
         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
     }
@@ -367,9 +371,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
             });
 
         } else {
-            //if (data.ID == '317') {
             log.l(err.body);
-            //}
         }
     });
 };
