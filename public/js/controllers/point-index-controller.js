@@ -556,7 +556,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
                 //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
-                pushes = parentForm._call('getDriversActions', [_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
+                mobilePushes = parentForm._call('getDriversActions', [_data.idArr[j], getDateStrFor1C(_data.server_time * 1000)]);
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {
@@ -613,7 +613,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
 
-                allPushes = allPushes.concat(pushes);
+                allPushes = allPushes.concat(mobilePushes);
             }
 
             checkConfirmedFromLocalStorage();
