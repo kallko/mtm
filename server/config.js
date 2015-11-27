@@ -6,7 +6,7 @@ var config = {
     },
 
     defaultSoapLogin: 'k00056.0',
-    defaultMonitoringLogin: 'k00056.0',
+    defaultMonitoringLogin: 'ids.dsp',
 
     loadOnlyItineraryNew: false,
 
