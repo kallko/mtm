@@ -216,7 +216,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
     var me = this;
 
-    if (!config.loadOnlyItineraryNew) {
+    if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko' && this.login != 'ids.dsp')) {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
             itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
         });
