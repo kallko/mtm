@@ -694,7 +694,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function updateProblemIndex(route) {
             var point,
                 lateMinutesCoef = scope.params.predictMinutes, // scope.params.,
-                volumeCoef =  scope.params.volume,
+                volumeCoef = scope.params.volume,
                 weightCoef = scope.params.weight,
                 valueCoef = scope.params.value,
                 outWorkingWindowCoef = scope.params.value,
@@ -888,7 +888,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
             });
 
-            rootScope.$on('settingChanged', function(event, params) {
+            rootScope.$on('settingChanged', function (event, params) {
 
                 if (params.workingWindowType !== scope.params.workingWindowType) {
                     console.log('workingWindowType was changed!');
@@ -1340,14 +1340,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var trWindow = getTstampAvailabilityWindow('03:00 - ' +
                         route.transport.END_OF_WORK.substr(0, 5)),
                     jobWindows,
-                    timeStep = 600;
+                    timeStep = 600,
+                    warehouseEnd;
 
                 console.log(trWindow);
 
                 for (i = 0; i < route.points.length; i++) {
 
                     if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE
-                        && route.points[i].status != STATUS.FINISHED_TOO_EARLY) {
+                        && route.points[i].status != STATUS.FINISHED_TOO_EARLY && route.points[i].waypoint.TYPE != 'WAREHOUSE') {
                         pt = route.points[i];
                         point = {
                             "lat": parseFloat(pt.waypoint.LAT),
@@ -1437,6 +1438,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 mathInput.points.push(point);
 
+                warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
+                if (warehouseEnd) {
+                    point = {
+                        "lat": parseFloat(route.points[route.points.length - 1].LAT),
+                        "lon": parseFloat(route.points[route.points.length - 1].LON),
+                        "ID": "-3",
+                        "servicetime": 0,
+                        "add_servicetime": 0,
+                        "max_height_transport": 0,
+                        "max_length_transport": 0,
+                        "only_pallets": false,
+                        "ramp": false,
+                        "need_refrigerator": false,
+                        "temperature_control": false,
+                        "ignore_cargo_incompatibility": false,
+                        "ignore_pallet_incompatibility": false,
+                        "region": "-1"
+                    };
+
+                    mathInput.points.push(point);
+                }
+
                 mathInput.trList.push({
                     "id": "-1",
                     "cost_per_hour": parseInt(route.transport.COST_PER_HOUR),
@@ -1458,8 +1481,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     "weigth_nominal": 0,
                     "time_max": 0,
                     "start_point": "-1",
-                    "finish_point": route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE"
-                        ? route.points[route.points.length - 1].waypoint.ID : "-1",
+                    "finish_point": warehouseEnd ? "-3" : "-1",
                     "points_limit": 0,
                     "road_speed": 1,
                     "point_speed": 1,
@@ -1528,7 +1550,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     changedRoute.points[i].status != STATUS.FINISHED_TOO_EARLY) {
 
                     for (var k = 0; k < newData.length; k++) {
-                        if (newData[k].pointId == changedRoute.points[i].waypoint.gIndex) {
+                        if (newData[k].pointId == changedRoute.points[i].waypoint.gIndex
+                            || (newData[k].pointId == '-3' && i == changedRoute.points.length - 1)
+                        ) {
                             tmpPoint = tmpRawRoute.points.splice(j, 1)[0];
                             tmpPoint.ARRIVAL_TIME = filter('date')((newData[k].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
                             toMove.push(tmpPoint);
@@ -1539,11 +1563,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
+            //if (changedRoute.points[changedRoute.points.length - 1].waypoint.TYPE == "WAREHOUSE") {
+            //    tmpPoint = tmpRawRoute.points.pop();
+            //    tmpPoint.ARRIVAL_TIME = filter('date')((newData[newData.length - 1].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+            //    toMove.push(tmpPoint);
+            //}
+
             //console.log(toMove);
 
             for (i = 0; i < newData.length; i++) {
                 for (var j = 0; j < toMove.length; j++) {
-                    if (newData[i].pointId == toMove[j].waypoint.gIndex) {
+                    if (newData[i].pointId == toMove[j].waypoint.gIndex
+                        || (newData[i].pointId == '-3' && j == toMove.length - 1)
+                    ) {
                         tmpRawRoute.points.push(JSON.parse(JSON.stringify(toMove[j])));
                     }
                 }
