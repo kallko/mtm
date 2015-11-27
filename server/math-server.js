@@ -36,7 +36,8 @@ MathServer.prototype.recalculate = function (route, callback) {
                     json: true
                 }, function (error, response, body) {
                     if(error || body.error) {
-                        console.log(error, body.error);
+                        console.log(error);
+                        if (body)   console.log(body.error);
                         clearInterval(intervalID);
                         callback({status: 'error'});
                     } else {
