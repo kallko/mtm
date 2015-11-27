@@ -1,24 +1,24 @@
 var config = {
 
-    //cashing: {
-    //    soap: false,
-    //    tracks: false
-    //},
-    //
-    //defaultSoapLogin: 'k00056.0',
-    //defaultMonitoringLogin: 'k00056.0',
-    //
-    //loadOnlyItineraryNew: false,
-
     cashing: {
         soap: false,
-        tracks: false,
-        session: false
+        tracks: false
     },
 
-    defaultSoapLogin: 'ids.dsp',
-    defaultMonitoringLogin: 'ids.dsp',
-    loadOnlyItineraryNew: true,
+    defaultSoapLogin: 'k00056.0',
+    defaultMonitoringLogin: 'k00056.0',
+
+    loadOnlyItineraryNew: false,
+
+    //cashing: {
+    //    soap: false,
+    //    tracks: false,
+    //    session: false
+    //},
+    //
+    //defaultSoapLogin: 'ids.dsp',
+    //defaultMonitoringLogin: 'ids.dsp',
+    //loadOnlyItineraryNew: true,
 
     aggregator: {
         //url: 'http://62.205.137.118:9001/',
