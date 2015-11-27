@@ -489,6 +489,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpArrival = route.real_track[j];
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
+                                if (tmpPoint.waypoint.TYPE == 'WAREHOUSE') continue;
+
                                 LAT = parseFloat(tmpPoint.LAT);
                                 LON = parseFloat(tmpPoint.LON);
                                 lat = parseFloat(tmpArrival.lat);
@@ -571,9 +573,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 mobilePushes = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
-
-                console.log('mobilePushes array', mobilePushes);
-                console.log({pushes: JSON.stringify(mobilePushes)});
+                console.log('mobilePushes array', {pushes: JSON.stringify(mobilePushes)});
 
                 // TODO: FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
 
@@ -918,6 +918,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function addToConfirmed(id, code) {
+            if (id == '') return;
+
             if (localStorage['confirmed'] == undefined) {
                 localStorage['confirmed'] = '{}';
             }

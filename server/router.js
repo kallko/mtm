@@ -245,7 +245,6 @@ router.route('/dailydata')
             return;
         }
 
-        console.log('NO demo mode');
         // TODO: !!! REMOVE !!!
         if (req.session.login == null) {
             req.session.login = config.defaultSoapLogin;

@@ -176,6 +176,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     // ONLY FOR TEST
     date = !itIsToday ? date : Date.now();
     //date = date - 86400000 * 2;
+    //date = 1448091000000;
 
     console.log('itIsToday', itIsToday);
     console.log('Date >>>', new Date(date));
