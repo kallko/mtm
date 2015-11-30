@@ -577,8 +577,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     continue;
                 }
 
+                var tmp = JSON.stringify(mobilePushes),
+                    p1 = tmp.substr(0, tmp.length / 2);
                 mobilePushes = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
-                console.log('mobilePushes array', {pushes: JSON.stringify(mobilePushes)});
+                console.log('mobilePushes array p1', {pushes: p1});
+                console.log('mobilePushes array p2', {pushes: tmp.substr(p1.length)});
 
                 // TODO: FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
 
