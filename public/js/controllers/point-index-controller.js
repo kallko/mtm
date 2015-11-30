@@ -35,8 +35,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,
-            enableDynamicUpdate = false,
-            demoMode = false;
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -103,14 +102,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.selectedRow = -1;
             scope.filters.text = "";
+            scope.demoMode = true;
 
             scope.params = {
                 predictMinutes: 10,
-                factMinutes: 10,
+                factMinutes: 15,
                 volume: 0,
                 weight: 0,
                 value: 0,
                 workingWindowType: 1,
+                demoTime: 10,
                 endWindowSize: 3
             };
         }
@@ -255,9 +256,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function linkDataParts(data) {
             console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
-            demoMode = data.demoMode;
-            if (demoMode) {
+
+            scope.demoMode = data.demoMode;
+            scope.$emit('setMode', {mode: scope.demoMode});
+            if (scope.demoMode) {
                 console.log('DEMO MODE');
+                data.server_time = data.server_time_demo + (scope.params.demoTime - 6) * 3600;
+                console.log('Demo time', new Date(data.server_time * 1000));
             }
 
             init();
@@ -888,33 +893,45 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
             });
 
-            rootScope.$on('settingChanged', function (event, params) {
-
-                if (params.workingWindowType !== scope.params.workingWindowType) {
-                    console.log('workingWindowType was changed!');
-                    scope.params = JSON.parse(JSON.stringify(params));
-                }
-
-                if (params.endWindowSize !== scope.params.endWindowSize) {
-                    console.log('endWindowSize was changed!');
-                    scope.params = JSON.parse(JSON.stringify(params));
-                }
-
-                if (params.predictMinutes !== scope.params.predictMinutes
-                    || params.factMinutes !== scope.params.factMinutes
-                    || params.volume !== scope.params.volume
-                    || params.weight !== scope.params.weight
-                    || params.value !== scope.params.value) {
-                    console.log('problem index parameter was changed!');
-                    scope.params = JSON.parse(JSON.stringify(params));
-                }
-            });
+            rootScope.$on('settingsChanged', settingsChanged);
 
             $('.header .problem-index-col').on('click', function () {
                 problemSortType++;
                 problemSortType = problemSortType % 3;
                 console.log(problemSortType);
             });
+        }
+
+        function settingsChanged(event, params) {
+            var changed = false;
+            if (params.workingWindowType !== scope.params.workingWindowType) {
+                console.log('workingWindowType was changed!');
+                changed = true;
+            }
+
+            if (params.endWindowSize !== scope.params.endWindowSize) {
+                console.log('endWindowSize was changed!');
+                changed = true;
+            }
+
+            if (params.demoTime !== scope.params.demoTime) {
+                console.log('demoTime was changed!');
+                changed = true;
+            }
+
+            if (params.predictMinutes !== scope.params.predictMinutes
+                || params.factMinutes !== scope.params.factMinutes
+                || params.volume !== scope.params.volume
+                || params.weight !== scope.params.weight
+                || params.value !== scope.params.value) {
+                console.log('problem index parameter was changed!');
+                changed = true;
+            }
+
+            if (changed) {
+                scope.params = JSON.parse(JSON.stringify(params));
+                linkDataParts(rawData);
+            }
         }
 
         function addToConfirmed(id, code) {

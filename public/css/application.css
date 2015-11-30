@@ -160,7 +160,7 @@ template {
 }
 
 .setting-panel input[type=range]{
-    width: 50%;
+    width: 48%;
     float: right;
 }
 
@@ -176,7 +176,7 @@ template {
 .setting-panel .param-title  {
     float: left;
     margin-right: 15px;
-    width: 42%;
+    width: 40%;
 }
 
 .setting-panel .title {

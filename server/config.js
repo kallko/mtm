@@ -1,13 +1,12 @@
 var config = {
 
     cashing: {
-        soap: true,
+        soap: false,
         tracks: false
     },
 
     defaultSoapLogin: 'k00056.0',
     defaultMonitoringLogin: 'ids.dsp',
-
     loadOnlyItineraryNew: false,
 
     //cashing: {

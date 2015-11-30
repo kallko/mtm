@@ -226,10 +226,19 @@
             <button class="btn btn-info btn-sm" ng-click="saveAllParams()" >Сохранить</button>
         </div>
 
+        <div class="block" ng-show="demoMd" id="demo-setting" >
+            <div class="title">Настройки демо-режима</div>
+            <div class="setting-row" >
+                <span class="param-title" >Время в демо-режиме</span>
+                <input type="range" min="6" max="21" ng-model="params.demoTime" />
+                {{params.demoTime}}:00
+            </div>
+        </div>
+
         <div class="block" >
             <div class="title">Настрока типа рабочего окна</div>
             <div class="setting-row" >
-                <span class="param-title" >Тип рабочег окна</span>
+                <span class="param-title" >Тип рабочего окна</span>
                 <select ng-model="params.workingWindowType" class="group-select"
                         ng-options='option.value as option.name for option in workingWindowTypes'>
                 </select>
