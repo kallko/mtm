@@ -580,6 +580,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var tmp = JSON.stringify(mobilePushes),
                     p1 = tmp.substr(0, tmp.length / 2);
                 mobilePushes = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
+
+                console.log('mobilePushes array full', {pushes: tmp});
                 console.log('mobilePushes array p1', {pushes: p1});
                 console.log('mobilePushes array p2', {pushes: tmp.substr(p1.length)});
 
