@@ -929,6 +929,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             if (changed) {
+                scope.$emit('clearMap');
                 scope.params = JSON.parse(JSON.stringify(params));
                 linkDataParts(rawData);
             }
@@ -1187,15 +1188,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if (route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
-                console.log('donwload tracks');
+                console.log('download tracks');
                 http.post('gettracksbystates', {
                     states: route.real_track,
-                    gid: route.transport.gid
+                    gid: route.transport.gid,
+                    demoTime: scope.demoMode ? _data.server_time : -1
                 })
                     .success(function (data) {
                         console.log({data: data});
                         route.real_track = data;
-                        route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
 
                         console.log('before', route.real_track.length);
                         for (var k = 0; k < route.real_track.length; k++) {
@@ -1205,6 +1206,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 k--;
                             }
                         }
+
+                        if (scope.demoMode) {
+                            route.real_track[0].lastTrackUpdate = 2000000000;
+                            //route.car_position = route.real_track[route.real_track.length - 2];
+                        } else {
+                            route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
+                        }
+
                         console.log('after', route.real_track.length);
 
                         draw(route);

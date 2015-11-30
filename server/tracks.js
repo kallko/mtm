@@ -48,7 +48,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
     }
 };
 
-TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
+TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, callback) {
     var counter = 0,
         me = this,
         started = 0,
@@ -56,7 +56,8 @@ TracksManager.prototype.getTrackByStates = function (states, gid, callback) {
 
     console.log('last update time,', updateTime);
     for (var i = 0; i < states.length; i++) {
-        if (states[i].t1 < updateTime + 1800) continue;
+        if ((demoTime != -1 && states[i].t2 > demoTime) ||
+            (demoTime == -1 && states[i].t1 < updateTime + 1800)) continue;
 
         started++;
         (function (ii) {
