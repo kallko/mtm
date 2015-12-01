@@ -9,8 +9,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             dataUpdateInterval = 120,
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
-            radius = 0.15,
-            mobileRadius = 50,
+            radius = 0.12,
+            mobileRadius = 0.5,
             controlledWindow = 600,
             promisedWindow = 3600,
             problemSortType = 0,
@@ -470,6 +470,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var route,
                 tmpPoint,
                 tmpArrival,
+                timeThreshold = 90 * 60,
                 LAT,
                 LON,
                 lat,
@@ -494,7 +495,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpArrival = route.real_track[j];
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
-                                if (tmpPoint.waypoint.TYPE == 'WAREHOUSE') continue;
+                                //if (tmpPoint.waypoint.TYPE == 'WAREHOUSE') continue;
 
                                 LAT = parseFloat(tmpPoint.LAT);
                                 LON = parseFloat(tmpPoint.LON);
@@ -506,8 +507,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                 tmpDistance = getDistanceFromLatLonInKm(lat, lon, LAT, LON);
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
-                                if (tmpDistance < radius && (tmpPoint.distanceToStop > tmpDistance &&
+                                //var checkIn = false;
+                                //if (tmpPoint.waypoint.ADDRESS == "м. Київ, вул. Кіквідзе, 7/11") {
+                                //    checkIn = true;
+                                //}
+
+                                if (tmpPoint.arrival_time_ts < tmpArrival.t1 + timeThreshold  &&
+                                    tmpDistance < radius && (tmpPoint.distanceToStop > tmpDistance &&
                                     tmpPoint.timeToStop > tmpTime)) {
+
+                                    //if (checkIn) {
+                                    //    console.log(tmpPoint.arrival_time_ts, new Date(tmpPoint.arrival_time_ts * 1000));
+                                    //    console.log((tmpPoint.arrival_time_ts + timeThreshold),
+                                    //        new Date((tmpPoint.arrival_time_ts + timeThreshold) * 1000));
+                                    //    console.log(tmpArrival.t1, new Date(tmpArrival.t1 * 1000));
+                                    //}
 
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
