@@ -512,7 +512,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 //    checkIn = true;
                                 //}
 
-                                if (tmpPoint.arrival_time_ts < tmpArrival.t1 + timeThreshold  &&
+                                if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
                                     tmpDistance < radius && (tmpPoint.distanceToStop > tmpDistance &&
                                     tmpPoint.timeToStop > tmpTime)) {
 
