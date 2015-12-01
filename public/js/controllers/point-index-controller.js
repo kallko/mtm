@@ -567,12 +567,41 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            var mobilePushes,
+            var mobilePushes = [],
                 allPushes = [];
+
+            if (scope.demoMode) {
+                var rand,
+                    gpsTime,
+                    tmp;
+                for (var i = 0; i < _data.routes.length; i++) {
+
+                    rand = random(0, 3600);
+                    seed = i;
+                    for (var j = 0; j < _data.routes[i].points.length; j++) {
+                        if (_data.server_time > (_data.routes[i].points[j].arrival_time_ts  + (rand - 1800))) {
+                            if (random(1, 7) != 1) {
+                                tmp = (_data.routes[i].points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
+                                gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
+                                mobilePushes.push({
+                                    cancel_reason: "",
+                                    canceled: false,
+                                    gps_time: gpsTime,
+                                    lat: _data.routes[i].points[j].LAT,
+                                    lon: _data.routes[i].points[j].LON,
+                                    number: _data.routes[i].points[j].TASK_NUMBER,
+                                    time: gpsTime
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
             for (var m = 0; m < _data.idArr.length; m++) {
 
                 if (scope.demoMode) {
-                    mobilePushes = _data.demoPushes;
+                    //mobilePushes = _data.demoPushes;
                     m = 2000000000;
                 } else {
                     mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
@@ -635,6 +664,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             checkConfirmedFromLocalStorage();
+        }
+
+        var seed = 1;
+        function random(min, max) {
+            var x = Math.sin(seed++) * 10000;
+            return Math.floor((x - Math.floor(x)) * (max - min) + min);
         }
 
         function checkConfirmedFromLocalStorage() {
