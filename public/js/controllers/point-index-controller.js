@@ -10,7 +10,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
             radius = 0.15,
-            mobileRadius = 0.5,
+            mobileRadius = 50,
             controlledWindow = 600,
             promisedWindow = 3600,
             problemSortType = 0,
@@ -548,7 +548,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            if (parentForm == undefined) {
+            if (parentForm == undefined && !scope.demoMode) {
                 checkConfirmedFromLocalStorage();
                 return;
             }
@@ -556,14 +556,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var mobilePushes,
                 allPushes = [];
             for (var m = 0; m < _data.idArr.length; m++) {
-                //TODO REMOVE
-                console.log([_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
-                //mobilePushes = parentForm._call('getDriversActions', [_data.ID == '28' ? '28/2' : _data.ID, getTodayStrFor1C()]);
-                //console.log('mobilePushes', mobilePushes);
-                //console.log('28/2', parentForm._call('getDriversActions', ['28/2', getTodayStrFor1C()]));
-                //console.log('28', parentForm._call('getDriversActions', ['28', getTodayStrFor1C()]));
 
-                mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
+                if (scope.demoMode) {
+                    mobilePushes = _data.demoPushes;
+                    m = 2000000000;
+                } else {
+                    mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
+                }
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {
@@ -577,15 +576,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     continue;
                 }
 
-                var tmp = JSON.stringify(mobilePushes),
-                    p1 = tmp.substr(0, tmp.length / 2);
-                mobilePushes = JSON.parse(buttonsStr.substr(1, buttonsStr.length - 2));
-
-                console.log('mobilePushes array full', {pushes: tmp});
-                console.log('mobilePushes array p1', {pushes: p1});
-                console.log('mobilePushes array p2', {pushes: tmp.substr(p1.length)});
-
-                // TODO: FIX если есть проверка по кнопкам, не совсем корректно работает пересчет
+                console.log('mobilePushes array', {pushes: mobilePushes});
 
                 if (mobilePushes == undefined) continue;
 

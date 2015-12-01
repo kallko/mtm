@@ -71,7 +71,15 @@ SoapManager.prototype.loadDemoData = function (callback) {
             return console.log(err);
         }
 
-        callback(JSON.parse(data));
+        data = JSON.parse(data);
+        fs.readFile('./data/pushes.js', 'utf8', function (err, pushes) {
+            if (err) {
+                return console.log(err);
+            }
+
+            data.demoPushes = JSON.parse(pushes);
+            callback(data);
+        });
     });
 };
 
