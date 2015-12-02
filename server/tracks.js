@@ -298,7 +298,15 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
     for (var i = 0; i < data.routes.length; i++) {
         for (var j = 0; j < data.sensors.length; j++) {
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
+                if (data.routes[i].haveSensor) {
+                    data.routes[i].moreThanOneSensor = true;
+                    console.log('moreThanOneSensor = true');
+                    break;
+                }
+
                 data.sensors[j].loading = true;
+                data.routes[i].haveSensor = true;
+
                 (function (jj) {
                     console.log('request for stops ', jj, url + '&gid=' + data.sensors[jj].GID);
                     request({
@@ -333,7 +341,7 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
                         }
                     });
                 })(j);
-                break;
+                //break;
             }
         }
     }

@@ -273,7 +273,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 routeId = 0,
                 len = 0,
                 tPoint,
-                roundingNumb = 300;
+                roundingNumb = 300,
+                problematicRoutes = [];
             scope.rowCollection = [];
 
             for (var i = 0; i < data.sensors.length; i++) {
@@ -286,6 +287,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             for (i = 0; i < data.routes.length; i++) {
+                if (data.routes[i].moreThanOneSensor) problematicRoutes.push(data.routes[i]);
+
                 for (j = 0; j < data.transports.length; j++) {
                     if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                         data.routes[i].transport = data.transports[j];
@@ -402,6 +405,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
+            }
+
+            if (problematicRoutes.length > 0) {
+                var msg = '<p style="width: 450px;" >Обнаружены машины с несколькими датчиками. Для данных машин необходимо ' +
+                    'оставить только один датчик, в противном случае ' +
+                    'для них не будут корректно определяться стопы.</p><ul>';
+                for (var j = 0; j < problematicRoutes.length; j++) {
+                    msg += '<li>' + problematicRoutes[j].transport.NAME + ', '
+                        + problematicRoutes[j].driver.NAME + '</li>';
+                }
+                msg += '</ul>';
+                showPopup(msg);
             }
 
             _data = data;

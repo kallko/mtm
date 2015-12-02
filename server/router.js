@@ -81,7 +81,7 @@ router.route('/acp/mergesolution')
 
 router.route('/acp/savesolution')
     .post(function (req, res) {
-        console.log('savesolution');
+        console.log('savesolution', new Date());
         if (!req.body.solution || req.body.solution.length == 0) {
             res.status(200).json({status: 'nothing to save'});
             return;

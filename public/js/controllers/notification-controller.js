@@ -17,7 +17,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
     }
 
     function showPopup(text) {
-        $('#notification div').text(text);
+        $('#notification div').html(text);
         $('#notification').popup('show');
     }
 
