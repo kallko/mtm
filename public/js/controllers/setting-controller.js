@@ -21,8 +21,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
         };
 
         scope.workingWindowTypes = [
-            {name: 'Обещанное окно', value: 0},
-            {name: 'Заказанное окно', value: 1}
+            {name: 'Заказанное окно', value: 0},
+            {name: 'Обещанное окно', value: 1}
         ];
 
         rootScope.$on('setMode', function (event, params) {
