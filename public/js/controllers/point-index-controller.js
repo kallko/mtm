@@ -387,7 +387,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         tPoint.promised_window.start -= tPoint.promised_window.start % roundingNumb - roundingNumb;
                         tPoint.promised_window.finish = tPoint.promised_window.start + promisedWindow;
-                        for (k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                        for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
                                 tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
                                 if (tPoint.windows[k].finish < tPoint.promised_window.finish) {
@@ -400,6 +400,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (tPoint.promised_window_changed == undefined) {
                         tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
+                    }
+
+                    if (scope.params.workingWindowType == 0) {
+                        for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                            if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                                tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                                tPoint.working_window = tPoint.windows[k];
+                            }
+                        }
+
+                        if (tPoint.working_window == undefined) tPoint.working_window = tPoint.promised_window_changed;
+                    } else if (scope.params.workingWindowType == 1) {
+                        tPoint.working_window = tPoint.promised_window_changed;
                     }
 
                 }
@@ -453,8 +466,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         _data.routes[i].points[j].status == STATUS.ARRIVED_LATE ||
                         _data.routes[i].points[j].status == STATUS.DELAY ||
                         _data.routes[i].points[j].status == STATUS.IN_PROGRESS) &&
-                        _data.routes[i].points[j].promised_window_changed.finish - scope.params.endWindowSize * 300 < now &&
-                        _data.routes[i].points[j].promised_window_changed.finish > now) {
+                        _data.routes[i].points[j].working_window.finish - scope.params.endWindowSize * 300 < now &&
+                        _data.routes[i].points[j].working_window.finish > now) {
                         _data.routes[i].points[j].promised_15m = true;
                     } else {
                         _data.routes[i].points[j].promised_15m = false;
@@ -710,7 +723,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (scope.rowCollection[i].rawConfirmed === 1) {
                     row.confirmed = true;
                 } else if (scope.rowCollection[i].rawConfirmed === -1) {
-                    if (_data.server_time > row.promised_window_changed.finish) {
+                    if (_data.server_time > row.working_window.finish) {
                         row.status = STATUS.ARRIVED_LATE;
                     } else {
                         row.status = STATUS.DELAY;
@@ -737,9 +750,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             if (tmpPoint.rawConfirmed !== -1) {
-                if (tmpPoint.real_arrival_time > tmpPoint.promised_window_changed.finish) {
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
                     tmpPoint.status = STATUS.FINISHED_LATE;
-                } else if (tmpPoint.real_arrival_time < tmpPoint.promised_window_changed.start) {
+                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
                     tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
                 } else {
                     tmpPoint.status = STATUS.FINISHED;
@@ -837,7 +850,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
-                                        if (now > _route.points[j].promised_window_changed.finish) {
+                                        if (now > _route.points[j].working_window.finish) {
                                             _route.points[j].status = STATUS.ARRIVED_LATE;
                                         }
 
@@ -865,10 +878,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
                                     if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
                                         _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction -
-                                            _route.points[j].promised_window_changed.finish);
+                                            _route.points[j].working_window.finish);
 
                                         if (_route.points[j].overdue_time > 0) {
-                                            if (_route.points[j].promised_window_changed.finish < now) {
+                                            if (_route.points[j].working_window.finish < now) {
                                                 _route.points[j].status = STATUS.ARRIVED_LATE;
                                             } else {
                                                 _route.points[j].status = STATUS.DELAY;
@@ -1030,7 +1043,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 case 'not-delivered-status':
                     if (!needChanges) return;
 
-                    if (_data.server_time > row.promised_window_changed.finish) {
+                    if (_data.server_time > row.working_window.finish) {
                         row.status = STATUS.ARRIVED_LATE;
                     } else {
                         row.status = STATUS.DELAY;
