@@ -102,18 +102,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.selectedRow = -1;
             scope.filters.text = "";
-            scope.demoMode = true;
+            scope.demoMode = false;
 
-            scope.params = {
-                predictMinutes: 10,
-                factMinutes: 15,
-                volume: 0,
-                weight: 0,
-                value: 0,
-                workingWindowType: 1,
-                demoTime: 10,
-                endWindowSize: 3
-            };
+            if (scope.params == undefined) {
+                scope.params = {
+                    predictMinutes: 10,
+                    factMinutes: 15,
+                    volume: 0,
+                    weight: 0,
+                    value: 0,
+                    workingWindowType: 1,
+                    demoTime: 10,
+                    endWindowSize: 3
+                };
+            }
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -254,18 +256,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function linkDataParts(data) {
+            init();
             console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
 
-            scope.demoMode = data.demoMode;
+            scope.demoMode = data.demoMode === true;
             scope.$emit('setMode', {mode: scope.demoMode});
             if (scope.demoMode) {
                 console.log('DEMO MODE');
                 data.server_time = data.server_time_demo + (scope.params.demoTime - 6) * 3600;
                 console.log('Demo time', new Date(data.server_time * 1000));
             }
-
-            init();
 
             var tmpPoints,
                 rowId = 0,
@@ -423,7 +424,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return parts[0] + ' ' + parts[1];
         }
 
-
         function updateData() {
             statusUpdate();
             predicationArrivalUpdate();
@@ -576,11 +576,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tmp;
                 for (var i = 0; i < _data.routes.length; i++) {
 
+                    seed = i * 42;
                     rand = random(0, 3600);
-                    seed = i;
                     for (var j = 0; j < _data.routes[i].points.length; j++) {
                         if (_data.server_time > (_data.routes[i].points[j].arrival_time_ts  + (rand - 1800))) {
-                            if (random(1, 7) != 1) {
+                            if (random(1, 8) != 1) {
                                 tmp = (_data.routes[i].points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
                                 gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
                                 mobilePushes.push({
