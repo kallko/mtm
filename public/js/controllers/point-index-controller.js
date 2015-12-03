@@ -9,7 +9,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             dataUpdateInterval = 120,
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
-            radius = 0.12,
+            radius = 0.15,
             mobileRadius = 0.5,
             controlledWindow = 600,
             promisedWindow = 3600,
@@ -19,7 +19,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 FINISHED_LATE: 1,
                 FINISHED_TOO_EARLY: 2,
                 IN_PROGRESS: 3,
-                ARRIVED_LATE: 4,
+                TIME_OUT: 4,
                 DELAY: 5,
                 //FOCUS_L1: 5,
                 //FOCUS_L2: 6,
@@ -66,7 +66,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     class: 'delivered-too-early-status'
                 },
                 {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
-                {name: 'время вышло', value: STATUS.ARRIVED_LATE, class: 'arrived-late-status'},
+                {name: 'время вышло', value: STATUS.TIME_OUT, class: 'time-out-status'},
                 {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
                 //{name: 'под контролем', value: 4, class: 'controlled-status'},
                 //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
@@ -463,7 +463,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
                     if ((_data.routes[i].points[j].status == STATUS.SCHEDULED ||
-                        _data.routes[i].points[j].status == STATUS.ARRIVED_LATE ||
+                        _data.routes[i].points[j].status == STATUS.TIME_OUT ||
                         _data.routes[i].points[j].status == STATUS.DELAY ||
                         _data.routes[i].points[j].status == STATUS.IN_PROGRESS) &&
                         _data.routes[i].points[j].working_window.finish - scope.params.endWindowSize * 300 < now &&
@@ -647,8 +647,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     continue;
                 }
 
-                buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
-                mobilePushes = JSON.parse(buttonsStr);
+                if (!scope.demoMode) {
+                    buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
+                    mobilePushes = JSON.parse(buttonsStr);
+                }
                 console.log('mobilePushes array', {pushes: mobilePushes});
 
                 if (mobilePushes == undefined) continue;
@@ -726,7 +728,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     row.confirmed = true;
                 } else if (scope.rowCollection[i].rawConfirmed === -1) {
                     if (_data.server_time > row.working_window.finish) {
-                        row.status = STATUS.ARRIVED_LATE;
+                        row.status = STATUS.TIME_OUT;
                     } else {
                         row.status = STATUS.DELAY;
                     }
@@ -773,11 +775,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function updateProblemIndex(route) {
             var point,
-                lateMinutesCoef = scope.params.predictMinutes, // scope.params.,
-                volumeCoef = scope.params.volume,
-                weightCoef = scope.params.weight,
-                valueCoef = scope.params.value,
-                outWorkingWindowCoef = scope.params.value,
                 timeThreshold = 3600 * 6,
                 timeMin = 0.25,
                 timeCoef;
@@ -785,34 +782,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var j = 0; j < route.points.length; j++) {
                 point = route.points[j];
 
+                point.problem_index = 0;
                 if (point.overdue_time > 0) {
-                    point.problem_index = parseInt(point.overdue_time * lateMinutesCoef);
-                    point.problem_index += parseInt(point.WEIGHT) * weightCoef;
-                    point.problem_index += parseInt(point.VOLUME) * volumeCoef;
-                    point.problem_index += parseInt(point.VALUE) * valueCoef;
+                    if (point.status == STATUS.D) {
+                        point.problem_index += (point.working_window.finish - point.real_arrival_time) * scope.params.factMinutes;
+                        timeCoef = 3;
+                    } else {
+                        //timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
+                        //timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
 
-                    if (point.windows != undefined) {
-                        for (var k = 0; k < point.windows.length; k++) {
-                            if (point.windows[k].finish > point.arrival_time_ts &&
-                                point.windows[k].start < point.arrival_time_ts &&
-                                point.arrival_time_ts + point.overdue_time > point.windows[k].finish) {
-                                point.problem_index += ((point.arrival_time_ts + point.overdue_time) - point.windows[k].finish)
-                                    * outWorkingWindowCoef;
-                                break;
-                            }
-                        }
+                        timeCoef = 1;
                     }
 
-                    timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
-                    timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
-                    point.problem_index = parseInt(point.problem_index * timeCoef);
+                    point.problem_index += parseInt(point.overdue_time * scope.params.predictMinutes);
+                    point.problem_index += parseInt(point.WEIGHT) * scope.params.weight;
+                    point.problem_index += parseInt(point.VOLUME) * scope.params.volume;
+                    point.problem_index += parseInt(point.VALUE) * scope.params.value;
 
-                    //if (route.ID == '11') {
-                    //    console.log('b: ' + point.problem_index);
-                    //    console.log('a: ' + parseInt(point.problem_index * timeCoef));
-                    //}
-                } else {
-                    point.problem_index = 0;
+                    point.problem_index = parseInt(point.problem_index * timeCoef);
+                    point.problem_index = parseInt(point.problem_index / 100);
                 }
             }
         }
@@ -853,7 +841,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
                                         if (now > _route.points[j].working_window.finish) {
-                                            _route.points[j].status = STATUS.ARRIVED_LATE;
+                                            _route.points[j].status = STATUS.TIME_OUT;
                                         }
 
                                         _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
@@ -884,7 +872,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                         if (_route.points[j].overdue_time > 0) {
                                             if (_route.points[j].working_window.finish < now) {
-                                                _route.points[j].status = STATUS.ARRIVED_LATE;
+                                                _route.points[j].status = STATUS.TIME_OUT;
                                             } else {
                                                 _route.points[j].status = STATUS.DELAY;
                                             }
@@ -1046,7 +1034,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (!needChanges) return;
 
                     if (_data.server_time > row.working_window.finish) {
-                        row.status = STATUS.ARRIVED_LATE;
+                        row.status = STATUS.TIME_OUT;
                     } else {
                         row.status = STATUS.DELAY;
                     }
@@ -1470,7 +1458,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         mathInput.points.push(point);
 
-                        late = route.points[i].status == STATUS.ARRIVED_LATE ||
+                        late = route.points[i].status == STATUS.TIME_OUT ||
                             route.points[i].status == STATUS.DELAY;
 
                         jobWindows = [];

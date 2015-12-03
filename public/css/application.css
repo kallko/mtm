@@ -209,7 +209,7 @@ template {
 
 .delivered-status,
 .performed-status,
-.arrived-late-status,
+.time-out-status,
 .delay-status,
 .controlled-status,
 .awaiting-status,
@@ -238,7 +238,7 @@ template {
     color: blue;
 }
 
-.arrived-late-status, .delay-status {
+.time-out-status, .delay-status {
     color: red;
 }
 
