@@ -647,6 +647,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     continue;
                 }
 
+                mobilePushes = JSON.parse(buttonsStr);
                 console.log('mobilePushes array', {pushes: mobilePushes});
 
                 if (mobilePushes == undefined) continue;
