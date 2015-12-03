@@ -34,9 +34,9 @@ SoapManager.prototype.getFullUrl = function () {
     return 'https://' + this.admin_login + ':' + this.password + this.url;
 };
 
-SoapManager.prototype.getAllDailyData = function (callback) {
+SoapManager.prototype.getAllDailyData = function (callback, date) {
     if (!loadFromCache) {
-        this.getDailyPlan(callback);
+        this.getDailyPlan(callback, date);
     } else {
         this.loadFromCachedJson(callback);
     }
@@ -182,10 +182,17 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     var me = this,
         itIsToday = typeof date === 'undefined';
 
+    if (date) {
+        date = parseInt(date);
+        date += 18 * 3600000;
+    }
+
+    console.log('date >>>', date);
     // ONLY FOR TEST
     date = !itIsToday ? date : Date.now();
     //date = date - 86400000 * 2;
-    //date = 1448091000000;
+    //date = 1448992800000;
+    //1448992800000
 
     console.log('itIsToday', itIsToday);
     console.log('Date >>>', new Date(date));
@@ -351,16 +358,16 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     data[nIndx].sensors.push(sensors[i].$);
                 }
 
-                if (itIsToday) {
-                    for (i = 0; i < data[nIndx].routes.length; i++) {
-                        tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
-                    }
-                    tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback);
-                    checkBeforeSend(data, callback);
-                } else {
-                    console.log('DONE!');
-                    callback(data);
+                //if (itIsToday) {
+                for (i = 0; i < data[nIndx].routes.length; i++) {
+                    tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
                 }
+                tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback);
+                checkBeforeSend(data, callback);
+                //} else {
+                //    console.log('DONE!');
+                //    callback(data);
+                //}
 
                 //data.tasks = [];
                 //

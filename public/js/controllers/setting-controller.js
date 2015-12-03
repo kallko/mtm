@@ -17,7 +17,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                 value: 0,
                 workingWindowType: 1,
                 demoTime: 10,
-                endWindowSize: 3
+                endWindowSize: 3,
+                showDate: -1
             };
 
             var settings = Settings.load();
@@ -34,6 +35,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
         }
 
         scope.saveAllParams = function () {
+            var date = new Date($('#show-date').val());
+            scope.params.showDate = date.getTime() || -1;
             scope.$emit('settingsChanged', scope.params);
             saveToLocalStorage();
         };

@@ -114,7 +114,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     value: 0,
                     workingWindowType: 1,
                     demoTime: 10,
-                    endWindowSize: 3
+                    endWindowSize: 3,
+                    showDate: -1
                 };
 
                 var settings = Settings.load();
@@ -205,12 +206,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             loadDailyData(true);
         };
 
-        function loadDailyData(force) {
+        function loadDailyData(force, showDate) {
             var url = './dailydata';
-            if (force) {
-                url += '?force=true';
-            }
+            if (force)  url += '?force=true';
+            if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
 
+            console.log(url);
             http.get(url, {})
                 .success(function (data) {
                     linkDataParts(data);
@@ -991,6 +992,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || params.value !== scope.params.value) {
                 console.log('problem index parameter was changed!');
                 changed = true;
+            }
+
+            if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
+                console.log('OMG!!1 New show date!');
+                scope.params = JSON.parse(JSON.stringify(params));
+                loadDailyData(false, params.showDate);
+                return;
             }
 
             if (changed) {

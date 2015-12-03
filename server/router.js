@@ -155,7 +155,7 @@ router.route('/acp/loadsolution')
 
                 for (var i = 0; i < json.length; i++) {
                     if (!json[i].solved) {
-                        if(json[i].changed || json[i].done){
+                        if (json[i].changed || json[i].done) {
                             json[i].hide = true;
                         }
                         toSend.push(json[i]);
@@ -254,19 +254,25 @@ router.route('/dailydata')
             day = 86400000,
             today12am = now - (now % day);
 
-        if (config.cashing.session && req.query.force == null && req.session.login != null
-        && cashedDataArr[req.session.login] != null &&
-        cashedDataArr[req.session.login].lastUpdate == today12am) {
+        if (config.cashing.session
+            && req.query.force == null
+            && req.query.showDate == null
+            && req.session.login != null
+            && cashedDataArr[req.session.login] != null
+            && cashedDataArr[req.session.login].lastUpdate == today12am) {
             console.log('=== loaded from session === send data to client ===');
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             var soapManager = new soap(req.session.login);
-            soapManager.getAllDailyData(dataReadyCallback);
+            soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
-                data.lastUpdate = today12am;
-                cashedDataArr[req.session.login] = data;
+                if (!req.query.showDate){
+                    data.lastUpdate = today12am;
+                    cashedDataArr[req.session.login] = data;
+                }
+
                 res.status(200).json(data);
             }
         }

@@ -4,7 +4,9 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
             var settingsStr = localStorage['settings'];
             if (!settingsStr) return;
 
-            return JSON.parse(settingsStr);
+            settingsStr = JSON.parse(settingsStr);
+            settingsStr.showDate = -1;
+            return settingsStr;
         }
     };
 }]);

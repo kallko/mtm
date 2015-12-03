@@ -20,7 +20,7 @@ var myLayout = new GoldenLayout({
                     ,
                     {
                         type: 'component',
-                        height: 50,
+                        height: 52,
                         title: 'Настройки',
                         componentName: 'template',
                         componentState: {templateId: 'template2'}
