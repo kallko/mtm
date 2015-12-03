@@ -651,8 +651,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 if (mobilePushes == undefined) continue;
 
+                console.log('mobilePushes.length', mobilePushes.length);
                 for (var i = 0; i < mobilePushes.length; i++) {
                     if (mobilePushes[i].canceled) continue;
+                    console.log('i after continue', i);
 
                     if (mobilePushes[i].gps_time_ts == undefined) {
                         if (mobilePushes[i].gps_time) {
@@ -663,6 +665,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     if (mobilePushes[i].gps_time_ts > _data.server_time) continue;
+                    console.log('i after gps_time_ts > server_time', i);
 
                     for (var j = 0; j < _data.routes.length; j++) {
                         for (var k = 0; k < _data.routes[j].points.length; k++) {
