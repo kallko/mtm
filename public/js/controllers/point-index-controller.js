@@ -648,16 +648,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
-                console.log(buttonsStr);
                 mobilePushes = JSON.parse(buttonsStr);
                 console.log('mobilePushes array', {pushes: mobilePushes});
 
                 if (mobilePushes == undefined) continue;
 
-                console.log('mobilePushes.length', mobilePushes.length);
                 for (var i = 0; i < mobilePushes.length; i++) {
                     if (mobilePushes[i].canceled) continue;
-                    console.log('i after continue', i);
 
                     if (mobilePushes[i].gps_time_ts == undefined) {
                         if (mobilePushes[i].gps_time) {
