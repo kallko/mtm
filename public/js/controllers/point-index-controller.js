@@ -665,7 +665,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     if (mobilePushes[i].gps_time_ts > _data.server_time) continue;
-                    console.log('i after gps_time_ts > server_time', i);
 
                     for (var j = 0; j < _data.routes.length; j++) {
                         for (var k = 0; k < _data.routes[j].points.length; k++) {
