@@ -784,14 +784,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 point.problem_index = 0;
                 if (point.overdue_time > 0) {
-                    if (point.status == STATUS.D) {
-                        point.problem_index += (point.working_window.finish - point.real_arrival_time) * scope.params.factMinutes;
-                        timeCoef = 3;
-                    } else {
-                        //timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
-                        //timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
-
+                    if (point.status == STATUS.TIME_OUT) {
+                        point.problem_index += (_data.server_time - point.working_window.finish) * scope.params.factMinutes;
                         timeCoef = 1;
+                    } else {
+                        timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
+                        timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
                     }
 
                     point.problem_index += parseInt(point.overdue_time * scope.params.predictMinutes);
