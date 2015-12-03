@@ -1,5 +1,6 @@
-angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval', '$filter', '$rootScope',
-    function (scope, http, timeout, interval, filter, rootScope) {
+angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
+    , '$filter', '$rootScope', 'Settings',
+    function (scope, http, timeout, interval, filter, rootScope, Settings) {
 
         var pointTableHolder,
             pointContainer,
@@ -115,6 +116,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     demoTime: 10,
                     endWindowSize: 3
                 };
+
+                var settings = Settings.load();
+                scope.params = settings || scope.params;
             }
         }
 
