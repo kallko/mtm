@@ -212,6 +212,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         function loadDailyData(force, showDate) {
+            showPopup('Загружаю данные...');
+
             var url = './dailydata';
             if (force)  url += '?force=true';
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
@@ -471,6 +473,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             console.log('Finish linking', data);
             scope.displayCollection = [].concat(scope.rowCollection);
+
+            showPopup('Загрузка завершенна!');
 
             setColResizable();
             prepareFixedHeader();

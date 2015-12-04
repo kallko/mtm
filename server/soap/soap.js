@@ -248,7 +248,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
     if (!err) {
         //console.log(result.return);
         //log.toFLog('itinerary', result.return, false);
-        log.toFLog('itinerary', result.return, false);
+        //log.toFLog('itinerary', result.return, false);
         parseXML(result.return, function (err, res) {
 
             if (res.MESSAGE.ITINERARIES == null ||
