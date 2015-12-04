@@ -81,6 +81,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'В обещанном', value: WINDOW_TYPE.IN_PROMISED, class: 'in-promised'}
             ];
 
+            scope.filters.branches = [
+                {name: 'Все филиалы', value: -1}
+            ];
+
+            scope.filters.branch = scope.filters.branches[0].value;
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.routes = [{name: 'все маршруты', value: -1}];
             scope.filters.route = scope.filters.routes[0].value;
@@ -279,7 +284,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 len = 0,
                 tPoint,
                 roundingNumb = 300,
-                problematicRoutes = [];
+                problematicRoutes = [],
+                branchIndx;
             scope.rowCollection = [];
 
             for (var i = 0; i < data.sensors.length; i++) {
@@ -293,6 +299,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (i = 0; i < data.routes.length; i++) {
                 if (data.routes[i].moreThanOneSensor) problematicRoutes.push(data.routes[i]);
+
+                //TODO: get real branch office
+                data.routes[i].branch = i % 2 == 0 ? 'Киев ТЕСТ' : 'Одесса ТЕСТ';
+
+                for (var j = 0; j < scope.filters.branches.length; j++) {
+                    if (scope.filters.branches[j].name == data.routes[i].branch) {
+                        branchIndx = scope.filters.branches[j].value;
+                        break;
+                    }
+                    else if (j == scope.filters.branches.length - 1) {
+                        scope.filters.branches.push({
+                            name: data.routes[i].branch,
+                            value: scope.filters.branches.length
+                        });
+                        branchIndx = scope.filters.branches.length - 1;
+                    }
+                }
 
                 for (j = 0; j < data.transports.length; j++) {
                     if (data.routes[i].TRANSPORT == data.transports[j].ID) {
@@ -322,6 +345,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPoints = data.routes[i].points;
                 for (j = 0; j < tmpPoints.length; j++) {
                     tPoint = tmpPoints[j];
+                    tPoint.branchIndx = branchIndx;
+                    tPoint.branchName = data.routes[i].branch;
                     tPoint.driver = data.routes[i].driver;
                     tPoint.in_plan = true;
                     if (data.routes[i].filterId == null) {
@@ -612,7 +637,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     seed = i * 42;
                     rand = random(0, 3600);
                     for (var j = 0; j < _data.routes[i].points.length; j++) {
-                        if (_data.server_time > (_data.routes[i].points[j].arrival_time_ts  + (rand - 1800))) {
+                        if (_data.server_time > (_data.routes[i].points[j].arrival_time_ts + (rand - 1800))) {
                             if (random(1, 8) != 1) {
                                 tmp = (_data.routes[i].points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
                                 gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
@@ -704,6 +729,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         var seed = 1;
+
         function random(min, max) {
             var x = Math.sin(seed++) * 10000;
             return Math.floor((x - Math.floor(x)) * (max - min) + min);
@@ -945,7 +971,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             scope.$watch(function () {
-                return scope.filters.route + scope.filters.status + scope.filters.problem_index;
+                return scope.filters.route + scope.filters.status
+                    + scope.filters.problem_index + scope.filters.branch;
             }, function () {
                 updateResizeGripHeight();
             });
@@ -1799,5 +1826,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || row.driver.PHONE.indexOf(scope.filters.text) >= 0
                 || row.transport.REGISTRATION_NUMBER.indexOf(scope.filters.text) >= 0;
         };
+
+        scope.branchFilter = function (row) {
+            return (scope.filters.branch == -1 || row.branchIndx == scope.filters.branch);
+        }
 
     }]);

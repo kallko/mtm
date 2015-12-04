@@ -29,7 +29,7 @@ var myLayout = new GoldenLayout({
             },
             {
                 type: 'component',
-                width: 58,
+                width: 50,
                 componentName: 'template',
                 title: 'Точки маршрута',
                 componentState: {templateId: 'template-point-table'}
