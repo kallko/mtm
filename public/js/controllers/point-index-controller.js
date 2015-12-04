@@ -213,12 +213,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function loadDailyData(force, showDate) {
             showPopup('Загружаю данные...');
-
             var url = './dailydata';
             if (force)  url += '?force=true';
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
 
-            console.log(url);
             http.get(url, {})
                 .success(function (data) {
                     linkDataParts(data);
@@ -1186,6 +1184,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        scope.dblRowClick = function (row) {
+            console.log('dblRowClick');
+            scope.$emit('showPoint', row);
+        };
+
         scope.getTextStatus = function (statusCode, row_id, confirmed) {
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
@@ -1226,21 +1229,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return '';
         };
 
-        scope.statusFilter = function (row) {
+        function statusFilter (row) {
             return (scope.filters.status == -1 || row.status == scope.filters.status);
-        };
+        }
 
-        scope.routeFilter = function (row) {
+        function routeFilter (row) {
             return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
-        };
+        }
 
-        scope.problemFilter = function (row) {
+        function problemFilter (row) {
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
-        };
+        }
 
-        scope.promise15MFilter = function (row) {
+        function promise15MFilter (row) {
             return (scope.filters.promised_15m == -1 || row.promised_15m);
-        };
+        }
 
         scope.drawPlannedRoute = function () {
             if (scope.selectedRow != -1) {
@@ -1817,22 +1820,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateResizeGripHeight();
         };
 
-        scope.textFilter = function (row) {
+        function textFilter (row) {
             if (scope.filters.text === "") return true;
             if (row.waypoint == undefined) return false;
+            var filterLowCase = scope.filters.text.toLowerCase();
 
-            return row.waypoint.NAME.indexOf(scope.filters.text) >= 0
-                || row.driver.NAME.indexOf(scope.filters.text) >= 0
-                || row.waypoint.ADDRESS.indexOf(scope.filters.text) >= 0
-                || row.waypoint.COMMENT.indexOf(scope.filters.text) >= 0
-                || row.NUMBER.indexOf(scope.filters.text) >= 0
-                || row.transport.NAME.indexOf(scope.filters.text) >= 0
-                || row.driver.PHONE.indexOf(scope.filters.text) >= 0
-                || row.transport.REGISTRATION_NUMBER.indexOf(scope.filters.text) >= 0;
-        };
+            return row.waypoint.NAME.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.driver.NAME.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.waypoint.ADDRESS.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.waypoint.COMMENT.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.NUMBER.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.transport.NAME.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.driver.PHONE.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.transport.REGISTRATION_NUMBER.toLowerCase().indexOf(filterLowCase) >= 0;
+        }
 
-        scope.branchFilter = function (row) {
+        function branchFilter (row) {
             return (scope.filters.branch == -1 || row.branchIndx == scope.filters.branch);
+        }
+
+        scope.applyFilter = function (row) {
+            return statusFilter(row)
+                && routeFilter(row)
+                && problemFilter(row)
+                && promise15MFilter(row)
+                && textFilter(row)
+                && branchFilter(row);
         }
 
     }]);

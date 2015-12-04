@@ -274,3 +274,45 @@ template {
     padding: 0;
     height: 22px;
 }
+
+#point-view {
+    background-color: #D5DBD8;
+    border: 2px solid grey;
+    padding: 12px;
+}
+
+#point-view-table {
+
+}
+
+.filter-btn {
+    height: 21px;
+}
+
+/*.data-block {*/
+    /*padding: 20px;*/
+/*}*/
+
+/*#point-view .row {*/
+
+/*}*/
+
+/*#point-view .row .row-title{*/
+    /*width: 120px;*/
+    /*float: left;*/
+/*}*/
+
+/*#point-view .row .row-data{*/
+    /*width: 240px;*/
+/*}*/
+
+
+
+
+
+
+
+
+
+
+

@@ -25,14 +25,6 @@
         parentForm = thisForm;
         console.log('initialize complete');
     }
-
-//    window.setTimeout(function () {
-//        var res = parentForm._call('getDriversActions', ['15', '20151111']);
-//
-//        console.log('res', res);
-//        console.log('res.m_value', res.m_value);
-//        console.log('JSON.parse(res.m_value)', JSON.parse(res.m_value));
-//    }, 3000);
 </script>
 
 <script src="./js/app.js"></script>
@@ -42,6 +34,7 @@
 <script src="./js/controllers/debug-controller.js"></script>
 <script src="./js/controllers/notification-controller.js"></script>
 <script src="./js/controllers/setting-controller.js"></script>
+<script src="./js/controllers/point-view-controler.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -101,9 +94,12 @@
                 </button>
 
                 <input id="search-input" type="text" size="15" enter-event="setTextFilter()" />
-                <!--<button class="btn btn-info btn-sm" id="cancel-filter-btn"  ng-click="cancelTextFilter()">-->
-                    <!--x-->
-                <!--</button>-->
+                <button class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()" >
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                </button>
+                <button class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
+                    <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
             </div>
         </div>
 
@@ -142,8 +138,8 @@
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
                     ng-click="rowClick(row.row_id)"
-                    ng-show="statusFilter(row) && routeFilter(row) && problemFilter(row)
-                            && promise15MFilter(row) && textFilter(row) && branchFilter(row)"
+                    ng-dblclick="dblRowClick(row)"
+                    ng-show="applyFilter(row)"
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row" >
 
                     <td>{{row.NUMBER}}</td>
@@ -302,6 +298,28 @@
     <div>
         Текст оповещения
     </div>
+</div>
+
+<div id="point-view" ng-controller="PointViewController" >
+    <!--<div class="data-block" >-->
+        <!--<div class="row" >-->
+            <!--<div class="row-title" >Название:</div>-->
+            <!--<div class="row-data" >{{point.waypoint.NAME}}</div>-->
+        <!--</div>-->
+        <!--<div class="row" >-->
+            <!--<div class="row-title" >Адрес:</div>-->
+            <!--<div class="row-data" >{{point.waypoint.ADDRESS}}</div>-->
+        <!--</div>-->
+    <!--</div>-->
+
+    <!--<table id="point-view-table" >-->
+        <!--<tbody>-->
+            <!--<tr>-->
+                <!--<td class="title" >Название</td>-->
+                <!--<td class="row-data" >{{point.waypoint.NAME}}</td>-->
+            <!--</tr>-->
+        <!--</tbody>-->
+    <!--</table>-->
 </div>
 
 
