@@ -353,6 +353,11 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 }
 
                 data[nIndx].sensors = [];
+                if (sensors == undefined) {
+                    console.log('NO SENSORS!');
+                    callback({status: 'no sensors'});
+                }
+
                 for (i = 0; i < sensors.length; i++) {
                     data[nIndx].sensors.push(sensors[i].$);
                 }
