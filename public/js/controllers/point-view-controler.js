@@ -16,6 +16,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         function show (event, row) {
             scope.point = row;
             $('#point-view').popup('show');
+            console.log('show:', row);
         }
 
         function initStatuses (event, data) {
@@ -24,7 +25,23 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             console.log('initStatuses', data);
             STATUS = data.statuses;
             scope.statuses = data.filters;
-            //console.log('initStatuses', scope.statuses);
         }
+
+        scope.confirmStatus = function () {
+            console.log('confirmStatus');
+        };
+
+        scope.cancelStatus = function () {
+            console.log('cancelStatus');
+        };
+
+        scope.cancelTask = function () {
+            console.log('cancelTask');
+        };
+
+        scope.unconfirmed = function () {
+            return !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
+                scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
+        };
 
     }]);

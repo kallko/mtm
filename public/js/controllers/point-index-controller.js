@@ -1188,7 +1188,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.dblRowClick = function (row) {
-            console.log('dblRowClick', row);
             row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             scope.$emit('showPoint', row);

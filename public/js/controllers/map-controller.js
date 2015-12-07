@@ -45,7 +45,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     function highlightPointMarker(point) {
-        console.log('highlightPointMarker');
+        //console.log('highlightPointMarker');
         //console.log(point);
 
         //highlightedPoint = L.marker([point.LAT, point.LON],

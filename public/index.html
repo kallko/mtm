@@ -375,9 +375,9 @@
     </table>
 
     <div id="point-view-setting" >
-        <button class="btn btn-primary btn-sm" >Подтвердить статус доставлено</button>
-        <button class="btn btn-primary btn-sm" >Отменить статус доставлено</button>
-        <button class="btn btn-danger btn-sm" >Отменить задание</button>
+        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="confirmStatus()" >Подтвердить статус доставлено</button>
+        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="cancelStatus()" >Отменить статус доставлено</button>
+        <button class="btn btn-danger btn-sm" ng-click="cancelTask()" >Отменить задание</button>
     </div>
 </div>
 
