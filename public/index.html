@@ -78,7 +78,7 @@
                 </button>
 
                 <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
-                    {{params.endWindowSize * 5}} минут
+                    на краю окна
                 </button>
 
                 <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
@@ -109,7 +109,7 @@
                 <thead class="header">
                 <tr class="titles-tr">
                     <th class="number-col">Номер</th>
-                    <th class="car-type-col">Маршрут</th>
+                    <th class="car-type-col">Машина</th>
                     <th class="driver-name-col">Водитель</th>
                     <th class="client-name-col">Название</th>
                     <th class="address-col">Адрес</th>
@@ -301,25 +301,84 @@
 </div>
 
 <div id="point-view" ng-controller="PointViewController" >
-    <!--<div class="data-block" >-->
-        <!--<div class="row" >-->
-            <!--<div class="row-title" >Название:</div>-->
-            <!--<div class="row-data" >{{point.waypoint.NAME}}</div>-->
-        <!--</div>-->
-        <!--<div class="row" >-->
-            <!--<div class="row-title" >Адрес:</div>-->
-            <!--<div class="row-data" >{{point.waypoint.ADDRESS}}</div>-->
-        <!--</div>-->
-    <!--</div>-->
+    <div class="card-title" >
+        Карточка задания
+    </div>
 
-    <!--<table id="point-view-table" >-->
-        <!--<tbody>-->
+    <table id="point-view-table" class="table table-striped" >
+        <tbody>
+            <tr>
+                <td class="title" >Название:</td>
+                <td class="row-data" >{{point.waypoint.NAME}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Адрес:</td>
+                <td class="row-data" >{{point.waypoint.ADDRESS}}</td>
+            </tr>
+            <tr>
+                <td class="title" >План. прибытие:</td>
+                <td class="row-data" >{{point.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+            </tr>
+            <tr>
+                <td class="title" >План. номер:</td>
+                <td class="row-data" >{{point.NUMBER}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Машина:</td>
+                <td class="row-data" >{{point.transport.NAME}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Водитель:</td>
+                <td class="row-data" >{{point.driver.NAME}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Заказанное окно:</td>
+                <td class="row-data" >{{point.AVAILABILITY_WINDOWS}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Обещанное окно:</td>
+                <td class="row-data" >
+                    {{point.promised_window.start * 1000 | date:'HH:mm'}} -
+                    {{point.promised_window.finish * 1000 | date:'HH:mm'}}
+                </td>
+            </tr>
+            <tr>
+                <td class="title" >Тел. водителя:</td>
+                <td class="row-data" >{{point.driver.PHONE}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Комментарий:</td>
+                <td class="row-data" >{{point.waypoint.COMMENT}}</td>
+            </tr>
             <!--<tr>-->
-                <!--<td class="title" >Название</td>-->
-                <!--<td class="row-data" >{{point.waypoint.NAME}}</td>-->
+                <!--<td class="title" >Стоп:</td>-->
+                <!--<td class="row-data" >{{point.haveStop ? 'Есть' : ''}}</td>-->
             <!--</tr>-->
-        <!--</tbody>-->
-    <!--</table>-->
+            <!--<tr>-->
+                <!--<td class="title" >Моб. нажатие:</td>-->
+                <!--<td class="row-data" >{{point.havePush ? 'Есть' : ''}}</td>-->
+            <!--</tr>-->
+            <tr>
+                <td class="title" >Статус:</td>
+                <td class="row-data" >
+                    <!--<select ng-model="point.status"-->
+                            <!--ng-options='option.value as option.name for option in statuses'>-->
+                    <!--</select>-->
+                    {{point.textStatus}}
+                </td>
+            </tr>
+            <tr>
+                <td class="title" >Окно:</td>
+                <td class="row-data" >{{point.textWindow}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div id="point-view-setting" >
+        <button class="btn btn-primary btn-sm" >Подтвердить статус доставлено</button>
+        <button class="btn btn-primary btn-sm" >Отменить статус доставлено</button>
+        <button class="btn btn-danger btn-sm" >Отменить задание</button>
+    </div>
 </div>
 
 

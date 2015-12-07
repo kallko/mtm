@@ -277,40 +277,47 @@ template {
 
 #point-view {
     background-color: #D5DBD8;
-    border: 2px solid grey;
-    padding: 12px;
+    border: 2px solid #bdbdbd;
+    padding: 8px;
 }
 
 #point-view-table {
-
+    font-size: 13px;
 }
 
 .filter-btn {
     height: 21px;
 }
 
-/*.data-block {*/
-    /*padding: 20px;*/
-/*}*/
+#point-view-table{
+    border: 2px solid #bdbdbd !important;
+    margin: 0;
+}
 
-/*#point-view .row {*/
+#point-view-table td{
+    padding: 4px 8px;
+}
 
-/*}*/
+#point-view-table .title {
+    width: 140px;
+}
 
-/*#point-view .row .row-title{*/
-    /*width: 120px;*/
-    /*float: left;*/
-/*}*/
+#point-view-table .row-data {
+    width: 500px;
+}
 
-/*#point-view .row .row-data{*/
-    /*width: 240px;*/
-/*}*/
+#point-view-setting {
+    padding-top: 7px;
+}
 
+.card-title {
+    text-align: center;
+    margin: -3px 10px 3px 0;
+}
 
-
-
-
-
+#point-view button {
+    width: 32.89%;
+}
 
 
 

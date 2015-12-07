@@ -22,8 +22,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 IN_PROGRESS: 3,
                 TIME_OUT: 4,
                 DELAY: 5,
-                //FOCUS_L1: 5,
-                //FOCUS_L2: 6,
                 SCHEDULED: 7,
                 CANCELED: 8
             },
@@ -126,6 +124,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var settings = Settings.load();
                 scope.params = settings || scope.params;
             }
+
+            scope.$emit('sendStatuses', {
+                statuses: STATUS,
+                filters: scope.filters.statuses
+            });
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -472,7 +475,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('Finish linking', data);
             scope.displayCollection = [].concat(scope.rowCollection);
 
-            showPopup('Загрузка завершенна!');
+            showPopup('Загрузка завершенна!', 2500);
 
             setColResizable();
             prepareFixedHeader();
@@ -1185,7 +1188,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.dblRowClick = function (row) {
-            console.log('dblRowClick');
+            console.log('dblRowClick', row);
+            row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
+            row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             scope.$emit('showPoint', row);
         };
 
@@ -1193,13 +1198,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
                     var object = $('#status-td-' + row_id);
-                    object.removeClass();
-                    var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
-                        statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
-                    if (unconfirmed) {
-                        object.addClass('yellow-status');
+                    if (object) {
+                        object.removeClass();
+                        var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
+                            statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
+                        if (unconfirmed) {
+                            object.addClass('yellow-status');
+                        }
+                        object.addClass(scope.filters.statuses[i].class);
                     }
-                    object.addClass(scope.filters.statuses[i].class);
+
                     if (scope.filters.statuses[i].table_name != undefined) {
                         return scope.filters.statuses[i].table_name + (unconfirmed ? '?' : '');
                     }
@@ -1418,8 +1426,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateData();
         };
 
-        function showPopup(text) {
-            scope.$emit('showNotification', text);
+        function showPopup(text, duration) {
+            scope.$emit('showNotification', {text: text, duration: duration});
         }
 
         scope.recalculateRoute = function () {

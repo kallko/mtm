@@ -1,9 +1,10 @@
-angular.module('MTMonitor').controller('NotificationController', ['$scope', '$rootScope', function (scope, rootScope) {
+angular.module('MTMonitor').controller('NotificationController', ['$scope', '$rootScope', '$timeout',
+    function (scope, rootScope, timeout) {
 
     init();
 
-    rootScope.$on('showNotification', function (event, text) {
-        showPopup(text);
+    rootScope.$on('showNotification', function (event, data) {
+        showPopup(data.text, data.duration);
     });
 
     function init() {
@@ -16,9 +17,14 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
         //}, 1000);
     }
 
-    function showPopup(text) {
+    function showPopup(text, duration) {
         $('#notification div').html(text);
         $('#notification').popup('show');
+        if (!duration) return;
+
+        timeout(function() {
+            $('#notification').popup('hide');
+        }, duration);
     }
 
 }]);
