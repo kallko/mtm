@@ -22,25 +22,36 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         function initStatuses (event, data) {
             if (scope.statuses) return;
 
-            console.log('initStatuses', data);
             STATUS = data.statuses;
             scope.statuses = data.filters;
         }
 
         scope.confirmStatus = function () {
             console.log('confirmStatus');
+            scope.$emit('changeConfirmation', {
+                row: scope.point,
+                option: 'confirm-status'
+            });
         };
 
         scope.cancelStatus = function () {
             console.log('cancelStatus');
+            scope.$emit('changeConfirmation', {
+                row: scope.point,
+                option: 'not-delivered-status'
+            });
         };
 
         scope.cancelTask = function () {
             console.log('cancelTask');
+            scope.$emit('changeConfirmation', {
+                row: scope.point,
+                option: 'cancel-point'
+            });
         };
 
         scope.unconfirmed = function () {
-            return !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
+            return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
                 scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
         };
 

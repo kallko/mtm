@@ -1058,19 +1058,29 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(option);
             var contextJ = $(context)[0],
                 row = scope.rowCollection[parseInt(contextJ.id.substr(6))],
-                point = rawData.routes[row.route_id].points[row.NUMBER - 1],
-                needChanges = !(row.confirmed && (row.status == STATUS.FINISHED
+                point = rawData.routes[row.route_id].points[row.NUMBER - 1];
+
+            changeStatus(row, point, option);
+
+            // TODO: подсветить строку под меню
+        }
+
+        rootScope.$on('changeConfirmation', onChangeStatus);
+        function onChangeStatus (event, data) {
+            var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
+            changeStatus(data.row, rawPoint, data.option);
+        }
+
+        function changeStatus (row, rawPoint, option) {
+            var needChanges = !(row.confirmed && (row.status == STATUS.FINISHED
                 || row.status == STATUS.FINISHED_LATE || row.status == STATUS.FINISHED_TOO_EARLY));
 
             switch (option) {
-                case 'sort':
-                    sortByRoute(row.route_indx);
-                    return;
                 case 'confirm-status':
                     if (!needChanges) return;
                     row.confirmed = true;
-                    point.rawConfirmed = 1;
-                    addToConfirmed(point.TASK_NUMBER, point.rawConfirmed);
+                    rawPoint.rawConfirmed = 1;
+                    addToConfirmed(rawPoint.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'not-delivered-status':
                     if (!needChanges) return;
@@ -1080,18 +1090,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     } else {
                         row.status = STATUS.DELAY;
                     }
-                    point.rawConfirmed = -1;
-                    addToConfirmed(point.TASK_NUMBER, point.rawConfirmed);
+                    rawPoint.rawConfirmed = -1;
+                    addToConfirmed(rawPoint.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'cancel-point':
                     row.status = STATUS.CANCELED;
                     break;
             }
 
-            point.checkedStatus = row.status;
+            rawPoint.checkedStatus = row.status;
             scope.$apply();
-
-            // TODO: подсветить строку под меню
         }
 
         function sortByRoute(indx) {
