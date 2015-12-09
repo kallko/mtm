@@ -288,7 +288,7 @@ router.route('/opentask/:itineraryid/:taskid')
         var result = locker.checkTaskLock(req.params.itineraryid, req.params.taskid);
         console.log('opentask, result = ', result);
         if (!result) {
-            //locker.lockTask(decodeURIComponent(req.params.itineraryid), decodeURIComponent(req.params.taskid), req.session.login);
+            locker.lockTask(req.params.itineraryid.replace('SL', '/'), req.params.taskid, req.session.login);
             res.status(200).json({status: 'ok'});
         } else {
             res.status(423).json({status: 'locked', byUser: result});
