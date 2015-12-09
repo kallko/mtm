@@ -2,8 +2,8 @@
  * Created by dev-2 on 25.11.15.
  */
 
-angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootScope', 'Settings',
-    function (scope, rootScope, Settings) {
+angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootScope', 'Settings', '$filter',
+    function (scope, rootScope, Settings, filter) {
 
         init();
 
@@ -16,7 +16,7 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                 weight: 0,
                 value: 0,
                 workingWindowType: 1,
-                demoTime: 10,
+                demoTime: 48,
                 endWindowSize: 3,
                 showDate: -1
             };
@@ -31,6 +31,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
 
             rootScope.$on('setMode', function (event, params) {
                 scope.demoMd = params.mode;
+                scope.startDemoTime = params.demoStartTime;
+                //console.log(params.demoStartTime);
             });
         }
 

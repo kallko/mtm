@@ -185,7 +185,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if (i + 1 == track.length) {
                 var indx = track[i].coords.length - 1;
                 tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
-                    {'title': 'Текущее положение транспортного средства'});
+                    {'title': 'Текущее положение транспортного средства\n' +
+                    'Время сигнала: ' + formatDate(new Date(track[i].t2 * 1000))});
                 tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                 addMarker(tmpVar);
             }

@@ -78,7 +78,7 @@
                 </button>
 
                 <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
-                    на краю окна
+                    {{params.endWindowSize * 5}} минут до закрытия
                 </button>
 
                 <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
@@ -231,8 +231,8 @@
             <div class="title">Настройки демо-режима</div>
             <div class="setting-row" >
                 <span class="param-title" >Время в демо-режиме</span>
-                <input type="range" min="6" max="21" ng-model="params.demoTime" />
-                {{params.demoTime}}:00
+                <input type="range" min="0" max="168" ng-model="params.demoTime" />
+                {{(startDemoTime + 300 * params.demoTime) * 1000 | date:'HH:mm'}}
             </div>
         </div>
 

@@ -116,7 +116,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     weight: 0,
                     value: 0,
                     workingWindowType: 1,
-                    demoTime: 10,
+                    demoTime: 48,
                     endWindowSize: 3,
                     showDate: -1
                 };
@@ -274,10 +274,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rawData = JSON.parse(JSON.stringify(data));
 
             scope.demoMode = data.demoMode === true;
-            scope.$emit('setMode', {mode: scope.demoMode});
+            scope.$emit('setMode', {
+                mode: scope.demoMode,
+                demoStartTime: data.server_time_demo
+            });
+
             if (scope.demoMode) {
                 console.log('DEMO MODE');
-                data.server_time = data.server_time_demo + (scope.params.demoTime - 6) * 3600;
+                data.server_time = data.server_time_demo + scope.params.demoTime * 300;
                 console.log('Demo time', new Date(data.server_time * 1000));
             }
 
@@ -1060,20 +1064,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 row = scope.rowCollection[parseInt(contextJ.id.substr(6))],
                 point = rawData.routes[row.route_id].points[row.NUMBER - 1];
 
-            changeStatus(row, point, option);
+            switch (option) {
+                case 'sort':
+                    sortByRoute(row.route_indx);
+                    return;
+                default:
+                    changeStatus(row, point, option);
+            }
 
             // TODO: подсветить строку под меню
         }
 
         rootScope.$on('changeConfirmation', onChangeStatus);
-        function onChangeStatus (event, data) {
+        function onChangeStatus(event, data) {
             var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
             changeStatus(data.row, rawPoint, data.option);
         }
 
-        function changeStatus (row, rawPoint, option) {
+        function changeStatus(row, rawPoint, option) {
             var needChanges = !(row.confirmed && (row.status == STATUS.FINISHED
-                || row.status == STATUS.FINISHED_LATE || row.status == STATUS.FINISHED_TOO_EARLY));
+            || row.status == STATUS.FINISHED_LATE || row.status == STATUS.FINISHED_TOO_EARLY));
 
             switch (option) {
                 case 'confirm-status':
@@ -1196,9 +1206,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.dblRowClick = function (row) {
-            row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
-            row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
-            scope.$emit('showPoint', row);
+            var url = './opentask/' + encodeURIComponent(_data.ID) + '/' + encodeURIComponent(row.TASK_NUMBER);
+            http.get(url)
+                .success(function (data) {
+                    row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
+                    row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
+                    scope.$emit('showPoint', row);
+                })
+
+                .error(function (data, error) {
+                    if (error == 423) {
+                        showPopup('Задание заблокировано пользователем ' + data.byUser)
+                    }
+                });
+
+
         };
 
         scope.getTextStatus = function (statusCode, row_id, confirmed) {
@@ -1244,19 +1266,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return '';
         };
 
-        function statusFilter (row) {
+        function statusFilter(row) {
             return (scope.filters.status == -1 || row.status == scope.filters.status);
         }
 
-        function routeFilter (row) {
+        function routeFilter(row) {
             return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
         }
 
-        function problemFilter (row) {
+        function problemFilter(row) {
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
         }
 
-        function promise15MFilter (row) {
+        function promise15MFilter(row) {
             return (scope.filters.promised_15m == -1 || row.promised_15m);
         }
 
@@ -1835,7 +1857,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateResizeGripHeight();
         };
 
-        function textFilter (row) {
+        function textFilter(row) {
             if (scope.filters.text === "") return true;
             if (row.waypoint == undefined) return false;
             var filterLowCase = scope.filters.text.toLowerCase();
@@ -1850,7 +1872,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || row.transport.REGISTRATION_NUMBER.toLowerCase().indexOf(filterLowCase) >= 0;
         }
 
-        function branchFilter (row) {
+        function branchFilter(row) {
             return (scope.filters.branch == -1 || row.branchIndx == scope.filters.branch);
         }
 

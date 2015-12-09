@@ -7,6 +7,8 @@ var express = require('express'),
     fs = require('fs'),
     math_server = new (require('./math-server'))(),
     db = new (require('./db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
+    locker = new (require('./locker'))(),
+
     cashedDataArr = [],
     demoLogin = 'demo',
     tracksManager = new tracks(
@@ -254,6 +256,7 @@ router.route('/dailydata')
             day = 86400000,
             today12am = now - (now % day);
 
+        //console.log('req.session.itineraryID', req.session.itineraryID);
         if (config.cashing.session
             && req.query.force == null
             && req.query.showDate == null
@@ -261,6 +264,7 @@ router.route('/dailydata')
             && cashedDataArr[req.session.login] != null
             && cashedDataArr[req.session.login].lastUpdate == today12am) {
             console.log('=== loaded from session === send data to client ===');
+            req.session.itineraryID = cashedDataArr[req.session.login].ID;
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             var soapManager = new soap(req.session.login);
@@ -268,14 +272,28 @@ router.route('/dailydata')
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
-                if (!req.query.showDate){
+                if (!req.query.showDate) {
                     data.lastUpdate = today12am;
                     cashedDataArr[req.session.login] = data;
                 }
 
+                req.session.itineraryID = data.ID;
                 res.status(200).json(data);
             }
         }
+    });
+
+router.route('/opentask/:itineraryid/:taskid')
+    .get(function (req, res) {
+        var result = locker.checkTaskLock(req.params.itineraryid, req.params.taskid);
+        console.log('opentask, result = ', result);
+        if (!result) {
+            //locker.lockTask(decodeURIComponent(req.params.itineraryid), decodeURIComponent(req.params.taskid), req.session.login);
+            res.status(200).json({status: 'ok'});
+        } else {
+            res.status(423).json({status: 'locked', byUser: result});
+        }
+        log.dump(locker.lockedTasks);
     });
 
 router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:move_d')

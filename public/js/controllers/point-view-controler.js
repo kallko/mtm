@@ -15,6 +15,11 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         function show (event, row) {
             scope.point = row;
+            //$('#my_popup').popup({
+            //    onopen: function() {
+            //        alert('Popup just opened!');
+            //    }
+            //}).popup('show');
             $('#point-view').popup('show');
             console.log('show:', row);
         }
