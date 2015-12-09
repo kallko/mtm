@@ -1206,7 +1206,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.dblRowClick = function (row) {
-            var url = '/opentask/' + encodeURIComponent(_data.ID) + '/' + encodeURIComponent(row.TASK_NUMBER);
+            var url = './opentask/' + encodeURIComponent(_data.ID) + '/' + encodeURIComponent(row.TASK_NUMBER);
             http.get(url)
                 .success(function (data) {
                     row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
@@ -1333,7 +1333,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
                 console.log('download tracks');
-                http.post('gettracksbystates', {
+                http.post('./gettracksbystates', {
                     states: route.real_track,
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
