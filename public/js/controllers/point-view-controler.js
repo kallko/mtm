@@ -55,18 +55,31 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
-        scope.blockTask = function () {
-            var url = './opentask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER + '?lockTask=false';
-            http.get(url)
-                .success(function (data) {
-                    scope.$emit('showNotification', {text: 'Задание переведено в режим редактирования.'});
-                })
-
-                .error(function (data, error) {
-                    if (error == 423) {
-                        scope.$emit('showNotification', {text: 'Задание заблокировано пользователем ' + data.byUser});
-                    }
-                });
+        scope.toggleBlock = function () {
+            if (!scope.point.locked) {
+                var url = './opentask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER + '?lockTask=false';
+                http.get(url)
+                    .success(function (data) {
+                        if (data.status === 'ok') {
+                            scope.point.locked = true;
+                            //scope.$emit('showNotification', {text: 'Задание переведено в режим редактирования.'});
+                        } else if (data.status === 'locked' && data.me) {
+                            scope.point.locked = true;
+                            //scope.$emit('showNotification', {text: 'Задание уже переведено в режим редактирования.'});
+                        } else if (data.status === 'locked') {
+                            scope.$emit('showNotification', {text: 'Задание заблокировано пользователем ' + data.byUser});
+                        }
+                    });
+            } else {
+                var url = './unlocktask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER;
+                http.get(url)
+                    .success(function (data) {
+                        if (data.status === 'unlocked') {
+                            scope.point.locked = false;
+                            //scope.$emit('showNotification', {text: 'Редактирование завершенно.'});
+                        }
+                    });
+            }
         };
 
         scope.unconfirmed = function () {

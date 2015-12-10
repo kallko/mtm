@@ -286,27 +286,29 @@ router.route('/dailydata')
 router.route('/opentask/:itineraryid/:taskid')
     .get(function (req, res) {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
-        locker.checkTaskLock(req.params.itineraryid, req.params.taskid,
+        locker.checkTaskLock(req.params.itineraryid, req.params.taskid, req.session.login,
             function() {
                 if (req.query.lockTask) locker.lockTask(req.params.itineraryid, req.params.taskid, req.session.login);
                 res.status(200).json({status: 'ok'});
             },
             function(user) {
-                res.status(423).json({status: 'locked', byUser: user});
+                res.status(200).json({
+                    status: 'locked',
+                    byUser: user,
+                    me: req.session.login === user
+                });
             });
     });
 
-//router.route('/blocktask/:itineraryid/:taskid')
-//    .get(function (req, res) {
-//        locker.checkTaskLock(req.params.itineraryid, req.params.taskid,
-//            function() {
-//                locker.lockTask(req.params.itineraryid, req.params.taskid, req.session.login);
-//                res.status(200).json({status: 'ok'});
-//            },
-//            function(user) {
-//                res.status(423).json({status: 'locked', byUser: user});
-//            });
-//    });
+router.route('/unlocktask/:itineraryid/:taskid')
+    .get(function (req, res) {
+        req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
+        if (locker.unlock(req.params.itineraryid, req.params.taskid, req.session.login)) {
+            res.status(200).json({status: 'unlocked'});
+        } else {
+            res.status(200).json({status: 'not_yours'});
+        }
+    });
 
 router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:move_d')
     .get(function (req, res) {

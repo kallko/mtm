@@ -23,7 +23,7 @@ function initItinerary(lockedTasks, itineraryId) {
 Locker.prototype.lockTask = function (itineraryId, taskId, user) {
     initItinerary(this.lockedTasks, itineraryId);
 
-    if (this.checkTaskLock(itineraryId, taskId)) return;
+    if (this.checkTaskLock(itineraryId, taskId, user)) return;
 
     var timestamp = (new Date()).getTime();
     this.lockedTasks[itineraryId].locked.push({
@@ -35,11 +35,12 @@ Locker.prototype.lockTask = function (itineraryId, taskId, user) {
     this.lockedTasks[itineraryId].lastChange = timestamp;
 };
 
-Locker.prototype.unlock = function (itineraryId, taskId) {
+Locker.prototype.unlock = function (itineraryId, taskId, user) {
     if (!this.lockedTasks[itineraryId]) return false;
 
     for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
-        if (this.lockedTasks[itineraryId][i].taskId == taskId) {
+        if (this.lockedTasks[itineraryId].locked[i].taskId == taskId
+            && this.lockedTasks[itineraryId].locked[i].user == user) {
             this.lockedTasks[itineraryId].locked.splice(i, 1);
             return true;
         }
@@ -55,7 +56,7 @@ Locker.prototype.checkLocks = function (itineraryId, lastCheckTime) {
     return this.lockedTasks[itineraryId];
 };
 
-Locker.prototype.checkTaskLock = function (itineraryId, taskId, notLockedCallback, lockedCallback) {
+Locker.prototype.checkTaskLock = function (itineraryId, taskId, user, notLockedCallback, lockedCallback) {
     if (!this.lockedTasks[itineraryId]) {
         if (notLockedCallback) notLockedCallback();
         return false;
@@ -63,7 +64,9 @@ Locker.prototype.checkTaskLock = function (itineraryId, taskId, notLockedCallbac
 
     for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
         if (this.lockedTasks[itineraryId].locked[i].taskId == taskId) {
-            if (lockedCallback) lockedCallback(this.lockedTasks[itineraryId].locked[i].user);
+            if (lockedCallback) {
+                lockedCallback(this.lockedTasks[itineraryId].locked[i].user);
+            }
             return true;
         }
     }

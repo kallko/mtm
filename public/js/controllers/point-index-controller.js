@@ -1219,14 +1219,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var url = './opentask/' + _data.ID.replace('/', 'SL') + '/' + row.TASK_NUMBER;// + '?lockTask=false';
             http.get(url)
                 .success(function (data) {
-                    row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
-                    row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
-                    row.itineraryID = _data.ID;
-                    scope.$emit('showPoint', row);
-                })
-
-                .error(function (data, error) {
-                    if (error == 423) {
+                    if (data.status === 'ok' || data.me) {
+                        row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
+                        row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
+                        row.itineraryID = _data.ID;
+                        scope.$emit('showPoint', row);
+                    } else if (data.status === 'locked') {
                         showPopup('Задание заблокировано пользователем ' + data.byUser)
                     }
                 });
