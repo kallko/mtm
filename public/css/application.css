@@ -110,7 +110,11 @@ template {
     background-color: #ED8585 !important;
 }
 
-.selected-row {
+#point-table-tbl tbody tr {
+    background-color: #f9f9f9 !important;
+}
+
+#point-table-tbl tbody .selected-row {
     background-color: #90C3D4 !important;
 }
 
@@ -316,7 +320,7 @@ template {
 }
 
 #point-view button {
-    width: 32.89%;
+    width: 24.5%;
 }
 
 

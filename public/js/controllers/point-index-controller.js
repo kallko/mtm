@@ -125,6 +125,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 scope.params = settings || scope.params;
             }
 
+            setProblemIndexSortMode(0);
+
+            if ($('#promised-15m-btn').hasClass('btn-success')) {
+                $('#promised-15m-btn').toggleClass('btn-default').toggleClass('btn-success');
+            }
+
+            if ($('#problem-index-btn').hasClass('btn-success')) {
+                $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
+            }
+
             scope.$emit('sendStatuses', {
                 statuses: STATUS,
                 filters: scope.filters.statuses
@@ -980,7 +990,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             scope.$watch(function () {
-                return scope.filters.route + scope.filters.status
+                return scope.filters.route + scope.filters.status + scope.filters.promised_15m +
                     + scope.filters.problem_index + scope.filters.branch;
             }, function () {
                 updateResizeGripHeight();
@@ -1206,11 +1216,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.dblRowClick = function (row) {
-            var url = './opentask/' + _data.ID.replace('/', 'SL') + '/' + row.TASK_NUMBER;
+            var url = './opentask/' + _data.ID.replace('/', 'SL') + '/' + row.TASK_NUMBER;// + '?lockTask=false';
             http.get(url)
                 .success(function (data) {
                     row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
                     row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
+                    row.itineraryID = _data.ID;
                     scope.$emit('showPoint', row);
                 })
 
@@ -1219,8 +1230,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         showPopup('Задание заблокировано пользователем ' + data.byUser)
                     }
                 });
-
-
         };
 
         scope.getTextStatus = function (statusCode, row_id, confirmed) {

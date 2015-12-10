@@ -26,12 +26,6 @@
     table-layout: fixed;
 }
 
-#points-table-holder table tr td {
-    padding: 3px 3px 3px 10px;
-    margin: 0;
-    font-size: 12px;
-}
-
 #setting-holder input[type=range] {
     width: 100px;
     float: left;

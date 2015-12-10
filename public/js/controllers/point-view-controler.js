@@ -1,5 +1,5 @@
-angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope',
-    function (scope, rootScope) {
+angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http',
+    function (scope, rootScope, http) {
         var STATUS;
 
         init();
@@ -15,11 +15,11 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         function show (event, row) {
             scope.point = row;
-            //$('#my_popup').popup({
+            //$('#point-view').popup({
             //    onopen: function() {
-            //        alert('Popup just opened!');
+            //        console.log('ONOPEN');
             //    }
-            //}).popup('show');
+            //});
             $('#point-view').popup('show');
             console.log('show:', row);
         }
@@ -53,6 +53,20 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'cancel-point'
             });
+        };
+
+        scope.blockTask = function () {
+            var url = './opentask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER + '?lockTask=false';
+            http.get(url)
+                .success(function (data) {
+                    scope.$emit('showNotification', {text: 'Задание переведено в режим редактирования.'});
+                })
+
+                .error(function (data, error) {
+                    if (error == 423) {
+                        scope.$emit('showNotification', {text: 'Задание заблокировано пользователем ' + data.byUser});
+                    }
+                });
         };
 
         scope.unconfirmed = function () {

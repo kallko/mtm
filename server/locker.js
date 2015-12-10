@@ -1,6 +1,8 @@
 module.exports = Locker;
 
-function Locker() {
+var log = new (require('./logging'))('./logs');
+
+    function Locker() {
     this.lockedTasks = {};
 
     function test() {
@@ -53,16 +55,20 @@ Locker.prototype.checkLocks = function (itineraryId, lastCheckTime) {
     return this.lockedTasks[itineraryId];
 };
 
-Locker.prototype.checkTaskLock = function (itineraryId, taskId) {
-    if (!this.lockedTasks[itineraryId]) return false;
+Locker.prototype.checkTaskLock = function (itineraryId, taskId, notLockedCallback, lockedCallback) {
+    if (!this.lockedTasks[itineraryId]) {
+        if (notLockedCallback) notLockedCallback();
+        return false;
+    }
 
     for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
         if (this.lockedTasks[itineraryId].locked[i].taskId == taskId) {
-            return this.lockedTasks[itineraryId].locked[i].user;
+            if (lockedCallback) lockedCallback(this.lockedTasks[itineraryId].locked[i].user);
+            return true;
         }
     }
 
-    return false;
+    if (notLockedCallback) notLockedCallback();
 };
 
 

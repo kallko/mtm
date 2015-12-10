@@ -205,10 +205,10 @@
             <div id="context-menu">
                 <ul class="dropdown-menu" role="menu">
                     <li><a tabindex="-1" data-menu-option="sort" >Вкл/Выкл фильтр по машине</a></li>
-                    <li class="divider"></li>
-                        <li><a tabindex="-1" data-menu-option="confirm-status" >Подтвердить статус доставлено</a></li>
-                    <li><a tabindex="-1" data-menu-option="not-delivered-status" >Отменить статус доставлено</a></li>
-                    <li><a tabindex="-1" data-menu-option="cancel-point" >Отменить задание</a></li>
+                    <!--<li class="divider"></li>-->
+                    <!--<li><a tabindex="-1" data-menu-option="confirm-status" >Подтвердить статус доставлено</a></li>-->
+                    <!--<li><a tabindex="-1" data-menu-option="not-delivered-status" >Отменить статус доставлено</a></li>-->
+                    <!--<li><a tabindex="-1" data-menu-option="cancel-point" >Отменить задание</a></li>-->
                 </ul>
             </div>
         </div>
@@ -369,15 +369,28 @@
             </tr>
             <tr>
                 <td class="title" >Окно:</td>
-                <td class="row-data" >{{point.textWindow}}</td>
+                <td class="row-data" >{{point.AVAILABILITY_WINDOWS}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Стоимость:</td>
+                <td class="row-data" >{{point.VALUE}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Объем:</td>
+                <td class="row-data" >{{point.VOLUME}}</td>
+            </tr>
+            <tr>
+                <td class="title" >Вес:</td>
+                <td class="row-data" >{{point.WEIGHT}}</td>
             </tr>
         </tbody>
     </table>
 
     <div id="point-view-setting" >
-        <button class="btn btn-danger btn-sm" ng-click="cancelTask()" >Отменить задание</button>
-        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="confirmStatus()" >Подтвердить статус доставлено</button>
-        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="cancelStatus()" >Отменить статус доставлено</button>
+        <button class="btn btn-danger btn-sm" ng-click="blockTask()" >Редактировать</button>
+        <button class="btn btn-danger btn-sm" ng-click="cancelTask()" >Отменить</button>
+        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="confirmStatus()" >Подтвердить статус</button>
+        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="cancelStatus()" >Отменить статус</button>
     </div>
 </div>
 
