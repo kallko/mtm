@@ -6,28 +6,24 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         function init() {
             $('#point-view').popup({
-                transition: 'all 0.1s'
-            });
+                    transition: 'all 0.15s',
+                    onclose: function () {
+                        if(scope.point.lockedByMe)  scope.toggleBlock();
+                    }
+                }
+            );
 
             rootScope.$on('showPoint', show);
             rootScope.$on('sendStatuses', initStatuses);
         }
 
-        function show (event, row) {
+        function show(event, row) {
             scope.point = row;
-
-            $('#point-view').popup({
-                onopen: function() {
-                    alert('Popup just opened!');
-                }
-            });
             $('#point-view').popup('show');
-
-
             //console.log('show:', row);
         }
 
-        function initStatuses (event, data) {
+        function initStatuses(event, data) {
             if (scope.statuses) return;
 
             STATUS = data.statuses;

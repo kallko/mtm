@@ -9,7 +9,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
 
     function init() {
         $('#notification').popup({
-            transition: 'all 0.1s'
+            transition: 'all 0.15s'
         });
     }
 
