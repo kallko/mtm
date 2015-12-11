@@ -329,13 +329,13 @@ router.route('/unlocktask/:itineraryid/:taskid')
         }
     });
 
-router.route('/lockroute/:itineraryid/:tasks')
+router.route('/lockroute/:itineraryid/:routeid/:tasks')
     .get(function (req, res) {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         var tasksArr = req.params.tasks.split(';');
         locker.checkRouteLocks(req.params.itineraryid, tasksArr, req.session.login,
             function() {
-                locker.lockRoute(req.params.itineraryid, tasksArr, req.session.login);
+                locker.lockRoute(req.params.itineraryid, req.params.routeid, tasksArr, req.session.login);
                 res.status(200).json({status : 'ok'});
             },
 
@@ -344,7 +344,7 @@ router.route('/lockroute/:itineraryid/:tasks')
             });
     });
 
-router.route('/unlockroute/:itineraryid/:tasks')
+router.route('/unlockroute/:itineraryid/:routeid/:tasks')
     .get(function (req, res) {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         var tasksArr = req.params.tasks.split(';');

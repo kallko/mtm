@@ -92,7 +92,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         };
 
         scope.toggleRouteBlock = function () {
-            var url = (scope.route.lockedByMe ? './unlockroute/' : './lockroute/') + scope.point.itineraryID.replace('/', 'SL') + '/',
+            var url = (scope.route.lockedByMe ? './unlockroute/' : './lockroute/') + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.route.filterId + '/',
                 first = true;
             for (var i = 0; i < scope.route.points.length; i++) {
                 if (scope.route.points[i].TASK_NUMBER != '') {

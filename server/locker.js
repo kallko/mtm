@@ -103,7 +103,8 @@ Locker.prototype.checkRouteLocks = function (itineraryId, taskIdArr, user, notLo
     return false;
 };
 
-Locker.prototype.lockRoute = function (itineraryId, taskIdArr, user) {
+Locker.prototype.lockRoute = function (itineraryId, routeId, taskIdArr, user) {
+    console.log('routeId', routeId);
     for (var i = 0; i < taskIdArr.length; i++) {
         this.lockTask(itineraryId, taskIdArr[i], user);
     }
