@@ -389,7 +389,7 @@
 
     <div id="point-view-setting" >
         <button id="lock-route-btn" ng-show="locked(point)"  class="btn btn-primary btn-sm down-btn"
-                ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" >
+                ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()" >
             <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'" ></i>
             &nbsp;Машрут
         </button>

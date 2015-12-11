@@ -2,7 +2,7 @@ module.exports = Locker;
 
 var log = new (require('./logging'))('./logs');
 
-    function Locker() {
+function Locker() {
     this.lockedTasks = {};
 
     function test() {
@@ -35,7 +35,7 @@ Locker.prototype.lockTask = function (itineraryId, taskId, user) {
     this.lockedTasks[itineraryId].lastChange = timestamp;
 };
 
-Locker.prototype.unlock = function (itineraryId, taskId, user) {
+Locker.prototype.unlockTask = function (itineraryId, taskId, user) {
     if (!this.lockedTasks[itineraryId]) return false;
 
     for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
@@ -73,12 +73,54 @@ Locker.prototype.checkTaskLock = function (itineraryId, taskId, user, notLockedC
     if (notLockedCallback) notLockedCallback();
 };
 
+Locker.prototype.getBlockerName = function (itineraryId, taskId) {
+    if (!this.lockedTasks[itineraryId]) return;
 
+    for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
+        if (this.lockedTasks[itineraryId].locked[i].taskId == taskId) {
+            return this.lockedTasks[itineraryId].locked[i].user;
+        }
+    }
 
+    return '';
+};
 
+Locker.prototype.checkRouteLocks = function (itineraryId, taskIdArr, user, notLockedCallback, lockedCallback) {
+    var blockerName;
 
+    for (var i = 0; i < taskIdArr.length; i++) {
+        if (this.checkTaskLock(itineraryId, taskIdArr[i], user)) {
+            blockerName = this.getBlockerName(itineraryId, taskIdArr[i]);
+            //console.log('blockerName', blockerName);
+            if (blockerName !== user) {
+                if (lockedCallback) lockedCallback(blockerName);
+                return true;
+            }
+        }
+    }
 
+    notLockedCallback();
+    return false;
+};
 
+Locker.prototype.lockRoute = function (itineraryId, taskIdArr, user) {
+    for (var i = 0; i < taskIdArr.length; i++) {
+        this.lockTask(itineraryId, taskIdArr[i], user);
+    }
+};
+
+Locker.prototype.unlockRoute = function (itineraryId, taskIdArr, user) {
+    var result = {
+        'unlocked': 0,
+        'not_yours': 0
+    };
+    for (var i = 0; i < taskIdArr.length; i++) {
+        if (this.unlockTask(itineraryId, taskIdArr[i], user)) result.unlocked++;
+        else result.not_yours++;
+    }
+
+    return result;
+};
 
 
 

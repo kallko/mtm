@@ -1254,18 +1254,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.dblRowClick = function (row) {
-            var url = './opentask/' + _data.ID.replace('/', 'SL') + '/' + row.TASK_NUMBER;// + '?lockTask=false';
-            http.get(url)
-                .success(function (data) {
-                    if (data.status === 'ok' || data.me) {
-                        row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
-                        row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
-                        row.itineraryID = _data.ID;
-                        scope.$emit('showPoint', row);
-                    } else if (data.status === 'locked') {
-                        showPopup('Задание заблокировано пользователем ' + data.byUser)
-                    }
-                });
+            row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
+            row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
+            row.itineraryID = _data.ID;
+            scope.$emit('showPoint', { point: row, route: _data.routes[row.route_indx]});
+
+            //var url = './opentask/' + _data.ID.replace('/', 'SL') + '/' + row.TASK_NUMBER;// + '?lockTask=false';
+            //http.get(url)
+            //    .success(function (data) {
+            //        if (data.status === 'ok' || data.me) {
+            //            row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
+            //            row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
+            //            row.itineraryID = _data.ID;
+            //            console.log(row);
+            //            scope.$emit('showPoint', { point: row, route: undefined});
+            //        } else if (data.status === 'locked') {
+            //            showPopup('Задание заблокировано пользователем ' + data.byUser)
+            //        }
+            //    });
         };
 
         scope.getTextStatus = function (statusCode, row_id, confirmed) {

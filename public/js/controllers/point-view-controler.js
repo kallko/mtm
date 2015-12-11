@@ -8,7 +8,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             $('#point-view').popup({
                     transition: 'all 0.15s',
                     onclose: function () {
-                        if(scope.point.lockedByMe)  scope.toggleTaskBlock();
+                        if (scope.point.lockedByMe && !scope.route.lockedByMe)  scope.toggleTaskBlock();
                     }
                 }
             );
@@ -18,10 +18,12 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             rootScope.$on('newTextStatus', newTextStatus);
         }
 
-        function show(event, row) {
-            scope.point = row;
+        function show(event, data) {
+            scope.point = data.point;
+            scope.route = data.route;
             $('#point-view').popup('show');
-            console.log('show:', row);
+            //console.log('point', data.point);
+            //console.log('route', data.route);
         }
 
         function initStatuses(event, data) {
@@ -87,6 +89,44 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                         }
                     });
             }
+        };
+
+        scope.toggleRouteBlock = function () {
+            var url = (scope.route.lockedByMe ? './unlockroute/' : './lockroute/') + scope.point.itineraryID.replace('/', 'SL') + '/',
+                first = true;
+            for (var i = 0; i < scope.route.points.length; i++) {
+                if (scope.route.points[i].TASK_NUMBER != '') {
+                    url += (!first ? ';' : '') + scope.route.points[i].TASK_NUMBER;
+                    first = false;
+                }
+            }
+
+            if (!scope.route.lockedByMe) {
+                http.get(url)
+                    .success(function (data) {
+                        console.log(data);
+                        if (data.status == 'ok') {
+                            scope.route.lockedByMe = true;
+                            for (var i = 0; i < scope.route.points.length; i++) {
+                                scope.route.points[i].locked = true;
+                                scope.route.points[i].lockedByMe = true;
+                                scope.route.points[i].lockedRoute = true;
+                            }
+                        }
+                    });
+            } else {
+                http.get(url)
+                    .success(function (data) {
+                        console.log(data);
+                        scope.route.lockedByMe = false;
+                        for (var i = 0; i < scope.route.points.length; i++) {
+                            delete scope.route.points[i].locked;
+                            delete scope.route.points[i].lockedByMe;
+                            delete scope.route.points[i].lockedRoute;
+                        }
+                    });
+            }
+
         };
 
         scope.unconfirmed = function () {
