@@ -20,16 +20,18 @@ function initItinerary(lockedTasks, itineraryId) {
     };
 }
 
-Locker.prototype.lockTask = function (itineraryId, taskId, user) {
+Locker.prototype.lockTask = function (itineraryId, taskId, user, routeId) {
     initItinerary(this.lockedTasks, itineraryId);
 
     if (this.checkTaskLock(itineraryId, taskId, user)) return;
 
     var timestamp = Date.now();
+
     this.lockedTasks[itineraryId].locked.push({
         taskId: taskId,
         user: user,
-        timestamp: timestamp
+        timestamp: timestamp,
+        routeId: routeId
     });
 
     this.lockedTasks[itineraryId].lastChange = timestamp;
@@ -104,9 +106,8 @@ Locker.prototype.checkRouteLocks = function (itineraryId, taskIdArr, user, notLo
 };
 
 Locker.prototype.lockRoute = function (itineraryId, routeId, taskIdArr, user) {
-    console.log('routeId', routeId);
     for (var i = 0; i < taskIdArr.length; i++) {
-        this.lockTask(itineraryId, taskIdArr[i], user);
+        this.lockTask(itineraryId, taskIdArr[i], user, routeId);
     }
 };
 

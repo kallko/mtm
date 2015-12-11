@@ -180,11 +180,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function refreshLocked() {
+            var row;
             for (var i = 0; i < scope.rowCollection.length; i++) {
                 for (var j = 0; scope.locked && j < scope.locked.length; j++) {
+                    row = scope.rowCollection[i];
                     if (scope.locked[j].taskId == scope.rowCollection[i].TASK_NUMBER) {
-                        scope.rowCollection[i].locked = true;
-                        scope.rowCollection[i].lockedByMe = scope.locked[j].user == _data.user;
+                        row.locked = true;
+                        row.lockedByMe = scope.locked[j].user == _data.user;
+                        if (scope.locked[j].routeId) {
+                            row.lockedRoute = true;
+                            // TODO: назначить все нужные флаги при наличии routeId
+                        }
                         break;
                     }
 
