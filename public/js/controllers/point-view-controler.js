@@ -15,13 +15,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         function show (event, row) {
             scope.point = row;
-            //$('#point-view').popup({
-            //    onopen: function() {
-            //        console.log('ONOPEN');
-            //    }
-            //});
+
+            $('#point-view').popup({
+                onopen: function() {
+                    alert('Popup just opened!');
+                }
+            });
             $('#point-view').popup('show');
-            console.log('show:', row);
+
+
+            //console.log('show:', row);
         }
 
         function initStatuses (event, data) {
@@ -62,9 +65,11 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     .success(function (data) {
                         if (data.status === 'ok') {
                             scope.point.locked = true;
+                            scope.point.lockedByMe = true;
                             //scope.$emit('showNotification', {text: 'Задание переведено в режим редактирования.'});
                         } else if (data.status === 'locked' && data.me) {
                             scope.point.locked = true;
+                            scope.point.lockedByMe = true;
                             //scope.$emit('showNotification', {text: 'Задание уже переведено в режим редактирования.'});
                         } else if (data.status === 'locked') {
                             scope.$emit('showNotification', {text: 'Задание заблокировано пользователем ' + data.byUser});
@@ -76,6 +81,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     .success(function (data) {
                         if (data.status === 'unlocked') {
                             scope.point.locked = false;
+                            scope.point.lockedByMe = false;
                             //scope.$emit('showNotification', {text: 'Редактирование завершенно.'});
                         }
                     });
@@ -86,5 +92,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
                 scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
         };
+
+        scope.locked = function (point) {
+            return !point.locked || point.lockedByMe;
+        }
 
     }]);

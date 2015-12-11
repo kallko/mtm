@@ -11,10 +11,6 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
         $('#notification').popup({
             transition: 'all 0.1s'
         });
-
-        //window.setTimeout(function() {
-        //    showPopup('looooooooooong test test  test notification');
-        //}, 1000);
     }
 
     function showPopup(text, duration) {

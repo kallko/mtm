@@ -7,14 +7,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             pointTable,
             _data,
             rawData,
+
             dataUpdateInterval = 120,
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
+            checkLocksInterval = 7,
+
             radius = 0.15,
             mobileRadius = 0.5,
             controlledWindow = 600,
             promisedWindow = 3600,
             problemSortType = 0,
+
             STATUS = {
                 FINISHED: 0,
                 FINISHED_LATE: 1,
@@ -38,6 +42,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         setListeners();
         init();
+        setCheckLocksInterval();
         loadDailyData(false);
 
         if (enableDynamicUpdate) {
@@ -157,6 +162,38 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 _data.server_time += seconds;
                 loadTrackParts();
             }, seconds * 1000);
+        }
+
+        function setCheckLocksInterval() {
+            interval(checkLocks, checkLocksInterval * 1000);
+        }
+
+        function checkLocks() {
+            http.get('./checklocks/' + _data.ID.replace('/', 'SL'))
+                .success(function (data) {
+                    if (data.status == 'changed') {
+                        console.log(data);
+                        scope.locked = data.locked.locked;
+                        refreshLocked();
+                    }
+                });
+        }
+
+        function refreshLocked() {
+            for (var i = 0; i < scope.rowCollection.length; i++) {
+                for (var j = 0; scope.locked && j < scope.locked.length; j++) {
+                    if (scope.locked[j].taskId == scope.rowCollection[i].TASK_NUMBER) {
+                        scope.rowCollection[i].locked = true;
+                        scope.rowCollection[i].lockedByMe = scope.locked[j].user == _data.user;
+                        break;
+                    }
+
+                    if (j + 1 == scope.locked.length) {
+                        delete scope.rowCollection[i].locked;
+                        delete scope.rowCollection[i].lockedByMe;
+                    }
+                }                
+            }
         }
 
         function loadTrackParts() {
@@ -489,6 +526,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('Finish linking', data);
             scope.displayCollection = [].concat(scope.rowCollection);
 
+            checkLocks();
             showPopup('Загрузка завершенна!', 2500);
 
             setColResizable();
@@ -990,8 +1028,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             scope.$watch(function () {
-                return scope.filters.route + scope.filters.status + scope.filters.promised_15m +
-                    + scope.filters.problem_index + scope.filters.branch;
+                return scope.filters.route + scope.filters.status + scope.filters.promised_15m + +scope.filters.problem_index + scope.filters.branch;
             }, function () {
                 updateResizeGripHeight();
             });

@@ -140,7 +140,8 @@
                     ng-click="rowClick(row.row_id)"
                     ng-dblclick="dblRowClick(row)"
                     ng-show="applyFilter(row)"
-                    on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row" >
+                    on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row"
+                    ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}" >
 
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.transport.NAME}}</td>
@@ -387,10 +388,10 @@
     </table>
 
     <div id="point-view-setting" >
-        <button class="btn btn-danger btn-sm" ng-click="toggleBlock()" >{{point.locked ? 'Завершить' : 'Редактировать'}}</button>
-        <button class="btn btn-danger btn-sm" ng-click="cancelTask()" >Отменить</button>
-        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="confirmStatus()" >Подтвердить статус</button>
-        <button ng-show="unconfirmed()" class="btn btn-primary btn-sm" ng-click="cancelStatus()" >Отменить статус</button>
+        <button ng-show="locked(point)" class="btn btn-danger btn-sm" ng-click="toggleBlock()" >{{point.locked ? 'Завершить' : 'Редактировать'}}</button>
+        <button ng-show="locked(point)"  class="btn btn-danger btn-sm" ng-click="cancelTask()" >Отменить</button>
+        <button ng-show="locked(point) && unconfirmed()" class="btn btn-primary btn-sm" ng-click="confirmStatus()" >Подтвердить статус</button>
+        <button ng-show="locked(point) && unconfirmed()" class="btn btn-primary btn-sm" ng-click="cancelStatus()" >Отменить статус</button>
     </div>
 </div>
 

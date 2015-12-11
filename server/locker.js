@@ -25,7 +25,7 @@ Locker.prototype.lockTask = function (itineraryId, taskId, user) {
 
     if (this.checkTaskLock(itineraryId, taskId, user)) return;
 
-    var timestamp = (new Date()).getTime();
+    var timestamp = Date.now();
     this.lockedTasks[itineraryId].locked.push({
         taskId: taskId,
         user: user,
@@ -42,6 +42,7 @@ Locker.prototype.unlock = function (itineraryId, taskId, user) {
         if (this.lockedTasks[itineraryId].locked[i].taskId == taskId
             && this.lockedTasks[itineraryId].locked[i].user == user) {
             this.lockedTasks[itineraryId].locked.splice(i, 1);
+            this.lockedTasks[itineraryId].lastChange = Date.now();
             return true;
         }
     }
@@ -51,7 +52,7 @@ Locker.prototype.unlock = function (itineraryId, taskId, user) {
 
 Locker.prototype.checkLocks = function (itineraryId, lastCheckTime) {
     if (!this.lockedTasks[itineraryId] ||
-        this.lockedTasks[itineraryId].timestamp <= lastCheckTime) return [];
+        this.lockedTasks[itineraryId].lastChange <= lastCheckTime) return false;
 
     return this.lockedTasks[itineraryId];
 };
@@ -64,9 +65,7 @@ Locker.prototype.checkTaskLock = function (itineraryId, taskId, user, notLockedC
 
     for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
         if (this.lockedTasks[itineraryId].locked[i].taskId == taskId) {
-            if (lockedCallback) {
-                lockedCallback(this.lockedTasks[itineraryId].locked[i].user);
-            }
+            if (lockedCallback) lockedCallback(this.lockedTasks[itineraryId].locked[i].user);
             return true;
         }
     }

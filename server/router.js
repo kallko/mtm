@@ -237,11 +237,13 @@ router.route('/acp/getplan/:timestamp')
 router.route('/dailydata')
     .get(function (req, res) {
 
+        req.session.lastLockCheck = 0;
         if (req.session.login == demoLogin) {
             var soapManager = new soap(req.session.login);
             soapManager.loadDemoData(function (data) {
                 console.log('Demo data loaded!');
                 data.demoMode = true;
+                data.user = req.session.login;
                 res.status(200).json(data);
             });
             return;
@@ -265,6 +267,7 @@ router.route('/dailydata')
             && cashedDataArr[req.session.login].lastUpdate == today12am) {
             console.log('=== loaded from session === send data to client ===');
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
+            cashedDataArr[req.session.login].user = req.session.login;
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             var soapManager = new soap(req.session.login);
@@ -278,8 +281,24 @@ router.route('/dailydata')
                 }
 
                 req.session.itineraryID = data.ID;
+                data.user = req.session.login;
                 res.status(200).json(data);
             }
+        }
+    });
+
+router.route('/checklocks/:itineraryid')
+    .get(function (req, res) {
+        req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
+        //req.session.lastLockCheck = req.session.lastLockCheck || 0;
+        // TODO: fix double init load
+
+        var result = locker.checkLocks(req.params.itineraryid, req.session.lastLockCheck);
+        if (result) {
+            req.session.lastLockCheck = result.lastChange;
+            res.status(200).json({status: 'changed', locked: result});
+        } else {
+            res.status(200).json({status: 'no_changes'});
         }
     });
 
