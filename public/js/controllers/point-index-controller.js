@@ -1156,7 +1156,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             rawPoint.checkedStatus = row.status;
-            scope.$apply();
+            scope.$emit('newTextStatus', scope.getTextStatus(row.status, row.row_id, row.confirmed));
+            //scope.$apply();
         }
 
         function sortByRoute(indx) {

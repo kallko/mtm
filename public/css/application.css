@@ -324,5 +324,10 @@ template {
 }
 
 #confirm-status-task-btn {
-    margin-left: 25px;
+    margin-left: 15px;
+}
+
+#confirm-status-task-btn, #cancel-status-task-btn {
+    padding: 1px 7px;
+    height: 20px;
 }

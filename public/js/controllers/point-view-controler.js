@@ -8,13 +8,14 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             $('#point-view').popup({
                     transition: 'all 0.15s',
                     onclose: function () {
-                        if(scope.point.lockedByMe)  scope.toggleBlock();
+                        if(scope.point.lockedByMe)  scope.toggleTaskBlock();
                     }
                 }
             );
 
             rootScope.$on('showPoint', show);
             rootScope.$on('sendStatuses', initStatuses);
+            rootScope.$on('newTextStatus', newTextStatus);
         }
 
         function show(event, row) {
@@ -28,6 +29,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
             STATUS = data.statuses;
             scope.statuses = data.filters;
+        }
+
+        function newTextStatus(event, text) {
+            if (scope.point)    scope.point.textStatus = text;
         }
 
         scope.confirmStatus = function () {
@@ -54,7 +59,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
-        scope.toggleBlock = function () {
+        scope.toggleTaskBlock = function () {
             if (!scope.point.locked) {
                 var url = './opentask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER + '?lockTask=false';
                 http.get(url)
