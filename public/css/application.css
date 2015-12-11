@@ -319,6 +319,10 @@ template {
     margin: -3px 10px 3px 0;
 }
 
-#point-view button {
-    width: 24.5%;
+#point-view  .down-btn {
+    width: 32.5%;
+}
+
+#confirm-status-task-btn {
+    margin-left: 25px;
 }

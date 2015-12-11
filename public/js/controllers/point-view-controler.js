@@ -20,7 +20,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         function show(event, row) {
             scope.point = row;
             $('#point-view').popup('show');
-            //console.log('show:', row);
+            console.log('show:', row);
         }
 
         function initStatuses(event, data) {
