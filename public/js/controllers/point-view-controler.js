@@ -94,7 +94,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         };
 
         scope.locked = function (point) {
-            return !point.locked || point.lockedByMe;
+            return scope.point && (!scope.point.locked || scope.point.lockedByMe);
         }
 
     }]);
