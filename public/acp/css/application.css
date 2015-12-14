@@ -124,3 +124,7 @@ table tr {
 .selected-row {
     background-color: #71d5d5 !important;
 }
+
+#points-table-holder table tr td {
+    padding: 3px;
+}

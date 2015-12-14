@@ -23,6 +23,7 @@ var soap = require('soap'),
 
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
+    this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
     this.login = login;
     this.admin_login = 'soap_admin';
     this.password = '$o@p';
@@ -66,6 +67,8 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 };
 
 SoapManager.prototype.loadDemoData = function (callback) {
+    //this.getReasonList();
+
     fs.readFile('./data/demoDay.js', 'utf8', function (err, data) {
         if (err) {
             return console.log(err);
@@ -394,6 +397,26 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
         } else {
             log.l(err.body);
         }
+    });
+};
+
+SoapManager.prototype.getReasonList = function () {
+    console.log('getReasonList');
+    var me = this,
+        url = 'https://' + this.admin_login + ':' + this.password + this.urlPda;
+    soap.createClient(url, function (err, client) {
+        if (err) throw err;
+
+        client.setSecurity(new soap.BasicAuthSecurity('k00056.0', 'As123456'));
+        console.log(client.describe());
+        client.get_reason_list(function (err, result) {
+            if (!err) {
+                log.dump(result.return.reason);
+                log.toFLog('reason_list.js', result.return.reason);
+            } else {
+                console.log('err', err.body);
+            }
+        });
     });
 };
 

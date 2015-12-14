@@ -196,8 +196,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 point.lockedRoute = true;
                                 _data.routes[i].lockedByMe = point.lockedByMe;
                                 _data.routes[i].locked = true;
-
-                                // TODO: удалять флаги лока роута после цикла
                             }
                             break;
                         }
