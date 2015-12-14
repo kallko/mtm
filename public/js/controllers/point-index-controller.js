@@ -180,25 +180,40 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function refreshLocked() {
-            var row;
-            for (var i = 0; i < scope.rowCollection.length; i++) {
-                for (var j = 0; scope.locked && j < scope.locked.length; j++) {
-                    row = scope.rowCollection[i];
-                    if (scope.locked[j].taskId == scope.rowCollection[i].TASK_NUMBER) {
-                        row.locked = true;
-                        row.lockedByMe = scope.locked[j].user == _data.user;
-                        if (scope.locked[j].routeId) {
-                            row.lockedRoute = true;
-                            // TODO: назначить все нужные флаги при наличии routeId
-                        }
-                        break;
-                    }
+            var point,
+                haveLockedTasks;
 
-                    if (j + 1 == scope.locked.length) {
-                        delete scope.rowCollection[i].locked;
-                        delete scope.rowCollection[i].lockedByMe;
+            for (var i = 0; i < _data.routes.length; i++) {
+                haveLockedTasks = false;
+                for (var j = 0; j < _data.routes[i].points.length; j++) {
+                    point = _data.routes[i].points[j];
+                    for (var k = 0; scope.locked && k < scope.locked.length; k++) {
+                        if (scope.locked[k].taskId == point.TASK_NUMBER) {
+                            haveLockedTasks = true;
+                            point.locked = true;
+                            point.lockedByMe = scope.locked[k].user == _data.user;
+                            if (scope.locked[k].routeId) {
+                                point.lockedRoute = true;
+                                _data.routes[i].lockedByMe = point.lockedByMe;
+                                _data.routes[i].locked = true;
+
+                                // TODO: удалять флаги лока роута после цикла
+                            }
+                            break;
+                        }
+
+                        if (k + 1 == scope.locked.length) {
+                            delete point.locked;
+                            delete point.lockedByMe;
+                            delete point.lockedRoute;
+                        }
                     }
-                }                
+                }
+
+                if (!haveLockedTasks) {
+                    delete _data.routes[i].lockedByMe;
+                    delete _data.routes[i].locked;
+                }
             }
         }
 

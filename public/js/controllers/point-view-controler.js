@@ -8,7 +8,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             $('#point-view').popup({
                     transition: 'all 0.15s',
                     onclose: function () {
-                        if (scope.point.lockedByMe && !scope.route.lockedByMe)  scope.toggleTaskBlock();
+                        if (scope.point.lockedByMe && !scope.route.locked)  scope.toggleTaskBlock();
                     }
                 }
             );
@@ -22,8 +22,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.point = data.point;
             scope.route = data.route;
             $('#point-view').popup('show');
-            //console.log('point', data.point);
-            //console.log('route', data.route);
+            console.log('point', data.point);
+            console.log('route', data.route);
         }
 
         function initStatuses(event, data) {
@@ -107,7 +107,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                         console.log(data);
                         if (data.status == 'ok') {
                             scope.route.lockedByMe = true;
+                            scope.route.locked = true;
                             for (var i = 0; i < scope.route.points.length; i++) {
+                                if (!scope.route.points[i].TASK_NUMBER) continue;
+
                                 scope.route.points[i].locked = true;
                                 scope.route.points[i].lockedByMe = true;
                                 scope.route.points[i].lockedRoute = true;
@@ -118,8 +121,11 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 http.get(url)
                     .success(function (data) {
                         console.log(data);
-                        scope.route.lockedByMe = false;
+                        delete scope.route.lockedByMe;
+                        delete scope.route.locked;
                         for (var i = 0; i < scope.route.points.length; i++) {
+                            if (!scope.route.points[i].TASK_NUMBER) continue;
+
                             delete scope.route.points[i].locked;
                             delete scope.route.points[i].lockedByMe;
                             delete scope.route.points[i].lockedRoute;
@@ -135,7 +141,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         };
 
         scope.locked = function (point) {
-            return scope.point && (!scope.point.locked || scope.point.lockedByMe);
+            return scope.point && scope.point.TASK_NUMBER
+                && (!scope.point.locked || scope.point.lockedByMe)
+                && (!scope.route.locked || scope.route.lockedByMe);
         }
 
     }]);
