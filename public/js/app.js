@@ -19,11 +19,24 @@ var myLayout = new GoldenLayout({
                     }
                     ,
                     {
-                        type: 'component',
-                        height: 52,
-                        title: 'Настройки',
-                        componentName: 'template',
-                        componentState: {templateId: 'template2'}
+                        type: 'stack',
+                        height: 50,
+                        activeItemIndex: 1,
+                        content: [
+                            {
+                                type: 'component',
+                                title: 'Настройки',
+                                componentName: 'template',
+                                componentState: {templateId: 'setting-window'}
+                            }
+                            ,
+                            {
+                                type: 'component',
+                                title: 'Редактирование маршрута',
+                                componentName: 'template',
+                                componentState: {templateId: 'edit-route'}
+                            }
+                        ]
                     }
                 ]
             },

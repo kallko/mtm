@@ -35,7 +35,8 @@
 <script src="./js/controllers/debug-controller.js"></script>
 <script src="./js/controllers/notification-controller.js"></script>
 <script src="./js/controllers/setting-controller.js"></script>
-<script src="./js/controllers/point-view-controler.js"></script>
+<script src="./js/controllers/point-view-controller.js"></script>
+<script src="./js/controllers/edit-route-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -82,13 +83,13 @@
                     {{params.endWindowSize * 5}} минут до закрытия
                 </button>
 
-                <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
-                        ng-options='option.value as option.name for option in recalc_modes'>
-                </select>
+                <!--<select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"-->
+                        <!--ng-options='option.value as option.name for option in recalc_modes'>-->
+                <!--</select>-->
 
-                <button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">
-                    пересчитать
-                </button>
+                <!--<button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">-->
+                    <!--пересчитать-->
+                <!--</button>-->
 
                 <button class="btn btn-info btn-sm" id="save-btn" ng-click="saveRoutes()">
                     сохранить
@@ -206,7 +207,8 @@
 
             <div id="context-menu">
                 <ul class="dropdown-menu" role="menu">
-                    <li><a tabindex="-1" data-menu-option="sort" >Вкл/Выкл фильтр по машине</a></li>
+                    <li><a tabindex="-1" data-menu-option="sort" >Вкл/Выкл фильтр по маршруту</a></li>
+                    <li><a tabindex="-1" data-menu-option="edit" >Редактировать маршрут</a></li>
                     <!--<li class="divider"></li>-->
                     <!--<li><a tabindex="-1" data-menu-option="confirm-status" >Подтвердить статус доставлено</a></li>-->
                     <!--<li><a tabindex="-1" data-menu-option="not-delivered-status" >Отменить статус доставлено</a></li>-->
@@ -223,7 +225,7 @@
     </div>
 </template>
 
-<template type="text/html" id="template2">
+<template type="text/html" id="setting-window">
     <div class="section setting-panel" ng-controller="SettingController">
         <div class="button-row" >
             <button class="btn btn-info btn-sm" ng-click="saveAllParams()" >Сохранить</button>
@@ -296,12 +298,25 @@
     </div>
 </template>
 
+<template type="text/html" id="edit-route" >
+    <div id="edit-panel" ng-controller="EditRouteController" >
+
+        <div id="original-route" >
+            Original route<br>
+            <div>
+                <div ng-repeat="point in route.points" class="task-box" >
+                    #{{point.NUMBER}} {{point.arrival_time_hhmm}}
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
 <div id="notification" ng-controller="NotificationController" >
     <div>
         Текст оповещения
     </div>
 </div>
-
 
 <div id="point-view" ng-controller="PointViewController" >
     <div class="card-title" >
@@ -403,3 +418,4 @@
         <button id="cancel-task-btn"  class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()" >Отменить задание</button>
     </div>
 </div>
+

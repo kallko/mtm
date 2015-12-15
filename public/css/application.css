@@ -70,7 +70,6 @@ template {
     background-color: whitesmoke;
 }
 
-
 .nav > li > a {
     padding: 5px !important;
 }
@@ -88,7 +87,6 @@ template {
     padding: 0 3px;
     margin-bottom: 3px;
 }
-
 
 #tab-selector {
     margin-bottom: 10px;
@@ -152,7 +150,7 @@ template {
     left: 0;
 }
 
-.header-copy th{
+.header-copy th {
     /*white-space: nowrap;*/
 }
 
@@ -163,7 +161,7 @@ template {
     overflow-x: scroll;
 }
 
-.setting-panel input[type=range]{
+.setting-panel input[type=range] {
     width: 48%;
     float: right;
 }
@@ -179,9 +177,9 @@ template {
 .setting-panel input[type=text] {
     width: 50px;
     height: 20px;
- }
+}
 
-.setting-panel .param-title  {
+.setting-panel .param-title {
     float: left;
     margin-right: 15px;
     width: 40%;
@@ -293,12 +291,12 @@ template {
     height: 21px;
 }
 
-#point-view-table{
+#point-view-table {
     border: 2px solid #bdbdbd !important;
     margin: 0;
 }
 
-#point-view-table td{
+#point-view-table td {
     padding: 4px 8px;
 }
 
@@ -319,7 +317,7 @@ template {
     margin: -3px 10px 3px 0;
 }
 
-#point-view  .down-btn {
+#point-view .down-btn {
     width: 32.5%;
 }
 
@@ -331,3 +329,29 @@ template {
     padding: 1px 7px;
     height: 20px;
 }
+
+#original-route, #changed-route {
+    /*border: 1px solid grey;*/
+    margin: 8px;
+    padding: 5px;
+}
+
+.task-box {
+    border: 1px solid grey;
+    width: 95px;
+    padding: 2px;
+    margin: 2px;
+    float: left;
+}
+
+
+
+
+
+
+
+
+
+
+
+
