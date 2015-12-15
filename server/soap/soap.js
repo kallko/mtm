@@ -236,13 +236,13 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
     var me = this;
 
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko' && this.login != 'ids.dsp')) {
-        console.log('_xml.itineraryXML(id, version) >>>>>', _xml.itineraryXML(id, version));
+        //console.log('_xml.itineraryXML(id, version) >>>>>', _xml.itineraryXML(id, version));
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
             itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
         });
     }
 
-    console.log("_xml.itineraryXML(id, version, true) >>>>>", _xml.itineraryXML(id, version, true));
+    //console.log("_xml.itineraryXML(id, version, true) >>>>>", _xml.itineraryXML(id, version, true));
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
         itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
     });

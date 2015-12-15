@@ -943,15 +943,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmpTime;
 
                             for (var j = 0; j < _route.points.length; j++) {
+                                if ('4400519438' == _route.points[j].TASK_NUMBER) {
+                                    console.log(_route.points[j].TASK_NUMBER);
+                                }
+
                                 if (j < lastPoint) {
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
                                         if (now > _route.points[j].working_window.finish) {
                                             _route.points[j].status = STATUS.TIME_OUT;
+                                            _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                         }
-
-                                        _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                     } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
                                         totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
                                     }
