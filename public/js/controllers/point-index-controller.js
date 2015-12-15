@@ -169,6 +169,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function checkLocks() {
+            if (!_data) return;
+
             http.get('./checklocks/' + _data.ID.replace('/', 'SL'))
                 .success(function (data) {
                     if (data.status == 'changed') {
