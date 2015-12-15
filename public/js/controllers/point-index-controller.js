@@ -917,7 +917,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 url,
                 point,
                 tmpPred,
-                now = _data.server_time; //Date.now();
+                now = _data.server_time;
 
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
@@ -929,7 +929,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 point = route.car_position;
-                //console.log({car: route.car_position, real_track: route.real_track});
                 url = './findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].LAT + '&' + route.points[route.lastPointIndx].LON;
 
@@ -943,10 +942,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmpTime;
 
                             for (var j = 0; j < _route.points.length; j++) {
-                                if ('4400519438' == _route.points[j].TASK_NUMBER) {
-                                    console.log(_route.points[j].TASK_NUMBER);
-                                }
-
                                 if (j < lastPoint) {
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;

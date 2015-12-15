@@ -22,8 +22,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.point = data.point;
             scope.route = data.route;
             $('#point-view').popup('show');
-            console.log('point', data.point);
-            console.log('route', data.route);
+            //console.log('point', data.point);
+            //console.log('route', data.route);
         }
 
         function initStatuses(event, data) {
