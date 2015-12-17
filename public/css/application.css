@@ -343,7 +343,6 @@ template {
 }
 
 .box {
-    vertical-align: middle;
     border: 1px solid grey;
     height: 30px;
     margin: 1px;
@@ -351,6 +350,11 @@ template {
     text-align: center;
     font-size: 10px;
     padding-top: 7px;
+}
+
+.end-box {
+    width: 40px;
+    background-color: transparent;
 }
 
 .task-box {
@@ -376,6 +380,11 @@ template {
     margin-bottom: 3px;
 }
 
+.highlighted-box {
+    border: 1px solid red;
+    background-color: #ff4b44;
+    font-weight: bold;
+}
 
 
 

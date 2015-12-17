@@ -322,13 +322,18 @@
             <div id="changed-route" >
                 <div class="block-title" >Измененный маршрут</div>
                 <div>
-                    <div ng-repeat="box in originalBoxes" class="box" style="width: {{boxWidth(box.size)}}px;"
-                         ng-class="{'task-box': box.type == BOX_TYPE.TASK,
+                    <div ng-repeat="box in changebleBoxes" class="box" style="width: {{boxWidth(box.size)}}px;"
+                         ng-class="{'task-box draggable-box droppable-box': box.type == BOX_TYPE.TASK,
                                     'travel-box': box.type == BOX_TYPE.TRAVEL,
                                     'downtime-box': box.type == BOX_TYPE.DOWNTIME}"
-                         title="{{tooltip(box)}}" >
+                         title="{{tooltip(box)}}"
+                         ng-show="box.status != STATUS.FINISHED
+                                && box.status != STATUS.FINISHED_TOO_EARLY
+                                && box.status != STATUS.FINISHED_LATE"
+                            data-index="{{box.index}}" >
                         {{box.number}}
                     </div>
+                    <div class="box end-box droppable-box" data-index="55555" ></div>
                 </div>
             </div>
         </div>

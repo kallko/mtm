@@ -21,10 +21,66 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             scope.route = data.route;
             scope.changedRoute = JSON.parse(JSON.stringify(data.route));
-            scope.originalBoxes = getBoxesFromRoute(scope.route);
-            scope.$apply();
+            updateBoxes(true);
+        }
 
-            console.log({'scope_boxes': scope.originalBoxes});
+        function updateIndices(points) {
+            for (var i = 0; i < points.length; i++) {
+                points[i].index = i;
+            }
+        }
+
+        function updateBoxes(updateOriginal) {
+            if (updateOriginal) scope.originalBoxes = getBoxesFromRoute(scope.route);
+            updateIndices(scope.changedRoute.points);
+            scope.changebleBoxes = getBoxesFromRoute(scope.changedRoute);
+            scope.$apply();
+            $('.draggable-box').draggable({
+                start: onDragStartTask,
+                stop: onDragStopTask
+            });
+
+            $('.droppable-box').droppable({
+                drop: onDropTask
+                //, over: function(event, ui) {
+                //    console.log('over', $(this).data('index'));
+                //    $(this).before('<div class="box tmp-place" style="width: 40px;" ></div>');
+                //}
+                //, out: function(event, ui) {
+                //    console.log('out', $(this).data('index'));
+                //    $('.tmp-place').remove();
+                //}
+                , over: function(event, ui) {
+                    $(this).addClass('highlighted-box');
+                }
+                , out: function(event, ui) {
+                    $(this).removeClass('highlighted-box');
+                }
+            });
+        }
+
+        function onDragStartTask(event, ui) {
+            ui.helper.css('z-index', '999999')
+        }
+
+        function onDragStopTask(event, ui) {
+            ui.helper.css('left', '0px').css('top', '0px').css('z-index', 'auto');
+        }
+
+        function  onDropTask(event, ui) {
+            var moved = ui.helper.data('index'),
+                target = $(this).data('index'),
+                point = scope.changedRoute.points.splice(moved, 1)[0];
+
+            if (target == 55555) {
+                scope.changedRoute.points.push(point);
+            } else {
+                target = target > moved ? target - 1 : target;
+                scope.changedRoute.points.splice(target, 0, point);
+            }
+
+            $(this).removeClass('highlighted-box');
+            updateBoxes();
         }
 
         function getBoxesFromRoute(route) {
@@ -62,7 +118,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         endTimeStr: point.end_time_hhmm,
                         travelTime: point.TRAVEL_TIME,
                         downtime: point.DOWNTIME,
-                        status: point.status
+                        status: point.status,
+                        number: point.NUMBER,
+                        index: point.index
                     });
                 }
             }

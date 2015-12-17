@@ -258,6 +258,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (loadParts) {
                         loadTrackParts();
                     }
+                })
+                .error(function (data) {
+                    console.log(data);
                 });
         }
 
