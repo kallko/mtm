@@ -330,18 +330,50 @@ template {
     height: 20px;
 }
 
+#edit-panel {
+    padding: 7px;
+}
+
 #original-route, #changed-route {
-    /*border: 1px solid grey;*/
-    margin: 8px;
-    padding: 5px;
+    border: 1px solid grey;
+    margin: 3px;
+    padding: 3px;
+    width: 100%;
+    float: right;
+}
+
+.box {
+    vertical-align: middle;
+    border: 1px solid grey;
+    height: 30px;
+    margin: 1px;
+    float: left;
+    text-align: center;
+    font-size: 10px;
+    padding-top: 7px;
 }
 
 .task-box {
-    border: 1px solid grey;
-    width: 95px;
-    padding: 2px;
-    margin: 2px;
-    float: left;
+    background-color: #92ee91;
+}
+
+.travel-box {
+    background-color: #39ed5a;
+}
+
+.downtime-box {
+    background-color: #d6ada4;
+}
+
+.finished-box {
+    background-color: #dddddd;
+    border: 1px solid #b19ca5;
+}
+
+.block-title {
+    border-bottom: 1px solid grey;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
 }
 
 

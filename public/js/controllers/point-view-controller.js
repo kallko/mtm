@@ -1,5 +1,5 @@
-angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http',
-    function (scope, rootScope, http) {
+angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http', 'Statuses',
+    function (scope, rootScope, http, Statuses) {
         var STATUS;
 
         init();
@@ -13,8 +13,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             );
 
+            initStatuses();
+
             rootScope.$on('showPoint', show);
-            rootScope.$on('sendStatuses', initStatuses);
             rootScope.$on('newTextStatus', newTextStatus);
         }
 
@@ -26,11 +27,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             //console.log('route', data.route);
         }
 
-        function initStatuses(event, data) {
-            if (scope.statuses) return;
-
-            STATUS = data.statuses;
-            scope.statuses = data.filters;
+        function initStatuses() {
+            STATUS = Statuses.getStatuses();
+            scope.statuses = Statuses.getTextStatuses();
         }
 
         function newTextStatus(event, text) {

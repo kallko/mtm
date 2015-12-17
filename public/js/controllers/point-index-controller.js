@@ -1,6 +1,6 @@
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
-    , '$filter', '$rootScope', 'Settings',
-    function (scope, http, timeout, interval, filter, rootScope, Settings) {
+    , '$filter', '$rootScope', 'Settings', 'Statuses',
+    function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses) {
 
         var pointTableHolder,
             pointContainer,
@@ -11,7 +11,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             dataUpdateInterval = 120,
             stopUpdateInterval = 60,
             updateTrackInterval = 30,
-            checkLocksInterval = 7,
+            checkLocksInterval = 15,
 
             radius = 0.15,
             mobileRadius = 0.5,
@@ -19,16 +19,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             promisedWindow = 3600,
             problemSortType = 0,
 
-            STATUS = {
-                FINISHED: 0,
-                FINISHED_LATE: 1,
-                FINISHED_TOO_EARLY: 2,
-                IN_PROGRESS: 3,
-                TIME_OUT: 4,
-                DELAY: 5,
-                SCHEDULED: 7,
-                CANCELED: 8
-            },
+            STATUS = Statuses.getStatuses(),
 
             WINDOW_TYPE = {
                 OUT_WINDOWS: 0,
@@ -54,29 +45,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.rowCollection = [];
             scope.displayCollection = [].concat(scope.rowCollection);
             scope.filters = {};
-            scope.filters.statuses = [
-                {name: 'все статусы', value: -1, class: 'all-status'},
-                {name: 'доставлено', value: STATUS.FINISHED, class: 'delivered-status'},
-                {
-                    name: 'доставлено поздно',
-                    table_name: 'доставлено',
-                    value: STATUS.FINISHED_LATE,
-                    class: 'delivered-late-status'
-                },
-                {
-                    name: 'доставлено рано',
-                    table_name: 'доставлено',
-                    value: STATUS.FINISHED_TOO_EARLY,
-                    class: 'delivered-too-early-status'
-                },
-                {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
-                {name: 'время вышло', value: STATUS.TIME_OUT, class: 'time-out-status'},
-                {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
-                //{name: 'под контролем', value: 4, class: 'controlled-status'},
-                //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
-                {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
-                {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
-            ];
+            scope.filters.statuses = Statuses.getTextStatuses();
 
             scope.filters.window_types = [
                 {name: 'Вне окон', value: WINDOW_TYPE.OUT_WINDOWS, class: 'out-windows'},
@@ -139,11 +108,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if ($('#problem-index-btn').hasClass('btn-success')) {
                 $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
             }
-
-            scope.$emit('sendStatuses', {
-                statuses: STATUS,
-                filters: scope.filters.statuses
-            });
         }
 
         function setDynamicDataUpdate(seconds) {
@@ -1761,8 +1725,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function processModifiedPoints(changedRoute, data) {
             console.log('recalculate success!');
             console.log(data);
-            //console.log(rawData);
-            //console.log(changedRoute);
 
             if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
                 console.log('Bad data');
@@ -1805,14 +1767,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             }
-
-            //if (changedRoute.points[changedRoute.points.length - 1].waypoint.TYPE == "WAREHOUSE") {
-            //    tmpPoint = tmpRawRoute.points.pop();
-            //    tmpPoint.ARRIVAL_TIME = filter('date')((newData[newData.length - 1].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
-            //    toMove.push(tmpPoint);
-            //}
-
-            //console.log(toMove);
 
             for (i = 0; i < newData.length; i++) {
                 for (var j = 0; j < toMove.length; j++) {
