@@ -386,6 +386,9 @@ template {
     font-weight: bold;
 }
 
+.draggable-box {
+    cursor: -webkit-grab;
+}
 
 
 

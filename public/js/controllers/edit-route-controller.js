@@ -1,7 +1,9 @@
 angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses',
     function (scope, rootScope, Statuses) {
         var minWidth = 0,
-            widthDivider = 15;
+            widthDivider = 15,
+            movedJ,
+            toHideJ;
 
         scope.BOX_TYPE = {
             TRAVEL: 0,
@@ -14,14 +16,48 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         function init() {
             rootScope.$on('routeToChange', onRouteToChange);
+            $('#boxes').mouseleave(function() {
+                // .position()
+                console.log('mouseleave');
+                console.log($(this).position(), $(this).width(), $(this).height());
+                //$('.tmp-place').remove();
+            });
+
+            $('#changed-route').mouseover(function () {
+                //console.log('mouseover');
+            });
+
         }
 
         function onRouteToChange(event, data) {
             console.log('onRouteToChange');
 
-            scope.route = data.route;
-            scope.changedRoute = JSON.parse(JSON.stringify(data.route));
+            var routeCopy = JSON.parse(JSON.stringify(data.route));
+            //moveSkippedToEnd(routeCopy);
+            scope.route = routeCopy;
+            scope.changedRoute = JSON.parse(JSON.stringify(routeCopy));
             updateBoxes(true);
+        }
+
+        function moveSkippedToEnd(route) {
+            console.log(route.lastPointIndx);
+            var toMoveArr = [];
+
+            for (var i = 0; i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
+                if (route.points[i].status != scope.STATUS.FINISHED &&
+                    route.points[i].status != scope.STATUS.FINISHED_LATE &&
+                    route.points[i].status != scope.STATUS.FINISHED_TOO_EARLY) {
+                    toMoveArr.push(route.points[i]);
+                    route.points.splice(i, 1);
+                    i--;
+                }
+            }
+
+            for (var i = 0; i < toMoveArr.length; i++) {
+                toMoveArr[i].TRAVEL_TIME = '0';
+                toMoveArr[i].DOWNTIME = '0';
+                route.points.push(toMoveArr[i]);
+            }
         }
 
         function updateIndices(points) {
@@ -37,41 +73,54 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.$apply();
             $('.draggable-box').draggable({
                 start: onDragStartTask,
-                stop: onDragStopTask
+                stop: onDragStopTask,
+                helper: 'clone'
             });
 
             $('.droppable-box').droppable({
                 drop: onDropTask
-                //, over: function(event, ui) {
-                //    console.log('over', $(this).data('index'));
-                //    $(this).before('<div class="box tmp-place" style="width: 40px;" ></div>');
-                //}
-                //, out: function(event, ui) {
-                //    console.log('out', $(this).data('index'));
-                //    $('.tmp-place').remove();
-                //}
                 , over: function(event, ui) {
-                    $(this).addClass('highlighted-box');
+                    $('.tmp-place').remove();
+                    var dataIndex = $(this).data('index'),
+                        placeHolder = $('<div class="box tmp-place" style="width: ' + movedJ.width() + 'px;" ' +
+                        ' data-index="' + dataIndex + '" ></div>');
+                    $('#box-' + scope.BOX_TYPE.TASK + '-' + dataIndex).before(placeHolder);
+                    placeHolder.droppable({
+                        drop: onDropTask
+                    });
                 }
                 , out: function(event, ui) {
-                    $(this).removeClass('highlighted-box');
+                    //$('.tmp-place').remove();
                 }
+
+                //, over: function(event, ui) {
+                //    $(this).addClass('highlighted-box');
+                //}
+                //, out: function(event, ui) {
+                //    $(this).removeClass('highlighted-box');
+                //}
             });
         }
 
         function onDragStartTask(event, ui) {
-            ui.helper.css('z-index', '999999')
+            ui.helper.css('z-index', '999999');
+            movedJ = ui.helper;
+            toHideJ = $('#box-' + scope.BOX_TYPE.TASK + '-' + movedJ.data('index'));
+            toHideJ.hide();
         }
 
         function onDragStopTask(event, ui) {
             ui.helper.css('left', '0px').css('top', '0px').css('z-index', 'auto');
+            $('.tmp-place').remove();
+            toHideJ.show();
         }
 
-        function  onDropTask(event, ui) {
+        function onDropTask(event, ui) {
             var moved = ui.helper.data('index'),
                 target = $(this).data('index'),
                 point = scope.changedRoute.points.splice(moved, 1)[0];
 
+            $('.tmp-place').remove();
             if (target == 55555) {
                 scope.changedRoute.points.push(point);
             } else {
@@ -95,7 +144,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     boxes.push({
                         type: scope.BOX_TYPE.TRAVEL,
                         size: tmpTime,
-                        status: point.status
+                        status: point.status,
+                        index: point.index
                     });
                 }
 
@@ -104,7 +154,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     boxes.push({
                         type: scope.BOX_TYPE.DOWNTIME,
                         size: tmpTime,
-                        status: point.status
+                        status: point.status,
+                        index: point.index
                     });
                 }
 
@@ -119,7 +170,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         travelTime: point.TRAVEL_TIME,
                         downtime: point.DOWNTIME,
                         status: point.status,
-                        number: point.NUMBER,
                         index: point.index
                     });
                 }
