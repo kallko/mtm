@@ -1,9 +1,10 @@
-angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses',
-    function (scope, rootScope, Statuses) {
+angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses', '$timeout',
+    function (scope, rootScope, Statuses, timeout) {
         var minWidth = 0,
             widthDivider = 15,
             movedJ,
-            toHideJ;
+            toHideJ,
+            hidePlaceholder = false;
 
         scope.BOX_TYPE = {
             TRAVEL: 0,
@@ -16,17 +17,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         function init() {
             rootScope.$on('routeToChange', onRouteToChange);
-            $('#boxes').mouseleave(function() {
-                // .position()
-                console.log('mouseleave');
-                console.log($(this).position(), $(this).width(), $(this).height());
-                //$('.tmp-place').remove();
-            });
-
-            $('#changed-route').mouseover(function () {
-                //console.log('mouseover');
-            });
-
         }
 
         function onRouteToChange(event, data) {
@@ -81,6 +71,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 drop: onDropTask
                 , over: function(event, ui) {
                     $('.tmp-place').remove();
+                    hidePlaceholder = false;
                     var dataIndex = $(this).data('index'),
                         placeHolder = $('<div class="box tmp-place" style="width: ' + movedJ.width() + 'px;" ' +
                         ' data-index="' + dataIndex + '" ></div>');
@@ -90,15 +81,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     });
                 }
                 , out: function(event, ui) {
-                    //$('.tmp-place').remove();
+                    hidePlaceholder = true;
+                    timeout(function () {
+                        if (hidePlaceholder) $('.tmp-place').remove();
+                    }, 100);
                 }
-
-                //, over: function(event, ui) {
-                //    $(this).addClass('highlighted-box');
-                //}
-                //, out: function(event, ui) {
-                //    $(this).removeClass('highlighted-box');
-                //}
             });
         }
 

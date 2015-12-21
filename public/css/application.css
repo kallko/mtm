@@ -332,6 +332,8 @@ template {
 
 #edit-panel {
     padding: 7px;
+    overflow-y: scroll;
+    height: 100%;
 }
 
 #original-route, #changed-route {
