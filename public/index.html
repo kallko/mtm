@@ -111,31 +111,33 @@
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
                 <tr class="titles-tr">
-                    <th class="number-col">Номер</th>
-                    <th class="car-type-col">Машина</th>
-                    <th class="driver-name-col">Водитель</th>
-                    <th class="client-name-col">Название</th>
-                    <th class="address-col">Адрес</th>
-                    <th class="status-col" st-sort="status">Статус</th>
-                    <th class="window-type-col">Окно</th>
-                    <th class="stop-col">Стоп</th>
-                    <th class="mobile-push-col">Моб.нажатие</th>
-                    <th class="plan-arrival-time-col">План. прибытие</th>
-                    <th class="time-window-col">Заказанное окно</th>
-                    <th class="prediction-arrival-time-col">Прогноз прибытия</th>
-                    <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction">Осталось до прибытия</th>
-                    <th class="real-arrival-time-col">Фактическое прибытие</th>
+                    <th class="number-col" title="Плановый номер задания" >План</th>
+                    <th class="car-type-col" title="Назавание машины" >Машина</th>
+                    <th class="driver-name-col" title="Фамилия и имя водителя" >Водитель</th>
+                    <th class="client-name-col" title="Название точки доставки" >Название</th>
+                    <th class="address-col" title="Адрес доставки" >Адрес</th>
+                    <th class="status-col" st-sort="status" title="Статус доставки" >Статус</th>
+                    <th class="window-type-col" title="Фактическое окно доставки" >Факт. окно</th>
+                    <th class="stop-col" title="Наличие стопа связанного с точкой" >Стоп</th>
+                    <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения" >Моб.нажатие</th>
+                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку" >План. прибытие</th>
+                    <th class="time-window-col" title="Заказанное клиентом окно" >Заказанное</th>
+                    <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия" >Прогноз прибытия</th>
+                    <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction" title="Осталось до прогнозируемого времени прибытия" >
+                        Осталось до прибытия
+                    </th>
+                    <th class="real-arrival-time-col" title="Фактическое время прибытия" >Факт. прибытие</th>
 
-                    <th class="overdue-col">Размер опоздания</th>
-                    <th class="problem-index-col" st-sort="problem_index">Проблемность</th>
+                    <th class="overdue-col" title="Размер опоздания от планового времени прибытия" >Опазд.</th>
+                    <th class="problem-index-col" st-sort="problem_index" title="Индекс проблемности задания" >Проблемность</th>
                     <!--<th class="point-id-col">ID точки</th>-->
                     <!--<th class="task-id-col">ID заказа</th>-->
-                    <th class="promised-window-col">Обещанное окно</th>
-                    <th class="promised-window-changed-col">Изменяемое окно</th>
-                    <th class="driver-phone-col">Телефон водителя</th>
-                    <th class="car-number-col">Номер машины</th>
-                    <th class="branch-col">Филиал</th>
-                    <th>Комментарий к точке</th>
+                    <th class="promised-window-col" title="Обещанное клиенту окно" >Обещ. окно</th>
+                    <th class="promised-window-changed-col" title="Редактируемое обещанное окно" >Редакт. окно</th>
+                    <th class="driver-phone-col" title="Телефон водителя" >Тел. водителя</th>
+                    <th class="car-number-col" title="Номер машины" >Номер</th>
+                    <th class="branch-col" title="Филиал" >Филиал</th>
+                    <th title="Комментарий к точке" >Комментарий</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -147,7 +149,7 @@
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{row.NUMBER}}</td>
-                    <td>{{row.transport.NAME}}</td>
+                    <td title="{{row.transport.NAME}}" >{{row.transport.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
