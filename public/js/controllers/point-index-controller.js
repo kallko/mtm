@@ -327,7 +327,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tPoint,
                 roundingNumb = 300,
                 problematicRoutes = [],
-                branchIndx;
+                branchIndx,
+                tmpTaskNumber = -1;
             scope.rowCollection = [];
 
             for (var i = 0; i < data.sensors.length; i++) {
@@ -391,6 +392,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint.branchName = data.routes[i].branch;
                     tPoint.driver = data.routes[i].driver;
                     tPoint.in_plan = true;
+
+                    if (!tPoint.TASK_NUMBER) {
+                        //console.log('!tPoint.TASK_NUMBER', tPoint.waypoint.TYPE);
+                        tPoint.TASK_NUMBER = tmpTaskNumber;
+                        tmpTaskNumber--;
+                    }
+
                     if (data.routes[i].filterId == null) {
                         data.routes[i].filterId = routeId;
                         scope.filters.routes.push({
