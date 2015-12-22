@@ -679,7 +679,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tmp;
                 for (var i = 0; i < _data.routes.length; i++) {
 
-                    seed = i * 42;
+                    seed = i * 122;
                     rand = random(0, 3600);
                     for (var j = 0; j < _data.routes[i].points.length; j++) {
                         if (_data.server_time > (_data.routes[i].points[j].arrival_time_ts + (rand - 1800))) {
@@ -690,8 +690,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     cancel_reason: "",
                                     canceled: false,
                                     gps_time: gpsTime,
-                                    lat: _data.routes[i].points[j].LAT,
-                                    lon: _data.routes[i].points[j].LON,
+                                    lat: parseFloat(_data.routes[i].points[j].LAT) + (random(0, 4) / 10000 - 0.0002),
+                                    lon: parseFloat(_data.routes[i].points[j].LON) + (random(0, 4) / 10000 - 0.0002),
                                     number: _data.routes[i].points[j].TASK_NUMBER,
                                     time: gpsTime
                                 });
@@ -760,6 +760,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
                                 tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
                                 _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                                _data.routes[j].pushes = _data.routes[j].pushes || [];
+                                if (mobilePushes[i].gps_time_ts < _data.server_time) {
+                                    _data.routes[j].pushes.push(mobilePushes[i]);
+                                }
                                 findStatusAndWindowForPoint(tmpPoint);
                                 break;
                             }

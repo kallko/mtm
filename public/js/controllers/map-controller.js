@@ -25,7 +25,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     });
 
     rootScope.$on('drawRealTrack', function (event, route) {
-        drawRealRoute(route.real_track);
+        drawRealRoute(route);
         drawAllPoints(route.points)
     });
 
@@ -36,7 +36,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
     rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
         drawPlannedRoute(route.plan_geometry, 0);
-        drawRealRoute(route.real_track);
+        drawRealRoute(route);
         drawAllPoints(route.points)
     });
 
@@ -59,7 +59,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //var real_track = route.plan_geometry,
         //    planned_track = route.plan_geometry;
 
-        drawRealRoute(route.real_track);
+        drawRealRoute(route);
 
         var i = route.points.length - 1;
         for (; i >= 0; i--) {
@@ -113,17 +113,20 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         addPolyline(geometry, 'blue', 3, 0.5, 1, true);
     }
 
-    function drawRealRoute(track) {
-        if (track == null) return;
+    function drawRealRoute(route) {
+        if (!route || !route.real_track) return;
 
-        var tmpVar,
+        var track = route.real_track,
+            pushes = route.pushes,
+            tmpVar,
             polyline,
             iconIndex = 14,
             tmpTitle = '',
             color = '',
             stopIndx,
             stopTime,
-            drawStops = $('#draw-stops').is(':checked');
+            drawStops = $('#draw-stops').is(':checked'),
+            drawPushes = $('#draw-pushes').is(':checked');
 
         for (var i = 0; i < track.length; i++) {
             if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
@@ -142,10 +145,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             } else if (track[i].state == 'ARRIVAL') {
                 stopIndx = (parseInt(i / 2 + 0.5) - 1);
                 stopTime = mmhh(track[i].time);
+                tmpVar = stopTime.split(':');
+                if (tmpVar[1] != '00') {
+                    stopTime = parseInt(tmpVar[0]) + 1;
+                } else {
+                    stopTime = parseInt(tmpVar[0]);
+                }
+
                 tmpTitle = 'Остановка #' + stopIndx + '\n';
                 tmpTitle += 'Время прибытия: ' + formatDate(new Date(track[i].t1 * 1000)) + '\n';
                 tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
-                tmpTitle += 'Длительность: ' + stopTime + '\n';
+                tmpTitle += 'Длительность: ' + mmhh(track[i].time) + '\n';
 
                 if (i + 1 < track.length) {
                     tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
@@ -190,6 +200,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                 addMarker(tmpVar);
             }
+        }
+
+        for (var i = 0; drawPushes && i < pushes.length; i++) {
+            tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
+            tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
+            tmpTitle += 'ID задания: ' + pushes[i].number;
+
+            tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
+            tmpVar.setIcon(getIcon('S', iconIndex, 'orange', 'black'));
+            addMarker(tmpVar);
         }
     }
 
