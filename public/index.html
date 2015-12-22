@@ -330,9 +330,6 @@
                                     'travel-box': box.type == BOX_TYPE.TRAVEL,
                                     'downtime-box': box.type == BOX_TYPE.DOWNTIME}"
                          title="{{tooltip(box)}}"
-                         ng-show="box.status != STATUS.FINISHED
-                                && box.status != STATUS.FINISHED_TOO_EARLY
-                                && box.status != STATUS.FINISHED_LATE"
                             data-index="{{box.index}}"
                             id="box-{{box.type}}-{{box.index}}" >
                         {{box.number}}

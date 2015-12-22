@@ -1116,7 +1116,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 case 'edit':
                     scope.$emit('routeToChange', {
                         route: _data.routes[row.route_id],
-                        demoTime: scope.demoMode ? _data.server_time : -1
+                        serverTime: _data.server_time,
+                        demoMode: scope.demoMode
                     });
                     break;
                 default:

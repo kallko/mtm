@@ -5,7 +5,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             movedJ,
             toHideJ,
             hidePlaceholder = false,
-            routerData;
+            routerData,
+            serverTime;
 
         scope.BOX_TYPE = {
             TRAVEL: 0,
@@ -21,14 +22,14 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         function onRouteToChange(event, data) {
-            loadRouterData(data.route.points);
             var routeCopy = JSON.parse(JSON.stringify(data.route));
+            serverTime = data.serverTime
 
-            if (data.demoTime) {
+            if (data.demoMode) {
                 routeCopy.car_position = undefined;
                 for (var i = 0; i < routeCopy.real_track.length; i++) {
-                    if (routeCopy.real_track[i].t1 < data.demoTime &&
-                        routeCopy.real_track[i].t2 > data.demoTime) {
+                    if (routeCopy.real_track[i].t1 < serverTime &&
+                        routeCopy.real_track[i].t2 > serverTime) {
                         routeCopy.car_position = routeCopy.real_track[i];
                         break;
                     }
@@ -42,9 +43,18 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.changedRoute = JSON.parse(JSON.stringify(routeCopy));
 
             for (var i = 0; i < scope.changedRoute.points.length; i++) {
-                scope.changedRoute.points[i].base_index = i;
+                if (scope.changedRoute.points[i].status == scope.STATUS.FINISHED ||
+                    scope.changedRoute.points[i].status == scope.STATUS.FINISHED_LATE ||
+                    scope.changedRoute.points[i].status == scope.STATUS.FINISHED_TOO_EARLY){
+                    scope.changedRoute.points.splice(i, 1);
+                    i--;
+                } else {
+                    scope.changedRoute.points[i].base_index = i;
+                }
+
             }
 
+            loadRouterData(scope.changedRoute.points);
             updateBoxes(true);
         }
 
@@ -54,7 +64,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return;
             }
 
-            //console.log('scope.changedRoute >>', scope.changedRoute);
+            console.log('scope.changedRoute >>', scope.changedRoute);
             var url = './findtime2p/'
                 + scope.changedRoute.car_position.lat + '&'
                 + scope.changedRoute.car_position.lon + '&'
@@ -65,11 +75,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 .success(function(data) {
                     console.log(data);
 
-                var tmpTime =  parseInt(data.time_table[0][0][1] / 10),
-                    fromPoint,
+                var fromPoint,
                     toPoint;
 
-                console.log(tmpTime);
+                //console.log(tmpTime);
+                scope.changedRoute.points[0].TRAVEL_TIME = parseInt(data.time_table[0][0][1] / 10);
+                scope.changedRoute.points[0].DOWNTIME = '0';
                 for (var i = 1; i < scope.changedRoute.points.length; i++) {
                     fromPoint = scope.changedRoute.points[i - 1];
                     toPoint = scope.changedRoute.points[i];
