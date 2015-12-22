@@ -1102,7 +1102,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     sortByRoute(row.route_indx);
                     return;
                 case 'edit':
-                    scope.$emit('routeToChange', {route: _data.routes[row.route_id]});
+                    scope.$emit('routeToChange', {
+                        route: _data.routes[row.route_id],
+                        demoTime: scope.demoMode ? _data.server_time : -1
+                    });
                     break;
                 default:
                     changeStatus(row, point, option);

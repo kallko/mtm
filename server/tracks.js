@@ -553,7 +553,16 @@ TracksManager.prototype.sendDataToSolver = function () {
 
 };
 
-
+TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
+    request({
+        url: this.routerUrl + 'table?' + pointsStr,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            callback(body);
+        }
+    });
+};
 
 
 

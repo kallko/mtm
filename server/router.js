@@ -480,6 +480,16 @@ router.route('/routerdata')
         tracksManager.getRouterData(cData, routeIndx, -1, checkFunc, callback, true);
     });
 
+router.route('/getroutermatrix/:points')
+    .get(function (req, res) {
+        console.log('getmatrix');
+        tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
+            res.status(200).json(data);
+        });
+
+        //res.status(200).json({status: 'ok'});
+    });
+
 router.route('/log')
     .post(function (req, res) {
         //db.testConnection();
