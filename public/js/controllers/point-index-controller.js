@@ -272,7 +272,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
         }
 
-        function getTstampAvailabilityWindow(strWindows) {
+        function getTstampAvailabilityWindow(strWindows, currentTime) {
             if (!strWindows) {
                 //console.log('Invalid strWindows!');
                 return;
@@ -285,8 +285,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var parts = windows[i].split(' '),
                     timeStart = parts[0].split(':'),
                     timeFinish = parts[2].split(':'),
-                    startDate = new Date(),
-                    finishDate = new Date();
+                    startDate = new Date(currentTime * 1000),
+                    finishDate = new Date(currentTime * 1000);
 
                 startDate.setHours(timeStart[0]);
                 startDate.setMinutes(timeStart[1]);
@@ -437,7 +437,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //    }
                     //}
 
-                    tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS);
+                    tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, data.server_time);
                     if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
                         for (k = 0; k < tPoint.windows.length; k++) {
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
@@ -1550,7 +1550,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (var i = 0; i < route.points.length; i++) {
                     if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
-                        timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS);
+                        timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS,
+                            _data.server_time);
                         mathInput.depotList.push({
                             "id": "1",
                             "point": "-2",
@@ -1564,7 +1565,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 var trWindow = getTstampAvailabilityWindow('03:00 - ' +
-                        route.transport.END_OF_WORK.substr(0, 5)),
+                        route.transport.END_OF_WORK.substr(0, 5), _data.server_time),
                     jobWindows,
                     timeStep = 600,
                     warehouseEnd;

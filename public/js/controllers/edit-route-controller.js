@@ -1,12 +1,13 @@
 angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses', '$timeout', '$http',
     function (scope, rootScope, Statuses, timeout, http) {
         var minWidth = 0,
-            widthDivider = 15,
+            widthDivider = 25,
             movedJ,
             toHideJ,
             hidePlaceholder = false,
             routerData,
-            serverTime;
+            serverTime,
+            firstInit;
 
         scope.BOX_TYPE = {
             TRAVEL: 0,
@@ -23,7 +24,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         function onRouteToChange(event, data) {
             var routeCopy = JSON.parse(JSON.stringify(data.route));
-            serverTime = data.serverTime
+            serverTime = data.serverTime;
+            firstInit = true;
+            routerData = undefined;
 
             if (data.demoMode) {
                 routeCopy.car_position = undefined;
@@ -42,10 +45,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.route = routeCopy;
             scope.changedRoute = JSON.parse(JSON.stringify(routeCopy));
 
+            moveSkippedToEnd(scope.changedRoute);
             for (var i = 0; i < scope.changedRoute.points.length; i++) {
                 if (scope.changedRoute.points[i].status == scope.STATUS.FINISHED ||
                     scope.changedRoute.points[i].status == scope.STATUS.FINISHED_LATE ||
-                    scope.changedRoute.points[i].status == scope.STATUS.FINISHED_TOO_EARLY){
+                    scope.changedRoute.points[i].status == scope.STATUS.FINISHED_TOO_EARLY) {
                     scope.changedRoute.points.splice(i, 1);
                     i--;
                 } else {
@@ -54,13 +58,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             }
 
-            loadRouterData(scope.changedRoute.points);
-            updateBoxes(true);
+            loadRouterData(scope.changedRoute.points, recalculateRoute);
+            //updateBoxes(true);
         }
 
         function recalculateRoute() {
             if (!routerData) {
-                loadRouterData(scope.changedRoute.points);
+                loadRouterData(scope.changedRoute.points, recalculateRoute);
                 return;
             }
 
@@ -72,27 +76,60 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 + scope.changedRoute.points[scope.changedRoute.lastPointIndx + 1].LON;
             console.log(url);
             http.get(url)
-                .success(function(data) {
+                .success(function (data) {
                     console.log(data);
 
-                var fromPoint,
-                    toPoint;
+                    var fromPoint,
+                        toPoint,
+                        cTime;
 
-                //console.log(tmpTime);
-                scope.changedRoute.points[0].TRAVEL_TIME = parseInt(data.time_table[0][0][1] / 10);
-                scope.changedRoute.points[0].DOWNTIME = '0';
-                for (var i = 1; i < scope.changedRoute.points.length; i++) {
-                    fromPoint = scope.changedRoute.points[i - 1];
-                    toPoint = scope.changedRoute.points[i];
-                    toPoint.TRAVEL_TIME = routerData.timeTable[fromPoint.base_index][toPoint.base_index] / 10;
-                    toPoint.DOWNTIME = '0';
-                    //toPoint.TRAVEL_TIME = '0';
+                    cTime = applyTravelTimeToPoint(scope.changedRoute.points[0],
+                        parseInt(data.time_table[0][0][1] / 10), serverTime);
+
+                    for (var i = 1; i < scope.changedRoute.points.length; i++) {
+                        fromPoint = scope.changedRoute.points[i - 1];
+                        toPoint = scope.changedRoute.points[i];
+                        cTime = applyTravelTimeToPoint(toPoint,
+                            routerData.timeTable[fromPoint.base_index][toPoint.base_index] / 10, cTime);
+                    }
+
+                    updateBoxes(firstInit);
+                });
+        }
+
+        function applyTravelTimeToPoint(point, travelTime, cTime) {
+            point.TRAVEL_TIME = travelTime;
+            cTime += travelTime;
+            point.DOWNTIME = getDowntime(cTime, point.windows);
+            cTime += point.DOWNTIME;
+            cTime += parseInt(point.TASK_TIME);
+
+            //console.log('cTime', new Date(cTime * 1000));
+            return cTime;
+        }
+
+        function getDowntime(time, windows) {
+            if (!windows || windows.length == 0) return 0;
+
+            var closestWindow;
+            if (windows.length == 1) {
+                closestWindow = windows[0];
+            } else {
+                for (var i = 0; i < windows.length; i++) {
+                    if (windows[i].finish > time || i == windows.length - 1) {
+                        closestWindow = windows[i];
+                        break;
+                    }
                 }
-            });
+            }
+
+            //console.log('start', new Date(closestWindow.start * 1000), 'time', new Date(time * 1000));
+            if (closestWindow.start > time) return closestWindow.start - time;
+
+            return 0;
         }
 
         function moveSkippedToEnd(route) {
-            console.log(route.lastPointIndx);
             var toMoveArr = [];
 
             for (var i = 0; i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
@@ -112,7 +149,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
         }
 
-        function loadRouterData(points) {
+        function loadRouterData(points, callback) {
             var pointsStr = '';
             for (var i = 0; i < points.length; i++) {
                 if (points[i].LAT != null && points[i].LON != null) {
@@ -121,11 +158,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
 
             http.get('./getroutermatrix/' + pointsStr)
-                .success(function(data) {
+                .success(function (data) {
                     routerData = {
                         lengthTable: data.length_table[0],
                         timeTable: data.time_table[0]
                     };
+                    callback();
                 });
         }
 
@@ -136,36 +174,45 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         function updateBoxes(updateOriginal) {
-            if (updateOriginal) scope.originalBoxes = getBoxesFromRoute(scope.route);
+            if (updateOriginal) {
+                scope.originalBoxes = getBoxesFromRoute(scope.route);
+                firstInit = false;
+            }
+
             updateIndices(scope.changedRoute.points);
             scope.changebleBoxes = getBoxesFromRoute(scope.changedRoute);
-            scope.$apply();
-            $('.draggable-box').draggable({
-                start: onDragStartTask,
-                stop: onDragStopTask,
-                helper: 'clone'
-            });
+            //console.log('scope.$apply()');
+            //scope.$apply();
 
-            $('.droppable-box').droppable({
-                drop: onDropTask
-                , over: function(event, ui) {
-                    $('.tmp-place').remove();
-                    hidePlaceholder = false;
-                    var dataIndex = $(this).data('index'),
-                        placeHolder = $('<div class="box tmp-place" style="width: ' + movedJ.width() + 'px;" ' +
-                        ' data-index="' + dataIndex + '" ></div>');
-                    $('#box-' + scope.BOX_TYPE.TASK + '-' + dataIndex).before(placeHolder);
-                    placeHolder.droppable({
-                        drop: onDropTask
-                    });
-                }
-                , out: function(event, ui) {
-                    hidePlaceholder = true;
-                    timeout(function () {
-                        if (hidePlaceholder) $('.tmp-place').remove();
-                    }, 100);
-                }
-            });
+            timeout(function () {
+                console.log('setting listeners');
+                $('.draggable-box').draggable({
+                    start: onDragStartTask,
+                    stop: onDragStopTask,
+                    helper: 'clone'
+                });
+
+                $('.droppable-box').droppable({
+                    drop: onDropTask
+                    , over: function (event, ui) {
+                        $('.tmp-place').remove();
+                        hidePlaceholder = false;
+                        var dataIndex = $(this).data('index'),
+                            placeHolder = $('<div class="box tmp-place" style="width: ' + movedJ.width() + 'px;" ' +
+                                ' data-index="' + dataIndex + '" ></div>');
+                        $('#box-' + scope.BOX_TYPE.TASK + '-' + dataIndex).before(placeHolder);
+                        placeHolder.droppable({
+                            drop: onDropTask
+                        });
+                    }
+                    , out: function (event, ui) {
+                        hidePlaceholder = true;
+                        timeout(function () {
+                            if (hidePlaceholder) $('.tmp-place').remove();
+                        }, 100);
+                    }
+                });
+            }, 1);
         }
 
         function onDragStartTask(event, ui) {
@@ -196,7 +243,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             //$(this).removeClass('highlighted-box');
             recalculateRoute();
-            updateBoxes();
+            //updateBoxes();
         }
 
         function getBoxesFromRoute(route) {
@@ -245,11 +292,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             return boxes;
         }
 
-        scope.boxWidth = function(size) {
+        scope.boxWidth = function (size) {
             return size / widthDivider > minWidth ? size / widthDivider : minWidth;
         };
 
-        scope.tooltip = function(box) {
+        scope.tooltip = function (box) {
             var result = '';
 
             switch (box.type) {
