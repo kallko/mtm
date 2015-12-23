@@ -159,7 +159,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            console.log('pointsStr', pointsStr);
+            console.log('./getroutermatrix/' + pointsStr);
             http.get('./getroutermatrix/' + pointsStr)
                 .success(function (data) {
                     routerData = {
