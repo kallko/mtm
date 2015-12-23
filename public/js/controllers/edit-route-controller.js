@@ -51,6 +51,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     scope.changedRoute.points[i].status == scope.STATUS.FINISHED_LATE ||
                     scope.changedRoute.points[i].status == scope.STATUS.FINISHED_TOO_EARLY) {
                     scope.changedRoute.points.splice(i, 1);
+                    scope.changedRoute.lastPointIndx--;
                     i--;
                 } else {
                     scope.changedRoute.points[i].base_index = i;
