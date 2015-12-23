@@ -59,7 +59,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             }
 
-            loadRouterData(scope.changedRoute.points, recalculateRoute);
+            if (scope.changedRoute.points.length > 0) {
+                loadRouterData(scope.changedRoute.points, recalculateRoute);
+            } else {
+                scope.$emit('showNotification', {text: 'Маршрут полностью выполнен.'});
+            }
             //updateBoxes(true);
         }
 
