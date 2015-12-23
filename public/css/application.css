@@ -392,7 +392,10 @@ template {
     cursor: -webkit-grab;
 }
 
-
+.late-box {
+    border: 1px solid red;
+    background-color: #ff9c87;
+}
 
 
 

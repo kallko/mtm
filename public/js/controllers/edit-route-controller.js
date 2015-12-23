@@ -1,7 +1,7 @@
 angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses', '$timeout', '$http',
     function (scope, rootScope, Statuses, timeout, http) {
-        var minWidth = 0,
-            widthDivider = 25,
+        var minWidth = 20,
+            widthDivider = 15,
             movedJ,
             toHideJ,
             hidePlaceholder = false,
@@ -105,7 +105,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         function applyTravelTimeToPoint(point, travelTime, cTime) {
             point.TRAVEL_TIME = travelTime;
             cTime += travelTime;
-            point.DOWNTIME = getDowntime(cTime, point.windows);
+            point.DOWNTIME = getDowntime(cTime, point);
             cTime += point.DOWNTIME;
             cTime += parseInt(point.TASK_TIME);
 
@@ -113,10 +113,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             return cTime;
         }
 
-        function getDowntime(time, windows) {
-            if (!windows || windows.length == 0) return 0;
+        function getDowntime(time, point) {
+            if (!point || !point.windows || point.windows.length == 0) return 0;
 
-            var closestWindow;
+            var closestWindow,
+                windows = point.windows;
             if (windows.length == 1) {
                 closestWindow = windows[0];
             } else {
@@ -128,8 +129,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            //console.log('start', new Date(closestWindow.start * 1000), 'time', new Date(time * 1000));
             if (closestWindow.start > time) return closestWindow.start - time;
+            if (time > closestWindow.finish) point.late = true;
 
             return 0;
         }
@@ -163,7 +164,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            console.log('./getroutermatrix/' + pointsStr);
+            //console.log('./getroutermatrix/' + pointsStr);
             http.get('./getroutermatrix/' + pointsStr)
                 .success(function (data) {
                     routerData = {
@@ -192,7 +193,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             //scope.$apply();
 
             timeout(function () {
-                console.log('setting listeners');
                 $('.draggable-box').draggable({
                     start: onDragStartTask,
                     stop: onDragStopTask,
@@ -291,16 +291,20 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         travelTime: point.TRAVEL_TIME,
                         downtime: point.DOWNTIME,
                         status: point.status,
-                        index: point.index
+                        index: point.index,
+                        late: point.late
                     });
+
+                    console.log('point.late >>>', point.late);
                 }
             }
 
             return boxes;
         }
 
-        scope.boxWidth = function (size) {
-            return size / widthDivider > minWidth ? size / widthDivider : minWidth;
+        scope.boxWidth = function (size, type) {
+            var mWidth = type == scope.BOX_TYPE.TASK ? minWidth : size / widthDivider;
+            return parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
         };
 
         scope.tooltip = function (box) {
@@ -321,8 +325,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             result += 'Продолжительность: ' + toMinutes(box.size) + ' мин.\n';
 
             if (box.type == scope.BOX_TYPE.TASK) {
-                result += 'Время прибытия: ' + box.arrivalStr + '\n';
-                result += 'Время отъезда: ' + box.endTimeStr + '\n';
+                result += 'Время прибытия: ' + box.arrivalStr + '\n';   //TODO
+                result += 'Время отъезда: ' + box.endTimeStr + '\n';    //TODO
                 result += 'Переезд: ' + toMinutes(box.travelTime) + ' мин.\n';
                 result += 'Простой: ' + toMinutes(box.downtime) + ' мин.\n';
             }
