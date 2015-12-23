@@ -143,6 +143,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
+            route.lastPointIndx -= toMoveArr.length;
             for (var i = 0; i < toMoveArr.length; i++) {
                 toMoveArr[i].TRAVEL_TIME = '0';
                 toMoveArr[i].DOWNTIME = '0';
