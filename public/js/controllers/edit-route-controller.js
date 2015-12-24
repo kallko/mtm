@@ -1,5 +1,5 @@
-angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses', '$timeout', '$http',
-    function (scope, rootScope, Statuses, timeout, http) {
+angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootScope', 'Statuses', '$timeout', '$http', '$filter',
+    function (scope, rootScope, Statuses, timeout, http, filter) {
         var minWidth = 20,
             widthDivider = 15,
             movedJ,
@@ -129,10 +129,23 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            if (closestWindow.start > time) return closestWindow.start - time;
-            if (time > closestWindow.finish) point.late = true;
+            if (closestWindow.start > time) {
+                updatePointInfo(point, closestWindow.start);
+                return closestWindow.start - time;
+            }
+
+            if (time > closestWindow.finish){
+                updatePointInfo(point, time);
+                point.late = true;
+            }
 
             return 0;
+        }
+
+        function updatePointInfo(point, time) {
+            time *= 1000;
+            point.arrival_time_hhmm = filter('date')(time, 'yyyy HH:mm:ss');
+            point.end_time_hhmm = filter('date')(time + parseInt(point.TASK_TIME) * 1000, 'yyyy HH:mm:ss');
         }
 
         function moveSkippedToEnd(route) {
@@ -292,10 +305,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         downtime: point.DOWNTIME,
                         status: point.status,
                         index: point.index,
-                        late: point.late
+                        late: point.late,
+                        windows: point.AVAILABILITY_WINDOWS,
+                        promised: point.promised_window_changed
                     });
-
-                    console.log('point.late >>>', point.late);
                 }
             }
 
@@ -325,8 +338,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             result += 'Продолжительность: ' + toMinutes(box.size) + ' мин.\n';
 
             if (box.type == scope.BOX_TYPE.TASK) {
-                result += 'Время прибытия: ' + box.arrivalStr + '\n';   //TODO
-                result += 'Время отъезда: ' + box.endTimeStr + '\n';    //TODO
+                result += 'Время прибытия: ' + box.arrivalStr + '\n';
+                result += 'Время отъезда: ' + box.endTimeStr + '\n';
+                result += 'Заказанное окно: ' + box.windows + '\n';
+                result += 'Обещананое окно: ' +
+                    filter('date')(box.promised.start * 1000, 'HH:mm') +
+                    ' - ' +
+                    filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';
                 result += 'Переезд: ' + toMinutes(box.travelTime) + ' мин.\n';
                 result += 'Простой: ' + toMinutes(box.downtime) + ' мин.\n';
             }
