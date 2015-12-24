@@ -115,34 +115,39 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             point.END_TIME = filter('date')(cTime * 1000, 'dd.MM.yyyy HH:mm:ss');
             point.end_time_hhmm = point.END_TIME.substr(11, 8);
 
+            checkLate(point);
+
             return cTime;
         }
 
         function getDowntime(time, point) {
             if (!point || !point.windows || point.windows.length == 0) return 0;
 
-            var closestWindow,
-                windows = point.windows;
-            if (windows.length == 1) {
-                closestWindow = windows[0];
-            } else {
-                for (var i = 0; i < windows.length; i++) {
-                    if (windows[i].finish > time || i == windows.length - 1) {
-                        closestWindow = windows[i];
-                        break;
-                    }
-                }
-            }
+            var closestWindow = findClosestWindow(point.windows);
 
             if (closestWindow.start > time) {
                 return closestWindow.start - time;
             }
 
-            if (time > closestWindow.finish){
-                point.late = true;
-            }
-
             return 0;
+        }
+
+        function findClosestWindow(windows) {
+            if (windows.length == 1) {
+                return windows[0];
+            } else {
+                for (var i = 0; i < windows.length; i++) {
+                    if (windows[i].finish > time || i == windows.length - 1) {
+                        return windows[i];
+                    }
+                }
+            }
+        }
+
+        function checkLate(point) {
+            if (!point || !point.windows || point.windows.length == 0) return;
+
+            point.late = point.arrival_time_ts > findClosestWindow(point.windows).finish;
         }
 
         function updatePointInfo(point, time) {
