@@ -107,9 +107,14 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             cTime += travelTime;
             point.DOWNTIME = getDowntime(cTime, point);
             cTime += point.DOWNTIME;
+            point.arrival_time_ts = cTime;
+            point.ARRIVAL_TIME = filter('date')(cTime * 1000, 'dd.MM.yyyy HH:mm:ss');
+            point.arrival_time_hhmm = point.ARRIVAL_TIME.substr(11, 8);
             cTime += parseInt(point.TASK_TIME);
+            point.end_time_ts = cTime;
+            point.END_TIME = filter('date')(cTime * 1000, 'dd.MM.yyyy HH:mm:ss');
+            point.end_time_hhmm = point.END_TIME.substr(11, 8);
 
-            //console.log('cTime', new Date(cTime * 1000));
             return cTime;
         }
 
@@ -130,12 +135,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
 
             if (closestWindow.start > time) {
-                updatePointInfo(point, closestWindow.start);
                 return closestWindow.start - time;
             }
 
             if (time > closestWindow.finish){
-                updatePointInfo(point, time);
                 point.late = true;
             }
 
