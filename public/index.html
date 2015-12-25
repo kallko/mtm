@@ -112,33 +112,36 @@
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
                 <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания" >План</th>
-                    <th class="car-type-col" title="Назавание машины" >Машина</th>
-                    <th class="driver-name-col" title="Фамилия и имя водителя" >Водитель</th>
-                    <th class="client-name-col" title="Название точки доставки" >Название</th>
-                    <th class="address-col" title="Адрес доставки" >Адрес</th>
-                    <th class="status-col" st-sort="status" title="Статус доставки" >Статус</th>
-                    <th class="window-type-col" title="Фактическое окно доставки" >Факт. окно</th>
-                    <th class="stop-col" title="Наличие стопа связанного с точкой" >Стоп</th>
-                    <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения" >Моб.нажатие</th>
-                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку" >План. прибытие</th>
-                    <th class="time-window-col" title="Заказанное клиентом окно" >Заказанное</th>
-                    <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия" >Прогноз прибытия</th>
-                    <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction" title="Осталось до прогнозируемого времени прибытия" >
+                    <th class="number-col" title="Плановый номер задания">План</th>
+                    <th class="car-type-col" title="Назавание машины">Машина</th>
+                    <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
+                    <th class="client-name-col" title="Название точки доставки">Название</th>
+                    <th class="address-col" title="Адрес доставки">Адрес</th>
+                    <th class="status-col" st-sort="status" title="Статус доставки">Статус</th>
+                    <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
+                    <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
+                    <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
+                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
+                    <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                    <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                    <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction"
+                        title="Осталось до прогнозируемого времени прибытия">
                         Осталось до прибытия
                     </th>
-                    <th class="real-arrival-time-col" title="Фактическое время прибытия" >Факт. прибытие</th>
+                    <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
 
-                    <th class="overdue-col" title="Размер опоздания от планового времени прибытия" >Опазд.</th>
-                    <th class="problem-index-col" st-sort="problem_index" title="Индекс проблемности задания" >Проблемность</th>
+                    <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
+                    <th class="problem-index-col" st-sort="problem_index" title="Индекс проблемности задания">
+                        Проблемность
+                    </th>
                     <!--<th class="point-id-col">ID точки</th>-->
                     <!--<th class="task-id-col">ID заказа</th>-->
-                    <th class="promised-window-col" title="Обещанное клиенту окно" >Обещ. окно</th>
-                    <th class="promised-window-changed-col" title="Редактируемое обещанное окно" >Редакт. окно</th>
-                    <th class="driver-phone-col" title="Телефон водителя" >Тел. водителя</th>
-                    <th class="car-number-col" title="Номер машины" >Номер</th>
-                    <th class="branch-col" title="Филиал" >Филиал</th>
-                    <th title="Комментарий к точке" >Комментарий</th>
+                    <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
+                    <th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>
+                    <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
+                    <th class="car-number-col" title="Номер машины">Номер</th>
+                    <th class="branch-col" title="Филиал">Филиал</th>
+                    <th title="Комментарий к точке">Комментарий</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -150,7 +153,7 @@
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{row.NUMBER}}</td>
-                    <td title="{{row.transport.NAME}}" >{{row.transport.NAME}}</td>
+                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
@@ -305,9 +308,9 @@
 <template type="text/html" id="edit-route">
     <div id="edit-panel" ng-controller="EditRouteController">
 
-        <div ng-show="route !== undefined" >
+        <div ng-show="route !== undefined">
             <div id="original-route">
-                <div class="block-title" >Плановый маршрут</div>
+                <div class="block-title">Плановый маршрут</div>
                 <div>
                     <div ng-repeat="box in originalBoxes" class="box" style="width: {{box.width}}px;"
                          ng-class="{'task-box': box.type == BOX_TYPE.TASK,
@@ -317,9 +320,9 @@
                                     'finished-box': box.status == STATUS.FINISHED
                                                     || box.status == STATUS.FINISHED_TOO_EARLY
                                                     || box.status == STATUS.FINISHED_LATE}"
-                           title="{{tooltip(box)}}" >
+                         title="{{tooltip(box)}}">
                         {{box.number}}
-                        <span ng-show="box.tooBig" >
+                        <span ng-show="box.tooBig">
                             <span class="glyphicon glyphicon-menu-right"></span>
                             <span class="glyphicon glyphicon-menu-right"></span>
                             <span class="glyphicon glyphicon-menu-right"></span>
@@ -328,9 +331,9 @@
                 </div>
             </div>
 
-            <div id="changed-route" >
-                <div class="block-title" >Измененный маршрут</div>
-                <div id="boxes" >
+            <div id="changed-route">
+                <div class="block-title">Измененный маршрут</div>
+                <div id="boxes">
                     <div ng-repeat="box in changebleBoxes" class="box droppable-box" style="width: {{box.width}}px;"
                          ng-class="{'task-box draggable-box': box.type == BOX_TYPE.TASK,
                                     'travel-box': box.type == BOX_TYPE.TRAVEL,
@@ -338,16 +341,17 @@
                                     'late-box': box.late,
                                     'too-big-box': box.tooBig}"
                          title="{{tooltip(box)}}"
-                            data-index="{{box.index}}"
-                            id="box-{{box.type}}-{{box.index}}" >
+                         data-index="{{box.index}}"
+                         id="box-{{box.type}}-{{box.index}}"
+                         ng-dblclick="boxDblClick(box.waypointNumber)" >
                         {{box.number}}
-                        <span ng-show="box.tooBig" >
+                        <span ng-show="box.tooBig">
                             <span class="glyphicon glyphicon-menu-right"></span>
                             <span class="glyphicon glyphicon-menu-right"></span>
                             <span class="glyphicon glyphicon-menu-right"></span>
                         </span>
                     </div>
-                    <div class="box end-box droppable-box" data-index="55555" >END</div>
+                    <div class="box end-box droppable-box" data-index="55555">END</div>
                 </div>
             </div>
         </div>
@@ -357,7 +361,7 @@
 
 <div id="notification" ng-controller="NotificationController">
     <div>
-        Текст оповещения
+        [[текст оповещения]]
     </div>
 </div>
 
@@ -401,6 +405,16 @@
             <td class="row-data">
                 {{point.promised_window.start * 1000 | date:'HH:mm'}} -
                 {{point.promised_window.finish * 1000 | date:'HH:mm'}}
+            </td>
+        </tr><tr>
+            <td class="title">Изменяемое окно:</td>
+            <td class="row-data">
+                <input type="text" class="promised-text-card" id="{{'promised-start-card'}}"
+                       value="{{point.promised_window_changed.start * 1000 | date:'HH:mm'}}"
+                       enter-event="changePromisedWindow(point.row_id)"> -
+                <input type="text" class="promised-text-card" id="{{'promised-finish-card'}}"
+                       value="{{point.promised_window_changed.finish * 1000 | date:'HH:mm'}}"
+                       enter-event="changePromisedWindow(point.row_id)">
             </td>
         </tr>
         <tr>

@@ -1497,17 +1497,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var rawPoints = rawData.routes[point.route_id].points;
             for (var i = 0; i < rawPoints.length; i++) {
                 if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
-                    console.log('Change promised window in rawData');
                     rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
                     rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
                     break;
                 }
             }
 
-            //point.arrival_time_ts = (point.promised_window.start +
-            //    point.promised_window.finish) / 2;
-
-            console.log(_data);
             updateData();
         };
 

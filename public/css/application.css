@@ -402,7 +402,11 @@ template {
     padding-right: 10px;
 }
 
-
+.promised-text-card {
+    width: 45px;
+    height: 20px;
+    padding-left: 3px;
+}
 
 
 

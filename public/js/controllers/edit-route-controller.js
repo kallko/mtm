@@ -28,7 +28,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         function onResize(e) {
-            console.log('resetBlocksWidth');
             maxWidth = editPanelJ.width() - 30;
 
             if (!scope.originalBoxes) return;
@@ -36,7 +35,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             resetBlocksWidth(scope.originalBoxes);
             resetBlocksWidth(scope.changebleBoxes);
             scope.$apply();
-
         }
 
         function resetBlocksWidth (boxes) {
@@ -105,7 +103,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 + scope.changedRoute.car_position.lon + '&'
                 + scope.changedRoute.points[scope.changedRoute.lastPointIndx + 1].LAT + '&'
                 + scope.changedRoute.points[scope.changedRoute.lastPointIndx + 1].LON;
-            console.log(url);
+            //console.log(url);
             http.get(url)
                 .success(function (data) {
                     console.log(data);
@@ -349,6 +347,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         late: point.late,
                         windows: point.AVAILABILITY_WINDOWS,
                         promised: point.promised_window_changed,
+                        waypointNumber: point.END_WAYPOINT,
                         width: widthRes.width,
                         tooBig: widthRes.tooBig
                     });
@@ -408,4 +407,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             return parseInt(seconds / 60);
         }
 
+        scope.boxDblClick = function (waypointNumber) {
+            for (var i = 0; i < scope.changedRoute.points.length; i++) {
+                if (scope.changedRoute.points[i].END_WAYPOINT == waypointNumber) {
+                    scope.$emit('showPoint', { point: scope.changedRoute.points[i], route: scope.route});
+                    break;
+                }
+            }
+        }
     }]);
