@@ -145,4 +145,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 && (!scope.route.locked || scope.route.lockedByMe);
         }
 
+        scope.changePromisedWindow = function(waypointNumber) {
+            console.log(waypointNumber);
+        }
+
     }]);

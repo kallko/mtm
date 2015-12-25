@@ -414,5 +414,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     break;
                 }
             }
-        }
+        };
+
     }]);
