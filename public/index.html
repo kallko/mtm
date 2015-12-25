@@ -309,15 +309,21 @@
             <div id="original-route">
                 <div class="block-title" >Плановый маршрут</div>
                 <div>
-                    <div ng-repeat="box in originalBoxes" class="box" style="width: {{boxWidth(box.size)}}px;"
+                    <div ng-repeat="box in originalBoxes" class="box" style="width: {{box.width}}px;"
                          ng-class="{'task-box': box.type == BOX_TYPE.TASK,
                                     'travel-box': box.type == BOX_TYPE.TRAVEL,
                                     'downtime-box': box.type == BOX_TYPE.DOWNTIME,
+                                    'too-big-box': box.tooBig,
                                     'finished-box': box.status == STATUS.FINISHED
                                                     || box.status == STATUS.FINISHED_TOO_EARLY
                                                     || box.status == STATUS.FINISHED_LATE}"
                            title="{{tooltip(box)}}" >
                         {{box.number}}
+                        <span ng-show="box.tooBig" >
+                            <span class="glyphicon glyphicon-menu-right"></span>
+                            <span class="glyphicon glyphicon-menu-right"></span>
+                            <span class="glyphicon glyphicon-menu-right"></span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -325,16 +331,21 @@
             <div id="changed-route" >
                 <div class="block-title" >Измененный маршрут</div>
                 <div id="boxes" >
-                    <div ng-repeat="box in changebleBoxes" class="box droppable-box" style="width: {{boxWidth(box.size, box.type)}}px;"
-                         ng-show="boxWidth(box.size, box.type) > 0"
+                    <div ng-repeat="box in changebleBoxes" class="box droppable-box" style="width: {{box.width}}px;"
                          ng-class="{'task-box draggable-box': box.type == BOX_TYPE.TASK,
                                     'travel-box': box.type == BOX_TYPE.TRAVEL,
                                     'downtime-box': box.type == BOX_TYPE.DOWNTIME,
-                                    'late-box': box.late}"
+                                    'late-box': box.late,
+                                    'too-big-box': box.tooBig}"
                          title="{{tooltip(box)}}"
                             data-index="{{box.index}}"
                             id="box-{{box.type}}-{{box.index}}" >
                         {{box.number}}
+                        <span ng-show="box.tooBig" >
+                            <span class="glyphicon glyphicon-menu-right"></span>
+                            <span class="glyphicon glyphicon-menu-right"></span>
+                            <span class="glyphicon glyphicon-menu-right"></span>
+                        </span>
                     </div>
                     <div class="box end-box droppable-box" data-index="55555" >END</div>
                 </div>

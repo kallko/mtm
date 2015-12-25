@@ -4,6 +4,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             widthDivider = 15,
             movedJ,
             toHideJ,
+            editPanelJ,
+            maxWidth,
             hidePlaceholder = false,
             routerData,
             serverTime,
@@ -19,7 +21,31 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         init();
 
         function init() {
+            editPanelJ = $('#edit-panel');
+
             rootScope.$on('routeToChange', onRouteToChange);
+            myLayout.on('stateChanged', onResize);
+        }
+
+        function onResize(e) {
+            console.log('resetBlocksWidth');
+            maxWidth = editPanelJ.width() - 30;
+
+            if (!scope.originalBoxes) return;
+
+            resetBlocksWidth(scope.originalBoxes);
+            resetBlocksWidth(scope.changebleBoxes);
+            scope.$apply();
+
+        }
+
+        function resetBlocksWidth (boxes) {
+            var widthRes;
+            for (var i = 0; i < boxes.length; i++) {
+                widthRes = scope.boxWidth(boxes[i].size, boxes[i].type);
+                boxes[i].width = widthRes.width;
+                boxes[i].tooBig = widthRes.tooBig;
+            }
         }
 
         function onRouteToChange(event, data) {
@@ -210,7 +236,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             updateIndices(scope.changedRoute.points);
             scope.changebleBoxes = getBoxesFromRoute(scope.changedRoute);
-            //console.log('scope.$apply()');
             //scope.$apply();
 
             timeout(function () {
@@ -277,32 +302,40 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         function getBoxesFromRoute(route) {
             var boxes = [],
                 point,
-                tmpTime;
+                tmpTime,
+                widthRes;
 
             for (var i = 0; i < route.points.length; i++) {
                 point = route.points[i];
-                if (point.TRAVEL_TIME !== '0') {
+                if (point.TRAVEL_TIME != '0') {
                     tmpTime = parseInt(point.TRAVEL_TIME);
+                    widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.TRAVEL);
                     boxes.push({
                         type: scope.BOX_TYPE.TRAVEL,
                         size: tmpTime,
                         status: point.status,
-                        index: point.index
+                        index: point.index,
+                        width: widthRes.width,
+                        tooBig: widthRes.tooBig
                     });
                 }
 
-                if (point.DOWNTIME !== '0') {
+                if (point.DOWNTIME != '0') {
                     tmpTime = parseInt(point.DOWNTIME);
+                    widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.DOWNTIME);
                     boxes.push({
                         type: scope.BOX_TYPE.DOWNTIME,
                         size: tmpTime,
                         status: point.status,
-                        index: point.index
+                        index: point.index,
+                        width: widthRes.width,
+                        tooBig: widthRes.tooBig
                     });
                 }
 
-                if (point.TASK_TIME !== '0') {
+                if (point.TASK_TIME != '0') {
                     tmpTime = parseInt(point.TASK_TIME);
+                    widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.TASK);
                     boxes.push({
                         type: scope.BOX_TYPE.TASK,
                         size: tmpTime,
@@ -315,7 +348,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         index: point.index,
                         late: point.late,
                         windows: point.AVAILABILITY_WINDOWS,
-                        promised: point.promised_window_changed
+                        promised: point.promised_window_changed,
+                        width: widthRes.width,
+                        tooBig: widthRes.tooBig
                     });
                 }
             }
@@ -323,9 +358,18 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             return boxes;
         }
 
+        //var tmp = 0;
         scope.boxWidth = function (size, type) {
-            var mWidth = type == scope.BOX_TYPE.TASK ? minWidth : size / widthDivider;
-            return parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
+            var mWidth = type == scope.BOX_TYPE.TASK ? minWidth : size / widthDivider,
+                res = parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
+
+            if (res > maxWidth) {
+                res = { width: maxWidth, tooBig: true};
+            } else {
+                res = { width: res, tooBig: false};
+            }
+
+            return res;
         };
 
         scope.tooltip = function (box) {

@@ -397,6 +397,11 @@ template {
     background-color: #ff9c87;
 }
 
+.too-big-box {
+    text-align: right;
+    padding-right: 10px;
+}
+
 
 
 

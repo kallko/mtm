@@ -21,7 +21,7 @@ var myLayout = new GoldenLayout({
                     {
                         type: 'stack',
                         height: 50,
-                        activeItemIndex: 0,
+                        activeItemIndex: 1,
                         content: [
                             {
                                 type: 'component',
