@@ -1143,7 +1143,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (!needChanges) return;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
-                    addToConfirmed(rawPoint.TASK_NUMBER, rawPoint.rawConfirmed);
+                    addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'not-delivered-status':
                     if (!needChanges) return;
@@ -1154,7 +1154,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         row.status = STATUS.DELAY;
                     }
                     rawPoint.rawConfirmed = -1;
-                    addToConfirmed(rawPoint.TASK_NUMBER, rawPoint.rawConfirmed);
+                    addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'cancel-point':
                     row.status = STATUS.CANCELED;
