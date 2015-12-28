@@ -24,6 +24,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             editPanelJ = $('#edit-panel');
 
             rootScope.$on('routeToChange', onRouteToChange);
+            rootScope.$on('checkPoint', onPromisedChanged);
             myLayout.on('stateChanged', onResize);
         }
 
@@ -35,6 +36,18 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             resetBlocksWidth(scope.originalBoxes);
             resetBlocksWidth(scope.changebleBoxes);
             scope.$apply();
+        }
+
+        function onPromisedChanged(event, point) {
+            console.log('point >>>', point);
+
+            point.old_promised = {
+                start: point.promised_window.start,
+                finish: point.promised_window.finish
+            };
+
+            point.promised_window.start = point.promised_window_changed.start;
+            point.promised_window.finish = point.promised_window_changed.finish;
         }
 
         function resetBlocksWidth (boxes) {
@@ -393,6 +406,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 result += 'Время отъезда: ' + box.endTimeStr + '\n';
                 result += 'Заказанное окно: ' + box.windows + '\n';
                 result += 'Обещананое окно: ' +
+                    filter('date')(box.promised.start * 1000, 'HH:mm') +
+                    ' - ' +
+                    filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';
+                result += 'Измененное окно: ' +
                     filter('date')(box.promised.start * 1000, 'HH:mm') +
                     ' - ' +
                     filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';

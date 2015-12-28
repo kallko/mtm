@@ -131,7 +131,6 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                         }
                     });
             }
-
         };
 
         scope.unconfirmed = function () {
@@ -143,10 +142,32 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             return scope.point && scope.point.TASK_NUMBER
                 && (!scope.point.locked || scope.point.lockedByMe)
                 && (!scope.route.locked || scope.route.lockedByMe);
-        }
+        };
 
-        scope.changePromisedWindow = function(waypointNumber) {
-            console.log(waypointNumber);
+        scope.changePromisedWindow = function(point) {
+            var start = $('#promised-start-card').val().split(':'),
+                finish = $('#promised-finish-card').val().split(':'),
+                oldStart = new Date(point.promised_window_changed.start * 1000),
+                clearOldDate = new Date(oldStart.getFullYear(), oldStart.getMonth(), oldStart.getDate()).getTime();
+
+
+            point.promised_window_changed = {
+                start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
+                finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
+            };
+
+            scope.$emit('checkPoint', point);
+
+            // TODO изменение сырых данных в родительском контролере
+
+            //var rawPoints = rawData.routes[point.route_id].points;
+            //for (var i = 0; i < rawPoints.length; i++) {
+            //    if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
+            //        rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
+            //        rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
+            //        break;
+            //    }
+            //}
         }
 
     }]);

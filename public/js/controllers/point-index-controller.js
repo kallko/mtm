@@ -1114,6 +1114,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     sortByRoute(row.route_indx);
                     return;
                 case 'edit':
+                    sortByRoute(row.route_indx);
                     scope.$emit('routeToChange', {
                         route: _data.routes[row.route_id],
                         serverTime: _data.server_time,
