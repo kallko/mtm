@@ -534,6 +534,9 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894'
     };
 
+    //user = 'IDS.a.kravchenko';
+    //pointId = '2dddb7d0-c943-11e2-a05b-52540027e502';
+
     if (!userIds[user]) {
         console.log('openPointWindow >> can not find user');
         return;
@@ -544,25 +547,25 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
             console.log('user', user, 'pointId', pointId);
             console.log('err.body >> ', err.body);
             return;
-            //throw err;
         }
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
 
-        //console.log('client.describe() >>', client.describe());
+        ////console.log('client.describe() >>', client.describe());
         //console.log({
-        //    userIds: userIds[user], //'33d45347-7834-11e3-840c-005056a70133', // ID Вердиша
+        //    UserId: userIds[user],
         //    ObjectType: 'СПРАВОЧНИК',
         //    ObjectName: 'КУБ_Точки',
-        //    ElementId: pointId //'9ae1cbb3-4944-11e2-802b-52540027e502' // ID рандомной точки
+        //    ElementId: pointId
         //});
 
         client.OpenElement({
-            userIds: userIds[user],
+            UserId: userIds[user],
             ObjectType: 'СПРАВОЧНИК',
             ObjectName: 'КУБ_Точки',
             ElementId: pointId
         }, function (err, result) {
-            console.log(err, result);
+            if(err) console.log(err.body);
+            if(result) console.log(result.body);
         });
     });
 };
@@ -574,7 +577,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
 //    console.log('client.describe() >>', client.describe());
 //
 //    client.OpenElement({
-//        UserId: '33d45347-7834-11e3-840c-005056a70133',
+//        UserId: '33d45347-7834-11e3-840c-005  056a70133',
 //        ObjectType: 'СПРАВОЧНИК',
 //        ObjectName: 'КУБ_Точки',
 //        ElementId: '7bebb6b0-91ee-11e5-bd07-005056a76b49'
