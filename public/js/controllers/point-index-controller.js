@@ -681,7 +681,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var mobilePushes = [],
                 allPushes = [];
 
-            console.log(parentForm.getClientName());
+            console.log(parentForm.ТекущаяКомпания);
 
             if (scope.demoMode) {
                 var rand,
