@@ -368,6 +368,9 @@
 <div id="point-view" ng-controller="PointViewController">
     <div class="card-title">
         Карточка задания
+        <button class="btn btn-primary btn-sm"
+                ng-show="companyName == 'IDS'"
+                ng-click="open1CWindow()" >Открыть в 1С</button>
     </div>
 
     <table id="point-view-table" class="table table-striped">

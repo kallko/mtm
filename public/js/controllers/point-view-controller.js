@@ -17,6 +17,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
             rootScope.$on('showPoint', show);
             rootScope.$on('newTextStatus', newTextStatus);
+            rootScope.$on('companyName', function (event, data) {
+                scope.companyName = data;
+                console.log(data);
+            });
         }
 
         function show(event, data) {
@@ -144,7 +148,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 && (!scope.route.locked || scope.route.lockedByMe);
         };
 
-        scope.changePromisedWindow = function(point) {
+        scope.changePromisedWindow = function (point) {
             var start = $('#promised-start-card').val().split(':'),
                 finish = $('#promised-finish-card').val().split(':'),
                 oldStart = new Date(point.promised_window_changed.start * 1000),
@@ -168,6 +172,14 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             //        break;
             //    }
             //}
-        }
+        };
+
+        scope.open1CWindow = function () {
+            console.log('open1CWindow');
+            http.get('./openidspointwindow/' + scope.point.waypoint.ID)
+                .success(function(data) {
+                    console.log(data);
+                });
+        };
 
     }]);

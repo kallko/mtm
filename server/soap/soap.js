@@ -525,35 +525,40 @@ SoapManager.prototype.saveRoutesTo1C = function (routes) {
             });
         }
     }
-
-
 };
 
 SoapManager.prototype.openPointWindow = function (user, pointId) {
     var userIds = {
-        'IDS.dev': '33d45347-7834-11e3-840c-005056a70133'
+        'IDS.dev': '33d45347-7834-11e3-840c-005056a70133',
+        '292942.Viktor': 'a6d774a7-fd9c-11e2-a23d-005056a74894',
+        'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894'
     };
+
+    if (!userIds[user]) {
+        console.log('openPointWindow >> can not find user');
+        return;
+    }
 
     soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
+
         //console.log('client.describe() >>', client.describe());
-
-        console.log({
-            userIds: userIds[user], //'33d45347-7834-11e3-840c-005056a70133', // ID Вердиша
-            ObjectType: 'СПРАВОЧНИК',
-            ObjectName: 'КУБ_Точки',
-            ElementId: pointId //'9ae1cbb3-4944-11e2-802b-52540027e502' // ID рандомной точки
-        });
-
-        //client.OpenElement({
+        //console.log({
         //    userIds: userIds[user], //'33d45347-7834-11e3-840c-005056a70133', // ID Вердиша
         //    ObjectType: 'СПРАВОЧНИК',
         //    ObjectName: 'КУБ_Точки',
         //    ElementId: pointId //'9ae1cbb3-4944-11e2-802b-52540027e502' // ID рандомной точки
-        //}, function (err, result) {
-        //    console.log(err, result);
         //});
+
+        client.OpenElement({
+            userIds: userIds[user],
+            ObjectType: 'СПРАВОЧНИК',
+            ObjectName: 'КУБ_Точки',
+            ElementId: pointId
+        }, function (err, result) {
+            console.log(err, result);
+        });
     });
 };
 
@@ -567,7 +572,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
 //        UserId: '33d45347-7834-11e3-840c-005056a70133',
 //        ObjectType: 'СПРАВОЧНИК',
 //        ObjectName: 'КУБ_Точки',
-//        ElementId: '9ae1cbb3-4944-11e2-802b-52540027e502'
+//        ElementId: '7bebb6b0-91ee-11e5-bd07-005056a76b49'
 //    }, function (err, result) {
 //        console.log(err, result);
 //    });

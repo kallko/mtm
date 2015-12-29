@@ -675,18 +675,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if (parentForm == undefined && !scope.demoMode) {
                 checkConfirmedFromLocalStorage();
+                _data.companyName = 'IDS';
+                scope.$emit('companyName', _data.companyName);
                 return;
             }
 
             var mobilePushes = [],
                 allPushes = [];
 
-            console.log(parentForm._call('getClientName'));
-
             if (scope.demoMode) {
                 var rand,
                     gpsTime,
                     tmp;
+
+                _data.companyName = 'Demo';
                 for (var i = 0; i < _data.routes.length; i++) {
 
                     seed = i * 122;
@@ -709,7 +711,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
                 }
+            } else {
+                _data.companyName = parentForm._call('getClientName');
             }
+
+            scope.$emit('companyName', _data.companyName);
 
             for (var m = 0; m < _data.idArr.length; m++) {
 
