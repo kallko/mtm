@@ -540,7 +540,12 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     }
 
     soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
-        if (err) throw err;
+        if (err) {
+            console.log('user', user, 'pointId', pointId);
+            console.log('err.body >> ', err.body);
+            return;
+            //throw err;
+        }
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
 
         //console.log('client.describe() >>', client.describe());
