@@ -681,6 +681,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var mobilePushes = [],
                 allPushes = [];
 
+            console.log(parentForm.getClientName());
+
             if (scope.demoMode) {
                 var rand,
                     gpsTime,

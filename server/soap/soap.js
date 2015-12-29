@@ -539,21 +539,21 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
         //console.log('client.describe() >>', client.describe());
 
-        //console.log({
-        //    userIds: userIds[user], //'33d45347-7834-11e3-840c-005056a70133', // ID Вердиша
-        //    ObjectType: 'СПРАВОЧНИК',
-        //    ObjectName: 'КУБ_Точки',
-        //    ElementId: pointId //'9ae1cbb3-4944-11e2-802b-52540027e502' // ID рандомной точки
-        //});
-
-        client.OpenElement({
+        console.log({
             userIds: userIds[user], //'33d45347-7834-11e3-840c-005056a70133', // ID Вердиша
             ObjectType: 'СПРАВОЧНИК',
             ObjectName: 'КУБ_Точки',
             ElementId: pointId //'9ae1cbb3-4944-11e2-802b-52540027e502' // ID рандомной точки
-        }, function (err, result) {
-            console.log(err, result);
         });
+
+        //client.OpenElement({
+        //    userIds: userIds[user], //'33d45347-7834-11e3-840c-005056a70133', // ID Вердиша
+        //    ObjectType: 'СПРАВОЧНИК',
+        //    ObjectName: 'КУБ_Точки',
+        //    ElementId: pointId //'9ae1cbb3-4944-11e2-802b-52540027e502' // ID рандомной точки
+        //}, function (err, result) {
+        //    console.log(err, result);
+        //});
     });
 };
 

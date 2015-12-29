@@ -494,7 +494,7 @@ router.route('/openidspointwindow/:pointId')
     .get(function (req, res) {
         console.log('openidspointwindow');
         var soapManager = new soap(config.defaultMonitoringLogin);
-        //soapManager.openPointWindow(req.session.login, req.params.points);
+        soapManager.openPointWindow(req.session.login, req.params.pointId);
         //soapManager.openPointWindow('IDS.dev', '9ae1cbb3-4944-11e2-802b-52540027e502');
         res.status(200).json({status: 'ok'});
     });
