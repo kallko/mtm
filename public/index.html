@@ -409,14 +409,13 @@
                 {{point.promised_window.start * 1000 | date:'HH:mm'}} -
                 {{point.promised_window.finish * 1000 | date:'HH:mm'}}
             </td>
-        </tr><tr>
+        </tr>
+        <tr>
             <td class="title">Изменяемое окно:</td>
             <td class="row-data">
                 <input type="text" class="promised-text-card" id="promised-start-card"
-                       value="{{point.promised_window_changed.start * 1000 | date:'HH:mm'}}"
                        enter-event="changePromisedWindow(point)"> -
                 <input type="text" class="promised-text-card" id="promised-finish-card"
-                       value="{{point.promised_window_changed.finish * 1000 | date:'HH:mm'}}"
                        enter-event="changePromisedWindow(point)">
             </td>
         </tr>

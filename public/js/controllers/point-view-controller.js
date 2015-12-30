@@ -1,5 +1,5 @@
-angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http', 'Statuses',
-    function (scope, rootScope, http, Statuses) {
+angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http', 'Statuses', '$filter',
+    function (scope, rootScope, http, Statuses, filter) {
         var STATUS,
             parent;
 
@@ -26,8 +26,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         function show(event, data) {
             scope.point = data.point;
+
+            $('#promised-start-card').val(filter('date')(data.point.promised_window_changed.start * 1000, 'HH:mm'));
+            $('#promised-finish-card').val(filter('date')(data.point.promised_window_changed.finish * 1000, 'HH:mm'));
+
+            console.log(new Date(data.point.promised_window_changed.start * 1000));
+            console.log(new Date(data.point.promised_window_changed.finish * 1000));
+
             scope.route = data.route;
             parent = data.parent;
+
             $('#point-view').popup('show');
             //console.log('point', data.point);
             //console.log('route', data.route);
