@@ -308,6 +308,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
 
+            if (data.status && data.status === 'no plan') {
+                showPopup('Нет планов для загрузки.');
+            }
+
             scope.demoMode = data.demoMode === true;
             scope.$emit('setMode', {
                 mode: scope.demoMode,

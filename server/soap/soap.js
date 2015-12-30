@@ -534,8 +534,10 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894'
     };
 
-    //user = 'IDS.a.kravchenko';
     //pointId = '2dddb7d0-c943-11e2-a05b-52540027e502';
+    //user = 'IDS.a.kravchenko';
+
+    console.log('user', user, 'pointId', pointId);
 
     if (!userIds[user]) {
         console.log('openPointWindow >> can not find user');
@@ -565,7 +567,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
             ElementId: pointId
         }, function (err, result) {
             if(err) console.log(err.body);
-            if(result) console.log(result.body);
+            if(result) console.log(result);
         });
     });
 };
