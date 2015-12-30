@@ -1053,6 +1053,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             rootScope.$on('settingsChanged', settingsChanged);
+            rootScope.$on('updateRawPromised', function(event, data) {
+                updateRawPromised(data.point);
+            });
+
 
             $('.header .problem-index-col').on('click', function () {
                 problemSortType++;
@@ -1130,7 +1134,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     scope.$emit('routeToChange', {
                         route: _data.routes[row.route_id],
                         serverTime: _data.server_time,
-                        demoMode: scope.demoMode
+                        demoMode: scope.demoMode,
+                        workingWindow: scope.params.workingWindowType
                     });
                     break;
                 default:
@@ -1507,6 +1512,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
 
+            //var rawPoints = rawData.routes[point.route_id].points;
+            //for (var i = 0; i < rawPoints.length; i++) {
+            //    if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
+            //        rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
+            //        rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
+            //        break;
+            //    }
+            //}
+
+            updateRawPromised(point);
+            updateData();
+        };
+
+        function updateRawPromised(point) {
             var rawPoints = rawData.routes[point.route_id].points;
             for (var i = 0; i < rawPoints.length; i++) {
                 if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
@@ -1515,9 +1534,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     break;
                 }
             }
-
-            updateData();
-        };
+        }
 
         function showPopup(text, duration) {
             scope.$emit('showNotification', {text: text, duration: duration});

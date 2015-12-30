@@ -1,6 +1,7 @@
 angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http', 'Statuses',
     function (scope, rootScope, http, Statuses) {
-        var STATUS;
+        var STATUS,
+            parent;
 
         init();
 
@@ -26,6 +27,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         function show(event, data) {
             scope.point = data.point;
             scope.route = data.route;
+            parent = data.parent;
             $('#point-view').popup('show');
             //console.log('point', data.point);
             //console.log('route', data.route);
@@ -154,13 +156,18 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 oldStart = new Date(point.promised_window_changed.start * 1000),
                 clearOldDate = new Date(oldStart.getFullYear(), oldStart.getMonth(), oldStart.getDate()).getTime();
 
-
             point.promised_window_changed = {
                 start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
                 finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
 
-            scope.$emit('checkPoint', point);
+            if (parent === 'editRoute')  {
+                console.log('checkPoint');
+                scope.$emit('checkPoint', point);
+            } else {
+                console.log('updateRawPromised');
+                scope.$emit('updateRawPromised', { point: point });
+            }
 
             // TODO изменение сырых данных в родительском контролере
 
