@@ -22,6 +22,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 scope.companyName = data;
                 console.log(data);
             });
+            rootScope.$on('lockRoute', lockRoute);
         }
 
         function show(event, data) {
@@ -39,6 +40,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             $('#point-view').popup('show');
             //console.log('point', data.point);
             //console.log('route', data.route);
+        }
+
+        function lockRoute(event, data) {
+            scope.route = data.route;
+            scope.point = data.point;
+            scope.route.lockedByMe = false;
+            scope.toggleRouteBlock();
         }
 
         function initStatuses() {

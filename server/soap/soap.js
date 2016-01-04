@@ -531,7 +531,8 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     var userIds = {
         'IDS.dev': '33d45347-7834-11e3-840c-005056a70133',
         '292942.Viktor': 'a6d774a7-fd9c-11e2-a23d-005056a74894',
-        'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894'
+        'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894',
+        '0000.IDS' : 'efa17485-fb45-11e2-a23d-005056a74894'
     };
 
     //pointId = '2dddb7d0-c943-11e2-a05b-52540027e502';
