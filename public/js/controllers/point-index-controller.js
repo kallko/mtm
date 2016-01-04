@@ -1131,7 +1131,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     sortByRoute(row.route_indx);
                     return;
                 case 'edit':
-                    sortByRoute(row.route_indx);
+                    sortByRoute(row.route_indx, true);
                     route = _data.routes[row.route_id];
                     point = route.points[row.NUMBER - 1];
                     point.itineraryID = _data.ID;
@@ -1192,11 +1192,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //scope.$apply();
         }
 
-        function sortByRoute(indx) {
-            if (scope.filters.route == indx) {
-                scope.filters.route = -1;
-            } else {
+        function sortByRoute(indx, force) {
+            if (force) {
                 scope.filters.route = indx;
+            } else {
+                if (scope.filters.route == indx) {
+                    scope.filters.route = -1;
+                } else {
+                    scope.filters.route = indx;
+                }
             }
 
             scope.$apply();
