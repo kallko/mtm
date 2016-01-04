@@ -546,32 +546,32 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         return;
     }
 
-    //soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
-    //    if (err) {
-    //        console.log('user', user, 'pointId', pointId);
-    //        console.log('err.body >> ', err.body);
-    //        return;
-    //    }
-    //    client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
-    //
-    //    ////console.log('client.describe() >>', client.describe());
-    //    //console.log({
-    //    //    UserId: userIds[user],
-    //    //    ObjectType: 'СПРАВОЧНИК',
-    //    //    ObjectName: 'КУБ_Точки',
-    //    //    ElementId: pointId
-    //    //});
-    //
-    //    client.OpenElement({
-    //        UserId: userIds[user],
-    //        ObjectType: 'СПРАВОЧНИК',
-    //        ObjectName: 'КУБ_Точки',
-    //        ElementId: pointId
-    //    }, function (err, result) {
-    //        if(err) console.log(err.body);
-    //        if(result) console.log(result);
-    //    });
-    //});
+    soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
+        if (err) {
+            console.log('user', user, 'pointId', pointId);
+            console.log('err.body >> ', err.body);
+            return;
+        }
+        client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
+
+        ////console.log('client.describe() >>', client.describe());
+        //console.log({
+        //    UserId: userIds[user],
+        //    ObjectType: 'СПРАВОЧНИК',
+        //    ObjectName: 'КУБ_Точки',
+        //    ElementId: pointId
+        //});
+
+        client.OpenElement({
+            UserId: userIds[user],
+            ObjectType: 'СПРАВОЧНИК',
+            ObjectName: 'КУБ_Точки',
+            ElementId: pointId
+        }, function (err, result) {
+            if(err) console.log(err.body);
+            if(result) console.log(result);
+        });
+    });
 };
 
 //soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
