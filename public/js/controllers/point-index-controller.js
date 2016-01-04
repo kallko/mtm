@@ -1,6 +1,6 @@
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
-    , '$filter', '$rootScope', 'Settings', 'Statuses',
-    function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses) {
+    , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
+    function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {
 
         var pointTableHolder,
             pointContainer,
@@ -272,37 +272,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
         }
 
-        function getTstampAvailabilityWindow(strWindows, currentTime) {
-            if (!strWindows) {
-                //console.log('Invalid strWindows!');
-                return;
-            }
-
-            var windows = strWindows.split(' ; '),
-                resWindows = [];
-
-            for (var i = 0; i < windows.length; i++) {
-                var parts = windows[i].split(' '),
-                    timeStart = parts[0].split(':'),
-                    timeFinish = parts[2].split(':'),
-                    startDate = new Date(currentTime * 1000),
-                    finishDate = new Date(currentTime * 1000);
-
-                startDate.setHours(timeStart[0]);
-                startDate.setMinutes(timeStart[1]);
-
-                finishDate.setHours(timeFinish[0]);
-                finishDate.setMinutes(timeFinish[1]);
-
-                resWindows.push({
-                    start: parseInt(startDate.getTime() / 1000),
-                    finish: parseInt(finishDate.getTime() / 1000)
-                });
-            }
-
-            return resWindows;
-        }
-
         function linkDataParts(data) {
             init();
             console.log('Start linking ...', new Date(data.server_time * 1000));
@@ -441,7 +410,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //    }
                     //}
 
-                    tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, data.server_time);
+                    tPoint.windows = TimeConverter.getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, data.server_time);
                     if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
                         for (k = 0; k < tPoint.windows.length; k++) {
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
@@ -1553,309 +1522,309 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$emit('showNotification', {text: text, duration: duration});
         }
 
-        scope.recalculateRoute = function () {
-            var route;
-
-            if (scope.filters.route != -1) {
-                route = _data.routes[scope.filters.route];
-            } else if (scope.selectedRow != -1) {
-                route = _data.routes[scope.displayCollection[scope.selectedRow].route_id];
-            }
-
-            if (route != undefined) {
-                route.recalcIter = route.recalcIter || 0;
-                route.recalcIter++;
-                console.log('route.recalcIter', route.recalcIter);
-
-                var mathInput = {
-                        "margin_of_safety": 1,
-                        "garbage": false,
-                        "one_car_recalc": true,
-                        "etaps": 1,
-                        "parent_id": "",
-                        "points": [],
-                        "cargo_list": [],
-                        "trList": [],
-                        "jobList": [],
-                        "depotList": [],
-                        "inn_list": []
-                    },
-                    point,
-                    pt,
-                    job,
-                    timeWindow,
-                    late;
-
-                for (var i = 0; i < route.points.length; i++) {
-                    if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
-                        timeWindow = getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS,
-                            _data.server_time);
-                        mathInput.depotList.push({
-                            "id": "1",
-                            "point": "-2",
-                            "window": {
-                                "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
-                                "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
-                            }
-                        });
-                        break;
-                    }
-                }
-
-                var trWindow = getTstampAvailabilityWindow('03:00 - ' +
-                        route.transport.END_OF_WORK.substr(0, 5), _data.server_time),
-                    jobWindows,
-                    timeStep = 600,
-                    warehouseEnd;
-
-                console.log(trWindow);
-
-                for (i = 0; i < route.points.length; i++) {
-
-                    if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE
-                        && route.points[i].status != STATUS.FINISHED_TOO_EARLY && route.points[i].waypoint.TYPE != 'WAREHOUSE') {
-                        pt = route.points[i];
-                        point = {
-                            "lat": parseFloat(pt.waypoint.LAT),
-                            "lon": parseFloat(pt.waypoint.LON),
-                            "ID": pt.waypoint.gIndex + '', //pt.waypoint.ID,
-                            "servicetime": 0, //parseInt(pt.waypoint.QUEUING_TIME),
-                            "add_servicetime": 0, // parseInt(pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER),
-                            "max_height_transport": 0,
-                            "max_length_transport": 0,
-                            "only_pallets": false,
-                            "ramp": false,
-                            "need_refrigerator": false,
-                            "temperature_control": false,
-                            "ignore_cargo_incompatibility": false,
-                            "ignore_pallet_incompatibility": false,
-                            "region": "-1"
-                        };
-
-                        mathInput.points.push(point);
-
-                        late = route.points[i].status == STATUS.TIME_OUT ||
-                            route.points[i].status == STATUS.DELAY;
-
-                        jobWindows = [];
-                        switch (scope.recalc_mode) {
-                            case scope.recalc_modes[0].value:   // пересчет по большим окнам
-                                jobWindows = [
-                                    {
-                                        "start": late ? _data.server_time : pt.promised_window_changed.start,
-                                        "finish": late ? trWindow[0].finish : pt.promised_window_changed.finish
-                                    }
-                                ];
-                                break;
-                            case scope.recalc_modes[1].value:   // пересчет по заданным окнам
-                                jobWindows = [
-                                    {
-                                        "start": pt.promised_window_changed.start,
-                                        "finish": pt.promised_window_changed.finish
-                                    }
-                                ];
-                                break;
-                            case scope.recalc_modes[2].value:   // пересчетпри рекрусивном увелечении окон
-                                jobWindows = [
-                                    {
-                                        "start": pt.promised_window_changed.start - timeStep,
-                                        "finish": pt.promised_window_changed.finish + timeStep
-                                    }
-                                ];
-                                pt.promised_window_changed = jobWindows[0];
-                                break;
-                        }
-
-                        job = {
-                            "id": i.toString(),
-                            "weigth": parseInt(pt.WEIGHT),
-                            "volume": parseInt(pt.VOLUME),
-                            "value": parseInt(pt.VALUE),
-                            "servicetime": parseInt(pt.TASK_TIME),
-                            "cargo_type": "-1",
-                            "vehicle_required": "",
-                            "penalty": 0,
-                            "rest": false,
-                            "backhaul": false,
-                            "point": pt.waypoint.gIndex + '',
-                            "windows": jobWindows
-                        };
-                        mathInput.jobList.push(job);
-                    }
-                }
-
-                point = {
-                    "lat": parseFloat(route.car_position.lat),
-                    "lon": parseFloat(route.car_position.lon),
-                    "ID": "-2",
-                    "servicetime": 0,
-                    "add_servicetime": 0,
-                    "max_height_transport": 0,
-                    "max_length_transport": 0,
-                    "only_pallets": false,
-                    "ramp": false,
-                    "need_refrigerator": false,
-                    "temperature_control": false,
-                    "ignore_cargo_incompatibility": false,
-                    "ignore_pallet_incompatibility": false,
-                    "region": "-1"
-                };
-
-                mathInput.points.push(point);
-
-                warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
-                if (warehouseEnd) {
-                    point = {
-                        "lat": parseFloat(route.points[route.points.length - 1].LAT),
-                        "lon": parseFloat(route.points[route.points.length - 1].LON),
-                        "ID": "-3",
-                        "servicetime": 0,
-                        "add_servicetime": 0,
-                        "max_height_transport": 0,
-                        "max_length_transport": 0,
-                        "only_pallets": false,
-                        "ramp": false,
-                        "need_refrigerator": false,
-                        "temperature_control": false,
-                        "ignore_cargo_incompatibility": false,
-                        "ignore_pallet_incompatibility": false,
-                        "region": "-1"
-                    };
-
-                    mathInput.points.push(point);
-                }
-
-                mathInput.trList.push({
-                    "id": "-1",
-                    "cost_per_hour": parseInt(route.transport.COST_PER_HOUR),
-                    "cost_per_km": parseInt(route.transport.COST_PER_KILOMETER),
-                    "cost_onTime": parseInt(route.transport.COST_ONE_TIME),
-                    "maxweigth": parseInt(route.transport.MAXIMUM_WEIGHT),
-                    "maxvolume": parseInt(route.transport.MAXIMUM_VOLUME),
-                    "maxvalue": parseInt(route.transport.MAXIMUM_VALUE),
-                    "multi_use": true,
-                    "amount_use": 1,
-                    "proto": false,
-                    "cycled": false,
-                    "time_load": 0,
-                    "time_min": 0,
-                    "window": {
-                        "start": _data.server_time,
-                        "finish": trWindow[0].finish
-                    },
-                    "weigth_nominal": 0,
-                    "time_max": 0,
-                    "start_point": "-1",
-                    "finish_point": warehouseEnd ? "-3" : "-1",
-                    "points_limit": 0,
-                    "road_speed": 1,
-                    "point_speed": 1,
-                    "add_servicetime": 0, // parseInt(route.transport.TIME_OF_DISEMBARK),
-                    "number_of_pallets": 0,
-                    "refrigerator": false,
-                    "temperature_control": false,
-                    "low_temperature": 0,
-                    "high_temperature": 0,
-                    "time_preserving": 0,
-                    "height": 0,
-                    "length": 0,
-                    "can_with_ramp": true,
-                    "can_without_ramp": true,
-                    "use_inn": false,
-                    "min_rest_time": 0,
-                    "region": "-1",
-                    "donor": false,
-                    "recipient": false,
-                    "points_acquaintances": [],
-                    "tr_constraints": [],
-                    "tr_permits": []
-                });
-
-                console.log(mathInput);
-
-                http.post('./recalculate/', {input: mathInput}).
-                    success(function (data) {
-                        processModifiedPoints(route, data);
-                    });
-            }
-        };
-
-        function processModifiedPoints(changedRoute, data) {
-            console.log('recalculate success!');
-            console.log(data);
-
-            if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
-                console.log('Bad data');
-                showPopup('Автоматический пересчет не удался.');
-                return;
-            }
-
-            console.log('MATH DATE >> ', new Date(_data.server_time * 1000));
-
-            var tmpRawRoute,
-                toMove = [],
-                newData = data.solutions[0].routes[0].deliveries,
-                tmpPoint,
-                routeIndx;
-
-            for (var i = 0; i < rawData.routes.length; i++) {
-                if (_data.routes[i].ID == changedRoute.ID) {
-                    tmpRawRoute = rawData.routes[i];
-                    tmpRawRoute.recalcIter = _data.routes[i].recalcIter;
-                    routeIndx = i;
-                    break;
-                }
-            }
-
-            for (var i = 0, j = 0; i < changedRoute.points.length; i++, j++) {
-                if (changedRoute.points[i].status != STATUS.FINISHED &&
-                    changedRoute.points[i].status != STATUS.FINISHED_LATE &&
-                    changedRoute.points[i].status != STATUS.FINISHED_TOO_EARLY) {
-
-                    for (var k = 0; k < newData.length; k++) {
-                        if (newData[k].pointId == changedRoute.points[i].waypoint.gIndex
-                            || (newData[k].pointId == '-3' && i == changedRoute.points.length - 1)
-                        ) {
-                            tmpPoint = tmpRawRoute.points.splice(j, 1)[0];
-                            tmpPoint.ARRIVAL_TIME = filter('date')((newData[k].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
-                            toMove.push(tmpPoint);
-                            j--;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            for (i = 0; i < newData.length; i++) {
-                for (var j = 0; j < toMove.length; j++) {
-                    if (newData[i].pointId == toMove[j].waypoint.gIndex
-                        || (newData[i].pointId == '-3' && j == toMove.length - 1)
-                    ) {
-                        tmpRawRoute.points.push(JSON.parse(JSON.stringify(toMove[j])));
-                    }
-                }
-            }
-
-            for (i = 0; i < tmpRawRoute.points.length; i++) {
-                tmpRawRoute.points[i].NUMBER = i + 1;
-            }
-
-            tmpRawRoute.toSave = true;
-            tmpRawRoute.change_timestamp = data.timestamp;
-
-            http.get('./routerdata?routeIndx=' + routeIndx).
-                success(function (data) {
-                    console.log('routerdata DONE!');
-                    console.log(data);
-                    tmpRawRoute.plan_geometry = data.geometry;
-                    tmpRawRoute.time_matrix = data.time_matrix;
-
-                    linkDataParts(rawData);
-                    if (loadParts) {
-                        loadTrackParts();
-                    }
-                });
-        }
+        //scope.recalculateRoute = function () {
+        //    var route;
+        //
+        //    if (scope.filters.route != -1) {
+        //        route = _data.routes[scope.filters.route];
+        //    } else if (scope.selectedRow != -1) {
+        //        route = _data.routes[scope.displayCollection[scope.selectedRow].route_id];
+        //    }
+        //
+        //    if (route != undefined) {
+        //        route.recalcIter = route.recalcIter || 0;
+        //        route.recalcIter++;
+        //        console.log('route.recalcIter', route.recalcIter);
+        //
+        //        var mathInput = {
+        //                "margin_of_safety": 1,
+        //                "garbage": false,
+        //                "one_car_recalc": true,
+        //                "etaps": 1,
+        //                "parent_id": "",
+        //                "points": [],
+        //                "cargo_list": [],
+        //                "trList": [],
+        //                "jobList": [],
+        //                "depotList": [],
+        //                "inn_list": []
+        //            },
+        //            point,
+        //            pt,
+        //            job,
+        //            timeWindow,
+        //            late;
+        //
+        //        for (var i = 0; i < route.points.length; i++) {
+        //            if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
+        //                timeWindow = TimeConverter.getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS,
+        //                    _data.server_time);
+        //                mathInput.depotList.push({
+        //                    "id": "1",
+        //                    "point": "-2",
+        //                    "window": {
+        //                        "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
+        //                        "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
+        //                    }
+        //                });
+        //                break;
+        //            }
+        //        }
+        //
+        //        var trWindow = TimeConverter.getTstampAvailabilityWindow('03:00 - ' +
+        //                route.transport.END_OF_WORK.substr(0, 5), _data.server_time),
+        //            jobWindows,
+        //            timeStep = 600,
+        //            warehouseEnd;
+        //
+        //        console.log(trWindow);
+        //
+        //        for (i = 0; i < route.points.length; i++) {
+        //
+        //            if (route.points[i].status != STATUS.FINISHED && route.points[i].status != STATUS.FINISHED_LATE
+        //                && route.points[i].status != STATUS.FINISHED_TOO_EARLY && route.points[i].waypoint.TYPE != 'WAREHOUSE') {
+        //                pt = route.points[i];
+        //                point = {
+        //                    "lat": parseFloat(pt.waypoint.LAT),
+        //                    "lon": parseFloat(pt.waypoint.LON),
+        //                    "ID": pt.waypoint.gIndex + '', //pt.waypoint.ID,
+        //                    "servicetime": 0, //parseInt(pt.waypoint.QUEUING_TIME),
+        //                    "add_servicetime": 0, // parseInt(pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER),
+        //                    "max_height_transport": 0,
+        //                    "max_length_transport": 0,
+        //                    "only_pallets": false,
+        //                    "ramp": false,
+        //                    "need_refrigerator": false,
+        //                    "temperature_control": false,
+        //                    "ignore_cargo_incompatibility": false,
+        //                    "ignore_pallet_incompatibility": false,
+        //                    "region": "-1"
+        //                };
+        //
+        //                mathInput.points.push(point);
+        //
+        //                late = route.points[i].status == STATUS.TIME_OUT ||
+        //                    route.points[i].status == STATUS.DELAY;
+        //
+        //                jobWindows = [];
+        //                switch (scope.recalc_mode) {
+        //                    case scope.recalc_modes[0].value:   // пересчет по большим окнам
+        //                        jobWindows = [
+        //                            {
+        //                                "start": late ? _data.server_time : pt.promised_window_changed.start,
+        //                                "finish": late ? trWindow[0].finish : pt.promised_window_changed.finish
+        //                            }
+        //                        ];
+        //                        break;
+        //                    case scope.recalc_modes[1].value:   // пересчет по заданным окнам
+        //                        jobWindows = [
+        //                            {
+        //                                "start": pt.promised_window_changed.start,
+        //                                "finish": pt.promised_window_changed.finish
+        //                            }
+        //                        ];
+        //                        break;
+        //                    case scope.recalc_modes[2].value:   // пересчет при рекрусивном увелечении окон
+        //                        jobWindows = [
+        //                            {
+        //                                "start": pt.promised_window_changed.start - timeStep,
+        //                                "finish": pt.promised_window_changed.finish + timeStep
+        //                            }
+        //                        ];
+        //                        pt.promised_window_changed = jobWindows[0];
+        //                        break;
+        //                }
+        //
+        //                job = {
+        //                    "id": i.toString(),
+        //                    "weigth": parseInt(pt.WEIGHT),
+        //                    "volume": parseInt(pt.VOLUME),
+        //                    "value": parseInt(pt.VALUE),
+        //                    "servicetime": parseInt(pt.TASK_TIME),
+        //                    "cargo_type": "-1",
+        //                    "vehicle_required": "",
+        //                    "penalty": 0,
+        //                    "rest": false,
+        //                    "backhaul": false,
+        //                    "point": pt.waypoint.gIndex + '',
+        //                    "windows": jobWindows
+        //                };
+        //                mathInput.jobList.push(job);
+        //            }
+        //        }
+        //
+        //        point = {
+        //            "lat": parseFloat(route.car_position.lat),
+        //            "lon": parseFloat(route.car_position.lon),
+        //            "ID": "-2",
+        //            "servicetime": 0,
+        //            "add_servicetime": 0,
+        //            "max_height_transport": 0,
+        //            "max_length_transport": 0,
+        //            "only_pallets": false,
+        //            "ramp": false,
+        //            "need_refrigerator": false,
+        //            "temperature_control": false,
+        //            "ignore_cargo_incompatibility": false,
+        //            "ignore_pallet_incompatibility": false,
+        //            "region": "-1"
+        //        };
+        //
+        //        mathInput.points.push(point);
+        //
+        //        warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
+        //        if (warehouseEnd) {
+        //            point = {
+        //                "lat": parseFloat(route.points[route.points.length - 1].LAT),
+        //                "lon": parseFloat(route.points[route.points.length - 1].LON),
+        //                "ID": "-3",
+        //                "servicetime": 0,
+        //                "add_servicetime": 0,
+        //                "max_height_transport": 0,
+        //                "max_length_transport": 0,
+        //                "only_pallets": false,
+        //                "ramp": false,
+        //                "need_refrigerator": false,
+        //                "temperature_control": false,
+        //                "ignore_cargo_incompatibility": false,
+        //                "ignore_pallet_incompatibility": false,
+        //                "region": "-1"
+        //            };
+        //
+        //            mathInput.points.push(point);
+        //        }
+        //
+        //        mathInput.trList.push({
+        //            "id": "-1",
+        //            "cost_per_hour": parseInt(route.transport.COST_PER_HOUR),
+        //            "cost_per_km": parseInt(route.transport.COST_PER_KILOMETER),
+        //            "cost_onTime": parseInt(route.transport.COST_ONE_TIME),
+        //            "maxweigth": parseInt(route.transport.MAXIMUM_WEIGHT),
+        //            "maxvolume": parseInt(route.transport.MAXIMUM_VOLUME),
+        //            "maxvalue": parseInt(route.transport.MAXIMUM_VALUE),
+        //            "multi_use": true,
+        //            "amount_use": 1,
+        //            "proto": false,
+        //            "cycled": false,
+        //            "time_load": 0,
+        //            "time_min": 0,
+        //            "window": {
+        //                "start": _data.server_time,
+        //                "finish": trWindow[0].finish
+        //            },
+        //            "weigth_nominal": 0,
+        //            "time_max": 0,
+        //            "start_point": "-1",
+        //            "finish_point": warehouseEnd ? "-3" : "-1",
+        //            "points_limit": 0,
+        //            "road_speed": 1,
+        //            "point_speed": 1,
+        //            "add_servicetime": 0, // parseInt(route.transport.TIME_OF_DISEMBARK),
+        //            "number_of_pallets": 0,
+        //            "refrigerator": false,
+        //            "temperature_control": false,
+        //            "low_temperature": 0,
+        //            "high_temperature": 0,
+        //            "time_preserving": 0,
+        //            "height": 0,
+        //            "length": 0,
+        //            "can_with_ramp": true,
+        //            "can_without_ramp": true,
+        //            "use_inn": false,
+        //            "min_rest_time": 0,
+        //            "region": "-1",
+        //            "donor": false,
+        //            "recipient": false,
+        //            "points_acquaintances": [],
+        //            "tr_constraints": [],
+        //            "tr_permits": []
+        //        });
+        //
+        //        console.log(mathInput);
+        //
+        //        http.post('./recalculate/', {input: mathInput}).
+        //            success(function (data) {
+        //                processModifiedPoints(route, data);
+        //            });
+        //    }
+        //};
+        //
+        //function processModifiedPoints(changedRoute, data) {
+        //    console.log('recalculate success!');
+        //    console.log(data);
+        //
+        //    if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
+        //        console.log('Bad data');
+        //        showPopup('Автоматический пересчет не удался.');
+        //        return;
+        //    }
+        //
+        //    console.log('MATH DATE >> ', new Date(_data.server_time * 1000));
+        //
+        //    var tmpRawRoute,
+        //        toMove = [],
+        //        newData = data.solutions[0].routes[0].deliveries,
+        //        tmpPoint,
+        //        routeIndx;
+        //
+        //    for (var i = 0; i < rawData.routes.length; i++) {
+        //        if (_data.routes[i].ID == changedRoute.ID) {
+        //            tmpRawRoute = rawData.routes[i];
+        //            tmpRawRoute.recalcIter = _data.routes[i].recalcIter;
+        //            routeIndx = i;
+        //            break;
+        //        }
+        //    }
+        //
+        //    for (var i = 0, j = 0; i < changedRoute.points.length; i++, j++) {
+        //        if (changedRoute.points[i].status != STATUS.FINISHED &&
+        //            changedRoute.points[i].status != STATUS.FINISHED_LATE &&
+        //            changedRoute.points[i].status != STATUS.FINISHED_TOO_EARLY) {
+        //
+        //            for (var k = 0; k < newData.length; k++) {
+        //                if (newData[k].pointId == changedRoute.points[i].waypoint.gIndex
+        //                    || (newData[k].pointId == '-3' && i == changedRoute.points.length - 1)
+        //                ) {
+        //                    tmpPoint = tmpRawRoute.points.splice(j, 1)[0];
+        //                    tmpPoint.ARRIVAL_TIME = filter('date')((newData[k].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+        //                    toMove.push(tmpPoint);
+        //                    j--;
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //    }
+        //
+        //    for (i = 0; i < newData.length; i++) {
+        //        for (var j = 0; j < toMove.length; j++) {
+        //            if (newData[i].pointId == toMove[j].waypoint.gIndex
+        //                || (newData[i].pointId == '-3' && j == toMove.length - 1)
+        //            ) {
+        //                tmpRawRoute.points.push(JSON.parse(JSON.stringify(toMove[j])));
+        //            }
+        //        }
+        //    }
+        //
+        //    for (i = 0; i < tmpRawRoute.points.length; i++) {
+        //        tmpRawRoute.points[i].NUMBER = i + 1;
+        //    }
+        //
+        //    tmpRawRoute.toSave = true;
+        //    tmpRawRoute.change_timestamp = data.timestamp;
+        //
+        //    http.get('./routerdata?routeIndx=' + routeIndx).
+        //        success(function (data) {
+        //            console.log('routerdata DONE!');
+        //            console.log(data);
+        //            tmpRawRoute.plan_geometry = data.geometry;
+        //            tmpRawRoute.time_matrix = data.time_matrix;
+        //
+        //            linkDataParts(rawData);
+        //            if (loadParts) {
+        //                loadTrackParts();
+        //            }
+        //        });
+        //}
 
         scope.saveRoutes = function () {
             console.log('saveRoutes');

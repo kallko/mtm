@@ -414,8 +414,23 @@ template {
     padding-left: 3px;
 }
 
+#edit-panel-menu {
+    padding-bottom: 4px;
+    margin-left: -3px;
+}
 
+#edit-panel-menu select {
+    width: 150px;
+    padding: 1px;
+    margin-top: 3px;
+}
 
+#edit-panel-menu button {
+    padding: 0 5px;
+}
 
-
+#edit-panel-empty {
+    text-align: center;
+    padding-top: 20px;
+}
 
