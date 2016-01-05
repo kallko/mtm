@@ -11,7 +11,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             routerData,
             serverTime,
             firstInit,
-            workingWindowб
+            workingWindow,
             STATUS = Statuses.getStatuses();
 
         scope.BOX_TYPE = {
@@ -694,54 +694,31 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             console.log('MATH DATE >> ', new Date(serverTime * 1000));
 
-            var tmpRawRoute,
-                toMove = [],
-                newData = data.solutions[0].routes[0].deliveries,
-                tmpPoint;
+            var newSolution = data.solutions[0].routes[0].deliveries,
+                updatedPoints = [],
+                point,
+                tmp;
 
-            for (var i = 0, j = 0; i < changedRoute.points.length; i++, j++) {
-                for (var k = 0; k < newData.length; k++) {
-                    if (newData[k].pointId == changedRoute.points[i].waypoint.gIndex
-                        || (newData[k].pointId == '-3' && i == changedRoute.points.length - 1)
-                    ) {
-                        tmpPoint = tmpRawRoute.points.splice(j, 1)[0];
-                        tmpPoint.ARRIVAL_TIME = filter('date')((newData[k].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
-                        toMove.push(tmpPoint);
-                        j--;
-                        break;
+            for (var i = 0; i < newSolution.length; i++) {
+                tmp = newSolution[i].pointId;
+                if (newSolution[i].pointId == -3) {
+                    point = changedRoute.points[changedRoute.points.length - 1];
+                    point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+                    updatedPoints.push(point);
+                    break;
+                }
+
+                for (var j = 0; j < changedRoute.points.length; j++) {
+                    if (newSolution[i].pointId == changedRoute.points[j].waypoint.gIndex) {
+                        point = changedRoute.points[j];
+                        point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+                        updatedPoints.push(point);
                     }
                 }
             }
 
-            for (i = 0; i < newData.length; i++) {
-                for (var j = 0; j < toMove.length; j++) {
-                    if (newData[i].pointId == toMove[j].waypoint.gIndex
-                        || (newData[i].pointId == '-3' && j == toMove.length - 1)
-                    ) {
-                        tmpRawRoute.points.push(JSON.parse(JSON.stringify(toMove[j])));
-                    }
-                }
-            }
-
-            for (i = 0; i < tmpRawRoute.points.length; i++) {
-                tmpRawRoute.points[i].NUMBER = i + 1;
-            }
-
-            tmpRawRoute.toSave = true;
-            tmpRawRoute.change_timestamp = data.timestamp;
-
-            //http.get('./routerdata?routeIndx=' + routeIndx).
-            //    success(function (data) {
-            //        console.log('routerdata DONE!');
-            //        console.log(data);
-            //        tmpRawRoute.plan_geometry = data.geometry;
-            //        tmpRawRoute.time_matrix = data.time_matrix;
-            //
-            //        linkDataParts(rawData);
-            //        if (loadParts) {
-            //            loadTrackParts();
-            //        }
-            //    });
+            changedRoute.points = updatedPoints;
+            recalculateRoute();
         }
 
     }]);
