@@ -1025,7 +1025,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.$on('updateRawPromised', function(event, data) {
                 updateRawPromised(data.point);
             });
-
+            rootScope.$on('saveRoutes', updateRoute);
 
             $('.header .problem-index-col').on('click', function () {
                 problemSortType++;
@@ -1937,6 +1937,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 && promise15MFilter(row)
                 && textFilter(row)
                 && branchFilter(row);
+        };
+
+        function updateRoute(event, data) {
+            console.log('updateRoute at point-index-controller', data.route);
+            _data.routes[data.route.filterId] = data.route;
+            //rawData.routes[data.route.filterId] = data.route;
+            var a = 0;
         }
 
     }]);

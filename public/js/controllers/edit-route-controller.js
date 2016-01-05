@@ -721,4 +721,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             recalculateRoute();
         }
 
+        scope.saveRoutes = function () {
+            scope.$emit('saveRoutes', {route: scope.changedRoute});
+        }
+
     }]);

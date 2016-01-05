@@ -94,9 +94,9 @@
                 <!--пересчитать-->
                 <!--</button>-->
 
-                <button class="btn btn-info btn-sm" id="save-btn" ng-click="saveRoutes()">
-                    сохранить
-                </button>
+                <!--<button class="btn btn-info btn-sm" id="save-btn" ng-click="saveRoutes()">-->
+                    <!--сохранить-->
+                <!--</button>-->
 
                 <input id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
                 <button class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()">
@@ -320,6 +320,8 @@
             <button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">
             пересчитать
             </button>
+
+            <button class="btn btn-info btn-sm" ng-click="saveRoutes()" >сохранить</button>
         </div>
 
         <div ng-show="route !== undefined">
