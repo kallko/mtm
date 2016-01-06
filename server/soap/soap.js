@@ -220,7 +220,11 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
                         data = [];
                     for (var i = 0; i < itineraries.length; i++) {
-                        me.getItinerary(client, itineraries[i].$.ID, itineraries[i].$.VERSION, itIsToday, data, date, callback);
+                        (function(ii) {
+                            setTimeout(function() {
+                                me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
+                            }, i * 5);
+                        })(i);
                     }
 
                 });
