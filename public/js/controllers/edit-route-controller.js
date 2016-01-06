@@ -20,7 +20,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             TASK: 2
         };
         scope.recalc_modes = [
-            {name: 'по большим окнам', value: 0},
+            {name: 'без окон', value: 0},
             {name: 'по заданным окнам', value: 1},
             {name: 'по увеличенному заданному окну', value: 2}
         ];
@@ -723,6 +723,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         scope.saveRoutes = function () {
             scope.$emit('saveRoutes', {route: scope.changedRoute});
+            scope.route = undefined;
+            scope.changedRoute = undefined;
         }
 
     }]);

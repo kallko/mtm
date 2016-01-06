@@ -23,6 +23,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 console.log(data);
             });
             rootScope.$on('lockRoute', lockRoute);
+            rootScope.$on('unlockRoute', unlockRoute);
         }
 
         function show(event, data) {
@@ -46,6 +47,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.route = data.route;
             scope.point = data.point;
             scope.route.lockedByMe = false;
+            scope.toggleRouteBlock();
+        }
+
+        function unlockRoute(event, data) {
+            scope.route = data.route;
+            scope.point = data.point;
+            scope.route.lockedByMe = true;
             scope.toggleRouteBlock();
         }
 

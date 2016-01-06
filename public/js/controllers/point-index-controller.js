@@ -495,6 +495,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('Finish linking', data);
             scope.displayCollection = [].concat(scope.rowCollection);
 
+            saveRoutes();
             checkLocks();
             showPopup('Загрузка завершенна!', 2500);
 
@@ -1826,14 +1827,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //        });
         //}
 
-        scope.saveRoutes = function () {
+        function saveRoutes() {
             console.log('saveRoutes');
 
             var routes = [],
                 route,
                 point;
             for (var i = 0; i < _data.routes.length; i++) {
-                if (_data.routes[i].toSave || i == 0) {
+                if (_data.routes[i].toSave) { // || i == 0) {
                     route = {
                         itineraryID: _data.routes[i].itineraryID,
                         routesID: _data.routes[i].ID,
@@ -1893,7 +1894,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         delete _data.routes[i].toSave;
                     }
                 });
-        };
+        }
 
         function cancelPoint(row_id) {
             var point = scope.displayCollection[row_id];
@@ -1941,9 +1942,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function updateRoute(event, data) {
             console.log('updateRoute at point-index-controller', data.route);
-            _data.routes[data.route.filterId] = data.route;
-            //rawData.routes[data.route.filterId] = data.route;
-            var a = 0;
+
+            var updatedRoute = rawData.routes[data.route.filterId],
+                route = data.route,
+                point = _data.routes[data.route.filterId].points[0];
+
+            point.itineraryID = _data.ID;
+            scope.$emit('unlockRoute', {
+                route: _data.routes[data.route.filterId],
+                point: point
+            });
+
+            for (var i = 0; i < route.points.length; i++) {
+                for (var j = 0; j < updatedRoute.points.length; j++) {
+                    if (updatedRoute.points[j].NUMBER == route.points[i].NUMBER) {
+                        updatedRoute.points.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+
+            for (var i = 0; i < route.points.length; i++) {
+                updatedRoute.points.push(route.points[i]);
+            }
+
+            updatedRoute.toSave = true;
+            updatedRoute.change_timestamp = data.timestamp;
+
+            linkDataParts(rawData);
         }
 
     }]);
