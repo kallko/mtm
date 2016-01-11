@@ -24,11 +24,11 @@ var soap = require('soap'),
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
+    //this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl";
+    //this.urlPda = "@sngtrans.com.ua/copy/ws/pda/?wsdl";
     this.login = login;
     this.admin_login = 'soap_admin';
     this.password = '$o@p';
-    //this.admin_login = 'samogot';
-    //this.password = 'samogot123';
 }
 
 SoapManager.prototype.getFullUrl = function () {
@@ -454,8 +454,6 @@ SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, ca
             });
         }
     });
-
-
 };
 
 SoapManager.prototype.getAllSensors = function (callback) {
@@ -520,15 +518,31 @@ SoapManager.prototype.saveRoutesTo1C = function (routes) {
                 });
         };
 
+    var resXml;
     for (var i = 0; i < routes.length; i++) {
         routes[i].counter = 0;
         for (var j = 0; j < routes[i].points.length; j++) {
             loadGeometry(i, j, function () {
-                var resXml = _xml.routesXML(routes, me.login);
+                resXml = _xml.routesXML(routes, me.login);
                 log.toFLog('saveChanges.xml', resXml, false);
             });
         }
     }
+
+    //soap.createClient(me.getFullUrl(), function (err, client) {
+    //    if (err) throw err;
+    //    client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+    //    client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+    //        if (!err) {
+    //            console.log('saveRoutesTo1C OK');
+    //            log.toFLog('afterSave.js', result);
+    //        } else {
+    //            console.log('saveRoutesTo1C ERROR');
+    //            console.log(err.body);
+    //        }
+    //    });
+    //});
+
 };
 
 SoapManager.prototype.openPointWindow = function (user, pointId) {

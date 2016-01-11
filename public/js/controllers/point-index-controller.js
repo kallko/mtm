@@ -374,7 +374,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (data.routes[i].filterId == null) {
                         data.routes[i].filterId = routeId;
+
+                        //TODO REMOVE AFTER TESTING
+                        //data.routes[i].transport = data.routes[0].transport;
+                        ///////////////////////////
+
                         scope.filters.routes.push({
+                            //name: data.routes[i].transport.NAME,
                             name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
@@ -900,6 +906,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 nextPointTime = parseInt(data.time_table[0][1][0] / 10),
                                 totalWorkTime = 0,
                                 totalTravelTime = 0,
+                                tmpDowntime = 0,
+                                totalDowntime = 0,
                                 tmpTime;
 
                             for (var j = 0; j < _route.points.length; j++) {
@@ -917,7 +925,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 } else {
                                     tmpTime = _route.time_matrix.time_table[0][j - 1][j];
                                     totalTravelTime += tmpTime == 2147483647 ? 0 : tmpTime / 10;
-                                    tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime;
+                                    tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
+                                    tmpDowntime = _route.points[j].working_window.start - tmpPred;
+                                    if (tmpDowntime > 0) {
+                                        console.log(_route.filterId + ': adding ' + tmpDowntime + ' (tmpDowntime) to ' + totalDowntime + ' (totalDowntime)');
+                                        totalDowntime += tmpDowntime;
+                                        tmpPred = _route.points[j].working_window.start;
+                                    }
+
                                     _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
 
                                     _route.points[j].in_plan = true;
