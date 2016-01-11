@@ -747,21 +747,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             lat = mobilePushes[i].lat;
                             lon = mobilePushes[i].lon;
 
-                            if (mobilePushes[i].number == tmpPoint.TASK_NUMBER
-                                && getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius
-                            ) {
-                                tmpPoint.mobile_push = mobilePushes[i];
-                                tmpPoint.havePush = true;
-                                tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                                tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
-                                tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
-                                _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                                _data.routes[j].pushes = _data.routes[j].pushes || [];
-                                if (mobilePushes[i].gps_time_ts < _data.server_time) {
-                                    _data.routes[j].pushes.push(mobilePushes[i]);
+                            if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+                                if (getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius) {
+                                    tmpPoint.mobile_push = mobilePushes[i];
+                                    tmpPoint.havePush = true;
+                                    tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
+                                    tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+                                    tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+                                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                                    _data.routes[j].pushes = _data.routes[j].pushes || [];
+                                    if (mobilePushes[i].gps_time_ts < _data.server_time) {
+                                        _data.routes[j].pushes.push(mobilePushes[i]);
+                                    }
+                                    findStatusAndWindowForPoint(tmpPoint);
+                                    break;
+                                } else {
+                                    console.log('out of mobile radius');
                                 }
-                                findStatusAndWindowForPoint(tmpPoint);
-                                break;
                             }
                         }
                     }
