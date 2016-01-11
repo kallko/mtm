@@ -750,7 +750,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
                                 tmpPoint.mobile_push = mobilePushes[i];
                                 tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                                console.log(getDistanceFromLatLonInKm(lat, lon, LAT, LON));
                                 if (getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius) {
                                     tmpPoint.havePush = true;
                                     tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
@@ -1120,13 +1119,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     return;
                 case 'edit':
                     sortByRoute(row.route_indx, true);
-                    route = _data.routes[row.route_id];
-                    point = route.points[row.NUMBER - 1];
-                    point.itineraryID = _data.ID;
-                    scope.$emit('lockRoute', {
-                        route: route,
-                        point: point
-                    });
+                    _data.routes[row.route_id].points[0].itineraryID = _data.ID;
 
                     scope.$emit('routeToChange', {
                         route: _data.routes[row.route_id],
@@ -1991,13 +1984,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         scope.getPushStatus = function (row) {
-            var a = row.havePush,
-                b = row.mobile_push;
-
             if (row.havePush) {
                 return 'Есть';
             } else if (row.mobile_push) {
-                return '?Есть';
+                //return '?Есть';
+                return '';
             } else {
                 return '';
             }

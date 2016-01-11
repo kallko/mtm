@@ -115,9 +115,16 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
 
             if (scope.changedRoute.points.length > 0) {
+                scope.$emit('lockRoute', {
+                    route: data.route,
+                    point: data.route.points[0]
+                });
+
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
             } else {
                 scope.$emit('showNotification', {text: 'Маршрут полностью выполнен.'});
+                scope.route = undefined;
+                scope.changedRoute = undefined;
             }
             //updateBoxes(true);
         }
