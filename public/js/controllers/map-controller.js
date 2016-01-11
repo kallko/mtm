@@ -6,6 +6,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         holderEl = null,
         changingWindow = false,
         markersArr = [],
+        maximized = false,
         highlightedPoint;
 
     initMap();
@@ -334,9 +335,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         $('body').on('mouseenter', checkMapWindowRect);
         holderEl.on('mouseenter', checkMapWindowRect);
+
+        $('.lm_maximise').on('click', function() {
+            maximized = $(this).attr('title') === 'minimise';
+            if (maximized) disableMap();
+        })
     }
 
     function checkMapWindowRect() {
+        if (maximized) return;
+
+        console.log('checkMapWindowRect');
         if (holderEl == null) {
             holderEl = $('#transparent-map-holder');
         }
@@ -348,7 +357,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         inside = true;
         $('.lm_goldenlayout').css('pointer-events', 'none');
 
+        $('body').off('mousemove');
         $('body').mousemove(function (event) {
+            //console.log("$('body').mousemove", position, event.clientX, event.clientY);
             if (!checkMouseInRect(position, event.clientX, event.clientY)) {
                 disableMap();
             }

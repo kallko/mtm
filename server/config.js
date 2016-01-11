@@ -11,6 +11,7 @@ var config = {
     //loadOnlyItineraryNew: false,
 
     cashing: {
+        //soap: true,
         soap: false,
         tracks: false,
         session: false

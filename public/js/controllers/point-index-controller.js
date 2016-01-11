@@ -928,7 +928,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
                                     tmpDowntime = _route.points[j].working_window.start - tmpPred;
                                     if (tmpDowntime > 0) {
-                                        console.log(_route.filterId + ': adding ' + tmpDowntime + ' (tmpDowntime) to ' + totalDowntime + ' (totalDowntime)');
+                                        //console.log(_route.filterId + ': adding ' + tmpDowntime + ' (tmpDowntime) to ' + totalDowntime + ' (totalDowntime)');
                                         totalDowntime += tmpDowntime;
                                         tmpPred = _route.points[j].working_window.start;
                                     }
