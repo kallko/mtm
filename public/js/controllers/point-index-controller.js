@@ -1991,7 +1991,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         scope.getPushStatus = function (row) {
-            if (row.haveStop) {
+            var a = row.havePush,
+                b = row.mobile_push;
+
+            if (row.havePush) {
                 return 'Есть';
             } else if (row.mobile_push) {
                 return '?Есть';
