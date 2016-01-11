@@ -14,7 +14,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             checkLocksInterval = 15,
 
             radius = 0.15,
-            mobileRadius = 0.5,
+            mobileRadius = 0.15,
             controlledWindow = 600,
             promisedWindow = 3600,
             problemSortType = 0,

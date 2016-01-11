@@ -345,7 +345,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
     function checkMapWindowRect() {
         if (maximized) return;
 
-        console.log('checkMapWindowRect');
         if (holderEl == null) {
             holderEl = $('#transparent-map-holder');
         }
