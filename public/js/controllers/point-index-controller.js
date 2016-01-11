@@ -748,10 +748,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             lon = mobilePushes[i].lon;
 
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+                                tmpPoint.mobile_push = mobilePushes[i];
+                                tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
+                                console.log(getDistanceFromLatLonInKm(lat, lon, LAT, LON));
                                 if (getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius) {
-                                    tmpPoint.mobile_push = mobilePushes[i];
                                     tmpPoint.havePush = true;
-                                    tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
                                     tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
                                     tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
                                     _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
@@ -762,7 +763,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     findStatusAndWindowForPoint(tmpPoint);
                                     break;
                                 } else {
-                                    console.log('out of mobile radius');
+                                    console.log('>>> OUT of mobile radius');
                                 }
                             }
                         }
@@ -1987,6 +1988,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updatedRoute.change_timestamp = data.timestamp;
 
             linkDataParts(rawData);
+        }
+
+        scope.getPushStatus = function (row) {
+            if (row.haveStop) {
+                return 'Есть';
+            } else if (row.mobile_push) {
+                return '?Есть';
+            } else {
+                return '';
+            }
         }
 
     }]);

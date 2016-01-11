@@ -163,7 +163,7 @@
                     </td>
                     <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
                     <td>{{row.haveStop ? 'Есть' : ''}}</td>
-                    <td>{{row.havePush ? 'Есть' : ''}}</td>
+                    <td id="{{'push-td-' + row.row_id}}">{{getPushStatus(row)}}</td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
