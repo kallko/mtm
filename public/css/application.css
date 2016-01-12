@@ -365,6 +365,11 @@ template {
     background-color: transparent;
 }
 
+.warehouse-box {
+    background-color: #eee4b4 !important;
+    width: 65px !important;
+}
+
 .task-box {
     background-color: #92ee91;
 }
@@ -378,7 +383,7 @@ template {
 }
 
 .finished-box {
-    background-color: #dddddd;
+    background-color: #dddddd !important;
     border: 1px solid #b19ca5;
 }
 

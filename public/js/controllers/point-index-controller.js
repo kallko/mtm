@@ -380,8 +380,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         ///////////////////////////
 
                         scope.filters.routes.push({
-                            //name: data.routes[i].transport.NAME,
-                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME,
+                            //name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
                         routeId++;

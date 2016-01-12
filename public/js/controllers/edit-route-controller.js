@@ -83,6 +83,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             workingWindow = data.workingWindow;
             console.log('workingType >>', workingWindow);
 
+
+
             if (data.demoMode) {
                 routeCopy.car_position = undefined;
                 for (var i = 0; i < routeCopy.real_track.length; i++) {
@@ -101,6 +103,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.changedRoute = JSON.parse(JSON.stringify(routeCopy));
 
             moveSkippedToEnd(scope.changedRoute);
+            markWarehouses(scope.changedRoute);
+            markWarehouses(scope.route);
             for (var i = 0; i < scope.changedRoute.points.length; i++) {
                 if (scope.changedRoute.points[i].status == scope.STATUS.FINISHED ||
                     scope.changedRoute.points[i].status == scope.STATUS.FINISHED_LATE ||
@@ -114,7 +118,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             }
 
-            if (scope.changedRoute.points.length > 0) {
+            if (scope.changedRoute.points.length > 1) {
                 scope.$emit('lockRoute', {
                     route: data.route,
                     point: data.route.points[0]
@@ -122,7 +126,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
             } else {
-                scope.$emit('showNotification', {text: 'Маршрут полностью выполнен.'});
+                scope.$emit('showNotification', {text: scope.changedRoute.points.length == 0 ?
+                    'Маршрут полностью выполнен.' : 'В маршруте осталось одно задание.'});
                 scope.route = undefined;
                 scope.changedRoute = undefined;
             }
@@ -229,9 +234,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         function moveSkippedToEnd(route) {
-            var toMoveArr = [];
+            var toMoveArr = [],
+                lastTask;
 
-            for (var i = 0; i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
+            route.warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
+            if (route.warehouseEnd) lastTask = route.points.pop();
+
+            for (var i = 0; i < route.points.length > i && i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
                 if (route.points[i].status != scope.STATUS.FINISHED &&
                     route.points[i].status != scope.STATUS.FINISHED_LATE &&
                     route.points[i].status != scope.STATUS.FINISHED_TOO_EARLY) {
@@ -246,6 +255,14 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 toMoveArr[i].TRAVEL_TIME = '0';
                 toMoveArr[i].DOWNTIME = '0';
                 route.points.push(toMoveArr[i]);
+            }
+
+            if (route.warehouseEnd) route.points.push(lastTask);
+        }
+
+        function markWarehouses(route) {
+            for (var i = 0; i < route.points.length; i++) {
+                route.points[i].warehouse = route.points[i].waypoint.TYPE == "WAREHOUSE";
             }
         }
 
@@ -397,7 +414,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         promised: point.promised_window_changed,
                         waypointNumber: point.END_WAYPOINT,
                         width: widthRes.width,
-                        tooBig: widthRes.tooBig
+                        tooBig: widthRes.tooBig,
+                        warehouse: point.warehouse
                     });
                 }
             }
@@ -514,8 +532,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 var trWindow = TimeConverter.getTstampAvailabilityWindow('03:00 - ' +
                         route.transport.END_OF_WORK.substr(0, 5), serverTime),
                     jobWindows,
-                    timeStep = 600,
-                    warehouseEnd;
+                    timeStep = 600;
 
                 console.log(trWindow);
 
@@ -612,8 +629,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                 mathInput.points.push(point);
 
-                warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
-                if (warehouseEnd) {
+                //warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
+                if (route.warehouseEnd) {
                     point = {
                         "lat": parseFloat(route.points[route.points.length - 1].LAT),
                         "lon": parseFloat(route.points[route.points.length - 1].LON),
@@ -655,7 +672,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     "weigth_nominal": 0,
                     "time_max": 0,
                     "start_point": "-1",
-                    "finish_point": warehouseEnd ? "-3" : "-1",
+                    "finish_point": route.warehouseEnd ? "-3" : "-1",
                     "points_limit": 0,
                     "road_speed": 1,
                     "point_speed": 1,
