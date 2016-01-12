@@ -1985,6 +1985,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.getPushStatus = function (row) {
             if (row.havePush) {
+                console.log('Normal mobile push >>', row);
                 return 'Есть';
             } else if (row.mobile_push) {
                 console.log('Invalid mobile push >>', row);
