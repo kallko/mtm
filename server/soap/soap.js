@@ -219,6 +219,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
                         data = [];
+
+                    data.iLength = itineraries.length;
+                    if (!config.loadOnlyItineraryNew) data.iLength *= 2;
+
                     for (var i = 0; i < itineraries.length; i++) {
                         (function(ii) {
                             setTimeout(function() {
@@ -253,15 +257,25 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 };
 
 function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
+
     if (!err) {
         //console.log(result.return);
         //log.toFLog('itinerary', result.return, false);
         //log.toFLog('itinerary', result.return, false);
         parseXML(result.return, function (err, res) {
+            //console.log(res);
+            data.iLength--;
+            console.log(data.iLength);
 
             if (res.MESSAGE.ITINERARIES == null ||
                 res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
-                res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') return;
+                res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED !== 'true') {
+                if (data.iLength == 0) {
+                    console.log('NO PLANS!');
+                    callback({status: 'no plan'});
+                }
+                return;
+            }
 
             console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
             var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
