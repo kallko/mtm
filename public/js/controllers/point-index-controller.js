@@ -1989,7 +1989,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return 'Есть';
             } else if (row.mobile_push) {
                 //console.log('Invalid mobile push >>', row);
-                $('#push-td-' + row,row_id).addClass('invalid-push');
+                $('#push-td-' + row.row_id).addClass('invalid-push');
                 return 'Есть';
                 //return '';
             } else {
