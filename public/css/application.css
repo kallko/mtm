@@ -434,3 +434,6 @@ template {
     padding-top: 20px;
 }
 
+.invalid-push {
+    background-color: red;
+}

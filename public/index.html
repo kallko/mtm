@@ -95,7 +95,7 @@
                 <!--</button>-->
 
                 <!--<button class="btn btn-info btn-sm" id="save-btn" ng-click="saveRoutes()">-->
-                    <!--сохранить-->
+                <!--сохранить-->
                 <!--</button>-->
 
                 <input id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
@@ -308,20 +308,20 @@
 
 <template type="text/html" id="edit-route">
     <div id="edit-panel" ng-controller="EditRouteController">
-        <div ng-show="route == undefined" id="edit-panel-empty" >
+        <div ng-show="route == undefined" id="edit-panel-empty">
             Маршрут для редактирования не выбран
         </div>
 
-        <div id="edit-panel-menu" ng-show="route !== undefined" >
+        <div id="edit-panel-menu" ng-show="route !== undefined">
             <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
-            ng-options='option.value as option.name for option in recalc_modes'>
+                    ng-options='option.value as option.name for option in recalc_modes'>
             </select>
 
             <button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">
-            пересчитать
+                пересчитать
             </button>
 
-            <button class="btn btn-info btn-sm" ng-click="saveRoutes()" >сохранить</button>
+            <button class="btn btn-info btn-sm" ng-click="saveRoutes()">сохранить</button>
         </div>
 
         <div ng-show="route !== undefined">
@@ -359,7 +359,7 @@
                          title="{{tooltip(box)}}"
                          data-index="{{box.index}}"
                          id="box-{{box.type}}-{{box.index}}"
-                         ng-dblclick="boxDblClick(box.waypointNumber)" >
+                         ng-dblclick="boxDblClick(box.waypointNumber)">
                         {{box.number}}
                         <span ng-show="box.tooBig">
                             <span class="glyphicon glyphicon-menu-right"></span>
@@ -386,7 +386,8 @@
         Карточка задания
         <button class="btn btn-primary btn-sm"
                 ng-show="companyName == 'IDS'"
-                ng-click="open1CWindow()" >Открыть в 1С</button>
+                ng-click="open1CWindow()">Открыть в 1С
+        </button>
     </div>
 
     <table id="point-view-table" class="table table-striped">
