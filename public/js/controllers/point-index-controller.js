@@ -14,7 +14,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             checkLocksInterval = 15,
 
             radius = 0.15,
-            mobileRadius = 0.15,
+            mobileRadius = 150,
             controlledWindow = 600,
             promisedWindow = 3600,
             problemSortType = 0,
@@ -713,6 +713,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 var buttonsStr = mobilePushes[Object.keys(mobilePushes)[0]];
+
                 if (buttonsStr == '[]') {
                     console.log('no mobile buttons push');
                     continue;
@@ -750,7 +751,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
                                 tmpPoint.mobile_push = mobilePushes[i];
                                 tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                                if (getDistanceFromLatLonInKm(lat, lon, LAT, LON) < mobileRadius) {
+                                mobilePushes[i].distance = parseInt(getDistanceFromLatLonInKm(lat, lon, LAT, LON) * 1000);
+                                if (mobilePushes[i].distance <= mobileRadius) {
                                     tmpPoint.havePush = true;
                                     tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
                                     tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
@@ -1985,10 +1987,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.getPushStatus = function (row) {
             if (row.havePush) {
-                //console.log('Normal mobile push >>', row);
                 return 'Есть';
             } else if (row.mobile_push) {
-                //console.log('Invalid mobile push >>', row);
                 $('#push-td-' + row.row_id).addClass('invalid-push');
                 return 'Есть';
                 //return '';

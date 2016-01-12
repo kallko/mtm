@@ -163,7 +163,12 @@
                     </td>
                     <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
                     <td>{{row.haveStop ? 'Есть' : ''}}</td>
-                    <td id="{{'push-td-' + row.row_id}}">{{getPushStatus(row)}}</td>
+                    <td id="{{'push-td-' + row.row_id}}"
+                        title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
+                                'время gps: ' + row.mobile_push.gps_time + '\n' +
+                                'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}" >
+                        {{getPushStatus(row)}}
+                     </td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
