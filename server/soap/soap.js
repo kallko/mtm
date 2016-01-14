@@ -224,6 +224,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     if (!config.loadOnlyItineraryNew) data.iLength *= 2;
 
                     for (var i = 0; i < itineraries.length; i++) {
+                        if (itineraries[i].$.ID == '4') continue;
+
                         (function(ii) {
                             setTimeout(function() {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
@@ -543,19 +545,19 @@ SoapManager.prototype.saveRoutesTo1C = function (routes) {
         }
     }
 
-    //soap.createClient(me.getFullUrl(), function (err, client) {
-    //    if (err) throw err;
-    //    client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-    //    client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
-    //        if (!err) {
-    //            console.log('saveRoutesTo1C OK');
-    //            log.toFLog('afterSave.js', result);
-    //        } else {
-    //            console.log('saveRoutesTo1C ERROR');
-    //            console.log(err.body);
-    //        }
-    //    });
-    //});
+    soap.createClient(me.getFullUrl(), function (err, client) {
+        if (err) throw err;
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+            if (!err) {
+                console.log('saveRoutesTo1C OK');
+                log.toFLog('afterSave.js', result);
+            } else {
+                console.log('saveRoutesTo1C ERROR');
+                console.log(err.body);
+            }
+        });
+    });
 
 };
 

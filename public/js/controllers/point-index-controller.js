@@ -304,6 +304,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpTaskNumber = -1;
             scope.rowCollection = [];
 
+            console.log(data);
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
@@ -376,12 +377,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].filterId = routeId;
 
                         //TODO REMOVE AFTER TESTING
-                        //data.routes[i].transport = data.routes[0].transport;
+                        data.routes[i].transport = data.routes[0].transport;
+                        data.server_time = 1446611800;
                         ///////////////////////////
 
                         scope.filters.routes.push({
-                            //name: data.routes[i].transport.NAME,
-                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME,
+                            //name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
                         routeId++;
@@ -1977,6 +1979,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (var i = 0; i < route.points.length; i++) {
                 updatedRoute.points.push(route.points[i]);
+            }
+
+            for (var i = 0; i < updatedRoute.points.length; i++) {
+                updatedRoute.points[i].NUMBER = i + 1;
             }
 
             updatedRoute.toSave = true;

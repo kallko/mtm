@@ -115,7 +115,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 } else {
                     scope.changedRoute.points[i].base_index = i;
                 }
-
             }
 
             if (scope.changedRoute.points.length > 1) {
@@ -141,11 +140,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
 
             console.log('scope.changedRoute >>', scope.changedRoute);
-            var url = './findtime2p/'
+            var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
+                    scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1,
+                url = './findtime2p/'
                 + scope.changedRoute.car_position.lat + '&'
                 + scope.changedRoute.car_position.lon + '&'
-                + scope.changedRoute.points[scope.changedRoute.lastPointIndx + 1].LAT + '&'
-                + scope.changedRoute.points[scope.changedRoute.lastPointIndx + 1].LON;
+                + scope.changedRoute.points[last].LAT + '&'
+                + scope.changedRoute.points[last].LON;
             //console.log(url);
             http.get(url)
                 .success(function (data) {
