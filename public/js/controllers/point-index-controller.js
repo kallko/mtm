@@ -1959,13 +1959,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('updateRoute at point-index-controller', data.route);
 
             var updatedRoute = rawData.routes[data.route.filterId],
-                route = data.route,
-                point = _data.routes[data.route.filterId].points[0];
+                route = data.route;
 
-            point.itineraryID = _data.ID;
             scope.$emit('unlockRoute', {
                 route: _data.routes[data.route.filterId],
-                point: point
+                point: _data.routes[data.route.filterId].points[0]
             });
 
             for (var i = 0; i < route.points.length; i++) {

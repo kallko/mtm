@@ -12,7 +12,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             serverTime,
             firstInit,
             workingWindow,
-            STATUS = Statuses.getStatuses();
+            STATUS = Statuses.getStatuses(),
+            baseRoute;
 
         scope.BOX_TYPE = {
             TRAVEL: 0,
@@ -77,13 +78,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         function onRouteToChange(event, data) {
             var routeCopy = JSON.parse(JSON.stringify(data.route));
+            baseRoute = data.route;
             serverTime = data.serverTime;
             firstInit = true;
             routerData = undefined;
             workingWindow = data.workingWindow;
             console.log('workingType >>', workingWindow);
-
-
 
             if (data.demoMode) {
                 routeCopy.car_position = undefined;
@@ -750,6 +750,16 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.$emit('saveRoutes', {route: scope.changedRoute});
             scope.route = undefined;
             scope.changedRoute = undefined;
-        }
+        };
+
+        scope.cancelEdit = function () {
+            scope.$emit('unlockRoute', {
+                route: baseRoute,
+                point: baseRoute.points[0]
+            });
+
+            scope.route = undefined;
+            scope.changedRoute = undefined;
+        };
 
     }]);
