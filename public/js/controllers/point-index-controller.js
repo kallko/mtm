@@ -1904,7 +1904,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.post('./saveroute/', {routes: routes}).
                 success(function (data) {
-                    console.log(data);
+                    console.log('Save to 1C result >>', data);
                     for (var i = 0; i < _data.routes.length; i++) {
                         delete _data.routes[i].toSave;
                     }

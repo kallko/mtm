@@ -451,8 +451,13 @@ router.route('/saveroute/')
     .post(function (req, res) {
         console.log('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
-        soapManager.saveRoutesTo1C(req.body.routes);
-        res.status(200).json({status: 'ok'});
+        soapManager.saveRoutesTo1C(req.body.routes, function (data) {
+            if (!data.error) {
+                res.status(200).json({ result: data.result });
+            } else {
+                res.status(200).json({ error: data.error });
+            }
+        });
     });
 
 router.route('/routerdata')

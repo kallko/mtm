@@ -758,6 +758,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 point: baseRoute.points[0]
             });
 
+            // TODO send request to update locks
+
             scope.route = undefined;
             scope.changedRoute = undefined;
         };

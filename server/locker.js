@@ -106,6 +106,8 @@ Locker.prototype.checkRouteLocks = function (itineraryId, taskIdArr, user, notLo
 };
 
 Locker.prototype.lockRoute = function (itineraryId, routeId, taskIdArr, user) {
+    this.unlockAllByUser(itineraryId, user);
+
     for (var i = 0; i < taskIdArr.length; i++) {
         this.lockTask(itineraryId, taskIdArr[i], user, routeId);
     }
@@ -116,12 +118,27 @@ Locker.prototype.unlockRoute = function (itineraryId, taskIdArr, user) {
         'unlocked': 0,
         'not_yours': 0
     };
+
     for (var i = 0; i < taskIdArr.length; i++) {
         if (this.unlockTask(itineraryId, taskIdArr[i], user)) result.unlocked++;
         else result.not_yours++;
     }
 
     return result;
+};
+
+Locker.prototype.unlockAllByUser = function (itineraryId, user) {
+    //console.log(itineraryId);
+    //console.log(this.lockedTasks[itineraryId]);
+
+    if (!this.lockedTasks[itineraryId]) return;
+
+    for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
+        if (this.lockedTasks[itineraryId].locked[i].user == user) {
+            this.unlockTask(itineraryId, this.lockedTasks[itineraryId].locked[i].taskId, user);
+            i--;
+        }
+    }
 };
 
 

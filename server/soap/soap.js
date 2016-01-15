@@ -514,7 +514,7 @@ SoapManager.prototype.getPlanByDate = function (timestamp, callback) {
     });
 };
 
-SoapManager.prototype.saveRoutesTo1C = function (routes) {
+SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
     console.log('saveRoutesTo1C');
     var counter = 0,
         me = this,
@@ -552,9 +552,11 @@ SoapManager.prototype.saveRoutesTo1C = function (routes) {
             if (!err) {
                 console.log('saveRoutesTo1C OK');
                 log.toFLog('afterSave.js', result);
+                callback({ result: result });
             } else {
                 console.log('saveRoutesTo1C ERROR');
                 console.log(err.body);
+                callback({ error: err });
             }
         });
     });

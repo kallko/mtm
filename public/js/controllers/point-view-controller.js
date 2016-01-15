@@ -163,6 +163,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }
         };
 
+        //function unlockAllRoutes() {
+        //
+        //}
+
         scope.unconfirmed = function () {
             return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
                 scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
