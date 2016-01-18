@@ -83,7 +83,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             firstInit = true;
             routerData = undefined;
             workingWindow = data.workingWindow;
-            console.log('workingType >>', workingWindow);
+            //console.log('workingType >>', workingWindow);
 
             if (data.demoMode) {
                 routeCopy.car_position = undefined;
@@ -139,7 +139,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return;
             }
 
-            console.log('scope.changedRoute >>', scope.changedRoute);
+            //console.log('scope.changedRoute >>', scope.changedRoute);
             var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
                     scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1,
                 url = './findtime2p/'
@@ -150,7 +150,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             //console.log(url);
             http.get(url)
                 .success(function (data) {
-                    console.log(data);
+                    //console.log(data);
 
                     var fromPoint,
                         toPoint,
@@ -757,8 +757,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 route: baseRoute,
                 point: baseRoute.points[0]
             });
-
-            // TODO send request to update locks
 
             scope.route = undefined;
             scope.changedRoute = undefined;

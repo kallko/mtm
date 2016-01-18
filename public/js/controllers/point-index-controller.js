@@ -138,7 +138,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get('./checklocks/' + _data.ID.replace('/', 'SL'))
                 .success(function (data) {
                     if (data.status == 'changed') {
-                        console.log(data);
+                        //console.log(data);
                         scope.locked = data.locked.locked;
                         refreshLocked();
                     }
@@ -1048,6 +1048,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 updateRawPromised(data.point);
             });
             rootScope.$on('saveRoutes', updateRoute);
+            rootScope.$on('forceCheckLocks', checkLocks);
+            rootScope.$on('unlockAllRoutes', unlockAllRoutes);
 
             $('.header .problem-index-col').on('click', function () {
                 problemSortType++;
@@ -1111,7 +1113,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function deliveryRowConextMenu(context, e) {
             var option = $(e.target).data("menuOption");
-            console.log(option);
+            //console.log(option);
             var contextJ = $(context)[0],
                 row = scope.rowCollection[parseInt(contextJ.id.substr(6))],
                 point = rawData.routes[row.route_id].points[row.NUMBER - 1],
@@ -1843,7 +1845,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //}
 
         function saveRoutes() {
-            console.log('saveRoutes');
+            //console.log('saveRoutes');
 
             var routes = [],
                 route,
@@ -1998,6 +2000,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //return '';
             } else {
                 return '';
+            }
+        };
+
+        function unlockAllRoutes(event, data) {
+            var route;
+            console.log('unlockAllRoutes()', data.filterId);
+
+            for (var i = 0; i < _data.routes.length; i++) {
+                route = _data.routes[i];
+                if (data.filterId == route.filterId || !route.lockedByMe) continue;
+
+                delete route.lockedByMe;
+                delete route.locked;
+                for (var j = 0; j < route.points.length; j++) {
+                    if (!route.points[j].TASK_NUMBER) continue;
+
+                    delete route.points[j].locked;
+                    delete route.points[j].lockedByMe;
+                    delete route.points[j].lockedRoute;
+                }
             }
         }
 

@@ -44,6 +44,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         }
 
         function lockRoute(event, data) {
+            scope.$emit('unlockAllRoutes', { filterId: data.route.filterId });
             scope.route = data.route;
             scope.point = data.point;
             scope.route.lockedByMe = false;
@@ -133,8 +134,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             if (!scope.route.lockedByMe) {
                 http.get(url)
                     .success(function (data) {
-                        console.log(data);
+                        //console.log(data);
                         if (data.status == 'ok') {
+                            scope.$emit('unlockAllRoutes', { filterId: scope.route.filterId });
                             scope.route.lockedByMe = true;
                             scope.route.locked = true;
                             for (var i = 0; i < scope.route.points.length; i++) {
