@@ -74,7 +74,61 @@ SoapManager.prototype.loadDemoData = function (callback) {
             return console.log(err);
         }
 
-        data = JSON.parse(data);
+        var counter = 0,
+            len = 0,
+            toSend = JSON.parse(data);
+
+        //data = JSON.parse(data);
+        //
+        //for (var i = 0; i < data.sensors.length; i++) {
+        //    for (var j = 0; j < data.transports.length; j++) {
+        //        if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
+        //            data.transports[j].gid = data.sensors[i].GID;
+        //            data.transports[j].real_track = data.sensors[i].real_track;
+        //        }
+        //    }
+        //}
+        //
+        //for (var i = 0; i < data.routes.length; i++) {
+        //    for (j = 0; j < data.transports.length; j++) {
+        //        if (data.routes[i].TRANSPORT == data.transports[j].ID) {
+        //            data.routes[i].transport = data.transports[j];
+        //            data.routes[i].real_track = data.transports[j].real_track;
+        //
+        //            if (data.transports[j].real_track != undefined &&
+        //                data.routes[i].real_track.length > 0 &&
+        //                data.routes[i].real_track != "invalid parameter 'gid'. ") {
+        //                len = data.routes[i].real_track.length - 1;
+        //                data.routes[i].car_position = data.routes[i].real_track[len];
+        //                data.routes[i].real_track.splice(len, 1);
+        //            }
+        //            break;
+        //        }
+        //    }
+        //}
+        //
+        //for (var i = 0; i < data.routes.length; i++) {
+        //    (function(ii) {
+        //        setTimeout(function() {
+        //            tracksManager.getTrackByStates(data.routes[ii].real_track, data.routes[ii].transport.gid, data.server_time_demo + 3600 * 15, function(track) {
+        //                console.log(ii + ' loaded!');
+        //                toSend.routes[ii].real_track = track;
+        //                counter++;
+        //                if (counter == data.routes.length) {
+        //                    log.toFLog('dempTest.js', data);
+        //                }
+        //            });
+        //        }, ii * 1300);
+        //    })(i);
+        //}
+
+
+
+        //tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
+        //    console.log('get tracks by states DONE!');
+        //    res.status(200).json(data);
+        //});
+
         //fs.readFile('./data/pushes.js', 'utf8', function (err, pushes) {
         //    if (err) {
         //        return console.log(err);
@@ -83,7 +137,8 @@ SoapManager.prototype.loadDemoData = function (callback) {
         //    data.demoPushes = JSON.parse(pushes);
         //    callback(data);
         //});
-        callback(data);
+
+        callback(toSend);
     });
 };
 

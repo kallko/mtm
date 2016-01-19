@@ -54,7 +54,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
         started = 0,
         updateTime = states[0].lastTrackUpdate == undefined ? 0 : states[0].lastTrackUpdate;
 
-    console.log('last update time,', updateTime);
+    //console.log('last update time,', updateTime);
     for (var i = 0; i < states.length; i++) {
         if ((demoTime != -1 && states[i].t2 > demoTime) ||
             (demoTime == -1 && states[i].t1 < updateTime + 1800)) continue;
