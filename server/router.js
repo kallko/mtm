@@ -11,7 +11,7 @@ var express = require('express'),
 
     cashedDataArr = [],
     demoLogin = 'demo',
-    savingSolution = true,
+    savingSolution = false,
     tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
