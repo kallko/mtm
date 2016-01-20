@@ -304,7 +304,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpTaskNumber = -1;
             scope.rowCollection = [];
 
-            console.log(data);
+            //console.log(data);
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
@@ -377,13 +377,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].filterId = routeId;
 
                         //TODO REMOVE AFTER TESTING
-                        //data.routes[i].transport = data.routes[0].transport;
-                        //data.server_time = 1446611800;
+                        data.routes[i].transport = data.routes[0].transport;
+                        data.server_time = 1446611800;
                         ///////////////////////////
 
                         scope.filters.routes.push({
-                            //name: data.routes[i].transport.NAME,
-                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME,
+                            //name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
                         routeId++;
@@ -619,6 +619,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
+                                    tmpPoint.stopState = tmpArrival;
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
@@ -669,6 +670,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var rand,
                     gpsTime,
                     tmp,
+                    tmpLen,
+                    tmpCoord,
                     tmpLat,
                     tmpLon;
 
@@ -683,18 +686,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmp = (_data.routes[i].points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
                                 gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
 
-                                if (_data.routes[i].points[j].haveStop) {
-
+                                if (_data.routes[i].points[j].haveStop &&
+                                    _data.routes[i].points[j].stopState != undefined &&
+                                    _data.routes[i].points[j].stopState.coords &&
+                                    (tmpLen = _data.routes[i].points[j].stopState.coords.length) > 0) {
+                                    tmpLen = tmpLen > 20 ? 20 : tmpLen;
+                                    tmpCoord = _data.routes[i].points[j].stopState.coords[random(0, tmpLen)];
+                                    tmpLat = tmpCoord.lat;
+                                    tmpLon = tmpCoord.lon;
                                 } else {
-
+                                    tmpLat = parseFloat(_data.routes[i].points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
+                                    tmpLon = parseFloat(_data.routes[i].points[j].LON) + (random(0, 4) / 10000 - 0.0002);
                                 }
 
                                 mobilePushes.push({
                                     cancel_reason: "",
                                     canceled: false,
                                     gps_time: gpsTime,
-                                    lat: parseFloat(_data.routes[i].points[j].LAT) + (random(0, 4) / 10000 - 0.0002),
-                                    lon: parseFloat(_data.routes[i].points[j].LON) + (random(0, 4) / 10000 - 0.0002),
+                                    lat: tmpLat,
+                                    lon: tmpLon,
                                     number: _data.routes[i].points[j].TASK_NUMBER,
                                     time: gpsTime
                                 });

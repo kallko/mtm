@@ -11,6 +11,7 @@ var express = require('express'),
 
     cashedDataArr = [],
     demoLogin = 'demo',
+    savingSolution = true,
     tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
@@ -90,33 +91,47 @@ router.route('/acp/savesolution')
         }
         console.log(req.body.solution.length);
 
-        fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
-            log.toFLog(config.defaultMonitoringLogin + '_' + Date.now() + '_changes.json', req.body.solution);
 
-            if (err) {
-                res.status(200).json({error: err});
-                console.log(err);
-                return err;
-            } else {
-                var jsonData = JSON.parse(data),
-                    toSave = req.body.solution,
-                    savedCount = 0;
-                for (var i = 0; i < jsonData.length; i++) {
-                    for (var j = 0; j < toSave.length; j++) {
-                        if (jsonData[i].id == toSave[j].id) {
-                            savedCount++;
-                            delete toSave[j].needSave;
-                            jsonData[i] = toSave[j];
-                            break;
+
+        var saveSolution = function (solution) {
+            if (!savingSolution) {
+                console.log('Saving solution...');
+                savingSolution = true;
+                fs.readFile('./logs/' + config.defaultMonitoringLogin + '_solution.json', 'utf8', function (err, data) {
+                    log.toFLog(config.defaultMonitoringLogin + '_' + Date.now() + '_changes.json', solution);
+
+                    if (err) {
+                        res.status(200).json({error: err});
+                        console.log(err);
+                        return err;
+                    } else {
+                        var jsonData = JSON.parse(data),
+                            toSave = solution,
+                            savedCount = 0;
+                        for (var i = 0; i < jsonData.length; i++) {
+                            for (var j = 0; j < toSave.length; j++) {
+                                if (jsonData[i].id == toSave[j].id) {
+                                    savedCount++;
+                                    delete toSave[j].needSave;
+                                    jsonData[i] = toSave[j];
+                                    break;
+                                }
+                            }
                         }
+
+                        log.toFLog(config.defaultMonitoringLogin + '_solution.json', jsonData);
+                        savingSolution = false;
+
+                        res.status(200).json({status: 'saved'});
                     }
-                }
-
-                log.toFLog(config.defaultMonitoringLogin + '_solution.json', jsonData);
-
-                res.status(200).json({status: 'saved'});
+                });
+            } else {
+                console.log('Waiting for unlock...');
+                setTimeout(saveSolution, 500, solution);
             }
-        });
+        };
+
+        saveSolution(req.body.solution);
 
     });
 
@@ -306,11 +321,11 @@ router.route('/opentask/:itineraryid/:taskid')
     .get(function (req, res) {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         locker.checkTaskLock(req.params.itineraryid, req.params.taskid, req.session.login,
-            function() {
+            function () {
                 if (req.query.lockTask) locker.lockTask(req.params.itineraryid, req.params.taskid, req.session.login);
                 res.status(200).json({status: 'ok'});
             },
-            function(user) {
+            function (user) {
                 res.status(200).json({
                     status: 'locked',
                     byUser: user,
@@ -334,13 +349,13 @@ router.route('/lockroute/:itineraryid/:routeid/:tasks')
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         var tasksArr = req.params.tasks.split(';');
         locker.checkRouteLocks(req.params.itineraryid, tasksArr, req.session.login,
-            function() {
+            function () {
                 locker.lockRoute(req.params.itineraryid, req.params.routeid, tasksArr, req.session.login);
-                res.status(200).json({status : 'ok'});
+                res.status(200).json({status: 'ok'});
             },
 
-            function(user) {
-                res.status(200).json({status : 'locked', byUser: user});
+            function (user) {
+                res.status(200).json({status: 'locked', byUser: user});
             });
     });
 
@@ -453,9 +468,9 @@ router.route('/saveroute/')
         var soapManager = new soap(req.session.login);
         soapManager.saveRoutesTo1C(req.body.routes, function (data) {
             if (!data.error) {
-                res.status(200).json({ result: data.result });
+                res.status(200).json({result: data.result});
             } else {
-                res.status(200).json({ error: data.error });
+                res.status(200).json({error: data.error});
             }
         });
     });
