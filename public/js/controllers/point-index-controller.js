@@ -377,13 +377,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].filterId = routeId;
 
                         //TODO REMOVE AFTER TESTING
-                        data.routes[i].transport = data.routes[0].transport;
-                        data.server_time = 1446611800;
+                        //data.routes[i].transport = data.routes[0].transport;
+                        //data.server_time = 1446611800;
                         ///////////////////////////
 
                         scope.filters.routes.push({
-                            name: data.routes[i].transport.NAME,
-                            //name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            //name: data.routes[i].transport.NAME,
+                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
                         routeId++;
@@ -672,31 +672,36 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tmp,
                     tmpLen,
                     tmpCoord,
+                    tmpTime,
                     tmpLat,
-                    tmpLon;
+                    tmpLon,
+                    tmpRoute;
 
                 _data.companyName = 'Demo';
                 for (var i = 0; i < _data.routes.length; i++) {
 
+                    tmpRoute = _data.routes[i];
                     seed = i * 122;
                     rand = random(0, 3600);
-                    for (var j = 0; j < _data.routes[i].points.length; j++) {
-                        if (_data.server_time > (_data.routes[i].points[j].arrival_time_ts + (rand - 1800))) {
+                    for (var j = 0; j < tmpRoute.points.length; j++) {
+                        if (_data.server_time > (tmpRoute.points[j].arrival_time_ts + (rand - 1800))) {
                             if (random(1, 8) != 1) {
-                                tmp = (_data.routes[i].points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
+                                tmp = (tmpRoute.points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
                                 gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
 
-                                if (_data.routes[i].points[j].haveStop &&
-                                    _data.routes[i].points[j].stopState != undefined &&
-                                    _data.routes[i].points[j].stopState.coords &&
-                                    (tmpLen = _data.routes[i].points[j].stopState.coords.length) > 0) {
+                                if (tmpRoute.points[j].haveStop &&
+                                    tmpRoute.points[j].stopState != undefined &&
+                                    tmpRoute.points[j].stopState.coords &&
+                                    (tmpLen = tmpRoute.points[j].stopState.coords.length) > 0) {
+                                    //tmpTime = parseInt(tmpRoute.points[j].TASK_TIME);
+
                                     tmpLen = tmpLen > 20 ? 20 : tmpLen;
-                                    tmpCoord = _data.routes[i].points[j].stopState.coords[random(0, tmpLen)];
+                                    tmpCoord = tmpRoute.points[j].stopState.coords[random(0, tmpLen)];
                                     tmpLat = tmpCoord.lat;
                                     tmpLon = tmpCoord.lon;
                                 } else {
-                                    tmpLat = parseFloat(_data.routes[i].points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
-                                    tmpLon = parseFloat(_data.routes[i].points[j].LON) + (random(0, 4) / 10000 - 0.0002);
+                                    tmpLat = parseFloat(tmpRoute.points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
+                                    tmpLon = parseFloat(tmpRoute.points[j].LON) + (random(0, 4) / 10000 - 0.0002);
                                 }
 
                                 mobilePushes.push({
@@ -705,7 +710,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     gps_time: gpsTime,
                                     lat: tmpLat,
                                     lon: tmpLon,
-                                    number: _data.routes[i].points[j].TASK_NUMBER,
+                                    number: tmpRoute.points[j].TASK_NUMBER,
                                     time: gpsTime
                                 });
                             }
