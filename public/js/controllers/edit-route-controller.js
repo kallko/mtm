@@ -747,7 +747,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         scope.saveRoutes = function () {
-            scope.$emit('saveRoutes', {route: scope.changedRoute});
+            scope.$emit('saveRoutes', {route: scope.changedRoute, timestamp: parseInt(Date.now() / 1000)});
             scope.route = undefined;
             scope.changedRoute = undefined;
         };
