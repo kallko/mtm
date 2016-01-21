@@ -23,7 +23,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             //scope.plans = [];
             //loadPlans(from, to);
 
-            if (false) {
+            if (true) {
                 Solution.load().success(function (data) {
                     scope.data = data;
                     groupButtonsByRadius();
