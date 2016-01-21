@@ -437,7 +437,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     callback({status: 'no sensors'});
                 }
 
-                for (i = 0; i < sensors.length; i++) {
+                for (i = 0; sensors && i < sensors.length; i++) {
                     data[nIndx].sensors.push(sensors[i].$);
                 }
 
