@@ -495,7 +495,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         scope.data[i].outGroupPrc = parseFloat(((scope.data[i].coords.length - sum.count) / scope.data[i].coords.length * 100).toFixed(2));
                         scope.data[i].solved = scope.data[i].grouped_coords_length > 1 && scope.data[i].outGroupPrc <= 50;
 
-                        if (!scope.data[i].solved) {
+                        if (!scope.data[i].solved && !scope.data[i].hide) {
                             totalCount++;
                         }
 
