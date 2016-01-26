@@ -28,7 +28,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false,
+            loadParts = true,
             enableDynamicUpdate = false;
 
         setListeners();
@@ -191,6 +191,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var _now = Date.now() / 1000,
                 url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
 
+            console.log(url);
             http.get(url)
                 .success(function (trackParts) {
                     console.log('loaded track parts');
@@ -560,6 +561,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         function statusUpdate() {
+            console.log('statusUpdate');
+
             var route,
                 tmpPoint,
                 tmpArrival,
@@ -575,8 +578,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
-                    _data.routes[i].points[j].status = STATUS.SCHEDULED;
+                    tmpPoint = _data.routes[i].points[j];
+                    tmpPoint.status = STATUS.SCHEDULED;
+
+                    delete tmpPoint.distanceToStop;
+                    delete tmpPoint.timeToStop;
+                    delete tmpPoint.haveStop;
+                    delete tmpPoint.stopState;
+                    delete tmpPoint.stop_arrival_time;
+                    delete tmpPoint.real_arrival_time;
+                    delete tmpPoint.windowType;
+
+                    delete tmpPoint.mobile_push;
+                    delete tmpPoint.mobile_arrival_time;
+                    delete tmpPoint.havePush;
+                    delete tmpPoint.real_arrival_time;
+                    delete tmpPoint.confirmed;
+
+                    delete tmpPoint.overdue_time;
                 }
+
+                _data.routes[i].lastPointIndx = 0;
+                delete _data.routes[i].pushes;
             }
 
             for (i = 0; i < _data.routes.length; i++) {
@@ -600,10 +623,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                 tmpDistance = getDistanceFromLatLonInKm(lat, lon, LAT, LON);
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
-                                //var checkIn = false;
-                                //if (tmpPoint.waypoint.ADDRESS == "м. Київ, вул. Кіквідзе, 7/11") {
-                                //    checkIn = true;
-                                //}
+
+                                //var b1 = tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold,
+                                //    b2 = tmpDistance < radius,
+                                //    b3 = tmpPoint.distanceToStop > tmpDistance,
+                                //    b4 = tmpPoint.timeToStop > tmpTime;
 
                                 if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
                                     tmpDistance < radius && (tmpPoint.distanceToStop > tmpDistance &&
@@ -929,9 +953,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 url = './findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].LAT + '&' + route.points[route.lastPointIndx].LON;
 
-                (function (_route) {
-                    http.get(url).
+                (function (_route, _url) {
+                    //console.log('>> BEFORE findtime2p', _route.filterId, _url);
+                    http.get(_url).
                         success(function (data) {
+                            //console.log('>> AFTER findtime2p DONE', _route.filterId, _url);
                             var lastPoint = _route.lastPointIndx + 1,
                                 nextPointTime = parseInt(data.time_table[0][1][0] / 10),
                                 totalWorkTime = 0,
@@ -1003,7 +1029,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             updateProblemIndex(_route);
                         });
-                })(route);
+                })(route, url);
             }
 
             for (i = 0; i < scope.rowCollection.length; i++) {

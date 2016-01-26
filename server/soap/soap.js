@@ -610,6 +610,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
                 callback({ result: result });
             } else {
                 console.log('saveRoutesTo1C ERROR');
+                log.toFLog('afterSaveError.js', err);
                 console.log(err.body);
                 callback({ error: err });
             }
