@@ -8,8 +8,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data,
             rawData,
 
-            dataUpdateInterval = 120,
-            stopUpdateInterval = 180,
+            dataUpdateInterval = 60,
+            stopUpdateInterval = 60,
             updateTrackInterval = 30,
             checkLocksInterval = 15,
 
@@ -29,7 +29,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,
-            enableDynamicUpdate = false;
+            enableDynamicUpdate = true;
 
         setListeners();
         init();

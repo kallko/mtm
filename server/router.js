@@ -447,6 +447,7 @@ router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
 
 router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
+        //console.log('findtime2p request', req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2);
         tracksManager.findTime(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
             function (data) {
                 res.status(200).json(data);
