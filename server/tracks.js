@@ -564,6 +564,203 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
     });
 };
 
+function deg2rad(deg) {
+    return deg * (Math.PI / 180)
+}
+
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+    var dLon = deg2rad(lon2 - lon1);
+    var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c; // Distance in km
+    return d;
+}
+
+function getNByGid(gid) {
+    var nToGids = [['А28', 725],
+        ['А17', 710],
+        ['А15', 714],
+        ['А12', 716],
+        ['А43', 718],
+        ['А27', 701],
+        ['А59', 721],
+        ['А49', 706],
+        ['А48', 708],
+        ['А50', 712],
+        ['А32', 711],
+        ['А64', 715],
+        ['А68', 713],
+        ['А33', 722],
+        ['А73', 759],
+        ['А46', 757],
+        ['А61', 723],
+        ['А41', 709],
+        ['А22', 746],
+        ['А18', 744],
+        ['А10', 739],
+        ['А24', 747],
+        ['А08', 735],
+        ['А78', 933],
+        ['А79', 762],
+        ['А37', 760],
+        ['А05', 745],
+        ['А55', 717],
+        ['А42', 753],
+        ['А45', 758],
+        ['А52', 812],
+        ['А75', 720],
+        ['А47', 719],
+        ['А35', 755],
+        ['А09', 734],
+        ['А81', 809],
+        ['А21', 707],
+        ['А19', 738],
+        ['А03', 736],
+        ['А23', 748],
+        ['А29', 763],
+        ['А51', 764],
+        ['А34', 901],
+        ['А14', 741],
+        ['А54', 895],
+        ['А63', 756],
+        ['А38', 896],
+        ['А74', 810],
+        ['А02', 761],
+        ['А44', 697],
+        ['А11', 814],
+        ['А16', 743],
+        ['А56', 705],
+        ['А04', 733],
+        ['А01', 899],
+        ['А69', 811],
+        ['А06', 900],
+        ['А77', 897],
+        ['А36', 754],
+        ['А07', 813],
+        ['А25', 749]];
+
+    for (var i = 0; i < nToGids.length; i++) {
+        if (nToGids[i][1] == gid) return nToGids[i][0];
+    }
+
+    return 'NONE'
+}
+
+TracksManager.prototype.getStateDataByPeriod = function () {
+    var gids = [741,708,711,710,712,764,709,715,739,742,753,0,897,725,714,716,718,701,713,723,746,735,762,812,720,733,814,896,756,721,706,759,757,744,747,760,717,758,719,755,734,809,707,738,736,748,763,749,754,813,811,705,743,899,745,933,900,697,761,810,895],
+        step = 24 * 60 * 60,
+        days = 61,
+        startDate = 1446336000,
+        endDate = startDate + days * 3600 * 24,
+        tmpTime = startDate,
+        result = {},
+        me = this,
+        reqCounter = 0,
+        warehouse = {
+            lat: 50.489879,
+            lon: 30.451639
+        },
+        maxDistFromWh = 0.5;
+
+    while (tmpTime < endDate) {
+        //console.log('day ', new Date(tmpTime * 1000));
+        for (var j = 0; j < gids.length; j++) {
+            (function (jj, _tmpTime) {
+                setTimeout(function () {
+                    (function (gid, time) {
+                        var wasNearWh = false,
+                            wasFarFromWh = false,
+                            returnToWh = false,
+                            nearWh,
+                            distFromWh;
+
+                        console.log('GO >>', new Date(time * 1000), gid);
+                        me.getStops(gid, time, time + step, function (data) {
+
+                            console.log('READY >>', new Date(time * 1000), gid);
+                            reqCounter++;
+
+                            result[gid] = result[gid] || {};
+                            result[gid][time] = result[gid][time] || {
+                                    MOVE: {
+                                        dist: 0,
+                                        time: 0
+                                    },
+
+                                    ARRIVAL: {
+                                        dist: 0,
+                                        time: 0
+                                    },
+
+                                    NO_SIGNAL: {
+                                        dist: 0,
+                                        time: 0
+                                    }
+                                };
+
+                            for (var i = 0; i < data.length; i++) {
+                                if (returnToWh) break;
+
+                                distFromWh = getDistanceFromLatLonInKm(warehouse.lat, warehouse.lon, data[i].lat, data[i].lon);
+                                nearWh = distFromWh < maxDistFromWh;
+
+                                wasNearWh = nearWh || wasNearWh;
+                                wasFarFromWh = (wasNearWh && !nearWh) || wasFarFromWh;
+                                returnToWh = wasFarFromWh && nearWh;
+
+                                if (returnToWh || data[i].state === 'START' || data[i].state === 'CURRENT_POSITION') continue;
+
+                                result[gid][time][data[i].state].dist += data[i].dist;
+                                result[gid][time][data[i].state].time += data[i].time;
+                            }
+
+                            if (reqCounter === gids.length * days) {
+                                console.log('Done!');
+                                log.toFLog('jsonStates.json', result);
+
+                                var strRes = '',
+                                //= 'Дата, Гид машины, Время движения, Дистанция движения, ' +
+                                //'Время простоя, Дистаниця простоя, Время без сигнала, Дистанция без сигнала',
+                                    states;
+
+                                for (var k in result) {
+                                    if (!result.hasOwnProperty(k)) continue;
+
+                                    for (var k2 in result[k]) {
+                                        if (!result[k].hasOwnProperty(k2)) continue;
+
+                                        states = result[k][k2];
+                                        strRes += (parseInt(k2) / 86400 + 25569) + ','
+                                            + getNByGid(k) + ','
+                                            + (states.MOVE.dist / 1000) + ','
+                                            + (states.MOVE.time / 24 / 3600) + ','
+                                            + (states.ARRIVAL.dist / 1000) + ','
+                                            + (states.ARRIVAL.time / 24 / 3600) + ','
+                                            + (states.NO_SIGNAL.dist / 1000) + ','
+                                            + (states.NO_SIGNAL.time / 24 / 3600)
+                                            + '\r\n';
+                                    }
+                                }
+
+                                console.log(strRes);
+                                log.toFLog('jsonStates.csv', strRes, false);
+                            }
+                        });
+                    })(gids[jj], _tmpTime);
+                }, jj * 10000);
+            })(j, tmpTime);
+        }
+
+        tmpTime += step;
+    }
+};
+
 
 
 

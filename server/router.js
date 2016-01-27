@@ -18,6 +18,8 @@ var express = require('express'),
         config.aggregator.login,
         config.aggregator.password);
 
+tracksManager.getStateDataByPeriod();
+
 router.route('/')
     .get(function (req, res) {
         res.status(200);

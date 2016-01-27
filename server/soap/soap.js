@@ -21,6 +21,10 @@ var soap = require('soap'),
 // k00056.0
 // 12101968 123
 
+
+
+
+
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
@@ -602,6 +606,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
 
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
+
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
         client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
             if (!err) {
