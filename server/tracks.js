@@ -655,8 +655,8 @@ function getNByGid(gid) {
 TracksManager.prototype.getStateDataByPeriod = function () {
     var gids = [741,708,711,710,712,764,709,715,739,742,753,897,725,714,716,718,701,713,723,746,735,762,812,720,733,814,896,756,721,706,759,757,744,747,760,717,758,719,755,734,809,707,738,736,748,763,749,754,813,811,705,743,899,745,933,900,697,761,810,895],
         step = 24 * 60 * 60,
-        days = 61,
-        startDate = 1446336000,
+        days = 1,
+        startDate = 1453852800,//1446336000,
         endDate = startDate + days * 3600 * 24,
         tmpTime = startDate,
         result = {},
@@ -667,7 +667,8 @@ TracksManager.prototype.getStateDataByPeriod = function () {
             lon: 30.451639
         },
         maxDistFromWh = 0.5,
-        requests = [];
+        requests = [],
+        strRes = '';
 
     while (tmpTime < endDate) {
         console.log(tmpTime);
@@ -731,11 +732,6 @@ TracksManager.prototype.getStateDataByPeriod = function () {
                 console.log('Done!');
                 log.toFLog('jsonStates.json', result);
 
-                var strRes = '',
-                //= 'Дата, Гид машины, Время движения, Дистанция движения, ' +
-                //'Время простоя, Дистаниця простоя, Время без сигнала, Дистанция без сигнала',
-                    states;
-
                 for (var k in result) {
                     if (!result.hasOwnProperty(k)) continue;
 
@@ -758,7 +754,8 @@ TracksManager.prototype.getStateDataByPeriod = function () {
                 //console.log(strRes);
                 log.toFLog('jsonStates.csv', strRes, false);
             }
-            do_func();
+
+            if (requests.length > 0)  do_func();
         });
     }
     do_func();
