@@ -275,6 +275,20 @@
         </div>
 
         <div class="block">
+            <div class="title">Настройка радиусов автопривязки привязки стопов и моб.нажатий</div>
+            <div class="setting-row">
+                <span class="param-title">Радиус автопривязки стопов</span>
+                <input type="range" min="10" max="500" ng-model="params.stopRadius"/>
+                {{params.stopRadius}}
+            </div>
+            <div class="setting-row">
+                <span class="param-title">Радиус автопривязки моб.нажатий</span>
+                <input type="range" min="10" max="500" ng-model="params.mobileRadius"/>
+                {{params.mobileRadius}}
+            </div>
+        </div>
+
+        <div class="block">
             <div class="title">Настройки коэффициентов индекса проблемности</div>
             <div class="setting-row">
                 <span class="param-title">Влияние прогнозного опоздания</span>

@@ -13,8 +13,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateTrackInterval = 30,
             checkLocksInterval = 15,
 
-            radius = 0.15,
-            mobileRadius = 150,
             controlledWindow = 600,
             promisedWindow = 3600,
             problemSortType = 0,
@@ -29,7 +27,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,
-            enableDynamicUpdate = true;
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -83,20 +81,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.demoMode = false;
 
             if (scope.params == undefined) {
-                scope.params = {
-                    predictMinutes: 10,
-                    factMinutes: 15,
-                    volume: 0,
-                    weight: 0,
-                    value: 0,
-                    workingWindowType: 1,
-                    demoTime: 48,
-                    endWindowSize: 3,
-                    showDate: -1
-                };
-
-                var settings = Settings.load();
-                scope.params = settings || scope.params;
+                scope.params = Settings.load();
             }
 
             setProblemIndexSortMode(0);
@@ -542,7 +527,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
-        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
             var R = 6371; // Radius of the earth in km
             var dLat = deg2rad(lat2 - lat1);  // deg2rad below
             var dLon = deg2rad(lon2 - lon1);
@@ -553,7 +538,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 ;
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             var d = R * c; // Distance in km
-            return d;
+            return d * 1000;
         }
 
         function deg2rad(deg) {
@@ -621,7 +606,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
                                 tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
 
-                                tmpDistance = getDistanceFromLatLonInKm(lat, lon, LAT, LON);
+                                tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
 
                                 //var b1 = tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold,
@@ -630,7 +615,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 //    b4 = tmpPoint.timeToStop > tmpTime;
 
                                 if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
-                                    tmpDistance < radius && (tmpPoint.distanceToStop > tmpDistance &&
+                                    tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                                     tmpPoint.timeToStop > tmpTime)) {
 
                                     //if (checkIn) {
@@ -658,8 +643,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     lastPoint = route.points[route.lastPointIndx];
                     if (lastPoint != null) {
                         if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
-                            && getDistanceFromLatLonInKm(route.car_position.lat, route.car_position.lon,
-                                lastPoint.LAT, lastPoint.LON) < radius) {
+                            && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
+                                lastPoint.LAT, lastPoint.LON) < scope.params.stopRadius) {
                             lastPoint.status = STATUS.IN_PROGRESS;
                         }
                     }
@@ -801,8 +786,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
                                 tmpPoint.mobile_push = mobilePushes[i];
                                 tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                                mobilePushes[i].distance = parseInt(getDistanceFromLatLonInKm(lat, lon, LAT, LON) * 1000);
-                                if (mobilePushes[i].distance <= mobileRadius) {
+                                mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+                                if (mobilePushes[i].distance <= scope.params.mobileRadius) {
                                     tmpPoint.havePush = true;
                                     tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
                                     tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
@@ -1129,7 +1114,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || params.factMinutes !== scope.params.factMinutes
                 || params.volume !== scope.params.volume
                 || params.weight !== scope.params.weight
-                || params.value !== scope.params.value) {
+                || params.value !== scope.params.value
+                || params.stopRadius !== scope.params.stopRadius
+                || params.mobileRadius !== scope.params.mobileRadius) {
                 console.log('problem index parameter was changed!');
                 changed = true;
             }

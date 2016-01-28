@@ -1,7 +1,3 @@
-/**
- * Created by dev-2 on 25.11.15.
- */
-
 angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootScope', 'Settings', '$filter',
     function (scope, rootScope, Settings, filter) {
 
@@ -9,20 +5,7 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
 
         function init() {
             scope.demoMd = false;
-            scope.params = {
-                predictMinutes: 10,
-                factMinutes: 15,
-                volume: 0,
-                weight: 0,
-                value: 0,
-                workingWindowType: 1,
-                demoTime: 48,
-                endWindowSize: 3,
-                showDate: -1
-            };
-
-            var settings = Settings.load();
-            scope.params = settings || scope.params;
+            scope.params = Settings.load();
 
             scope.workingWindowTypes = [
                 {name: 'Заказанное окно', value: 0},
@@ -32,7 +15,6 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
             rootScope.$on('setMode', function (event, params) {
                 scope.demoMd = params.mode;
                 scope.startDemoTime = params.demoStartTime;
-                //console.log(params.demoStartTime);
             });
         }
 
@@ -40,10 +22,6 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
             var date = new Date($('#show-date').val());
             scope.params.showDate = date.getTime() || -1;
             scope.$emit('settingsChanged', scope.params);
-            saveToLocalStorage();
+            Settings.saveToLocalStorage(scope.params);
         };
-
-        function saveToLocalStorage() {
-            localStorage['settings'] = JSON.stringify(scope.params);
-        }
     }]);
