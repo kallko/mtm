@@ -17,9 +17,9 @@ var config = {
         session: false
     },
 
-    defaultSoapLogin: 'k00056.0',
+    defaultSoapLogin: 'ids.dsp',
     defaultMonitoringLogin: 'ids.dsp',
-    loadOnlyItineraryNew: false,
+    loadOnlyItineraryNew: true,
 
     aggregator: {
         //url: 'http://62.205.137.118:9001/',
@@ -36,8 +36,8 @@ var config = {
     },
 
     mathServer: {
-        //url: 'http://192.168.9.29:9000/'
-        url: 'http://62.205.137.118:9000/'
+        url: 'http://192.168.9.29:9000/'
+        //url: 'http://62.205.137.118:9000/'
     }
 };
 

@@ -27,7 +27,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,
-            enableDynamicUpdate = true;
+            enableDynamicUpdate = false;
 
         setListeners();
         init();
@@ -288,7 +288,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpTaskNumber = -1;
             scope.rowCollection = [];
 
-            //console.log(data);
+            if (!data.sensors) {
+                console.log(data);
+                return;
+            }
+
+            console.log(data);
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
@@ -361,13 +366,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].filterId = routeId;
 
                         //TODO REMOVE AFTER TESTING
-                        //data.routes[i].transport = data.routes[0].transport;
-                        //data.server_time = 1446611800;
+                        data.routes[i].transport = data.routes[0].transport;
+                        data.server_time = 1446611800;
                         ///////////////////////////
 
                         scope.filters.routes.push({
-                            //name: data.routes[i].transport.NAME,
-                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME,
+                            //name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
                         routeId++;

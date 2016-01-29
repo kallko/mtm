@@ -591,6 +591,27 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
                         }
                     }
                 });
+        },
+
+        saveTo1C = function (resXml) {
+            soap.createClient(me.getFullUrl(), function (err, client) {
+                if (err) throw err;
+
+                client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+
+                client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+                    if (!err) {
+                        console.log('saveRoutesTo1C OK');
+                        log.toFLog('afterSave.js', result);
+                        callback({ result: result });
+                    } else {
+                        console.log('saveRoutesTo1C ERROR');
+                        log.toFLog('afterSaveError.js', err);
+                        console.log(err.body);
+                        callback({ error: err });
+                    }
+                });
+            });
         };
 
     var resXml;
@@ -600,27 +621,12 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             loadGeometry(i, j, function () {
                 resXml = _xml.routesXML(routes, me.login);
                 log.toFLog('saveChanges.xml', resXml, false);
+                saveTo1C(resXml);
             });
         }
     }
 
-    soap.createClient(me.getFullUrl(), function (err, client) {
-        if (err) throw err;
 
-        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
-            if (!err) {
-                console.log('saveRoutesTo1C OK');
-                log.toFLog('afterSave.js', result);
-                callback({ result: result });
-            } else {
-                console.log('saveRoutesTo1C ERROR');
-                log.toFLog('afterSaveError.js', err);
-                console.log(err.body);
-                callback({ error: err });
-            }
-        });
-    });
 
 };
 
