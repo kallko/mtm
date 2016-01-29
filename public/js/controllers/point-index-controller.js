@@ -366,13 +366,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].filterId = routeId;
 
                         //TODO REMOVE AFTER TESTING
-                        data.routes[i].transport = data.routes[0].transport;
-                        data.server_time = 1446611800;
+                        //data.routes[i].transport = data.routes[0].transport;
+                        //data.server_time = 1446611800;
                         ///////////////////////////
 
                         scope.filters.routes.push({
-                            name: data.routes[i].transport.NAME,
-                            //name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            //name: data.routes[i].transport.NAME,
+                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId
                         });
                         routeId++;

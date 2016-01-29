@@ -203,6 +203,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+        if (!pushes) return;
+
         for (var i = 0; drawPushes && i < pushes.length; i++) {
             tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
             tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
