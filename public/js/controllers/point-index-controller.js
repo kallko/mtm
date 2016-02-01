@@ -258,6 +258,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function linkDataParts(data) {
             init();
+
             console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
 
@@ -346,6 +347,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         data.routes[i].driver = data.drivers[j];
                         break;
                     }
+                }
+
+                if (!data.routes[i].transport || !data.routes[i].driver) {
+                    data.routes.splice(i, 1);
+                    rawData.routes.splice(i, 1);
+                    i--;
+                    continue;
                 }
 
                 tmpPoints = data.routes[i].points;
@@ -1082,7 +1090,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
 
             rootScope.$on('settingsChanged', settingsChanged);
-            rootScope.$on('updateRawPromised', function(event, data) {
+            rootScope.$on('updateRawPromised', function (event, data) {
                 updateRawPromised(data.point);
             });
             rootScope.$on('saveRoutes', updateRoute);
@@ -1320,7 +1328,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             row.itineraryID = _data.ID;
-            scope.$emit('showPoint', { point: row, route: _data.routes[row.route_indx]});
+            scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
 
             //var url = './opentask/' + _data.ID.replace('/', 'SL') + '/' + row.TASK_NUMBER;// + '?lockTask=false';
             //http.get(url)

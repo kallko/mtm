@@ -9,6 +9,7 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
             SCHEDULED: 7,
             CANCELED: 8
         },
+
         textStatuses = [
             {name: 'все статусы', value: -1, class: 'all-status'},
             {name: 'доставлено', value: STATUS.FINISHED, class: 'delivered-status'},
@@ -16,7 +17,8 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
                 name: 'доставлено поздно',
                 table_name: 'доставлено',
                 value: STATUS.FINISHED_LATE,
-                class: 'delivered-late-status'
+                class: 'delivered-late-status',
+                color: 'red'
             },
             {
                 name: 'доставлено рано',

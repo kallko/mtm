@@ -67,7 +67,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             point.promisedWasChanged = true;
         }
 
-        function resetBlocksWidth (boxes) {
+        function resetBlocksWidth(boxes) {
             var widthRes;
             for (var i = 0; i < boxes.length; i++) {
                 widthRes = scope.boxWidth(boxes[i].size, boxes[i].type);
@@ -125,8 +125,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
             } else {
-                scope.$emit('showNotification', {text: scope.changedRoute.points.length == 0 ?
-                    'Маршрут полностью выполнен.' : 'В маршруте осталось одно задание.'});
+                scope.$emit('showNotification', {
+                    text: scope.changedRoute.points.length == 0 ?
+                        'Маршрут полностью выполнен.' : 'В маршруте осталось одно задание.'
+                });
                 scope.route = undefined;
                 scope.changedRoute = undefined;
             }
@@ -141,17 +143,15 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             //console.log('scope.changedRoute >>', scope.changedRoute);
             var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
-                    scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1,
+                scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1,
                 url = './findtime2p/'
-                + scope.changedRoute.car_position.lat + '&'
-                + scope.changedRoute.car_position.lon + '&'
-                + scope.changedRoute.points[last].LAT + '&'
-                + scope.changedRoute.points[last].LON;
+                    + scope.changedRoute.car_position.lat + '&'
+                    + scope.changedRoute.car_position.lon + '&'
+                    + scope.changedRoute.points[last].LAT + '&'
+                    + scope.changedRoute.points[last].LON;
             //console.log(url);
             http.get(url)
                 .success(function (data) {
-                    //console.log(data);
-
                     var fromPoint,
                         toPoint,
                         cTime;
@@ -430,9 +430,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 res = parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
 
             if (res > maxWidth) {
-                res = { width: maxWidth, tooBig: true};
+                res = {width: maxWidth, tooBig: true};
             } else {
-                res = { width: res, tooBig: false};
+                res = {width: res, tooBig: false};
             }
 
             return res;
@@ -481,7 +481,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         scope.boxDblClick = function (waypointNumber) {
             for (var i = 0; i < scope.changedRoute.points.length; i++) {
                 if (scope.changedRoute.points[i].END_WAYPOINT == waypointNumber) {
-                    scope.$emit('showPoint', { point: scope.changedRoute.points[i], route: scope.route, parent: 'editRoute'});
+                    scope.$emit('showPoint', {
+                        point: scope.changedRoute.points[i],
+                        route: scope.route,
+                        parent: 'editRoute'
+                    });
                     break;
                 }
             }

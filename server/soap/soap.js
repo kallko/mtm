@@ -614,6 +614,8 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             });
         };
 
+    log.toFLog('origBeforeSave.json', routes, false);
+
     var resXml;
     for (var i = 0; i < routes.length; i++) {
         routes[i].counter = 0;
@@ -625,8 +627,6 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             });
         }
     }
-
-
 
 };
 
