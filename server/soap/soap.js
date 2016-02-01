@@ -21,10 +21,6 @@ var soap = require('soap'),
 // k00056.0
 // 12101968 123
 
-
-
-
-
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";

@@ -11,28 +11,63 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
         },
 
         textStatuses = [
-            {name: 'все статусы', value: -1, class: 'all-status'},
-            {name: 'доставлено', value: STATUS.FINISHED, class: 'delivered-status'},
+            {
+                name: 'все статусы',
+                value: -1,
+                class: 'all-status'
+            },
+            {
+                name: 'доставлено',
+                value: STATUS.FINISHED,
+                class: 'delivered-status',
+                color: '#0A800A'
+            },
             {
                 name: 'доставлено поздно',
                 table_name: 'доставлено',
                 value: STATUS.FINISHED_LATE,
                 class: 'delivered-late-status',
-                color: 'red'
+                color: 'green'
             },
             {
                 name: 'доставлено рано',
                 table_name: 'доставлено',
                 value: STATUS.FINISHED_TOO_EARLY,
-                class: 'delivered-too-early-status'
+                class: 'delivered-too-early-status',
+                color: 'green'
             },
-            {name: 'выполняется', value: STATUS.IN_PROGRESS, class: 'performed-status'},
-            {name: 'время вышло', value: STATUS.TIME_OUT, class: 'time-out-status'},
-            {name: 'опаздывает', value: STATUS.DELAY, class: 'delay-status'},
+            {
+                name: 'выполняется',
+                value: STATUS.IN_PROGRESS,
+                class: 'performed-status',
+                color: 'blue'
+            },
+            {
+                name: 'время вышло',
+                value: STATUS.TIME_OUT,
+                class: 'time-out-status',
+                color: 'red'
+            },
+            {
+                name: 'опаздывает',
+                value: STATUS.DELAY,
+                class: 'delay-status',
+                color: 'red'
+            },
             //{name: 'под контролем', value: 4, class: 'controlled-status'},
             //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
-            {name: 'запланирован', value: STATUS.SCHEDULED, class: 'scheduled-status'},
-            {name: 'отменен', value: STATUS.CANCELED, class: 'canceled-status'}
+            {
+                name: 'запланирован',
+                value: STATUS.SCHEDULED,
+                class: 'scheduled-status',
+                color: '#4482AB'
+            },
+            {
+                name: 'отменен',
+                value: STATUS.CANCELED,
+                class: 'canceled-status',
+                color: '#969696'
+            }
         ];
 
     return {
