@@ -1,24 +1,24 @@
 var config = {
 
     cashing: {
-        //soap: true,
+        //soap: true, // загрузка данных из локального json, а не из соапа (для отладки)
         soap: false,
-        tracks: false,
-        session: false
+        tracks: false, // кеширование трека
+        session: false // использования сессии для кеширование данных получвемых из соапа
     },
 
-    loadOnlyItineraryNew: false,
+    loadOnlyItineraryNew: false, // загружать только решения нового типа GET_ITINERARY_NEW
 
     soap: {
-        login: 'soap_admin',
-        password: '$o@p',
-        //defaultClientLogin: 'k00056.0'              // for local test
-        defaultClientLogin: 'ids.dsp'               // for local test
+        login: 'soap_admin', // админский логин для клиента соапа
+        password: '$o@p', // админский пароль для клиента соапа
+        defaultClientLogin: 'k00056.0' // логин для прогрузки интерфейса при запуске вне окна 1С
+        //defaultClientLogin: 'ids.dsp'
     },
 
     aggregator: {
-        //url: 'http://127.1:20000/',                 // local
-        url: 'http://192.168.122.247:20000/',     // outer
+        //url: 'http://127.1:20000/', // локальный путь к аггрегатору
+        url: 'http://192.168.122.247:20000/', // путь к агрегатору на хосте
         login: 'admin',
         password: 'admin321'
     },
@@ -28,8 +28,8 @@ var config = {
     },
 
     mathServer: {
-        //url: 'http://192.168.9.29:9000/'            // local
-        url: 'http://62.205.137.118:9000/'        // outer
+        //url: 'http://192.168.9.29:9000/' // локальный путь к матсерверу
+        url: 'http://62.205.137.118:9000/' // путь к матсерверу на хосте
     }
 };
 

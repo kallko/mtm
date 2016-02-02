@@ -4,7 +4,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         oms,
         mapJ,
         pointsTableJ,
-        settnigsPanelJ,
+        settingsPanelJ,
         windowJ,
 
         colors = [
@@ -67,14 +67,14 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         windowJ = $(window);
         pointsTableJ = $('#points-table-holder');
         mapJ = $('#map');
-        settnigsPanelJ = $('#setting-holder');
+        settingsPanelJ = $('#setting-holder');
 
         windowJ.resize(resize);
         resize();
     }
 
     function resize() {
-        var mapTopMargin = pointsTableJ.height() + settnigsPanelJ.height();
+        var mapTopMargin = pointsTableJ.height() + settingsPanelJ.height();
         mapJ.height(windowJ.height() - mapTopMargin);
         mapJ.css('margin', mapTopMargin + 'px 0 0 0');
         map.invalidateSize();
