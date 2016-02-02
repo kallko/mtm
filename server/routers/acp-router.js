@@ -13,6 +13,31 @@ var express = require('express'),
         config.aggregator.login,
         config.aggregator.password);
 
+//fs.readFile('./logs/111.txt', 'utf8', function (err, data) {
+//    var lines = data.split('\r\n'),
+//        lineParts,
+//        counter = 0,
+//        resObj = [];
+//
+//    for (var i = 0; i < lines.length; i++) {
+//        lineParts = lines[i].split('\t');
+//        counter += lineParts.length;
+//
+//        resObj.push({
+//            id: lineParts[0],
+//            lat: lineParts[3] ? parseFloat(lineParts[3].replace(',', '.')) : 0,
+//            lon: lineParts[4] ? parseFloat(lineParts[4].replace(',', '.')) : 0,
+//            name: lineParts[2],
+//            adress: lineParts[1],
+//            coords: []
+//        });
+//    }
+//
+//    log.toFLog('withoutPushes.js', resObj);
+//
+//    console.log(lines.length, counter, counter / lines.length);
+//});
+
 router.route('/')
     .get(function (req, res) {
         res.sendFile('index.html', {root: './public/acp/'});
