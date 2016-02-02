@@ -562,7 +562,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var route,
                 tmpPoint,
                 tmpArrival,
-                timeThreshold = 90 * 60,
+                timeThreshold = scope.params.timeThreshold * 60,
                 LAT,
                 LON,
                 lat,
@@ -619,11 +619,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                 tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
-
-                                //var b1 = tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold,
-                                //    b2 = tmpDistance < radius,
-                                //    b3 = tmpPoint.distanceToStop > tmpDistance,
-                                //    b4 = tmpPoint.timeToStop > tmpTime;
 
                                 if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
                                     tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
@@ -1127,7 +1122,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || params.weight !== scope.params.weight
                 || params.value !== scope.params.value
                 || params.stopRadius !== scope.params.stopRadius
-                || params.mobileRadius !== scope.params.mobileRadius) {
+                || params.mobileRadius !== scope.params.mobileRadius
+                || params.timeThreshold !== scope.params.timeThreshold) {
                 console.log('problem index parameter was changed!');
                 changed = true;
             }

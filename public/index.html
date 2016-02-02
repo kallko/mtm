@@ -275,7 +275,7 @@
         </div>
 
         <div class="block">
-            <div class="title">Настройка радиусов автопривязки привязки стопов и моб.нажатий</div>
+            <div class="title">Настройка автопривязки привязки стопов и моб.нажатий</div>
             <div class="setting-row">
                 <span class="param-title">Радиус автопривязки стопов</span>
                 <input type="range" min="10" max="500" ng-model="params.stopRadius"/>
@@ -285,6 +285,11 @@
                 <span class="param-title">Радиус автопривязки моб.нажатий</span>
                 <input type="range" min="10" max="500" ng-model="params.mobileRadius"/>
                 {{params.mobileRadius}}
+            </div>
+            <div class="setting-row">
+                <span class="param-title">Временное смещение стопа (минуты)</span>
+                <input type="range" min="10" max="480" ng-model="params.timeThreshold"/>
+                {{params.timeThreshold}}
             </div>
         </div>
 

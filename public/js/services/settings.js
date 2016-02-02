@@ -38,7 +38,8 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
                 endWindowSize: 3,
                 showDate: -1,
                 stopRadius: 150,
-                mobileRadius: 150
+                mobileRadius: 150,
+                timeThreshold: 90
             };
         },
 
