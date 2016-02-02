@@ -14,21 +14,15 @@ var soap = require('soap'),
         config.aggregator.login,
         config.aggregator.password),
 
-    counter = 0,
-    starTime,
-    totalPoints = 0;
+    counter = 0;
 
-// k00056.0
-// 12101968 123
 
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
-    //this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl";
-    //this.urlPda = "@sngtrans.com.ua/copy/ws/pda/?wsdl";
     this.login = login;
-    this.admin_login = 'soap_admin';
-    this.password = '$o@p';
+    this.admin_login = config.soap.login;
+    this.password = config.soap.password;
 }
 
 SoapManager.prototype.getFullUrl = function () {
@@ -67,78 +61,12 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 };
 
 SoapManager.prototype.loadDemoData = function (callback) {
-    //this.getReasonList();
-
     fs.readFile('./data/demoDay.js', 'utf8', function (err, data) {
         if (err) {
             return console.log(err);
         }
 
-        var counter = 0,
-            len = 0,
-            toSend = JSON.parse(data);
-
-        //data = JSON.parse(data);
-        //
-        //for (var i = 0; i < data.sensors.length; i++) {
-        //    for (var j = 0; j < data.transports.length; j++) {
-        //        if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
-        //            data.transports[j].gid = data.sensors[i].GID;
-        //            data.transports[j].real_track = data.sensors[i].real_track;
-        //        }
-        //    }
-        //}
-        //
-        //for (var i = 0; i < data.routes.length; i++) {
-        //    for (j = 0; j < data.transports.length; j++) {
-        //        if (data.routes[i].TRANSPORT == data.transports[j].ID) {
-        //            data.routes[i].transport = data.transports[j];
-        //            data.routes[i].real_track = data.transports[j].real_track;
-        //
-        //            if (data.transports[j].real_track != undefined &&
-        //                data.routes[i].real_track.length > 0 &&
-        //                data.routes[i].real_track != "invalid parameter 'gid'. ") {
-        //                len = data.routes[i].real_track.length - 1;
-        //                data.routes[i].car_position = data.routes[i].real_track[len];
-        //                data.routes[i].real_track.splice(len, 1);
-        //            }
-        //            break;
-        //        }
-        //    }
-        //}
-        //
-        //for (var i = 0; i < data.routes.length; i++) {
-        //    (function(ii) {
-        //        setTimeout(function() {
-        //            tracksManager.getTrackByStates(data.routes[ii].real_track, data.routes[ii].transport.gid, data.server_time_demo + 3600 * 15, function(track) {
-        //                console.log(ii + ' loaded!');
-        //                toSend.routes[ii].real_track = track;
-        //                counter++;
-        //                if (counter == data.routes.length) {
-        //                    log.toFLog('dempTest.js', data);
-        //                }
-        //            });
-        //        }, ii * 1300);
-        //    })(i);
-        //}
-
-
-
-        //tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-        //    console.log('get tracks by states DONE!');
-        //    res.status(200).json(data);
-        //});
-
-        //fs.readFile('./data/pushes.js', 'utf8', function (err, pushes) {
-        //    if (err) {
-        //        return console.log(err);
-        //    }
-        //
-        //    data.demoPushes = JSON.parse(pushes);
-        //    callback(data);
-        //});
-
-        callback(toSend);
+        callback(JSON.parse(data));
     });
 };
 
@@ -147,14 +75,13 @@ function checkBeforeSend(_data, callback) {
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
 
-        if (data.sensors == null) { // || !data.tasks_loaded) {
+        if (data.sensors == null) {
             return;
         }
 
         for (var i = 0; i < data.routes.length; i++) {
             if (!data.routes[i].time_matrix_loaded
                 || !data.routes[i].plan_geometry_loaded) {
-                //console.log(i, data.routes[i].time_matrix_loaded, data.routes[i].plan_geometry_loaded);
                 return;
             }
         }
@@ -216,7 +143,6 @@ function checkBeforeSend(_data, callback) {
         for (k = 0; k < data[j].sensors.length; k++) {
             if (data[j].sensors[k].real_track != undefined) {
                 allData.sensors[k].real_track = data[j].sensors[k].real_track;
-                //console.log('save real_track!');
             }
         }
     }
@@ -245,13 +171,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         date += 21 * 3600000;
     }
 
-    // ONLY FOR TEST
     date = !itIsToday ? date : Date.now();
-    //date = date - 86400000 * 2;
-    //date = 1448992800000;
-    //1448992800000
 
-    console.log('itIsToday', itIsToday);
     console.log('Date >>>', new Date(date));
 
     soap.createClient(me.getFullUrl(), function (err, client) {
@@ -264,7 +185,6 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                 console.log('DONE getDailyPlan');
                 console.log(result.return);
 
-                console.log();
                 parseXML(result.return, function (err, res) {
                     if (res.MESSAGE.PLANS == null) {
                         console.log('NO PLANS!');
@@ -279,10 +199,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     if (!config.loadOnlyItineraryNew) data.iLength *= 2;
 
                     for (var i = 0; i < itineraries.length; i++) {
-                        if (itineraries[i].$.ID == '4') continue;
-
-                        (function(ii) {
-                            setTimeout(function() {
+                        (function (ii) {
+                            setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
                             }, i * 25);
                         })(i);
@@ -301,13 +219,11 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
     var me = this;
 
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko' && this.login != 'ids.dsp')) {
-        //console.log('_xml.itineraryXML(id, version) >>>>>', _xml.itineraryXML(id, version));
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
             itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
         });
     }
 
-    //console.log("_xml.itineraryXML(id, version, true) >>>>>", _xml.itineraryXML(id, version, true));
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
         itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
     });
@@ -316,13 +232,8 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
 
     if (!err) {
-        //console.log(result.return);
-        //log.toFLog('itinerary', result.return, false);
-        //log.toFLog('itinerary', result.return, false);
         parseXML(result.return, function (err, res) {
-            //console.log(res);
             data.iLength--;
-            console.log(data.iLength);
 
             if (res.MESSAGE.ITINERARIES == null ||
                 res.MESSAGE.ITINERARIES[0].ITINERARY == null ||
@@ -365,9 +276,6 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
         for (var j = 0; j < routes[i].SECTION.length; j++) {
             if (j == 0 && routes[i].SECTION[j].$.START_WAYPOINT == "") {
                 routes[i].SECTION[j].$.START_WAYPOINT = routes[i].SECTION[j].$.END_WAYPOINT;
-                //routes[i].SECTION.shift();
-                //j--;
-                //continue;
             }
 
             tmpRoute.points.push(routes[i].SECTION[j].$);
@@ -381,7 +289,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
-    //log.l(_xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
@@ -441,33 +348,11 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     data[nIndx].sensors.push(sensors[i].$);
                 }
 
-                //if (itIsToday) {
                 for (i = 0; i < data[nIndx].routes.length; i++) {
                     tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
                 }
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback);
                 checkBeforeSend(data, callback);
-                //} else {
-                //    console.log('DONE!');
-                //    callback(data);
-                //}
-
-                //data.tasks = [];
-                //
-                //counter = 0;
-                //totalPoints = 0;
-                //for (i = 0; i < data.routes.length; i++) {
-                //    for (var j = 0; j < data.routes[i].points.length; j++) {
-                //        if (data.routes[i].points[j].TASK_NUMBER == '') continue;
-                //        totalPoints++;
-                //        (function (ii, jj) {
-                //            setTimeout(function () {
-                //                me.getTask(client, data.routes[ii].points[jj].TASK_NUMBER,
-                //                    data.routes[ii].points[jj].TASK_DATE, data, callback);
-                //            }, (i + j) * 50);
-                //        })(i, j);
-                //    }
-                //}
             });
 
         } else {
@@ -493,37 +378,6 @@ SoapManager.prototype.getReasonList = function () {
                 console.log('err', err.body);
             }
         });
-    });
-};
-
-SoapManager.prototype.getTask = function (client, taskNumber, taskDate, data, callback) {
-    client.runAsUser({'input_data': _xml.taskXML(taskNumber, taskDate), 'user': me.login}, function (err, result) {
-        if (!err) {
-
-            if (counter == 0) {
-                starTime = Date.now();
-                log.l('========= totalPoints = ' + totalPoints);
-            }
-
-            counter++;
-            if (counter % 10 == 0) {
-                log.l(taskNumber + ' OK: counter = ' + counter + '; totalPoints = ' + totalPoints);
-            }
-
-            if (counter == totalPoints) {
-                log.l('======== TOTAL TIME = ' + ((Date.now() - starTime) / 1000) + ' seconds');
-            }
-
-            parseXML(result.return, function (err, res) {
-
-                data.tasks.push(res.MESSAGE.TASKS[0].TASK[0].$);
-                if (counter == totalPoints) {
-                    data.tasks_loaded = true;
-                    console.log('all tasks DONE!');
-                    checkBeforeSend(data, callback);
-                }
-            });
-        }
     });
 };
 
@@ -564,8 +418,6 @@ SoapManager.prototype.getPlanByDate = function (timestamp, callback) {
 
         timestamp *= 1000;
         me.getDailyPlan(callback, timestamp);
-
-        //callback({status: 'working for ' + timestamp});
     });
 };
 
@@ -578,7 +430,6 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
                 function (data) {
                     routes[ii].points[jj].geometry = data.route_geometry;
                     routes[ii].counter++;
-                    //console.log('part ready', jj, routes[ii].counter, routes[ii].points.length);
                     if (routes[ii].counter == routes[ii].points.length) {
                         counter++;
                         console.log('route ready', ii);
@@ -599,12 +450,12 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
                     if (!err) {
                         console.log('saveRoutesTo1C OK');
                         log.toFLog('afterSave.js', result);
-                        callback({ result: result });
+                        callback({result: result});
                     } else {
                         console.log('saveRoutesTo1C ERROR');
                         log.toFLog('afterSaveError.js', err);
                         console.log(err.body);
-                        callback({ error: err });
+                        callback({error: err});
                     }
                 });
             });
@@ -631,7 +482,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         'IDS.dev': '33d45347-7834-11e3-840c-005056a70133',
         '292942.Viktor': 'a6d774a7-fd9c-11e2-a23d-005056a74894',
         'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894',
-        'IDS.red\'kina' : 'efa17485-fb45-11e2-a23d-005056a74894'
+        'IDS.red\'kina': 'efa17485-fb45-11e2-a23d-005056a74894'
     };
 
     //pointId = '2dddb7d0-c943-11e2-a05b-52540027e502';
@@ -667,24 +518,8 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
             ObjectName: 'КУБ_Точки',
             ElementId: pointId
         }, function (err, result) {
-            if(err) console.log(err.body);
-            if(result) console.log(result);
+            if (err) console.log(err.body);
+            if (result) console.log(result);
         });
     });
 };
-
-//soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
-//    if (err) throw err;
-//    client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
-//
-//    console.log('client.describe() >>', client.describe());
-//
-//    client.OpenElement({
-//        UserId: '33d45347-7834-11e3-840c-005  056a70133',
-//        ObjectType: 'СПРАВОЧНИК',
-//        ObjectName: 'КУБ_Точки',
-//        ElementId: '7bebb6b0-91ee-11e5-bd07-005056a76b49'
-//    }, function (err, result) {
-//        console.log(err, result);
-//    });
-//});

@@ -28,12 +28,12 @@ function XMLConstructor() {
         , setGetValue: function (key, value) {
             return ' KEY="' + key + '" VALUE="' + value + '" ';
         }
-        , addParameter: function(key, value) {
+        , addParameter: function (key, value) {
             return this.parameter.begin +
                 this.setGetValue(key, value) +
                 this.slashEnd;
         }
-        , addAttribute: function(key, value) {
+        , addAttribute: function (key, value) {
             return ' ' + key + '="' + value + '" ';
         }
     };
@@ -123,7 +123,7 @@ XMLConstructor.prototype.taskXML = function (taskNumber, taskDate) {
     return str;
 };
 
-XMLConstructor.prototype.allSensorsXML = function() {
+XMLConstructor.prototype.allSensorsXML = function () {
     var str = '';
     str += this.xml.begin;
     str += this.xml.instructions.begin;
@@ -136,7 +136,7 @@ XMLConstructor.prototype.allSensorsXML = function() {
     return str;
 };
 
-XMLConstructor.prototype.routesXML = function(routes, login) {
+XMLConstructor.prototype.routesXML = function (routes, login) {
     if (routes.length == 0) return;
 
     console.log(login);
@@ -161,7 +161,7 @@ XMLConstructor.prototype.routesXML = function(routes, login) {
 
     str += this.xml.begin;
     str += '<ITINERARIES_UPDATE>';
-    for (var key in itineraries){
+    for (var key in itineraries) {
         if (!itineraries.hasOwnProperty(key)) continue;
 
         routes = itineraries[key].routes;

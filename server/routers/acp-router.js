@@ -1,0 +1,208 @@
+var express = require('express'),
+    router = express.Router(),
+    config = require('../config'),
+    soap = require('../soap/soap'),
+    tracks = require('../tracks'),
+    log = new (require('../logging'))('./logs'),
+    fs = require('fs'),
+
+    savingSolution = false,
+    tracksManager = new tracks(
+        config.aggregator.url,
+        config.router.url,
+        config.aggregator.login,
+        config.aggregator.password);
+
+router.route('/')
+    .get(function (req, res) {
+        res.sendFile('index.html', {root: './public/acp/'});
+    });
+
+router.route('/login')
+    .get(function (req, res) {
+        req.session.login = req.query.curuser;
+        console.log(req.query.curuser);
+        res.sendFile('index.html', {root: './public/acp/'});
+    });
+
+
+router.route('/mergesolution')
+    .post(function (req, res) {
+        console.log('mergesolution');
+        fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
+            var oldJson = JSON.parse(data),
+                newJson = req.body.newData,
+                newPoints = [],
+                toSaveArr;
+            console.log(oldJson.length);
+            console.log(newJson.length);
+
+            for (var i = 0; i < newJson.length; i++) {
+                if (i % 100 == 0) console.log('i = ', i);
+                for (var j = 0; j < oldJson.length; j++) {
+                    if (newJson[i].id == oldJson[j].id) {
+                        break;
+                    }
+
+                    if (j == oldJson.length - 1) {
+                        newPoints.push(newJson[i]);
+                    }
+                }
+            }
+
+            console.log('newPoints.length = ', newPoints.length);
+            toSaveArr = oldJson.concat(newPoints);
+            log.toFLog(config.soap.defaultClientLogin + '_solution.json', toSaveArr);
+            res.status(200).json({status: 'merged'});
+        });
+    });
+
+router.route('/savesolution')
+    .post(function (req, res) {
+        console.log('savesolution', new Date());
+        if (!req.body.solution || req.body.solution.length == 0) {
+            res.status(200).json({status: 'nothing to save'});
+            return;
+        }
+
+        var saveSolution = function (solution) {
+            if (!savingSolution) {
+                console.log('Saving solution...');
+                savingSolution = true;
+                fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
+                    log.toFLog(config.soap.defaultClientLogin + '_' + Date.now() + '_changes.json', solution);
+
+                    if (err) {
+                        res.status(200).json({error: err});
+                        console.log(err);
+                        return err;
+                    } else {
+                        var jsonData = JSON.parse(data),
+                            toSave = solution,
+                            savedCount = 0;
+                        for (var i = 0; i < jsonData.length; i++) {
+                            for (var j = 0; j < toSave.length; j++) {
+                                if (jsonData[i].id == toSave[j].id) {
+                                    savedCount++;
+                                    delete toSave[j].needSave;
+                                    jsonData[i] = toSave[j];
+                                    break;
+                                }
+                            }
+                        }
+
+                        log.toFLog(config.soap.defaultClientLogin + '_solution.json', jsonData);
+                        savingSolution = false;
+
+                        res.status(200).json({status: 'saved'});
+                    }
+                });
+            } else {
+                console.log('Waiting for unlock...');
+                setTimeout(saveSolution, 500, solution);
+            }
+        };
+
+        saveSolution(req.body.solution);
+
+    });
+
+router.route('/savebigsol')
+    .post(function (req, res) {
+        console.log('savebigsol');
+        log.toFLog(config.soap.defaultClientLogin + '_BigSolution.json', req.body.solution);
+        res.status(200).json({status: 'saved'});
+    });
+
+router.route('/loadsolution')
+    .get(function (req, res) {
+        console.log('loadsolution for ', config.soap.defaultClientLogin);
+
+        fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
+            if (err) {
+                console.log(err);
+                return err;
+            } else {
+                console.log('Done!');
+
+                //var newJson = [],
+                //    _json = JSON.parse(data);
+                //console.log(_json.length);
+                //for (var i = 0; i < _json.length; i++) {
+                //    if (_json[i].solved || _json[i].changed) {
+                //        newJson.push({
+                //            id: _json[i].id,
+                //            new_position: _json[i].new_position
+                //        });
+                //    }
+                //}
+                //
+                //log.toFLog('brand_new_json.json', newJson);
+
+                var json = JSON.parse(data),
+                    toSend = [];
+
+                for (var i = 0; i < json.length; i++) {
+                    if (!json[i].solved) {
+                        if (json[i].changed || json[i].done) {
+                            json[i].hide = true;
+                        }
+                        toSend.push(json[i]);
+                    }
+                }
+
+                res.status(200).json(toSend);
+            }
+        });
+    });
+
+router.route('/getstops/:gid/:from/:to')
+    .get(function (req, res) {
+        fs.readFile('./logs/' + req.params.gid + '_' + req.params.from + '_' + req.params.to + '.json', 'utf8', function (err, data) {
+            if (err) {
+                tracksManager.getStops(req.params.gid, req.params.from, req.params.to, function (data) {
+                    log.toFLog(req.params.gid + '_' + req.params.from + '_' + req.params.to + '.json', data);
+                    res.status(200).json({gid: req.params.gid, data: data});
+                });
+            } else {
+                res.status(200).json({gid: req.params.gid, data: JSON.parse(data)});
+            }
+        });
+    });
+
+router.route('/gettracks/:gid/:from/:to')
+    .get(function (req, res) {
+        console.log('gettracks');
+        tracksManager.getTrackPart(req.params.gid, req.params.from, req.params.to, function (data) {
+            res.status(200).json({gid: req.params.gid, data: data});
+        });
+    });
+
+router.route('/getsensors')
+    .get(function (req, res) {
+        console.log('getsensors');
+        var soapManager = new soap(config.soap.defaultClientLogin);
+        soapManager.getAllSensors(function (data) {
+            res.status(200).json(data);
+        });
+    });
+
+router.route('/getplan/:timestamp')
+    .get(function (req, res) {
+        var fileName = './logs/' + config.soap.defaultClientLogin + '_' + req.params.timestamp + '.json';
+        fs.readFile(fileName, 'utf8', function (err, data) {
+            if (err) {
+                console.log('load plan for ' + config.soap.defaultClientLogin + ', date = ' + new Date(req.params.timestamp * 1000));
+                var soapManager = new soap(config.soap.defaultClientLogin);
+                soapManager.getPlanByDate(req.params.timestamp, function (plan) {
+                    log.toFLog(config.soap.defaultClientLogin + '_' + req.params.timestamp + '.json', plan);
+                    res.status(200).json(plan);
+                });
+            } else {
+                console.log('load plan FROM CACHE for ' + config.soap.defaultClientLogin + ', date = ' + new Date(req.params.timestamp * 1000));
+                res.status(200).json(JSON.parse(data));
+            }
+        });
+    });
+
+module.exports = router;

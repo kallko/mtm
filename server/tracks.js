@@ -21,14 +21,12 @@ function TracksManager(aggregatorUrl, routerUrl, login, password) {
 
 TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
                                              stop_s, stop_d, move_s, move_d, callback) {
-
     if (loadFromCache) {
         fs.readFile('./logs/' + gid + '_' + 'track.js', 'utf8', function (err, data) {
             if (err) {
                 return console.log(err);
             }
 
-            //console.log('The tracks loaded from the cache.');
             callback(JSON.parse(data));
         });
     } else {
@@ -54,7 +52,6 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
         started = 0,
         updateTime = states[0].lastTrackUpdate == undefined ? 0 : states[0].lastTrackUpdate;
 
-    //console.log('last update time,', updateTime);
     for (var i = 0; i < states.length; i++) {
         if ((demoTime != -1 && states[i].t2 > demoTime) ||
             (demoTime == -1 && states[i].t1 < updateTime + 1800)) continue;
@@ -84,15 +81,13 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
             this.stop_d, this.move_s, this.move_d),
         counter = 0,
         reqCounter = 0,
-        result = [],
-        me = this;
+        result = [];
 
     for (var i = 0; i < data.routes.length; i++) {
         for (var j = 0; j < data.sensors.length; j++) {
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 counter++;
                 (function (jj) {
-                    //console.log(url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true
@@ -113,21 +108,11 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
             }
         }
     }
-
-    //request({
-    //    url: url,
-    //    json: true
-    //}, function (error, response, body) {
-    //    if (!error && response.statusCode === 200) {
-    //        callback(body);
-    //    }
-    //});
 };
 
 TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
                                                     stop_s, stop_d, move_s, move_d, op) {
     op = typeof op !== 'undefined' ? op : 'states';
-
     return this.aggregatorUrl
         + op
         + '?login=' + this.login
@@ -144,22 +129,17 @@ TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
 };
 
 TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBeforeSend, callback, onlyOne) {
-
     var data = onlyOne ? _data : _data[nIndx],
         loc_str = '',
         points = data.routes[index].points,
         me = this;
 
-    //log.toFLog('points_' + nIndx + '_' + index, points);
-    //console.log('getRouterData', index);
-    //console.log('points.length', points.length);
     for (var i = 0; i < points.length; i++) {
         if (points[i].LAT != null && points[i].LON != null) {
             loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
         }
     }
 
-    //console.log(this.routerUrl + 'table?' + loc_str);
     request({
         url: this.routerUrl + 'table?' + loc_str,
         json: true
@@ -173,13 +153,11 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         }
     });
 
-    //console.log(this.routerUrl + 'viaroute?instructions=true&compression=false' + loc_str);
     request({
         url: this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log('Viaroute READY!', index);
             if (body.route_geometry == null) {
                 console.log('body.route_geometry == null');
                 data.routes[index].plan_geometry = [];
@@ -206,10 +184,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
             + '&loc=' + points[startPos + 1].LAT
             + "," + points[startPos + 1].LON;
 
-    //console.log(startPos, points[startPos], points[startPos + 1]);
-    //log.toFLog('points', points);
-
-    if(points[startPos].LAT == undefined || points[startPos + 1].LAT == undefined) {
+    if (points[startPos].LAT == undefined || points[startPos + 1].LAT == undefined) {
         startPos++;
         me.getGeometryByParts(_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne);
         return;
@@ -238,8 +213,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
 TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback) {
     console.log('=== getRealTracks ===');
 
-    var me = this,
-        data = _data[nIndx],
+    var data = _data[nIndx],
         now = new Date(data.server_time * 1000),
         url = this.createParamsStr(
             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
@@ -270,108 +244,9 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
                             data.sensors[jj].stops_loaded = true;
                             data.sensors[jj].real_track = body;
                             checkBeforeSend(_data, callback);
-                            //if (body == undefined || body == "invalid parameter 'gid'. ") {
-                            //    data.sensors[jj].real_track = undefined;
-                            //} else {
-                            //    var counter = 0;
-                            //    for (var k = 0; k < body.length; k++) {
-                            //        (function (kk) {
-                            //            me.getTrackPart(data.sensors[jj].GID, body[kk].t1, body[kk].t2, function (trackPart) {
-                            //                body[kk].coords = trackPart;
-                            //                counter++;
-                            //                if (counter == body.length) {
-                            //                    data.sensors[jj].real_track = body;
-                            //                    //log.toFLog(data.sensors[jj].GID + '_body.js', body);
-                            //                    data.sensors[jj].real_track_loaded = true;
-                            //                    console.log('track for sensor loaded', jj);
-                            //                    checkBeforeSend(_data, callback);
-                            //                }
-                            //            });
-                            //        })(k);
-                            //    }
-                            //}
                         }
                     });
                 })(j);
-                //break;
-            }
-        }
-    }
-};
-
-TracksManager.prototype.getAllStops = function (data, checkBeforeSend, callback) {
-    console.log('=== getRealTracks ===');
-
-    var now = new Date(),
-        url = this.createParamsStr(
-            new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
-            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,
-            this.undef_t, this.undef_d,
-            this.stop_s, this.stop_d, this.move_s, this.move_d);
-
-    for (var i = 0; i < data.routes.length; i++) {
-        for (var j = 0; j < data.sensors.length; j++) {
-            if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
-                data.sensors[j].stops_loading = true;
-                data.stops_started = true;
-                (function (jj) {
-                    console.log('request STOPS for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
-                    request({
-                        url: url + '&gid=' + data.sensors[jj].GID,
-                        json: true
-                    }, function (error, response, body) {
-                        if (!error && response.statusCode === 200) {
-                            console.log('stops for sensor loaded', jj);
-                            if (body == undefined || body == "invalid parameter 'gid'. ") {
-                                data.sensors[jj].stops = undefined;
-                            } else {
-                                data.sensors[jj].stops = body;
-                            }
-                            data.sensors[jj].stops_loaded = true;
-                            checkBeforeSend(data, callback);
-                        }
-                    });
-                })(j);
-                break;
-            }
-        }
-    }
-};
-
-TracksManager.prototype.getAllTracks = function (data, checkBeforeSend, callback) {
-    console.log('=== getRealTracks ===');
-
-    var now = new Date(),
-        url = this.createParamsStr(
-            new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
-            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,
-            this.undef_t, this.undef_d,
-            this.stop_s, this.stop_d, this.move_s, this.move_d, 'messages');
-
-    for (var i = 0; i < data.routes.length; i++) {
-        for (var j = 0; j < data.sensors.length; j++) {
-            if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
-                data.sensors[j].track_loading = true;
-                data.tracks_started = true;
-                (function (jj) {
-                    console.log('request TRACK for sensor #', jj, url + '&gid=' + data.sensors[jj].GID);
-                    request({
-                        url: url + '&gid=' + data.sensors[jj].GID,
-                        json: true
-                    }, function (error, response, body) {
-                        if (!error && response.statusCode === 200) {
-                            console.log('track for sensor loaded', jj);
-                            if (body == undefined || body == "invalid parameter 'gid'. ") {
-                                data.sensors[jj].track = undefined;
-                            } else {
-                                data.sensors[jj].track = body;
-                            }
-                            data.sensors[jj].track_loaded = true;
-                            checkBeforeSend(data, callback);
-                        }
-                    });
-                })(j);
-                break;
             }
         }
     }
@@ -407,50 +282,6 @@ TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
     });
 };
 
-TracksManager.prototype.getTimeMatrix = function (data, index, checkBeforeSend, callback) {
-    var url = this.routerUrl + 'table?',
-        points = data[index];
-
-    for (var i = 0; i < points.length; i++) {
-        if (points[i].LAT != null && points[i].LON != null) {
-            url += "&loc=" + points[i].LAT + "," + points[i].LON;
-        }
-    }
-
-    request({
-        url: url,
-        json: true
-    }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            //log.dump(body);
-
-            data.routes[index].time_matrix = body;
-            checkBeforeSend(data, callback);
-        }
-    });
-};
-
-TracksManager.prototype.getPlanGeometry = function (data, index, checkBeforeSend, callback) {
-    var url = this.routerUrl + 'viaroute?instructions=false&compression=false',
-        points = data[index];
-
-    for (var i = 0; i < points.length; i++) {
-        if (points[i].LAT != null && points[i].LON != null) {
-            url += "&loc=" + points[i].LAT + "," + points[i].LON;
-        }
-    }
-
-    request({
-        url: url,
-        json: true
-    }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            data.routes[index].plan_geometry = body.route_geometry;
-            checkBeforeSend(data, callback);
-        }
-    });
-};
-
 TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
     if (points.length < 2) return;
 
@@ -474,7 +305,6 @@ TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);
 
-    //console.log(url + '&gid=' + gid);
     request({
         url: url + '&gid=' + gid,
         json: true
@@ -489,8 +319,6 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    //console.log(url + '&gid=' + gid);
-
     request({
         url: url + '&gid=' + gid,
         json: true
@@ -503,7 +331,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 
 TracksManager.prototype.sendDataToSolver = function () {
 
-    fs.readFile('./logs/' + config.defaultMonitoringLogin + '_BigSolution.json', 'utf8', function (err, data) {
+    fs.readFile('./logs/' + config.soap.defaultClientLogin + '_BigSolution.json', 'utf8', function (err, data) {
         if (err) {
             return console.log(err);
         }
@@ -563,6 +391,117 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
         }
     });
 };
+
+TracksManager.prototype.getStateDataByPeriod = function () {
+    var gids = [1086, 900, 758, 709], //[741,708,711,710,712,764,709,715,739,742,753,897,725,714,716,718,701,713,723,746,735,762,812,720,733,814,896,756,721,706,759,757,744,747,760,717,758,719,755,734,809,707,738,736,748,763,749,754,813,811,705,743,899,745,933,900,697,761,810,895],
+        step = 24 * 60 * 60,
+        days = 1,
+        startDate = 1454025600, //1453852800,//1446336000,
+        endDate = startDate + days * 3600 * 24,
+        tmpTime = startDate,
+        result = {},
+        me = this,
+        reqCounter = 0,
+        warehouse = {
+            lat: 50.489879,
+            lon: 30.451639
+        },
+        maxDistFromWh = 0.5,
+        requests = [],
+        strRes = '';
+
+    while (tmpTime < endDate) {
+        console.log(tmpTime);
+        //console.log('day ', new Date(tmpTime * 1000));
+        for (var j = 0; j < gids.length; j++) {
+            requests.push([gids[j], tmpTime]);
+        }
+
+        tmpTime += step;
+    }
+    function do_func() {
+        var wasNearWh = false,
+            wasFarFromWh = false,
+            returnToWh = false,
+            nearWh,
+            distFromWh,
+            req = requests.pop(),
+            gid = req[0], time = req[1];
+
+        console.log('GO >>', new Date(time * 1000), gid);
+        me.getStops(gid, time, time + step, function (data) {
+
+            console.log('READY >>', new Date(time * 1000), gid);
+            reqCounter++;
+
+            result[gid] = result[gid] || {};
+            result[gid][time] = result[gid][time] || {
+                    MOVE: {
+                        dist: 0,
+                        time: 0
+                    },
+
+                    ARRIVAL: {
+                        dist: 0,
+                        time: 0
+                    },
+
+                    NO_SIGNAL: {
+                        dist: 0,
+                        time: 0
+                    }
+                };
+
+            for (var i = 0; i < data.length; i++) {
+                if (returnToWh) break;
+
+                distFromWh = getDistanceFromLatLonInKm(warehouse.lat, warehouse.lon, data[i].lat, data[i].lon);
+                nearWh = distFromWh < maxDistFromWh;
+
+                wasNearWh = nearWh || wasNearWh;
+                wasFarFromWh = (wasNearWh && !nearWh) || wasFarFromWh;
+                returnToWh = wasFarFromWh && nearWh;
+
+                if (!wasFarFromWh || returnToWh || data[i].state === 'START' || data[i].state === 'CURRENT_POSITION') continue;
+
+                result[gid][time][data[i].state].dist += data[i].dist;
+                result[gid][time][data[i].state].time += data[i].time;
+            }
+
+            if (reqCounter === gids.length * days) {
+                console.log('Done!');
+                log.toFLog('jsonStates.json', result);
+
+                for (var k in result) {
+                    if (!result.hasOwnProperty(k)) continue;
+
+                    for (var k2 in result[k]) {
+                        if (!result[k].hasOwnProperty(k2)) continue;
+
+                        states = result[k][k2];
+                        strRes += (parseInt(k2) / 86400 + 25569) + ','
+                            + getNByGid(k) + ','
+                            + (states.MOVE.dist / 1000) + ','
+                            + (states.MOVE.time / 24 / 3600) + ','
+                            + (states.ARRIVAL.dist / 1000) + ','
+                            + (states.ARRIVAL.time / 24 / 3600) + ','
+                            + (states.NO_SIGNAL.dist / 1000) + ','
+                            + (states.NO_SIGNAL.time / 24 / 3600)
+                            + '\r\n';
+                    }
+                }
+
+                //console.log(strRes);
+                log.toFLog('jsonStates.csv', strRes, false);
+            }
+
+            if (requests.length > 0)  do_func();
+        });
+    }
+
+    do_func();
+};
+
 
 function deg2rad(deg) {
     return deg * (Math.PI / 180)
@@ -651,116 +590,6 @@ function getNByGid(gid) {
 
     return 'NONE'
 }
-
-TracksManager.prototype.getStateDataByPeriod = function () {
-    var gids = [1086, 900, 758, 709], //[741,708,711,710,712,764,709,715,739,742,753,897,725,714,716,718,701,713,723,746,735,762,812,720,733,814,896,756,721,706,759,757,744,747,760,717,758,719,755,734,809,707,738,736,748,763,749,754,813,811,705,743,899,745,933,900,697,761,810,895],
-        step = 24 * 60 * 60,
-        days = 1,
-        startDate = 1454025600, //1453852800,//1446336000,
-        endDate = startDate + days * 3600 * 24,
-        tmpTime = startDate,
-        result = {},
-        me = this,
-        reqCounter = 0,
-        warehouse = {
-            lat: 50.489879,
-            lon: 30.451639
-        },
-        maxDistFromWh = 0.5,
-        requests = [],
-        strRes = '';
-
-    while (tmpTime < endDate) {
-        console.log(tmpTime);
-        //console.log('day ', new Date(tmpTime * 1000));
-        for (var j = 0; j < gids.length; j++) {
-            requests.push([gids[j], tmpTime]);
-        }
-
-        tmpTime += step;
-    }
-    function do_func(){
-        var wasNearWh = false,
-            wasFarFromWh = false,
-            returnToWh = false,
-            nearWh,
-            distFromWh,
-            req=requests.pop(),
-            gid=req[0], time=req[1];
-
-        console.log('GO >>', new Date(time * 1000), gid);
-        me.getStops(gid, time, time + step, function (data) {
-
-            console.log('READY >>', new Date(time * 1000), gid);
-            reqCounter++;
-
-            result[gid] = result[gid] || {};
-            result[gid][time] = result[gid][time] || {
-                    MOVE: {
-                        dist: 0,
-                        time: 0
-                    },
-
-                    ARRIVAL: {
-                        dist: 0,
-                        time: 0
-                    },
-
-                    NO_SIGNAL: {
-                        dist: 0,
-                        time: 0
-                    }
-                };
-
-            for (var i = 0; i < data.length; i++) {
-                if (returnToWh) break;
-
-                distFromWh = getDistanceFromLatLonInKm(warehouse.lat, warehouse.lon, data[i].lat, data[i].lon);
-                nearWh = distFromWh < maxDistFromWh;
-
-                wasNearWh = nearWh || wasNearWh;
-                wasFarFromWh = (wasNearWh && !nearWh) || wasFarFromWh;
-                returnToWh = wasFarFromWh && nearWh;
-
-                if (!wasFarFromWh || returnToWh || data[i].state === 'START' || data[i].state === 'CURRENT_POSITION') continue;
-
-                result[gid][time][data[i].state].dist += data[i].dist;
-                result[gid][time][data[i].state].time += data[i].time;
-            }
-
-            if (reqCounter === gids.length * days) {
-                console.log('Done!');
-                log.toFLog('jsonStates.json', result);
-
-                for (var k in result) {
-                    if (!result.hasOwnProperty(k)) continue;
-
-                    for (var k2 in result[k]) {
-                        if (!result[k].hasOwnProperty(k2)) continue;
-
-                        states = result[k][k2];
-                        strRes += (parseInt(k2) / 86400 + 25569) + ','
-                            + getNByGid(k) + ','
-                            + (states.MOVE.dist / 1000) + ','
-                            + (states.MOVE.time / 24 / 3600) + ','
-                            + (states.ARRIVAL.dist / 1000) + ','
-                            + (states.ARRIVAL.time / 24 / 3600) + ','
-                            + (states.NO_SIGNAL.dist / 1000) + ','
-                            + (states.NO_SIGNAL.time / 24 / 3600)
-                            + '\r\n';
-                    }
-                }
-
-                //console.log(strRes);
-                log.toFLog('jsonStates.csv', strRes, false);
-            }
-
-            if (requests.length > 0)  do_func();
-        });
-    }
-    do_func();
-};
-
 
 
 

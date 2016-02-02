@@ -3,7 +3,6 @@ module.exports = MathServer;
 var request = require('request'),
     config = require('./config'),
     fs = require('fs'),
-    querystring = require('querystring'),
     log = new (require('./logging'))('./logs');
 
 function MathServer() {
@@ -13,36 +12,31 @@ function MathServer() {
 MathServer.prototype.recalculate = function (route, callback) {
     me = this;
 
-    //for(var i = 0; i < route.points.length; i++) {
-    //    route.points[i].lat = parseFloat(route.points[i].lat);
-    //    route.points[i].lon = parseFloat(route.points[i].lon);
-    //}
-
     log.toFLog('query.js', this.mathServerUrl + 'task?action=add&globalID=uniqGuid&task=' + JSON.stringify(route));
     request({
         url: this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route),
         json: true
-    }, function(error, response, body) {
+    }, function (error, response, body) {
         console.log('recalculate callback!');
-        if(error) {
+        if (error) {
             console.log(error);
         } else {
             log.toFLog('math_res.js', body);
             var queryID = body.query;
 
-            var intervalID = setInterval(function() {
+            var intervalID = setInterval(function () {
                 request({
                     url: me.mathServerUrl + 'task?action=getState&queryID=' + queryID + '&lastSID=0',
                     json: true
                 }, function (error, response, body) {
-                    if(error || body.error) {
+                    if (error || body.error) {
                         console.log(error);
                         if (body)   console.log(body.error);
                         clearInterval(intervalID);
                         callback({status: 'error'});
                     } else {
-                        if(body.state.status == 3 || body.state.status == 4 || body.state.status == 5) {
-                            if(body.state.status == 4) {
+                        if (body.state.status == 3 || body.state.status == 4 || body.state.status == 5) {
+                            if (body.state.status == 4) {
                                 log.toFLog('math_res2.js', body);
                                 console.log('Math ready!');
                                 clearInterval(intervalID);
