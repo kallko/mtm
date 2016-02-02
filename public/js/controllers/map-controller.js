@@ -9,59 +9,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             markersArr = [],
             maximized = false,
             textStatuses = Statuses.getTextStatuses(),
-            STATUS = Statuses.getStatuses(),
-            highlightedPoint;
+            STATUS = Statuses.getStatuses();
 
         initMap();
         addListeners();
 
-        rootScope.$on('clearMap', function () {
-            clearMap();
-        });
-
-        rootScope.$on('setMapCenter', function (event, data) {
-            setMapCenter(data.lat, data.lon);
-        });
-
-        rootScope.$on('drawCombinedTrack', function (event, route) {
-            drawCombinedRoute(route);
-        });
-
-        rootScope.$on('drawRealTrack', function (event, route) {
-            drawRealRoute(route);
-            drawAllPoints(route.points)
-        });
-
-        rootScope.$on('drawPlannedTrack', function (event, route) {
-            drawPlannedRoute(route.plan_geometry, 0);
-            drawAllPoints(route.points)
-        });
-
-        rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
-            drawPlannedRoute(route.plan_geometry, 0);
-            drawRealRoute(route);
-            drawAllPoints(route.points)
-        });
-
-        rootScope.$on('highlightPointMarker', function (event, point) {
-            highlightPointMarker(point);
-        });
-
-        function highlightPointMarker(point) {
-            //console.log('highlightPointMarker');
-            //console.log(point);
-
-            //highlightedPoint = L.marker([point.LAT, point.LON],
-            //    {'title': 'title'});
-            //highlightedPoint.setIcon(getIcon('TEST', 14, 'white', 'black'));
-            //map.addLayer(highlightedPoint);
-            //oms.addMarker(highlightedPoint);
-        }
-
         function drawCombinedRoute(route) {
-            //var real_track = route.plan_geometry,
-            //    planned_track = route.plan_geometry;
-
             drawRealRoute(route);
 
             var i = route.points.length - 1;
@@ -105,9 +58,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function drawPlannedRoute(track, startIndx) {
             if (track == null) return;
 
-            var tmp,
-                geometry = [];
-
+            var geometry = [];
             for (var i = startIndx; i < track.length; i++) {
                 if (track[i] == null) continue;
                 geometry = geometry.concat(getLatLonArr(track[i]));
@@ -144,7 +95,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
                     polyline.addTo(map);
-                    //continue;
                 } else if (track[i].state == 'ARRIVAL') {
                     stopIndx = (parseInt(i / 2 + 0.5) - 1);
                     stopTime = mmhh(track[i].time);
@@ -172,27 +122,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         polyline.addTo(map);
                     } else if (i + 1 == track.length) {
                         tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
-                        //polyline = new L.Polyline(track[i].coords, {
-                        //    color: 'red',
-                        //    weight: 3,
-                        //    opacity: 0.8,
-                        //    smoothFactor: 1
-                        //});
-                        //
-                        //polyline.addTo(map);
                     }
 
                     tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                         {'title': tmpTitle});
                     tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
                     if (drawStops) addMarker(tmpVar);
-                    //continue;
                 } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                     color = '#5bc0de';
-                    //continue;
                 } else if (track[i].state == 'START') {
                     color = 'yellow';
-                    //continue;
                 }
 
                 if (i + 1 == track.length) {
@@ -224,8 +163,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             for (var i = 0; i < textStatuses.length; i++) {
                 if (textStatuses[i].value === status) return textStatuses[i];
             }
-
-            return;
         }
 
         function drawAllPoints(points) {
@@ -234,7 +171,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpStatus,
                 tmpBgColor,
                 tmpFColor,
-                confirmed,
                 point;
 
             for (var i = 0; i < points.length; i++) {
@@ -267,7 +203,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     'title': title
                 });
 
-                //#95A932
                 tmpBgColor = '#7EDDFC';
                 tmpFColor = 'white';
                 if (tmpStatus) {
@@ -280,7 +215,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpFColor = 'black';
                 }
 
-                //tmpBgColor = '#95A932';
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
                 addMarker(tmpVar);
             }
@@ -310,23 +244,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             });
 
             polyline.addTo(map);
-
-            //if (decorator) {
-            //    L.polylineDecorator(geometry, {
-            //        opacity: 1,
-            //        patterns: [
-            //            {offset: 125, repeat: 250, symbol: L.Symbol.arrowHead({pixelSize: 14, pathOptions: {fillOpacity: 1, weight: 0, color: color}})}
-            //        ]
-            //    }).addTo(map);
-            //}
         }
 
         function formatDate(d) {
             var dformat =
-                //    [ d.getDate().padLeft(),
-                //    (d.getMonth()+1).padLeft(),
-                //    d.getFullYear()].join('/')+
-                //' ' +
                 [d.getHours().padLeft(),
                     d.getMinutes().padLeft(),
                     d.getSeconds().padLeft()].join(':');
@@ -336,16 +257,43 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function checkMouseInRect(pos, x, y) {
             if (pos.top < y && pos.left < x &&
                 pos.top + pos.height > y && pos.left + pos.width > x) {
-                // console.log('Inside!');
                 return true;
             }
-            // console.log('Outside!');
+
             return false;
         }
 
         function addListeners() {
             $(window).resize(resize);
             resize();
+
+            rootScope.$on('clearMap', function () {
+                clearMap();
+            });
+
+            rootScope.$on('setMapCenter', function (event, data) {
+                setMapCenter(data.lat, data.lon);
+            });
+
+            rootScope.$on('drawCombinedTrack', function (event, route) {
+                drawCombinedRoute(route);
+            });
+
+            rootScope.$on('drawRealTrack', function (event, route) {
+                drawRealRoute(route);
+                drawAllPoints(route.points)
+            });
+
+            rootScope.$on('drawPlannedTrack', function (event, route) {
+                drawPlannedRoute(route.plan_geometry, 0);
+                drawAllPoints(route.points)
+            });
+
+            rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
+                drawPlannedRoute(route.plan_geometry, 0);
+                drawRealRoute(route);
+                drawAllPoints(route.points)
+            });
 
             holderEl = $('#transparent-map-holder');
             holderEl.parent().on('mouseenter', function (event) {
@@ -354,12 +302,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
             });
 
-            $('.lm_drag_handle').on('mousedown', function () {
+            var dragHandle = $('.lm_drag_handle');
+            dragHandle.on('mousedown', function () {
                 changingWindow = true;
                 disableMap();
             });
 
-            $('.lm_drag_handle').on('mouseup', function () {
+            dragHandle.on('mouseup', function () {
                 changingWindow = false;
             });
 
@@ -393,9 +342,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             inside = true;
             $('.lm_goldenlayout').css('pointer-events', 'none');
 
-            $('body').off('mousemove');
-            $('body').mousemove(function (event) {
-                //console.log("$('body').mousemove", position, event.clientX, event.clientY);
+            var $body = $('body');
+            $body.off('mousemove');
+            $body.mousemove(function (event) {
                 if (!checkMouseInRect(position, event.clientX, event.clientY)) {
                     disableMap();
                 }
@@ -422,11 +371,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         function initMap() {
-            //map = L.map('map').setView([50.4412776, 30.6671281], 11);
-            //L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            //    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            //}).addTo(map);
-
             map = new L.Map('map', {
                 center: new L.LatLng(50.4412776, 30.6671281),
                 zoom: 11,
@@ -446,8 +390,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         function resize() {
-            $('#map').height($(window).height());
-            $('#map').width($(window).width());
+            var $map = $('#map');
+            $map.height($(window).height());
+            $map.width($(window).width());
             map.invalidateSize();
         }
 

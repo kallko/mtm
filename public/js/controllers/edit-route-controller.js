@@ -83,7 +83,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             firstInit = true;
             routerData = undefined;
             workingWindow = data.workingWindow;
-            //console.log('workingType >>', workingWindow);
 
             if (data.demoMode) {
                 routeCopy.car_position = undefined;
@@ -132,7 +131,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 scope.route = undefined;
                 scope.changedRoute = undefined;
             }
-            //updateBoxes(true);
         }
 
         function recalculateRoute() {
@@ -141,7 +139,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return;
             }
 
-            //console.log('scope.changedRoute >>', scope.changedRoute);
             var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
                 scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1,
                 url = './findtime2p/'
@@ -149,7 +146,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     + scope.changedRoute.car_position.lon + '&'
                     + scope.changedRoute.points[last].LAT + '&'
                     + scope.changedRoute.points[last].LON;
-            //console.log(url);
+
             http.get(url)
                 .success(function (data) {
                     var fromPoint,
@@ -189,14 +186,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         function getDowntime(time, point) {
-            //if (!point || !point.windows || point.windows.length == 0) return 0;
-            //
-            //var closestWindow = findClosestWindow(point.windows);
-            //
-            //if (closestWindow.start > time) {
-            //    return closestWindow.start - time;
-            //}
-
             if (!point || !point.working_window) return 0;
 
             if (point.working_window.start > time) {
@@ -206,32 +195,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             return 0;
         }
 
-        function findClosestWindow(windows) {
-            if (windows.length == 1) {
-                return windows[0];
-            } else {
-                for (var i = 0; i < windows.length; i++) {
-                    if (windows[i].finish > time || i == windows.length - 1) {
-                        return windows[i];
-                    }
-                }
-            }
-        }
-
         function checkLate(point) {
-            //if (!point || !point.windows || point.windows.length == 0) return;
-            //
-            //point.late = point.arrival_time_ts > findClosestWindow(point.windows).finish;
-
             if (!point || !point.working_window) return;
 
             point.late = point.arrival_time_ts > point.working_window.finish;
-        }
-
-        function updatePointInfo(point, time) {
-            time *= 1000;
-            point.arrival_time_hhmm = filter('date')(time, 'yyyy HH:mm:ss');
-            point.end_time_hhmm = filter('date')(time + parseInt(point.TASK_TIME) * 1000, 'yyyy HH:mm:ss');
         }
 
         function moveSkippedToEnd(route) {
@@ -275,7 +242,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            //console.log('./getroutermatrix/' + pointsStr);
             http.get('./getroutermatrix/' + pointsStr)
                 .success(function (data) {
                     routerData = {
@@ -300,7 +266,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             updateIndices(scope.changedRoute.points);
             scope.changebleBoxes = getBoxesFromRoute(scope.changedRoute);
-            //scope.$apply();
 
             timeout(function () {
                 $('.draggable-box').draggable({
@@ -358,9 +323,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 scope.changedRoute.points.splice(target, 0, point);
             }
 
-            //$(this).removeClass('highlighted-box');
             recalculateRoute();
-            //updateBoxes();
         }
 
         function getBoxesFromRoute(route) {
@@ -424,7 +387,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             return boxes;
         }
 
-        //var tmp = 0;
         scope.boxWidth = function (size, type) {
             var mWidth = type == scope.BOX_TYPE.TASK ? minWidth : size / widthDivider,
                 res = parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
@@ -634,7 +596,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                 mathInput.points.push(point);
 
-                //warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
                 if (route.warehouseEnd) {
                     point = {
                         "lat": parseFloat(route.points[route.points.length - 1].LAT),
@@ -707,7 +668,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 http.post('./recalculate/', {input: mathInput}).
                     success(function (data) {
                         processModifiedPoints(route, data);
-                        //console.log('Recalculate READY >>', data);
                     });
             }
         };

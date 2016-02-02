@@ -39,12 +39,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             parent = data.parent;
 
             $('#point-view').popup('show');
-            //console.log('point', data.point);
-            //console.log('route', data.route);
         }
 
         function lockRoute(event, data) {
-            scope.$emit('unlockAllRoutes', { filterId: data.route.filterId });
+            scope.$emit('unlockAllRoutes', {filterId: data.route.filterId});
             scope.route = data.route;
             scope.point = data.point;
             scope.route.lockedByMe = false;
@@ -92,8 +90,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         };
 
         scope.toggleTaskBlock = function () {
+            var url;
+
             if (!scope.point.locked) {
-                var url = './opentask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER + '?lockTask=false';
+                url = './opentask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER + '?lockTask=false';
                 http.get(url)
                     .success(function (data) {
                         if (data.status === 'ok') {
@@ -109,13 +109,12 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                         }
                     });
             } else {
-                var url = './unlocktask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER;
+                url = './unlocktask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER;
                 http.get(url)
                     .success(function (data) {
                         if (data.status === 'unlocked') {
                             scope.point.locked = false;
                             scope.point.lockedByMe = false;
-                            //scope.$emit('showNotification', {text: 'Редактирование завершенно.'});
                         }
                     });
             }
@@ -136,7 +135,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     .success(function (data) {
                         //console.log(data);
                         if (data.status == 'ok') {
-                            scope.$emit('unlockAllRoutes', { filterId: scope.route.filterId });
+                            scope.$emit('unlockAllRoutes', {filterId: scope.route.filterId});
                             scope.route.lockedByMe = true;
                             scope.route.locked = true;
                             for (var i = 0; i < scope.route.points.length; i++) {
@@ -165,10 +164,6 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }
         };
 
-        //function unlockAllRoutes() {
-        //
-        //}
-
         scope.unconfirmed = function () {
             return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
                 scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
@@ -191,30 +186,19 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
 
-            if (parent === 'editRoute')  {
+            if (parent === 'editRoute') {
                 console.log('checkPoint');
                 scope.$emit('checkPoint', point);
             } else {
                 console.log('updateRawPromised');
-                scope.$emit('updateRawPromised', { point: point });
+                scope.$emit('updateRawPromised', {point: point});
             }
-
-            // TODO изменение сырых данных в родительском контролере
-
-            //var rawPoints = rawData.routes[point.route_id].points;
-            //for (var i = 0; i < rawPoints.length; i++) {
-            //    if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
-            //        rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
-            //        rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
-            //        break;
-            //    }
-            //}
         };
 
         scope.open1CWindow = function () {
             console.log('open1CWindow');
             http.get('./openidspointwindow/' + scope.point.waypoint.ID)
-                .success(function(data) {
+                .success(function (data) {
                     console.log(data);
                 });
         };

@@ -1,4 +1,4 @@
-angular.module('MTMonitor').factory('Incident', [function() {
+angular.module('MTMonitor').factory('Incident', [function () {
 
     // опаздание
     // клиент переносит / отменяется

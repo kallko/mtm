@@ -49,21 +49,12 @@ angular.module('MTMonitor').controller('DebugController', ['$scope', '$http', '$
             "&" + scope.params.move_d;
     }
 
-    rootScope.$on('saveForDebug', function(event, data){
+    rootScope.$on('saveForDebug', function (event, data) {
         _data = data.data;
         rowCollection = data.rowCollection;
     });
 
     scope.test = function () {
-        //saveLogToDB('TEST! Message to log. Message to log. Message to log.');
-        //http.get('test').
-        //    success(function (data) {
-        //        console.log(data);
-        //    });
-
-        //console.log(parentForm._call('getDriversActions', ["3684/5"]));
-
-        // 1578403 taskID
         parentForm._call('action1C', [1, '1565180']);
     };
 
