@@ -1,4 +1,4 @@
-angular.module('acp').config(function($routeProvider){
+angular.module('acp').config(function ($routeProvider) {
     $routeProvider
         .when('/', {
             redirectTo: '/console'

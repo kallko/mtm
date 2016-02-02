@@ -15,9 +15,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         function loadData() {
             console.log('loadData');
 
-            //var from = 1444435200,
-            //    to = 1445385600;
-
             //var from = 1433116800,
             //    to = 1446595200; //1446076800; //1439596800
             //scope.plans = [];
@@ -29,7 +26,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     groupButtonsByRadius();
                     scope.map.clearMap();
                     scope.points.reinit(scope.data);
-                    //loadSensorsAndStops();
                 });
             } else {
                 scope.data = jsonData2;
@@ -38,9 +34,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     console.log('Merge complete!');
                 });
             }
-
-            //scope.map.clearMap();
-            //scope.points.reinit(scope.data);
         }
 
         function loadSensorsAndStops() {
@@ -55,7 +48,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                             if (scope.data[i].coords[j].transportid == sensors[k].TRANSPORT) {
                                 scope.data[i].coords[j].gid = sensors[k].GID;
                                 sensors[k].need_data = true;
-                                //console.log('connected');
                                 break;
                             }
                         }
@@ -69,7 +61,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                         (function (ii) {
                             counter++;
-                            //console.log('GO #', ii);
                             Track.stops(sensors[ii].GID, from, to).success(function (stops) {
                                 for (var i = 0; i < stops.data.length; i++) {
                                     stops.data[i].transportid = sensors[ii].TRANSPORT;
@@ -81,7 +72,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                                 if (counter == 0) {
                                     console.log('all stops downloaded!');
                                     console.log({stops: scope.stopsCollection});
-                                    //loadPlans(from, to);
                                 }
                             });
                         })(i);
@@ -118,24 +108,10 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         }
                     }
 
-                    //data.routes[i].waypoints = [];
                     for (var j = 0; j < data.routes[i].points.length; j++) {
                         for (var k = 0; k < data.waypoints.length; k++) {
                             if (data.routes[i].points[j].END_WAYPOINT == data.waypoints[k].ID) {
                                 data.routes[i].points[j].waypoint = data.waypoints[k];
-
-                                //var idInArr = false;
-                                //for (var l = 0; l < data.routes[i].waypoints.length; l++) {
-                                //    if (data.routes[i].waypoints[l].ID == data.waypoints[k].ID) {
-                                //        idInArr = true;
-                                //        break;
-                                //    }
-                                //}
-                                //
-                                //if (!idInArr) {
-                                //    data.routes[i].waypoints.push(data.waypoints[k].ID);
-                                //}
-
                                 pointsCounter++;
                                 break;
                             }
@@ -153,7 +129,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     (function (ii) {
                         Track.stops(data.routes[ii].transport.gid, from, from + 86400)
                             .success(function (stops) {
-                                //console.log(stops);
                                 data.routes[ii].stops = stops.data;
                                 bindPlanStopsToPoints(data.routes[ii]);
                                 counter++;
@@ -191,15 +166,6 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     if (stop.state == "ARRIVAL" &&
                         getDistanceFromLatLonInKm(parseFloat(point.waypoint.LAT), parseFloat(point.waypoint.LON),
                             stop.lat, stop.lon) * 1000 <= 60) {
-
-                        // 120 - 41990
-                        // 100 - 46502
-                        // 80 - 50330
-                        // 70 - 51832
-                        // 60 - 52510
-                        // 55 - 52503
-                        // 50 - 52182
-                        // 45 - 51419
 
                         tmpKey = 'task#' + point.TASK_NUMBER;
                         if (result.jobs[tmpKey] == undefined) {

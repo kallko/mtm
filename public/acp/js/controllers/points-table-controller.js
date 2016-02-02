@@ -3,8 +3,6 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
     scope.points.reinit = function (data) {
         scope.selectedRow = -1;
         scope.rowCollection = [];
-        var idArr = [],
-            lastRowId = -1;
 
         for (var i = 0; i < data.length; i++) {
             scope.data[i].coords_length = scope.data[i].coords.length;

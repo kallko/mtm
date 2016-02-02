@@ -1,7 +1,7 @@
 angular.module('acp').factory('Sensor', ['$http', function SensorFactory(http) {
     return {
-      all: function() {
-          return http.get('./getsensors');
-      }
+        all: function () {
+            return http.get('./getsensors');
+        }
     };
 }]);

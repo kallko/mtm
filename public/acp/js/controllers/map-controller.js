@@ -145,8 +145,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         title += 'ID: ' + point.id + '\n';
 
         scope.map.setCenter(point.new_position);
-        //scope.map.drawMarker(point.center, 'c', title, 14, 'yellow', 'black');
-        //scope.map.drawMarker(point.median, 'm', title, 14, 'yellow', 'black');
         scope.map.drawMarker(point.new_position, 'C', title, 14, 'yellow', 'black', true);
     }
+
 }]);
