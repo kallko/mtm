@@ -1,3 +1,13 @@
+<!-- получение объекта родительской формы из 1С -->
+<script type="text/javascript">
+    var parentForm;
+    function initialize(thisForm) {
+        parentForm = thisForm;
+        console.log('initialize complete');
+    }
+</script>
+
+<!-- файлы стилей -->
 <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css"/>
 <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css"/>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -6,6 +16,7 @@
 <link rel="stylesheet" href="./css/columns.css"/>
 <link rel="stylesheet" href="./css/bootstrap.css"/>
 
+<!-- библиотеки -->
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="./js/vendor/jquery-ui.min.js"></script>
 <script src="./js/vendor/angular.js"></script>
@@ -20,14 +31,7 @@
 <script src="./js/vendor/oms.min.js"></script>
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
 
-<script type="text/javascript">
-    var parentForm;
-    function initialize(thisForm) {
-        parentForm = thisForm;
-        console.log('initialize complete');
-    }
-</script>
-
+<!-- скрипты Ангуляра  -->
 <script src="./js/app.js"></script>
 
 <script src="./js/controllers/point-index-controller.js"></script>
@@ -37,7 +41,6 @@
 <script src="./js/controllers/setting-controller.js"></script>
 <script src="./js/controllers/point-view-controller.js"></script>
 <script src="./js/controllers/edit-route-controller.js"></script>
-<script src="./js/controllers/incident-index-controller.js" ></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -48,12 +51,14 @@
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
 <script src="./js/services/time-converter.js"></script>
-<script src="./js/services/incident.js" ></script>
 
+<!-- карта на фоне -->
 <div id="map"></div>
 
+<!-- таблица точек доставки -->
 <template type="text/html" id="template-point-table">
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
+        <!-- меню -->
         <div id="point-menu-panel">
             <div>
                 <select id="status-select" ng-model="filters.status" class="group-select"
@@ -88,18 +93,6 @@
                     {{params.endWindowSize * 5}} минут до закрытия
                 </button>
 
-                <!--<select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"-->
-                <!--ng-options='option.value as option.name for option in recalc_modes'>-->
-                <!--</select>-->
-
-                <!--<button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">-->
-                <!--пересчитать-->
-                <!--</button>-->
-
-                <!--<button class="btn btn-info btn-sm" id="save-btn" ng-click="saveRoutes()">-->
-                <!--сохранить-->
-                <!--</button>-->
-
                 <input id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
                 <button class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -110,6 +103,7 @@
             </div>
         </div>
 
+        <!-- таблица точек -->
         <div id="point-table" class="table-holder">
             <table class="table table-striped point-table" id="point-table-tbl"
                    st-safe-src="rowCollection" st-table="displayCollection">
@@ -137,8 +131,6 @@
                     <th class="problem-index-col" st-sort="problem_index" title="Индекс проблемности задания">
                         Проблемность
                     </th>
-                    <!--<th class="point-id-col">ID точки</th>-->
-                    <!--<th class="task-id-col">ID заказа</th>-->
                     <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
                     <th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>
                     <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
@@ -168,9 +160,9 @@
                     <td id="{{'push-td-' + row.row_id}}"
                         title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
                                 'время gps: ' + row.mobile_push.gps_time + '\n' +
-                                'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}" >
+                                'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
                         {{getPushStatus(row)}}
-                     </td>
+                    </td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
@@ -188,16 +180,12 @@
                             {{ row.real_arrival_time * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
-
-
                     <td>
                         <span ng-show="row.overdue_time > 0">
                             {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
                     <td>{{row.problem_index}}</td>
-                    <!--<td>{{row.TASK_NUMBER}}</td>-->
-                    <!--<td>{{row.waypoint.ID}}</td>-->
                     <td>
                         {{row.promised_window.start * 1000 | date:'HH:mm'}} -
                         {{row.promised_window.finish * 1000 | date:'HH:mm'}}
@@ -224,22 +212,20 @@
                 <ul class="dropdown-menu" role="menu">
                     <li><a tabindex="-1" data-menu-option="sort">Вкл/Выкл фильтр по маршруту</a></li>
                     <li><a tabindex="-1" data-menu-option="edit">Редактировать маршрут</a></li>
-                    <!--<li class="divider"></li>-->
-                    <!--<li><a tabindex="-1" data-menu-option="confirm-status" >Подтвердить статус доставлено</a></li>-->
-                    <!--<li><a tabindex="-1" data-menu-option="not-delivered-status" >Отменить статус доставлено</a></li>-->
-                    <!--<li><a tabindex="-1" data-menu-option="cancel-point" >Отменить задание</a></li>-->
                 </ul>
             </div>
         </div>
     </div>
 </template>
 
+<!-- прозрачное окно для отображения карты -->
 <template type="text/html" id="transparent-map-window">
     <div class="section" ng-controller="MapController" id="transparent-map-holder">
         transparent-map-window
     </div>
 </template>
 
+<!-- панель настроек -->
 <template type="text/html" id="setting-window">
     <div class="section setting-panel" ng-controller="SettingController">
         <div class="button-row">
@@ -332,12 +318,14 @@
     </div>
 </template>
 
+<!-- панель редактирования маршрута -->
 <template type="text/html" id="edit-route">
     <div id="edit-panel" ng-controller="EditRouteController">
         <div ng-show="route == undefined" id="edit-panel-empty">
             Маршрут для редактирования не выбран
         </div>
 
+        <!-- меню -->
         <div id="edit-panel-menu" ng-show="route !== undefined">
             <select id="recalc-mode-select" ng-model="recalc_mode" class="group-select"
                     ng-options='option.value as option.name for option in recalc_modes'>
@@ -352,6 +340,7 @@
             <button class="btn btn-info btn-sm" ng-click="cancelEdit()">отменить</button>
         </div>
 
+        <!-- оригинальный маршрут до изменений -->
         <div ng-show="route !== undefined">
             <div id="original-route">
                 <div class="block-title">Плановый маршрут</div>
@@ -376,6 +365,7 @@
                 </div>
             </div>
 
+            <!-- изменяемая копия маршрута -->
             <div id="changed-route">
                 <div class="block-title">Измененный маршрут</div>
                 <div id="boxes">
@@ -406,12 +396,14 @@
     </div>
 </template>
 
+<!-- див для оповещений -->
 <div id="notification" ng-controller="NotificationController">
     <div>
         [[текст оповещения]]
     </div>
 </div>
 
+<!-- див для отображения окна точки -->
 <div id="point-view" ng-controller="PointViewController">
     <div class="card-title">
         Карточка задания
@@ -475,14 +467,6 @@
             <td class="title">Комментарий:</td>
             <td class="row-data">{{point.waypoint.COMMENT}}</td>
         </tr>
-        <!--<tr>-->
-        <!--<td class="title" >Стоп:</td>-->
-        <!--<td class="row-data" >{{point.haveStop ? 'Есть' : ''}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-        <!--<td class="title" >Моб. нажатие:</td>-->
-        <!--<td class="row-data" >{{point.havePush ? 'Есть' : ''}}</td>-->
-        <!--</tr>-->
         <tr>
             <td class="title">Статус:</td>
             <td class="row-data">

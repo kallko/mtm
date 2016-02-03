@@ -1,6 +1,6 @@
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
-    , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter', 'Incident',
-    function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter, Incident) {
+    , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
+    function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {
 
         var pointTableHolder,
             pointContainer,
