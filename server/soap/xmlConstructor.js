@@ -1,9 +1,10 @@
 var log = new (require('../logging'))('./logs');
 module.exports = XMLConstructor;
 
+// конструктор xml запросов
 function XMLConstructor() {
     this.xml = {
-        begin: '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua">'
+        begin: '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua">'  // заголовок
         , end: '</MESSAGE>'
         , instructions: {
             begin: '<INSTRUCTIONS>'
@@ -11,14 +12,14 @@ function XMLConstructor() {
         }
         , instruction: {
             begin: '<INSTRUCTION>'
-            , daily_plan: '<INSTRUCTION NAME="GET_DAILY_PLANS" >'
-            , itinerary_new: '<INSTRUCTION NAME="GET_ITINERARY_NEW" >'
-            , itinerary: '<INSTRUCTION NAME="GET_ITINERARY" >'
-            , transports: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'
-            , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'
-            , waypoints: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="WAYPOINTS" />'
-            , sensors: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="SENSORS" />'
-            , jobs: '<INSTRUCTION NAME="GET_STATUS_OF_TASK">'
+            , daily_plan: '<INSTRUCTION NAME="GET_DAILY_PLANS" >'  // получение списка id решений на указанный день
+            , itinerary_new: '<INSTRUCTION NAME="GET_ITINERARY_NEW" >' // получить конкретное решение нового типа
+            , itinerary: '<INSTRUCTION NAME="GET_ITINERARY" >' // получить конкретное решение старого типа
+            , transports: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="TRANSPORTS" />'  // получение списка машин
+            , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'  // получение списка водителей
+            , waypoints: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="WAYPOINTS" />'  // получение расширенного списка точек по маршруту
+            , sensors: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="SENSORS" />' // получение списка сенсоров
+            , jobs: '<INSTRUCTION NAME="GET_STATUS_OF_TASK">'  //  получить статус задачи
             , end: '</INSTRUCTION>'
         }
         , parameter: {
@@ -39,6 +40,7 @@ function XMLConstructor() {
     };
 }
 
+// строка формата 1С по указанной дате
 XMLConstructor.prototype.getTodayStr = function (timestamp) {
     var date = new Date(timestamp);
     return ( ("0" + date.getDate())).slice(-2) + '.' +
@@ -46,6 +48,7 @@ XMLConstructor.prototype.getTodayStr = function (timestamp) {
         date.getFullYear();
 };
 
+// xml для получения списка id решений на указанную дату
 XMLConstructor.prototype.dailyPlanXML = function (timestamp) {
     var str = '';
     str += this.xml.begin;
@@ -62,6 +65,7 @@ XMLConstructor.prototype.dailyPlanXML = function (timestamp) {
     return str;
 };
 
+// xml для получения решения по id
 XMLConstructor.prototype.itineraryXML = function (id, version, newItinerary) {
     var str = '';
     str += this.xml.begin;
@@ -82,6 +86,7 @@ XMLConstructor.prototype.itineraryXML = function (id, version, newItinerary) {
     return str;
 };
 
+// xmk для получения дополнительных данных по решению
 XMLConstructor.prototype.additionalDataXML = function (routeid) {
     var str = '';
     str += this.xml.begin;
@@ -104,25 +109,7 @@ XMLConstructor.prototype.additionalDataXML = function (routeid) {
     return str;
 };
 
-XMLConstructor.prototype.taskXML = function (taskNumber, taskDate) {
-    var str = '';
-    str += this.xml.begin;
-    str += this.xml.instructions.begin;
-
-    str += this.xml.instruction.jobs;
-    str += this.xml.parameter.begin;
-    str += this.xml.setGetValue('NUMBER', taskNumber);
-    str += this.xml.slashEnd;
-    str += this.xml.parameter.begin;
-    str += this.xml.setGetValue('DATE', taskDate);
-    str += this.xml.slashEnd;
-    str += this.xml.instruction.end;
-
-    str += this.xml.instructions.end;
-    str += this.xml.end;
-    return str;
-};
-
+// xml для получения списка всех сенсоров
 XMLConstructor.prototype.allSensorsXML = function () {
     var str = '';
     str += this.xml.begin;
@@ -136,6 +123,7 @@ XMLConstructor.prototype.allSensorsXML = function () {
     return str;
 };
 
+// xml для сохранения маршрута в 1С
 XMLConstructor.prototype.routesXML = function (routes, login) {
     if (routes.length == 0) return;
 
@@ -146,6 +134,8 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
         tmpGeometry,
         coords;
 
+    // создание списка решений, изменения в которых, будут сохранены в 1С
+    // и сохранение самого позднего времени сохранения
     for (var i = 0; i < routes.length; i++) {
         if (!itineraries[routes[i].itineraryID]) {
             itineraries[routes[i].itineraryID] = {

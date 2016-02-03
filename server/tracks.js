@@ -6,11 +6,14 @@ var request = require("request"),
     log = new (require('./logging'))('./logs'),
     loadFromCache = config.cashing.tracks;
 
+// класс для работу перимущественно с агрегатаром и роутером
 function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.aggregatorUrl = aggregatorUrl;
     this.routerUrl = routerUrl;
     this.login = login;
     this.password = password;
+
+    // параметры используемые для отладки агрегатора, которые можно вообще не передовать
     this.undef_t = 60;
     this.undef_d = 1000;
     this.stop_s = 5;
@@ -19,8 +22,10 @@ function TracksManager(aggregatorUrl, routerUrl, login, password) {
     this.move_d = 110;
 }
 
+// получить трек по указанному гиду машины и в заданном временом диапазоне
 TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
                                              stop_s, stop_d, move_s, move_d, callback) {
+    // загрузка треков из кеша в случае наличия флага и самого кеша (использовалось для отладки)
     if (loadFromCache) {
         fs.readFile('./logs/' + gid + '_' + 'track.js', 'utf8', function (err, data) {
             if (err) {
@@ -46,6 +51,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
     }
 };
 
+// получение треков по переданным стейтам и гиду машины
 TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, callback) {
     var counter = 0,
         me = this,
@@ -76,6 +82,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
 };
 
+// получение части треков по всему склееному решению и заданному времени
 TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
             this.stop_d, this.move_s, this.move_d),
@@ -85,6 +92,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
 
     for (var i = 0; i < data.routes.length; i++) {
         for (var j = 0; j < data.sensors.length; j++) {
+            // запрашивать треки только по сенсорам прикрепленным к машинам имеющихся маршрутов
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 counter++;
                 (function (jj) {
@@ -110,6 +118,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
     }
 };
 
+// создать строку параметров для запроса к агрегатору
 TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
                                                     stop_s, stop_d, move_s, move_d, op) {
     op = typeof op !== 'undefined' ? op : 'states';
@@ -128,6 +137,7 @@ TracksManager.prototype.createParamsStr = function (from, to, undef_t, undef_d,
         + '&current=true';
 };
 
+// поулчить данные роутера (плановые треки, матрицы расстояний и матрицы времен проезда) по конкреьтному маршруту
 TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBeforeSend, callback, onlyOne) {
     var data = onlyOne ? _data : _data[nIndx],
         loc_str = '',
@@ -140,6 +150,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         }
     }
 
+    // получение матриц времени и расстояний
     request({
         url: this.routerUrl + 'table?' + loc_str,
         json: true
@@ -153,11 +164,13 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
         }
     });
 
+    // получение плановых маршрутов
     request({
         url: this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
+            // если роутер не смог проложить маршрут сразу, запрашиваем треки кусками по две точки
             if (body.route_geometry == null) {
                 console.log('body.route_geometry == null');
                 data.routes[index].plan_geometry = [];
@@ -174,6 +187,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
     });
 };
 
+// запрашивает треки кусками по две точки, если роутер не смог проложить маршрут сразу
 TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne) {
     var data = onlyOne ? _data : _data[nIndx],
         points = data.routes[index].points,
@@ -210,6 +224,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
     });
 };
 
+// получить реальные треки и стопы по всем машинам решения за весь день указанный в переданных данных в поле server_time
 TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback) {
     console.log('=== getRealTracks ===');
 
@@ -252,6 +267,7 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
     }
 };
 
+// получить от роутера проложенный маршрут между двумя точками
 TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
     request({
         url: this.routerUrl + 'viaroute?instructions=false&compression=false'
@@ -267,6 +283,7 @@ TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
     });
 };
 
+// получить от роутера время проезда между двумя точками
 TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
     request({
         url: this.routerUrl + 'table?'
@@ -282,6 +299,7 @@ TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
     });
 };
 
+// получить маршрут проложенный через точки
 TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
     if (points.length < 2) return;
 
@@ -301,6 +319,7 @@ TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
 
 };
 
+// получить стопы по гиду машины за указанный промежуток времени
 TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);
@@ -315,6 +334,7 @@ TracksManager.prototype.getStops = function (gid, from, to, callback) {
     });
 };
 
+// получить трек по гиду машины за указанный промежуток времени
 TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
@@ -329,6 +349,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     });
 };
 
+// сохранить данные обработанные в консоли анализа истории в солвер
 TracksManager.prototype.sendDataToSolver = function () {
 
     fs.readFile('./logs/' + config.soap.defaultClientLogin + '_BigSolution.json', 'utf8', function (err, data) {
@@ -381,6 +402,7 @@ TracksManager.prototype.sendDataToSolver = function () {
 
 };
 
+// получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
     request({
         url: this.routerUrl + 'table?' + pointsStr,
@@ -392,6 +414,7 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
     });
 };
 
+// сформировать отчет по пробегам и типам стейтов
 TracksManager.prototype.getStateDataByPeriod = function () {
     var gids = [1086, 900, 758, 709], //[741,708,711,710,712,764,709,715,739,742,753,897,725,714,716,718,701,713,723,746,735,762,812,720,733,814,896,756,721,706,759,757,744,747,760,717,758,719,755,734,809,707,738,736,748,763,749,754,813,811,705,743,899,745,933,900,697,761,810,895],
         step = 24 * 60 * 60,
@@ -507,6 +530,7 @@ function deg2rad(deg) {
     return deg * (Math.PI / 180)
 }
 
+// расстояние в км между двумя точками
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     var R = 6371; // Radius of the earth in km
     var dLat = deg2rad(lat2 - lat1);  // deg2rad below
@@ -590,11 +614,3 @@ function getNByGid(gid) {
 
     return 'NONE'
 }
-
-
-
-
-
-
-
-

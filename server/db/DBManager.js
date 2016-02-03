@@ -3,10 +3,12 @@ module.exports = DBManager;
 var pg = require('pg');
 pg.defaults.poolSize = 25;
 
+// менеджер работы с базой данных
 function DBManager(conString) {
     this.conString = conString;
 }
 
+// выполнить любой запрос к БД
 DBManager.prototype.queryToDB = function (query, values, callback) {
     pg.connect(this.conString, function (err, client, done) {
         if (err) {
@@ -29,6 +31,7 @@ DBManager.prototype.testConnection = function () {
     });
 };
 
+// записать лог-сообещние в БД
 DBManager.prototype.logMessage = function (user_id, message, callback) {
     console.log('logMessage:', message);
     this.queryToDB('INSERT INTO logs(user_id, utimestamp, message) VALUES ($1, $2, $3);',

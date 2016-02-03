@@ -5,10 +5,12 @@ var request = require('request'),
     fs = require('fs'),
     log = new (require('./logging'))('./logs');
 
+// класс для работы с математическим сервером
 function MathServer() {
     this.mathServerUrl = config.mathServer.url;
 }
 
+// запрос на пересчет маршрута
 MathServer.prototype.recalculate = function (route, callback) {
     me = this;
 
@@ -53,4 +55,3 @@ MathServer.prototype.recalculate = function (route, callback) {
         }
     });
 };
-

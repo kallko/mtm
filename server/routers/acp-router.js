@@ -38,11 +38,41 @@ var express = require('express'),
 //    console.log(lines.length, counter, counter / lines.length);
 //});
 
+//fs.readFile('./logs/222.txt', 'utf8', function (err, data) {
+//    var lines = data.split('\r\n'),
+//        ids = {};
+//
+//    for (var i = 0; i < lines.length; i++) {
+//        ids[lines[i]] = true;
+//    }
+//
+//    fs.readFile('./logs/ids.dsp_solution.json', 'utf8', function (err, data2) {
+//        var solution = JSON.parse(data2),
+//            newSolution = [];
+//
+//        console.log('lines', lines.length);
+//        console.log('solution', solution.length);
+//
+//        for (var j = 0; j < solution.length; j++) {
+//            if (ids.hasOwnProperty(solution[j].id)) {
+//                newSolution.push(solution[j]);
+//            }
+//        }
+//
+//        console.log('newSolution', newSolution.length);
+//
+//        log.toFLog('ids.dsp_solution.json', newSolution);
+//    });
+//});
+
+// открытие консоли анализа истории и передача ей в качестве index из подпапки acp
 router.route('/')
     .get(function (req, res) {
         res.sendFile('index.html', {root: './public/acp/'});
     });
 
+
+// сохранение логина при запуске из окна 1С
 router.route('/login')
     .get(function (req, res) {
         req.session.login = req.query.curuser;
@@ -51,6 +81,7 @@ router.route('/login')
     });
 
 
+// догружает новые данные в уже существующее решение
 router.route('/mergesolution')
     .post(function (req, res) {
         console.log('mergesolution');
@@ -82,6 +113,9 @@ router.route('/mergesolution')
         });
     });
 
+
+// сохраняет отдельные части данных в общее решение,
+// если сохранение уже происходит, ждет пол секунды и пробует опять
 router.route('/savesolution')
     .post(function (req, res) {
         console.log('savesolution', new Date());
@@ -139,6 +173,7 @@ router.route('/savebigsol')
         res.status(200).json({status: 'saved'});
     });
 
+// получить решение исключая из него все измененные и готовые точки
 router.route('/loadsolution')
     .get(function (req, res) {
         console.log('loadsolution for ', config.soap.defaultClientLogin);
@@ -150,6 +185,7 @@ router.route('/loadsolution')
             } else {
                 console.log('Done!');
 
+                //// кусок для формирования json загружаемого в 1С для обновления координат
                 //var newJson = [],
                 //    _json = JSON.parse(data);
                 //console.log(_json.length);
@@ -181,6 +217,7 @@ router.route('/loadsolution')
         });
     });
 
+// получить стопы по конкретному гиду машины за конкретный период времени
 router.route('/getstops/:gid/:from/:to')
     .get(function (req, res) {
         fs.readFile('./logs/' + req.params.gid + '_' + req.params.from + '_' + req.params.to + '.json', 'utf8', function (err, data) {
@@ -195,6 +232,7 @@ router.route('/getstops/:gid/:from/:to')
         });
     });
 
+// получить трек по конкретному гиду машины за конкретный период времени
 router.route('/gettracks/:gid/:from/:to')
     .get(function (req, res) {
         console.log('gettracks');
@@ -203,6 +241,7 @@ router.route('/gettracks/:gid/:from/:to')
         });
     });
 
+// получить список сенсоров (устройств передающих треки) по авторизированному пользователю
 router.route('/getsensors')
     .get(function (req, res) {
         console.log('getsensors');
@@ -212,6 +251,7 @@ router.route('/getsensors')
         });
     });
 
+// загрузить план на конкретную дату
 router.route('/getplan/:timestamp')
     .get(function (req, res) {
         var fileName = './logs/' + config.soap.defaultClientLogin + '_' + req.params.timestamp + '.json';

@@ -2,7 +2,9 @@ module.exports = Locker;
 
 var log = new (require('./logging'))('./logs');
 
+// класс для блокировки/разблокировки отдельных точек и маршрутов целиком
 function Locker() {
+    // список заблокирвоанных решений
     this.lockedTasks = {};
 
     function test() {
@@ -11,6 +13,7 @@ function Locker() {
     }
 }
 
+// начальная инциализация указанного решения в списке заблокированных задач
 function initItinerary(lockedTasks, itineraryId) {
     if (lockedTasks[itineraryId]) return;
 
@@ -20,13 +23,13 @@ function initItinerary(lockedTasks, itineraryId) {
     };
 }
 
+// блокировка задачи
 Locker.prototype.lockTask = function (itineraryId, taskId, user, routeId) {
     initItinerary(this.lockedTasks, itineraryId);
 
     if (this.checkTaskLock(itineraryId, taskId, user)) return;
 
     var timestamp = Date.now();
-
     this.lockedTasks[itineraryId].locked.push({
         taskId: taskId,
         user: user,
@@ -37,6 +40,7 @@ Locker.prototype.lockTask = function (itineraryId, taskId, user, routeId) {
     this.lockedTasks[itineraryId].lastChange = timestamp;
 };
 
+// разблокировка задачи
 Locker.prototype.unlockTask = function (itineraryId, taskId, user) {
     if (!this.lockedTasks[itineraryId]) return false;
 
@@ -52,6 +56,7 @@ Locker.prototype.unlockTask = function (itineraryId, taskId, user) {
     return false;
 };
 
+// получение забокированных задач по указанному id решения
 Locker.prototype.checkLocks = function (itineraryId, lastCheckTime) {
     if (!this.lockedTasks[itineraryId] ||
         this.lockedTasks[itineraryId].lastChange <= lastCheckTime) return false;
@@ -59,6 +64,7 @@ Locker.prototype.checkLocks = function (itineraryId, lastCheckTime) {
     return this.lockedTasks[itineraryId];
 };
 
+// проверка блокировки задачи и в случае наличия таковой возвращения имени блокирующего пользователя
 Locker.prototype.checkTaskLock = function (itineraryId, taskId, user, notLockedCallback, lockedCallback) {
     if (!this.lockedTasks[itineraryId]) {
         if (notLockedCallback) notLockedCallback();
@@ -75,6 +81,7 @@ Locker.prototype.checkTaskLock = function (itineraryId, taskId, user, notLockedC
     if (notLockedCallback) notLockedCallback();
 };
 
+// получить имя пользователся заблокировашего задачу
 Locker.prototype.getBlockerName = function (itineraryId, taskId) {
     if (!this.lockedTasks[itineraryId]) return;
 
@@ -87,6 +94,7 @@ Locker.prototype.getBlockerName = function (itineraryId, taskId) {
     return '';
 };
 
+// проверить блокировку маршрута и в случае наличия блокировки получить имя блокируещего пользователя
 Locker.prototype.checkRouteLocks = function (itineraryId, taskIdArr, user, notLockedCallback, lockedCallback) {
     var blockerName;
 
@@ -105,6 +113,7 @@ Locker.prototype.checkRouteLocks = function (itineraryId, taskIdArr, user, notLo
     return false;
 };
 
+// заблокировать весь маршрут
 Locker.prototype.lockRoute = function (itineraryId, routeId, taskIdArr, user) {
     this.unlockAllByUser(itineraryId, user);
 
@@ -113,6 +122,7 @@ Locker.prototype.lockRoute = function (itineraryId, routeId, taskIdArr, user) {
     }
 };
 
+// разблокировать весь маршрут
 Locker.prototype.unlockRoute = function (itineraryId, taskIdArr, user) {
     var result = {
         'unlocked': 0,
@@ -127,10 +137,8 @@ Locker.prototype.unlockRoute = function (itineraryId, taskIdArr, user) {
     return result;
 };
 
+// разблокировать все задачи ранее заблокированные указанным пользователем
 Locker.prototype.unlockAllByUser = function (itineraryId, user) {
-    //console.log(itineraryId);
-    //console.log(this.lockedTasks[itineraryId]);
-
     if (!this.lockedTasks[itineraryId]) return;
 
     for (var i = 0; i < this.lockedTasks[itineraryId].locked.length; i++) {
@@ -140,12 +148,3 @@ Locker.prototype.unlockAllByUser = function (itineraryId, user) {
         }
     }
 };
-
-
-
-
-
-
-
-
-
