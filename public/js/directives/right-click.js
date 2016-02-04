@@ -1,3 +1,4 @@
+// директива правого клика на элементе
 angular.module('MTMonitor').directive('ngRightClick', function ($parse) {
     return function (scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);

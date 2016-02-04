@@ -1,3 +1,4 @@
+// директива завершения рендеринга ng-repeat
 angular.module('MTMonitor').directive('onFinishRender', function ($timeout) {
     return {
         restrict: 'A',

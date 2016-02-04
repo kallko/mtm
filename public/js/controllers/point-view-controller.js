@@ -1,10 +1,12 @@
+// контроллер для отображения окна точки
 angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootScope', '$http', 'Statuses', '$filter',
     function (scope, rootScope, http, Statuses, filter) {
         var STATUS,
-            parent;
+            parent; // откуда было открыто окно
 
         init();
 
+        // начальная инициализация контроллера
         function init() {
             $('#point-view').popup({
                     transition: 'all 0.15s',
@@ -26,14 +28,12 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             rootScope.$on('unlockRoute', unlockRoute);
         }
 
+        // показать окно с точкой
         function show(event, data) {
             scope.point = data.point;
 
             $('#promised-start-card').val(filter('date')(data.point.promised_window_changed.start * 1000, 'HH:mm'));
             $('#promised-finish-card').val(filter('date')(data.point.promised_window_changed.finish * 1000, 'HH:mm'));
-
-            console.log(new Date(data.point.promised_window_changed.start * 1000));
-            console.log(new Date(data.point.promised_window_changed.finish * 1000));
 
             scope.route = data.route;
             parent = data.parent;
@@ -41,6 +41,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             $('#point-view').popup('show');
         }
 
+        // заблокировать маршрут
         function lockRoute(event, data) {
             scope.$emit('unlockAllRoutes', {filterId: data.route.filterId});
             scope.route = data.route;
@@ -49,6 +50,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.toggleRouteBlock();
         }
 
+        // разблокировать маршрут
         function unlockRoute(event, data) {
             scope.route = data.route;
             scope.point = data.point;
@@ -56,15 +58,19 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.toggleRouteBlock();
         }
 
+        // инициализация статусов
         function initStatuses() {
             STATUS = Statuses.getStatuses();
             scope.statuses = Statuses.getTextStatuses();
         }
 
+        // назначение нового текстового статуса
         function newTextStatus(event, text) {
             if (scope.point)    scope.point.textStatus = text;
         }
 
+        // подтверждение статуса (генерирует событие, которое принимается в PointIndexController
+        // и подтверждает сомнительный статус
         scope.confirmStatus = function () {
             console.log('confirmStatus');
             scope.$emit('changeConfirmation', {
@@ -73,6 +79,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
+        // отмена сомнительного статуса
         scope.cancelStatus = function () {
             console.log('cancelStatus');
             scope.$emit('changeConfirmation', {
@@ -81,6 +88,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
+        // отменить задачу
         scope.cancelTask = function () {
             console.log('cancelTask');
             scope.$emit('changeConfirmation', {
@@ -89,6 +97,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
+        // перекелючить (вкл/выкл) блокировку задачи
         scope.toggleTaskBlock = function () {
             var url;
 
@@ -99,11 +108,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                         if (data.status === 'ok') {
                             scope.point.locked = true;
                             scope.point.lockedByMe = true;
-                            //scope.$emit('showNotification', {text: 'Задание переведено в режим редактирования.'});
                         } else if (data.status === 'locked' && data.me) {
                             scope.point.locked = true;
                             scope.point.lockedByMe = true;
-                            //scope.$emit('showNotification', {text: 'Задание уже переведено в режим редактирования.'});
                         } else if (data.status === 'locked') {
                             scope.$emit('showNotification', {text: 'Задание заблокировано пользователем ' + data.byUser});
                         }
@@ -120,6 +127,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }
         };
 
+        // перекелючить (вкл/выкл) блокировку маршрута целиком
         scope.toggleRouteBlock = function () {
             var url = (scope.route.lockedByMe ? './unlockroute/' : './lockroute/') + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.route.filterId + '/',
                 first = true;
@@ -164,17 +172,20 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }
         };
 
+        // проверка на неопределенность статуса задачи
         scope.unconfirmed = function () {
             return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
                 scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
         };
 
+        // проверка на блокировку статуса задачи
         scope.locked = function (point) {
             return scope.point && scope.point.TASK_NUMBER
                 && (!scope.point.locked || scope.point.lockedByMe)
                 && (!scope.route.locked || scope.route.lockedByMe);
         };
 
+        // изменить обещанные окна
         scope.changePromisedWindow = function (point) {
             var start = $('#promised-start-card').val().split(':'),
                 finish = $('#promised-finish-card').val().split(':'),
@@ -186,6 +197,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
             };
 
+            // в зависимости от того, откуда открыто окно данные меняются в исходных данных или
+            // же только в изменяемой копии редактируемого маршрута
             if (parent === 'editRoute') {
                 console.log('checkPoint');
                 scope.$emit('checkPoint', point);
@@ -195,6 +208,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }
         };
 
+        // открывает окно в 1С IDS-овцев
         scope.open1CWindow = function () {
             console.log('open1CWindow');
             http.get('./openidspointwindow/' + scope.point.waypoint.ID)

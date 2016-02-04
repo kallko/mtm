@@ -1,8 +1,9 @@
+// работа с конвертированием времени
 angular.module('MTMonitor').factory('TimeConverter', [function TimeConverterFactory() {
     return {
+        // получает из строкового представления окон доступности массив объектов с таймстемпами начала и конца окон
         getTstampAvailabilityWindow: function (strWindows, currentTime) {
             if (!strWindows) {
-                //console.log('Invalid strWindows!');
                 return;
             }
 

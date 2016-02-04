@@ -1,3 +1,4 @@
+// фильтр для выборки уникальных элементов из массива
 angular.module('MTMonitor').filter('unique', function () {
     return function (arr, field) {
         if (arr == undefined) return [];

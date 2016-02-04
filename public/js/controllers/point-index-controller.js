@@ -1,33 +1,34 @@
+// контроллер для работы с таблицей точек и маршрутами в целом
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
     , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
     function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {
 
-        var pointTableHolder,
-            pointContainer,
-            pointTable,
-            _data,
-            rawData,
-            seed = 1,
+        var pointTableHolder,                               // холдер таблица точек
+            pointContainer,                                 // холдер всего контроллера
+            pointTable,                                     // таблица точек
+            _data,                                          // главное хранилище данных
+            rawData,                                        // сырые не измененные данные пришедшие от сервера
+            seed = 1,                                       // сид для генерации
 
-            stopUpdateInterval = 120,
-            updateTrackInterval = 30,
-            checkLocksInterval = 15,
+            stopUpdateInterval = 120,                       // интервал обновлений стопов
+            updateTrackInterval = 30,                       // интервал загрузки новых данных при отрисовке треков
+            checkLocksInterval = 15,                        // интервал проверки блокировок на сервере
 
-            controlledWindow = 600,
-            promisedWindow = 3600,
-            problemSortType = 0,
+            controlledWindow = 600,                         // размер контролируемого окна
+            promisedWindow = 3600,                          // размер обещанного окна
+            problemSortType = 0,                            // тип сортировки проблемности
 
-            STATUS = Statuses.getStatuses(),
+            STATUS = Statuses.getStatuses(),                // массив кодов статусов
 
-            WINDOW_TYPE = {
+            WINDOW_TYPE = {                                 // типы попадания в окон
                 OUT_WINDOWS: 0,
                 IN_ORDERED: 1,
                 IN_PROMISED: 2
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false,
-            enableDynamicUpdate = false;
+            loadParts = false,                              // догрузить новые данные сразу после загрузки интерфейса
+            enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
 
         setListeners();
         init();
@@ -38,29 +39,30 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             setRealTrackUpdate(stopUpdateInterval);
         }
 
+        // начальная инициализация
         function init() {
-            scope.rowCollection = [];
-            scope.displayCollection = [].concat(scope.rowCollection);
-            scope.filters = {};
-            scope.filters.statuses = Statuses.getTextStatuses();
+            scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
+            scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
+            scope.filters = {};                                         // фильтры
+            scope.filters.statuses = Statuses.getTextStatuses();        // фильтры по статусам
 
-            scope.filters.window_types = [
+            scope.filters.window_types = [                              // фильтры по типам попадания в окна
                 {name: 'Вне окон', value: WINDOW_TYPE.OUT_WINDOWS, class: 'out-windows'},
                 {name: 'В заказанном', value: WINDOW_TYPE.IN_ORDERED, class: 'in-ordered'},
                 {name: 'В обещанном', value: WINDOW_TYPE.IN_PROMISED, class: 'in-promised'}
             ];
 
-            scope.filters.branches = [
+            scope.filters.branches = [                                  // фильтры по филиалам
                 {name: 'Все филиалы', value: -1}
             ];
 
             scope.filters.branch = scope.filters.branches[0].value;
             scope.filters.status = scope.filters.statuses[0].value;
-            scope.filters.routes = [{name: 'все маршруты', value: -1}];
+            scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
             scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = -1;
             scope.filters.promised_15m = -1;
-            scope.draw_modes = [
+            scope.draw_modes = [                                        // режимы отрисовки треков
                 {name: 'комбинированный трек', value: 0},
                 {name: 'фактический трек', value: 1},
                 {name: 'плановый трек', value: 2},
@@ -68,32 +70,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ];
             scope.draw_mode = scope.draw_modes[0].value;
 
-            scope.recalc_modes = [
+            scope.recalc_modes = [                                      // режимы пересчета маршрута
                 {name: 'по большим окнам', value: 0},
                 {name: 'по заданным окнам', value: 1},
                 {name: 'по увеличенному заданному окну', value: 2}
             ];
             scope.recalc_mode = scope.recalc_modes[0].value;
 
-            scope.selectedRow = -1;
-            scope.filters.text = "";
-            scope.demoMode = false;
+            scope.selectedRow = -1;                                     // выбранная строка в таблице точек
+            scope.filters.text = "";                                    // текстовый фильтр таблицы
+            scope.demoMode = false;                                     // активирован ли демо режим
 
-            scope.params = scope.params || Settings.load();
+            scope.params = scope.params || Settings.load();             // настройки приложения
 
-            setProblemIndexSortMode(0);
+            setProblemIndexSortMode(0);                                 // сброс фильтрации по индексу проблемности
 
             var $promised = $('#promised-15m-btn');
+            // отжатие кнопки
             if ($promised.hasClass('btn-success')) {
                 $promised.toggleClass('btn-default').toggleClass('btn-success');
             }
 
             var $problem = $('#problem-index-btn');
+            // отжатие кнопки
             if ($problem.hasClass('btn-success')) {
                 $problem.toggleClass('btn-default').toggleClass('btn-success');
             }
         }
 
+        // установить динамическое обновление данных
         function setDynamicDataUpdate(seconds) {
             interval(function () {
                 console.log('setDynamicDataUpdate()');
@@ -103,6 +108,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }, seconds * 1000);
         }
 
+        // установить динамическое обновление треков
         function setRealTrackUpdate(seconds) {
             interval(function () {
                 console.log('setRealTrackUpdate()');
@@ -112,10 +118,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }, seconds * 1000);
         }
 
+        // установить интервал обновление информации о блокировках задач
         function setCheckLocksInterval() {
             interval(checkLocks, checkLocksInterval * 1000);
         }
 
+        // проверить блокировку задач
         function checkLocks() {
             if (!_data) return;
 
@@ -129,6 +137,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
         }
 
+        // привести таблицу задач в соответствие с scope.locked
         function refreshLocked() {
             var point,
                 haveLockedTasks;
@@ -165,6 +174,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // загрузить части трека
         function loadTrackParts() {
             if (_data == null) return;
 
@@ -181,12 +191,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log('loaded track parts');
 
                     for (var i = 0; i < trackParts.length; i++) {
+                        // если часть трека не валидна - пропускаем итерацию
                         if (trackParts[i].data == undefined ||
                             trackParts[i].data.length == 0 ||
                             trackParts[i].data == aggregatorError) {
                             continue;
                         }
 
+                        // добавляем новые данные к уже существующему треку
                         for (var j = 0; j < _data.routes.length; j++) {
                             if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                 if (trackParts[i].data.length > 0) {
@@ -217,11 +229,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
         }
 
+        // насильная загрузка данных мимо кеша сервера
         scope.forceLoad = function () {
             console.log('forceLoad');
             loadDailyData(true);
         };
 
+        // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
             showPopup('Загружаю данные...');
             var url = './dailydata';
@@ -240,6 +254,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
         }
 
+        // получить объект Date из строки
         function strToTstamp(strDate) {
             var parts = strDate.split(' '),
                 _date = parts[0].split('.'),
@@ -248,6 +263,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
         }
 
+        // слинковать данные пришедшие от сервера
         function linkDataParts(data) {
             init();
 
@@ -275,17 +291,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 routeId = 0,
                 len = 0,
                 tPoint,
-                roundingNumb = 300,
+                roundingNumb = 300,         // шаг округления обещанных окон
                 problematicRoutes = [],
                 branchIndx,
                 tmpTaskNumber = -1;
             scope.rowCollection = [];
 
+            // нет сенсоров - нет интерфейса
             if (!data.sensors) {
                 console.log(data);
                 return;
             }
 
+            // привязывание гидов из сенсоров к машинам, назначение реальных треков машинам
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
                     if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
@@ -315,6 +333,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
 
+                // назначение машин и реальных треков на маршруты
                 for (j = 0; j < data.transports.length; j++) {
                     if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                         data.routes[i].transport = data.transports[j];
@@ -324,14 +343,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             data.routes[i].real_track.length > 0 &&
                             data.routes[i].real_track != aggregatorError) {
                             len = data.routes[i].real_track.length - 1;
-                            //console.log('NOT NULL', data.routes[i].real_track.length);
-                            data.routes[i].car_position = data.routes[i].real_track[len];
-                            data.routes[i].real_track.splice(len, 1);
+                            data.routes[i].car_position = data.routes[i].real_track[len]; // определение текущего положения машины
+                            data.routes[i].real_track.splice(len, 1); // удаление стейта с текущим положением машины
                         }
                         break;
                     }
                 }
 
+                // назначение маршрутам водитилей
                 for (j = 0; j < data.drivers.length; j++) {
                     if (data.routes[i].DRIVER == data.drivers[j].ID) {
                         data.drivers[j].NAME = cutFIO(data.drivers[j].NAME);
@@ -340,6 +359,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
 
+                // если у маршрута нет машины или водителя - удаляем маршрут
                 if (!data.routes[i].transport || !data.routes[i].driver) {
                     data.routes.splice(i, 1);
                     rawData.routes.splice(i, 1);
@@ -355,6 +375,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint.driver = data.routes[i].driver;
                     tPoint.in_plan = true;
 
+                    // если нет номера задачи, ставим отрицательный номер
                     if (!tPoint.TASK_NUMBER) {
                         tPoint.TASK_NUMBER = tmpTaskNumber;
                         tmpTaskNumber--;
@@ -397,6 +418,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rowId++;
 
                     tPoint.windows = TimeConverter.getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, data.server_time);
+                    // создание обещанных окон
                     if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
                         for (k = 0; k < tPoint.windows.length; k++) {
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
@@ -418,6 +440,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
 
+                    // если обещанное окно не было созданно выше, создаем его вокруг времени прибытия и округляем
                     if (tPoint.promised_window == undefined) {
                         tPoint.promised_window = {
                             start: tPoint.arrival_time_ts - promisedWindow / 2,
@@ -437,6 +460,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     }
 
+                    // копируем обещанное окно без ссылок
                     if (tPoint.promised_window_changed == undefined) {
                         tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
                     }
@@ -459,6 +483,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
             }
 
+            // оповещаем ползователя о проблемных маршрутах
             if (problematicRoutes.length > 0) {
                 var msg = '<p style="width: 450px;" >Обнаружены машины с несколькими датчиками. Для данных машин необходимо ' +
                     'оставить только один датчик, в противном случае ' +
@@ -473,10 +498,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             _data = data;
             updateData();
-            scope.$emit('saveForDebug', {
-                'rowCollection': scope.rowCollection,
-                'data': data
-            });
 
             console.log('Finish linking', data);
             scope.displayCollection = [].concat(scope.rowCollection);
@@ -489,18 +510,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             prepareFixedHeader();
         }
 
-
+        // обрезает ФИО до ФИ
         function cutFIO(fioStr) {
             var parts = fioStr.split(' ');
             return parts[0] + ' ' + parts[1];
         }
 
+        // обновляет статусы и делает прогнозы по слинкованным данным
         function updateData() {
             statusUpdate();
             predicationArrivalUpdate();
             promised15MUpdate();
         }
 
+        // проверка на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         function promised15MUpdate() {
             var now = _data.server_time;
             for (var i = 0; i < _data.routes.length; i++) {
@@ -515,6 +538,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // получить дистанцию между двумя LanLon в метрах
         function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
             var R = 6371; // Radius of the earth in km
             var dLat = deg2rad(lat2 - lat1);  // deg2rad below
@@ -529,10 +553,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return d * 1000;
         }
 
+        // конверт градусов в радианы
         function deg2rad(deg) {
             return deg * (Math.PI / 180)
         }
 
+        // обновление статусов
         function statusUpdate() {
             console.log('statusUpdate');
 
@@ -549,6 +575,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpDistance,
                 tmpTime;
 
+            // удалением всех свойств задач созданных ранее при назначении статусов перед их переназначением
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
                     tmpPoint = _data.routes[i].points[j];
@@ -580,8 +607,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route.lastPointIndx = 0;
                 if (route.real_track != undefined) {
                     for (j = 0; j < route.real_track.length; j++) {
+                        // если статус не из будущего (в случае демо-режима) и стейт является стопом, проверяем его
                         if (route.real_track[j].t1 < _data.server_time && route.real_track[j].state == "ARRIVAL") {
                             tmpArrival = route.real_track[j];
+                            // перебираем все точки к которым
                             for (var k = 0; k < route.points.length; k++) {
                                 tmpPoint = route.points[k];
 
@@ -596,6 +625,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
 
+                                // если стоп от точки не раньше значения timeThreshold и в пределах
+                                // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
+                                // по времени чем предыдущий детект - привязываем этот стоп к точке
                                 if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
                                     tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                                     tmpPoint.timeToStop > tmpTime)) {
@@ -615,6 +647,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     lastPoint = route.points[route.lastPointIndx];
+                    // проверка последней определенной точки на статус выполняется
                     if (lastPoint != null) {
                         if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
                             && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
@@ -635,6 +668,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var mobilePushes = [],
                 allPushes = [];
 
+            // генерируем мобильные нажатия, если мы в демо-режиме
             if (scope.demoMode) {
                 var rand,
                     gpsTime,
@@ -686,11 +720,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             } else {
+                // получаем через 1С-ый parentForm имя клиента
                 _data.companyName = parentForm._call('getClientName');
             }
 
             scope.$emit('companyName', _data.companyName);
 
+            // по каждому доступному решению запрашиваем нажатия
             for (var m = 0; m < _data.idArr.length; m++) {
 
                 if (scope.demoMode) {
@@ -741,13 +777,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             lat = mobilePushes[i].lat;
                             lon = mobilePushes[i].lon;
 
+                            // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
                                 tmpPoint.mobile_push = mobilePushes[i];
                                 tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
                                 mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+                                // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
                                 if (mobilePushes[i].distance <= scope.params.mobileRadius) {
                                     tmpPoint.havePush = true;
                                     tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+                                    // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
                                     tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
                                     _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                                     _data.routes[j].pushes = _data.routes[j].pushes || [];
@@ -775,6 +814,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return Math.floor((x - Math.floor(x)) * (max - min) + min);
         }
 
+        // проверить подтвержденние точек в локальном хранилище
         function checkConfirmedFromLocalStorage() {
             if (!localStorage['confirmed'] || localStorage['confirmed'] == '[object Object]') {
                 localStorage['confirmed'] = '{}';
@@ -809,6 +849,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // поределить статус точки и тип окна, в которое она попадает
         function findStatusAndWindowForPoint(tmpPoint) {
             tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
             if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
@@ -837,6 +878,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // получить строковую дату в формате 1С
         function getDateStrFor1C(timestamp) {
             var date = new Date(timestamp);
             return date.getFullYear() +
@@ -844,6 +886,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 ( ("0" + date.getDate())).slice(-2);
         }
 
+        // обновить индекс проблемности
         function updateProblemIndex(route) {
             var point,
                 timeThreshold = 3600 * 6,
@@ -874,6 +917,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // обновить предсказание прибытия к точкам
         function predicationArrivalUpdate() {
             var route,
                 url,
@@ -883,6 +927,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
+                // пропускаем итерацию в случае не валидного трека
                 if (route.real_track == undefined ||
                     route.real_track.length == 0 ||
                     route.real_track == aggregatorError) {
@@ -894,6 +939,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 url = './findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].LAT + '&' + route.points[route.lastPointIndx].LON;
 
+                // получаем время проезда от текущего положения машины и до следующей по плану точки
                 (function (_route, _url) {
                     http.get(_url).
                         success(function (data) {
@@ -907,6 +953,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             for (var j = 0; j < _route.points.length; j++) {
                                 if (j < lastPoint) {
+                                    // все точки до последней выполненной проверяются по факту
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
@@ -918,7 +965,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
                                     }
                                 } else {
+                                    // точки ниже последней выполненной считаются ниже
                                     tmpTime = _route.time_matrix.time_table[0][j - 1][j];
+                                    // времена проезда от роутера приходят в десятых долях секунд
                                     totalTravelTime += tmpTime == 2147483647 ? 0 : tmpTime / 10;
                                     tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
                                     tmpDowntime = _route.points[j].working_window.start - tmpPred;
@@ -941,6 +990,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     }
 
                                     _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
+                                    // предсказываем статус опаздывает или уже опаздал
                                     if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
                                         _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction -
                                             _route.points[j].working_window.finish);
@@ -971,6 +1021,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // назначить колонки в таблице доступные для ресайза
         function setColResizable() {
             $("#point-table-tbl").colResizable({
                 onResize: function () {
@@ -979,6 +1030,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         }
 
+        // подписаться на события
         function setListeners() {
             $(window).resize(function () {
                 resetHeight();
@@ -995,6 +1047,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 pointTable = $('#point-table > table');
             }
 
+            // после изменений размера панельки, пересчитывать размеры таблицы и её шапки
             myLayout.on('stateChanged', function (e) {
                 var pointMenuPanel = $('#point-menu-panel');
                 pointTableHolder.height(pointContainer.height() - 27 - pointMenuPanel.height());
@@ -1010,6 +1063,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 updateFixedHeaderPos();
             });
 
+            // контролировать размер таблицы после изменения фильтров для изменения размеров грипов для ресайза колонок
             scope.$watch(function () {
                 return scope.filters.route + scope.filters.status + scope.filters.promised_15m + +scope.filters.problem_index + scope.filters.branch;
             }, function () {
@@ -1040,6 +1094,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         }
 
+        // обработчик события изменения настроек
         function settingsChanged(event, params) {
             var changed = false;
             if (params.workingWindowType !== scope.params.workingWindowType) {
@@ -1083,6 +1138,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // добавить в подтвержденные
         function addToConfirmed(id, code) {
             if (id == '') return;
 
@@ -1096,6 +1152,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(obj);
         }
 
+        // контестнео меню у строки в таблице
         function deliveryRowConextMenu(context, e) {
             var option = $(e.target).data("menuOption");
             var contextJ = $(context)[0],
@@ -1103,10 +1160,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point = rawData.routes[row.route_id].points[row.NUMBER - 1];
 
             switch (option) {
-                case 'sort':
+                case 'sort':    // сортировка по маршруту
                     sortByRoute(row.route_indx);
                     return;
-                case 'edit':
+                case 'edit':    // отправить маршрут на редактирование
                     sortByRoute(row.route_indx, true);
                     _data.routes[row.route_id].points[0].itineraryID = _data.ID;
 

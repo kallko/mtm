@@ -1,3 +1,4 @@
+// директива Enter на элементе
 angular.module('MTMonitor').directive('enterEvent', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {

@@ -1,3 +1,4 @@
+// контроллер для работы с попапами
 angular.module('MTMonitor').controller('NotificationController', ['$scope', '$rootScope', '$timeout',
     function (scope, rootScope, timeout) {
 
@@ -13,6 +14,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
             });
         }
 
+        // показать попап
         function showPopup(text, duration) {
             $('#notification div').html(text);
             $('#notification').popup('show');

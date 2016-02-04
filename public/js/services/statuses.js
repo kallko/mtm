@@ -1,4 +1,6 @@
+// сервис для хранения списка статусов
 angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
+        // коды статусов
     var STATUS = {
             FINISHED: 0,
             FINISHED_LATE: 1,
@@ -10,6 +12,7 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
             CANCELED: 8
         },
 
+        // параметры статусов
         textStatuses = [
             {
                 name: 'все статусы',

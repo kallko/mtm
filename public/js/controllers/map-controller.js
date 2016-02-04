@@ -1,27 +1,33 @@
+// контроллер для работы с картой
 angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', '$http', 'Statuses',
     function (scope, rootScope, http, Statuses) {
-        var map,
-            oms,
-            position,
-            inside = false,
-            holderEl = null,
-            changingWindow = false,
-            markersArr = [],
-            maximized = false,
-            textStatuses = Statuses.getTextStatuses(),
-            STATUS = Statuses.getStatuses();
+        var map,                                        // объект карты
+            oms,                                        // слой используемый Overlapping Marker Spiderfier
+            position,                                   // позиция границ прозрачного окна карты
+            inside = false,                             // находится ли курсор над прозрачным окном отображающим карту
+            holderEl = null,                            // обертка внутренностей панели отображающей карту
+            changingWindow = false,                     // меняется ли позиция окна в текущйи момент
+            markersArr = [],                            // список маркеров отрисованных на карте
+            maximized = false,                          // развернута ли панелька на весь браузер
+            textStatuses = Statuses.getTextStatuses(),  // расширенная информация о статусах
+            STATUS = Statuses.getStatuses();            // коды статусов
 
         initMap();
         addListeners();
 
+        // отрисовать комбинированный маршрут
         function drawCombinedRoute(route) {
             drawRealRoute(route);
 
             var i = route.points.length - 1;
+            // i будет равна первой выполненной задаче с конца маршрута
             for (; i >= 0; i--) {
-                if (route.points[i].status == 0) break;
+                if (route.points[i].status == STATUS.FINISHED ||
+                    route.points[i].status == STATUS.FINISHED_LATE ||
+                    route.points[i].status == STATUS.FINISHED_TOO_EARLY) break;
             }
 
+            // если трек есть и последняя задача в марщруте не выполнена - отрисовать остаток планового маршрута
             if (route.real_track != undefined && i != route.points.length - 1) {
                 var lastCoords = route.real_track[route.real_track.length - 1].coords,
                     carPos = lastCoords[lastCoords.length - 1],
@@ -42,6 +48,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             drawAllPoints(route.points);
         }
 
+        // из массива строк получить массив LatLng объектов
         function getLatLonArr(data) {
             var tmp,
                 geometry = [];
@@ -55,6 +62,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             return geometry;
         }
 
+        // отрисовать плановый трек с заданной позиции
         function drawPlannedRoute(track, startIndx) {
             if (track == null) return;
 
@@ -67,6 +75,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             addPolyline(geometry, 'blue', 3, 0.5, 1, true);
         }
 
+        // отрисовать фактический трек
         function drawRealRoute(route) {
             if (!route || !route.real_track) return;
 
@@ -79,13 +88,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 color = '',
                 stopIndx,
                 stopTime,
-                drawStops = $('#draw-stops').is(':checked'),
-                drawPushes = $('#draw-pushes').is(':checked');
+                drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
+                drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия
 
             for (var i = 0; i < track.length; i++) {
                 if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
 
                 color = '#5cb85c';
+                // отрисовать движение
                 if (track[i].state == 'MOVE') {
                     polyline = new L.Polyline(track[i].coords, {
                         color: color,
@@ -95,7 +105,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
                     polyline.addTo(map);
-                } else if (track[i].state == 'ARRIVAL') {
+                } else if (track[i].state == 'ARRIVAL') { // отрисовать стоп
+                    // если отрисовка стопов выключена, пропустить итерацию
+                    if (!drawStops) continue;
+
                     stopIndx = (parseInt(i / 2 + 0.5) - 1);
                     stopTime = mmhh(track[i].time);
                     tmpVar = stopTime.split(':');
@@ -105,6 +118,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         stopTime = parseInt(tmpVar[0]);
                     }
 
+                    // формирование всплывающей подсказки для стопов
                     tmpTitle = 'Остановка #' + stopIndx + '\n';
                     tmpTitle += 'Время прибытия: ' + formatDate(new Date(track[i].t1 * 1000)) + '\n';
                     tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
@@ -127,7 +141,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                         {'title': tmpTitle});
                     tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
-                    if (drawStops) addMarker(tmpVar);
+                    addMarker(tmpVar);
                 } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                     color = '#5bc0de';
                 } else if (track[i].state == 'START') {
@@ -146,6 +160,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
             }
 
+            // если не включена отрисовка нажатий - выход из функции
             if (!pushes) return;
 
             for (var i = 0; drawPushes && i < pushes.length; i++) {
@@ -159,12 +174,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+        // получить текстовый статус по коду статуса
         function getTextStatuses(status) {
             for (var i = 0; i < textStatuses.length; i++) {
                 if (textStatuses[i].value === status) return textStatuses[i];
             }
         }
 
+        // отрисовать все точки (задачи) на карте
         function drawAllPoints(points) {
             var tmpVar,
                 title,
@@ -220,21 +237,25 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+        // перевести timestamp в строковой формат времени минуты:часы
         function mmhh(time) {
             return (parseInt(time / 60)).padLeft() + ':' + (time % 60).padLeft();
         }
 
+        // добавить ноль слева, если число меньше десяти
         Number.prototype.padLeft = function (base, chr) {
             var len = (String(base || 10).length - String(this).length) + 1;
             return len > 0 ? new Array(len).join(chr || '0') + this : this;
         };
 
+        // добавить маркер на карту (добавляет сам маркер, добавляет в слой oms, добавляет в массив маркеров)
         function addMarker(marker) {
             map.addLayer(marker);
             oms.addMarker(marker);
             markersArr.push(marker);
         }
 
+        // добавить полилайн на карту
         function addPolyline(geometry, color, weight, opacity, smoothFactor, decorator) {
             var polyline = new L.Polyline(geometry, {
                 color: color,
@@ -246,6 +267,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             polyline.addTo(map);
         }
 
+        // форматировать дату в строковой формат часы:минуты:секунды
         function formatDate(d) {
             var dformat =
                 [d.getHours().padLeft(),
@@ -254,6 +276,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             return dformat;
         }
 
+        // проверить попадание координаты в Rect
         function checkMouseInRect(pos, x, y) {
             if (pos.top < y && pos.left < x &&
                 pos.top + pos.height > y && pos.left + pos.width > x) {
@@ -263,6 +286,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             return false;
         }
 
+        // подписаться на ряд событий
         function addListeners() {
             $(window).resize(resize);
             resize();
@@ -297,17 +321,21 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             holderEl = $('#transparent-map-holder');
             holderEl.parent().on('mouseenter', function (event) {
+                // если на родителя холдера карты зашел курсор, но ещё не числится, что он внутри
+                // и при этом панельки не меняются, происходит пересчет границ прозрачной панельки карты
                 if (!inside && !changingWindow) {
                     checkMapWindowRect();
                 }
             });
 
-            var dragHandle = $('.lm_drag_handle');
+            var dragHandle = $('.lm_drag_handle'); // загаловок панели
+            // нажатие на загаловке панели
             dragHandle.on('mousedown', function () {
                 changingWindow = true;
                 disableMap();
             });
 
+            // отжатие загаловка панели
             dragHandle.on('mouseup', function () {
                 changingWindow = false;
             });
@@ -328,6 +356,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             })
         }
 
+        // найти новые границы прозрачной панельки карты
         function checkMapWindowRect() {
             if (maximized) return;
 
@@ -351,12 +380,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             });
         }
 
+        // отключить взаимодействие с картой
         function disableMap() {
             inside = false;
             $('.lm_goldenlayout').css('pointer-events', 'auto');
             $('body').off('mousemove');
         }
 
+        // сделать панель карты прозрачной
         function setTransparent() {
             var el = holderEl.parent();
 
@@ -370,6 +401,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+        // инициализация карты
         function initMap() {
             map = new L.Map('map', {
                 center: new L.LatLng(50.4412776, 30.6671281),
@@ -389,6 +421,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             oms = new OverlappingMarkerSpiderfier(map);
         }
 
+        // изменение размеров окна браузера и, как следствие, карты
         function resize() {
             var $map = $('#map');
             $map.height($(window).height());
@@ -396,6 +429,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             map.invalidateSize();
         }
 
+        // очистить карту
         function clearMap() {
             var m = map;
             for (i in m._layers) {
@@ -415,6 +449,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             map.removeLayer(oms);
         }
 
+        // установить центр карты
         function setMapCenter(lat, lon) {
             var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
                 offset = map.getSize(),

@@ -1,5 +1,7 @@
+// сервис для работы с настройками приложения
 angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
     return {
+        // выгружает настройки из локального хранилища, если они там есть, или создает новые настройки по умолчанию
         load: function() {
             var settings = localStorage['settings'] ? JSON.parse(localStorage['settings']) : undefined;
             if (!settings) {
@@ -13,6 +15,8 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
             return settings;
         },
 
+        // проверяет наличие свойств у переданного объекта по отноешнию к настройкам по умолчанию
+        // и дополняет переданный объект
         checkUndefinedSettings: function (comparedSettings) {
             var defaultSettings = this.getDefaultSettings(),
                 updated = false;
@@ -26,6 +30,7 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
             if (updated) this.saveToLocalStorage(comparedSettings);
         },
 
+        // настройки по умолчанию
         getDefaultSettings: function () {
             return {
                 predictMinutes: 10,
@@ -43,6 +48,7 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
             };
         },
 
+        // сохраняет настройки в локальное хранилище
         saveToLocalStorage: function (settings) {
             localStorage['settings'] = JSON.stringify(settings);
         }

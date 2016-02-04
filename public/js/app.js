@@ -1,5 +1,6 @@
 angular.module('MTMonitor', ['smart-table']);
 
+// инициализация Golden Layout (перемещаемые панельки)
 var myLayout = new GoldenLayout({
     settings: {
         showPopoutIcon: false,
@@ -8,6 +9,7 @@ var myLayout = new GoldenLayout({
     },
     content: [{
         type: 'row',
+        // начальное расположение панелек в интерфейсе
         content: [
             {
                 type: 'column',
@@ -15,9 +17,10 @@ var myLayout = new GoldenLayout({
                     {
                         type: 'component',
                         componentName: 'template',
-                        componentState: {templateId: 'transparent-map-window'}
+                        componentState: {templateId: 'transparent-map-window'} // id темплейта из index.html
                     }
                     ,
+                    // две панельки в одном стеке
                     {
                         type: 'stack',
                         height: 50,
@@ -55,6 +58,7 @@ myLayout.registerComponent('template', function (container, state) {
     container.getElement().html(templateHtml);
 });
 
+// ручной запуск Ангуляра после инициализации Golden Layout
 myLayout.on('initialised', function () {
     angular.bootstrap(document.body, ['MTMonitor']);
 });
