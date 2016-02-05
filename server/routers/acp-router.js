@@ -180,6 +180,7 @@ router.route('/loadsolution')
 
         var loadSolution = function (_res) {
             if (!processingSolution) {
+                processingSolution = true;
                 fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
                     if (err) {
                         console.log(err);
@@ -215,6 +216,7 @@ router.route('/loadsolution')
                             }
                         }
 
+                        processingSolution = false;
                         _res.status(200).json(toSend);
                     }
                 });
