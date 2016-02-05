@@ -178,53 +178,52 @@ router.route('/loadsolution')
     .get(function (req, res) {
         console.log('loadsolution for ', config.soap.defaultClientLogin);
 
-        //var loadSolution = function (res) {
-        //    if (!processingSolution) {
-        //
-        //    } else {
-        //        //setTimeout(loadSolution, attemptTimeout, res);
-        //    }
-        //};
+        var loadSolution = function (_res) {
+            if (!processingSolution) {
+                fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
+                    if (err) {
+                        console.log(err);
+                        return err;
+                    } else {
+                        console.log('Done!');
 
-        fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
+                        //// кусок для формирования json загружаемого в 1С для обновления координат
+                        //var newJson = [],
+                        //    _json = JSON.parse(data);
+                        //console.log(_json.length);
+                        //for (var i = 0; i < _json.length; i++) {
+                        //    if (_json[i].solved || _json[i].changed) {
+                        //        newJson.push({
+                        //            id: _json[i].id,
+                        //            new_position: _json[i].new_position
+                        //        });
+                        //    }
+                        //}
+                        //
+                        //log.toFLog('brand_new_json.json', newJson);
 
-            if (err) {
-                console.log(err);
-                return err;
-            } else {
-                console.log('Done!');
+                        var json = JSON.parse(data),
+                            toSend = [];
 
-                //// кусок для формирования json загружаемого в 1С для обновления координат
-                //var newJson = [],
-                //    _json = JSON.parse(data);
-                //console.log(_json.length);
-                //for (var i = 0; i < _json.length; i++) {
-                //    if (_json[i].solved || _json[i].changed) {
-                //        newJson.push({
-                //            id: _json[i].id,
-                //            new_position: _json[i].new_position
-                //        });
-                //    }
-                //}
-                //
-                //log.toFLog('brand_new_json.json', newJson);
-
-                var json = JSON.parse(data),
-                    toSend = [];
-
-                for (var i = 0; i < json.length; i++) {
-                    if (!json[i].solved && json[i].lat && json[i].lon
-                        && json[i].coords && json[i].coords.length > 0) {
-                        if (json[i].changed || json[i].done) {
-                            json[i].hide = true;
+                        for (var i = 0; i < json.length; i++) {
+                            if (!json[i].solved && json[i].lat && json[i].lon
+                                && json[i].coords && json[i].coords.length > 0) {
+                                if (json[i].changed || json[i].done) {
+                                    json[i].hide = true;
+                                }
+                                toSend.push(json[i]);
+                            }
                         }
-                        toSend.push(json[i]);
-                    }
-                }
 
-                res.status(200).json(toSend);
+                        _res.status(200).json(toSend);
+                    }
+                });
+            } else {
+                setTimeout(loadSolution, attemptTimeout, _res);
             }
-        });
+        };
+        loadSolution(res);
+
     });
 
 // получить стопы по конкретному гиду машины за конкретный период времени
