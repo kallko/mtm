@@ -7,7 +7,7 @@ var config = {
         session: false // использования сессии для кеширование данных получвемых из соапа
     },
 
-    loadOnlyItineraryNew: false, // загружать только решения нового типа GET_ITINERARY_NEW
+    loadOnlyItineraryNew: true, // загружать только решения нового типа GET_ITINERARY_NEW
 
     soap: {
         login: 'soap_admin', // админский логин для клиента соапа
