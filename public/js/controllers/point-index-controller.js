@@ -1181,24 +1181,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // TODO: подсветить строку под меню
         }
 
+        // обработчик изменения статуса
         rootScope.$on('changeConfirmation', onChangeStatus);
         function onChangeStatus(event, data) {
             var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
             changeStatus(data.row, rawPoint, data.option);
         }
 
+        // изменение статуса
         function changeStatus(row, rawPoint, option) {
             var needChanges = !(row.confirmed && (row.status == STATUS.FINISHED
             || row.status == STATUS.FINISHED_LATE || row.status == STATUS.FINISHED_TOO_EARLY));
 
             switch (option) {
-                case 'confirm-status':
+                case 'confirm-status': // подтверждение сомнительного статуса
                     if (!needChanges) return;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
                     addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
-                case 'not-delivered-status':
+                case 'not-delivered-status': // отмена сомнительного статуса
                     if (!needChanges) return;
 
                     if (_data.server_time > row.working_window.finish) {
@@ -1209,7 +1211,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rawPoint.rawConfirmed = -1;
                     addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
-                case 'cancel-point':
+                case 'cancel-point': // отмена точки
                     row.status = STATUS.CANCELED;
                     break;
             }
@@ -1218,6 +1220,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$emit('newTextStatus', scope.getTextStatus(row.status, row.row_id, row.confirmed));
         }
 
+        // сортировать по точке
         function sortByRoute(indx, force) {
             if (force) {
                 scope.filters.route = indx;
@@ -1232,6 +1235,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$apply();
         }
 
+        // обновить размер грипов для ресайза
         function updateResizeGripHeight() {
             timeout(function () {
                 var height = pointTable.height();
@@ -1240,6 +1244,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }, 1);
         }
 
+        // подготовить заголовки таблицы для их фиксации при скролле
         function prepareFixedHeader() {
             var header = $('.header'),
                 table = $('#point-table > table'),
@@ -1266,6 +1271,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateFixedHeaderPos();
         }
 
+        // обновить область отрисовки заголовка таблицы
         function updateHeaderClip() {
             var x = pointTableHolder.scrollLeft(),
                 width = pointContainer.width() - 24;
@@ -1276,6 +1282,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         }
 
+        // изменить размер заголовка таблицы
         function resizeHead($table) {
             $table.find('thead.header > tr:first > th').each(function (i, h) {
                 $table.find('thead.header-copy > tr > th:eq(' + i + ')').css({
@@ -1287,16 +1294,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             $table.find('thead.header-copy').css('width', $table.outerWidth());
         }
 
+        // обновить позицию фиксированного заголовка таблицы
         function updateFixedHeaderPos() {
             $('.header-copy').offset(pointTableHolder.position());
         }
 
+        // обновить высоту таблицы
         function resetHeight() {
             var tableHeight = $(window).height() - $("#menu-holder").height()
                 - $("#tab-selector").height() - 22;
             $('#point-table').height(tableHeight);
         }
 
+        // обработчик клика на строке таблицы
         scope.rowClick = function (id) {
             $('.selected-row').removeClass('selected-row');
 
@@ -1314,6 +1324,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        // обработчик даблклика на строке таблицы
         scope.dblRowClick = function (row) {
             row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
@@ -1321,6 +1332,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
         };
 
+        // получить текстовый статус для задачи с необходимыми css классами
         scope.getTextStatus = function (statusCode, row_id, confirmed) {
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
@@ -1347,6 +1359,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return 'неизвестный статус';
         };
 
+        // получить текстовое представление окна по его коду
         scope.getTextWindow = function (windowCode, row_id) {
             for (var i = 0; i < scope.filters.window_types.length; i++) {
                 if (scope.filters.window_types[i].value == windowCode) {
@@ -1364,22 +1377,27 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return '';
         };
 
+        // фильтр по статусу
         function statusFilter(row) {
             return (scope.filters.status == -1 || row.status == scope.filters.status);
         }
 
+        // фильтр по маршруту
         function routeFilter(row) {
             return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
         }
 
+        // фильтр по проблемности
         function problemFilter(row) {
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
         }
 
+        // фильтр на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         function promise15MFilter(row) {
             return (scope.filters.promised_15m == -1 || row.promised_15m);
         }
 
+        // отрисовать плановый маршрут
         scope.drawPlannedRoute = function () {
             if (scope.selectedRow != -1) {
                 scope.$emit('drawPlannedTrack',
@@ -1389,6 +1407,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        // отрисовать маршрут
         scope.drawRoute = function () {
             scope.$emit('clearMap');
 
@@ -1428,6 +1447,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if (route.real_track == undefined) return;
 
+            // если время последнего обновления не известно или с момента последнего обновления
+            // трека прошло updateTrackInterval секунд - догружаем новые данные
             if (route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
                 console.log('download tracks');
@@ -1466,16 +1487,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
-        scope.checkPoint = function () {
-            var checkedObj = $('.point-checkbox:checked'),
-                checkedIdArr = [];
-
-            console.log(checkedObj.length);
-            for (var i = 0; i < checkedObj.length; i++) {
-                checkedIdArr.push(checkedObj[i].id);
-            }
-        };
-
+        // вкл/выкл фильтр только проблемных точек
         scope.toggleProblemPoints = function () {
             $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
             if (scope.filters.problem_index == -1) {
@@ -1492,6 +1504,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        // задать порядок сортировки по индексу проблемности
         function setProblemIndexSortMode(mode) {
             timeout(function () {
                 if (mode != problemSortType) {
@@ -1501,6 +1514,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }, 10);
         }
 
+        // вкл/выкл фильтр на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         scope.togglePromised15MPoints = function () {
             $('#promised-15m-btn').toggleClass('btn-default').toggleClass('btn-success');
             if (scope.filters.promised_15m == -1) {
@@ -1510,6 +1524,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        // перемещение элемента внутри массива
         Array.prototype.move = function (old_index, new_index) {
             if (new_index >= this.length) {
                 var k = new_index - this.length;
@@ -1521,6 +1536,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return this;
         };
 
+        // изменить обещанное окно
         scope.changePromisedWindow = function (row_id) {
             var start = $('#edit-promised-start-' + row_id).val().split(':'),
                 finish = $('#edit-promised-finish-' + row_id).val().split(':'),
@@ -1537,6 +1553,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateData();
         };
 
+        // изменить обещанное окно в сырых данных
         function updateRawPromised(point) {
             var rawPoints = rawData.routes[point.route_id].points;
             for (var i = 0; i < rawPoints.length; i++) {
@@ -1548,16 +1565,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
+        // показать попап
         function showPopup(text, duration) {
             scope.$emit('showNotification', {text: text, duration: duration});
         }
 
+        // сохранить маршрут
         function saveRoutes() {
             var routes = [],
                 route,
                 point;
             for (var i = 0; i < _data.routes.length; i++) {
-                if (_data.routes[i].toSave) { // || i == 0) {
+                // все маршруты, которые помечены на сохранение, переупаковать на отправку
+                if (_data.routes[i].toSave) {
                     route = {
                         itineraryID: _data.routes[i].itineraryID,
                         routesID: _data.routes[i].ID,
@@ -1610,6 +1630,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             console.log('sending routes to save', routes);
 
+            // отправляем переупакованные данныена пересчет
             http.post('./saveroute/', {routes: routes}).
                 success(function (data) {
                     console.log('Save to 1C result >>', data);
@@ -1619,17 +1640,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
         }
 
+        // назначить текстовый фильтр
         scope.setTextFilter = function () {
             scope.filters.text = $("#search-input").val();
             updateResizeGripHeight();
         };
 
+        // очистить текстовый фильтр
         scope.cancelTextFilter = function () {
             $("#search-input").val('');
             scope.filters.text = '';
             updateResizeGripHeight();
         };
 
+        // текстовый фильтр
         function textFilter(row) {
             if (scope.filters.text === "") return true;
             if (row.waypoint == undefined) return false;
@@ -1645,10 +1669,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || row.transport.REGISTRATION_NUMBER.toLowerCase().indexOf(filterLowCase) >= 0;
         }
 
+        // фильтр по филлиалам
         function branchFilter(row) {
             return (scope.filters.branch == -1 || row.branchIndx == scope.filters.branch);
         }
 
+        // применить все фильтры
         scope.applyFilter = function (row) {
             return statusFilter(row)
                 && routeFilter(row)
@@ -1658,12 +1684,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 && branchFilter(row);
         };
 
+        // обновить маршрут
         function updateRoute(event, data) {
             console.log('updateRoute at point-index-controller', data.route);
 
             var updatedRoute = rawData.routes[data.route.filterId],
                 route = data.route;
 
+            // разблокировать маршрут
             scope.$emit('unlockRoute', {
                 route: _data.routes[data.route.filterId],
                 point: _data.routes[data.route.filterId].points[0]
@@ -1692,6 +1720,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             linkDataParts(rawData);
         }
 
+        // получить статус нажатия
         scope.getPushStatus = function (row) {
             if (row.havePush) {
                 return 'Есть';
@@ -1703,6 +1732,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+        // разблокировать все маршруты
         function unlockAllRoutes(event, data) {
             var route;
             console.log('unlockAllRoutes()', data.filterId);
