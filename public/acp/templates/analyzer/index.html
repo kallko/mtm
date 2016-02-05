@@ -1,4 +1,5 @@
 <div id="points-table-holder"  ng-controller="PointsTableController">
+    <!-- таблица группированных нажатий -->
     <table class="table table-striped"
            st-safe-src="rowCollection"
            st-table="displayCollection">
@@ -33,6 +34,7 @@
 </div>
 
 <div id="setting-holder" ng-controller="SettingController" >
+    <!-- настройки -->
     <div class="holder" >
         <button ng-click="saveData()" class="btn btn-primary btn-sm" >сохранить</button>
         <button ng-click="points.doneRow()" id="done-btn" class="btn btn-primary btn-sm" >готово</button>
@@ -43,5 +45,6 @@
 </div>
 
 <div id="map-holder" ng-controller="MapController" >
+    <!-- карта -->
     <div id="map" ></div>
 </div>

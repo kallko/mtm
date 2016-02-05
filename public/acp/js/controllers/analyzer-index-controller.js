@@ -1,3 +1,4 @@
+// контроллер отвечающий за анализ и обработку данных
 angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 'Track', 'Sensor',
     '$timeout', 'Solution', 'Plan', function (scope, http, Track, Sensor, timeout, Solution, Plan) {
         scope.params = {};
@@ -12,30 +13,41 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             loadData();
         }, 1200);
 
+        // загружает данные с сервера
         function loadData() {
             console.log('loadData');
 
-            //var from = 1433116800,
-            //    to = 1446595200; //1446076800; //1439596800
-            //scope.plans = [];
-            //loadPlans(from, to);
-
-            if (true) {
-                Solution.load().success(function (data) {
-                    scope.data = data;
-                    groupButtonsByRadius();
-                    scope.map.clearMap();
-                    scope.points.reinit(scope.data);
-                });
+            if (false) {
+                // когда все точки обработаны, необходимо влючить эту ветку, для загрузки планов и
+                // дальнейшего анализа данных
+                var from = 1433116800, // грузить планы от
+                    to = 1446595200; // и до
+                scope.plans = [];
+                loadPlans(from, to); // Грузит планы, проводит дополнительный анализ, после чего
+                // сохраняет результат в BigSolution, который потом необходимо
+                // грузить в солвер. После этого в acp-router в роуте loadsolution необходимо раскоментить кусок
+                // кода, который формирует json для загрузки в 1С обновленных координат и выгрузить этот json в 1C
             } else {
-                scope.data = jsonData2;
-                groupButtonsByRadius();
-                Solution.merge(jsonData2).success(function (data) {
-                    console.log('Merge complete!');
-                });
+                if (true) {
+                    // в этой ветке происходит штатная работа человека работающего с перемещением точек
+                    Solution.load().success(function (data) {
+                        scope.data = data;
+                        groupButtonsByRadius();
+                        scope.map.clearMap();
+                        scope.points.reinit(scope.data);
+                    });
+                } else {
+                    // ветка влючаемая при необходимости догрузить новые данные в основной массив
+                    scope.data = jsonData2; // новые данные подключаются отдельным файлом в /data/input_test2.js
+                    groupButtonsByRadius();
+                    Solution.merge(jsonData2).success(function (data) {
+                        console.log('Merge complete!');
+                    });
+                }
             }
         }
 
+        // загрузить сенсоры и стопы
         function loadSensorsAndStops() {
             var from = 1433116800,
                 to = 1446076800;
@@ -80,6 +92,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             });
         }
 
+        // загрузить планы в диапазоне from - to
         function loadPlans(from, to) {
             console.log('loadPlans');
             Plan.all(from).success(function (data) {
@@ -87,11 +100,13 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 console.log(new Date(from * 1000));
                 scope.plans.push(data);
 
+                // в случае отсутствия планов начинается новый цикл загрузки
                 if (data.status == 'no plan') {
                     startNewLoadCycle(from, to);
                     return;
                 }
 
+                // назначения гидов машинам из сенсоров
                 for (var i = 0; i < data.sensors.length; i++) {
                     for (var j = 0; j < data.transports.length; j++) {
                         if (data.sensors[i].TRANSPORT == data.transports[j].ID) {
@@ -101,6 +116,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 }
 
                 for (i = 0; i < data.routes.length; i++) {
+                    // назначение машин на маршруты
                     for (j = 0; j < data.transports.length; j++) {
                         if (data.routes[i].TRANSPORT == data.transports[j].ID) {
                             data.routes[i].transport = data.transports[j];
@@ -108,6 +124,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         }
                     }
 
+                    // привязывание конечных waypoint к точкам
                     for (var j = 0; j < data.routes[i].points.length; j++) {
                         for (var k = 0; k < data.waypoints.length; k++) {
                             if (data.routes[i].points[j].END_WAYPOINT == data.waypoints[k].ID) {
@@ -126,13 +143,15 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         continue;
                     }
 
+                    // получение стопов по гидам машин из маршрутов
                     (function (ii) {
                         Track.stops(data.routes[ii].transport.gid, from, from + 86400)
                             .success(function (stops) {
                                 data.routes[ii].stops = stops.data;
-                                bindPlanStopsToPoints(data.routes[ii]);
+                                bindPlanStopsToPoints(data.routes[ii]); // привязываем плановые стопы к точкам
                                 counter++;
                                 if (counter == data.routes.length) {
+                                    // после выгрузки всех стопов начинаем новый цикл загрузки плана
                                     console.log('stops loaded!');
                                     startNewLoadCycle(from, to);
                                 }
@@ -143,6 +162,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             });
         }
 
+        // привязываем стопы из планов к точкам
         function bindPlanStopsToPoints(route) {
             var result = {
                     jobs: {
@@ -158,6 +178,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 stopsArr,
                 goodPoint;
 
+            // начальное соотношение стопов к задачам
             for (var i = 0; i < route.points.length; i++) {
                 point = route.points[i];
                 if (point.waypoint == undefined) continue;
@@ -186,6 +207,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             result.jobs.find_coef = result.jobs.len / route.points.length * 100;
             route.linked_jobs = result.jobs;
 
+            // соотношения задач к стопам
             for (var key in result.jobs) {
                 if (result.jobs.hasOwnProperty(key) && key.substr(0, 5) == 'task#') {
 
@@ -207,6 +229,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 scope.good_points = [];
             }
 
+            // финальная подвязка стопа к задаче и определение "хороших" точек
             for (var key in result.jobs) {
                 if (result.jobs.hasOwnProperty(key) && key.substr(0, 5) == 'task#') {
                     stopsArr = result.jobs[key];
@@ -242,14 +265,18 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
         }
 
+        // запуск нового цикла загрузки планов
         function startNewLoadCycle(from, to) {
-            from += 86400;
+            from += 86400; // + день в секундах
             if (to > from) {
+                // если до конечного таймстемпа не дошли, запрашиваем следующий план
                 loadPlans(from, to);
             } else {
                 console.log('All plans loaded!');
+                // если дошли, заменяем IDS-овские гуиды на наши внутренние id, необходимые для солвера
                 replaceDataID();
 
+                // сохраняем готовые данные в BigSolution
                 Solution.saveBig(scope.good_points)
                     .success(function (data) {
                         console.log(data);
@@ -259,9 +286,11 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
         }
 
+        // заменяем IDS-овские гуиды на наши внутренние id, необходимые для солвера
         function replaceDataID() {
             var point;
 
+            // данные для замен берутся из трех файлов /data/drivers.js, /data/transports.js, /data/waypoins.js
             for (var i = 0; i < scope.good_points.length; i++) {
                 point = scope.good_points[i];
 
@@ -289,6 +318,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }
         }
 
+        // сохранить измененные данные
         scope.saveData = function () {
             if (saving) {
                 toLogDiv('Всё ещё сохраняю...');
@@ -328,39 +358,20 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             }, 100);
         };
 
-        //scope.saveData = function () {
-        //    console.log('saveData');
-        //    var toSave = [];
-        //    toLogDiv(' Сохраняю...');
-        //
-        //    for (var i = 0; i < scope.data.length; i++) {
-        //        if (scope.data[i].needSave) {
-        //            delete scope.data[i].needSave;
-        //            toSave.push(scope.data[i]);
-        //        }
-        //    }
-        //
-        //    timeout(function () {
-        //        Solution.save(toSave).success(function (data) {
-        //            toLogDiv('Сохранено!');
-        //        });
-        //    }, 100);
-        //};
-
+        // вкл/выкл отображение включенных
         scope.toggleChanged = function () {
             $('#toggle-edited-btn').toggleClass('btn-default').toggleClass('btn-success');
             scope.points.showHidden = !scope.points.showHidden;
         };
 
+        // анализироваьт данные
         scope.analyzeData = function () {
             console.log('analyzeData');
-            //console.log({stops: scope.stopsCollection});
             groupButtonsByRadius();
-            //bindStopsToButtons();
-            //getTracksForStops();
             scope.points.reinit(scope.data);
         };
 
+        // гриппировать мобильные нажатия по радиусу
         function groupButtonsByRadius() {
             var aBtn,
                 bBtn,
@@ -374,6 +385,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 changedCount = 0,
                 doneCount = 0;
 
+            // в первом проходе для каждого нажатия находятся нажатия в радиусе
             for (var i = 0; i < scope.data.length; i++) {
                 if (scope.data[i].changed) continue;
 
@@ -406,6 +418,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 }
 
                 maxCount = -1;
+                // находим максимальное количество нажатий в радиусе
                 for (j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];
                     if (aBtn.closePointsCount > maxCount) {
@@ -415,6 +428,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
 
                 for (j = 0; j < scope.data[i].coords.length; j++) {
                     aBtn = scope.data[i].coords[j];
+                    // находим нажатие с максимальным количеством нажатий в радиусе
                     if (aBtn.closePointsCount == maxCount) {
                         sum = {
                             count: 0,
@@ -423,6 +437,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                         };
 
                         coodsToSort = [];
+                        // находим нажатия в радиусе у нажатия с максимальным количеством нажатий
                         for (k = 0; k < scope.data[i].coords.length; k++) {
                             bBtn = scope.data[i].coords[k];
                             bBtn.inRadius = getDistanceFromLatLonInKm(aBtn.lat, aBtn.lon, bBtn.lat, bBtn.lon) * 1000 <=
@@ -485,10 +500,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             console.log('готово', doneCount);
         }
 
+        // вывести сообщение в лог-див
         function toLogDiv(msg) {
             $('#log-div').text(msg);
         }
 
+        // перобразовать строку объект Date
         function strToTstamp(strDate) {
             var parts = strDate.split(' '),
                 _date = parts[0].split('.'),
@@ -497,83 +514,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
         }
 
-        function bindStopsToButtons() {
-            if (scope.stopsCollection == undefined) return;
-            console.log({scopedata: scope.data})
-
-            var stop,
-                stopsArr,
-                button,
-                buttonPush,
-                timeShift = 1 * 60 * 60,
-                stopRadius = 150,
-                undefCounter = 0;
-
-            for (var i = 0; i < scope.data.length; i++) {
-                if (i % 100 == 0) console.log("I: " + i + " out of " + scope.data.length + ", undef = " + undefCounter);
-
-                button = scope.data[i];
-                button.stops = [];
-                for (var j = 0; j < scope.data[i].coords.length; j++) {
-                    //if(j % 500 == 0) console.log("J: " + j + " out of " + scope.data[i].coords.length);
-                    buttonPush = scope.data[i].coords[j];
-                    stopsArr = scope.stopsCollection[buttonPush.gid];
-
-                    if (stopsArr == undefined) {
-                        //console.log("buttonPush", buttonPush);
-                        //console.log("buttonPush.gid", buttonPush.gid);
-                        //console.log("buttonPush.gid = undefined ");
-                        undefCounter++;
-                        continue;
-                    }
-
-                    for (var k = 0; k < stopsArr.length; k++) {
-                        //if(k % 100 == 0) console.log("K: " + k + " out of " + stopsArr.length);
-                        stop = stopsArr[k];
-
-                        if (buttonPush.time_ts == undefined) {
-                            buttonPush.time_ts = strToTstamp(buttonPush.time);
-                        }
-
-                        if (buttonPush.time_ts + timeShift > stop.t1 &&
-                            buttonPush.time_ts - timeShift < stop.t1 &&
-                            getDistanceFromLatLonInKm(stop.lat, stop.lon,
-                                button.new_position.lat, button.new_position.lon) * 1000 <= stopRadius) {
-
-                            if (buttonPush.stops == null) buttonPush.stops = [];
-                            if (stop.pushes == null) stop.pushes = [];
-
-                            buttonPush.stops.push(stop);
-                            button.stops.push(stop);
-                            stop.pushes.push(buttonPush);
-                        }
-                    }
-                }
-            }
-        }
-
-        function getTracksForStops() {
-            var counter = 0;
-            for (var i = 0; i < scope.data.length; i++) {
-                for (var j = 0; j < scope.data[i].stops.length; j++) {
-                    (function (ii, jj) {
-                        var stop = scope.data[ii].stops[jj];
-                        counter++;
-                        Track.track(stop.gid, stop.t1, stop.t2).success(function (track) {
-                            stop.track = track.data;
-                            stop.median = findMedianForPoints(track.data);
-                            counter--;
-
-                            if (counter == 0) {
-                                console.log('all tracks downloaded!');
-                                findRealPointPosition();
-                            }
-                        });
-                    })(i, j);
-                }
-            }
-        }
-
+        // найти медиану координат точек
         function findMedianForPoints(points) {
             var coodsToSort = {
                     lat: [],
@@ -609,6 +550,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
             return median;
         }
 
+        // найти новое положение точек
         function findRealPointPosition() {
             var points;
             console.log('findRealPointPosition', scope.data);
@@ -623,10 +565,12 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                     points.push(scope.data[i].coords[j]);
                 }
 
+                // получаем новое положение из медианы стопов точки и ей мобильных нажатий
                 scope.data[i].new_position = findMedianForPoints(points);
             }
         }
 
+        // получить дистанцию между двумя координатами в км
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
             var R = 6371; // Radius of the earth in km
             var dLat = deg2rad(lat2 - lat1);  // deg2rad below

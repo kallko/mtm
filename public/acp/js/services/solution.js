@@ -1,3 +1,4 @@
+// сервис для работы с решениями
 angular.module('acp').factory('Solution', ['$http', function SolutionFactory(http) {
     return {
         save: function (solution) {

@@ -1,13 +1,14 @@
+// контроллер работы с картой
 angular.module('acp').controller('MapController', ['$scope', function (scope) {
-    var map,
-        markersArr = [],
-        oms,
-        mapJ,
-        pointsTableJ,
-        settingsPanelJ,
-        windowJ,
+    var map,                // Leaflet объект карты
+        markersArr = [],    // массив маркеров
+        oms,                // слой для Overlapping Marker Spiderfier
+        mapJ,               // jQuery объект карты
+        pointsTableJ,       // jQuery объект таблицы точек
+        settingsPanelJ,     // jQuery объект панели настроек
+        windowJ,            // jQuery объект window
 
-        colors = [
+        colors = [          // массив цветов для маркеров
             '#A9D0F5',
             '#40FF00',
             '#04B4AE',
@@ -23,6 +24,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
     initMap();
     setListeners();
 
+    // инициализация карты
     function initMap() {
         map = new L.Map('map', {
             center: new L.LatLng(50.4303429,30.5621329),
@@ -44,6 +46,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         oms = new OverlappingMarkerSpiderfier(map);
     }
 
+    // очистить карту
     scope.map.clearMap = function () {
         var m = map;
         for (i in m._layers) {
@@ -63,6 +66,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         map.removeLayer(oms);
     };
 
+    // привязать обработчики
     function setListeners() {
         windowJ = $(window);
         pointsTableJ = $('#points-table-holder');
@@ -73,6 +77,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         resize();
     }
 
+    // обработчик события ресайза окна
     function resize() {
         var mapTopMargin = pointsTableJ.height() + settingsPanelJ.height();
         mapJ.height(windowJ.height() - mapTopMargin);
@@ -80,6 +85,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         map.invalidateSize();
     }
 
+    // отрисовать мобильные нажатия
     scope.map.drawButtonsPushes = function (pushes) {
         for (var i = 0; i < pushes.length; i++) {
             for (var j = 0; j < pushes[i].coords.length; j++) {
@@ -88,6 +94,7 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         }
     };
 
+    // отрисовать маркер
     scope.map.drawMarker = function (point, text, title, iconIndex, colorB, colorF, draggable) {
         draggable = typeof draggable !== 'undefined' ? draggable : false;
         var tmpMarker;
@@ -107,17 +114,20 @@ angular.module('acp').controller('MapController', ['$scope', function (scope) {
         addMarker(tmpMarker);
     };
 
+    // центрировать карту
     scope.map.setCenter = function (point) {
         var zoom = map.getZoom() > 17 ? map.getZoom() : 17;
         map.setView(point, zoom);
     };
 
+    // добавить маркер на карту
     function addMarker(marker) {
         map.addLayer(marker);
         oms.addMarker(marker);
         markersArr.push(marker);
     }
 
+    // отрисовать точку
     scope.map.drawPoint = function (point) {
         var title;
 

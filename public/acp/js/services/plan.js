@@ -1,3 +1,4 @@
+// сервис для работы с планами
 angular.module('acp').factory('Plan', ['$http', function PlanFactory(http) {
     return {
         all: function(timestamp) {

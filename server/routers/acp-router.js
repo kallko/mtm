@@ -204,7 +204,7 @@ router.route('/loadsolution')
                     toSend = [];
 
                 for (var i = 0; i < json.length; i++) {
-                    if (!json[i].solved) {
+                    if (!json[i].solved && json[i].lat && json[i].lon) {
                         if (json[i].changed || json[i].done) {
                             json[i].hide = true;
                         }

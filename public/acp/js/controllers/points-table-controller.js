@@ -1,6 +1,7 @@
+// контроллер работы с точками и нажатиями
 angular.module('acp').controller('PointsTableController', ['$scope', '$http', function (scope, http) {
-
-    scope.points.reinit = function (data) {
+   // переинициализация контроллера
+   scope.points.reinit = function (data) {
         scope.selectedRow = -1;
         scope.rowCollection = [];
 
@@ -13,6 +14,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         console.log('reinit', {'scope.rowCollection': scope.rowCollection});
     };
 
+    // обработчик нажатия на строке в таблице
     scope.rowClick = function (row_id) {
         lastRowId = row_id;
 
@@ -32,6 +34,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         scope.map.drawPoint(row);
     };
 
+    // скрыть строку
     scope.points.hideRow = function () {
         var row = scope.rowCollection[scope.selectedRow];
         row.hide = !row.hide;
@@ -39,6 +42,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         changeHideButtonText(row.hide);
     };
 
+    // поменять текст кнопки в зависимости от выбранной строки
     function changeHideButtonText(hidden) {
         var btn = $('#hide-row-btn');
         if (hidden) {
@@ -48,6 +52,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         }
     }
 
+    // обозначить точку как выполненную
     scope.points.doneRow = function () {
         if (scope.selectedRow != -1) {
             var row = scope.rowCollection[scope.selectedRow];
@@ -58,6 +63,7 @@ angular.module('acp').controller('PointsTableController', ['$scope', '$http', fu
         }
     };
 
+    // назначить новые кооординаты
     scope.points.setNewLatLon = function (latlon) {
         if (scope.selectedRow != -1) {
             var row = scope.rowCollection[scope.selectedRow];
