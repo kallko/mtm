@@ -192,37 +192,42 @@ router.route('/loadsolution')
                         return err;
                     } else {
                         console.log('Done!');
+                        try {
+                            //// кусок для формирования json загружаемого в 1С для обновления координат
+                            //var newJson = [],
+                            //    _json = JSON.parse(data);
+                            //console.log(_json.length);
+                            //for (var i = 0; i < _json.length; i++) {
+                            //    if (_json[i].solved || _json[i].changed) {
+                            //        newJson.push({
+                            //            id: _json[i].id,
+                            //            new_position: _json[i].new_position
+                            //        });
+                            //    }
+                            //}
+                            //
+                            //log.toFLog('brand_new_json.json', newJson);
 
-                        //// кусок для формирования json загружаемого в 1С для обновления координат
-                        //var newJson = [],
-                        //    _json = JSON.parse(data);
-                        //console.log(_json.length);
-                        //for (var i = 0; i < _json.length; i++) {
-                        //    if (_json[i].solved || _json[i].changed) {
-                        //        newJson.push({
-                        //            id: _json[i].id,
-                        //            new_position: _json[i].new_position
-                        //        });
-                        //    }
-                        //}
-                        //
-                        //log.toFLog('brand_new_json.json', newJson);
+                            var json = JSON.parse(data),
+                                toSend = [];
 
-                        var json = JSON.parse(data),
-                            toSend = [];
-
-                        for (var i = 0; i < json.length; i++) {
-                            if (!json[i].solved && json[i].lat && json[i].lon
-                                && json[i].coords && json[i].coords.length > 0) {
-                                if (json[i].changed || json[i].done) {
-                                    json[i].hide = true;
+                            for (var i = 0; i < json.length; i++) {
+                                if (!json[i].solved && json[i].lat && json[i].lon
+                                    && json[i].coords && json[i].coords.length > 0) {
+                                    if (json[i].changed || json[i].done) {
+                                        json[i].hide = true;
+                                    }
+                                    toSend.push(json[i]);
                                 }
-                                toSend.push(json[i]);
                             }
+
+                            _res.status(200).json(toSend);
+                        } catch (e) {
+                            console.log(e);
+                            _res.status(500).json({status: 'error'});
                         }
 
                         processingSolution = false;
-                        _res.status(200).json(toSend);
                     }
                 });
             } else {
