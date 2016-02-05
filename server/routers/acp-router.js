@@ -137,24 +137,29 @@ router.route('/savesolution')
                         console.log(err);
                         return err;
                     } else {
-                        var jsonData = JSON.parse(data),
-                            toSave = solution,
-                            savedCount = 0;
-                        for (var i = 0; i < jsonData.length; i++) {
-                            for (var j = 0; j < toSave.length; j++) {
-                                if (jsonData[i].id == toSave[j].id) {
-                                    savedCount++;
-                                    delete toSave[j].needSave;
-                                    jsonData[i] = toSave[j];
-                                    break;
+                        try {
+                            var jsonData = JSON.parse(data),
+                                toSave = solution,
+                                savedCount = 0;
+                            for (var i = 0; i < jsonData.length; i++) {
+                                for (var j = 0; j < toSave.length; j++) {
+                                    if (jsonData[i].id == toSave[j].id) {
+                                        savedCount++;
+                                        delete toSave[j].needSave;
+                                        jsonData[i] = toSave[j];
+                                        break;
+                                    }
                                 }
                             }
+
+                            log.toFLog(config.soap.defaultClientLogin + '_solution.json', jsonData);
+                            res.status(200).json({status: 'saved'});
+                        } catch (e) {
+                            console.log(e);
+                            res.status(500).json({status: 'error'});
                         }
 
-                        log.toFLog(config.soap.defaultClientLogin + '_solution.json', jsonData);
                         processingSolution = false;
-
-                        res.status(200).json({status: 'saved'});
                     }
                 });
             } else {
