@@ -6,7 +6,8 @@ var express = require('express'),
     log = new (require('../logging'))('./logs'),
     fs = require('fs'),
 
-    savingSolution = false,
+    processingSolution = false,
+    attemptTimeout = 200,
     tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
@@ -125,9 +126,9 @@ router.route('/savesolution')
         }
 
         var saveSolution = function (solution) {
-            if (!savingSolution) {
+            if (!processingSolution) {
                 console.log('Saving solution...');
-                savingSolution = true;
+                processingSolution = true;
                 fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
                     log.toFLog(config.soap.defaultClientLogin + '_' + Date.now() + '_changes.json', solution);
 
@@ -151,19 +152,18 @@ router.route('/savesolution')
                         }
 
                         log.toFLog(config.soap.defaultClientLogin + '_solution.json', jsonData);
-                        savingSolution = false;
+                        processingSolution = false;
 
                         res.status(200).json({status: 'saved'});
                     }
                 });
             } else {
                 console.log('Waiting for unlock...');
-                setTimeout(saveSolution, 500, solution);
+                setTimeout(saveSolution, attemptTimeout, solution);
             }
         };
 
         saveSolution(req.body.solution);
-
     });
 
 router.route('/savebigsol')
@@ -178,7 +178,16 @@ router.route('/loadsolution')
     .get(function (req, res) {
         console.log('loadsolution for ', config.soap.defaultClientLogin);
 
+        //var loadSolution = function (res) {
+        //    if (!processingSolution) {
+        //
+        //    } else {
+        //        //setTimeout(loadSolution, attemptTimeout, res);
+        //    }
+        //};
+
         fs.readFile('./logs/' + config.soap.defaultClientLogin + '_solution.json', 'utf8', function (err, data) {
+
             if (err) {
                 console.log(err);
                 return err;
@@ -204,7 +213,8 @@ router.route('/loadsolution')
                     toSend = [];
 
                 for (var i = 0; i < json.length; i++) {
-                    if (!json[i].solved && json[i].lat && json[i].lon) {
+                    if (!json[i].solved && json[i].lat && json[i].lon
+                        && json[i].coords && json[i].coords.length > 0) {
                         if (json[i].changed || json[i].done) {
                             json[i].hide = true;
                         }
