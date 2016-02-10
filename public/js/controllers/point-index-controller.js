@@ -303,6 +303,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
+            console.log(data);
             // привязывание гидов из сенсоров к машинам, назначение реальных треков машинам
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
@@ -312,6 +313,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             }
+
+            //data.routes.pop(); // TODO remove
+            //data.routes.pop(); // TODO remove
+            //data.routes.pop(); // TODO remove
+            //data.routes.pop(); // TODO remove
+            //data.routes.pop(); // TODO remove
+            //data.routes.pop(); // TODO remove
 
             for (i = 0; i < data.routes.length; i++) {
                 if (data.routes[i].moreThanOneSensor) problematicRoutes.push(data.routes[i]);
@@ -397,15 +405,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         routeId++;
                     }
 
-                    tPoint.route_indx = data.routes[i].filterId;
-                    tPoint.transport = data.routes[i].transport;
-                    tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
-                    tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
-                    tPoint.base_arrival_ts = strToTstamp(tPoint.base_arrival);
-                    tPoint.controlled_window = {
-                        start: tPoint.arrival_time_ts - controlledWindow,
-                        finish: tPoint.arrival_time_ts + controlledWindow
-                    };
+                    try {
+                        tPoint.route_indx = data.routes[i].filterId;
+                        tPoint.transport = data.routes[i].transport;
+                        tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
+                        tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
+                        tPoint.base_arrival_ts = strToTstamp(tPoint.base_arrival);
+                        tPoint.controlled_window = {
+                            start: tPoint.arrival_time_ts - controlledWindow,
+                            finish: tPoint.arrival_time_ts + controlledWindow
+                        };
+                    } catch (e) {
+                        console.log(tPoint.driver.NAME, e);
+                    }
 
                     tPoint.end_time_hhmm = tPoint.END_TIME.substr(11, 8);
                     tPoint.end_time_ts = strToTstamp(tPoint.END_TIME);
@@ -499,7 +511,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data = data;
             updateData();
 
-            console.log('Finish linking', data);
+            console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
 
             saveRoutes();
@@ -573,7 +585,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 now = _data.server_time,
                 lastPoint,
                 tmpDistance,
-                tmpTime;
+                tmpTime,
+                status,
+                haveUnfinished;
 
             // удалением всех свойств задач созданных ранее при назначении статусов перед их переназначением
             for (var i = 0; i < _data.routes.length; i++) {
@@ -632,6 +646,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                                     tmpPoint.timeToStop > tmpTime)) {
 
+                                    haveUnfinished = false;
+                                    if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
+                                        for (var l = k - 1; l > 0; l--) {
+                                            status = route.points[l].status;
+                                            if (status !== STATUS.FINISHED
+                                                && status !== STATUS.FINISHED_LATE
+                                                && status !== STATUS.FINISHED_TOO_EARLY) {
+                                                haveUnfinished = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if (haveUnfinished)  {
+                                            continue;
+                                        }
+                                    }
+
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
@@ -641,6 +672,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
 
                                     findStatusAndWindowForPoint(tmpPoint);
+
                                 }
                             }
                         }
@@ -675,11 +707,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tmp,
                     tmpLen,
                     tmpCoord,
-                    tmpTime,
                     tmpLat,
                     tmpLon,
                     tmpRoute;
 
+                tmpTime = undefined;
                 _data.companyName = 'Demo';
                 for (var i = 0; i < _data.routes.length; i++) {
 
@@ -943,6 +975,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 (function (_route, _url) {
                     http.get(_url).
                         success(function (data) {
+                            if (_route.ID === "289" || _route.ID === "292" || _route.ID === "302") {
+                                console.log(_route.lastPointIndx, _route);
+                            }
+
                             var lastPoint = _route.lastPointIndx + 1,
                                 nextPointTime = parseInt(data.time_table[0][1][0] / 10),
                                 totalWorkTime = 0,
@@ -1308,6 +1344,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик клика на строке таблицы
         scope.rowClick = function (id) {
+            // TODO REMOVE
+            collectDataForDayClosing();
+
             $('.selected-row').removeClass('selected-row');
 
             if (scope.selectedRow == id) {
@@ -1574,56 +1613,59 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function saveRoutes() {
             var routes = [],
                 route,
-                point;
+                point,
+                whStart,
+                len;
             for (var i = 0; i < _data.routes.length; i++) {
                 // все маршруты, которые помечены на сохранение, переупаковать на отправку
-                if (_data.routes[i].toSave) {
-                    route = {
-                        itineraryID: _data.routes[i].itineraryID,
-                        routesID: _data.routes[i].ID,
-                        transportID: _data.routes[i].transport.ID,
-                        routeNumber: _data.routes[i].NUMBER,
-                        change_timestamp: _data.routes[i].change_timestamp,
-                        driver: _data.routes[i].DRIVER,
-                        startTime: _data.routes[i].START_TIME,
-                        endTime: _data.routes[i].END_TIME,
-                        time: _data.routes[i].TIME,
-                        value: _data.routes[i].VALUE,
-                        distance: _data.routes[i].DISTANCE,
-                        numberOfTasks: _data.routes[i].NUMBER_OF_TASKS,
-                        points: []
-                    };
+                if (!_data.routes[i].toSave) continue;
 
-                    for (var j = 0; j < _data.routes[i].points.length; j++) {
-                        point = _data.routes[i].points[j];
-                        route.points.push({
-                            taskNumber: point.TASK_NUMBER,
-                            stepNumber: point.NUMBER,
-                            arrivalTime: point.arrival_time_ts,
-                            startWaypointId: point.START_WAYPOINT,
-                            endWaypointId: point.END_WAYPOINT,
-                            startLatLon: {
-                                lat: point.START_LAT,
-                                lon: point.START_LON
-                            },
-                            endLatLon: {
-                                lat: point.END_LAT,
-                                lon: point.END_LON
-                            },
-                            taskTime: point.TASK_TIME,
-                            downtime: point.DOWNTIME,
-                            travelTime: point.TRAVEL_TIME,
-                            distance: point.DISTANCE,
-                            startTime: point.START_TIME,
-                            endTime: point.END_TIME,
-                            taskDate: point.TASK_DATE,
-                            weight: point.WEIGHT,
-                            volume: point.VOLUME
-                        });
-                    }
+                len = _data.routes[i].points.length;
+                route = {
+                    itineraryID: _data.routes[i].itineraryID,
+                    routesID: _data.routes[i].ID,
+                    transportID: _data.routes[i].transport.ID,
+                    routeNumber: _data.routes[i].NUMBER,
+                    change_timestamp: _data.routes[i].change_timestamp,
+                    driver: _data.routes[i].DRIVER,
+                    startTime: _data.routes[i].START_TIME,
+                    endTime: _data.routes[i].END_TIME,
+                    time: _data.routes[i].TIME,
+                    value: _data.routes[i].VALUE,
+                    distance: _data.routes[i].DISTANCE,
+                    numberOfTasks: _data.routes[i].NUMBER_OF_TASKS,
+                    points: []
+                };
 
-                    routes.push(route);
+                for (var j = 0; j < len; j++) {
+                    point = _data.routes[i].points[j];
+                    route.points.push({
+                        taskNumber: point.TASK_NUMBER,
+                        stepNumber: point.NUMBER,
+                        arrivalTime: point.arrival_time_ts,
+                        startWaypointId: point.origStartWp ? point.origStartWp : point.START_WAYPOINT,
+                        endWaypointId: point.END_WAYPOINT,
+                        startLatLon: {
+                            lat: point.START_LAT,
+                            lon: point.START_LON
+                        },
+                        endLatLon: {
+                            lat: point.END_LAT,
+                            lon: point.END_LON
+                        },
+                        taskTime: point.ARRIVAL_TIME,
+                        downtime: point.DOWNTIME,
+                        travelTime: point.TRAVEL_TIME,
+                        distance: point.DISTANCE,
+                        startTime: point.START_TIME,
+                        endTime: point.END_TIME,
+                        taskDate: point.TASK_DATE,
+                        weight: point.WEIGHT,
+                        volume: point.VOLUME
+                    });
                 }
+
+                routes.push(route);
             }
 
             if (routes.length == 0) return;
@@ -1699,7 +1741,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (var i = 0; i < route.points.length; i++) {
                 for (var j = 0; j < updatedRoute.points.length; j++) {
-                    if (updatedRoute.points[j].NUMBER == route.points[i].NUMBER) {
+                    if (updatedRoute.points[j].NUMBER === route.points[i].NUMBER) {
                         updatedRoute.points.splice(j, 1);
                         break;
                     }
@@ -1751,6 +1793,64 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete route.points[j].lockedRoute;
                 }
             }
+        }
+
+        // создание структуры данных для закрытия дня
+        function collectDataForDayClosing() {
+            return;
+
+            var result = {
+                    routes: []
+                },
+                routeI,
+                pointJ,
+                route,
+                point,
+                startTime,
+                e;
+
+            for (var i = 0; i < _data.routes.length; i++) {
+                routeI = _data.routes[i];
+                route = {
+                    pointsReady: [],
+                    pointsUnconfirmed: [],
+                    pointsNotReady: [],
+                    driver: routeI.DRIVER,
+                    transport: routeI.TRANSPORT,
+                    number: routeI.NUMBER,
+                    startTimePlan: routeI.START_TIME,
+                    endTimePlan: routeI.END_TIME,
+                    totalPoints: routeI.points.length
+                };
+
+                for (var j = 0; j < routeI.points.length; j++) {
+                    pointJ = routeI.points[j];
+
+                    point = {
+                        waypoint: pointJ.END_WAYPOINT,
+                        taskNumber: pointJ.TASK_NUMBER,
+                        plannedNumber: pointJ.NUMBER,
+                        weight: pointJ.WEIGHT,
+                        volume: pointJ.VOLUME,
+                        value: pointJ.VALUE
+                    };
+
+
+
+                    if (pointJ.haveStop && pointJ.havePush) {
+                        route.pointsReady.push(point);
+                    } else if (pointJ.haveStop || pointJ.havePush) {
+                        route.pointsUnconfirmed.push(point);
+                    } else {
+                        route.pointsNotReady.push(point);
+                    }
+                }
+
+                result.routes.push(route);
+            }
+
+            console.log('collectDataForDayClosing >>', result);
+            return result;
         }
 
     }]);

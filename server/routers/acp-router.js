@@ -193,20 +193,25 @@ router.route('/loadsolution')
                     } else {
                         console.log('Done!');
                         try {
-                            //// кусок для формирования json загружаемого в 1С для обновления координат
+                            // кусок для формирования json загружаемого в 1С для обновления координат
                             //var newJson = [],
-                            //    _json = JSON.parse(data);
+                            //    _json = JSON.parse(data),
+                            //    csvRes = '';
                             //console.log(_json.length);
                             //for (var i = 0; i < _json.length; i++) {
                             //    if (_json[i].solved || _json[i].changed) {
-                            //        newJson.push({
-                            //            id: _json[i].id,
-                            //            new_position: _json[i].new_position
-                            //        });
+                            //        //newJson.push({
+                            //        //    id: _json[i].id,
+                            //        //    new_position: _json[i].new_position
+                            //        //});
+                            //        csvRes += _json[i].id + ',' + _json[i].new_position.lat  +
+                            //            ',' + _json[i].new_position.lon + '\r\n';
                             //    }
                             //}
                             //
-                            //log.toFLog('brand_new_json.json', newJson);
+                            //log.toFLog('npoints.csv', csvRes, false);
+                            ////log.toFLog('brand_new_json.json', newJson);
+                            //return;
 
                             var json = JSON.parse(data),
                                 toSend = [];

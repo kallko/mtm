@@ -221,6 +221,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     // получение развернутого решения по списку полученных ранее id решений
                     for (var i = 0; i < itineraries.length; i++) {
+                        //if (itineraries[i].$.ID == 4) continue; // TODO REMOVE
+
                         (function (ii) {
                             setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
@@ -242,10 +244,11 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
     var me = this;
 
-    if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko' && this.login != 'ids.dsp')) {
+    if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko')) {
+        setTimeout(function () {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
             itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
-        });
+        })}, 15);
     }
 
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
@@ -255,7 +258,6 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 
 // колбек срабатывающий при получении развернутого решения
 function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
-
     if (!err) {
         parseXML(result.return, function (err, res) {
             data.iLength--;
@@ -306,6 +308,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
 
         for (var j = 0; j < routes[i].SECTION.length; j++) {
             if (j == 0 && routes[i].SECTION[j].$.START_WAYPOINT == "") {
+                routes[i].SECTION[j].$.origStartWp = routes[i].SECTION[j].$.START_WAYPOINT;
                 routes[i].SECTION[j].$.START_WAYPOINT = routes[i].SECTION[j].$.END_WAYPOINT;
             }
 
@@ -458,6 +461,7 @@ SoapManager.prototype.getPlanByDate = function (timestamp, callback) {
 
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
+
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
         console.log('getPlansByTime', me.login);
 
@@ -509,7 +513,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             });
         };
 
-    log.toFLog('origBeforeSave.json', routes, false);
+    log.toFLog('origBeforeSave.json', routes);
 
     var resXml;
     for (var i = 0; i < routes.length; i++) {
@@ -518,7 +522,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             loadGeometry(i, j, function () {
                 resXml = _xml.routesXML(routes, me.login);
                 log.toFLog('saveChanges.xml', resXml, false);
-                saveTo1C(resXml);
+                //saveTo1C(resXml);
             });
         }
     }

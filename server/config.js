@@ -8,6 +8,7 @@ var config = {
     },
 
     loadOnlyItineraryNew: true, // загружать только решения нового типа GET_ITINERARY_NEW
+    //loadOnlyItineraryNew: false,
 
     soap: {
         login: 'soap_admin', // админский логин для клиента соапа

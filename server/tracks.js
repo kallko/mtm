@@ -142,49 +142,65 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
     var data = onlyOne ? _data : _data[nIndx],
         loc_str = '',
         points = data.routes[index].points,
-        me = this;
+        me = this,
+        counter = 0;
 
     for (var i = 0; i < points.length; i++) {
         if (points[i].LAT != null && points[i].LON != null) {
             loc_str += "&loc=" + points[i].LAT + "," + points[i].LON;
+            counter++;
         }
     }
 
+    if (counter < 2) {
+        data.routes[index].time_matrix_loaded = true;
+        data.routes[index].plan_geometry_loaded = true;
+        data.routes[index].not_enough_valid_points = true;
+        return;
+    }
+
     // получение матриц времени и расстояний
-    request({
-        url: this.routerUrl + 'table?' + loc_str,
-        json: true
-    }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            data.routes[index].time_matrix = body;
-            data.routes[index].time_matrix_loaded = true;
-            checkBeforeSend(_data, callback);
-        } else {
-            console.log('table', points.length, body);
-        }
-    });
+    (function (url) {
+        request({
+            url: url,
+            json: true
+        }, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                data.routes[index].time_matrix = body;
+                data.routes[index].time_matrix_loaded = true;
+                checkBeforeSend(_data, callback);
+            } else {
+                console.log('table', points.length, body, url);
+            }
+        });
+    })(this.routerUrl + 'table?' + loc_str);
+
+
 
     // получение плановых маршрутов
-    request({
-        url: this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str,
-        json: true
-    }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            // если роутер не смог проложить маршрут сразу, запрашиваем треки кусками по две точки
-            if (body.route_geometry == null) {
-                console.log('body.route_geometry == null');
-                data.routes[index].plan_geometry = [];
-                data.routes[index].plan_geometry_loaded = false;
-                me.getGeometryByParts(_data, nIndx, index, 0, checkBeforeSend, callback, onlyOne);
+    (function (url) {
+        request({
+            url: url,
+            json: true
+        }, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                // если роутер не смог проложить маршрут сразу, запрашиваем треки кусками по две точки
+                if (body.route_geometry == null) {
+                    console.log('body.route_geometry == null');
+                    data.routes[index].plan_geometry = [];
+                    data.routes[index].plan_geometry_loaded = false;
+                    me.getGeometryByParts(_data, nIndx, index, 0, checkBeforeSend, callback, onlyOne);
+                } else {
+                    data.routes[index].plan_geometry = body.route_geometry_splited;
+                    data.routes[index].plan_geometry_loaded = true;
+                    checkBeforeSend(_data, callback);
+                }
             } else {
-                data.routes[index].plan_geometry = body.route_geometry_splited;
-                data.routes[index].plan_geometry_loaded = true;
-                checkBeforeSend(_data, callback);
+                console.log('viaroute', points.length, body, url);
             }
-        } else {
-            console.log('viaroute', points.length, body);
-        }
-    });
+        });
+    })(this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str);
+
 };
 
 // запрашивает треки кусками по две точки, если роутер не смог проложить маршрут сразу
@@ -358,9 +374,29 @@ TracksManager.prototype.sendDataToSolver = function () {
         }
 
         data = JSON.parse(data);
+
+
+        var test = {},
+            counter = 0,
+            key;
+        for (var i = 0; i < data.length; i++) {
+            key = data[i].waypoint_id.toString() + data[i].timestamp.toString();
+            if (!test[key]) {
+                test[key] = { counter: 1 };
+            }
+            else {
+                test[key].counter++;
+                counter++;
+                //console.log('REPEAT!', counter);
+                data.splice(i, 1);
+                i--;
+            }
+        }
+
         var query;
         var func = function (ii, _query) {
             setTimeout(function () {
+                //console.log(_query);
                 request({
                     url: _query,
                     json: true
@@ -368,16 +404,17 @@ TracksManager.prototype.sendDataToSolver = function () {
                     console.log(body, ii);
                 });
 
-            }, ii * 4);
+            }, (ii) * 4 );
         };
 
-        for (var i = 2000; i < data.length; i++) {
+        for (var i = 0; i < data.length; i++) {
             if (i % 50 == 0) {
                 if (query != undefined) {
                     func(i, query);
                 }
 
                 query = 'http://5.9.147.66:5500/visit?';
+                //query = 'http://5.9.147.66:5500/delete?';
             } else {
                 query += "&";
             }
@@ -393,6 +430,9 @@ TracksManager.prototype.sendDataToSolver = function () {
                 + '0;'
                 + '0;'
                 + '0;0;0;0';
+
+            //query += 'point=' + data[i].waypoint_id +
+            //    '&date=' + data[i].timestamp;
         }
         func(i, query);
 

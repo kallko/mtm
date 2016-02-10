@@ -178,7 +178,7 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
             for (var j = 0; j < routes[i].points.length; j++) {
                 point = routes[i].points[j];
                 str += '<SECTION ';
-                str += this.xml.addAttribute('TASK_NUMBER', point.taskNumber);
+                str += this.xml.addAttribute('TASK_NUMBER', point.taskNumber < 0 ? '' : point.taskNumber);
                 str += this.xml.addAttribute('NUMBER', point.stepNumber);
                 str += this.xml.addAttribute('ARRIVAL_TIME', point.arrivalTime);
                 str += this.xml.addAttribute('START_WAYPOINT', point.startWaypointId);
@@ -189,7 +189,7 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
                 str += this.xml.addAttribute('DISTANCE', parseInt(point.distance));
                 str += this.xml.addAttribute('START_TIME', parseInt(point.startTime));
                 str += this.xml.addAttribute('END_TIME', parseInt(point.endTime));
-                str += this.xml.addAttribute('TASK_DATE', parseInt(point.taskDate));
+                str += this.xml.addAttribute('TASK_DATE', point.taskDate);
                 str += this.xml.addAttribute('WEIGHT', parseInt(point.weight));
                 str += this.xml.addAttribute('VOLUME', parseInt(point.volume));
 

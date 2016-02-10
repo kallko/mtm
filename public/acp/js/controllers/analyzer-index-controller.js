@@ -21,7 +21,7 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
                 // когда все точки обработаны, необходимо влючить эту ветку, для загрузки планов и
                 // дальнейшего анализа данных
                 var from = 1433116800, // грузить планы от
-                    to = 1446595200; // и до
+                    to =  1454924689; // и до
                 scope.plans = [];
                 loadPlans(from, to); // Грузит планы, проводит дополнительный анализ, после чего
                 // сохраняет результат в BigSolution, который потом необходимо
@@ -96,9 +96,9 @@ angular.module('acp').controller('AnalyzerIndexController', ['$scope', '$http', 
         function loadPlans(from, to) {
             console.log('loadPlans');
             Plan.all(from).success(function (data) {
-                console.log(data);
+                //console.log(data);
                 console.log(new Date(from * 1000));
-                scope.plans.push(data);
+                //scope.plans.push(data);
 
                 // в случае отсутствия планов начинается новый цикл загрузки
                 if (data.status == 'no plan') {

@@ -250,7 +250,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         // пометить склады
         function markWarehouses(route) {
             for (var i = 0; i < route.points.length; i++) {
-                route.points[i].warehouse = route.points[i].waypoint.TYPE == "WAREHOUSE";
+                route.points[i].warehouse = route.points[i].waypoint && route.points[i].waypoint.TYPE == "WAREHOUSE";
             }
         }
 
