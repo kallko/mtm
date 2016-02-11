@@ -338,11 +338,13 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 log.l('waypoints.length = ' + waypoints.length);
 
                 data[nIndx].transports = [];
-                for (var i = 0; i < transports.length; i++) {
+                if (transports === undefined) console.log('transports === undefined');
+                for (var i = 0; transports && i < transports.length; i++) {
                     data[nIndx].transports.push(transports[i].$);
                 }
 
                 data[nIndx].drivers = [];
+                if (drivers === undefined) console.log('drivers === undefined');
                 for (i = 0; i < drivers.length; i++) {
                     data[nIndx].drivers.push(drivers[i].$);
                 }
