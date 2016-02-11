@@ -341,7 +341,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 if (transports === undefined) {
                     console.log('transports === undefined');
                 } else {
-                    for (var i = 0; transports && i < transports.length; i++) {
+                    for (var i = 0; i < transports.length; i++) {
                         data[nIndx].transports.push(transports[i].$);
                     }
                 }
