@@ -658,7 +658,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                             }
                                         }
 
-                                        if (haveUnfinished)  {
+                                        if (haveUnfinished) {
                                             continue;
                                         }
                                     }
@@ -666,6 +666,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
+                                    tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
@@ -1344,6 +1345,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик клика на строке таблицы
         scope.rowClick = function (id) {
+            return;
+
             // TODO REMOVE
             collectDataForDayClosing();
 
@@ -1797,7 +1800,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // создание структуры данных для закрытия дня
         function collectDataForDayClosing() {
-            return;
+            //return;
 
             var result = {
                     routes: []
@@ -1807,7 +1810,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route,
                 point,
                 startTime,
-                e;
+                endTime;
 
             for (var i = 0; i < _data.routes.length; i++) {
                 routeI = _data.routes[i];
@@ -1820,9 +1823,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     number: routeI.NUMBER,
                     startTimePlan: routeI.START_TIME,
                     endTimePlan: routeI.END_TIME,
-                    totalPoints: routeI.points.length
+                    totalPoints: routeI.points.length,
+                    inOrderedLen: 0,
+                    inPromised: 0,
+                    inPlan: 0
                 };
 
+                endTime = 0;
+                startTime = 2000000000;
                 for (var j = 0; j < routeI.points.length; j++) {
                     pointJ = routeI.points[j];
 
@@ -1832,10 +1840,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         plannedNumber: pointJ.NUMBER,
                         weight: pointJ.WEIGHT,
                         volume: pointJ.VOLUME,
-                        value: pointJ.VALUE
+                        value: pointJ.VALUE,
+                        windowType: pointJ.windowType,
+                        inPlan: true,
+                        stopState: pointJ.stopState,
+                        moveState: pointJ.moveState,
+                        cancelReason: 0
                     };
 
+                    if (pointJ.real_arrival_time && pointJ.real_arrival_time > endTime) endTime = pointJ.real_arrival_time;
+                    if (pointJ.real_arrival_time && pointJ.real_arrival_time < startTime) startTime = pointJ.real_arrival_time;
 
+                    point.status = {
+                        promised: false,
+                        ordered: false
+                    };
+
+                    if (point.windowType === WINDOW_TYPE.IN_PROMISED) {
+                        point.status.promised = true;
+                        point.status.ordered = true;
+                    } else if (point.windowType === WINDOW_TYPE.IN_ORDERED) {
+                        point.status.ordered = true;
+                    }
+
+                    if (point.status.ordered) route.inOrderedLen++;
+                    if (point.status.promised) route.inPromised++;
+                    if (point.inPlan) route.inPlan++;
 
                     if (pointJ.haveStop && pointJ.havePush) {
                         route.pointsReady.push(point);
@@ -1846,10 +1876,45 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
 
+                route.startTimeFact = startTime === 2000000000 ? undefined : startTime;
+                route.endTimeFact = endTime === 0 ? undefined : endTime;
+
+                //TODO REMOVE only for test
+                route.pointsReady = route.pointsReady.concat(route.pointsUnconfirmed);
+                ///////////////////////////
+
+                for (var k = 0; k < route.pointsReady.length; k++) {
+                    point = route.pointsReady[k];
+                    if (point.stopState) {
+                        point.durationFact = point.stopState.t2 - point.stopState.t1;
+                        point.arrivalTimeFact = point.stopState.t1;
+                    }
+
+                    if (point.moveState) {
+                        point.moveDuration = point.moveState.t2 - point.moveState.t1;
+                        point.moveDistance = point.moveState.dist;
+                    }
+                }
+
                 result.routes.push(route);
             }
 
+            //TODO REMOVE only for test
+            for (var i = 0; i < result.routes.length; i++) {
+                delete result.routes[i].pointsUnconfirmed;
+
+                if (i > 1) {
+                    result.routes.pop();
+                    i--;
+                }
+            }
+            ///////////////////////////
+
+
             console.log('collectDataForDayClosing >>', result);
+            console.log('<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
+                + JSON.stringify(result)
+            + '</TEXTDATA></CLOSEDAY></MESSAGE>');
             return result;
         }
 

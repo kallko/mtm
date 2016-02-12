@@ -286,6 +286,59 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             return false;
         }
 
+        function showMarker(point) {
+            var tmpVar,
+                title,
+                tmpStatus,
+                tmpBgColor,
+                tmpFColor,
+
+            //for (var i = 0; i < points.length; i++) {
+                title = '';
+
+
+            if (point.TASK_NUMBER == '') {
+                title = 'Склад\n';
+            } else {
+                title = 'Точка #' + (point.NUMBER) + '\n';
+                tmpStatus = getTextStatuses(point.status);
+                title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
+            }
+
+            title += 'Время прибытия: ' + point.arrival_time_hhmm + '\n';
+            title += 'Время отбытия: ' + point.end_time_hhmm + '\n';
+            title += 'Время выполнения задачи: ' + mmhh(point.TASK_TIME) + '\n';
+            title += 'Временное окно: ' + point.AVAILABILITY_WINDOWS + '\n';
+            title += 'Время простоя: ' + mmhh(point.DOWNTIME) + '\n';
+            title += 'Расстояние: ' + point.DISTANCE + ' метра(ов)\n';
+            title += 'Время на дорогу к точке: ' + mmhh(point.TRAVEL_TIME) + '\n';
+
+            if (point.waypoint != null) {
+                title += 'Адрес: ' + point.waypoint.ADDRESS + '\n';
+                title += 'Клиент: ' + point.waypoint.NAME + '\n';
+                title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';
+            }
+
+            tmpVar = L.marker([point.LAT, point.LON], {
+                'title': title
+            });
+            tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
+            tmpBgColor = '#7EDDFC';
+            tmpFColor = 'white';
+            if (tmpStatus) {
+                tmpBgColor = tmpStatus.color;
+            }
+
+            if (!point.confirmed && (point.status == STATUS.FINISHED ||
+                point.status == STATUS.FINISHED_LATE || point.status == STATUS.FINISHED_TOO_EARLY)) {
+                tmpBgColor = 'yellow';
+                tmpFColor = 'black';
+            }
+            // }
+            tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
+            return tmpVar;
+        }
+
         // подписаться на ряд событий
         function addListeners() {
             $(window).resize(resize);
@@ -310,13 +363,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             rootScope.$on('drawPlannedTrack', function (event, route) {
                 drawPlannedRoute(route.plan_geometry, 0);
-                drawAllPoints(route.points)
+                drawAllPoints(route.points);
             });
 
             rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
                 drawPlannedRoute(route.plan_geometry, 0);
                 drawRealRoute(route);
-                drawAllPoints(route.points)
+                drawAllPoints(route.points);
             });
 
             holderEl = $('#transparent-map-holder');

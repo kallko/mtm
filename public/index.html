@@ -40,6 +40,7 @@
 <script src="./js/controllers/setting-controller.js"></script>
 <script src="./js/controllers/point-view-controller.js"></script>
 <script src="./js/controllers/edit-route-controller.js"></script>
+<script src="./js/controllers/close-day-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -96,6 +97,7 @@
                 <button class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </button>
+
                 <button class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
                     <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
                 </button>
@@ -121,7 +123,7 @@
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction"
-                        title="Осталось до прогнозируемого времени прибытия">
+                        title="Осталось до прогнозируемого времени прибытия" >
                         Осталось до прибытия
                     </th>
                     <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
@@ -395,6 +397,14 @@
     </div>
 </template>
 
+<!-- панель закрытия дня -->
+<template type="text/html" id="close-day">
+    <div id="close-day-panel" ng-controller="CloseDayController">
+        Закрытие дня
+        <!-- Визуальная часть закрытия дня -->
+    </div>
+</template>
+
 <!-- див для оповещений -->
 <div id="notification" ng-controller="NotificationController">
     <div>
@@ -513,4 +523,3 @@
         </button>
     </div>
 </div>
-

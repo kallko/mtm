@@ -414,7 +414,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 };
 
 // получение списка причин отмен
-SoapManager.prototype.getReasonList = function () {
+SoapManager.prototype.getReasonList = function (callback) {
     console.log('getReasonList');
 
     // запрос идет не на обычный адрес соапа, а на его версию для кпк
@@ -426,10 +426,10 @@ SoapManager.prototype.getReasonList = function () {
         console.log(client.describe());
         client.get_reason_list(function (err, result) {
             if (!err) {
-                log.dump(result.return.reason);
-                log.toFLog('reason_list.js', result.return.reason);
+                callback(result.return.reason);
             } else {
                 console.log('err', err.body);
+                callback({error: 'SOAP error'});
             }
         });
     });
@@ -577,3 +577,9 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         });
     });
 };
+
+
+
+//'<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
+//+ JSON.stringify(data)
+//+ '</TEXTDATA></CLOSEDAY></MESSAGE>'

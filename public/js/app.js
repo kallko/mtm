@@ -20,11 +20,11 @@ var myLayout = new GoldenLayout({
                         componentState: {templateId: 'transparent-map-window'} // id темплейта из index.html
                     }
                     ,
-                    // две панельки в одном стеке
+                    // три панельки в одном стеке
                     {
                         type: 'stack',
                         height: 50,
-                        activeItemIndex: 0,
+                        activeItemIndex: 2,
                         content: [
                             {
                                 type: 'component',
@@ -38,6 +38,12 @@ var myLayout = new GoldenLayout({
                                 title: 'Редактирование маршрута',
                                 componentName: 'template',
                                 componentState: {templateId: 'edit-route'}
+                            },
+                            {
+                                type: 'component',
+                                title: 'Закрытие дня',
+                                componentName: 'template',
+                                componentState: {templateId: 'close-day'}
                             }
                         ]
                     }

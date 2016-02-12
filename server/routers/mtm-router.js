@@ -315,6 +315,15 @@ router.route('/openidspointwindow/:pointId')
         res.status(200).json({status: 'ok'});
     });
 
+// получение списка отмен
+router.route('/getreasonlist')
+    .get(function (req, res) {
+        var soapManager = new soap(req.session.login);
+        soapManager.getReasonList(function(data) {
+            res.status(200).json(data);
+        });
+    });
+
 // логировать что-нибудь в БД
 router.route('/log')
     .post(function (req, res) {
