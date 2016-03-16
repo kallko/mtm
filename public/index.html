@@ -410,22 +410,24 @@
         <button ng-click = "closeDayClick()">I'm the button</button>
         <div>Имя компании: {{companyName}},
               Ответственный: {{user}},
-              Дата: {{(serverTime*1000) | date}}.
+              Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
+              Время: {{(serverTime*1000) | date:"HH:MM"}}.
         </div>
         <div>
             <table>
-                
+                    <th><input type="checkbox">Все</th>
                     <th>ID</th>
                     <th>Водитель</th>
                     <th>Машина</th>
-                    <th>Старт</th>
+                    <!--th>Старт</th-->
                     <th>Конец работы</th>
                 
-                <tr ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
+                <tr  ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
+                    <td><input type="checkbox"></td>
                     <td>{{item.filterId}}</td>
                     <td>{{item.driver.NAME}}</td>
                     <td>{{item.transport.NAME}}</td>
-                    <td>{{item.START_TIME.split(' ')[1]}}</td>
+                    <!--td>{{item.START_TIME.split(' ')[1]}}</td-->
                     <td>{{item.END_TIME.split(' ')[1]}}</td>
                 </tr>
             </table>

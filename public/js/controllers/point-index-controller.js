@@ -57,7 +57,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'Все филиалы', value: -1}
             ];
 
-            scope.filters.driver = false; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            scope.filters.driver = true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             scope.filters.branch = scope.filters.branches[0].value;
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
@@ -1433,7 +1433,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //фильтр по водителю
         function driversFilter(row) {
             //console.log(row.driver.NAME);
-            return (scope.filters.driverName == -1 || row.driver.NAME == scope.filters.driver);
+            return (scope.filters.driver === false || row.driver.NAME == scope.filters.driver); 
+            //переключая в этой стороке true/false мы задаем будет ли загружаться вся таблица при старте приложения
         }
         // фильтр по статусу
         function statusFilter(row) {
@@ -1443,6 +1444,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // фильтр по маршруту
         function routeFilter(row) {
             return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
+            console.log(row.route_indx, 'indx');
         }
 
         // фильтр по проблемности
