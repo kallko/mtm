@@ -2,27 +2,48 @@
 angular.module('MTMonitor').controller('NotificationController', ['$scope', '$rootScope', '$timeout',
     function (scope, rootScope, timeout) {
 
-        init();
+        //init();
 
         rootScope.$on('showNotification', function (event, data) {
             showPopup(data.text, data.duration);
+            //console.log(rootScope.data);
         });
 
+        rootScope.$on('showCloseRoutePoints', function (event, data) {
+            showPopup('Окно сработало', data.duration);
+            //console.log(rootScope.data);
+        });
+/*
         function init() {
             $('#notification').popup({
-                transition: 'all 0.15s'
+                //transition: 'all 0.10s' ------------not working
             });
         }
-
-        // показать попап
+*/
+        
+        // эта фукнция выводит popup, она универсальна, вызывается из point-index-controller
+        
         function showPopup(text, duration) {
             $('#notification div').html(text);
             $('#notification').popup('show');
-            if (!duration) return;
+            if (!duration) return;       
 
             timeout(function () {
                 $('#notification').popup('hide');
             }, duration);
         }
-
+        
     }]);
+/*
+ function showPopup(text, duration) {
+            console.log(text+' text', duration+ ' duration');
+            $('#notification div').html(text);
+            $('#notification').popup('show');
+            if (!duration) return;       
+
+            setTimeout(function () {
+                $('#notification').popup('hide');
+            }, duration);
+        }
+
+*/

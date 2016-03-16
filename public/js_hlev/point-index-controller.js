@@ -45,7 +45,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
             scope.filters = {};                                         // фильтры
             scope.filters.statuses = Statuses.getTextStatuses();        // фильтры по статусам
-            
 
             scope.filters.window_types = [                              // фильтры по типам попадания в окна
                 {name: 'Вне окон', value: WINDOW_TYPE.OUT_WINDOWS, class: 'out-windows'},
@@ -57,7 +56,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'Все филиалы', value: -1}
             ];
 
-            scope.filters.driver = false; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             scope.filters.branch = scope.filters.branches[0].value;
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
@@ -99,12 +97,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 $problem.toggleClass('btn-default').toggleClass('btn-success');
             }
         }
-         rootScope.$on('closeDriverName', function (event, data) {
-                 scope.filters.driver = data;
-                 console.log(scope.filters.driver, 'driverName');
-         });
+
         // установить динамическое обновление данных
-        //не понятно где используется!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         function setDynamicDataUpdate(seconds) {
             interval(function () {
                 console.log('setDynamicDataUpdate()');
@@ -308,7 +302,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log(data);
                 return;
             }
-            scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
+
             console.log(data);
             // привязывание гидов из сенсоров к машинам, назначение реальных треков машинам
             for (var i = 0; i < data.sensors.length; i++) {
@@ -499,7 +493,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
-               // console.log(scope.rowCollection, ' rcol'); !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }
 
             // оповещаем ползователя о проблемных маршрутах
@@ -524,7 +517,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             saveRoutes();
             checkLocks();
             showPopup('Загрузка завершенна!', 2500);
-            console.log(showPopup, ' showPopup');
 
             setColResizable();
             prepareFixedHeader();
@@ -703,7 +695,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 checkConfirmedFromLocalStorage();
                 _data.companyName = 'IDS';
                 scope.$emit('companyName', _data.companyName);
-                //scope.$emit('forCloseController', _data); // это реализовано около строки 308
                 return;
             }
 
@@ -765,7 +756,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // получаем через 1С-ый parentForm имя клиента
                 _data.companyName = parentForm._call('getClientName');
             }
-            //console.log( _data.companyName, ' cmpanyName');
 
             scope.$emit('companyName', _data.companyName);
 
@@ -1066,8 +1056,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (i = 0; i < scope.rowCollection.length; i++) {
                 scope.rowCollection[i].problem_index = scope.rowCollection[i].problem_index || 0;
             }
-            rootScope.rowCollection = scope.rowCollection;
-            //console.log(scope.rowCollection, ' rcol from poinindex');// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
         // назначить колонки в таблице доступные для ресайза
@@ -1430,11 +1418,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             return '';
         };
-        //фильтр по водителю
-        function driversFilter(row) {
-            //console.log(row.driver.NAME);
-            return (scope.filters.driverName == -1 || row.driver.NAME == scope.filters.driver);
-        }
+
         // фильтр по статусу
         function statusFilter(row) {
             return (scope.filters.status == -1 || row.status == scope.filters.status);
@@ -1737,8 +1721,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // применить все фильтры
         scope.applyFilter = function (row) {
-            return driversFilter(row)
-                && statusFilter(row)
+            return statusFilter(row)
                 && routeFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
@@ -1933,7 +1916,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 + JSON.stringify(result)
             + '</TEXTDATA></CLOSEDAY></MESSAGE>');
             return result;
-
-
         }
+
     }]);

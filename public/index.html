@@ -30,7 +30,14 @@
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+<!--Layout-->
+<script src="./js/vendor/jquery.layout.min.js"></script> <!--include layout-->
+<script src="./js/vendor/jquery.layout_and_plugins.min.js"></script>
 
+
+<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
 <!-- скрипты Ангуляра  -->
 <script src="./js/app.js"></script>
 
@@ -54,7 +61,7 @@
 
 <!-- карта на фоне -->
 <div id="map"></div>
-
+<!--div id = "test-popup" ng-controller = "CloseDayController" ng-show = "view">Test-popup</div-->
 <!-- таблица точек доставки -->
 <template type="text/html" id="template-point-table">
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
@@ -398,9 +405,31 @@
 </template>
 
 <!-- панель закрытия дня -->
-<template type="text/html" id="close-day">
-    <div id="close-day-panel" ng-controller="CloseDayController">
-        Закрытие дня
+<template type="text/html" id="close-day" >
+    <div id="close-day-panel" ng-controller = "CloseDayController" >
+        <button ng-click = "closeDayClick()">I'm the button</button>
+        <div>Имя компании: {{companyName}},
+              Ответственный: {{user}},
+              Дата: {{(serverTime*1000) | date}}.
+        </div>
+        <div>
+            <table>
+                
+                    <th>ID</th>
+                    <th>Водитель</th>
+                    <th>Машина</th>
+                    <th>Старт</th>
+                    <th>Конец работы</th>
+                
+                <tr ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
+                    <td>{{item.filterId}}</td>
+                    <td>{{item.driver.NAME}}</td>
+                    <td>{{item.transport.NAME}}</td>
+                    <td>{{item.START_TIME.split(' ')[1]}}</td>
+                    <td>{{item.END_TIME.split(' ')[1]}}</td>
+                </tr>
+            </table>
+        </div>
         <!-- Визуальная часть закрытия дня -->
     </div>
 </template>

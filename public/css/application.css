@@ -447,3 +447,11 @@ template {
 #close-day-panel {
     padding: 10px;
 }
+#test-popup{
+    width: 100px;
+    height: 100px;
+    z-index: 100;
+    background: green;
+    position: absolute;
+    opacity: 0.5;
+}
