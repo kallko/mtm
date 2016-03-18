@@ -1,8 +1,17 @@
 angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootScope', function (scope, rootScope) {
    init();
     scope.closeDayClick=function() {
-    	console.log('start closeday');
-    	//console.log(rootScope.rowCollection[0], ' from closeday')
+    	//console.log('start closeday');
+        //rootScope.$emit('setCheckBox');
+        //console.log($('#close-table-driver-5').html(), ' el');
+    };
+    scope.showCheckBoxToClose = function(){
+        rootScope.$emit('showCheckBoxToClose');
+    };
+    scope.hideCheckBoxToClose = function($event){
+        console.log($event, ' event');
+        $('#main-checkbox').removeAttr('checked');
+        $('input[checked]').removeAttr('checked');
     }
     function init(){
 
@@ -11,8 +20,10 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             scope.companyName = data.companyName;
             scope.user = data.user;
             scope.serverTime = data.server_time;
-
-            //console.log(data.routes[1], ' data');
+            for(var s=0; s<data.routes.length; s++){
+                data.routes[s].s_driverNumber = s; 
+                console.log(data.routes[s].s_driverNumber, ' data');
+            }
             });
     };
     scope.closeTableRowClick = function(){

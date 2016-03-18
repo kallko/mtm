@@ -161,7 +161,7 @@
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td id="{{'status-td-' + row.row_id}}">
-                        {{getTextStatus(row.status, row.row_id, row.confirmed)}}
+                        {{getTextStatus(row.status, row.row_id, row.confirmed, row.driver.NAME)}}
                     </td>
                     <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
                     <td>{{row.haveStop ? 'Есть' : ''}}</td>
@@ -407,7 +407,7 @@
 <!-- панель закрытия дня -->
 <template type="text/html" id="close-day" >
     <div id="close-day-panel" ng-controller = "CloseDayController" >
-        <button ng-click = "closeDayClick()">I'm the button</button>
+        <button ng-click = "closeDayClick()">Отобразить чекбоксы</button>
         <div>Имя компании: {{companyName}},
               Ответственный: {{user}},
               Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
@@ -415,17 +415,17 @@
         </div>
         <div>
             <table>
-                    <th><input type="checkbox">Все</th>
+                    <th><input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox">Все</th>
                     <th>ID</th>
                     <th>Водитель</th>
                     <th>Машина</th>
                     <!--th>Старт</th-->
                     <th>Конец работы</th>
                 
-                <tr  ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
-                    <td><input type="checkbox"></td>
+                <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
+                    <td><input id = "close-table-checkbox-{{item.s_driverNumber}}" type="checkbox" ng-click = "hideCheckBoxToClose()"></td>
                     <td>{{item.filterId}}</td>
-                    <td>{{item.driver.NAME}}</td>
+                    <td id = "close-table-driver-{{item.s_driverNumber}}">{{item.driver.NAME}}</td>
                     <td>{{item.transport.NAME}}</td>
                     <!--td>{{item.START_TIME.split(' ')[1]}}</td-->
                     <td>{{item.END_TIME.split(' ')[1]}}</td>
