@@ -407,7 +407,8 @@
 <!-- панель закрытия дня -->
 <template type="text/html" id="close-day" >
     <div id="close-day-panel" ng-controller = "CloseDayController" >
-        <button ng-click = "closeDayClick()">Отобразить чекбоксы</button>
+        <button ng-click = "showCheckBoxToClose()">Отобразить ситуацию</button>
+        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть день</button>
         <div>Имя компании: {{companyName}},
               Ответственный: {{user}},
               Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
@@ -415,7 +416,7 @@
         </div>
         <div>
             <table>
-                    <th><input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox">Все</th>
+                    <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->Все</th>
                     <th>ID</th>
                     <th>Водитель</th>
                     <th>Машина</th>
@@ -423,7 +424,7 @@
                     <th>Конец работы</th>
                 
                 <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
-                    <td><input id = "close-table-checkbox-{{item.s_driverNumber}}" type="checkbox" ng-click = "hideCheckBoxToClose()"></td>
+                    <td><input ng-click = "toggleCheckBoxToClose()" id = "close-table-checkbox-{{item.s_driverNumber}}" type="checkbox" ng-model="getCheck" ng-checked = "setCheck_{{item.s_driverNumber}}" ng-disabled="setDisabled_{{item.s_driverNumber}}"></td>
                     <td>{{item.filterId}}</td>
                     <td id = "close-table-driver-{{item.s_driverNumber}}">{{item.driver.NAME}}</td>
                     <td>{{item.transport.NAME}}</td>

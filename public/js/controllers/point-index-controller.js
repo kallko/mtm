@@ -1268,6 +1268,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     break;
                 case 'cancel-point': // отмена точки
                     row.status = STATUS.CANCELED;
+                    rootScope.$emit('checkInCloseDay') // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;
             }
 
@@ -1852,15 +1853,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // создание структуры данных для закрытия дня
         rootScope.$on('showCheckBoxToClose', function (event) {
-            s_showCheckBoxToClose()
+            //console.log($('#main-checkbox')['context']['documentElement']['attributes'], ' attr');
+            //console.log(document.querySelector('#main-checkbox').getAttribute('checked'), ' qs');
+            //if(!(document.querySelector('#main-checkbox').getAttribute('checked'))){
+              //  document.querySelector('#main-checkbox').setAttribute('checked', 'checked');
+
+                s_showCheckBoxToClose();
+            //}else{
+              //  document.querySelector('#main-checkbox').removeAttribute('checked');
+           // }
         });
         function s_showCheckBoxToClose(){
 
 
             function forSome(item, index, arr){
-                return item == 3 || item == 4 || item == 5 || item == 8
-                    //console.log(item, ' some');
-                
+                return item == 3 || item == 4 || item == 5; // на тесте еще был статус 8    
             };
             
             //var complited = [];  //массив, куда попадут водители с завершенными точками
@@ -1881,14 +1888,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     };
             };
             //console.log(complited, ' complited', uncomplited, ' uncomplited');
-            console.log(driversFromCloseTab, ' dr');
             for(var s=0; s<driversFromCloseTab.length; s++){
                 if(uncomplited.some(function(el){ return el == driversFromCloseTab[s]})==false){
-                    console.log(driversFromCloseTab[s]+ ' checked+,  el');
-                    console.log(checkBoxes, ' ch')
-                    document.querySelector(checkBoxes[s]).removeAttribute('checked', 'checked');
-                    document.querySelector(checkBoxes[s]).setAttribute('checked', 'checked');
+                    //console.log(driversFromCloseTab[s]+ ' checked+,  el');
+                    //console.log(checkBoxes, ' ch')
+                    ///document.querySelector(checkBoxes[s]).removeAttribute('checked', 'checked');
+                    ///document.querySelector(checkBoxes[s]).setAttribute('checked', 'checked');
                     //checkBoxes[s].attr('checked');
+                    //rootScope.$emit('returnCheckBoxes', checkBoxes[s]);
+                    rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s]});
                 };
             };
 
