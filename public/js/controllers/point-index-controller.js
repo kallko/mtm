@@ -682,9 +682,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.haveStop = true;
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
+
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
+                                    //route.points[k]
+                                    console.log("route-point-k", route.points[k], "route" , route)
+
+                                    if (angular.isUndefined(tmpArrival.servicePoints)==true){
+                                        tmpArrival.servicePoints=[];
+                                    }
+
+                                    tmpArrival.servicePoints.push(k);
+                                   // tmpArrival.servicePoints[0]=route.points[k];
+                                    //tmpArrival.servicePoints.push(tmpPoint);
 
                                     findStatusAndWindowForPoint(tmpPoint);
 

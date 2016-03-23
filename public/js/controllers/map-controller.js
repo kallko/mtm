@@ -115,6 +115,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     // если отрисовка стопов выключена, пропустить итерацию
                     if (!drawStops) continue;
 
+
+
                     stopIndx = (parseInt(i / 2 + 0.5) - 1);
                     stopTime = mmhh(track[i].time);
                     tmpVar = stopTime.split(':');
@@ -147,33 +149,32 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                         {'title': tmpTitle,
                         'draggable': true});
+                    tmpVar.source=track[i];
 
                     tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
 
 
-                    //tmpVar.pointConnection = 12;
 
-                    tmpVar.on('mouseover', function(event){
 
-                        console.log("MouseOver Stop");
-                        console.log("stop event " +
-                            "", event);
-                        console.log("this is stop ", this);
+                    tmpVar.on('dblclick', function(event){
+
+
+                        var localData=event.target.source;
+                        rootScope.$emit('pointEditingPopup', localData );
+                        rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
+                        console.log("this is stop source ", event.target.source);
                     });
 
 
+                    tmpVar.on('dragstart', function(event){
 
 
-
-
-
-
-
-
-
+                        console.log("start dragging source ", event.target.source);
+                    });
 
 
                     addMarker(tmpVar);
+
                 } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                     color = '#5bc0de';
                 } else if (track[i].state == 'START') {
@@ -234,13 +235,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 } else {
 
 
-                ////////////////tested information
-
-                    //if(point.NUMBER==13){
-                    //    console.log(point , " point " , point.NUMBER);
-                    //}
-
-
 
 
 
@@ -263,11 +257,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';
                 }
 
-
-                //if(point.stopState!=null){
-                //    title+="stopState" + point.stopState.lat +'\n';
-                //
-                //}
 
 
 
@@ -293,22 +282,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-               // tmpVar.id=route.ID +" "+ route.itineraryID +" "+stopIndx;
-                // console.log(route);
 
 
                 tmpVar.source=point;
-                //
-                //tmpVar.on('dblclick', function(event){
-                //
-                //    //console.log("this is point ", this);
-                //    //console.log("event point ", event);
-                //    //console.log("and point is ", point);
-                //
-                //    console.log ("point ", point.LAT, " ", point.LON, " waypoint ", this);
-                //    //stopDragend(event);
-                //
-                //});
 
 
 
@@ -327,12 +303,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                     var message = "Вы собираетесь изменить координаты " + newMarker.source.waypoint.NAME + " \n"
                         + "Старые координаты " + newMarker.source.waypoint.LAT + " " + newMarker.source.waypoint.LON + "\n"
-                        + "Новые координаты " + event.target.getLatLng().lat + " " + event.target.getLatLng().lng;
+                        + "Новые координаты " + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
 
                     if (confirm(message)){
                         alert("Координаты изменены");
-                        newMarker.source.waypoint.LAT=event.target.getLatLng().lat;
-                        newMarker.source.waypoint.LON=event.target.getLatLng().lng;
+                        newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
+                        newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
 
                     } else {
 
