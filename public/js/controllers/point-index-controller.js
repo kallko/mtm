@@ -57,7 +57,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'Все филиалы', value: -1}
             ];
 
-            scope.filters.driver = false; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            scope.filters.driver = true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             scope.filters.branch = scope.filters.branches[0].value;
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
@@ -101,7 +101,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
          rootScope.$on('closeDriverName', function (event, data) {
                  scope.filters.driver = data;
-                 console.log(scope.filters.driver, 'driverName');
+                 var driversArr = [];
+                 for(var i=0; i<scope.filters.routes.length; i++){
+                    driversArr.push( scope.filters.routes[i]['driver'] || null);   
+                 };
+                 scope.filters.route = driversArr.indexOf(data)-1;
          });
         // установить динамическое обновление данных
         //не понятно где используется!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -406,8 +410,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         scope.filters.routes.push({
                             //name: data.routes[i].transport.NAME,
                             name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
-                            value: data.routes[i].filterId
+                            value: data.routes[i].filterId,
+                            driver: data.routes[i].driver.NAME //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                         });
+                          //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
                     }
 
@@ -1262,6 +1268,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     break;
                 case 'cancel-point': // отмена точки
                     row.status = STATUS.CANCELED;
+                    rootScope.$emit('checkInCloseDay') // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;
             }
 
@@ -1387,13 +1394,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // получить текстовый статус для задачи с необходимыми css классами
-        scope.getTextStatus = function (statusCode, row_id, confirmed) {
+        scope.getTextStatus = function (statusCode, row_id, confirmed, driverName) {
+            //console.log('pusk');
+                    //console.log(row.driver.NAME, ' row');
+                 // rootScope.$on('setCheckBox', function (event){
+             //checkStatusForCheckBox(row_id, driverName, statusCode);
+        //});
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
                     var object = $('#status-td-' + row_id);
                     if (object) {
                         object.removeClass();
-                        var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
+                       var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
                             statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
                         if (unconfirmed) {
                             object.addClass('yellow-status');
@@ -1404,15 +1416,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (scope.filters.statuses[i].table_name != undefined) {
                         return scope.filters.statuses[i].table_name + (unconfirmed ? '?' : '');
                     }
-
                     return scope.filters.statuses[i].name + (unconfirmed ? '?' : '');
                 }
             }
 
             console.log(statusCode);
+            //checkStatusForCheckBox();
             return 'неизвестный статус';
         };
+        var checkBoxDrivers = [];
+        function checkStatusForCheckBox(row_id, driverName, statusCode){
+            
+            if (statusCode == 3 || 4 || 5 || 8){
+                checkBoxDrivers.push({row_id: driverName})
+            }
 
+
+            /*for(var i=0; i<checkBoxDrivers.length; i++){
+                if(driverName!=checkBoxDrivers[i]){
+                    checkBoxDrivers.push(driverName);
+                }
+            }
+            function forSome(item, index, arr){
+                return item == driverName;
+            };
+            if(checkBoxDrivers.some(forSome)==false){
+                checkBoxDrivers.push(driverName);
+            }*/
+           console.log(checkBoxDrivers,  'pusk');
+        };
+        //console.log($('.close-table-driver').val(), "ppppppppp");
+        
         // получить текстовое представление окна по его коду
         scope.getTextWindow = function (windowCode, row_id) {
             for (var i = 0; i < scope.filters.window_types.length; i++) {
@@ -1433,7 +1467,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //фильтр по водителю
         function driversFilter(row) {
             //console.log(row.driver.NAME);
-            return (scope.filters.driverName == -1 || row.driver.NAME == scope.filters.driver);
+            return (scope.filters.driver === false || row.driver.NAME == scope.filters.driver); 
+            //переключая в этой стороке true/false мы задаем будет ли загружаться вся таблица при старте приложения
         }
         // фильтр по статусу
         function statusFilter(row) {
@@ -1443,6 +1478,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // фильтр по маршруту
         function routeFilter(row) {
             return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
+            console.log(row.route_indx, 'indx');
         }
 
         // фильтр по проблемности
@@ -1816,9 +1852,59 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // создание структуры данных для закрытия дня
+        rootScope.$on('showCheckBoxToClose', function (event) {
+            //console.log($('#main-checkbox')['context']['documentElement']['attributes'], ' attr');
+            //console.log(document.querySelector('#main-checkbox').getAttribute('checked'), ' qs');
+            //if(!(document.querySelector('#main-checkbox').getAttribute('checked'))){
+              //  document.querySelector('#main-checkbox').setAttribute('checked', 'checked');
+
+                s_showCheckBoxToClose();
+            //}else{
+              //  document.querySelector('#main-checkbox').removeAttribute('checked');
+           // }
+        });
+        function s_showCheckBoxToClose(){
+
+
+            function forSome(item, index, arr){
+                return item == 3 || item == 4 || item == 5; // на тесте еще был статус 8    
+            };
+            
+            //var complited = [];  //массив, куда попадут водители с завершенными точками
+            var uncomplited = [];
+            var driversFromCloseTab = []; //список водителей из таблицы во вкладке закрытие дня
+            var checkBoxes = [];
+            //console.log(_data.routes[0].points, ' dr');
+            for(var m = 0; m<_data.routes.length; m++){
+                driversFromCloseTab.push($('#close-table-driver-'+m).html());
+                checkBoxes.push('#close-table-checkbox-'+m);
+                var ob = {driver:_data.routes[m].driver.NAME, statuses: []};
+                for(var s=0; s<_data.routes[m].points.length; s++){
+                    ob.statuses.push(_data.routes[m].points[s].status);
+                   // console.log(_data.routes[m].points[s].status, ' status');    
+                };
+                if(ob.statuses.some(forSome)==true){  //true - есть проблемные, false - проблемных нет
+                    uncomplited.push(ob.driver);
+                    };
+            };
+            //console.log(complited, ' complited', uncomplited, ' uncomplited');
+            for(var s=0; s<driversFromCloseTab.length; s++){
+                if(uncomplited.some(function(el){ return el == driversFromCloseTab[s]})==false){
+                    //console.log(driversFromCloseTab[s]+ ' checked+,  el');
+                    //console.log(checkBoxes, ' ch')
+                    ///document.querySelector(checkBoxes[s]).removeAttribute('checked', 'checked');
+                    ///document.querySelector(checkBoxes[s]).setAttribute('checked', 'checked');
+                    //checkBoxes[s].attr('checked');
+                    //rootScope.$emit('returnCheckBoxes', checkBoxes[s]);
+                    rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s]});
+                };
+            };
+
+        
+        };
+        
         function collectDataForDayClosing() {
             //return;
-
             var result = {
                     routes: []
                 },
@@ -1928,12 +2014,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ///////////////////////////
 
 
-            console.log('collectDataForDayClosing >>', result);
-            console.log('<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
-                + JSON.stringify(result)
-            + '</TEXTDATA></CLOSEDAY></MESSAGE>');
+            //console.log('collectDataForDayClosing >>', result);
+            //console.log('<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
+            //    + JSON.stringify(result)
+            //+ '</TEXTDATA></CLOSEDAY></MESSAGE>');
+            //console.log(result);
             return result;
 
 
         }
+        //console.log(scope.filters.route, ' filters route');
     }]);
