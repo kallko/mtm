@@ -48,6 +48,7 @@
 <script src="./js/controllers/point-view-controller.js"></script>
 <script src="./js/controllers/edit-route-controller.js"></script>
 <script src="./js/controllers/close-day-controller.js"></script>
+<script src="./js/controllers/point-popup-edit-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -535,6 +536,94 @@
         <tr>
             <td class="title">Вес:</td>
             <td class="row-data">{{point.WEIGHT}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div id="point-view-setting" ng-show="locked(point)">
+        <button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"
+                ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">
+            <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>
+            &nbsp;Машрут
+        </button>
+        <button id="edit-task-btn" class="btn btn-sm down-btn"
+                ng-class="point.locked ? 'btn-danger' : 'btn-primary'" ng-click="toggleTaskBlock()">
+            <i class="fa fa-md" ng-class="point.locked ? 'fa-lock' : 'fa-unlock'"></i>
+            &nbsp;Задание
+        </button>
+
+        <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
+        </button>
+    </div>
+</div>
+<!--Окошко для редактирования точек и времени-->
+
+<div id="point-editing-popup" ng-controller="PointPopupEditController" style="position: absolute; visibility: hidden">
+    <div class="card-title">
+        Окошко
+    </div> 
+    <table id="point-view-table" class="table table-striped">
+        <tbody>
+        <tr>
+            <td class="title">Название:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">Адрес:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">План. прибытие:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">План. номер:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">Машина:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">Заказанное окно:</td>
+            <td class="row-data"></td>
+        </tr>
+        <!--tr>
+            <td class="title">Изменяемое окно:</td>
+            <td class="row-data">
+                <input type="text" class="promised-text-card" id="promised-start-card"
+                       enter-event="changePromisedWindow(point)"> -
+                <input type="text" class="promised-text-card" id="promised-finish-card"
+                       enter-event="changePromisedWindow(point)">
+            </td>
+        </tr-->
+        <tr>
+            <td class="title">Статус:</td>
+            <td class="row-data">
+                
+                <button id="confirm-status-task-btn" ng-show="locked(point) && unconfirmed()"
+                        class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
+                </button>
+                <button id="cancel-status-task-btn" ng-show="locked(point) && unconfirmed()"
+                        class="btn btn-primary btn-sm" ng-click="cancelStatus()">Отменить
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Окно:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">Стоимость:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">Объем:</td>
+            <td class="row-data"></td>
+        </tr>
+        <tr>
+            <td class="title">Вес:</td>
+            <td class="row-data"></td>
         </tr>
         </tbody>
     </table>

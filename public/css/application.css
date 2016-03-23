@@ -277,7 +277,7 @@ template {
     height: 22px;
 }
 
-#point-view {
+#point-view, #point-editing-popup {
     background-color: #D5DBD8;
     border: 2px solid #bdbdbd;
     padding: 8px;
