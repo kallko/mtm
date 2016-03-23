@@ -12,6 +12,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             textStatuses = Statuses.getTextStatuses(),  // расширенная информация о статусах
             STATUS = Statuses.getStatuses();            // коды статусов
 
+
+
+
         initMap();
         addListeners();
 
@@ -79,6 +82,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function drawRealRoute(route) {
             if (!route || !route.real_track) return;
 
+            alert("Start drawing");
+            //console.log(route , 'route')
+
             var track = route.real_track,
                 pushes = route.pushes,
                 tmpVar,
@@ -139,8 +145,34 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     }
 
                     tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
-                        {'title': tmpTitle});
+                        {'title': tmpTitle,
+                        'draggable': true});
+
                     tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
+
+
+                    //tmpVar.pointConnection = 12;
+
+                    tmpVar.on('mouseover', function(event){
+
+                        console.log("MouseOver Stop");
+                        console.log("stop event " +
+                            "", event);
+                        console.log("this is stop ", this);
+                    });
+
+
+
+
+
+
+
+
+
+
+
+
+
                     addMarker(tmpVar);
                 } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
                     color = '#5bc0de';
@@ -190,6 +222,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpFColor,
                 point;
 
+
+
+
             for (var i = 0; i < points.length; i++) {
                 title = '';
                 point = points[i];
@@ -197,6 +232,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 if (point.TASK_NUMBER == '') {
                     title = 'Склад\n';
                 } else {
+
+
+                ////////////////tested information
+
+                    //if(point.NUMBER==13){
+                    //    console.log(point , " point " , point.NUMBER);
+                    //}
+
+
+
+
+
                     title = 'Точка #' + (point.NUMBER) + '\n';
                     tmpStatus = getTextStatuses(point.status);
                     title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
@@ -216,9 +263,21 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';
                 }
 
+
+                //if(point.stopState!=null){
+                //    title+="stopState" + point.stopState.lat +'\n';
+                //
+                //}
+
+
+
+
                 tmpVar = L.marker([point.LAT, point.LON], {
-                    'title': title
+                    'title': title,
+                    'draggable': true
+
                 });
+
 
                 tmpBgColor = '#7EDDFC';
                 tmpFColor = 'white';
@@ -231,6 +290,58 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpBgColor = 'yellow';
                     tmpFColor = 'black';
                 }
+
+
+
+               // tmpVar.id=route.ID +" "+ route.itineraryID +" "+stopIndx;
+                // console.log(route);
+
+
+                tmpVar.source=point;
+                //
+                //tmpVar.on('dblclick', function(event){
+                //
+                //    //console.log("this is point ", this);
+                //    //console.log("event point ", event);
+                //    //console.log("and point is ", point);
+                //
+                //    console.log ("point ", point.LAT, " ", point.LON, " waypoint ", this);
+                //    //stopDragend(event);
+                //
+                //});
+
+
+
+                tmpVar.on('dblclick', function(event){
+
+                    alert("dblClick on Point");
+
+
+                });
+
+
+                // Установка новых координат для вэйпоинта при переноске маркера-point
+                tmpVar.on('dragend', function(event){
+
+                    var newMarker = event.target;
+
+                    var message = "Вы собираетесь изменить координаты " + newMarker.source.waypoint.NAME + " \n"
+                        + "Старые координаты " + newMarker.source.waypoint.LAT + " " + newMarker.source.waypoint.LON + "\n"
+                        + "Новые координаты " + event.target.getLatLng().lat + " " + event.target.getLatLng().lng;
+
+                    if (confirm(message)){
+                        alert("Координаты изменены");
+                        newMarker.source.waypoint.LAT=event.target.getLatLng().lat;
+                        newMarker.source.waypoint.LON=event.target.getLatLng().lng;
+
+                    } else {
+
+                        newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
+
+
+                    }
+
+                });
 
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
                 addMarker(tmpVar);
@@ -250,6 +361,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // добавить маркер на карту (добавляет сам маркер, добавляет в слой oms, добавляет в массив маркеров)
         function addMarker(marker) {
+            console.log("adMarker start", marker);
+
             map.addLayer(marker);
             oms.addMarker(marker);
             markersArr.push(marker);
@@ -429,6 +542,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $body.mousemove(function (event) {
                 if (!checkMouseInRect(position, event.clientX, event.clientY)) {
                     disableMap();
+                    console.log("disable map");
                 }
             });
         }
@@ -442,6 +556,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // сделать панель карты прозрачной
         function setTransparent() {
+
+            console.log("Make map opacity")
             var el = holderEl.parent();
 
             for (var i = 0; i < 4; i++) {
@@ -456,6 +572,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // инициализация карты
         function initMap() {
+
+
+            console.log(map + " Map preinit");
+
             map = new L.Map('map', {
                 center: new L.LatLng(50.4412776, 30.6671281),
                 zoom: 11,
@@ -472,10 +592,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
 
             oms = new OverlappingMarkerSpiderfier(map);
+            console.log(map + " Map postinit");
         }
 
         // изменение размеров окна браузера и, как следствие, карты
         function resize() {
+
+
+            console.log("map resize");
             var $map = $('#map');
             $map.height($(window).height());
             $map.width($(window).width());
@@ -484,6 +608,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // очистить карту
         function clearMap() {
+            console.log("Clear Map");
+
             var m = map;
             for (i in m._layers) {
                 if (m._layers[i]._path != undefined) {
@@ -503,6 +629,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         // установить центр карты
+        console.log("Centre map");
         function setMapCenter(lat, lon) {
             var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
                 offset = map.getSize(),
@@ -514,4 +641,53 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 target = map.unproject(tmp, zoom);
             map.setView(target, zoom);
         }
+
+
+        //map.on('dblclick', function(event){
+        //
+        //    console.log("Map on Click", event.target);
+        //
+        //    var marker = new L.marker(event.latlng, { draggable:'true'});
+        //    marker.on('dragend', function(event){
+        //        var marker = event.target;
+        //        var position = marker.getLatLng();
+        //        alert(position);
+        //        console.log(typeof (position));
+        //        marker.setLatLng(position,{draggable:'true'}).update();
+        //        marker.setIcon(getIcon("35", 14, 'yellow', 'black'));
+        //
+        //    });
+        //
+        //    addMarker(marker);
+        //
+        //    //map.addLayer(marker);
+        //
+        //
+        //});
+        //
+
+
+        //var popup = new L.Popup();
+        //oms.addListener('click', function(marker) {
+        //    popup.setContent("Click on OMS");
+        //    popup.setLatLng(marker.getLatLng());
+        //    map.openPopup(popup);
+        //});
+
+
+        function stopDragend(e){
+            alert("stop " + e);
+            console.log(e);
+        }
+
+        function pointDragend(e){
+            alert("point " + e);
+        }
+
+
+        function pointDblClick(e){
+            console.log(e);
+            alert("point " + e);
+        }
+
     }]);
