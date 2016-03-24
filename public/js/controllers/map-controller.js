@@ -151,7 +151,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         'draggable': true});
                     tmpVar.source=track[i];
 
-                    tmpVar.setIcon(getIcon(stopTime, iconIndex, color, 'black'));
+                    tmpVar.setIcon(getIcon(stopTime, 14, 'white', 'black'));
 
 
 
