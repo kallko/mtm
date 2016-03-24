@@ -277,7 +277,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function linkDataParts(data) {
             init();
 
-            console.log('Start linking ...', new Date(data.server_time * 1000));
+           // console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
 
             if (data.status && data.status === 'no plan') {
@@ -313,7 +313,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
             scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
-            console.log(data);
+           // console.log(data);
             // привязывание гидов из сенсоров к машинам, назначение реальных треков машинам
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
@@ -524,13 +524,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data = data;
             updateData();
 
-            console.log('Finish linking');
+            //console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
 
             saveRoutes();
             checkLocks();
             showPopup('Загрузка завершенна!', 2500);
-            console.log(showPopup, ' showPopup');
+            //console.log(showPopup, ' showPopup');
 
             setColResizable();
             prepareFixedHeader();
@@ -586,7 +586,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обновление статусов
         function statusUpdate() {
-            console.log('statusUpdate');
+            //console.log('statusUpdate');
 
             var route,
                 tmpPoint,
