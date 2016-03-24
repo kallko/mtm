@@ -160,8 +160,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                         var localData=event.target.source;
-                        rootScope.$emit('pointEditingPopup', localData );
-                        rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
+                        //rootScope.$emit('pointEditingPopup', localData );
+                        //rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
                         console.log("this is stop source ", event.target.source);
                     });
 
@@ -225,6 +225,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     map.panTo(new L.LatLng(track[i].coords[indx].lat, track[i].coords[indx].lon));
                 }
             }
+
 
             // если не включена отрисовка нажатий - выход из функции
             if (!pushes) return;
@@ -321,11 +322,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-                tmpVar.on('mouseover', function(event){
+                tmpVar.on('mouseout', function(event){
 
 
                     var localData;
-                    console.log("mousover on Point", (event.target.source.NUMBER-1));
+                    console.log("mouseout on Point", (event.target.source.NUMBER-1));
 
                     localData=event.target.source.NUMBER-1;
 
