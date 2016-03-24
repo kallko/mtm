@@ -277,41 +277,42 @@ template {
     height: 22px;
 }
 
-#point-view {
+#point-view, #point-editing-popup {
     background-color: #D5DBD8;
     border: 2px solid #bdbdbd;
     padding: 8px;
 }
 
-#point-view-table {
+#point-view-table, #stop-info-table, #stop-point-view-table{
     font-size: 13px;
+    border: 2px solid #bdbdbd !important;
+    margin: 0;
 }
 
 .filter-btn {
     height: 21px;
 }
-
-#point-view-table {
-    border: 2px solid #bdbdbd !important;
-    margin: 0;
-}
-
-#point-view-table td {
+#point-view-table td, #stop-info-table td, #stop-point-view-table td {
     padding: 4px 8px;
 }
-
-#point-view-table .title {
+#point-view-table .title, #stop-info-table .title, #stop-point-view-table .title
+{
     width: 140px;
 }
-
+.stop-table-title td{
+    background: #D5DBD8;
+}
+#stop-info-table{
+    margin-top: 5px;
+    margin-bottom: 7px;
+}
+#stop-info-table td, #stop-point-view-table td{
+    text-align: center;
+    background-color: #FFFFFF;
+}
 #point-view-table .row-data {
     width: 500px;
 }
-
-#point-view-setting {
-    padding-top: 7px;
-}
-
 .card-title {
     text-align: center;
     margin: -3px 10px 3px 0;
@@ -454,4 +455,20 @@ template {
     background: green;
     position: absolute;
     opacity: 0.5;
+}
+.point-view-buttons{
+     padding-top: 7px;
+     text-align: center;
+}
+.col-md-2{
+    padding-right: ;
+}
+.card-title{
+    width:100%;
+}
+#btn-close{
+    padding: 2px 5px 2px 9px;
+}
+#point-editing-popup{
+    width:440px;
 }
