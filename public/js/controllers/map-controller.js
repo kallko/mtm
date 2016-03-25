@@ -160,7 +160,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                         var localData=event.target.source;
-                        //rootScope.$emit('pointEditingPopup', localData );
+                        rootScope.$emit('pointEditingPopup', localData );
                         //rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
                         console.log("this is stop source ", event.target.source);
                     });
