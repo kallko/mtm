@@ -158,11 +158,19 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                     tmpVar.on('dblclick', function(event){
 
+                        var marker = event.target;
 
-                        var localData=event.target.source;
+                        var icon = marker.options.icon;
+                        icon.options.iconSize = [30, 32];
+                        marker.setIcon(icon);
+                        //marker.update();
+                        //var localData=event.target.source;
                         //rootScope.$emit('pointEditingPopup', localData );
                         //rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
-                        console.log("this is stop source ", event.target.source);
+                      //  event.target.options.icon.options.iconSize[0]=30;
+                      //  event.target.options.icon.options.iconSize[1]=32;
+                       // marker.update();
+                        console.log("this is stop icon size ", event.target.options.icon.options.iconSize);
                     });
 
 
@@ -200,6 +208,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         container.setLatLng([container.source.lat, container.source.lon]).update();
 
                     });
+
 
 
 
@@ -299,6 +308,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     'title': title,
                     'draggable': true
 
+
                 });
 
 
@@ -313,6 +323,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpBgColor = 'yellow';
                     tmpFColor = 'black';
                 }
+
+
 
 
 
@@ -361,6 +373,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 });
 
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
+
+
                 addMarker(tmpVar);
             }
         }
