@@ -150,7 +150,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         {'title': tmpTitle,
                         'draggable': true});
                     tmpVar.source=track[i];
-
+                    tmpVar.stopIndx=stopIndx;
+                    tmpVar.routeRealTrackIndx=i;
                     tmpVar.setIcon(getIcon(stopTime, 14, 'white', 'black'));
 
 
@@ -159,10 +160,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar.on('dblclick', function(event){
 
 
-                        var localData=event.target.source;
+                        var localData=event.target;
                         rootScope.$emit('pointEditingPopup', localData );
                         //rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
-                        console.log("this is stop source ", event.target.source);
+                        console.log("this is stop source ", event.target);
                     });
 
 

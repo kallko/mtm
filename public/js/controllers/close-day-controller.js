@@ -22,7 +22,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     };
     rootScope.$on('returnCheckBoxes', function (event, data){  // <-----point-index-controller
         var splited = data.checkbox.split('-')[3];
-        console.log(splited, data.driver, ' uuuuuuuuuuuuuuuuuuuu');
+        //console.log(splited, data.driver, ' uuuuuuuuuuuuuuuuuuuu');
         scope['setCheck_'+splited]=true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         scope['setDisabled_'+splited] = false;
         if(!s_dataToCloseArr_general[splited]) s_dataToCloseArr_general[splited] = data.driver;

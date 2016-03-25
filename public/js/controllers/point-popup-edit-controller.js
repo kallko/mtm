@@ -9,16 +9,18 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
         	alert('deleted');
         };
     	rootScope.$on('pointEditingPopup', function (event, data) { // окошко редактирования точки
-    		if(data.servicePoints && data.servicePoints.length>1){
+	        scope.data = data.source;
+	        scope.stopIndx = data.stopIndx;
+    		if(scope.data.servicePoints && scope.data.servicePoints.length>1){
     			
-	            scope.viewPointsCollection = [{prop1: 111, prop2: 222}, {prop1: 'aaa', prop2: 'bbb'}, {prop1: 1212, prop2: 5454}];
+	            //scope.viewPointsCollection = [{prop1: 111, prop2: 222}, {prop1: 'aaa', prop2: 'bbb'}, {prop1: 1212, prop2: 5454}];
 	            scope.pointEditingPopup = true;
-	            console.log(scope.pointEditingPopup, ' pointpopup');
-	            console.log('Sobitie');
-	            console.log(data, ' data');
-	            for (var s=0; s<scope.viewPointsCollection.length; s++){
+	            //console.log(scope.pointEditingPopup, ' pointpopup');
+	            //console.log('Sobitie');
+	            //console.log(data, ' data');
+	            for (var s=0; s<scope.data.servicePoints.length; s++){
 	            	$('#stop-point-view-table').append('<tr data-table-stop-trow><td>'+
-	            		scope.viewPointsCollection[s].prop1+
+	            		scope.data.servicePoints[s]+
 	            		'</td><td><input type="text" class="promised-text-card">'+
 	            		'</td><td> <button data-delete-from-stop class="btn btn-primary btn-sm">Отвязать от стопа</button></td></tr>');
 	            };
