@@ -152,7 +152,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar.source=track[i];
                     tmpVar.stopIndx=stopIndx;
                     tmpVar.routeRealTrackIndx=i;
-                    tmpVar.setIcon(getIcon(stopTime, 14, 'white', 'black'));
+                    tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
 
 
 

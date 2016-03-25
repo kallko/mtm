@@ -1,9 +1,8 @@
 function getDivIcon(param){
     param.backColor2 = (param.backColor2 != undefined) ? param.backColor2 : param.backColor;
-
     var width       = param.width;
     var height      = param.height;
-    var bordrad     = "0px";
+    var bordrad     = param.bordrad || "0px";
 
     var style = "width: 100%; " +
                 "height: 100%; " +
@@ -101,7 +100,7 @@ function getIcon(numberIcon, typeIcon, colorIcon, colorText) {
             height: 16,
             status: 2
         };
-        return getDivIcon(paranDiv);
+        return getDivIcon(paramDiv);
     } else if (typeIcon == 12) {
         var newDiv = L.divIcon({
             iconSize    :   [8, 8],
@@ -123,6 +122,20 @@ function getIcon(numberIcon, typeIcon, colorIcon, colorText) {
             width: (10+5*numberIcon.length),
             height: 16,
             status: 1
+        };
+        return getDivIcon(paramDiv);
+    } else if (typeIcon == 15) {
+        colorIcon = colorIcon || '#ffffff';
+        colorText = colorText || '#000000';
+        numberIcon += '';
+        paramDiv = {
+            textColor: colorText,
+            backColor: colorIcon,
+            text: numberIcon,
+            width: (10+5*numberIcon.length),
+            height: 16,
+            status: 1,
+            bordrad: (10+5*numberIcon.length)/2+"px"
         };
         return getDivIcon(paramDiv);
     } else {
