@@ -738,10 +738,10 @@
                 <td>Продолжительность</td>
             </tr>
              <tr>
-                <td class="row-data">smth</td>
-                <td class="row-data">smth</td>
-                <td class="row-data">smth</td>
-                <td class="row-data">smth</td>
+                <td class="row-data">{{stopIndx}}</td>
+                <td class="row-data">{{data.t1*1000 | date: "HH:mm"}}</td>
+                <td class="row-data">{{data.t2*1000 | date: "HH:mm"}}</td>
+                <td class="row-data">{{(data.t2-data.t1)*1000 | date: "mm"}} мин</td>
             </tr>
         </tbody>    
     </div> 
