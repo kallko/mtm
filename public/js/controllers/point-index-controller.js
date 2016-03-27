@@ -1563,10 +1563,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     demoTime: scope.demoMode ? _data.server_time : -1
                 })
                     .success(function (data) {
-                        console.log({data: data});
+                        //console.log({data: data});
                         route.real_track = data;
 
-                        console.log('before', route.real_track.length);
+
                         for (var k = 0; k < route.real_track.length; k++) {
                             if (route.real_track[k].coords == undefined ||
                                 route.real_track[k].coords.length == 0) {
@@ -1582,7 +1582,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
                         }
 
-                        console.log('after', route.real_track.length);
+
 
                         draw(route);
                     });

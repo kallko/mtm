@@ -40,8 +40,7 @@
 
 
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+
 <!-- скрипты Ангуляра  -->
 <script src="./js/app.js"></script>
 
@@ -59,7 +58,6 @@
 
 <script src="./js/directives/finish-render.js"></script>
 <script src="./js/directives/right-click.js"></script>
-<script src="./js/directives/enter-event.js"></script>
 <script src="./js/directives/enter-event.js"></script>
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
@@ -111,7 +109,7 @@
 
 
 
-</div>
+
 <!--div id = "test-popup" ng-controller = "CloseDayController" ng-show = "view">Test-popup</div-->
 <!-- таблица точек доставки -->
 <template type="text/html" id="template-point-table">
@@ -709,7 +707,7 @@
         <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
         </button>
     </div>
-</div>
+<!--</div>-->
 <!--Окошко для редактирования точек и времени-->
 
 <div id="point-editing-popup" ng-controller="PointPopupEditController" style="position: absolute; visibility: hidden">
@@ -755,9 +753,9 @@
         </tbody>
     </table>
     <div class = "point-view-buttons">
-        <button id="cancel-task-btn" class="btn btn-primary btn-sm" ng-click="">Подтвердить
+        <button id="cancel-task-btn1" class="btn btn-primary btn-sm" ng-click="">Подтвердить
         </button>
-        <button id="cancel-task-btn" class="btn btn-primary btn-sm" ng-click="hidePopup('#point-editing-popup')">Отменить
+        <button id="cancel-task-btn2" class="btn btn-primary btn-sm" ng-click="hidePopup('#point-editing-popup')">Отменить
         </button>
     </div>
 </div>
