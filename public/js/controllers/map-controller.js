@@ -82,9 +82,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function drawRealRoute(route) {
             if (!route || !route.real_track) return;
 
-            alert("Start drawing");
-            //console.log(route , 'route')
-
             var track = route.real_track,
                 pushes = route.pushes,
                 tmpVar,
@@ -150,68 +147,50 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         {'title': tmpTitle,
                         'draggable': true});
                     tmpVar.source=track[i];
-
-                    tmpVar.setIcon(getIcon(stopTime, 14, 'white', 'black'));
+                    tmpVar.stopIndx=stopIndx;
+                    tmpVar.routeRealTrackIndx=i;
+                    tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
 
 
 
 
                     tmpVar.on('dblclick', function(event){
 
-                        var marker = event.target;
 
-                        var icon = marker.options.icon;
-                        icon.options.iconSize = [30, 32];
-                        marker.setIcon(icon);
-                        //marker.update();
-                        //var localData=event.target.source;
-                        //rootScope.$emit('pointEditingPopup', localData );
+                        var localData=event.target;
+                        rootScope.$emit('pointEditingPopup', localData );
                         //rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
-                      //  event.target.options.icon.options.iconSize[0]=30;
-                      //  event.target.options.icon.options.iconSize[1]=32;
-                       // marker.update();
-                        console.log("this is stop icon size ", event.target.options.icon.options.iconSize);
+                        //console.log("this is stop source ", event.target);
                     });
 
 
-
-
                     tmpVar.on('dragstart', function(event){
-                        console.log("start dragging stoppoint ", event.target.source);
+                        //console.log("start dragging stoppoint ", event.target.source);
                         rootScope.addingPoints=[];
                         if( typeof (event.target.source.servicePoints) == 'undefined'){
-
-                            console.log("Creation");
                             event.target.source.servicePoints=[];
-                            console.log(event.target);
                         }
                         rootScope.currentStopPoint=event.target.source;
 
 
 
 
+                    tmpVar.on('dblclick', function(event){
 
 
+<<<<<<< Temporary merge branch 1
+                        var localData=event.target.source;
+                        rootScope.$emit('pointEditingPopup', localData );
+                        rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1" /*,data*/)});
+                        //console.log("this is stop source ", event.target.source);
                     });
-
 
                     tmpVar.on('dragend', function(event){
                         var container=event.target;
-
-                        console.log("Check rootScopeStoppoint" , rootScope.currentStopPoint );
-
-                        console.log("adding points", rootScope.addingPoints);
-
                         checkAndAddNewWaypointToStop(rootScope.addingPoints, rootScope.currentStopPoint);
-
-                        console.log(container.source.lat + " " + container.source.lon);
                         container.setLatLng([container.source.lat, container.source.lon]).update();
-
+                        rootScope.currentStopPoint=null;
                     });
-
-
-
-
 
                     addMarker(tmpVar);
 
@@ -230,7 +209,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         });
                     tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                     addMarker(tmpVar);
-
                     map.panTo(new L.LatLng(track[i].coords[indx].lat, track[i].coords[indx].lon));
                 }
             }
@@ -278,9 +256,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 } else {
 
 
-
-
-
                     title = 'Точка #' + (point.NUMBER) + '\n';
                     tmpStatus = getTextStatuses(point.status);
                     title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
@@ -308,9 +283,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     'title': title,
                     'draggable': true
 
-
                 });
-
 
                 tmpBgColor = '#7EDDFC';
                 tmpFColor = 'white';
@@ -320,30 +293,23 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 if (!point.confirmed && (point.status == STATUS.FINISHED ||
                     point.status == STATUS.FINISHED_LATE || point.status == STATUS.FINISHED_TOO_EARLY)) {
-                    tmpBgColor = 'yellow';
+                    tmpBgColor = '#5cb85c';
                     tmpFColor = 'black';
                 }
 
-
-
-
-
-
-
                 tmpVar.source=point;
-
-
 
                 tmpVar.on('mouseout', function(event){
 
-
+                    var container=event.target;
                     var localData;
-                    console.log("mouseout on Point", (event.target.source.NUMBER-1));
-
                     localData=event.target.source.NUMBER-1;
 
-                   if (typeof(rootScope.addingPoints) != "undefined"){
-                    rootScope.addingPoints.push(localData);
+                   if (typeof(rootScope.addingPoints) != "undefined" && rootScope.currentStopPoint!=null){
+
+                       container.setIcon(getIcon(container.source.NUMBER, 14, '#5cb85c', 'black')).update();
+                       rootScope.addingPoints.push(localData);
+
                    }
 
                 });
@@ -367,14 +333,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
 
-
                     }
 
                 });
 
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
-
-
                 addMarker(tmpVar);
             }
         }
@@ -466,9 +429,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             tmpVar = L.marker([point.LAT, point.LON], {
                 'title': title
             });
-            tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
             tmpBgColor = '#7EDDFC';
             tmpFColor = 'white';
+            tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
             if (tmpStatus) {
                 tmpBgColor = tmpStatus.color;
             }
@@ -706,9 +669,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //});
 
 
+        // Проверка на добавление в остановку обслуживания точки, которая уже обслуживается этим стопом.
         function checkAndAddNewWaypointToStop(potencial, current){
             var i=0;
-
             while(i< potencial.length){
                 var j=0;
                 var finded=false;
@@ -716,28 +679,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         if(potencial[i]==current.servicePoints[j]){
                             finded=true;
-                            console.log ("FIND DUPLICATE!!!!");
                         }
-
-
-
                         j++;
                     }
-
                     if (!finded){
-
-                        console.log("adding new point");
                         current.servicePoints.push(potencial[i]);
-
-                        console.log("new service", current.servicePoints);
-
                     }
-
-
                 i++;
             }
-
-
         }
 
 

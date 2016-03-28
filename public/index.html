@@ -40,8 +40,7 @@
 
 
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+
 <!-- скрипты Ангуляра  -->
 <script src="./js/app.js"></script>
 
@@ -52,13 +51,13 @@
 <script src="./js/controllers/point-view-controller.js"></script>
 <script src="./js/controllers/edit-route-controller.js"></script>
 <script src="./js/controllers/close-day-controller.js"></script>
+<script src="./js/controllers/point-popup-edit-controller.js"></script>
 
 
 <script src="./js/filters/mtm-unique.js"></script>
 
 <script src="./js/directives/finish-render.js"></script>
 <script src="./js/directives/right-click.js"></script>
-<script src="./js/directives/enter-event.js"></script>
 <script src="./js/directives/enter-event.js"></script>
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
@@ -608,4 +607,155 @@
 
 
 
+    <table id="point-view-table" class="table table-striped">
+        <tbody>
+        <tr>
+            <td class="title">Название:</td>
+            <td class="row-data">{{point.waypoint.NAME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Адрес:</td>
+            <td class="row-data">{{point.waypoint.ADDRESS}}</td>
+        </tr>
+        <tr>
+            <td class="title">План. прибытие:</td>
+            <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+        </tr>
+        <tr>
+            <td class="title">План. номер:</td>
+            <td class="row-data">{{point.NUMBER}}</td>
+        </tr>
+        <tr>
+            <td class="title">Машина:</td>
+            <td class="row-data">{{point.transport.NAME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Водитель:</td>
+            <td class="row-data">{{point.driver.NAME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Заказанное окно:</td>
+            <td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>
+        </tr>
+        <tr>
+            <td class="title">Обещанное окно:</td>
+            <td class="row-data">
+                {{point.promised_window.start * 1000 | date:'HH:mm'}} -
+                {{point.promised_window.finish * 1000 | date:'HH:mm'}}
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Изменяемое окно:</td>
+            <td class="row-data">
+                <input type="text" class="promised-text-card" id="promised-start-card"
+                       enter-event="changePromisedWindow(point)"> -
+                <input type="text" class="promised-text-card" id="promised-finish-card"
+                       enter-event="changePromisedWindow(point)">
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Тел. водителя:</td>
+            <td class="row-data">{{point.driver.PHONE}}</td>
+        </tr>
+        <tr>
+            <td class="title">Комментарий:</td>
+            <td class="row-data">{{point.waypoint.COMMENT}}</td>
+        </tr>
+        <tr>
+            <td class="title">Статус:</td>
+            <td class="row-data">
+                {{point.textStatus}}
+                <button id="confirm-status-task-btn" ng-show="locked(point) && unconfirmed()"
+                        class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
+                </button>
+                <button id="cancel-status-task-btn" ng-show="locked(point) && unconfirmed()"
+                        class="btn btn-primary btn-sm" ng-click="cancelStatus()">Отменить
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Окно:</td>
+            <td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>
+        </tr>
+        <tr>
+            <td class="title">Стоимость:</td>
+            <td class="row-data">{{point.VALUE}}</td>
+        </tr>
+        <tr>
+            <td class="title">Объем:</td>
+            <td class="row-data">{{point.VOLUME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Вес:</td>
+            <td class="row-data">{{point.WEIGHT}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div id="point-view-setting" class = "point-view-buttons" ng-show="locked(point)">
+        <button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"
+                ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">
+            <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>
+            &nbsp;Машрут
+        </button>
+        <button id="edit-task-btn" class="btn btn-sm down-btn"
+                ng-class="point.locked ? 'btn-danger' : 'btn-primary'" ng-click="toggleTaskBlock()">
+            <i class="fa fa-md" ng-class="point.locked ? 'fa-lock' : 'fa-unlock'"></i>
+            &nbsp;Задание
+        </button>
+
+        <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
+        </button>
+    </div>
+<!--</div>-->
+<!--Окошко для редактирования точек и времени-->
+
+<div id="point-editing-popup" ng-controller="PointPopupEditController" style="position: absolute; visibility: hidden">
+    <div class="card-title">
+        <div id="container">
+            <div class = "row">
+                <div class = "col-md-3">
+                </div>
+                <div class = "col-md-6">
+                    Карточка остановки
+                </div>
+                <div class = "col-md-3">
+                    <button id="btn-close" class="btn btn-danger" ng-click="hidePopup('#point-editing-popup')">Закрыть
+                    </button>
+                </div>
+            </div>
+        </div> 
+    </div>
+    <div>
+        <table id="stop-info-table">
+        <tbody>
+            <tr class="stop-table-title">
+                <td>Номер стопа</td>
+                <td>Время начала</td>
+                <td>Время окончания</td>
+                <td>Продолжительность</td>
+            </tr>
+             <tr>
+                <td class="row-data">{{stopIndx}}</td>
+                <td class="row-data">{{data.t1*1000 | date: "HH:mm"}}</td>
+                <td class="row-data">{{data.t2*1000 | date: "HH:mm"}}</td>
+                <td class="row-data">{{(data.t2-data.t1)*1000 | date: "mm"}} мин</td>
+            </tr>
+        </tbody>    
+    </div> 
+    <table id="stop-point-view-table">
+        <tbody>
+            <tr class="stop-table-title">
+                <td class="title">Точка доставки:</td>
+                <td class="title">Интервал времени на обслуживание точки</td>
+                <td>Действие</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class = "point-view-buttons">
+        <button id="cancel-task-btn1" class="btn btn-primary btn-sm" ng-click="">Подтвердить
+        </button>
+        <button id="cancel-task-btn2" class="btn btn-primary btn-sm" ng-click="hidePopup('#point-editing-popup')">Отменить
+        </button>
+    </div>
 </div>
