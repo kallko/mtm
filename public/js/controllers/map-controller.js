@@ -108,7 +108,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
                     polyline.addTo(map);
-                } else if (track[i].state == 'ARRIVAL') { // отрисовать стоп
+                } else if (track[i].state == 'ARRIVAL')
+                { // отрисовать стоп
                     // если отрисовка стопов выключена, пропустить итерацию
                     if (!drawStops) continue;
 
@@ -164,26 +165,20 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
 
-                    tmpVar.on('dragstart', function(event){
-                        //console.log("start dragging stoppoint ", event.target.source);
-                        rootScope.addingPoints=[];
-                        if( typeof (event.target.source.servicePoints) == 'undefined'){
-                            event.target.source.servicePoints=[];
+                    tmpVar.on('dragstart', function(event) {
+                        console.log("start dragging stoppoint ", event.target.source);
+                        rootScope.addingPoints = [];
+                        if (typeof (event.target.source.servicePoints) == 'undefined') {
+                            event.target.source.servicePoints = [];
                         }
-                        rootScope.currentStopPoint=event.target.source;
 
 
 
+                    rootScope.currentStopPoint=event.target.source;
+                    console.log ("rootScope.currentStopPoint ", rootScope.currentStopPoint)
+                    })
 
-                    tmpVar.on('dblclick', function(event){
 
-
-<<<<<<< Temporary merge branch 1
-                        var localData=event.target.source;
-                        rootScope.$emit('pointEditingPopup', localData );
-                        rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1" /*,data*/)});
-                        //console.log("this is stop source ", event.target.source);
-                    });
 
                     tmpVar.on('dragend', function(event){
                         var container=event.target;
@@ -304,8 +299,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     var container=event.target;
                     var localData;
                     localData=event.target.source.NUMBER-1;
+                    console.log("rootScope.addingPoints " , rootScope.addingPoints , " rootScope.currentStopPoint " , rootScope.currentStopPoint);
 
                    if (typeof(rootScope.addingPoints) != "undefined" && rootScope.currentStopPoint!=null){
+
+                       console.log("lets change the color");
 
                        container.setIcon(getIcon(container.source.NUMBER, 14, '#5cb85c', 'black')).update();
                        rootScope.addingPoints.push(localData);
