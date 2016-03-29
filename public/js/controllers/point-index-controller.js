@@ -610,7 +610,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tmpPoint.status = STATUS.SCHEDULED;
 
                     delete tmpPoint.distanceToStop;
-                    delete tmpPoint.timeToStop;
+                    delete tmpPoint.timeToStop;    // опережение/отставание реального прибытия к планируемому
                     delete tmpPoint.haveStop;
                     delete tmpPoint.stopState;
                     delete tmpPoint.stop_arrival_time;
@@ -620,9 +620,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.mobile_push;
                     delete tmpPoint.mobile_arrival_time;
                     delete tmpPoint.havePush;
-                    delete tmpPoint.real_arrival_time;
+                    delete tmpPoint.real_arrival_time;  //дублирует 617 строку
                     delete tmpPoint.confirmed;
-
+                    delete tmpPoint.autofill_service_time;
                     delete tmpPoint.overdue_time;
                 }
 
@@ -683,9 +683,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
 
+                                    //console.log('connecting temppoint ', tmpPoint, ' with stop ', tmpArrival);
+
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
-                                    tmpPoint.stop_arrival_time = tmpArrival.t1;
-                                    tmpPoint.real_arrival_time = tmpArrival.t1;
+                                    tmpPoint.stop_arrival_time = tmpArrival.t1;   /// что то здесь не так. В этих 2х строчках
+                                    tmpPoint.real_arrival_time = tmpArrival.t1;   ///
+                                    tmpPoint.autofill_service_time=tmpArrival.t2-tmpArrival.t1;// Добавляем атрибут реальное время обслуживания точки. Не будет корректным если с одним стопом связано несколько точек
+                                    tmpPoint.real_service_time;
                                     //route.points[k]
                                     //console.log("route-point-k", route.points[k], "route" , route)
 
@@ -694,8 +698,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     }
 
                                     tmpArrival.servicePoints.push(k);
-                                   // tmpArrival.servicePoints[0]=route.points[k];
-                                    //tmpArrival.servicePoints.push(tmpPoint);
+
 
                                     findStatusAndWindowForPoint(tmpPoint);
 
@@ -2035,4 +2038,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
         //console.log(scope.filters.route, ' filters route');
+
+
+
+        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
+
     }]);

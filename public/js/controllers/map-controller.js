@@ -165,8 +165,22 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
 
-                    tmpVar.on('dragstart', function(event) {
-                        console.log("start dragging stoppoint ", event.target.source);
+                    tmpVar.on('drag', function(event) {
+                        //console.log("start dragging stoppoint ", event.target.source);
+
+
+                        // блок добавляющий попап к маркеру с номером элементаб с которым возможна потенциальная связь
+                        //var forPopup="?????";
+                        //if (typeof(scope.minI)!='undefined'){
+                        //
+                        //    forPopup=scope.minI;
+                        //} else{
+                        //    forPopup="?????";
+                        //}
+                        //
+                        //var container=event.target;
+                        //container.bindPopup(""+forPopup).openPopup();
+
                         rootScope.addingPoints = [];
                         if (typeof (event.target.source.servicePoints) == 'undefined') {
                             event.target.source.servicePoints = [];
@@ -175,8 +189,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                     rootScope.currentStopPoint=event.target.source;
-                    console.log ("rootScope.currentStopPoint ", rootScope.currentStopPoint)
-                    })
+
+                    findNearestPoint(this._latlng.lat, this._latlng.lng);
+
+                    //console.log ("this lat ", this._latlng.lat, " this lng ", this._latlng.lng );
+
+
+
+                    });
 
 
 
@@ -185,6 +205,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         checkAndAddNewWaypointToStop(rootScope.addingPoints, rootScope.currentStopPoint);
                         container.setLatLng([container.source.lat, container.source.lon]).update();
                         rootScope.currentStopPoint=null;
+
+                        try{
+                            map.removeLayer(scope.polyline)}
+                        catch (e) {
+                            console.log(e);
+                        };
+
                     });
 
                     addMarker(tmpVar);
@@ -241,7 +268,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-
+            scope.currentWayPoints=points;
             for (var i = 0; i < points.length; i++) {
                 title = '';
                 point = points[i];
@@ -271,7 +298,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
 
 
-
+                //Добавление титра реально обслужено. Если нет введенного в ручную параметра real_service_time то ставится автоматически время всего стопа
+                if(typeof (point.autofill_service_time)!='undefined'){
+                    title += 'Реально обслужено за: ' + mmhh((point.real_service_time) || (point.autofill_service_time)) + '\n';
+                }
 
 
                 tmpVar = L.marker([point.LAT, point.LON], {
@@ -296,14 +326,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 tmpVar.on('mouseout', function(event){
 
+                    console.log("mouse.out ", event.target);
                     var container=event.target;
                     var localData;
                     localData=event.target.source.NUMBER-1;
-                    console.log("rootScope.addingPoints " , rootScope.addingPoints , " rootScope.currentStopPoint " , rootScope.currentStopPoint);
+                    //console.log("rootScope.addingPoints " , rootScope.addingPoints , " rootScope.currentStopPoint " , rootScope.currentStopPoint);
 
                    if (typeof(rootScope.addingPoints) != "undefined" && rootScope.currentStopPoint!=null){
-
-                       console.log("lets change the color");
 
                        container.setIcon(getIcon(container.source.NUMBER, 14, '#5cb85c', 'black')).update();
                        rootScope.addingPoints.push(localData);
@@ -330,15 +359,25 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     } else {
 
                         newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
-
                     }
 
                 });
 
+
+
+                tmpVar.on('dblclick', function(event){
+                    console.log('this is waypoint ', event.target);
+                });
+
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
                 addMarker(tmpVar);
+
+
+
             }
         }
+
+        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
         // перевести timestamp в строковой формат времени минуты:часы
         function mmhh(time) {
@@ -687,6 +726,55 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+
+        // Нахождение ближайшего waypoint к стопу во время его 'drag', и отрисовка линии к нему
+        function findNearestPoint(lat, lng){
+
+            var i=0;
+            var minDist=0.005;
+            while(i<scope.currentWayPoints.length){
+
+                var LAT=parseFloat(scope.currentWayPoints[i].LAT);
+                var LNG=parseFloat(scope.currentWayPoints[i].LON);
+                var dist=Math.sqrt((LAT-lat)*(LAT-lat)+(LNG-lng)*(LNG-lng));
+
+                if(dist<minDist){
+                    minDist=dist;
+                  var  minLAT=LAT;
+                  var  minLNG=LNG;
+                    scope.minI=i;
+                }
+                i++;
+            }
+
+            if (minDist<0.005){
+
+                try{
+                    map.removeLayer(scope.polyline)}
+                catch (e) {
+                    console.log(e);
+                }
+
+
+                scope.polyline = L.polyline([[minLAT, minLNG], [lat, lng]], {color: '#5cb85c', weight: 3,
+                    opacity: 0.5,
+                    smoothFactor: 1});
+                map.addLayer(scope.polyline);
+
+
+            }
+
+
+            if (minDist==0.005) {
+
+                try {
+                    map.removeLayer(scope.polyline)
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            }
+        }
 
 
         function stopDragend(e){
