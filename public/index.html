@@ -568,7 +568,7 @@
                     Карточка остановки
                 </div>
                 <div class = "col-md-3">
-                    <button id="btn-close" class="btn btn-danger" ng-click="hidePopup('#point-editing-popup')">Закрыть
+                    <button id="btn-close" class="btn btn-danger" ng-click="cancel('#point-editing-popup')">Закрыть
                     </button>
                 </div>
             </div>
@@ -602,9 +602,9 @@
         </tbody>
     </table>
     <div class = "point-view-buttons">
-        <button class="btn btn-primary btn-sm" ng-click="">Подтвердить
+        <button class="btn btn-primary btn-sm" ng-click="confirm('#point-editing-popup')">Подтвердить
         </button>
-        <button class="btn btn-primary btn-sm" ng-click="hidePopup('#point-editing-popup')">Отменить
+        <button class="btn btn-primary btn-sm" ng-click="cancel('#point-editing-popup')">Отменить
         </button>
     </div>
 </div>

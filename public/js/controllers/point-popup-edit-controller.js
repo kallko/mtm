@@ -1,9 +1,7 @@
 angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$rootScope',
     function (scope, rootScope) {
-    	scope.hidePopup = function(id){
-    		$(id).popup('hide');
-    		$('[data-table-stop-trow]').remove();
-    	}
+    	var wayPointsToRemoveFromStop = []; // массив точек обслуживания, представленных к удалению (отвязыванию) из соответствующего стопа 
+
     	scope.pointEditingPopup = false;
         scope.deletePointFromStop=function(){
         	alert('deleted');
@@ -21,15 +19,15 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            //console.log(data, ' data');
 	           	
 	            for (var s=0; s<scope.data.servicePoints.length; s++){
-	            	$('#stop-point-view-table').append('<tr data-table-stop-trow><td>'+
-	            		scope.data.servicePoints[s]+
+	            	$('#stop-point-view-table').append('<tr data-table-stop-trow data-row='+s+'><td>'+
+	            		(scope.data.servicePoints[s]+1)+
 	            		'</td><td><input data-table-stop-input-'+s+' type="text" class="promised-text-card">'+
-	            		'</td><td> <button data-delete-from-stop-'+s+' class="btn btn-primary btn-sm">Отвязать от стопа</button></td></tr>');
+	            		'</td><td> <button data-delete-from-stop='+s+' class="btn btn-primary btn-sm">Отвязать от стопа</button></td></tr>');
 	            };
 	            //document.querySelector('[data-table-stop-input-'+s+']').value='ccc';
-	            $('[data-delete-from-stop]').click(function(){
-	            	alert(this, 'deleted');
-	            });
+	            // $('[data-delete-from-stop]').click(function(){
+	            // 	alert(this, 'deleted');
+	            // });
 	            $('#point-editing-popup').popup('show');
 	            //------------------------------разброс врмени простоя по точкам------
 	            //------------------------------разброс времемни по умолчанию
@@ -100,9 +98,6 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 		            			intervalSummManual += parseInt($('[data-table-stop-input-'+s+']').val());
 		            			//console.log(intervalSummManual, ' intervalSummManual');
 		            		};
-	            			
-	            				//console.log(previousTarget.value, ' previousTarget');
-	            			 //if (intervalSummManual <= intervalSummAutoFilled){
 	            				var localSumm = 0;
 	            					lastItem = scope.data.servicePoints.length-1;
 	            				for (var s=0; s<scope.data.servicePoints.length-1; s++){
@@ -121,16 +116,45 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            				console.log(intervalSummAutoFilled, 'autofill');
 	            				console.log(localSumm, ' localSumm');
 	            		});
-						
-						$('[data-delete-from-stop-'+s+']').click(function($event){
-							console.log('click', s);
-							delete scope.data.servicePoints[s];
-							$('#stop-point-view-table').remove('[data-table-stop-trow-'+s+']');
+						$('[data-delete-from-stop="'+s+'"]').click(function($event){
+							console.log(scope.data.servicePoints.length, ' servicePoints');
+
+							//----------------------------------------------
+							var localIndex = $($event.currentTarget).attr('data-delete-from-stop');
+							var localItem = scope.data.servicePoints[localIndex];
+							wayPointsToRemoveFromStop.push({index: localIndex, item: localItem});
+							delete scope.data.servicePoints[localIndex];
+							//scope.data.servicePoints.splice(scope.data.servicePoints.indexOf(localItem), 1);
+							//----------------------------------------------
+							$('[data-row="'+localIndex+'"]').remove();
+							setDeafaultInterval(); //!!!!!!!!!!!!!!!!!!!!!!!
+							console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
+							console.log(scope.data.servicePoints, ' servicePoints');
 						});
 
-	            	}
+	            	};
 	            };
-	
+	            //функция, которая спрячет и расформирует окно карточки вызова
+	            function hidePopup(id){
+    				$(id).popup('hide');
+    				$('[data-table-stop-trow]').remove();
+    			};
+	            //обработчик кнопки "отмена" и "закрыть": опустошает массив точек, представленных к удалению из стопа и прячет окно карточки остановки
+	            scope.cancel = function(id){
+	            	//scope.data.servicePoints = scope.data.servicePoints.concat(wayPointsToRemoveFromStop);
+	            	for(var s=0; s< wayPointsToRemoveFromStop.length; s++){
+	            		scope.data.servicePoints[wayPointsToRemoveFromStop[s].index]=wayPointsToRemoveFromStop[s].item;
+	            	};
+	            	wayPointsToRemoveFromStop = [];
+	            	hidePopup(id);
+	            	console.log(wayPointsToRemoveFromStop, ' cancel');
+	            };
+	            scope.confirm = function(id){
+	            	rootScope.$emit('confirmViewPointEditing', scope.data.servicePoints);
+	            	wayPointsToRemoveFromStop = [];
+	            	hidePopup(id);
+	            	console.log('emited edited servicePoints', scope.data.servicePoints);
+	            };
     		};
         });
 
