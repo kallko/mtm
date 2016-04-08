@@ -150,7 +150,7 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
-                    ng-click="rowClick(row.row_id)"
+                    ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
                     ng-show="applyFilter(row)"
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row"

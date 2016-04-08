@@ -106,6 +106,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     driversArr.push( scope.filters.routes[i]['driver'] || null);   
                  };
                  scope.filters.route = driversArr.indexOf(data)-1;
+             console.log("route", scope.filters.route, "_data", _data);///Определение номера маршрута, который надо отрисовать.
+             //rootScope.$emit('drawRoute', scope.filters.route);
+             scope.drawRoute();
+
          });
         // установить динамическое обновление данных
         //не понятно где используется!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -577,6 +581,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 ;
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             var d = R * c; // Distance in km
+            //console.log("lat1", lat1, "lon1", lon1, "lat2", lat2, "lon2", lon2, ' dist', d*1000);
             return d * 1000;
         }
 
@@ -617,7 +622,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.stop_arrival_time;
                     delete tmpPoint.real_arrival_time;
                     delete tmpPoint.windowType;
-
                     delete tmpPoint.mobile_push;
                     delete tmpPoint.mobile_arrival_time;
                     delete tmpPoint.havePush;
@@ -633,6 +637,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             for (i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
+                //console.log ("route.driver.name", route.driver.NAME);
                 route.lastPointIndx = 0;
                 if (route.real_track != undefined) {
                     for (j = 0; j < route.real_track.length; j++) {
@@ -652,16 +657,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
 
                                 tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
 
                                 // если стоп от точки не раньше значения timeThreshold и в пределах
                                 // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
                                 // по времени чем предыдущий детект - привязываем этот стоп к точке
+
+                                //Тестирование, почему неправильно привязывается точка 8в маршруте Гамоля
+
+
                                 if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
                                     tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                                     tmpPoint.timeToStop > tmpTime)) {
 
                                     haveUnfinished = false;
+
                                     if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
                                         for (var l = k - 1; l > 0; l--) {
                                             status = route.points[l].status;
@@ -678,15 +689,31 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         }
                                     }
 
+                                    if(tmpPoint.driver.NAME=="ГАМОЛЯ СЕРГЕЙ" && (tmpPoint.NUMBER==8 || tmpPoint.NUMBER==9)) {
+                                        console.log("Connecting point, for ГАМОЛЯ СЕРГЕЙ", tmpPoint, " with stop", tmpArrival, "Need Check");
+                                        scope.testFlag=true;
+                                       // var findBetterStop=findBestStop(tmpPoint, tmpArrival);
+
+                                    }
+
+
+                                    //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
+                                    if(tmpPoint.haveStop==true && !findBestStop(tmpPoint, tmpArrival)){
+                                        continue;
+                                    }
+
+
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
+                                    tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
 
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
+                                    tmpPoint.autofill_service_time = tmpArrival.time;
                                     //route.points[k]
                                     //console.log("route-point-k", route.points[k], "route" , route)
 
@@ -695,8 +722,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     }
 
                                     tmpArrival.servicePoints.push(k);
-                                   // tmpArrival.servicePoints[0]=route.points[k];
-                                    //tmpArrival.servicePoints.push(tmpPoint);
 
                                     findStatusAndWindowForPoint(tmpPoint);
 
@@ -912,6 +937,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // поределить статус точки и тип окна, в которое она попадает
         function findStatusAndWindowForPoint(tmpPoint) {
+
+
             tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
             if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
                 && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
@@ -937,6 +964,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             } else {
 
             }
+
+            if(scope.testFlag){
+                console.log("Status for", tmpPoint.NUMBER, tmpPoint.status, 'conf', tmpPoint.rawConfirmed);
+                scope.testFlag=false;
+
+            }
+
         }
 
         // получить строковую дату в формате 1С
@@ -1375,7 +1409,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // обработчик клика на строке таблицы
-        scope.rowClick = function (id) {
+        scope.rowClick = function (row) {
+            console.log("LAt/Lon", row.LAT, row.LON);
+            rootScope.$emit('findStopOnMarker', row.LAT, row.LON)
             return;
 
             // TODO REMOVE
@@ -1515,6 +1551,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // отрисовать маршрут
         scope.drawRoute = function () {
+            console.log("P-I-C recieve click");
             scope.$emit('clearMap');
 
             var indx,
@@ -1587,6 +1624,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         draw(route);
                     });
+                //console.log("Troubles here");
             } else {
                 console.log('load tracks from cache');
                 draw(route);
@@ -2063,5 +2101,60 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('error', ' error of pushing data');
                 rootScope.$emit('serverError');
             }
+
         };
+
+        function findBestStop(point, stop){
+            //console.log("recieve data", point.driver.NAME, "point", point.NUMBER);
+            //console.log("lat ", point.LAT, point.stopState.lat, stop.lat);
+            //console.log("lat ", point.LON, point.stopState.lon, stop.lon);
+            var findOldDist=getDistanceFromLatLonInM(point.LAT, point.LON, point.stopState.lat, point.stopState.lon);
+            var findNewDist=getDistanceFromLatLonInM(point.LAT, point.LON, stop.lat, stop.lon);
+            //console.log('oldDist', findOldDist, 'newDist', findNewDist);
+            //
+            var findOldTime=point.stopState.t2-point.stopState.t1;
+            var findNewTime=stop.time;
+            var etalonTime=point.TASK_TIME;
+
+            //console.log("Etalon", etalonTime, "old", findOldTime, "new", findNewTime);
+
+            var oldDeltaWindow=0;
+            if(point.real_arrival_time<point.controlled_window.start){
+                oldDeltaWindow=point.real_arrival_time-point.controlled_window.start;
+            }
+
+            if(point.real_arrival_time>point.controlled_window.finish){
+                oldDeltaWindow=point.real_arrival_time - point.controlled_window.finish;
+            }
+
+
+            var newDeltaWindow=0;
+            if (stop.t1<point.controlled_window.start){
+                newDeltaWindow=stop.t1-point.controlled_window.start;
+            }
+
+            if (stop.t1>point.controlled_window.finish){
+                newDeltaWindow=stop.t1-point.controlled_window.finish;
+            }
+
+            //console.log("OldWindow", oldDeltaWindow, "newWindow", newDeltaWindow);
+
+            var oldWeight=findOldDist+5*Math.abs(oldDeltaWindow/60)+(10*((etalonTime-findOldTime)/60));
+
+            var newWeight=findNewDist+5*Math.abs(newDeltaWindow/60)+(10*((etalonTime-findNewTime)/60));
+
+            //console.log("oldWeight", oldWeight, "newWeight", newWeight);
+
+
+            if(oldWeight>newWeight){
+                return true;
+            } else{
+                return false;
+            }
+
+        }
+
+
+        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
+
     }]);

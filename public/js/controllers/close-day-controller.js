@@ -77,5 +77,6 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     scope.closeTableRowClick = function(){
 
     	rootScope.$emit('closeDriverName', event.currentTarget.childNodes[5].innerHTML);
+
     }
 }]);
