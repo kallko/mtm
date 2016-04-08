@@ -80,7 +80,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // отрисовать фактический трек
         function drawRealRoute(route) {
+
+
             if (!route || !route.real_track) return;
+
 
             var track = route.real_track,
                 pushes = route.pushes,
@@ -93,6 +96,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 stopTime,
                 drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
                 drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия
+                stops=[];
 
             for (var i = 0; i < track.length; i++) {
                 if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
@@ -111,6 +115,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 } else if (track[i].state == 'ARRIVAL')
                 { // отрисовать стоп
                     // если отрисовка стопов выключена, пропустить итерацию
+                    stops.push(track[i]);
+
                     if (!drawStops) continue;
 
 
@@ -153,64 +159,45 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
 
 
-
-
                     tmpVar.on('dblclick', function(event){
-
-
                         var localData=event.target;
                         rootScope.$emit('pointEditingPopup', localData );
-                        //rootScope.$on('pointEditingPopup', function(event, data){console.log("!!!!!!!!!!!!!!!!!1", data)});
-                        //console.log("this is stop source ", event.target);
+
                     });
 
 
                     tmpVar.on('drag', function(event) {
-                        //console.log("start dragging stoppoint ", event.target.source);
 
-
-                        // блок добавляющий попап к маркеру с номером элементаб с которым возможна потенциальная связь
-                        //var forPopup="?????";
-                        //if (typeof(scope.minI)!='undefined'){
-                        //
-                        //    forPopup=scope.minI;
-                        //} else{
-                        //    forPopup="?????";
-                        //}
-                        //
-                        //var container=event.target;
-                        //container.bindPopup(""+forPopup).openPopup();
-
-                        rootScope.addingPoints = [];
-                        if (typeof (event.target.source.servicePoints) == 'undefined') {
-                            event.target.source.servicePoints = [];
-                        }
-
-
-
-                    rootScope.currentStopPoint=event.target.source;
-
-                    findNearestPoint(this._latlng.lat, this._latlng.lng);
-
-                    //console.log ("this lat ", this._latlng.lat, " this lng ", this._latlng.lng );
-
-
+                        oms.removeMarker(event.target);
+                        scope.currentDraggingStop=event.target;
+                        findNearestPoint(this._latlng.lat, this._latlng.lng);
 
                     });
 
 
 
                     tmpVar.on('dragend', function(event){
+
+
                         var container=event.target;
-                        checkAndAddNewWaypointToStop(rootScope.addingPoints, rootScope.currentStopPoint);
+                        oms.addMarker(container);
                         container.setLatLng([container.source.lat, container.source.lon]).update();
-                        rootScope.currentStopPoint=null;
+
 
                         try{
                             map.removeLayer(scope.polyline)}
                         catch (e) {
                             console.log(e);
                         };
+
+                        try{
+                            scope.spiderMarker.fire('click')}
+                        catch (e) {
+                            console.log(e);
+                        };
+
+                        scope.baseCurrentWayPoints[scope.minI].stopState=scope.currentDraggingStop.source;// тщательно оттестировать
+                        checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
 
                     });
 
@@ -267,8 +254,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 point;
 
 
+            scope.baseCurrentWayPoints=points;
+            scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
 
-            scope.currentWayPoints=points;
             for (var i = 0; i < points.length; i++) {
                 title = '';
                 point = points[i];
@@ -324,24 +312,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 tmpVar.source=point;
 
-                tmpVar.on('mouseout', function(event){
-
-                    console.log("mouse.out ", event.target);
-                    var container=event.target;
-                    var localData;
-                    localData=event.target.source.NUMBER-1;
-                    //console.log("rootScope.addingPoints " , rootScope.addingPoints , " rootScope.currentStopPoint " , rootScope.currentStopPoint);
-
-                   if (typeof(rootScope.addingPoints) != "undefined" && rootScope.currentStopPoint!=null){
-
-                       container.setIcon(getIcon(container.source.NUMBER, 14, '#5cb85c', 'black')).update();
-                       rootScope.addingPoints.push(localData);
-
-                   }
-
-                });
-
-
                 // Установка новых координат для вэйпоинта при переноске маркера-point
                 tmpVar.on('dragend', function(event){
 
@@ -372,8 +342,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
                 addMarker(tmpVar);
 
-
-
             }
         }
 
@@ -398,6 +366,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             oms.addMarker(marker);
             markersArr.push(marker);
         }
+
+
 
         // добавить полилайн на карту
         function addPolyline(geometry, color, weight, opacity, smoothFactor, decorator) {
@@ -573,7 +543,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $body.mousemove(function (event) {
                 if (!checkMouseInRect(position, event.clientX, event.clientY)) {
                     disableMap();
-                   // console.log("disable map");
                 }
             });
         }
@@ -623,7 +592,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
 
             oms = new OverlappingMarkerSpiderfier(map);
-            console.log(map + " Map postinit");
+            console.log("oms",oms,oms.prototype);
         }
 
         // изменение размеров окна браузера и, как следствие, карты
@@ -674,56 +643,126 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-        //map.on('dblclick', function(event){
-        //
-        //    console.log("Map on Click", event.target);
-        //
-        //    var marker = new L.marker(event.latlng, { draggable:'true'});
-        //    marker.on('dragend', function(event){
-        //        var marker = event.target;
-        //        var position = marker.getLatLng();
-        //        alert(position);
-        //        console.log(typeof (position));
-        //        marker.setLatLng(position,{draggable:'true'}).update();
-        //        marker.setIcon(getIcon("35", 14, 'yellow', 'black'));
-        //
-        //    });
-        //
-        //    addMarker(marker);
-        //
-        //    //map.addLayer(marker);
-        //
-        //
-        //});
-        //
 
-
-        //var popup = new L.Popup();
-        //oms.addListener('click', function(marker) {
-        //    popup.setContent("Click on OMS");
-        //    popup.setLatLng(marker.getLatLng());
-        //    map.openPopup(popup);
-        //});
 
 
         // Проверка на добавление в остановку обслуживания точки, которая уже обслуживается этим стопом.
-        function checkAndAddNewWaypointToStop(potencial, current){
-            var i=0;
-            while(i< potencial.length){
-                var j=0;
-                var finded=false;
-                    while(j<current.servicePoints.length){
+        function checkAndAddNewWaypointToStop(stop, indx){
 
-                        if(potencial[i]==current.servicePoints[j]){
-                            finded=true;
-                        }
-                        j++;
-                    }
-                    if (!finded){
-                        current.servicePoints.push(potencial[i]);
-                    }
+
+
+
+            //Нахождение маркера соответсвующего найденному waypoint
+            var i=0;
+            while(i<markersArr.length){
+                if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==(indx+1))){
+                    var marker=markersArr[i];
+                    console.log('marker for waypoint', marker)
+                    break;
+                };
                 i++;
             }
+
+
+            var wayPoint=marker.source;
+            console.log("I want to connect", stop, 'with point', wayPoint, "and indx", indx);
+            wayPoint.haveStop=true;
+
+
+            var oldStopTime=wayPoint.real_arrival_time;
+            console.log('oldStopTime', oldStopTime);
+
+            //var oldStop= $.extend(true, {}, wayPoint.stopState);
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // Проверка на аккуратность и внимательность человекаю Не пытается ли он связать уже связанные точку и стоп
+            if(typeof(wayPoint.stopState)!='undefined' && typeof(wayPoint.stopState.servicePoints)!='undefined'){
+                var i=0;
+                var duplicate=false;
+
+                console.log("Start Duplicate Checkfor wayPoint", wayPoint.stopState.servicePoints, "and indx", indx  );
+
+                while( i<wayPoint.stopState.servicePoints.length){
+                    console.log("looking Duplicate", typeof (wayPoint.stopState.servicePoints));
+                    if(wayPoint.stopState.servicePoints[i]==indx){
+                        console.log("FIND DUPLICATE")
+                        duplicate=true;
+                        break;
+                    }
+                    i++
+                }
+
+                wayPoint.rawConfirmed =1;
+                makeWayPointMarkerGreen(indx);
+                changeFieldsAlredyConnectedPoints(wayPoint, stop);
+                if(duplicate){return};
+            }
+
+
+
+            if(typeof (wayPoint.stopState)!='undefined'){
+
+                //Находим маркер oldStop;
+                var i=0;
+                while(i<markersArr.length){
+
+                    if((typeof (markersArr[i].source)!='undefined') &&(typeof (markersArr[i].source.t1!='undefined'))&& (markersArr[i].source.t1==oldStopTime)){
+                        var oldStopMarker=markersArr[i];
+                        console.log("Oldstop Marker", oldStopMarker);
+                        break;
+                    }
+                    i++;
+                }
+
+
+                //Удаляем из старого маркера шз его сервиспоинтс indx
+                var i=0;
+                while (typeof (oldStopMarker.source.servicePoints)!='undefined' && i<oldStopMarker.source.servicePoints.length){
+
+                    if (oldStopMarker.source.servicePoints[i]==indx){
+                        oldStopMarker.source.servicePoints.splice(i, 1);
+                        scope.$apply();
+                    }
+                    i++;
+                }
+
+
+
+
+
+                if(typeof (stop.source.servicePoints)=='undefined'){
+                    stop.source.servicePoints=[];
+                }
+                stop.source.servicePoints.push(indx);
+                //oldStopMarker.source.servicePoints=oldStop.servicePoints;
+                scope.$apply();
+
+            } else {
+               // console.log("Dont have stop yet");// У точки не было привязанного стопа. Добавляем
+            }
+
+            //// если этим стопом не обслужена еще ни одна точка, то создаем массив, закидываем туда точку и уходим.
+            if(typeof (typeof(stop.source)!= 'undefined' && stop.source.servicePoints)=='undefined'){
+
+                stop.source.servicePoints=[];
+                stop.source.servicePoints.push(indx);
+
+            }
+
+            makeWayPointMarkerGreen(indx);
+            changeFieldsAfterNewConnection(wayPoint, marker, stop);
+
         }
 
 
@@ -732,10 +771,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             var i=0;
             var minDist=0.005;
-            while(i<scope.currentWayPoints.length){
+            while(i<scope.baseCurrentWayPoints.length){
 
-                var LAT=parseFloat(scope.currentWayPoints[i].LAT);
-                var LNG=parseFloat(scope.currentWayPoints[i].LON);
+
+                var LAT=parseFloat(scope.tempCurrentWayPoints[i].LAT);
+                var LNG=parseFloat(scope.tempCurrentWayPoints[i].LON);
                 var dist=Math.sqrt((LAT-lat)*(LAT-lat)+(LNG-lng)*(LNG-lng));
 
                 if(dist<minDist){
@@ -755,13 +795,23 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     console.log(e);
                 }
 
+                try{
+                    scope.spiderMarker.fire('click')}
+                catch (e) {
+                    console.log(e);
+                };
 
                 scope.polyline = L.polyline([[minLAT, minLNG], [lat, lng]], {color: '#5cb85c', weight: 3,
                     opacity: 0.5,
                     smoothFactor: 1});
                 map.addLayer(scope.polyline);
+                if(scope.tempCurrentWayPoints[scope.minI]==scope.baseCurrentWayPoints[scope.minI]) {
 
 
+                    findAndClickMarker(scope.tempCurrentWayPoints[scope.minI]);
+                } else{
+                   // console.log("!!!!Spider");
+                }
             }
 
 
@@ -776,20 +826,222 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+        // При зуме карты в любом направлении все омс маркеры теряют свойствоство spiderfy если они его до этого имели.
 
-        function stopDragend(e){
-            alert("stop " + e);
-            console.log(e);
+        map.on('zoomend', function(event){
+            scope.tempCurrentWayPoints=[];
+            scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
+        })
+
+
+        // При клике на маркераб которые сливаются в одну точкуб омс их разбрасывает и выдает новые временные координаты.
+        // Однако в массиве маркеров могут быть и стопы и вэйпоинты. Мы используем специальную функцию, которая выберет из маркеров только
+        // вэйпоинты и передает их новые координаты в root.currentWayPoints
+        oms.addListener('spiderfy', function(event) {
+            createNewTempCurrentWayPoints(event);
+
+        });
+
+
+        //Возврат к нормальным координатам,
+        oms.addListener('unspiderfy', function(event) {
+            scope.tempCurrentWayPoints=[];
+            scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
+        });
+
+        function createNewTempCurrentWayPoints (data){
+            scope.tempCurrentWayPoints=[];
+            scope.tempCurrentWayPoints=$.extend(true, {}, scope.baseCurrentWayPoints); //JQerry клонирование  объекта координат для изменения
+
+            var omsPoints=[];
+            var i=0;
+            // В spider объектах отделяем waypoints от stop и waypoints складываем в массив omsPoints
+            while (i<data.length){
+                if(typeof(data[i].stopIndx)=='undefined') {
+                    omsPoints.push(data[i]);
+                }
+                i++;
+            }
+            i=0;
+            // добавляем новые координаты для spider объектов. берем из omsPoints
+            while (i<omsPoints.length) {
+                var N=omsPoints[i].source.NUMBER;
+                scope.tempCurrentWayPoints[N-1].LAT=omsPoints[i]._latlng.lat;
+                scope.tempCurrentWayPoints[N-1].LON=omsPoints[i]._latlng.lng;
+                i++
+            }
+
         }
 
-        function pointDragend(e){
-            alert("point " + e);
+        // Изменяет цвет маркера на зеленый после того, как с ним связали первый стоп
+         function makeWayPointMarkerGreen(indx){
+             var container;
+             var i=0;
+             var num;
+             var size = markersArr.length;
+             while (i<size){
+               if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
+                   if (markersArr[i].source.NUMBER==(indx+1)) {
+                       num=markersArr[i].source.NUMBER;
+                       container=markersArr[i];
+                   }
+               }
+                 i++;
+             }
+
+             container.setIcon(getIcon(num, 14, '#5cb85c', 'black')).update();
+             var k= container._icon.title.indexOf("Реально обслужено");
+             if (k<0){
+                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
+                 container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n';
+             } else {
+                 container._icon.title=container._icon.title.substring(0,k);
+                 container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n';
+                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
+             }
+        };
+
+
+        function findAndClickMarker(obj){
+           // console.log("obj LAT LON", obj.LAT);
+            var i=0;
+            while(i<markersArr.length){
+                if (typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined' && markersArr[i].source.NUMBER==obj.NUMBER)// выбрасываем маркера остановок и машины, находи марке соответсвующий объекту
+                {
+                    scope.spiderMarker=markersArr[i];
+                    scope.spiderMarker.fire('click');
+                }
+                i++;
+            }
+
         }
 
 
-        function pointDblClick(e){
-            console.log(e);
-            alert("point " + e);
+
+        function changeFieldsAfterNewConnection(waypoint, marker, stop) {
+
+            waypoint.real_arrival_time=stop.source.t1;
+            // Определение и изменение статуса заявки.
+            findStatusAndWindowForPoint(waypoint);
+
+            var newStatus=Statuses.getTextStatuses()[waypoint.status+1].name;
+            var startSymb=marker.options.title.indexOf("Статус");
+            var endSymb=marker.options.title.indexOf("Время при");
+            var newTitle=marker.options.title.substring(0,startSymb)+'Статус: '+newStatus+'\n'+marker.options.title.substring(endSymb);
+            marker.options.title=newTitle;
+            marker._icon.title=newTitle;
+
+            startSymb=marker.options.title.indexOf("Реально обслужено за: ");
+            if(startSymb>0) {
+                newTitle=marker.options.title.substring(0, startSymb) + "Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+                marker.options.title=newTitle;
+                marker._icon.title=newTitle;
+            } else {
+
+                marker.options.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+                marker._icon.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+            }
+            scope.$apply();
+        }
+
+
+
+        function findStatusAndWindowForPoint(tmpPoint) {
+            tmpPoint.rawConfirmed = 1;
+
+
+            tmpPoint.windowType = 0;
+            if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time) {
+                console.log("window type2");
+                tmpPoint.windowType = 2;
+            } else {
+                for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
+                    if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time) {
+                        tmpPoint.windowType = 1;
+                        console.log("window type1");
+                        break;
+                    }
+                }
+            }
+
+
+            if (tmpPoint.rawConfirmed !== -1) {
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
+                    tmpPoint.status = STATUS.FINISHED_LATE;
+                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
+                    tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
+                } else {
+                    tmpPoint.status = STATUS.FINISHED;
+                }
+            }
+
+
+        }
+
+        function changeFieldsAlredyConnectedPoints(waypoint, stop){
+
+            waypoint.rawConfirmed = 1;
+            console.log("changeFieldsAlredyConnectedPoints");
+
+            waypoint.windowType = 0;
+            if (waypoint.promised_window_changed.start < waypoint.real_arrival_time) {
+                console.log("window type2");
+                waypoint.windowType = 2;
+            } else {
+                for (var l = 0; waypoint.windows != undefined && l < waypoint.windows.length; l++) {
+                    if (waypoint.windows[l].start < waypoint.real_arrival_time) {
+                        waypoint.windowType = 1;
+                        console.log("window type1");
+                        break;
+                    }
+                }
+            }
+
+            if (waypoint.rawConfirmed !== -1) {
+                if (waypoint.real_arrival_time > waypoint.working_window.finish) {
+                    waypoint.status = STATUS.FINISHED_LATE;
+                } else if (waypoint.real_arrival_time < waypoint.working_window.start) {
+                    waypoint.status = STATUS.FINISHED_TOO_EARLY;
+                } else {
+                    waypoint.status = STATUS.FINISHED;
+                }
+            }
+
+            var newStatus=Statuses.getTextStatuses()[waypoint.status+1].name;
+
+            // нахождение маркера для этого вэйпоинта
+            var i=0;
+            while (i<markersArr.length){
+                if(typeof (markersArr[i].source)!='undefined' && typeof (markersArr[i].source.NUMBER)!='undefined' && markersArr[i].source.NUMBER==waypoint.NUMBER){
+                    var marker=markersArr[i];
+                    console.log('FIND markersArr[i]', markersArr[i])
+                    break;
+                }
+                i++;
+            }
+
+
+            var startSymb=marker.options.title.indexOf("Статус");
+            var endSymb=marker.options.title.indexOf("Время при");
+            var newTitle=marker.options.title.substring(0,startSymb)+'Статус: '+newStatus+'\n'+marker.options.title.substring(endSymb);
+            marker.options.title=newTitle;
+            //marker._icon.title=newTitle;
+            console.log("marker", marker);
+
+            //Дописывание в титл информации реально обслужено
+            startSymb=marker.options.title.indexOf("Реально обслужено за: ");
+            if(startSymb>0) {
+                newTitle=marker.options.title.substring(0, startSymb) + "Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+                marker.options.title=newTitle;
+                marker._icon.title=newTitle;
+            } else {
+
+                marker.options.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+                marker._icon.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+            }
+            scope.$apply();
         }
 
     }]);
+
+
