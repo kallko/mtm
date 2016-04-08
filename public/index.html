@@ -36,7 +36,8 @@
 
 
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-
+<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+<script src="./js/vendor/leaflet.polylineDecorator.js"></script>
 <!-- скрипты Ангуляра  -->
 <script src="./js/app.js"></script>
 
@@ -58,9 +59,6 @@
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
 <script src="./js/services/time-converter.js"></script>
-
-
-<meta charset="UTF-8">
 
 <!-- карта на фоне -->
 <div id="map"></div>
@@ -410,8 +408,8 @@
 <!-- панель закрытия дня -->
 <template type="text/html" id="close-day" >
     <div id="close-day-panel" ng-controller = "CloseDayController" >
-        <button ng-click = "showCheckBoxToClose()">Отобразить ситуацию</button>
-        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть день</button>
+        <button ng-click = "showCheckBoxToClose()">Готовые к закрытию</button>
+        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть выбранные</button>
         <div>Имя компании: {{companyName}},
               Ответственный: {{user}},
               Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
@@ -436,6 +434,8 @@
                 </tr>
             </table>
         </div>
+        
+
         <!-- Визуальная часть закрытия дня -->
     </div>
 </template>
@@ -604,9 +604,9 @@
         </tbody>
     </table>
     <div class = "point-view-buttons">
-        <button id="cancel-task-btn1" class="btn btn-primary btn-sm" ng-click="">Подтвердить
+        <button class="btn btn-primary btn-sm" ng-click="confirm('#point-editing-popup')">Подтвердить
         </button>
-        <button id="cancel-task-btn2" class="btn btn-primary btn-sm" ng-click="hidePopup('#point-editing-popup')">Отменить
+        <button class="btn btn-primary btn-sm" ng-click="cancel('#point-editing-popup')">Отменить
         </button>
     </div>
 </div>

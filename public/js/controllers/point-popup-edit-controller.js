@@ -1,33 +1,64 @@
 angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$rootScope',
     function (scope, rootScope) {
     	var wayPointsToRemoveFromStop = []; // массив точек обслуживания, представленных к удалению (отвязыванию) из соответствующего стопа 
-
+    	var servicePointsReserve=[];
+    	var localServicePoints = [];
     	scope.pointEditingPopup = false;
+    	var outgoingData;
+    	var wayPointsToRemoveFromStop = [];
         scope.deletePointFromStop=function(){
         	alert('deleted');
         };
     	rootScope.$on('pointEditingPopup', function (event, data) { // окошко редактирования точки
-	        console.log(data, ' data');
+	       // console.log(data, ' data');
 	        scope.data = data.source;
+	       // localServicePoints = scope.data.servicePoints;
+	       // servicePointsReserve = scope.data.servicePoints;
 	        scope.stopIndx = data.stopIndx;
     		if(scope.data.servicePoints && scope.data.servicePoints.length>1){
-    			
+	    		for(var s=0; s<scope.data.servicePoints.length; s++){
+					localServicePoints[s] = scope.data.servicePoints[s];	
+	    		};
 	            //scope.viewPointsCollection = [{prop1: 111, prop2: 222}, {prop1: 'aaa', prop2: 'bbb'}, {prop1: 1212, prop2: 5454}];
 	            scope.pointEditingPopup = true;
 	            //console.log(scope.pointEditingPopup, ' pointpopup');
 	            //console.log('Sobitie');
 	            //console.log(data, ' data');
-	           	
-	            for (var s=0; s<scope.data.servicePoints.length; s++){
-	            	$('#stop-point-view-table').append('<tr data-table-stop-trow data-row='+s+'><td>'+
-	            		(scope.data.servicePoints[s]+1)+
-	            		'</td><td><input data-table-stop-input-'+s+' type="text" class="promised-text-card">'+
-	            		'</td><td> <button data-delete-from-stop='+s+' class="btn btn-primary btn-sm">Отвязать от стопа</button></td></tr>');
-	            };
-	            //document.querySelector('[data-table-stop-input-'+s+']').value='ccc';
-	            // $('[data-delete-from-stop]').click(function(){
-	            // 	alert(this, 'deleted');
-	            // });
+	           	function buildTable(servicePoints){
+
+		            for (var s=0; s<servicePoints.length; s++){
+		            	// servicePointsReserve[s] = localServicePoints[s] = servicePoints[s]; //!!!!!!!!!
+		            	//console.log(localServicePoints, 'do do s' );
+		            	$('#stop-point-view-table').append('<tr data-table-stop-trow data-row='+(servicePoints[s])+'><td data-service-point-name-'+s+'>'+
+		            		(servicePoints[s]+1)+
+		            		'</td><td><input data-table-stop-input-'+s+' type="number" class="promised-text-card">'+
+		            		'</td><td> <button data-button data-delete-from-stop='+(servicePoints[s])+' class="btn btn-primary btn-sm">Отвязать от стопа</button></td></tr>');
+		            };
+
+		             $('[data-button]').click(function($event){
+					//console.log($event, ' event');
+
+					//----------------------------------------------
+					var localItem = parseInt($($event.currentTarget).attr('data-delete-from-stop'));
+					
+					var localIndex = localServicePoints.indexOf(localItem);
+					
+					localServicePoints.splice(localIndex, 1);
+				
+					//----------------------------------------------
+					wayPointsToRemoveFromStop.push({wayPoint: localItem, stopTime: -1}); 
+					console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
+					$('[data-row="'+localItem+'"]').remove();
+					cleanTable();
+					buildTable(localServicePoints);
+					setDeafaultInterval(localServicePoints);
+				});
+	           	};
+	           	function cleanTable(){
+	           		$('[data-table-stop-trow]').remove();
+	           	};
+	           	buildTable(localServicePoints);
+				scope.$apply();
 	            $('#point-editing-popup').popup('show');
 	            //------------------------------разброс врмени простоя по точкам------
 	            //------------------------------разброс времемни по умолчанию
@@ -36,31 +67,28 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            	wayPointTimeRestTotal,
 	            	wayPointTimeInteger;
 
-	            function setDeafaultInterval(){
+	            function setDeafaultInterval(servicePoints){
 
-		            if(scope.data.time/scope.data.servicePoints.length >= 60){ //время стопа в секундах, разделяется между точками обслуживания и переводиться в минуты
-		            	wayPointTime = (scope.data.time/60)/(scope.data.servicePoints.length); // время обслуживания точки с дробью
+		            if(scope.data.time/servicePoints.length >= 60){ //время стопа в секундах, разделяется между точками обслуживания и переводиться в минуты
+		            	wayPointTime = (scope.data.time/60)/(servicePoints.length); // время обслуживания точки с дробью
 		            	wayPointTimeInteger = Math.floor(wayPointTime); // время обслуживания точки округленное в сторону уменьшения (дробь вычитается)
 		            	
 		            	wayPointTimeRestOnePoint = wayPointTime - wayPointTimeInteger;  //вычисляется остаток (отнятая дробь) и округляется до единицы стандартно для одной точки
-		            	
-		            	//console.log(wayPointTime, ' wayPointTime');
-		            	//console.log(wayPointTimeInteger, ' wayPointTimeInteger');
+		            
 		            }else{
 		            	wayPointTimeInteger = 1;
 		            };
 		            	//-------------------------------------------------
 		            var wayPointIntValues = {}; //этот объект содержит ту же информацию, что и $('[...]').val(), только типа int, чтоб потом не делать parseInt()	
 		           //console.log(wayPointIntValues, ' !!wayPointIntValues');
-		            for (var s=0; s<scope.data.servicePoints.length-1; s++){	
+		            for (var s=0; s<servicePoints.length-1; s++){	
 		            	$('[data-table-stop-input-'+s+']').val(wayPointTimeInteger);
 		            	wayPointIntValues['[data-table-stop-input-'+s+']'] = wayPointTimeInteger;
 		            };
-		            var lastItem = scope.data.servicePoints.length-1;  // эта переменная используется только в нескольких строчках ниже.
+		            var lastItem = servicePoints.length-1;  // эта переменная используется только в нескольких строчках ниже.
 		            wayPointTimeRestTotal = Math.round(wayPointTimeRestOnePoint*(lastItem+1));
 		            if(wayPointTimeInteger + wayPointTimeRestTotal>=1){
-		            	//console.log(wayPointTimeRestOnePoint, ' wayPointTimeRestOnePoint');
-		            	//console.log(wayPointTimeRestTotal, ' wayPointTimeRestTotal');
+		            	
 		            	$('[data-table-stop-input-'+lastItem+']').val(wayPointTimeInteger + wayPointTimeRestTotal);
 		            	wayPointIntValues['[data-table-stop-input-'+lastItem+']'] = (wayPointTimeInteger + wayPointTimeRestTotal);	
 		            }else{
@@ -68,12 +96,12 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 		            	wayPointIntValues['[data-table-stop-input-'+lastItem+']'] = 1;		
 		            };
 
-	            	setManualInterval(wayPointIntValues);
+	            	setManualInterval(wayPointIntValues, servicePoints);
 	            };
-	            setDeafaultInterval();
+	            setDeafaultInterval(localServicePoints);
 
-	            function setManualInterval(wayPointIntValues){
-	            	//console.log(wayPointIntValues, ' wayPointIntValues');
+	            function setManualInterval(wayPointIntValues, servicePoints){
+	            	
 	            	var intervalSummAutoFilled = 0,
 	            		intervalSummManual = 0,
 	            		currentTarget,
@@ -84,28 +112,34 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            		//console.log(wayPointIntValues[property], ' property');
 	            	};
 	            	//console.log(intervalSummManual, ' intervalSumm');
-	            	for(var s=0; s<=scope.data.servicePoints.length; s++){
+	            	for(var s=0; s<=servicePoints.length; s++){
 	            		$('[data-table-stop-input-'+s+']').focus(function($event){
-	            			//console.log(intervalSummManual, 'zapusk');
+	            			console.log(previousTarget.valueStr, typeof(previousTarget.valueStr), ' previousTarget valueStr');
+	            		
 	            			previousTarget.target = currentTarget.target;
 	            			previousTarget.value = currentTarget.value;
+	            			previousTarget.valueStr = currentTarget.valueStr;
 	            			currentTarget.target = $event.currentTarget;
+	            			currentTarget.target.valueStr = $event.currentTarget.value;
 	            			currentTarget.value = parseInt($event.currentTarget.value); //используется для отката значения, если оператор ввел некорректно новое
 	            			intervalSummManual = 0;
-	            			console.log(previousTarget, ' pr');
-	            			console.log(currentTarget, ' cr');
-	            			for (var s=0; s<scope.data.servicePoints.length; s++){
+	            			
+	            			for (var s=0; s<servicePoints.length; s++){
+		            				if(parseInt($('[data-table-stop-input-'+s+']').val()) < 1){
+		            				alert('Время на обслуживание одной точки не может быть менее минуты!');
+		            				$('[data-table-stop-input-'+s+']').val(''+1);
+	            				};
+	            				
 		            			intervalSummManual += parseInt($('[data-table-stop-input-'+s+']').val());
-		            			//console.log(intervalSummManual, ' intervalSummManual');
 		            		};
 	            				var localSumm = 0;
-	            					lastItem = scope.data.servicePoints.length-1;
-	            				for (var s=0; s<scope.data.servicePoints.length-1; s++){
+	            					lastItem = servicePoints.length-1;
+	            				for (var s=0; s<servicePoints.length-1; s++){
 	            					localSumm += parseInt($('[data-table-stop-input-'+s+']').val());
 	            				};
-	            				if(intervalSummAutoFilled-localSumm>=0){
+	            				if(intervalSummAutoFilled-localSumm>=1){
 	            					if(parseInt($('[data-table-stop-input-'+lastItem+']').val())>(intervalSummAutoFilled-localSumm)){
-	            						alert('Вы ввели слишком большое значение или оставили поле пустым!');
+	            						
 	            					};	
 	            					$('[data-table-stop-input-'+lastItem+']').val(intervalSummAutoFilled-localSumm);
 	            				} else {
@@ -116,24 +150,10 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            				console.log(intervalSummAutoFilled, 'autofill');
 	            				console.log(localSumm, ' localSumm');
 	            		});
-						$('[data-delete-from-stop="'+s+'"]').click(function($event){
-							console.log(scope.data.servicePoints.length, ' servicePoints');
-
-							//----------------------------------------------
-							var localIndex = $($event.currentTarget).attr('data-delete-from-stop');
-							var localItem = scope.data.servicePoints[localIndex];
-							wayPointsToRemoveFromStop.push({index: localIndex, item: localItem});
-							delete scope.data.servicePoints[localIndex];
-							//scope.data.servicePoints.splice(scope.data.servicePoints.indexOf(localItem), 1);
-							//----------------------------------------------
-							$('[data-row="'+localIndex+'"]').remove();
-							setDeafaultInterval(); //!!!!!!!!!!!!!!!!!!!!!!!
-							console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
-							console.log(scope.data.servicePoints, ' servicePoints');
-						});
-
+						
 	            	};
 	            };
+	           
 	            //функция, которая спрячет и расформирует окно карточки вызова
 	            function hidePopup(id){
     				$(id).popup('hide');
@@ -142,18 +162,25 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            //обработчик кнопки "отмена" и "закрыть": опустошает массив точек, представленных к удалению из стопа и прячет окно карточки остановки
 	            scope.cancel = function(id){
 	            	//scope.data.servicePoints = scope.data.servicePoints.concat(wayPointsToRemoveFromStop);
-	            	for(var s=0; s< wayPointsToRemoveFromStop.length; s++){
-	            		scope.data.servicePoints[wayPointsToRemoveFromStop[s].index]=wayPointsToRemoveFromStop[s].item;
-	            	};
 	            	wayPointsToRemoveFromStop = [];
+	            	console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
+	            	for(var s=0; s<servicePointsReserve.length; s++){
+	            		localServicePoints[s] = servicePointsReserve[s];
+	            	};
+	            	
 	            	hidePopup(id);
-	            	console.log(wayPointsToRemoveFromStop, ' cancel');
+	            	
 	            };
 	            scope.confirm = function(id){
-	            	rootScope.$emit('confirmViewPointEditing', scope.data.servicePoints);
+	            	for(var s=0; s<localServicePoints.length; s++){
+	            		wayPointsToRemoveFromStop.push({wayPoint: parseInt($('[data-service-point-name-'+s+']').html())-1, stopTime: parseInt($('[data-table-stop-input-'+s+']').val())}); //объект на отправку 
+	            	};
+	            	rootScope.$emit('confirmViewPointEditing', wayPointsToRemoveFromStop);  //отправка массива точек, отвязанных от стопов
+	            	console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
 	            	wayPointsToRemoveFromStop = [];
+
 	            	hidePopup(id);
-	            	console.log('emited edited servicePoints', scope.data.servicePoints);
+	            	console.log('Emitted event from stop-card');
 	            };
     		};
         });

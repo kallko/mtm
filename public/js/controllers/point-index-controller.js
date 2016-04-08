@@ -258,6 +258,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (loadParts) {
                         loadTrackParts();
                     }
+                    console.log(data,' success data');
                 })
                 .error(function (data) {
                     console.log(data);
@@ -277,7 +278,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function linkDataParts(data) {
             init();
 
-           // console.log('Start linking ...', new Date(data.server_time * 1000));
+            console.log('Start linking ...', new Date(data.server_time * 1000));
             rawData = JSON.parse(JSON.stringify(data));
 
             if (data.status && data.status === 'no plan') {
@@ -313,7 +314,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
             scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
-           // console.log(data);
+            console.log(data);
             // привязывание гидов из сенсоров к машинам, назначение реальных треков машинам
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
@@ -524,13 +525,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             _data = data;
             updateData();
 
-            //console.log('Finish linking');
+            console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
 
             saveRoutes();
             checkLocks();
             showPopup('Загрузка завершенна!', 2500);
-            //console.log(showPopup, ' showPopup');
+            console.log(showPopup, ' showPopup');
 
             setColResizable();
             prepareFixedHeader();
@@ -586,7 +587,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обновление статусов
         function statusUpdate() {
-            //console.log('statusUpdate');
+            console.log('statusUpdate');
 
             var route,
                 tmpPoint,
@@ -610,7 +611,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tmpPoint.status = STATUS.SCHEDULED;
 
                     delete tmpPoint.distanceToStop;
-                    delete tmpPoint.timeToStop;    // опережение/отставание реального прибытия к планируемому
+                    delete tmpPoint.timeToStop;
                     delete tmpPoint.haveStop;
                     delete tmpPoint.stopState;
                     delete tmpPoint.stop_arrival_time;
@@ -620,9 +621,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.mobile_push;
                     delete tmpPoint.mobile_arrival_time;
                     delete tmpPoint.havePush;
-                    delete tmpPoint.real_arrival_time;  //дублирует 617 строку
+                    delete tmpPoint.real_arrival_time;
                     delete tmpPoint.confirmed;
-                    delete tmpPoint.autofill_service_time;
+
                     delete tmpPoint.overdue_time;
                 }
 
@@ -683,13 +684,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
 
-                                    //console.log('connecting temppoint ', tmpPoint, ' with stop ', tmpArrival);
-
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
-                                    tmpPoint.stop_arrival_time = tmpArrival.t1;   /// что то здесь не так. В этих 2х строчках
-                                    tmpPoint.real_arrival_time = tmpArrival.t1;   ///
-                                    tmpPoint.autofill_service_time=tmpArrival.t2-tmpArrival.t1;// Добавляем атрибут реальное время обслуживания точки. Не будет корректным если с одним стопом связано несколько точек
-                                    tmpPoint.real_service_time;
+                                    tmpPoint.stop_arrival_time = tmpArrival.t1;
+                                    tmpPoint.real_arrival_time = tmpArrival.t1;
                                     //route.points[k]
                                     //console.log("route-point-k", route.points[k], "route" , route)
 
@@ -698,7 +695,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     }
 
                                     tmpArrival.servicePoints.push(k);
-
+                                   // tmpArrival.servicePoints[0]=route.points[k];
+                                    //tmpArrival.servicePoints.push(tmpPoint);
 
                                     findStatusAndWindowForPoint(tmpPoint);
 
@@ -1566,10 +1564,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     demoTime: scope.demoMode ? _data.server_time : -1
                 })
                     .success(function (data) {
-                        //console.log({data: data});
+                        console.log({data: data});
                         route.real_track = data;
 
-
+                        console.log('before', route.real_track.length);
                         for (var k = 0; k < route.real_track.length; k++) {
                             if (route.real_track[k].coords == undefined ||
                                 route.real_track[k].coords.length == 0) {
@@ -1585,7 +1583,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
                         }
 
-
+                        console.log('after', route.real_track.length);
 
                         draw(route);
                     });
@@ -2032,15 +2030,38 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log('<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
             //    + JSON.stringify(result)
             //+ '</TEXTDATA></CLOSEDAY></MESSAGE>');
-            //console.log(result);
+            console.log(result);
             return result;
 
 
-        }
+        };
         //console.log(scope.filters.route, ' filters route');
-
-
-
-        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
-
+        rootScope.$on('pushCloseDayDataToServer', function(event, data){ // инициализация отправки данных на сервер для закрытия дня
+            modifyDataForCloseDay(data);
+            console.log(data, ' general');
+            pushDataToServer(data);   //пока так !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        });
+        function modifyDataForCloseDay(data){ //эта функция добавит в _data новое свойство CLOSED для определения закрыт ли маршрут
+            for(var s=0; s<_data.routes.length; s++){
+                _data.routes[s]['CLOSED'] = false;
+                // console.log(_data.routes, ' _data.routes');
+                //rootScope.$on('returnCheckBoxes', function(event, data){
+                //     console.log(data, ' returnCheckBoxes');
+                // });
+            };
+        };
+        function pushDataToServer(outgoingData){   // функция отправки данных на сервер, может быть универсальной
+            //collectDataForDayClosing();
+            console.log(' sended');
+            modifyDataForCloseDay();
+            http.post('/closeday', outgoingData).then(successCallback, errorCallback); //отправка на url /closeday временно
+            function successCallback(response){
+                rootScope.$emit('successOfPusingData');
+                // console.log(response, ' response');
+            };
+            function errorCallback(){
+                console.log('error', ' error of pushing data');
+                rootScope.$emit('serverError');
+            }
+        };
     }]);

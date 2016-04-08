@@ -472,7 +472,3 @@ template {
 #point-editing-popup{
     width:440px;
 }
-.leaflet-div-icon {
-    border: none;
-    background: transparent;
-}
