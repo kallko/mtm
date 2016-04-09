@@ -15,7 +15,8 @@ function getDivIcon(param){
                         "top: 0px; " +
                         "width: " + (width / 2) + "px; " +
                         "float: left; " +
-                        "border: none; ";
+                        "border: 1px #666; " +
+                        "border-style: solid none solid solid; ";
     leftStyle +=        (param.status == 1) ? "background: url(http://sngtrans.com.ua/img/left.png) 0% 100% " + param.backColor + " no-repeat; "
                         : "background: " + param.backColor + "; ";
 
@@ -26,7 +27,8 @@ function getDivIcon(param){
                         "top: 0px; " +
                         "width: " + (width / 2) + "px; " +
                         "float: left; " +
-                        "border: none; ";
+                        "border: 1px #666; " +
+                        "border-style: solid solid solid none; ";
     rightStyle +=       (param.status == 2) ? "background: url(http://sngtrans.com.ua/img/right.png) 100% 100% " + param.backColor + " no-repeat; "
                         : "background: " + param.backColor2 + "; ";
 
