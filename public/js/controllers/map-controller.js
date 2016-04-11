@@ -164,6 +164,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                     tmpVar.on('click', function(event){
                         var localData=event.target;
+                        console.log(localData, "local data");
                         rootScope.$emit('pointEditingPopup', localData );
 
                     });
@@ -640,7 +641,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // установить центр карты
         console.log("Centre map");
         function setMapCenter(lat, lon, newZoom) {
-            console.log("NewZoom in centre map", newZoom);
+
             var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
                 offset = map.getSize(),
                 tmp = map.project(new L.LatLng(lat, lon), newZoom||zoom).subtract(
@@ -650,7 +651,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     ]),
                 target = map.unproject(tmp, newZoom||zoom);
 
-            console.log("best zoom", newZoom||zoom)
+
             map.setView(target, newZoom||zoom);
         }
 
@@ -941,17 +942,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var endSymb=marker.options.title.indexOf("Время при");
             var newTitle=marker.options.title.substring(0,startSymb)+'Статус: '+newStatus+'\n'+marker.options.title.substring(endSymb);
             marker.options.title=newTitle;
-           // marker._icon.title=newTitle;
+            marker._icon.title=newTitle;
 
             startSymb=marker.options.title.indexOf("Реально обслужено за: ");
             if(startSymb>0) {
                 newTitle=marker.options.title.substring(0, startSymb) + "Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
                 marker.options.title=newTitle;
-               // marker._icon.title=newTitle;
+                marker._icon.title=newTitle;
             } else {
 
                 marker.options.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
-               // marker._icon.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+                marker._icon.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
             }
             scope.$apply();
         }
@@ -1004,7 +1005,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     if (waypoint.windows[l].start < waypoint.real_arrival_time) {
                         waypoint.windowType = 1;
                         console.log("window type1");
-                        break;
+
                     }
                 }
             }
@@ -1026,8 +1027,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             while (i<markersArr.length){
                 if(typeof (markersArr[i].source)!='undefined' && typeof (markersArr[i].source.NUMBER)!='undefined' && markersArr[i].source.NUMBER==waypoint.NUMBER){
                     var marker=markersArr[i];
-                    console.log('FIND markersArr[i]', markersArr[i])
-                    break;
+                    console.log('FIND markersArr[i]', markersArr[i]);
+
                 }
                 i++;
             }
@@ -1037,7 +1038,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var endSymb=marker.options.title.indexOf("Время при");
             var newTitle=marker.options.title.substring(0,startSymb)+'Статус: '+newStatus+'\n'+marker.options.title.substring(endSymb);
             marker.options.title=newTitle;
-            //marker._icon.title=newTitle;
+            marker._icon.title=newTitle;
             console.log("marker", marker);
 
             //Дописывание в титл информации реально обслужено
@@ -1045,11 +1046,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if(startSymb>0) {
                 newTitle=marker.options.title.substring(0, startSymb) + "Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
                 marker.options.title=newTitle;
-                //marker._icon.title=newTitle;
+                marker._icon.title=newTitle;
             } else {
 
                 marker.options.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
-                //marker._icon.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
+                marker._icon.title+="Реально обслужено за: " + mmhh(marker.source.stopState.time) + '\n';
             }
             scope.$apply();
         }
@@ -1066,6 +1067,124 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log("Recieve ", lat, lon);
             setMapCenter(lat, lon, 15);
         })
+
+
+
+        rootScope.$on('confirmViewPointEditing', function(event, data, stop){
+            console.log("Recieve data", data);
+           var i=0;
+            while(i<data.length){
+                if (data[i].stopTime<0){
+                   deleteSomePointsFromStop (data[i].wayPoint, stop)
+                } else {
+                    changeRealServiceTime(data[i].stopTime, data[i].wayPoint, stop);
+                }
+
+                i++;
+            }
+        });
+
+        function changeRealServiceTime(time, indx, stop){
+
+           // console.log("I try to change to time", time , "in point", indx, "of stop", stop);
+            var i=0;
+            while(i<markersArr.length){
+                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
+                    var container=markersArr[i];
+                   // console.log("Find marker", container);
+
+                }
+                i++;
+            }
+            container.source.real_service_time=time*60;
+            var symbol= container.options.title.indexOf("Реально");//22
+            //console.log("Symb", symbol);
+            var title=container.options.title.substring(0,symbol+22);
+            title+=time+":00";
+            container.options.title=title;
+            if (container._icon.title!=null){
+            container._icon.title=title;}
+            //scope.$apply;
+        }
+
+        function deleteSomePointsFromStop (indx, stop) {
+            console.log("I try to delete point", indx, "from stop", stop);
+            var i=0;
+            while(i<markersArr.length){
+                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
+                    var container=markersArr[i];
+                    console.log("Find marker", container);
+
+                }
+                i++;
+            }
+
+
+            var i=0;
+            while (i<stop.servicePoints.length){
+                console.log("looking");
+                if (stop.servicePoints[i]==indx){
+                    stop.servicePoints.splice(i, 1);
+                    scope.$apply;
+                }
+                i++;
+            }
+
+            console.log(stop.servicePoints, "stop.servicePoints");
+
+            container.source.stopState.servicePoints=stop.servicePoints;
+
+            console.log(container.source.stopState.servicePoints);
+            delete container.source.stopState;
+            delete container.source.stop_arrival_time;
+
+            //var i=0;
+            //while(i<container.source.stopState.servicePoints.length){
+            //    if (container.source.stopState.servicePoints[i]==indx){
+            //        container.source.stopState.servicePoints.splice(i, 1);
+            //
+            //        }
+            //
+            //    i++;
+            //}
+
+
+
+
+
+           delete container.source.autofill_service_time;
+           delete container.source.real_service_time;
+           delete container.source.haveStop;
+           delete container.source.real_arrival_time;
+            var now =  parseInt(Date.now()/1000);
+            container.source.status=5;
+            var textStatus='опаздывает';
+            var color='red';
+            if (now < container.source.end_time_ts){
+                container.source.status=7
+                textStatus='запланирован';
+                color='blue';
+            }
+            if(now>container.source.controlled_window.finish){
+                container.source.status=4;
+                textStatus='время вышло';
+            }
+
+            var title=container.options.title;
+            var symbol = title.indexOf("Статус");
+            var begin=title.substring(0, symbol+8);
+            symbol = title.indexOf("Время прибытия");
+            var end =  title.substring(symbol);
+            symbol=end.indexOf('Реально');
+            end=end.substring(0,symbol);
+            container.options.title = begin+textStatus+ '\n'+end;
+            container._icon.title = begin+textStatus+ '\n'+end;
+            container.setIcon(getIcon(container.source.NUMBER, 14, color, 'black')).update();
+
+
+
+
+        }
 
 
     }]);

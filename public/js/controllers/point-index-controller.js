@@ -1411,7 +1411,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обработчик клика на строке таблицы
         scope.rowClick = function (row) {
             console.log("LAt/Lon", row.LAT, row.LON);
-            rootScope.$emit('findStopOnMarker', row.LAT, row.LON)
+            rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
             return;
 
             // TODO REMOVE
