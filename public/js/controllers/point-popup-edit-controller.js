@@ -12,18 +12,22 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
     	rootScope.$on('pointEditingPopup', function (event, data) { // окошко редактирования точки
 	       // console.log(data, ' data');
 	        scope.data = data.source;
+			console.log("i recieve", scope.data);
 	       // localServicePoints = scope.data.servicePoints;
 	       // servicePointsReserve = scope.data.servicePoints;
 	        scope.stopIndx = data.stopIndx;
-    		if(scope.data.servicePoints && scope.data.servicePoints.length>1){
-	    		for(var s=0; s<scope.data.servicePoints.length; s++){
-					localServicePoints[s] = scope.data.servicePoints[s];	
-	    		};
+    		if(scope.data.servicePoints && scope.data.servicePoints.length>1)
+			{
+				localServicePoints=scope.data.servicePoints.slice();
+                //for(var s=0; s<scope.data.servicePoints.length; s++){
+				//	localServicePoints[s] = scope.data.servicePoints[s];
+                //};
 	            //scope.viewPointsCollection = [{prop1: 111, prop2: 222}, {prop1: 'aaa', prop2: 'bbb'}, {prop1: 1212, prop2: 5454}];
 	            scope.pointEditingPopup = true;
 	            //console.log(scope.pointEditingPopup, ' pointpopup');
 	            //console.log('Sobitie');
 	            //console.log(data, ' data');
+				//console.log(localServicePoints, 'localServicePoints', scope.data.servicePoints, 'scope.data.servicePoints');
 	           	function buildTable(servicePoints){
 
 		            for (var s=0; s<servicePoints.length; s++){
@@ -171,14 +175,20 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            	hidePopup(id);
 	            	
 	            };
-	            scope.confirm = function(id){
-	            	for(var s=0; s<localServicePoints.length; s++){
-	            		wayPointsToRemoveFromStop.push({wayPoint: parseInt($('[data-service-point-name-'+s+']').html())-1, stopTime: parseInt($('[data-table-stop-input-'+s+']').val())}); //объект на отправку 
-	            	};
-	            	rootScope.$emit('confirmViewPointEditing', wayPointsToRemoveFromStop);  //отправка массива точек, отвязанных от стопов
-	            	console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
-	            	wayPointsToRemoveFromStop = [];
+	            scope.confirm = function(id) {
+					for (var s = 0; s < localServicePoints.length; s++) {
+						wayPointsToRemoveFromStop.push({
+							wayPoint: parseInt($('[data-service-point-name-' + s + ']').html()) - 1,
+							stopTime: parseInt($('[data-table-stop-input-' + s + ']').val())
+						}); //объект на отправку
+					}
+					;
+					if (wayPointsToRemoveFromStop.length > 0) {
+						console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop', scope.data, " - stop");
+						rootScope.$emit('confirmViewPointEditing', wayPointsToRemoveFromStop, scope.data);  //отправка массива точек, отвязанных от стопов
 
+						wayPointsToRemoveFromStop = [];
+					}
 	            	hidePopup(id);
 	            	console.log('Emitted event from stop-card');
 	            };
