@@ -163,9 +163,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                     tmpVar.on('click', function(event){
+
                         var localData=event.target;
+                        if(localData.source.servicePoints == undefined ){
+                            return;
+                        }
+                        var timeData=checkRealServiceTime(localData)
                         console.log(localData, "local data");
-                        rootScope.$emit('pointEditingPopup', localData );
+                        rootScope.$emit('pointEditingPopup', localData , timeData);
 
                     });
 
@@ -1189,6 +1194,33 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         }
 
+
+        function checkRealServiceTime(data){
+            console.log("Checking Real Time in", data);
+            var times=[];
+            var i=0;
+            while (i<data.source.servicePoints.length){
+                console.log("Hey!", data.source.servicePoints[i]+1);
+                var number=data.source.servicePoints[i]+1;
+                var j=0;
+                while(j<markersArr.length){
+                    if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
+                        console.log('Marker real service time = ', markersArr[j].source.real_service_time);
+                        if(markersArr[j].source.real_service_time!=undefined){
+                          times.push(markersArr[j].source.real_service_time);
+                        } else {
+                            times.push(0);
+                        }
+                        }
+
+                    j++;
+                }
+                i++;
+            }
+            console.log('times', times);
+            return times;
+
+        }
         //function testSoap(waypoint){
         //    var str = '';
         //    str += '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua">';

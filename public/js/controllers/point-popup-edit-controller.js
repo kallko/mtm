@@ -9,10 +9,10 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
         scope.deletePointFromStop=function(){
         	alert('deleted');
         };
-    	rootScope.$on('pointEditingPopup', function (event, data) { // окошко редактирования точки
+    	rootScope.$on('pointEditingPopup', function (event, data, time) { // окошко редактирования точки
 	       // console.log(data, ' data');
 	        scope.data = data.source;
-			console.log("i recieve", scope.data);
+			console.log("i recieve data", data);
 	       // localServicePoints = scope.data.servicePoints;
 	       // servicePointsReserve = scope.data.servicePoints;
 	        scope.stopIndx = data.stopIndx;
@@ -29,6 +29,8 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            //console.log(data, ' data');
 				//console.log(localServicePoints, 'localServicePoints', scope.data.servicePoints, 'scope.data.servicePoints');
 	           	function buildTable(servicePoints){
+					console.log("Start Table build");
+					cleanTable();
 
 		            for (var s=0; s<servicePoints.length; s++){
 		            	// servicePointsReserve[s] = localServicePoints[s] = servicePoints[s]; //!!!!!!!!!
@@ -40,23 +42,23 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 		            };
 
 		             $('[data-button]').click(function($event){
-					//console.log($event, ' event');
+						//console.log($event, ' event');
 
-					//----------------------------------------------
-					var localItem = parseInt($($event.currentTarget).attr('data-delete-from-stop'));
-					
-					var localIndex = localServicePoints.indexOf(localItem);
-					
-					localServicePoints.splice(localIndex, 1);
-				
-					//----------------------------------------------
-					wayPointsToRemoveFromStop.push({wayPoint: localItem, stopTime: -1}); 
-					console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
-					$('[data-row="'+localItem+'"]').remove();
-					cleanTable();
-					buildTable(localServicePoints);
-					setDeafaultInterval(localServicePoints);
-				});
+						//----------------------------------------------
+						var localItem = parseInt($($event.currentTarget).attr('data-delete-from-stop'));
+
+						var localIndex = localServicePoints.indexOf(localItem);
+
+						localServicePoints.splice(localIndex, 1);
+
+						//----------------------------------------------
+						wayPointsToRemoveFromStop.push({wayPoint: localItem, stopTime: -1});
+						console.log(wayPointsToRemoveFromStop, ' wayPointsToRemoveFromStop');
+						$('[data-row="'+localItem+'"]').remove();
+						cleanTable();
+						buildTable(localServicePoints);
+						setDeafaultInterval(localServicePoints);
+					});
 	           	};
 	           	function cleanTable(){
 	           		$('[data-table-stop-trow]').remove();
@@ -86,18 +88,18 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 		            var wayPointIntValues = {}; //этот объект содержит ту же информацию, что и $('[...]').val(), только типа int, чтоб потом не делать parseInt()	
 		           //console.log(wayPointIntValues, ' !!wayPointIntValues');
 		            for (var s=0; s<servicePoints.length-1; s++){	
-		            	$('[data-table-stop-input-'+s+']').val(wayPointTimeInteger);
-		            	wayPointIntValues['[data-table-stop-input-'+s+']'] = wayPointTimeInteger;
+		            	$('[data-table-stop-input-'+s+']').val(time[s]/60 || wayPointTimeInteger);
+		            	wayPointIntValues['[data-table-stop-input-'+s+']'] = time[s]/60 || wayPointTimeInteger;
 		            };
 		            var lastItem = servicePoints.length-1;  // эта переменная используется только в нескольких строчках ниже.
 		            wayPointTimeRestTotal = Math.round(wayPointTimeRestOnePoint*(lastItem+1));
 		            if(wayPointTimeInteger + wayPointTimeRestTotal>=1){
 		            	
-		            	$('[data-table-stop-input-'+lastItem+']').val(wayPointTimeInteger + wayPointTimeRestTotal);
-		            	wayPointIntValues['[data-table-stop-input-'+lastItem+']'] = (wayPointTimeInteger + wayPointTimeRestTotal);	
+		            	$('[data-table-stop-input-'+lastItem+']').val(time[lastItem]/60 || (wayPointTimeInteger + wayPointTimeRestTotal));
+		            	wayPointIntValues['[data-table-stop-input-'+lastItem+']'] = (time[lastItem]/60 || (wayPointTimeInteger + wayPointTimeRestTotal));
 		            }else{
 		            	$('[data-table-stop-input-'+lastItem+']').val(1);
-		            	wayPointIntValues['[data-table-stop-input-'+lastItem+']'] = 1;		
+		            	wayPointIntValues['[data-table-stop-input-'+lastItem+']'] = time[lastItem]/60 || 1;
 		            };
 
 	            	setManualInterval(wayPointIntValues, servicePoints);
