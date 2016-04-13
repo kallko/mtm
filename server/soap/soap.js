@@ -422,7 +422,7 @@ SoapManager.prototype.getReasonList = function (callback) {
     soap.createClient(url, function (err, client) {
         if (err) throw err;
 
-        client.setSecurity(new soap.BasicAuthSecurity('k00056.0', 'As123456'));
+        client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
         console.log(client.describe());
         client.get_reason_list(function (err, result) {
             if (!err) {
@@ -578,6 +578,54 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     });
 };
 
+// сохранение маршрута в 1С
+SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
+    log.toFLog('origWaypointBeforeSave.json', waypoint);
+
+    console.log('updateWaypointCoordTo1C');
+        me = this;
+
+    var resXml;
+    resXml = _xml.waypointNewCoordXML(waypoint, me.login);
+    log.toFLog('saveChanges.xml', resXml, false);
+
+
+
+
+
+    // сохранение в 1С от имени авторизированного пользователя
+    saveTo1C = function (resXml) {
+
+        console.log("Saveto1C me", me)
+            soap.createClient(me.getFullUrl(), function (err, client) {
+                if (err) throw err;
+
+
+               // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
+                client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
+                //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+
+
+                client.runAsUser({'input_data': resXml, 'user': 'k00056.0'}, function (err, result) {
+                    if (!err) {
+                        console.log('updateWaypointCoordTo1C OK');
+                        log.toFLog('afterSave.js', result);
+                        callback({result: result});
+                    } else {
+                        console.log("Res.XML = ", resXml)
+                        console.log('updateWaypointCoordTo1C ERROR');
+                        log.toFLog('afterSaveError.js', err);
+                        console.log(err.body);
+                        callback({error: err});
+                    }
+                });
+            });
+        };
+
+    saveTo1C(resXml); //Снять комментарий и можно записывать
+
+
+};
 
 
 //'<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'

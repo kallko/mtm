@@ -331,9 +331,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         + "Новые координаты " + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
 
                     if (confirm(message)){
+                        changeWaypointCoordinates(newMarker, event.target.getLatLng().lat.toPrecision(8), event.target.getLatLng().lng.toPrecision(8) );
                         alert("Координаты изменены");
-                        newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
-                        newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
+                        //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
+                        //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
                         // Добавить Сатрт и Енд Лат Лоны
 
                     } else {
@@ -651,7 +652,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     ]),
                 target = map.unproject(tmp, newZoom||zoom);
 
-
             map.setView(target, newZoom||zoom);
         }
 
@@ -663,14 +663,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function checkAndAddNewWaypointToStop(stop, indx){
 
 
-
-
             //Нахождение маркера соответсвующего найденному waypoint
             var i=0;
             while(i<markersArr.length){
                 if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==(indx+1))){
                     var marker=markersArr[i];
-                    console.log('marker for waypoint', marker)
+                    //console.log('marker for waypoint', marker)
                     break;
                 };
                 i++;
@@ -678,23 +676,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             var wayPoint=marker.source;
-            console.log("I want to connect", stop, 'with point', wayPoint, "and indx", indx);
+           // console.log("I want to connect", stop, 'with point', wayPoint, "and indx", indx);
             wayPoint.haveStop=true;
 
 
             var oldStopTime=wayPoint.real_arrival_time;
-            console.log('oldStopTime', oldStopTime);
+           // console.log('oldStopTime', oldStopTime);
 
             //var oldStop= $.extend(true, {}, wayPoint.stopState);
-
-
-
-
-
-
-
-
-
 
 
 
@@ -749,9 +738,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     }
                     i++;
                 }
-
-
-
 
 
                 if(typeof (stop.source.servicePoints)=='undefined'){
@@ -862,6 +848,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
         });
 
+
+        // Функция необходимая для автоматического раскрытия oms маркеров.
         function createNewTempCurrentWayPoints (data){
             scope.tempCurrentWayPoints=[];
             scope.tempCurrentWayPoints=$.extend(true, {}, scope.baseCurrentWayPoints); //JQerry клонирование  объекта координат для изменения
@@ -915,6 +903,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         };
 
 
+        //Функция находящая ближайший марке, находящийся в oms при приближении к нему маркера остановки
         function findAndClickMarker(obj){
            // console.log("obj LAT LON", obj.LAT);
             var i=0;
@@ -930,7 +919,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-
+        // Функция менящая поля в объекте точки после связывания с новым стопом.
+        //
         function changeFieldsAfterNewConnection(waypoint, marker, stop) {
 
             waypoint.real_arrival_time=stop.source.t1;
@@ -958,7 +948,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-
+        // Функция определяющая статус точки в зависимости от времени связанного с ней стопа
         function findStatusAndWindowForPoint(tmpPoint) {
             tmpPoint.rawConfirmed = 1;
 
@@ -988,9 +978,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
             }
 
-
         }
 
+
+        // Костыль. Иногда даже при наличии связи стопа и точки, статус точки не "доставлено".
+        // В этом случае вызывается эта функцияб после "ручного" связывания
         function changeFieldsAlredyConnectedPoints(waypoint, stop){
 
             waypoint.rawConfirmed = 1;
@@ -1055,21 +1047,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             scope.$apply();
         }
 
-
-
-        //rootScope.$on('drawRoute', function(event, data){
-        //
-        //    console.log("I have to draw route", data);
-        //    //drawRealRoute();
-        //});
-
+        // Слушательб который центрирует карту по точке
         rootScope.$on('findStopOnMarker', function(event, lat, lon){
             console.log("Recieve ", lat, lon);
             setMapCenter(lat, lon, 15);
         })
 
 
-
+        //Слушатель, который меняет данные на карте, после вызова карточки остановки
         rootScope.$on('confirmViewPointEditing', function(event, data, stop){
             console.log("Recieve data", data);
            var i=0;
@@ -1084,6 +1069,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         });
 
+
+        // Изменение параметра реально обслужено в точке после вызова карточки остановки
         function changeRealServiceTime(time, indx, stop){
 
            // console.log("I try to change to time", time , "in point", indx, "of stop", stop);
@@ -1107,51 +1094,41 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //scope.$apply;
         }
 
+
+        //функция вызывается, когда из карточки остановки, одна или несколько точек отвязываются от стопа
         function deleteSomePointsFromStop (indx, stop) {
-            console.log("I try to delete point", indx, "from stop", stop);
+          //  console.log("I try to delete point", indx, "from stop", stop);
+
+            // нахождение маркера дя точки, которая отвязывается
             var i=0;
             while(i<markersArr.length){
                 if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
                     var container=markersArr[i];
-                    console.log("Find marker", container);
+                   // console.log("Find marker", container);
 
                 }
                 i++;
             }
 
-
+            //В стопе убирается информация о том, что он обслужил эту точку
             var i=0;
             while (i<stop.servicePoints.length){
-                console.log("looking");
+                //console.log("looking");
                 if (stop.servicePoints[i]==indx){
                     stop.servicePoints.splice(i, 1);
                     scope.$apply;
                 }
                 i++;
             }
-
-            console.log(stop.servicePoints, "stop.servicePoints");
-
+            //console.log(stop.servicePoints, "stop.servicePoints");
             container.source.stopState.servicePoints=stop.servicePoints;
+            //console.log(container.source.stopState.servicePoints);
 
-            console.log(container.source.stopState.servicePoints);
+            // В точке удаляется вся информация связанная со стопом.
+            // После этого она становится либо в плане, либо опоздавшей в зависимости от текущего времени
+            // и времени этой заявки, соответственно марке меняет цвет и меняется подсказка маркера
             delete container.source.stopState;
             delete container.source.stop_arrival_time;
-
-            //var i=0;
-            //while(i<container.source.stopState.servicePoints.length){
-            //    if (container.source.stopState.servicePoints[i]==indx){
-            //        container.source.stopState.servicePoints.splice(i, 1);
-            //
-            //        }
-            //
-            //    i++;
-            //}
-
-
-
-
-
            delete container.source.autofill_service_time;
            delete container.source.real_service_time;
            delete container.source.haveStop;
@@ -1181,11 +1158,48 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             container._icon.title = begin+textStatus+ '\n'+end;
             container.setIcon(getIcon(container.source.NUMBER, 14, color, 'black')).update();
 
+        }
+
+
+        function changeWaypointCoordinates (newMarker, lat, lng){
+            console.log("Start Changes", newMarker, lat, lng);
+
+            // в newmarker вставить новые координаты
+            newMarker._latlng.lat=lat;
+            newMarker._latlng.lng=lng;
+            newMarker.source.LAT=lat;
+            newMarker.source.LON=lng;
+            newMarker.source.END_LAT=lat;
+            newMarker.source.END_LON=lng;
+            newMarker.source.waypoint.LAT=lat;
+            newMarker.source.waypoint.LON=lng;
+
+            //Сформировать soap data и soap запрос
+            rootScope.$emit('pushWaypointTo1С', newMarker.source.waypoint);
+
+
+
+            //var soapStr=testSoap(newMarker.source);
+            //console.log(soapStr);
+
+            // Отправить на сервер
+            // Проверить результат
 
 
 
         }
 
+        //function testSoap(waypoint){
+        //    var str = '';
+        //    str += '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua">';
+        //    str += '<WAYPOINTS> <WAYPOINT ACTION="UPDATE" ';
+        //    str += 'ID="'+waypoint.waypoint.ID + '" ';
+        //    str += 'LAT="' + waypoint.LAT + '" ';
+        //    str += 'LON="' + waypoint.LON + '" ';
+        //    str += ' /> </WAYPOINTS>'
+        //    str += '</MESSAGE>';
+        //    return str;
+        //}
 
     }]);
 

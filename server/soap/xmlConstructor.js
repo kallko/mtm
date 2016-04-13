@@ -218,3 +218,18 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
 
     return str;
 };
+
+// xml для записи в 1С новых координат точки
+XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
+    console.log("Constructor in process, and waypoint.waypoint.NAME =", waypoint.waypoint.NAME);
+    var str = '';
+    str += this.xml.begin;
+    str += '<WAYPOINTS> <WAYPOINT ACTION="UPDATE" ';
+    str += 'ID="'+ waypoint.waypoint.ID + '" ';
+    str += 'LAT="' + waypoint.waypoint.LAT + '" ';
+    str += 'LON="' + waypoint.waypoint.LON + '" ';
+    str += ' /> </WAYPOINTS>'
+    str += this.xml.end;
+    console.log("XML Constructor res=", str);
+    return str;
+};

@@ -1787,6 +1787,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
         }
 
+
+
+        function updateWaypoint(waypoint) {
+
+            console.log('sending waypoint to save', waypoint);
+            http.post('./savewaypoint/', {waypoint: waypoint}).
+                success(function (data) {
+                    console.log('Save to 1C result >>', data);
+                })
+            .error(function(data){
+                console.log('ERROR to Save to 1C result >>', data);
+            });
+        }
+
+
+
+
+
         // назначить текстовый фильтр
         scope.setTextFilter = function () {
             scope.filters.text = $("#search-input").val();
@@ -2073,6 +2091,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         };
+
+
+        rootScope.$on('pushWaypointTo1С', function(event, data){ // инициализация отправки данных точки на сервер 1с
+            console.log(data, ' sended data');
+            updateWaypoint(data)
+
+        });
+
+
+
+
+
+
         //console.log(scope.filters.route, ' filters route');
         rootScope.$on('pushCloseDayDataToServer', function(event, data){ // инициализация отправки данных на сервер для закрытия дня
             modifyDataForCloseDay(data);
@@ -2088,6 +2119,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // });
             };
         };
+
+
         function pushDataToServer(outgoingData){   // функция отправки данных на сервер, может быть универсальной
             //collectDataForDayClosing();
             console.log(' sended');
@@ -2105,18 +2138,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         function findBestStop(point, stop){
-            //console.log("recieve data", point.driver.NAME, "point", point.NUMBER);
-            //console.log("lat ", point.LAT, point.stopState.lat, stop.lat);
-            //console.log("lat ", point.LON, point.stopState.lon, stop.lon);
+
             var findOldDist=getDistanceFromLatLonInM(point.LAT, point.LON, point.stopState.lat, point.stopState.lon);
             var findNewDist=getDistanceFromLatLonInM(point.LAT, point.LON, stop.lat, stop.lon);
-            //console.log('oldDist', findOldDist, 'newDist', findNewDist);
-            //
+
             var findOldTime=point.stopState.t2-point.stopState.t1;
             var findNewTime=stop.time;
             var etalonTime=point.TASK_TIME;
-
-            //console.log("Etalon", etalonTime, "old", findOldTime, "new", findNewTime);
 
             var oldDeltaWindow=0;
             if(point.real_arrival_time<point.controlled_window.start){
@@ -2127,7 +2155,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 oldDeltaWindow=point.real_arrival_time - point.controlled_window.finish;
             }
 
-
             var newDeltaWindow=0;
             if (stop.t1<point.controlled_window.start){
                 newDeltaWindow=stop.t1-point.controlled_window.start;
@@ -2137,14 +2164,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 newDeltaWindow=stop.t1-point.controlled_window.finish;
             }
 
-            //console.log("OldWindow", oldDeltaWindow, "newWindow", newDeltaWindow);
-
             var oldWeight=findOldDist+5*Math.abs(oldDeltaWindow/60)+(10*((etalonTime-findOldTime)/60));
 
             var newWeight=findNewDist+5*Math.abs(newDeltaWindow/60)+(10*((etalonTime-findNewTime)/60));
-
-            //console.log("oldWeight", oldWeight, "newWeight", newWeight);
-
 
             if(oldWeight>newWeight){
                 return true;
@@ -2155,6 +2177,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
 
-        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
+        //rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
     }]);

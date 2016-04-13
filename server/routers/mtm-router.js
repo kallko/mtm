@@ -271,6 +271,31 @@ router.route('/saveroute/')
         });
     });
 
+
+
+
+
+
+
+
+
+router.route('/savewaypoint/')
+    .post(function (req, res) {
+        console.log('savewaypoint, req.bod', req.body);
+        var soapManager = new soap(req.session.login);
+        soapManager.updateWaypointCoordTo1C(req.body, function (data) {
+            if (!data.error) {
+                res.status(200).json({result: data.result});
+            } else {
+                res.status(200).json({error: data.error});
+            }
+        });
+    });
+
+
+
+
+
 // получение с роутера планового трека и времен проезда по всем маршрутам по логину в сессии
 router.route('/routerdata')
     .get(function (req, res) {
