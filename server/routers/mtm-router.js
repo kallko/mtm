@@ -10,6 +10,7 @@ var express = require('express'),
     locker = new (require('../locker'))(),
 
     cashedDataArr = [],  // глобальный кеш
+    testCacshe = []; // Тестовый кэш
     demoLogin = 'demo',
     tracksManager = new tracks(
         config.aggregator.url,
@@ -63,6 +64,15 @@ router.route('/dailydata')
             day = 86400000,
             today12am = now - (now % day);
 
+        //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
+        if(testCacshe.length==0){
+            console.log("First call for data!");
+            testCacshe.push(1);
+        } else {
+            console.log("Repeat call for data!");
+        }
+
+
         // при включенном флаге кешинга по сессии, ищет наличие относительно свежего кеша и отправляет в случае успеха
         if (config.cashing.session
             && req.query.force == null
@@ -81,13 +91,17 @@ router.route('/dailydata')
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
+
                 if (!req.query.showDate) {
                     data.lastUpdate = today12am;
                     cashedDataArr[req.session.login] = data;
+                    //console.log();
                 }
 
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
+
+                console.log("This is Data:", data);
                 res.status(200).json(data);
             }
         }

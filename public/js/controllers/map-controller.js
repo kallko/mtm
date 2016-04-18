@@ -230,8 +230,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                     addMarker(tmpVar);
                     console.log(map.getZoom(), "Zoom", track[i].coords[indx].lat, track[i].coords[indx].lon);
-                    setMapCenter(track[i].coords[indx].lat, track[i].coords[indx].lon, 13);
+                    //Установить центр карты в текущее положение машины, если оно определено.
+                    if(track[i].coords[indx].lat && track[i].coords[indx].lon) {
+                        setMapCenter(track[i].coords[indx].lat, track[i].coords[indx].lon, 13);
 
+                    } else {
+                        console.log("Something wrong with car real coord");
+                    }
 
                 }
             }
@@ -306,6 +311,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
 
 
+                ///Отлавливатель странных точек!!!!!
+                if(point.LAT==undefined) {
+                    console.log('!!!!!!!!!!!!!!!!!!!!!!This is the  problem point!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', point);
+                    point.LAT=point.END_LAT;
+                    point.LON=point.END_LON;
+                }
+
+
                 tmpVar = L.marker([point.LAT, point.LON], {
                     'title': title,
                     'draggable': true
@@ -356,6 +369,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 });
 
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
+
+                //console.log(tmpVar);
+
+
                 addMarker(tmpVar);
 
             }

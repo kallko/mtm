@@ -1,8 +1,8 @@
 var config = {
 
     cashing: {
-        soap: true, // загрузка данных из локального json, а не из соапа (для отладки)
-        //soap: false,
+        //soap: true, // загрузка данных из локального json, а не из соапа (для отладки)
+        soap: false,
         tracks: false, // кеширование трека
         session: false // использования сессии для кеширование данных получвемых из соапа
     },
@@ -13,8 +13,8 @@ var config = {
     soap: {
         login: 'soap_admin', // админский логин для клиента соапа
         password: '$o@p', // админский пароль для клиента соапа
-        defaultClientLogin: 'k00056.0' // логин для прогрузки интерфейса при запуске вне окна 1С
-        //defaultClientLogin: 'ids.dsp'
+        //defaultClientLogin: 'k00056.0' // логин для прогрузки интерфейса при запуске вне окна 1С
+        defaultClientLogin: 'ids.dsp'
     },
 
     aggregator: {

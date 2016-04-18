@@ -49,6 +49,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
         console.log('The data loaded from the cache.');
 
         var jsonData = JSON.parse(data);
+        //console.log('jsonData', jsonData);
         //jsonData.server_time = parseInt(Date.now() / 1000); // - 3600 * 3; // Date.now();
         //console.log(jsonData.server_time);
         //
@@ -588,6 +589,7 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     var resXml;
     resXml = _xml.waypointNewCoordXML(waypoint, me.login);
     log.toFLog('saveChanges.xml', resXml, false);
+
 
 
 

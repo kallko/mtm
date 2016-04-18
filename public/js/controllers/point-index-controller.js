@@ -256,11 +256,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (force)  url += '?force=true';
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
 
+
             http.get(url, {})
                 .success(function (data) {
                     linkDataParts(data);
                     if (loadParts) {
                         loadTrackParts();
+                        console.log("load track parts");
                     }
                     console.log(data,' success data');
                 })
@@ -318,7 +320,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
             scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
-            console.log(data);
+            console.log("PIC 323", data);
+            // тестовоотладочный блок
+
+
             // привязывание гидов из сенсоров к машинам, назначение реальных треков машинам
             for (var i = 0; i < data.sensors.length; i++) {
                 for (var j = 0; j < data.transports.length; j++) {
