@@ -7,8 +7,8 @@ var config = {
         session: false // использования сессии для кеширование данных получвемых из соапа
     },
 
-    //loadOnlyItineraryNew: true, // загружать только решения нового типа GET_ITINERARY_NEW
-    loadOnlyItineraryNew: false,
+    loadOnlyItineraryNew: true, // загружать только решения нового типа GET_ITINERARY_NEW
+    //loadOnlyItineraryNew: false,
 
     soap: {
         login: 'soap_admin', // админский логин для клиента соапа
@@ -29,8 +29,8 @@ var config = {
     },
 
     mathServer: {
-        url: 'http://192.168.9.29:9000/' // локальный путь к матсерверу
-        //url: 'http://62.205.137.118:9000/' // путь к матсерверу на хосте
+        //url: 'http://192.168.9.29:9000/' // локальный путь к матсерверу
+        url: 'http://62.205.137.118:9000/' // путь к матсерверу на хосте
     }
 };
 
