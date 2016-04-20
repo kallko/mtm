@@ -12,8 +12,8 @@ var express = require('express'),
     cashedDataArr = [],  // глобальный кеш
     updateCacshe = []; // Тестовый кэш
 
-var todayRoutesCache = [],
-    oldRoutesCache = {};
+var todayRoutesCache = {}, // объект с массивами роутов текущего дня
+    oldRoutesCache = {}; // объект со всеми роутами,  кроме текущего дня
 
 
     demoLogin = 'demo',
@@ -97,12 +97,28 @@ router.route('/dailydata')
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
-                for(var i = 0; i < data.routes.length; i++){
-                    data.routes[i]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
-                    for(var j = 0; j < data.routes[i].points.length; j++){
-                        data.routes[i].points[j]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
+                // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
+                for(var i = 0; i < data.routes.length; i++){ 
+                    if(!data.routes[i]['uniqueID']){
+                        data.routes[i]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
+                        for(var j = 0; j < data.routes[i].points.length; j++){
+                            data.routes[i].points[j]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
+                        }
+                    }else{
+                        continue;
                     }
+
                 }
+
+                // if(todayRoutesCache[req.session.login] == undefined){
+                //     todayRoutesCache[req.session.login] = [];
+                //     todayRoutesCache[req.session.login] = JSON.parse(JSON.stringify(data.routes));
+                //     
+                // }else{
+                //     
+                //     data.routes = data.routes.concat(todayRoutesCache[req.session.login]);
+                // }
+
                 if (!req.query.showDate) {
                     data.lastUpdate = today12am;
                     cashedDataArr[req.session.login] = data;
@@ -119,10 +135,6 @@ router.route('/dailydata')
 
 
 
-router.route('/cron/')
-    .get(function(){
-
-    });
 
 
 // проверка блокировок точек и маршрутов

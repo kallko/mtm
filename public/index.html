@@ -456,6 +456,7 @@
         </div>
         <div>
             <table>
+                <tr>
                     <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->
                         <button ng-click="orderCloseDay('getCheck')"">Все</button></th>
                     <th><button ng-click="order('filterId'); orderCloseDay('getCheck')" >ID</button></th>
@@ -463,7 +464,8 @@
                     <th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>
                     <!--th>Старт</th-->
                     <th><button ng-click="order('END_TIME');">Конец работы</button></th>
-                
+                    <th>Дата старта маршрута</th>
+                </tr>
                 <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID)">
                     <td><input ng-click = "toggleCheckBoxToClose()"
                                id = "close-table-checkbox-{{::item.filterId}}"
@@ -475,9 +477,9 @@
                     <td>{{::item.filterId}}</td>
                     <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
                     <td>{{::item.transport.NAME}}</td>
-                    <!--td>{{item.START_TIME.split(' ')[1]}}</td-->
-
                     <td>{{::item.END_TIME.split(' ')[1]}}</td>
+
+                    <td>{{::item.START_TIME.split(' ')[0]}}</td>
                 </tr>
             </table>
         </div>

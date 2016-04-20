@@ -635,7 +635,6 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
 
 
 SoapManager.prototype.closeDay = function (closeDayData, callback) {
-    log.toFLog('origWaypointBeforeSave.json', closeDayData);
     var me = this;
     var url  = 'https://' + this.admin_login + ':' + this.password + this.url;
     // сохранение в 1С от имени авторизированного пользователя

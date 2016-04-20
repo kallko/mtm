@@ -1608,7 +1608,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по маршруту
         function routeFilter(row) {
-            console.info(row.uniqueID, scope.filters.routeUniqueID);
             return row.uniqueID == scope.filters.routeUniqueID;
 
         }
