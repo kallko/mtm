@@ -5,10 +5,11 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     var s_dataToCloseArr_reserve = []; // тот же массив, что и s_dataToCloseArr_general_general, но в отличие от s_dataToCloseArr_general_general, функция toggleCheckBoxToClose() не имеет права ничего удалять из него 
     scope.closeDayClick = function(){
         scope.orderCloseDay('getCheck');
-        confirm('Ура!!! Мы закрыли день! Надо выслать массив s_dataToCloseArr_general с данными!  '+s_dataToCloseArr_general);
+        //confirm('Ура!!! Мы закрыли день! Надо выслать массив s_dataToCloseArr_general с данными!  '+s_dataToCloseArr_general);
     	//console.log('start closeday');
         //rootScope.$emit('setCheckBox');
         rootScope.$emit('pushCloseDayDataToServer', scope.data);
+        rootScope.$emit('showNotification', {text: 'День закрыт', duration:2000});
         //console.log($('#close-table-driver-5').html(), ' el');
         delete s_dataToCloseArr_reserve; // удаляем резервный массив, может удалим еще что-то 
     };
@@ -132,6 +133,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         });
     }
     scope.closeTableRowClick = function(){
+        
     	rootScope.$emit('closeDriverName', event.currentTarget.childNodes[5].innerHTML);
     }
 }]);

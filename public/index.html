@@ -10,9 +10,6 @@
 <!-- файлы стилей -->
 <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css"/>
 <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css"/>
-<!--<link type="text/css" rel="stylesheet" href="./js/vendor/goldenlayout-base.css"/>-->
-<!--<link type="text/css" rel="stylesheet" href="./js/vendor/goldenlayout-light-theme.css"/>-->
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
 <link rel="stylesheet" href="./css/font-awesome.min.css"/>
 <link rel="stylesheet" href="./css/application.css"/>
@@ -22,7 +19,6 @@
 
 
 <!-- библиотеки -->
-
 <script src="./js/vendor/jquery-2.1.4.min.js"></script>
 <script src="./js/vendor/jquery-ui.min.js"></script>
 <script src="./js/vendor/angular.js"></script>
@@ -39,8 +35,6 @@
 <!--Layout-->
 <script src="./js/vendor/jquery.layout.min.js"></script> <!--include layout-->
 <script src="./js/vendor/jquery.layout_and_plugins.min.js"></script>
-<!--<script src="./js/vendor/goldenlayout.js"></script>-->
-<script src="./js/vendor/goldenlayout.min.js"></script>
 
 
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
@@ -104,22 +98,22 @@
                         ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
-
+                <!--
                 <select id="route-select" ng-model="filters.route" class="group-select"
                         ng-options='option.value as option.name for option in filters.routes'>
                 </select>
-
+                -->
 
                 <select id="branch-select" ng-model="filters.branch" class="group-select"
                         ng-options='option.value as option.name for option in filters.branches'>
                 </select>
 
                 <span></span>
-
+                <!--
                 <select id="draw-mode-select" ng-model="draw_mode" class="group-select"
                         ng-options='option.value as option.name for option in draw_modes'>
                 </select>
-
+                -->
                 <input id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
                 <input id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
@@ -135,7 +129,7 @@
                 <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
                     {{params.endWindowSize * 5}} минут до закрытия
                 </button>
-
+                <br>
                 <input id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
                 <button class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -504,9 +498,6 @@
             <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>
 </div>
-
-
-
 
 <!-- див для отображения окна точки -->
 <div id="point-view" ng-controller="PointViewController">
