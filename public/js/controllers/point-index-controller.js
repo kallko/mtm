@@ -46,6 +46,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function init() {
             scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
             scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
+            console.info(scope.displayCollection);
             scope.filters = {};                                         // фильтры
             scope.filters.statuses = Statuses.getTextStatuses();        // фильтры по статусам
 
@@ -107,15 +108,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 $problem.toggleClass('btn-default').toggleClass('btn-success');
             }
         }
-         rootScope.$on('closeDriverName', function (event, data) {
-                 scope.filters.driver = data;
-                 var driversArr = [];
-                 for(var i=0; i<scope.filters.routes.length; i++){
-                    driversArr.push( scope.filters.routes[i]['driver'] || null);
-                 };
-                 scope.filters.route = driversArr.indexOf(data)-1;
-             console.log("route", scope.filters.route, "_data", _data);///Определение номера маршрута, который надо отрисовать.
-             //rootScope.$emit('drawRoute', scope.filters.route);
+         rootScope.$on('closeDriverName', function (event, uniqueID) {
+
+                 // scope.filters.driver = data;
+                 // var driversArr = [];
+                 // for(var i=0; i<scope.filters.routes.length; i++){
+                 //    driversArr.push( scope.filters.routes[i].driver || null);
+                 // }
+                 // scope.filters.route = driversArr.indexOf(data)-1;
+
+
+             scope.filters.routeUniqueID = uniqueID;
+             for(var i = 0; _data.routes.length > i; i++){
+                 if(_data.routes[i].uniqueID == uniqueID){
+                     scope.filters.driver = _data.routes[i].driver.NAME;
+                     scope.filters.route = i;
+                     break;
+                 }
+             }
              scope.drawRoute();
 
          });
@@ -295,6 +305,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // слинковать данные пришедшие от сервера
         function linkDataParts(data) {
+            console.info(data);
             init();
 
             console.log('Start linking ...', new Date(data.server_time * 1000));
@@ -435,6 +446,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
                             value: data.routes[i].filterId,
                             driver: data.routes[i].driver.NAME //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+
                         });
                           //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
@@ -528,7 +540,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
-
                // console.log(scope.rowCollection, ' rcol'); !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }
 
@@ -1597,8 +1608,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по маршруту
         function routeFilter(row) {
-            return (scope.filters.route == -1 || row.route_indx == scope.filters.route);
-            console.log(row.route_indx, 'indx');
+            console.info(row.uniqueID, scope.filters.routeUniqueID);
+            return row.uniqueID == scope.filters.routeUniqueID;
+
         }
 
         // фильтр по проблемности
@@ -1931,9 +1943,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // применить все фильтры
         scope.applyFilter = function (row) {
-            return driversFilter(row)
+            return routeFilter(row)
                 && statusFilter(row)
-                && routeFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
                 && textFilter(row)
@@ -2024,8 +2035,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function s_showCheckBoxToClose(){
 
 
-            function forSome(item, index, arr){
-                if(item == 0 || item == 1 || item == 2 || item == 8){
+            function forSome(status, confirmed, havStop){
+                if( confirmed || ( (status == 0 || status == 1 || status == 2) && havStop  ) || status == 8){
                     return true;
                 }
                 return false;
@@ -2041,12 +2052,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(_data);
             outer: for(var m = 0; m<_data.routes.length; m++){
                 for(var i = 0; _data.routes[m].points.length > i; i++){
-                     if(!forSome(_data.routes[m].points[i].status)){
+                     if(!forSome(_data.routes[m].points[i].status, _data.routes[m].points[i].confirmed, _data.routes[m].points[i].haveStop)){
                             continue outer;
                      }
                 }
                 //readyDriversToClose.push(_data.routes[m]);
               //  console.log(_data.routes[m]);
+                console.log(_data.routes);
                 rootScope.$emit('returnCheckBoxes', _data.routes[m]);
                 // for(var j = 0; _data.routes[m].points.length > j; j++){
                 //     console.log(_data.routes[m].points[j].status);
@@ -2100,16 +2112,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point,
                 startTime,
                 endTime;
+            var routesID = [];
 
             for (var i = 0; i < _data.routes.length; i++) {
+
                 if(!_data.routes[i].getCheck){
                     continue;
                 }
-                console.log(_data.routes[i]);
+
                 routeI = _data.routes[i];
+                routesID.push(routeI.ID);
                 route = {
                     pointsReady: [],
-                    pointsUnconfirmed: [],
                     pointsNotReady: [],
                     driver: routeI.DRIVER,
                     transport: routeI.TRANSPORT,
@@ -2141,7 +2155,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         stopState: pointJ.stopState,
                         moveState: pointJ.moveState
                     };
-                    if(point.stopState.coords){
+                    if(point.stopState && point.stopState.coords){
                         delete point.stopState.coords;
                     }
 
@@ -2164,18 +2178,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (point.status.promised) route.inPromised++;
                     if (point.inPlan) route.inPlan++;
                     console.log(pointJ);
-                    var x, y, z = 0;
+
                     if(pointJ.status == 8){
-
-                        point.reason = pointJ.reason;
-                        route.pointsNotReady.push(point)
-                        console.log("NOT READY!!!!!!!!!!!!!!!!");
-                    } else if (/*pointJ.haveStop && pointJ.havePush*/ pointJ.confirmed) {
-
+                        point.reasonDisp = pointJ.reason;
+                        point.reasonDriver = '';
+                        route.pointsNotReady.push(point);
+                    } else {
                         route.pointsReady.push(point);
-                    } else if (pointJ.haveStop || pointJ.havePush) {
-
-                        route.pointsUnconfirmed.push(point);
                     }
                 }
 
@@ -2216,7 +2225,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //console.log('collectDataForDayClosing >>', result);
-            console.info(result);
+            //console.info(result);
             var date = new Date();
             var day = (parseInt(date.getDate()) < 10) ? '0' + date.getDay() : date.getDate();
             var month = (parseInt(date.getMonth())+1 < 10) ? '0' + (parseInt(date.getMonth())+1) : parseInt(date.getMonth())+1;
@@ -2225,7 +2234,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             send += JSON.stringify(result);
             send += '</TEXTDATA></CLOSEDAY></MESSAGE>';
             console.log(send);
-            return {closeDayData: send};
+            return {closeDayData: send, routesID: routesID};
         }
 
         rootScope.$on('pushWaypointTo1С', function(event, data){ // инициализация отправки данных точки на сервер 1с

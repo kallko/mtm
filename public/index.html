@@ -464,13 +464,13 @@
                     <!--th>Старт</th-->
                     <th><button ng-click="order('END_TIME');">Конец работы</button></th>
                 
-                <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
+                <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID)">
                     <td><input ng-click = "toggleCheckBoxToClose()"
                                id = "close-table-checkbox-{{::item.filterId}}"
                                type="checkbox"
                                ng-model="item.getCheck"
-                               ng-disabled="item.setDisabled"
-                               ng-init="item.getCheck=false; item.setDisabled=true">
+                               ng-disabled="true"
+                               ng-init="item.getCheck=false;">
                     </td>
                     <td>{{::item.filterId}}</td>
                     <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>

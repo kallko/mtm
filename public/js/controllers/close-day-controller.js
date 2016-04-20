@@ -28,7 +28,6 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         for(var i = 0; i < scope.data.routes.length; i++){
            if(scope.data.routes[i].filterId == data.filterId){
                scope.data.routes[i].getCheck = true;
-               scope.data.routes[i].setDisabled = false;
                break;
             }
         }
@@ -132,8 +131,8 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             // }
         });
     }
-    scope.closeTableRowClick = function(){
-        
-    	rootScope.$emit('closeDriverName', event.currentTarget.childNodes[5].innerHTML);
+    scope.closeTableRowClick = function(uniqueID){
+    	//rootScope.$emit('closeDriverName', uniqueID);
+        rootScope.$emit('closeDriverName', uniqueID);
     }
 }]);

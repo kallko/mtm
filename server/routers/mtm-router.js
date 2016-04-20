@@ -11,6 +11,11 @@ var express = require('express'),
 
     cashedDataArr = [],  // глобальный кеш
     updateCacshe = []; // Тестовый кэш
+
+var todayRoutesCache = [],
+    oldRoutesCache = {};
+
+
     demoLogin = 'demo',
     tracksManager = new tracks(
         config.aggregator.url,
@@ -83,6 +88,7 @@ router.route('/dailydata')
             console.log('=== loaded from session === send data to client ===');
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
             cashedDataArr[req.session.login].user = req.session.login;
+
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего кеша
@@ -91,20 +97,31 @@ router.route('/dailydata')
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
-
+                for(var i = 0; i < data.routes.length; i++){
+                    data.routes[i]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
+                    for(var j = 0; j < data.routes[i].points.length; j++){
+                        data.routes[i].points[j]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
+                    }
+                }
                 if (!req.query.showDate) {
                     data.lastUpdate = today12am;
                     cashedDataArr[req.session.login] = data;
-                    //console.log();
                 }
 
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
 
-                //console.log("This is Data:", data);
+
                 res.status(200).json(data);
             }
         }
+    });
+
+
+
+router.route('/cron/')
+    .get(function(){
+
     });
 
 
@@ -329,7 +346,7 @@ router.route('/saveupdate/')
         // Полученные данные нужно объедеенить с существующими на данный момент, которые были получены ранее
         // так как иногда у стопа может быть id=0, который потом измениться, а TASK_NUMBER не уникальный, приходится создавать
         // новые параметры newID oldID и сравнивать по ним.
-        var obj=req.body
+        var obj=req.body;
         var i=0;
         while (i<obj.data.length){
             var exist=false;
@@ -415,10 +432,15 @@ router.route('/getreasonlist')
 
 router.route('/closeday')
     .post(function (req, res) {
+        if (req.session.login == null) {
+            req.session.login = config.soap.defaultClientLogin;
+        }
+        console.log(req.body.routesID);
         var soapManager = new soap(req.session.login);
         soapManager.closeDay(req.body.closeDayData, function (data) {
             if (!data.error) {
                 res.status(200).json({result: data.result});
+
             } else {
                 res.status(200).json({error: data.error});
             }

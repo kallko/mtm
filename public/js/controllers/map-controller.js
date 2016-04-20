@@ -948,7 +948,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.info(markersArr);
             scope.learConnectWithStopsAndPoints = new L.layerGroup().addTo(map);
 
-            if(markersArr) {
+            if(markersArr != undefined) {
                 var i = 0;
                 while (markersArr[i].source != undefined) {
                     if (markersArr[i].source.servicePoints != undefined) {
