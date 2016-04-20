@@ -484,10 +484,10 @@ template {
     background: transparent;
     border: none;
 }
-.lm_content {
-    overflow: auto;
+.lm_goldenlayout.lm_item.lm_root {
+    position: absolute;
+    top:0;
 }
-
 .lm_goldenlayout.lm_item.lm_root {
     position: absolute;
     top:0;
