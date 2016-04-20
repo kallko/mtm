@@ -1402,8 +1402,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  //   addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'cancel-point': // отмена точки
+                    console.log(row);
                     row.status = STATUS.CANCELED;
-                    row.reason = row.point.reason;
+                    //row.reason = row.point.reason;
                     rootScope.$emit('checkInCloseDay');  // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;
             }
@@ -2120,7 +2121,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if(!_data.routes[i].getCheck){
                     continue;
                 }
-
+                console.log(_data.routes[i]);
                 routeI = _data.routes[i];
                 route = {
                     pointsReady: [],
@@ -2129,8 +2130,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     driver: routeI.DRIVER,
                     transport: routeI.TRANSPORT,
                     number: routeI.NUMBER,
-                    startTimePlan: routeI.START_TIME,
-                    endTimePlan: routeI.END_TIME,
+                    startTimePlan: strToTstamp(routeI.START_TIME),
+                    endTimePlan: strToTstamp(routeI.END_TIME),
                     totalPoints: routeI.points.length,
                     inOrderedLen: 0,
                     inPromised: 0,
@@ -2141,10 +2142,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 startTime = 2000000000;
                 for (var j = 0; j < routeI.points.length; j++) {
                     pointJ = routeI.points[j];
+                    var taskDay = pointJ.TASK_DATE.split(".");
 
                     point = {
                         waypoint: pointJ.END_WAYPOINT,
                         taskNumber: pointJ.TASK_NUMBER,
+                        taskDay: new Date(taskDay[1]+"/"+taskDay[0]+"/"+taskDay[2]).getTime() /1000,
                         plannedNumber: pointJ.NUMBER,
                         weight: pointJ.WEIGHT,
                         volume: pointJ.VOLUME,
@@ -2154,6 +2157,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         stopState: pointJ.stopState,
                         moveState: pointJ.moveState
                     };
+                    if(point.stopState.coords){
+                        delete point.stopState.coords;
+                    }
 
                     if (pointJ.real_arrival_time && pointJ.real_arrival_time > endTime) endTime = pointJ.real_arrival_time;
                     if (pointJ.real_arrival_time && pointJ.real_arrival_time < startTime) startTime = pointJ.real_arrival_time;
@@ -2173,13 +2179,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (point.status.ordered) route.inOrderedLen++;
                     if (point.status.promised) route.inPromised++;
                     if (point.inPlan) route.inPlan++;
+                    console.log(pointJ);
+                    var x, y, z = 0;
+                    if(pointJ.status == 8){
 
-                    if (pointJ.haveStop && pointJ.havePush) {
+                        point.reason = pointJ.reason;
+                        route.pointsNotReady.push(point)
+                        console.log("NOT READY!!!!!!!!!!!!!!!!");
+                    } else if (/*pointJ.haveStop && pointJ.havePush*/ pointJ.confirmed) {
+
                         route.pointsReady.push(point);
                     } else if (pointJ.haveStop || pointJ.havePush) {
-                        route.pointsReady.push(point);
-                    } else {
-                        route.pointsNotReady.push(point);
+
+                        route.pointsUnconfirmed.push(point);
                     }
                 }
 
@@ -2220,12 +2232,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //console.log('collectDataForDayClosing >>', result);
-            
-            var send = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="25.04.2016"><TEXTDATA>';
+            console.info(result);
+            var date = new Date();
+            var day = (parseInt(date.getDate()) < 10) ? '0' + date.getDay() : date.getDate();
+            var month = (parseInt(date.getMonth())+1 < 10) ? '0' + (parseInt(date.getMonth())+1) : parseInt(date.getMonth())+1;
+
+            var send = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+day+'.'+ month +'.'+ date.getFullYear() +'"><TEXTDATA>';
             send += JSON.stringify(result);
             send += '</TEXTDATA></CLOSEDAY></MESSAGE>';
-
-           console.info(send);
+            console.log(send);
             return {closeDayData: send};
         }
 

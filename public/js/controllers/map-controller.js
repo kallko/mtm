@@ -534,6 +534,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 console.log('i gona draw route', route);
                 updateStoredMarkers(route);
                 drawCombinedRoute(route);
+                scope.route = route;
             });
 
             rootScope.$on('drawRealTrack', function (event, route) {
@@ -652,7 +653,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         tms: true,
                         attribution: 'Данные карт © 2013 ЧАО «<a href="http://visicom.ua/">Визиком</a>»',
                         subdomains: '123'
-                    })
+                    }),
                 ]
             });
 
@@ -727,7 +728,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     var marker=markersArr[i];
                     //console.log('marker for waypoint', marker)
                     break;
-                };
+                }
                 i++;
             }
 
@@ -855,7 +856,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     scope.spiderMarker.fire('click')}
                 catch (e) {
                     console.log(e);
-                };
+                }
 
                 scope.polyline = L.polyline([[minLAT, minLNG], [lat, lng]], {color: '#5cb85c', weight: 3,
                     opacity: 0.5,
@@ -886,8 +887,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         map.on('zoomend', function(event){
             scope.tempCurrentWayPoints=[];
+            if (map.getZoom() > 17 && markersArr) {
+                drowConnectWithStopsAndPoints();
+            }else {
+                if(scope.learConnectWithStopsAndPoints != undefined) {
+                    map.removeLayer(scope.learConnectWithStopsAndPoints);
+                }
+            }
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
-        })
+        });
 
 
         // При клике на маркераб которые сливаются в одну точкуб омс их разбрасывает и выдает новые временные координаты.
@@ -897,6 +905,46 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             createNewTempCurrentWayPoints(event);
 
         });
+        function drowConnectWithStopsAndPoints(){
+            console.info(markersArr);
+            scope.learConnectWithStopsAndPoints = new L.layerGroup().addTo(map);
+
+            if(markersArr) {
+                var i = 0;
+                while (markersArr[i].source != undefined) {
+                    if (markersArr[i].source.servicePoints != undefined) {
+                        var servicePointsLat = markersArr[i]._latlng.lat;
+                        var servicePointsLng = markersArr[i]._latlng.lng;
+                        var arrIndexStopPoints = markersArr[i].source.servicePoints;
+                        console.log(arrIndexStopPoints);
+                        var j = 0;
+                        while (j < markersArr.length) {
+                            if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
+                                for (var k = 0; arrIndexStopPoints.length > k; k++) {
+                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER){
+                                        var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
+                                            color: 'black',
+                                            weight: 1,
+                                            opacity: 0.5,
+                                            smoothFactor: true
+                                        });
+                                        scope.learConnectWithStopsAndPoints.addLayer(polyline);
+
+                                    }
+                                }
+                            }
+                            j++;
+                        }
+
+
+                        //console.log ("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
+                    }
+                    i++;
+
+
+                }
+            }
+        }
 
 
         //Возврат к нормальным координатам,
@@ -1407,12 +1455,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         function checkTestStops() {
-
+            console.info(markersArr);
            // console.log("We will work with stop markers", markersArr);
             var i=0;
             while(markersArr[i].source!=undefined){
                 if(markersArr[i].source.servicePoints!=undefined){
-                console.log ("Tis is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
+                console.log ("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
+                   
                 }
                 i++;
 
