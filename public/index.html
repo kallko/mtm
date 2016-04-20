@@ -19,6 +19,8 @@
 <link rel="stylesheet" href="./css/application.css"/>
 <link rel="stylesheet" href="./css/columns.css"/>
 <link rel="stylesheet" href="./css/bootstrap.css"/>
+<link rel="stylesheet" href="./css/learning.css"/>
+
 
 <!-- библиотеки -->
 <script src="./js/vendor/jquery-2.1.4.min.js"></script>
@@ -63,6 +65,9 @@
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
 <script src="./js/services/time-converter.js"></script>
+<!--<script src="./js/learning/learning.js"></script>-->
+<!--<script src="./js/learning/lessons.js"></script>-->
+
 
 
 <meta charset="UTF-8">
@@ -86,31 +91,10 @@
     <!--&lt;!&ndash;x point 11 09.00 : 12.30 <input type="text"> <br>&ndash;&gt;-->
     <!--<button ng-click="hideForm()">Confirm</button>-->
 
+<!-- </div> -->
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
 <!--div id = "test-popup" ng-controller = "CloseDayController" ng-show = "view">Test-popup</div-->
 <!-- таблица точек доставки -->
 <template type="text/html" id="template-point-table">
@@ -161,8 +145,18 @@
             </div>
         </div>
 
+
+
+
+
+
+
+
+
         <!-- таблица точек -->
         <div id="point-table" class="table-holder">
+
+
             <table class="table table-striped point-table" id="point-table-tbl"
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
@@ -494,116 +488,116 @@
     </div>
 </div>
 
-<!-- див для отображения окна точки -->
-<!--<div id="point-view" ng-controller="PointViewController">-->
-    <!--<div class="card-title">-->
-        <!--Карточка задания-->
-        <!--<button class="btn btn-primary btn-sm"-->
-                <!--ng-show="companyName == 'IDS'"-->
-                <!--ng-click="open1CWindow()">Открыть в 1С-->
-        <!--</button>-->
-    <!--</div>-->
+ див для отображения окна точки
+<div id="point-view" ng-controller="PointViewController">
+    <div class="card-title">
+        Карточка задания
+        <button class="btn btn-primary btn-sm"
+                ng-show="companyName == 'IDS'"
+                ng-click="open1CWindow()">Открыть в 1С
+        </button>
+    </div>
 
-    <!--<table id="point-view-table" class="table table-striped">-->
-        <!--<tbody>-->
-        <!--<tr>-->
-            <!--<td class="title">Название:</td>-->
-            <!--<td class="row-data">{{point.waypoint.NAME}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Адрес:</td>-->
-            <!--<td class="row-data">{{point.waypoint.ADDRESS}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">План. прибытие:</td>-->
-            <!--<td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">План. номер:</td>-->
-            <!--<td class="row-data">{{point.NUMBER}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Машина:</td>-->
-            <!--<td class="row-data">{{point.transport.NAME}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Водитель:</td>-->
-            <!--<td class="row-data">{{point.driver.NAME}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Заказанное окно:</td>-->
-            <!--<td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Обещанное окно:</td>-->
-            <!--<td class="row-data">-->
-                <!--{{point.promised_window.start * 1000 | date:'HH:mm'}} - -->
-                <!--{{point.promised_window.finish * 1000 | date:'HH:mm'}}-->
-            <!--</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Изменяемое окно:</td>-->
-            <!--<td class="row-data">-->
-                <!--<input type="text" class="promised-text-card" id="promised-start-card"-->
-                       <!--enter-event="changePromisedWindow(point)"> - -->
-                <!--<input type="text" class="promised-text-card" id="promised-finish-card"-->
-                       <!--enter-event="changePromisedWindow(point)">-->
-            <!--</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Тел. водителя:</td>-->
-            <!--<td class="row-data">{{point.driver.PHONE}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Комментарий:</td>-->
-            <!--<td class="row-data">{{point.waypoint.COMMENT}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Статус:</td>-->
-            <!--<td class="row-data">-->
-                <!--{{point.textStatus}}-->
-                <!--<button id="confirm-status-task-btn" ng-show="locked(point) && unconfirmed()"-->
-                        <!--class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить-->
-                <!--</button>-->
-                <!--<button id="cancel-status-task-btn" ng-show="locked(point) && unconfirmed()"-->
-                        <!--class="btn btn-primary btn-sm" ng-click="cancelStatus()">Отменить-->
-                <!--</button>-->
-            <!--</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Окно:</td>-->
-            <!--<td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Стоимость:</td>-->
-            <!--<td class="row-data">{{point.VALUE}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Объем:</td>-->
-            <!--<td class="row-data">{{point.VOLUME}}</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-            <!--<td class="title">Вес:</td>-->
-            <!--<td class="row-data">{{point.WEIGHT}}</td>-->
-        <!--</tr>-->
-        <!--</tbody>-->
-    <!--</table>-->
+    <table id="point-view-table" class="table table-striped">
+        <tbody>
+        <tr>
+            <td class="title">Название:</td>
+            <td class="row-data">{{point.waypoint.NAME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Адрес:</td>
+            <td class="row-data">{{point.waypoint.ADDRESS}}</td>
+        </tr>
+        <tr>
+            <td class="title">План. прибытие:</td>
+            <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+        </tr>
+        <tr>
+            <td class="title">План. номер:</td>
+            <td class="row-data">{{point.NUMBER}}</td>
+        </tr>
+        <tr>
+            <td class="title">Машина:</td>
+            <td class="row-data">{{point.transport.NAME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Водитель:</td>
+            <td class="row-data">{{point.driver.NAME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Заказанное окно:</td>
+            <td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>
+        </tr>
+        <tr>
+            <td class="title">Обещанное окно:</td>
+            <td class="row-data">
+                {{point.promised_window.start * 1000 | date:'HH:mm'}} -
+                {{point.promised_window.finish * 1000 | date:'HH:mm'}}
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Изменяемое окно:</td>
+            <td class="row-data">
+                <input type="text" class="promised-text-card" id="promised-start-card"
+                       enter-event="changePromisedWindow(point)"> -
+                <input type="text" class="promised-text-card" id="promised-finish-card"
+                       enter-event="changePromisedWindow(point)">
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Тел. водителя:</td>
+            <td class="row-data">{{point.driver.PHONE}}</td>
+        </tr>
+        <tr>
+            <td class="title">Комментарий:</td>
+            <td class="row-data">{{point.waypoint.COMMENT}}</td>
+        </tr>
+        <tr>
+            <td class="title">Статус:</td>
+            <td class="row-data">
+                {{point.textStatus}}
+                <button id="confirm-status-task-btn" ng-show="locked(point) && unconfirmed()"
+                        class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
+                </button>
+                <button id="cancel-status-task-btn" ng-show="locked(point) && unconfirmed()"
+                        class="btn btn-primary btn-sm" ng-click="cancelStatus()">Отменить
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td class="title">Окно:</td>
+            <td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>
+        </tr>
+        <tr>
+            <td class="title">Стоимость:</td>
+            <td class="row-data">{{point.VALUE}}</td>
+        </tr>
+        <tr>
+            <td class="title">Объем:</td>
+            <td class="row-data">{{point.VOLUME}}</td>
+        </tr>
+        <tr>
+            <td class="title">Вес:</td>
+            <td class="row-data">{{point.WEIGHT}}</td>
+        </tr>
+        </tbody>
+    </table>
 
-    <!--<div id="point-view-setting" ng-show="locked(point)">-->
-        <!--<button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"-->
-                <!--ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">-->
-            <!--<i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>-->
-            <!--&nbsp;Машрут-->
-        <!--</button>-->
-        <!--<button id="edit-task-btn" class="btn btn-sm down-btn"-->
-                <!--ng-class="point.locked ? 'btn-danger' : 'btn-primary'" ng-click="toggleTaskBlock()">-->
-            <!--<i class="fa fa-md" ng-class="point.locked ? 'fa-lock' : 'fa-unlock'"></i>-->
-            <!--&nbsp;Задание-->
-        <!--</button>-->
+    <div id="point-view-setting" ng-show="locked(point)">
+        <button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"
+                ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">
+            <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>
+            &nbsp;Машрут
+        </button>
+        <button id="edit-task-btn" class="btn btn-sm down-btn"
+                ng-class="point.locked ? 'btn-danger' : 'btn-primary'" ng-click="toggleTaskBlock()">
+            <i class="fa fa-md" ng-class="point.locked ? 'fa-lock' : 'fa-unlock'"></i>
+            &nbsp;Задание
+        </button>
 
-        <!--<button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание-->
-        <!--</button>-->
-    <!--</div>-->
+        <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
+        </button>
+    </div>
 
 
 

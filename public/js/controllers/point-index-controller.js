@@ -34,6 +34,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         init();
         setCheckLocksInterval();
         loadDailyData(false);
+        loadReasonList();
 
         if (enableDynamicUpdate) {
             setRealTrackUpdate(stopUpdateInterval);
@@ -258,10 +259,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (loadParts) {
                         loadTrackParts();
                     }
+                    console.log(data,' success data');
                 })
                 .error(function (data) {
                     console.log(data);
                 });
+        }
+
+
+        // загрузить список причин отмены заявки
+        scope.showReasonList = false;
+        function loadReasonList(){
+            var url = './getreasonlist';
+
+            http.get(url, {})
+                .success(function(data){
+                    showLoadReasonList(data);
+                })
+                .error(function(data){
+                    return $timeout(loadReasonList, 3000);
+                });
+        }
+        function showLoadReasonList(data){
+            scope.loadReasonList = data;
+            scope.selectReasonList = scope.loadReasonList[0].attributes.id;
+            console.log(scope.selectReasonList);
+            scope.showReasonList = true;
+            console.log(scope.loadReasonList);
+
         }
 
         // получить объект Date из строки
@@ -687,7 +712,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
                                     tmpPoint.real_arrival_time = tmpArrival.t1;
                                     //route.points[k]
-                                    console.log("route-point-k", route.points[k], "route" , route)
+                                    //console.log("route-point-k", route.points[k], "route" , route)
 
                                     if (angular.isUndefined(tmpArrival.servicePoints)==true){
                                         tmpArrival.servicePoints=[];
@@ -2029,10 +2054,38 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log('<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
             //    + JSON.stringify(result)
             //+ '</TEXTDATA></CLOSEDAY></MESSAGE>');
-            //console.log(result);
+            console.log(result);
             return result;
 
 
-        }
+        };
         //console.log(scope.filters.route, ' filters route');
+        rootScope.$on('pushCloseDayDataToServer', function(event, data){ // инициализация отправки данных на сервер для закрытия дня
+            modifyDataForCloseDay(data);
+            console.log(data, ' general');
+            pushDataToServer(data);   //пока так !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        });
+        function modifyDataForCloseDay(data){ //эта функция добавит в _data новое свойство CLOSED для определения закрыт ли маршрут
+            for(var s=0; s<_data.routes.length; s++){
+                _data.routes[s]['CLOSED'] = false;
+                // console.log(_data.routes, ' _data.routes');
+                //rootScope.$on('returnCheckBoxes', function(event, data){
+                //     console.log(data, ' returnCheckBoxes');
+                // });
+            };
+        };
+        function pushDataToServer(outgoingData){   // функция отправки данных на сервер, может быть универсальной
+            collectDataForDayClosing();
+            console.log(' sended');
+            modifyDataForCloseDay();
+            http.post('/closeday', outgoingData).then(successCallback, errorCallback);
+            function successCallback(response){
+                rootScope.$emit('successOfPusingData');
+                // console.log(response, ' response');
+            };
+            function errorCallback(){
+                console.log('error', ' error of pushing data');
+                rootScope.$emit('serverError');
+            }
+        };
     }]);

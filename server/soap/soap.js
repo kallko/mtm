@@ -416,13 +416,16 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 // получение списка причин отмен
 SoapManager.prototype.getReasonList = function (callback) {
     console.log('getReasonList');
-
+    var config = {
+        login: 'ids.dsp',
+        pass: 'dspids'
+    };
     // запрос идет не на обычный адрес соапа, а на его версию для кпк
-    var url = 'https://' + this.admin_login + ':' + this.password + this.urlPda;
+    var url = 'https://' + config.login + ':' + config.pass + this.urlPda;
     soap.createClient(url, function (err, client) {
         if (err) throw err;
 
-        client.setSecurity(new soap.BasicAuthSecurity('k00056.0', 'As123456'));
+        client.setSecurity(new soap.BasicAuthSecurity(config.login, config.pass));
         console.log(client.describe());
         client.get_reason_list(function (err, result) {
             if (!err) {
