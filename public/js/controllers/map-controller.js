@@ -923,14 +923,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // При зуме карты в любом направлении все омс маркеры теряют свойствоство spiderfy если они его до этого имели.
 
+        scope.drowConnect = false;
         map.on('zoomend', function(event){
             scope.tempCurrentWayPoints=[];
-            if (map.getZoom() > 17 && markersArr) {
+            if (map.getZoom() > 17 && markersArr != undefined && !scope.drowConnect) {
                 drowConnectWithStopsAndPoints();
-            }else {
-                if(scope.learConnectWithStopsAndPoints != undefined) {
-                    map.removeLayer(scope.learConnectWithStopsAndPoints);
-                }
+                scope.drowConnect = true;
+            }else if(scope.drowConnect && map.getZoom() <= 17) {
+                map.removeLayer(scope.learConnectWithStopsAndPoints);
+                scope.drowConnect = false;
             }
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
         });
