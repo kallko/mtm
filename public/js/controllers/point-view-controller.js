@@ -249,5 +249,4 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     console.log(data);
                 });
         };
-
     }]);
