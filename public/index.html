@@ -556,12 +556,23 @@
             <td class="title">Статус:</td>
             <td class="row-data">
                 {{point.textStatus}}
-                <button id="confirm-status-task-btn" ng-show="locked(point) && unconfirmed()"
+
+                <div ng-show="showHideSeasonButtons">
+                <button id="confirm-status-task-btn"
+                        ng-disabled="selectReasonList"
+
                         class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
                 </button>
-                <button id="cancel-status-task-btn" ng-show="locked(point) && unconfirmed()"
-                        class="btn btn-primary btn-sm" ng-click="cancelStatus()">Отменить
+                <select ng-model="selectReasonList"
+                        ng-options="item.attributes.id as item.attributes.name  for item in loadReasonList">
+                    <option value="" selected>--Причина отказа--</option>
+                </select>
+                <button id="cancel-status-task-btn"
+                        ng-disabled="!selectReasonList"
+
+                        class="btn btn-primary btn-sm" ng-click="cancelTask()">Отменить
                 </button>
+                </div>
             </td>
         </tr>
         <tr>
@@ -584,6 +595,7 @@
     </table>
 
     <div id="point-view-setting" ng-show="locked(point)">
+        <!--
         <button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"
                 ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">
             <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>
@@ -597,6 +609,7 @@
 
         <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
         </button>
+        -->
     </div>
 
 

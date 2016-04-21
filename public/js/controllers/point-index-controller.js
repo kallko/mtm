@@ -29,12 +29,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,                              // догрузить новые данные сразу после загрузки интерфейса
             enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
-
+        console.log(STATUS);
         setListeners();
         init();
         setCheckLocksInterval();
         loadDailyData(false);
-        loadReasonList();
 
         if (enableDynamicUpdate) {
             setRealTrackUpdate(stopUpdateInterval);
@@ -267,27 +266,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
 
-        // загрузить список причин отмены заявки
-        scope.showReasonList = false;
-        function loadReasonList(){
-            var url = './getreasonlist';
 
-            http.get(url, {})
-                .success(function(data){
-                    showLoadReasonList(data);
-                })
-                .error(function(data){
-                    return $timeout(loadReasonList, 3000);
-                });
-        }
-        function showLoadReasonList(data){
-            scope.loadReasonList = data;
-            scope.selectReasonList = scope.loadReasonList[0].attributes.id;
-            console.log(scope.selectReasonList);
-            scope.showReasonList = true;
-            console.log(scope.loadReasonList);
-
-        }
 
         // получить объект Date из строки
         function strToTstamp(strDate) {
@@ -415,6 +394,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint = tmpPoints[j];
                     tPoint.branchIndx = branchIndx;
                     tPoint.branchName = data.routes[i].branch;
+                    tPoint.reason;
                     tPoint.driver = data.routes[i].driver;
                     tPoint.in_plan = true;
 
@@ -530,6 +510,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
+
                // console.log(scope.rowCollection, ' rcol'); !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }
 
@@ -1287,9 +1268,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             switch (option) {
                 case 'confirm-status': // подтверждение сомнительного статуса
                     if (!needChanges) return;
+                    row.status = STATUS.FINISHED;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
-                    addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
+                  //  addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'not-delivered-status': // отмена сомнительного статуса
                     if (!needChanges) return;
@@ -1300,7 +1282,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         row.status = STATUS.DELAY;
                     }
                     rawPoint.rawConfirmed = -1;
-                    addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
+                 //   addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'cancel-point': // отмена точки
                     row.status = STATUS.CANCELED;
@@ -1423,6 +1405,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик даблклика на строке таблицы
         scope.dblRowClick = function (row) {
+            row.reason;
             row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             row.itineraryID = _data.ID;
@@ -1932,8 +1915,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     ///document.querySelector(checkBoxes[s]).setAttribute('checked', 'checked');
                     //checkBoxes[s].attr('checked');
                     //rootScope.$emit('returnCheckBoxes', checkBoxes[s]);
-                    rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s]});
-                };
+                    rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s], ischecked:true});
+                }else {
+                    rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s], ischecked:false});
+                }
             };
 
         
