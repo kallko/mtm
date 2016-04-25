@@ -579,7 +579,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     });
 };
 
-// сохранение маршрута в 1С
+// сохранение координат точки в 1С
 SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     log.toFLog('origWaypointBeforeSave.json', waypoint);
 
@@ -589,9 +589,6 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     var resXml;
     resXml = _xml.waypointNewCoordXML(waypoint, me.login);
     log.toFLog('saveChanges.xml', resXml, false);
-
-
-
 
 
 

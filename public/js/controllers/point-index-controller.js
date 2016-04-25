@@ -29,10 +29,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,                              // догрузить новые данные сразу после загрузки интерфейса
             enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
+            scope.existData=[];                                         //Хранение измененных в течение дня данных
 
         setListeners();
         init();
         setCheckLocksInterval();
+        loadExistData();
         loadDailyData(false);
 
         if (enableDynamicUpdate) {
@@ -86,6 +88,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.params = scope.params || Settings.load();             // настройки приложения
 
             setProblemIndexSortMode(0);                                 // сброс фильтрации по индексу проблемности
+
+
+
+
 
             var $promised = $('#promised-15m-btn');
             // отжатие кнопки
@@ -251,11 +257,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
+
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
 
+            console.log('waiting for data');
 
             http.get(url, {})
                 .success(function (data) {
@@ -320,7 +328,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
             scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
-            console.log("PIC 323", data);
+            //console.log("PIC 323", data);
             // тестовоотладочный блок
 
 
@@ -531,16 +539,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 showPopup(msg);
             }
 
+
             _data = data;
             updateData();
+            //_data = concatDailyAndExistingData (_data);
 
-            console.log('Finish linking');
+            //console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
 
             saveRoutes();
             checkLocks();
+
+
             showPopup('Загрузка завершенна!', 2500);
-            console.log(showPopup, ' showPopup');
+            //console.log(showPopup, ' showPopup');
 
             setColResizable();
             prepareFixedHeader();
@@ -557,6 +569,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             statusUpdate();
             predicationArrivalUpdate();
             promised15MUpdate();
+            concatDailyAndExistingData (_data);
         }
 
         // проверка на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
@@ -618,6 +631,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
                     tmpPoint = _data.routes[i].points[j];
+
+
+
                     tmpPoint.status = STATUS.SCHEDULED;
 
                     delete tmpPoint.distanceToStop;
@@ -634,10 +650,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.confirmed;
 
                     delete tmpPoint.overdue_time;
+
+                    if(
+                        tmpPoint != undefined &&
+                        tmpPoint.NUMBER=='2' &&
+                        tmpPoint.driver.ID=='07861a67-494e-11e2-802b-52540027e502'
+                    ) {
+                        console.log("!!!!!!!!!!!!!!!!!!!! NOW I WILL BROKE EVERYTHING!!!!!");
+
+                    }
+
                 }
 
                 _data.routes[i].lastPointIndx = 0;
                 delete _data.routes[i].pushes;
+
+
             }
 
             for (i = 0; i < _data.routes.length; i++) {
@@ -678,6 +706,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                     haveUnfinished = false;
 
+
+                                    if(
+                                        tmpPoint != undefined &&
+                                        tmpPoint.NUMBER=='2' &&
+                                        tmpPoint.driver.ID=='07861a67-494e-11e2-802b-52540027e502'
+                                    ) {
+                                        console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ TempPoint distance", tmpDistance, "between", tmpPoint, "tempArrival", tmpArrival  );
+                                       // console.log("TempPoint.haveStop", tmpPoint.haveStop, "autofill", tmpPoint.autofill_service_time);
+                                    }
+
+
                                     if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
                                         for (var l = k - 1; l > 0; l--) {
                                             status = route.points[l].status;
@@ -694,18 +733,40 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         }
                                     }
 
-                                    if(tmpPoint.driver.NAME=="ГАМОЛЯ СЕРГЕЙ" && (tmpPoint.NUMBER==8 || tmpPoint.NUMBER==9)) {
-                                        console.log("Connecting point, for ГАМОЛЯ СЕРГЕЙ", tmpPoint, " with stop", tmpArrival, "Need Check");
-                                        scope.testFlag=true;
-                                       // var findBetterStop=findBestStop(tmpPoint, tmpArrival);
 
+
+
+                                    // Отладочный блок, почему то 2 точки
+                                    //console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TempPoint", tmpPoint);
+
+                                    //if( tmpPoint != undefined &&
+                                    //    tmpPoint.NUMBER=="2") {
+                                    //    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TempPoint", tmpPoint);
+                                    //    console.log("TempPoint.havestop", tmpPoint.haveStop);
+                                    //}
+
+
+
+                                    // Отладочный блок по проблемным точкам
+                                    if(
+                                        tmpPoint != undefined &&
+                                        tmpPoint.NUMBER=='2' &&
+                                        tmpPoint.driver.ID=='07861a67-494e-11e2-802b-52540027e502'
+                                    ) {
+                                        console.log("___________________________TempPoint", tmpPoint, "connect with arrival", tmpArrival);
+                                        console.log("TempPoint.haveStop", tmpPoint.haveStop, "autofill", tmpPoint.autofill_service_time, 'i',i,'k',k);
                                     }
 
 
                                     //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
-                                    if(tmpPoint.haveStop==true && !findBestStop(tmpPoint, tmpArrival)){
+                                    if(tmpPoint.haveStop ==true && !findBestStop(tmpPoint, tmpArrival)){
                                         continue;
                                     }
+
+
+
+
+
 
 
                                     tmpPoint.distanceToStop = tmpDistance;
@@ -713,7 +774,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.haveStop = true;
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
-                                    tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
+                                    //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
 
                                     route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                                     tmpPoint.stop_arrival_time = tmpArrival.t1;
@@ -726,9 +787,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         tmpArrival.servicePoints=[];
                                     }
 
+                                    if(
+                                        tmpPoint != undefined &&
+                                        tmpPoint.NUMBER==2 &&
+                                        tmpPoint.driver.ID=='07861a67-494e-11e2-802b-52540027e502'
+                                    ) {
+                                        console.log("tmppoint.HaveStop", tmpPoint.haveStop, "autofill", tmpPoint.autofill_service_time);
+                                    }
+
+
                                     tmpArrival.servicePoints.push(k);
 
+
+
+
+
+
                                     findStatusAndWindowForPoint(tmpPoint);
+
 
                                 }
                             }
@@ -1480,7 +1556,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         var checkBoxDrivers = [];
         function checkStatusForCheckBox(row_id, driverName, statusCode){
             
-            if (statusCode == 3 || 4 || 5 || 8){
+            if (statusCode == 3 || 4 || 5 ){
                 checkBoxDrivers.push({row_id: driverName})
             }
 
@@ -1599,17 +1675,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // трека прошло updateTrackInterval секунд - догружаем новые данные
             if (route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
-                console.log('download tracks');
+               // console.log('download tracks');
                 http.post('./gettracksbystates', {
                     states: route.real_track,
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
                 })
                     .success(function (data) {
-                        console.log({data: data});
+                        //console.log({data: data});
                         route.real_track = data;
 
-                        console.log('before', route.real_track.length);
+                        //console.log('before', route.real_track.length);
                         for (var k = 0; k < route.real_track.length; k++) {
                             if (route.real_track[k].coords == undefined ||
                                 route.real_track[k].coords.length == 0) {
@@ -1625,7 +1701,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
                         }
 
-                        console.log('after', route.real_track.length);
+                        //console.log('after', route.real_track.length);
 
                         draw(route);
                     });
@@ -1809,6 +1885,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
+        //function saveUpdate(points) {
+        //
+        //    console.log('sending update to save', points);
+        //    http.post('./saveupdate/', {waypoints: points}).
+        //        success(function (data) {
+        //            console.log('Save to 1C result >>', data);
+        //        })
+        //        .error(function(data){
+        //            console.log('ERROR to Save to 1C result >>', data);
+        //        });
+        //}
+
+
+
 
         // назначить текстовый фильтр
         scope.setTextFilter = function () {
@@ -1952,6 +2042,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 driversFromCloseTab.push($('#close-table-driver-'+m).html());
                 checkBoxes.push('#close-table-checkbox-'+m);
                 var ob = {driver:_data.routes[m].driver.NAME, statuses: []};
+
                 for(var s=0; s<_data.routes[m].points.length; s++){
                     ob.statuses.push(_data.routes[m].points[s].status);
                    // console.log(_data.routes[m].points[s].status, ' status');    
@@ -2144,6 +2235,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function findBestStop(point, stop){
 
+            //if (point.source &&
+            //    point.source.row_id == 246)
+            //{
+            //    console.log("Tested point", point, "and new stop is", stop, "and old point is ", point.stopState);
+            //}
+
             var findOldDist=getDistanceFromLatLonInM(point.LAT, point.LON, point.stopState.lat, point.stopState.lon);
             var findNewDist=getDistanceFromLatLonInM(point.LAT, point.LON, stop.lat, stop.lon);
 
@@ -2174,14 +2271,135 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var newWeight=findNewDist+5*Math.abs(newDeltaWindow/60)+(10*((etalonTime-findNewTime)/60));
 
             if(oldWeight>newWeight){
+
+              //  console.log("New point is better");
+              //  console.log("I have to remove ", point.NUMBER-1, "from", point.stopState.servicePoints);
+                var i=0;
+                while (i<point.stopState.servicePoints.length){
+                     if(point.stopState.servicePoints[i]==point.NUMBER-1) {
+                         point.stopState.servicePoints.splice(i,1);
+                     }
+
+                    i++;
+                }
+
+              //  console.log("result is", point.stopState.servicePoints);
+
                 return true;
             } else{
+
                 return false;
+
             }
 
         }
 
 
+        function loadExistData() {
+
+            console.log('Загружаю данные existing...');
+            var url = './existdata';
+            console.log('load exist data');
+            http.get(url)
+                .success(function (data) {
+
+                    console.log(data,' existing success data');
+                    scope.existData=data;
+
+                    console.log("scope.existData",scope.existData);
+                })
+                .error(function (data) {
+                    console.log(data);
+                });
+        }
+
+
+
+        function concatDailyAndExistingData (data){
+
+            console.log('concat from Node existing data', _data, "with", scope.existData  );
+            if (!scope.existData.data) return;
+            var i=0;
+            while (i<_data.routes.length){
+                var j=0;
+                while (j< _data.routes[i].points.length){
+                   var l=0;
+                       while (l<scope.existData.data.length){
+
+                           if( scope.existData.data[l]!=null &&
+                               scope.existData.data[l].route_id !=undefined &&
+                               scope.existData.data[l].route_id == _data.routes[i].points[j].route_id &&
+                               scope.existData.data[l].route_indx == _data.routes[i].points[j].route_indx &&
+                               scope.existData.data[l].row_id == _data.routes[i].points[j].row_id
+                           ) {
+                               console.log("Its time to concat loaded", _data.routes[i].points[j], "with", scope.existData.data[l] );
+                               _data.routes[i].points[j]=scope.existData.data[l];
+                           }
+                        l++
+                    }
+                    j++;
+                }
+                i++;
+            }
+
+
+            // Перезапписывание стопов реальными сохраненными данными
+            i=0;
+            while (i<_data.routes.length){
+
+                var j=0;
+                while (_data.routes[i].real_track!=undefined && j< _data.routes[i].real_track.length){
+                    var l=0;
+                    while (l<scope.existData.data.length){
+                        console.log("I m working");
+                        if( scope.existData.data[l]!=null &&
+                            _data.routes[i].real_track[j].id==scope.existData.data[l].id
+                           //&& _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
+                        ) {
+                            if(_data.routes[i].real_track[j].id='1680632') {
+                                console.log("#####################OverWrite######################")
+;                            }
+                            _data.routes[i].real_track[j]=scope.existData.data[l];
+                        }
+                        l++;
+                    }
+                    j++;
+                }
+                i++;
+            }
+
+
+            console.log("Data", _data);
+            console.log ("scope.rowCollection", scope.rowCollection);
+            //!!!!! Проапдейтить rowCollection , displaycollection обновится позже за пределами этой функции
+
+            scope.rowCollection=[];
+            i=0;
+            while (i<_data.routes.length){
+
+                console.log("Update rowCollection", scope.rowCollection.length);
+                scope.rowCollection=scope.rowCollection.concat(_data.routes[i].points);
+                i++;
+            }
+
+            console.log ("scope.rowCollection  2!!!!", scope.rowCollection);
+
+            return _data;
+        }
+
         //rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
+
+
+        // тестовый транзит в мтм роутре из мэп контроллер изменнных данных
+        rootScope.$on('saveUpdate', function (event, markers) {
+
+            console.log('PIC Recieve test');
+            http.post('./saveupdate/', {data: markers}).
+                success(function (data) {
+                   console.log('send from pic to route', data);
+                }
+
+        )});
+
 
     }]);

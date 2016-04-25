@@ -10,7 +10,7 @@ var express = require('express'),
     locker = new (require('../locker'))(),
 
     cashedDataArr = [],  // глобальный кеш
-    testCacshe = []; // Тестовый кэш
+    updateCacshe = []; // Тестовый кэш
     demoLogin = 'demo',
     tracksManager = new tracks(
         config.aggregator.url,
@@ -65,9 +65,9 @@ router.route('/dailydata')
             today12am = now - (now % day);
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
-        if(testCacshe.length==0){
+        if(updateCacshe.length==0){
             console.log("First call for data!");
-            testCacshe.push(1);
+
         } else {
             console.log("Repeat call for data!");
         }
@@ -101,7 +101,7 @@ router.route('/dailydata')
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
 
-                console.log("This is Data:", data);
+                //console.log("This is Data:", data);
                 res.status(200).json(data);
             }
         }
@@ -287,6 +287,15 @@ router.route('/saveroute/')
 
 
 
+router.route('/existdata/')
+    .get(function (req, res) {
+
+
+        var data=updateCacshe;
+        console.log("mtm existing data", data);
+        res.status(200).json(data);
+    });
+
 
 
 
@@ -306,6 +315,15 @@ router.route('/savewaypoint/')
         });
     });
 
+
+
+// тестовый прием измененных данных из мэп контроллера через поин индекс контроллер
+router.route('/saveupdate/')
+    .post(function (req, res) {
+        console.log('mtm-router recieve', req.body);
+        updateCacshe = req.body;
+        res.status(200).json({status: 'ok'});
+    });
 
 
 
