@@ -2382,14 +2382,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 while (_data.routes[i].real_track!=undefined && j< _data.routes[i].real_track.length){
                     var l=0;
                     while (l<scope.existData.data.length){
-                        console.log("I m working");
+                        //console.log("I m working");
                         if( scope.existData.data[l]!=null &&
                             _data.routes[i].real_track[j].id==scope.existData.data[l].id
                            //&& _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
                         ) {
-                            if(_data.routes[i].real_track[j].id='1680632') {
-                                console.log("#####################OverWrite######################")
-;                            }
+                            
                             _data.routes[i].real_track[j]=scope.existData.data[l];
                         }
                         l++;

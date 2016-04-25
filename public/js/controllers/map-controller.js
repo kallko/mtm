@@ -279,6 +279,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         // отрисовать все точки (задачи) на карте
+        var dragendPoint; // объект события при драге  маркера-point
         function drawAllPoints(points) {
             var tmpVar,
                 title,
@@ -363,25 +364,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 // Установка новых координат для вэйпоинта при переноске маркера-point
                 tmpVar.on('dragend', function(event){
+                    dragendPoint = event.target;
+                   // var newMarker = event.target;
 
-                    var newMarker = event.target;
-
-                    var message = "Вы собираетесь изменить координаты " + newMarker.source.waypoint.NAME + " \n"
-                        + "Старые координаты " + newMarker.source.waypoint.LAT + " " + newMarker.source.waypoint.LON + "\n"
+                    var message = "Вы собираетесь изменить координаты " + dragendPoint.source.waypoint.NAME + " \n"
+                        + "Старые координаты " + dragendPoint.source.waypoint.LAT + " " + dragendPoint.source.waypoint.LON + "\n"
                         + "Новые координаты " + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
-
-                    if (confirm(message)){
-                        changeWaypointCoordinates(newMarker, event.target.getLatLng().lat.toPrecision(8), event.target.getLatLng().lng.toPrecision(8) );
-                        alert("Координаты изменены");
-                        //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
-                        //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
-                        // Добавить Сатрт и Енд Лат Лоны
-                    } else {
-                        newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
-                    }
+                    rootScope.$emit('ReqChengeCoord', {message: message});
 
                 });
-
 
 
                 tmpVar.on('dblclick', function(event){
@@ -402,6 +393,21 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         }
+        rootScope.$on('ResChengeCoord', function(event, bool){
+           var newMarker = dragendPoint;
+            if (bool == 'true'){
+
+                changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8) );
+                rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
+                $('#notification_wrapper').css('opacity', '1');
+                //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
+                //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
+                // Добавить Сатрт и Енд Лат Лоны
+            } else {
+
+                newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
+            }
+        });
 
         rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
@@ -450,7 +456,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // проверить попадание координаты в Rect
         function checkMouseInRect(pos, x, y) {
-            if (pos.top < y && pos.left < x &&
+            if(pos.top < y && pos.left < x &&
                 pos.top + pos.height > y && pos.left + pos.width > x) {
                 return true;
             }

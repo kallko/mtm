@@ -488,11 +488,19 @@
 </template>
 
 <!-- див для оповещений -->
-<div id="notification" ng-controller="NotificationController">
-    <div>
-        [[текст оповещения]]
+<div ng-controller="NotificationController">
+    <div id="notification">
+        <div>[[текст оповещения]]</div>
+    </div>
+    <div id="ConfirmchengeCoord">
+        <div>[[текст оповещения]]</div>
+            <button ng-click="chengeCoordPoint('true')" >OK</button>
+            <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>
 </div>
+
+
+
 
 <!-- див для отображения окна точки -->
 <div id="point-view" ng-controller="PointViewController">
