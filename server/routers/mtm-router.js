@@ -381,6 +381,14 @@ router.route('/getreasonlist')
         });
     });
 
+router.route('/closeday')
+    .post(function (req, res) {
+        var soapManager = new soap(req.session.login);
+        
+    });
+
+
+
 // логировать что-нибудь в БД
 router.route('/log')
     .post(function (req, res) {

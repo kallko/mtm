@@ -25,6 +25,9 @@ function SoapManager(login) {
     this.password = config.soap.password;
 }
 
+
+
+
 // генерация строки запроса для обращения к соапу
 SoapManager.prototype.getFullUrl = function () {
     return 'https://' + this.admin_login + ':' + this.password + this.url;
@@ -417,13 +420,16 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 // получение списка причин отмен
 SoapManager.prototype.getReasonList = function (callback) {
     console.log('getReasonList');
-
+    var config = {
+        login: 'ids.dsp',
+        pass: 'dspids'
+    };
     // запрос идет не на обычный адрес соапа, а на его версию для кпк
-    var url = 'https://' + this.admin_login + ':' + this.password + this.urlPda;
+    var url = 'https://' + config.login + ':' + config.pass + this.urlPda;
     soap.createClient(url, function (err, client) {
         if (err) throw err;
 
-        client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
+        client.setSecurity(new soap.BasicAuthSecurity(config.login, config.pass));
         console.log(client.describe());
         client.get_reason_list(function (err, result) {
             if (!err) {
@@ -627,6 +633,3 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
 };
 
 
-//'<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
-//+ JSON.stringify(data)
-//+ '</TEXTDATA></CLOSEDAY></MESSAGE>'

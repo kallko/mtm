@@ -479,3 +479,6 @@ template {
     background: transparent;
     border: none;
 }
+.lm_content {
+    overflow: auto;
+}

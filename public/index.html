@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="./css/application.css"/>
 <link rel="stylesheet" href="./css/columns.css"/>
 <link rel="stylesheet" href="./css/bootstrap.css"/>
+<link rel="stylesheet" href="./css/learning.css"/>
+
 
 <!-- библиотеки -->
 <script src="./js/vendor/jquery-2.1.4.min.js"></script>
@@ -58,9 +60,33 @@
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
 <script src="./js/services/time-converter.js"></script>
+<!--<script src="./js/learning/learning.js"></script>-->
+<!--<script src="./js/learning/lessons.js"></script>-->
+
 
 <!-- карта на фоне -->
 <div id="map"></div>
+
+
+
+
+<!--<div ng-show="true" ng-controller="MapController" class="section" id="edittime" style="position: absolute; left: 50px; top:350px; opacity: 100; background: dimgrey" >-->
+    <!--Stop № {{currentStop[0]}}: {{currentStop[1]}} - {{currentStop[2]}} duration {{currentStop[3]}} <br>-->
+
+    <!--<div ng-repeat="point in pointsToEdit" >-->
+        <!--{{point[0]}}-->
+        <!--{{point[1]}} - {{point[2]}}-->
+        <!--<input type="text">-->
+    <!--</div>-->
+    <!--&lt;!&ndash;x point 07 09.00 : 13.00 <input type="text"> <br>&ndash;&gt;-->
+    <!--&lt;!&ndash;x point 09 09.00 : 12.30 <input type="text"> <br>&ndash;&gt;-->
+    <!--&lt;!&ndash;x point 11 09.00 : 12.30 <input type="text"> <br>&ndash;&gt;-->
+    <!--<button ng-click="hideForm()">Confirm</button>-->
+
+<!-- </div> -->
+
+
+
 <!--div id = "test-popup" ng-controller = "CloseDayController" ng-show = "view">Test-popup</div-->
 <!-- таблица точек доставки -->
 <template type="text/html" id="template-point-table">
@@ -111,8 +137,18 @@
             </div>
         </div>
 
+
+
+
+
+
+
+
+
         <!-- таблица точек -->
         <div id="point-table" class="table-holder">
+
+
             <table class="table table-striped point-table" id="point-table-tbl"
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
@@ -424,9 +460,15 @@
                     <th>Конец работы</th>
                 
                 <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
-                    <td><input ng-click = "toggleCheckBoxToClose()" id = "close-table-checkbox-{{item.s_driverNumber}}" type="checkbox" ng-model="getCheck" ng-checked = "setCheck_{{item.s_driverNumber}}" ng-disabled="setDisabled_{{item.s_driverNumber}}"></td>
+                    <td><input ng-click = "toggleCheckBoxToClose()"
+                               id = "close-table-checkbox-{{::item.filterId}}"
+                               type="checkbox"
+                               ng-model="item.getCheck"
+                               ng-disabled="item.setDisabled"
+                               ng-init="item.getCheck=false; item.setDisabled=true">
+                    </td>
                     <td>{{item.filterId}}</td>
-                    <td id = "close-table-driver-{{item.s_driverNumber}}">{{item.driver.NAME}}</td>
+                    <td id = "close-table-driver-{{::item.filterId}}">{{item.driver.NAME}}</td>
                     <td>{{item.transport.NAME}}</td>
                     <!--td>{{item.START_TIME.split(' ')[1]}}</td-->
                     <td>{{item.END_TIME.split(' ')[1]}}</td>
@@ -514,12 +556,23 @@
             <td class="title">Статус:</td>
             <td class="row-data">
                 {{point.textStatus}}
-                <button id="confirm-status-task-btn" ng-show="locked(point) && unconfirmed()"
+
+                <div ng-show="showHideSeasonButtons">
+                <button id="confirm-status-task-btn"
+                        ng-disabled="selectReasonList"
+
                         class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
                 </button>
-                <button id="cancel-status-task-btn" ng-show="locked(point) && unconfirmed()"
-                        class="btn btn-primary btn-sm" ng-click="cancelStatus()">Отменить
+                <select ng-model="selectReasonList"
+                        ng-options="item.attributes.id as item.attributes.name  for item in loadReasonList">
+                    <option value="" selected>--Причина отказа--</option>
+                </select>
+                <button id="cancel-status-task-btn"
+                        ng-disabled="!selectReasonList"
+
+                        class="btn btn-primary btn-sm" ng-click="cancelTask()">Отменить
                 </button>
+                </div>
             </td>
         </tr>
         <tr>
@@ -541,7 +594,8 @@
         </tbody>
     </table>
 
-    <div id="point-view-setting" class = "point-view-buttons" ng-show="locked(point)">
+    <div id="point-view-setting" ng-show="locked(point)">
+        <!--
         <button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"
                 ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">
             <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>
@@ -555,6 +609,7 @@
 
         <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
         </button>
+        -->
     </div>
 </div>
 <!--Окошко для редактирования точек и времени-->

@@ -123,6 +123,8 @@ XMLConstructor.prototype.allSensorsXML = function () {
     return str;
 };
 
+
+
 // xml для сохранения маршрута в 1С
 XMLConstructor.prototype.routesXML = function (routes, login) {
     if (routes.length == 0) return;

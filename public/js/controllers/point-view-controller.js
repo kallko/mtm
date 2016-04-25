@@ -5,6 +5,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             parent; // откуда было открыто окно
 
         init();
+        loadReasonList();
 
         // начальная инициализация контроллера
         function init() {
@@ -31,14 +32,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // показать окно с точкой
         function show(event, data) {
             scope.point = data.point;
-
             $('#promised-start-card').val(filter('date')(data.point.promised_window_changed.start * 1000, 'HH:mm'));
             $('#promised-finish-card').val(filter('date')(data.point.promised_window_changed.finish * 1000, 'HH:mm'));
 
             scope.route = data.route;
             parent = data.parent;
-
             $('#point-view').popup('show');
+            scope.showHideSeasonButtons = scope.point && !scope.point.confirmed  && !scope.point.reason;
+            if(scope.point && !scope.point.confirmed){
+                scope.selectReasonList = "";
+            }
         }
 
         // заблокировать маршрут
@@ -69,9 +72,32 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             if (scope.point)    scope.point.textStatus = text;
         }
 
+
+
+        // загрузить список причин отмены заявки
+        scope.showReasonList = false;
+        function loadReasonList(){
+            var url = './getreasonlist';
+
+            http.get(url, {})
+                .success(function(data){
+                    showLoadReasonList(data);
+                })
+                .error(function(data){
+                    return $timeout(loadReasonList, 3000);
+                });
+        }
+        function showLoadReasonList(data){
+            scope.loadReasonList = data;
+           // scope.selectReasonList = scope.loadReasonList[0].attributes.id;
+            scope.showReasonList = true;
+        }
+       
+
         // подтверждение статуса (генерирует событие, которое принимается в PointIndexController
         // и подтверждает сомнительный статус
         scope.confirmStatus = function () {
+            scope.showHideSeasonButtons = false;
             console.log('confirmStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,
@@ -81,6 +107,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // отмена сомнительного статуса
         scope.cancelStatus = function () {
+            scope.showHideSeasonButtons = false;
             console.log('cancelStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,
@@ -90,7 +117,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // отменить задачу
         scope.cancelTask = function () {
+            scope.showHideSeasonButtons = false;
             console.log('cancelTask');
+            scope.point.reason = scope.selectReasonList;
             scope.$emit('changeConfirmation', {
                 row: scope.point,
                 option: 'cancel-point'
@@ -174,15 +203,17 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // проверка на неопределенность статуса задачи
         scope.unconfirmed = function () {
-            return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
-                scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
+            //return scope.point && !scope.point.confirmed && (scope.point.status == STATUS.FINISHED ||
+              //  scope.point.status == STATUS.FINISHED_LATE || scope.point.status == STATUS.FINISHED_TOO_EARLY);
+
+            return scope.point && !scope.point.confirmed;
         };
 
         // проверка на блокировку статуса задачи
         scope.locked = function (point) {
             return scope.point && scope.point.TASK_NUMBER
-                && (!scope.point.locked || scope.point.lockedByMe)
-                && (!scope.route.locked || scope.route.lockedByMe);
+               && (!scope.point.locked || scope.point.lockedByMe)
+               && (!scope.route.locked || scope.route.lockedByMe);
         };
 
         // изменить обещанные окна

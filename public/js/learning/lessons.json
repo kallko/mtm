@@ -1,0 +1,140 @@
+{
+  "steps": {
+    "st-close-day": {
+      "text": "Нажмите, левой кнопкой мыши, на вкладку \"Закрытие дня\"",
+      "selector": ".lm_tab span:eq(3)"
+
+    },
+    "st-show-situation": {
+      "text": "Нажмите, левой кнопкой мыши, 'Готовые к закрытию'",
+      "selector": "#close-day-panel button:eq(0)"
+    },
+    "st-uncheck-driver": {
+      "text": "Уберите галочку с любого маршрута, чтоб закрывать день, только, для оставшихся",
+      "selector": "#close-day-panel table",
+      "selectorOn": "#close-day-panel table input"
+    },
+    "st-click-close-day": {
+      "text": "Маршруты готовы к закрытию, нажмите, 'Закрыть выбранные'. Маршруты получившие статус \"закрытых\", отобразяться другим цветом",
+      "selector": "#close-day-panel button:eq(1)"
+    },
+    "st-click-driver": {
+      "text": "Нажмите на строку, с интересующим водителем, левой кнопкой мыши",
+      "selector": "#close-day-panel table"
+    },
+    "st-click-driver-another": {
+      "text": "Для отрисовки другого маршруте, заново, нажмите на строку, с интересующим водителем, левой кнопкой мыши",
+      "selector": "#close-day-panel table"
+    },
+    "st-click-draw": {
+      "text": "Нажмите, левой кнопкой мыши, 'Отрисовать'",
+      "selector": ".btn.btn-info.btn-sm:eq(4)"
+    },
+    "st-click-problem": {
+      "text": "Нажмите, левой кнопкой мыши, 'проблемные'",
+      "selector": "#problem-index-btn"
+    },
+    "st-map-bunch": {
+      "text": "На карте, вы можете, посмотреть маршрут с точками.<br>Зажав, левую кнопку мыши, на карте и двигая мышью, вы передвинете карту.<br>Колесиком мыши, приблежаете или отдаляете.<br>Зажав, левую кнопку мыши, на маркере и двигая мышью, вы передвинете маркер.<br>ДЛЯ ЗАВЕРШЕНИЕ УРОКА, УБЕРИТЕ КУРСОР С КАРТЫ ",
+      "selector": "#transparent-map-holder",
+      "selectorOn": "#map",
+      "event": "mouseleave"
+    },
+    "st-map-move": {
+      "text": "Зажав, левую кнопку мыши, на карте и двигая мышью, вы передвинете карту.",
+      "selector": "#transparent-map-holder",
+      "selectorOn": "#map",
+      "event": "mouseleave"
+    },
+    "st-table-problem-driver": {
+      "text": "В таблице остались точки с проблемнымным статусом",
+      "selector": "#point-table-tbl",
+      "selectorOn": ".topScreen",
+      "event": "mouseleave"
+    },
+    "st-table-driver": {
+      "text": "В таблице остались точки выбранные по статусу",
+      "selector": "#point-table-tbl",
+      "selectorOn": ".topScreen",
+      "event": "mouseleave"
+    },
+    "st-status": {
+      "text": "Нажмите, левой кнопкой мыши, 'все статусы'",
+      "selector": "#status-select"
+    },
+    "st-marker": {
+      "text": "Перетяните иконку в нужное место",
+      "selector": "#transparent-map-holder",
+      "selectorOn": ".leaflet-marker-icon",
+      "event": "click",
+      "time": 2000
+    }
+
+  },
+  "lessons": [
+    {
+      "name": "Закрытие дня",
+      "steps": [
+        "st-close-day",
+        "st-show-situation",
+        "st-click-close-day"
+      ]
+    },
+    {
+      "name": "Закрыть день для отдельных маршрутов",
+      "steps": [
+        "st-close-day",
+        "st-show-situation",
+        "st-uncheck-driver",
+        "st-click-close-day"
+      ]
+    },
+    {
+      "name": "Если вы ошиблись в выборе маршрута",
+      "steps": [
+        "st-show-situation",
+        "st-uncheck-driver",
+        "st-click-close-day"
+      ]
+    },
+    {
+      "name": "Как отрисовать маршрут",
+      "steps": [
+        "st-close-day",
+        "st-click-driver",
+        "st-click-draw",
+        "st-map-bunch",
+        "st-click-driver-another",
+        "st-click-draw",
+        "st-map-bunch"
+      ]
+    },
+    {
+      "name": "Изменение координат заявки",
+      "steps": [
+        "st-close-day",
+        "st-click-driver",
+        "st-click-draw",
+        "st-marker"
+      ]
+    },
+    {
+      "name": "Просмотр проблемных точек в маршруте",
+      "steps": [
+        "st-show-situation",
+        "st-click-driver",
+        "st-click-problem",
+        "st-table-problem-driver"
+      ]
+    },
+    {
+      "name": "Просмотр статусов",
+      "steps": [
+        "st-show-situation",
+        "st-click-driver",
+        "st-status",
+        "st-table-driver"
+      ]
+    }
+  ]
+}
