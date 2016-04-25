@@ -384,9 +384,14 @@ router.route('/getreasonlist')
 router.route('/closeday')
     .post(function (req, res) {
         var soapManager = new soap(req.session.login);
-        
+        soapManager.closeDay(req.body.closeDayData, function (data) {
+            if (!data.error) {
+                res.status(200).json({result: data.result});
+            } else {
+                res.status(200).json({error: data.error});
+            }
+        });
     });
-
 
 
 // логировать что-нибудь в БД

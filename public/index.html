@@ -98,18 +98,22 @@
                         ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
+                <!--
                 <select id="route-select" ng-model="filters.route" class="group-select"
                         ng-options='option.value as option.name for option in filters.routes'>
                 </select>
+                -->
 
                 <select id="branch-select" ng-model="filters.branch" class="group-select"
                         ng-options='option.value as option.name for option in filters.branches'>
                 </select>
 
                 <span></span>
+                <!--
                 <select id="draw-mode-select" ng-model="draw_mode" class="group-select"
                         ng-options='option.value as option.name for option in draw_modes'>
                 </select>
+                -->
                 <input id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
                 <input id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
@@ -452,12 +456,13 @@
         </div>
         <div>
             <table>
-                    <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->Все</th>
-                    <th>ID</th>
-                    <th>Водитель</th>
-                    <th>Машина</th>
+                    <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->
+                        <button ng-click="orderCloseDay('getCheck')"">Все</button></th>
+                    <th><button ng-click="order('filterId'); orderCloseDay('getCheck')" >ID</button></th>
+                    <th><button ng-click="order('driver.NAME'); orderCloseDay('getCheck')">Водитель</button></th>
+                    <th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>
                     <!--th>Старт</th-->
-                    <th>Конец работы</th>
+                    <th><button ng-click="order('END_TIME');">Конец работы</button></th>
                 
                 <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
                     <td><input ng-click = "toggleCheckBoxToClose()"
@@ -467,11 +472,12 @@
                                ng-disabled="item.setDisabled"
                                ng-init="item.getCheck=false; item.setDisabled=true">
                     </td>
-                    <td>{{item.filterId}}</td>
-                    <td id = "close-table-driver-{{::item.filterId}}">{{item.driver.NAME}}</td>
-                    <td>{{item.transport.NAME}}</td>
+                    <td>{{::item.filterId}}</td>
+                    <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
+                    <td>{{::item.transport.NAME}}</td>
                     <!--td>{{item.START_TIME.split(' ')[1]}}</td-->
-                    <td>{{item.END_TIME.split(' ')[1]}}</td>
+
+                    <td>{{::item.END_TIME.split(' ')[1]}}</td>
                 </tr>
             </table>
         </div>

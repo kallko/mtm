@@ -4,7 +4,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     var s_dataToCloseArr_general = [];    //главный массив элементов (водителей) к закрытию. Индекс - номер, значение - имя водителя
     var s_dataToCloseArr_reserve = []; // тот же массив, что и s_dataToCloseArr_general_general, но в отличие от s_dataToCloseArr_general_general, функция toggleCheckBoxToClose() не имеет права ничего удалять из него 
     scope.closeDayClick = function(){
-        scope.order();
+        scope.orderCloseDay('getCheck');
         confirm('Ура!!! Мы закрыли день! Надо выслать массив s_dataToCloseArr_general с данными!  '+s_dataToCloseArr_general);
     	//console.log('start closeday');
         //rootScope.$emit('setCheckBox');
@@ -61,8 +61,14 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
     var orderBy = filter('orderBy');
-    scope.order = function(){
-         scope.data.routes = orderBy(scope.data.routes, 'getCheck');
+    scope.order = function(predicate){
+        scope.predicate = predicate;
+        scope.reverse = (scope.predicate === predicate) ? !scope.reverse : false;
+        scope.data.routes = orderBy(scope.data.routes, predicate, scope.reverse);
+    };
+
+    scope.orderCloseDay = function(predicate){
+      scope.data.routes = orderBy(scope.data.routes, predicate);
     };
 
 
