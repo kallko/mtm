@@ -405,9 +405,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
                         //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
                         // Добавить Сатрт и Енд Лат Лоны
-
                     } else {
-
                         newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
                     }
 

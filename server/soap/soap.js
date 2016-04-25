@@ -628,8 +628,46 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
         };
 
     saveTo1C(resXml); //Снять комментарий и можно записывать
-
-
 };
 
 
+
+
+
+SoapManager.prototype.closeDay = function (waypoint, callback) {
+    log.toFLog('origWaypointBeforeSave.json', waypoint);
+
+    console.log('updateWaypointCoordTo1C');
+    me = this;
+
+
+
+    // сохранение в 1С от имени авторизированного пользователя
+    var saveTo1C = function (resXml) {
+
+        console.log("Saveto1C me", me);
+        soap.createClient(me.getFullUrl(), function (err, client) {
+            if (err) throw err;
+            
+            // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
+            client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
+            //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+
+            client.runAsUser({'input_data': resXml, 'user': 'k00056.0'}, function (err, result) {
+                if (!err) {
+                    console.log('updateWaypointCoordTo1C OK');
+                    log.toFLog('afterSave.js', result);
+                    callback({result: result});
+                } else {
+                    console.log("Res.XML = ", resXml)
+                    console.log('updateWaypointCoordTo1C ERROR');
+                    log.toFLog('afterSaveError.js', err);
+                    console.log(err.body);
+                    callback({error: err});
+                }
+            });
+        });
+    };
+
+    saveTo1C(waypoint); //Снять комментарий и можно записывать
+};

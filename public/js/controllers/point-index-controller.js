@@ -74,8 +74,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'плановый трек', value: 2},
                 {name: 'фактический + плановый трек', value: 3}
             ];
-            scope.draw_mode = scope.draw_modes[0].value;
 
+            // console.info(scope.draw_modes[0].value);
+            scope.draw_mode = scope.draw_modes[0].value; // комбинированный трек
             scope.recalc_modes = [                                      // режимы пересчета маршрута
                 {name: 'по большим окнам', value: 0},
                 {name: 'по заданным окнам', value: 1},
