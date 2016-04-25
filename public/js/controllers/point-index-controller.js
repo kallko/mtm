@@ -32,7 +32,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
             scope.existData=[];                                         //Хранение измененных в течение дня данных
 
-
         setListeners();
         init();
         setCheckLocksInterval();
@@ -563,8 +562,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             setColResizable();
             prepareFixedHeader();
-
-            window.data= _data;
         }
 
         // обрезает ФИО до ФИ
@@ -660,6 +657,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     delete tmpPoint.overdue_time;
 
+                    
 
                 }
 
@@ -715,6 +713,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     haveUnfinished = false;
 
 
+                                    
 
 
                                     if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
@@ -747,6 +746,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
+                                    // Отладочный блок по проблемным точкам
+                                   
+
 
                                     //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
                                     if(tmpPoint.haveStop ==true && !findBestStop(tmpPoint, tmpArrival)){
@@ -777,8 +779,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         tmpArrival.servicePoints=[];
                                     }
 
+                                    
+
 
                                     tmpArrival.servicePoints.push(k);
+
+
+
+
 
 
                                     findStatusAndWindowForPoint(tmpPoint);
@@ -801,23 +809,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-
-            console.log("Lets work with pushes!!!!!", _data.routes[38].pushes);
-
-
-
             if (parentForm == undefined && !scope.demoMode) {
-                console.log("checkConfirmedFromLocalStorage");
-
                 checkConfirmedFromLocalStorage();
                 _data.companyName = 'IDS';
                 scope.$emit('companyName', _data.companyName);
                 //scope.$emit('forCloseController', _data); // это реализовано около строки 308
                 return;
             }
-
-
-            console.log("Continue work with a pushes");
 
             var mobilePushes = [],
                 allPushes = [];
@@ -880,8 +878,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log( _data.companyName, ' cmpanyName');
 
             scope.$emit('companyName', _data.companyName);
-
-
 
             // по каждому доступному решению запрашиваем нажатия
             for (var m = 0; m < _data.idArr.length; m++) {
@@ -1634,26 +1630,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 draw = function (route) {
                     switch (scope.draw_mode) {
                         case scope.draw_modes[0].value: // комбинированный
-                            console.log("scope.$emit('drawCombinedTrack', route);");
                             scope.$emit('drawCombinedTrack', route);
                             break;
                         case scope.draw_modes[1].value: // фактический
-                            console.log("scope.$emit('drawRealTrack', route);");
                             scope.$emit('drawRealTrack', route);
                             break;
                         case scope.draw_modes[2].value: // плановый
-                            console.log("scope.$emit('drawPlannedTrack', route);");
                             scope.$emit('drawPlannedTrack', route);
                             break;
                         case scope.draw_modes[3].value: // плановый + фактический
-                            console.log("scope.$emit('drawRealAndPlannedTrack', route);");
                             scope.$emit('drawRealAndPlannedTrack', route);
                             break;
                     }
                 };
-
-
-            console.log("Step 1");
 
             if (scope.filters.route != -1) {
                 indx = scope.filters.route;
@@ -1698,7 +1687,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
                         }
 
-                        if ( scope.demoMode) {
+                        if (scope.demoMode) {
                             route.real_track[0].lastTrackUpdate = 2000000000;
                             //route.car_position = route.real_track[route.real_track.length - 2];
                         } else {
@@ -2363,19 +2352,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                break;
                            }
                         l++
-                          // console.log("l", l)
                     }
                     j++;
-                   // console.log("j", j);
                 }
                 testUnitePushes(_data.routes[i].pushes);
 
                 i++;
-               // console.log("i",i);
             }
 
-
-            console.log("Finish Owerriting Waypoints");
 
             // Перезапписывание стопов реальными сохраненными данными
             i=0;
@@ -2388,12 +2372,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //console.log("I m working");
                         if( scope.existData.data[l]!=null &&
                             _data.routes[i].real_track[j].id==scope.existData.data[l].id
-
+                           //&& _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
                         ) {
-                            if(_data.routes[i].real_track[j].id='1680632') {
-                               // console.log("#####################OverWrite######################");
-
-;                            }
+                            
                             _data.routes[i].real_track[j]=scope.existData.data[l];
                             break;
 
@@ -2406,7 +2387,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            console.log("Data WITH PUSHES", _data);
+            console.log("Data", _data);
             console.log ("scope.rowCollection", scope.rowCollection);
             //!!!!! Проапдейтить rowCollection , displaycollection обновится позже за пределами этой функции
 
@@ -2494,7 +2475,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //  транзит в мтм роутер из мэп контроллер изменнных данных
         rootScope.$on('saveUpdate', function (event, markers) {
 
-            console.log('PIC Recieve test', markers);
+            console.log('PIC Recieve test');
             http.post('./saveupdate/', {data: markers}).
                 success(function (data) {
                    console.log('send from pic to route', data);

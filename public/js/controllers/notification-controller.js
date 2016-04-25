@@ -13,6 +13,18 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
             showPopup('Окно сработало', data.duration);
             //console.log(rootScope.data);
         });
+
+        rootScope.$on('ReqChengeCoord', function(event, data){
+            $('#ConfirmchengeCoord div').html(data.message);
+            $('#ConfirmchengeCoord').popup('show');
+
+        });
+
+        scope.chengeCoordPoint = function(bool){
+            rootScope.$emit('ResChengeCoord', bool);
+            $('#ConfirmchengeCoord').popup('hide');
+        };
+
 /*
         function init() {
             $('#notification').popup({

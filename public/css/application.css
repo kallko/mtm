@@ -261,12 +261,17 @@ template {
     width: 34px;
 }
 
-#notification {
+#notification, #ConfirmchengeCoord {
     background-color: #D5DBD8;
     border: 2px solid grey;
     padding: 20px;
 }
-
+#ConfirmchengeCoord {
+    text-align: center !important;
+}
+#ConfirmchengeCoord button{
+    margin: 10px;
+}
 .yellow-status {
     color: #95A932 !important;
 }
