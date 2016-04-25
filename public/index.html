@@ -461,9 +461,15 @@
                     <th>Конец работы</th>
                 
                 <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick()">
-                    <td><input ng-click = "toggleCheckBoxToClose()" id = "close-table-checkbox-{{item.s_driverNumber}}" type="checkbox" ng-model="getCheck" ng-checked = "setCheck_{{item.s_driverNumber}}" ng-disabled="setDisabled_{{item.s_driverNumber}}"></td>
+                    <td><input ng-click = "toggleCheckBoxToClose()"
+                               id = "close-table-checkbox-{{::item.filterId}}"
+                               type="checkbox"
+                               ng-model="item.getCheck"
+                               ng-disabled="item.setDisabled"
+                               ng-init="item.getCheck=false; item.setDisabled=true">
+                    </td>
                     <td>{{item.filterId}}</td>
-                    <td id = "close-table-driver-{{item.s_driverNumber}}">{{item.driver.NAME}}</td>
+                    <td id = "close-table-driver-{{::item.filterId}}">{{item.driver.NAME}}</td>
                     <td>{{item.transport.NAME}}</td>
                     <!--td>{{item.START_TIME.split(' ')[1]}}</td-->
                     <td>{{item.END_TIME.split(' ')[1]}}</td>

@@ -42,7 +42,6 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             if(scope.point && !scope.point.confirmed){
                 scope.selectReasonList = "";
             }
-
         }
 
         // заблокировать маршрут
@@ -109,7 +108,6 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // отмена сомнительного статуса
         scope.cancelStatus = function () {
             scope.showHideSeasonButtons = false;
-
             console.log('cancelStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,

@@ -25,6 +25,9 @@ function SoapManager(login) {
     this.password = config.soap.password;
 }
 
+
+
+
 // генерация строки запроса для обращения к соапу
 SoapManager.prototype.getFullUrl = function () {
     return 'https://' + this.admin_login + ':' + this.password + this.url;
@@ -583,6 +586,3 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
 
 
 
-//'<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA = "12.02.2016"><TEXTDATA>'
-//+ JSON.stringify(data)
-//+ '</TEXTDATA></CLOSEDAY></MESSAGE>'
