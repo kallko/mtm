@@ -137,24 +137,26 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     }
 
                     // формирование всплывающей подсказки для стопов
-                    tmpTitle = 'Остановка #' + stopIndx + '\n';
-                    tmpTitle += 'Время прибытия: ' + formatDate(new Date(track[i].t1 * 1000)) + '\n';
-                    tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
-                    tmpTitle += 'Длительность: ' + mmhh(track[i].time) + '\n';
+                    // Закомментирована лишняя информация
 
-                    if (i + 1 < track.length) {
-                        tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
-                        polyline = new L.Polyline([track[i].coords[0], track[i].coords[track[i].coords.length - 1]], {
-                            color: color,
-                            weight: 3,
-                            opacity: 0.8,
-                            smoothFactor: 1
-                        });
+                    //tmpTitle = 'Остановка #' + stopIndx + '\n';
+                    tmpTitle = 'Остановка в: ' + formatDate(new Date(track[i].t1 * 1000));
+                    //tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
+                    tmpTitle += ' (' + mmhh(track[i].time) + ')'+ '\n';
 
-                        polyline.addTo(map);
-                    } else if (i + 1 == track.length) {
-                        tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
-                    }
+                    //if (i + 1 < track.length) {
+                    //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
+                    //    polyline = new L.Polyline([track[i].coords[0], track[i].coords[track[i].coords.length - 1]], {
+                    //        color: color,
+                    //        weight: 3,
+                    //        opacity: 0.8,
+                    //        smoothFactor: 1
+                    //    });
+                    //
+                    //    polyline.addTo(map);
+                    //} else if (i + 1 == track.length) {
+                    //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
+                    //}
 
                     tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
                         {'title': tmpTitle,
@@ -236,6 +238,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                     addMarker(tmpVar);
                     //console.log(map.getZoom(), "Zoom", track[i].coords[indx].lat, track[i].coords[indx].lon);
+
                     //Установить центр карты в текущее положение машины, если оно определено.
                     if(track[i].coords[indx].lat && track[i].coords[indx].lon) {
                         setMapCenter(track[i].coords[indx].lat, track[i].coords[indx].lon, 13);
@@ -251,7 +254,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             checkTestStops();
             // если не включена отрисовка нажатий - выход из функции
-            if (!pushes) return;
+
+            // Закомментирован выбор рисовать или нет пуши на карте. По умолчанию рисовать.
+            //if (!pushes) return;
+
+            console.log("????????????????????????? drawPushes", drawPushes, 'pushes',pushes);
 
             for (var i = 0; drawPushes && i < pushes.length; i++) {
                 tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
@@ -299,6 +306,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 title = '';
                 point = points[i];
 
+
+
+                // Создание титла к точке. Ненужная информация закоментчена.
                 if (point.TASK_NUMBER == '') {
                     title = 'Склад\n';
                 } else {
@@ -309,18 +319,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
                 }
 
-                title += 'Время прибытия: ' + point.arrival_time_hhmm + '\n';
-                title += 'Время отбытия: ' + point.end_time_hhmm + '\n';
-                title += 'Время выполнения задачи: ' + mmhh(point.TASK_TIME) + '\n';
+                title += 'Время прибытия: ' + point.arrival_time_hhmm + ' (';
+                //title += 'Время отбытия: ' + point.end_time_hhmm + '\n';
+                title +=  mmhh(point.TASK_TIME) + ')'+'\n';
                 title += 'Временное окно: ' + point.AVAILABILITY_WINDOWS + '\n';
-                title += 'Время простоя: ' + mmhh(point.DOWNTIME) + '\n';
-                title += 'Расстояние: ' + point.DISTANCE + ' метра(ов)\n';
-                title += 'Время на дорогу к точке: ' + mmhh(point.TRAVEL_TIME) + '\n';
+                //title += 'Время простоя: ' + mmhh(point.DOWNTIME) + '\n';
+                //title += 'Расстояние: ' + point.DISTANCE + ' метра(ов)\n';
+                //title += 'Время на дорогу к точке: ' + mmhh(point.TRAVEL_TIME) + '\n';
 
                 if (point.waypoint != null) {
                     title += 'Адрес: ' + point.waypoint.ADDRESS + '\n';
-                    title += 'Клиент: ' + point.waypoint.NAME + '\n';
-                    title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';
+                   // title += 'Клиент: ' + point.waypoint.NAME + '\n';
+                   // title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';
                 }
 
 
