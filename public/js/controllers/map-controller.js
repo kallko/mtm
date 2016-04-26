@@ -438,6 +438,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
 
+
         }
 
         rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
@@ -1147,8 +1148,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // Слушательб который центрирует карту по точке
         rootScope.$on('findStopOnMarker', function(event, lat, lon){
-            console.log("Recieve ", lat, lon);
-            setMapCenter(lat, lon, 15);
+            //console.log("Recieve ", lat, lon);
+            //console.log("MapSize", map.getZoom());
+            var currentZoom=map.getZoom();
+            currentZoom = currentZoom<=15 ?  18:currentZoom;
+            setMapCenter(lat, lon, currentZoom);
         })
 
 
