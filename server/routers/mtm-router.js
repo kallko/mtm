@@ -317,12 +317,46 @@ router.route('/savewaypoint/')
 
 
 
-// тестовый прием измененных данных из мэп контроллера через поин индекс контроллер
+//  прием измененных данных из мэп контроллера через поин индекс контроллер
+// Если это первые данные, приняли и вернули ок.
+// Если какие-то данные уже были, то мы их объединяем, перезаписывая ранее сохранненные точки свежими версиями и добавлением новых точек.
 router.route('/saveupdate/')
     .post(function (req, res) {
-        console.log('mtm-router recieve', req.body);
-        updateCacshe = req.body;
+        if(updateCacshe.length==0){
+            updateCacshe = req.body;
+            res.status(200).json({status: 'ok'});
+            return;
+        }
         res.status(200).json({status: 'ok'});
+        // Полученные данные нужно объедеенить с существующими на данный момент, которые были получены ранее
+        // так как иногда у стопа может быть id=0, который потом измениться, а TASK_NUMBER не уникальный, приходится создавать
+        // новые параметры newID oldID и сравнивать по ним.
+        var obj=req.body
+        var i=0;
+        while (i<obj.data.length){
+            var exist=false;
+            var newID;
+            if(obj.data[i] && obj.data[i].id!=undefined) newID=""+obj.data[i].lat+obj.data[i].lon+obj.data[i].t1;
+            if(obj.data[i] && obj.data[i].TASK_NUMBER) newID=""+obj.data[i].TASK_NUMBER+obj.data[i].TASK_DATE;
+            var j=0;
+            while(j<updateCacshe.data.length){
+                var oldID;
+                if(updateCacshe.data[j] && updateCacshe.data[j].id!=undefined) oldID=""+updateCacshe.data[j].lat+updateCacshe.data[j].lon+updateCacshe.data[j].t1;
+                if(updateCacshe.data[j] && updateCacshe.data[j].TASK_NUMBER) oldID=""+updateCacshe.data[j].TASK_NUMBER+updateCacshe.data[j].TASK_DATE;
+                if(newID==oldID){
+                    //console.log("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
+                    updateCacshe.data[j]=obj.data[i];
+                    exist=true;
+                }
+                j++;
+            }
+            if(!exist) {
+               // console.log("Adding new point/stop")
+                updateCacshe.data.push(obj.data[i])
+            }
+            delete newID;
+            i++;
+        }
     });
 
 

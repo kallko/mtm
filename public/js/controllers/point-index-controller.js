@@ -1697,11 +1697,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
                         }
 
-                        if (scope.demoMode) {
+                        if ( scope.demoMode) {
                             route.real_track[0].lastTrackUpdate = 2000000000;
                             //route.car_position = route.real_track[route.real_track.length - 2];
                         } else {
-                            route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);
+                            if(route.real_track[0]){
+                            route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);}
                         }
 
                         //console.log('after', route.real_track.length);
@@ -2489,10 +2490,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-        // тестовый транзит в мтм роутре из мэп контроллер изменнных данных
+        //  транзит в мтм роутер из мэп контроллер изменнных данных
         rootScope.$on('saveUpdate', function (event, markers) {
 
-            console.log('PIC Recieve test');
+            console.log('PIC Recieve test', markers);
             http.post('./saveupdate/', {data: markers}).
                 success(function (data) {
                    console.log('send from pic to route', data);
