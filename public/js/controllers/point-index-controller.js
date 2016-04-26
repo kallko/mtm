@@ -1633,19 +1633,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 draw = function (route) {
                     switch (scope.draw_mode) {
                         case scope.draw_modes[0].value: // комбинированный
+                            console.log("scope.$emit('drawCombinedTrack', route);");
                             scope.$emit('drawCombinedTrack', route);
                             break;
                         case scope.draw_modes[1].value: // фактический
+                            console.log("scope.$emit('drawRealTrack', route);");
                             scope.$emit('drawRealTrack', route);
                             break;
                         case scope.draw_modes[2].value: // плановый
+                            console.log("scope.$emit('drawPlannedTrack', route);");
                             scope.$emit('drawPlannedTrack', route);
                             break;
                         case scope.draw_modes[3].value: // плановый + фактический
+                            console.log("scope.$emit('drawRealAndPlannedTrack', route);");
                             scope.$emit('drawRealAndPlannedTrack', route);
                             break;
                     }
                 };
+
+
+            console.log("Step 1");
 
             if (scope.filters.route != -1) {
                 indx = scope.filters.route;
@@ -1662,7 +1669,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            if (route.real_track == undefined) return;
+            if (route.real_track == undefined) {
+                draw(route);
+                return;
+            }
 
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные

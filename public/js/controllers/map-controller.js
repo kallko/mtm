@@ -22,6 +22,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // отрисовать комбинированный маршрут
         function drawCombinedRoute(route) {
+            markersArr=[];
+
             drawRealRoute(route);
 
             var i = route.points.length - 1;
@@ -426,8 +428,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 addMarker(tmpVar);
 
             }
-            //console.log('Finish draw.', markersArr);
 
+
+           // console.log('Finish draw markersArr.', markersArr, "points", points, "Only Points", markersArr.length==points.length );
+
+            //Если рисовался только трек из точек, то центрировать карту по первой точке.
+            if(markersArr.length==points.length) {
+                setMapCenter(markersArr[0]._latlng.lat, markersArr[0]._latlng.lng, 13);
+            }
 
 
         }
@@ -554,23 +562,25 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             });
 
             rootScope.$on('drawCombinedTrack', function (event, route) {
-                console.log('i gona draw route', route);
+                console.log('i gona  draw combined route', route);
                 updateStoredMarkers(route);
                 drawCombinedRoute(route);
             });
 
             rootScope.$on('drawRealTrack', function (event, route) {
+                console.log('i gona  draw real route', route);
                 drawRealRoute(route);
-
                 drawAllPoints(route.points)
             });
 
             rootScope.$on('drawPlannedTrack', function (event, route) {
+                console.log('i gona  draw planned route', route);
                 drawPlannedRoute(route.plan_geometry, 0);
                 drawAllPoints(route.points);
             });
 
             rootScope.$on('drawRealAndPlannedTrack', function (event, route) {
+                console.log('i gona  draw real Planned route', route);
                 drawPlannedRoute(route.plan_geometry, 0);
                 drawRealRoute(route);
                 drawAllPoints(route.points);
