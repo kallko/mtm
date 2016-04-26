@@ -175,9 +175,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpVar.on('click', function(event){
 
                         var localData=event.target;
-                        if(localData.source.servicePoints == undefined ){
-                            return;
-                        }
+                        // if(localData.source.servicePoints == undefined ){
+                        //     return;
+                        // }
                         var timeData=checkRealServiceTime(localData)
                         console.log(localData, "local data");
                         rootScope.$emit('pointEditingPopup', localData , timeData);
