@@ -248,7 +248,8 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
         now = new Date(data.server_time * 1000),
         url = this.createParamsStr(
             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
-            new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000,
+            //new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000, //Тестово отладочный блок. Если раскомментировать строку то будет получать все данные за день. В строке ниже, получает данные только до текущего времени сервера
+            new Date().getTime() / 1000,
             this.undef_t, this.undef_d,
             this.stop_s, this.stop_d, this.move_s, this.move_d);
 
