@@ -98,22 +98,22 @@
                         ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
-                <!--
+
                 <select id="route-select" ng-model="filters.route" class="group-select"
                         ng-options='option.value as option.name for option in filters.routes'>
                 </select>
-                -->
+
 
                 <select id="branch-select" ng-model="filters.branch" class="group-select"
                         ng-options='option.value as option.name for option in filters.branches'>
                 </select>
 
                 <span></span>
-                <!--
+
                 <select id="draw-mode-select" ng-model="draw_mode" class="group-select"
                         ng-options='option.value as option.name for option in draw_modes'>
                 </select>
-                -->
+
                 <input id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
                 <input id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
                 <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>

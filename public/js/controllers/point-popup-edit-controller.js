@@ -16,8 +16,8 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	       // localServicePoints = scope.data.servicePoints;
 	       // servicePointsReserve = scope.data.servicePoints;
 	        scope.stopIndx = data.stopIndx;
-    		if(scope.data.servicePoints && scope.data.servicePoints.length>1)
-			{
+            // if(scope.data.servicePoints && scope.data.servicePoints.length>1)
+			// {
 				localServicePoints=scope.data.servicePoints.slice();
                 //for(var s=0; s<scope.data.servicePoints.length; s++){
 				//	localServicePoints[s] = scope.data.servicePoints[s];
@@ -194,7 +194,7 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            	hidePopup(id);
 	            	console.log('Emitted event from stop-card');
 	            };
-    		};
+    		//};
         });
 
     }]);
