@@ -32,6 +32,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
             scope.existData=[];                                         //Хранение измененных в течение дня данных
 
+
         setListeners();
         init();
         setCheckLocksInterval();
@@ -561,6 +562,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             setColResizable();
             prepareFixedHeader();
+
+            window.data= _data;
         }
 
         // обрезает ФИО до ФИ

@@ -98,7 +98,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 stopIndx,
                 stopTime,
                 drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
-                drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия
+
+                //drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия если в таблице стоит галочка.
+                drawPushes = true;  // Железно отрисовывать пуши.
+
                 stops=[];
                 markersArr=[];
 
@@ -260,7 +263,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             console.log("????????????????????????? drawPushes", drawPushes, 'pushes',pushes);
 
-            for (var i = 0; drawPushes && i < pushes.length; i++) {
+
+
+            for (var i = 0; drawPushes && pushes && i < pushes.length; i++) {
                 tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
                 tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
                 tmpTitle += 'ID задания: ' + pushes[i].number;
