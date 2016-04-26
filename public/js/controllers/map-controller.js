@@ -98,7 +98,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 stopIndx,
                 stopTime,
                 drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
-                drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия
+
+                //drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия если в таблице стоит галочка.
+                drawPushes = true;  // Железно отрисовывать пуши.
+
                 stops=[];
                 markersArr=[];
 
@@ -252,22 +255,36 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             }
 
+
+            // тестовоотладочная функция проверки. Выбирает все привязанные стопы и печатает их с обслуженными точками.
             checkTestStops();
             // если не включена отрисовка нажатий - выход из функции
 
             // Закомментирован выбор рисовать или нет пуши на карте. По умолчанию рисовать.
             //if (!pushes) return;
 
+
+
+            //тестовоотладочный блок вытащенный вручную пуши.
+            //pushes = [{"number":"4400211954","time":"26.04.2016 04:08:31","canceled":false,"cancel_reason":"","lat":50.43812,"lon":30.54977,"gps_time":"26.04.2016 03:08:28","gps_time_ts":1461629308,"distance":23.6475022599009},{"number":"4400212049","time":"26.04.2016 04:40:24","canceled":false,"cancel_reason":"","lat":50.421516,"lon":30.54617,"gps_time":"26.04.2016 03:40:20","gps_time_ts":1461631220,"distance":94.34499795150076},{"number":"4400209927","time":"26.04.2016 04:40:04","canceled":false,"cancel_reason":"","lat":50.421246,"lon":30.545843,"gps_time":"26.04.2016 03:40:00","gps_time_ts":1461631200,"distance":140.8944289612977},{"number":"4400211355","time":"26.04.2016 04:45:54","canceled":false,"cancel_reason":"","lat":50.423893,"lon":30.543938,"gps_time":"26.04.2016 03:45:50","gps_time_ts":1461631550,"distance":24.041578535857116},{"number":"4400211602","time":"26.04.2016 05:13:44","canceled":false,"cancel_reason":"","lat":50.428165,"lon":30.546198,"gps_time":"26.04.2016 04:13:41","gps_time_ts":1461633221,"distance":121.91092887638787},{"number":"4400210929","time":"26.04.2016 05:10:31","canceled":false,"cancel_reason":"","lat":50.42749,"lon":30.54599,"gps_time":"26.04.2016 04:09:19","gps_time_ts":1461632959,"distance":46.717027221569836},{"number":"4400210485","time":"26.04.2016 05:23:41","canceled":false,"cancel_reason":"","lat":50.43216,"lon":30.545214,"gps_time":"26.04.2016 04:23:38","gps_time_ts":1461633818,"distance":23.932606767647098},{"number":"4400210064","time":"26.04.2016 08:58:58","canceled":false,"cancel_reason":"","lat":50.42726,"lon":30.543148,"gps_time":"26.04.2016 07:58:54","gps_time_ts":1461646734,"distance":60.14145658994281},{"number":"4400210383","time":"26.04.2016 09:57:05","canceled":false,"cancel_reason":"","lat":50.435696,"lon":30.54618,"gps_time":"26.04.2016 08:56:04","gps_time_ts":1461650164,"distance":35.59149350467806}];
+
             console.log("????????????????????????? drawPushes", drawPushes, 'pushes',pushes);
 
-            for (var i = 0; drawPushes && i < pushes.length; i++) {
+            for (var i = 0; drawPushes && pushes && i < pushes.length; i++) {
+
+                console.log("Start drawing Pushes");
+
                 tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
                 tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
                 tmpTitle += 'ID задания: ' + pushes[i].number;
 
                 tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
                 tmpVar.setIcon(getIcon('S', iconIndex, 'orange', 'black'));
-                addMarker(tmpVar);
+                map.addLayer(tmpVar);
+                oms.addMarker(tmpVar);
+
+
+                //addMarker(tmpVar);
             }
 
             //
@@ -919,9 +936,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             var omsPoints=[];
             var i=0;
+
+
+
             // В spider объектах отделяем waypoints от stop и waypoints складываем в массив omsPoints
             while (i<data.length){
-                if(typeof(data[i].stopIndx)=='undefined') {
+                if(typeof(data[i].stopIndx)=='undefined' && data[i].source!=undefined) {
                     omsPoints.push(data[i]);
                 }
                 i++;
