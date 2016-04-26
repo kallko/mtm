@@ -29,7 +29,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = false,                              // догрузить новые данные сразу после загрузки интерфейса
-            enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
+            enableDynamicUpdate = true;                    // динамическая догрузка данных по заданному выше интервалу
             scope.existData=[];                                         //Хранение измененных в течение дня данных
 
         setListeners();
@@ -257,6 +257,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
                     _data.trackUpdateTime = _now;
+                    console.log("Update Dinamicly stops for routes");
+
                     updateData();
                 });
         }
@@ -301,6 +303,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // получить объект Date из строки
         function strToTstamp(strDate) {
+            //console.log(strDate, "strDate");
             var parts = strDate.split(' '),
                 _date = parts[0].split('.'),
                 _time = parts[1].split(':');
@@ -401,7 +404,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             data.routes[i].real_track != aggregatorError) {
                             len = data.routes[i].real_track.length - 1;
                             data.routes[i].car_position = data.routes[i].real_track[len]; // определение текущего положения машины
-                            data.routes[i].real_track.splice(len, 1); // удаление стейта с текущим положением машины
+                            console.log('data.routes[i]', data.routes[i]);
+                            if (typeof (data.routes[i].real_track)==Array) {
+                            data.routes[i].real_track.splice(len, 1);} // удаление стейта с текущим положением машины
                         }
                         break;
                     }
@@ -463,6 +468,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
                         tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
                         tPoint.base_arrival_ts = strToTstamp(tPoint.base_arrival);
+
+                        tPoint.end_time_ts = strToTstamp(tPoint.END_TIME);//перенесена сюда из не трай блока снизу
+
                         tPoint.controlled_window = {
                             start: tPoint.arrival_time_ts - controlledWindow,
                             finish: tPoint.arrival_time_ts + controlledWindow
@@ -472,7 +480,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     tPoint.end_time_hhmm = tPoint.END_TIME.substr(11, 8);
-                    tPoint.end_time_ts = strToTstamp(tPoint.END_TIME);
+
+
+
                     tPoint.row_id = rowId;
                     tPoint.arrival_prediction = 0;
                     tPoint.arrival_left_prediction = 0;
@@ -825,6 +835,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
+            console.log("Step1 parentForm", parentForm);
+
+
+
             if (parentForm == undefined && !scope.demoMode) {
                 checkConfirmedFromLocalStorage();
                 _data.companyName = 'IDS';
@@ -832,6 +846,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //scope.$emit('forCloseController', _data); // это реализовано около строки 308
                 return;
             }
+
+
+            console.log("Step2");
 
             var mobilePushes = [],
                 allPushes = [];
@@ -889,6 +906,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             } else {
                 // получаем через 1С-ый parentForm имя клиента
+                console.log("Step3");
                 _data.companyName = parentForm._call('getClientName');
             }
             //console.log( _data.companyName, ' cmpanyName');
@@ -896,6 +914,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$emit('companyName', _data.companyName);
 
             // по каждому доступному решению запрашиваем нажатия
+
+            console.log("!!!!!!Find pushes. Where are you?!!!!!!", _data);
+
             for (var m = 0; m < _data.idArr.length; m++) {
 
                 if (scope.demoMode) {
@@ -903,6 +924,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 } else {
                     mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                 }
+
+               // console.log("mobilePushes recieved", mobilePushes );
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {
@@ -1613,6 +1636,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по маршруту
         function routeFilter(row) {
+            //console.info(row.uniqueID, scope.filters.routeUniqueID);
             return row.uniqueID == scope.filters.routeUniqueID;
 
         }
@@ -1639,7 +1663,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // отрисовать маршрут
         scope.drawRoute = function () {
-            console.log("P-I-C recieve click");
+            rootScope.clickOff=true;
+            console.log("P-I-C recieve click", rootScope.clickOff);
+            scope.$apply;
+
+
             scope.$emit('clearMap');
 
             var indx,
@@ -2500,6 +2528,29 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             }
+        }
+
+
+
+
+
+        scope.testbutton = function ()  {
+
+
+
+            console.log("button test was pushed", Date.now()/1000);
+            var gid=900;
+            var from=(Date.now()-(1000*60*60*3))/1000;
+            var to = Date.now()/1000;
+            http.get('./currentStops/'+gid +'/'+parseInt(from) +'/'+parseInt(to)).
+                success(function (data) {
+                    console.log('Call for current stops succesfull', data);
+                })
+                .error(function(data){
+                    console.log('ERROR to Call for current stops >>', data);
+                });
+
+
         }
 
 

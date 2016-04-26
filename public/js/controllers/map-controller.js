@@ -14,7 +14,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             STATUS = Statuses.getStatuses(),            // коды статусов
 
 
-            currentRouteID;                             //ID отображаемого в данный момент маршрута
+            currentRouteID,                             //ID отображаемого в данный момент маршрута
+            gpsPushMarkers=[];                          // Массив маркеров пушей текущего маршрута
 
 
         initMap();
@@ -284,6 +285,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpVar.setIcon(getIcon('S', iconIndex, 'orange', 'black'));
                 map.addLayer(tmpVar);
                 oms.addMarker(tmpVar);
+                gpsPushMarkers.push(tmpVar);
 
 
                 //addMarker(tmpVar);
@@ -293,7 +295,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-
+            rootScope.clickOff=false;
+            scope.$apply;
 
         }
 
@@ -426,7 +429,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 setMapCenter(markersArr[0]._latlng.lat, markersArr[0]._latlng.lng, 13);
             }
 
-
+            rootScope.clickOff=false;
+            scope.$apply;
 
         }
         rootScope.$on('ResChengeCoord', function(event, bool){
@@ -732,8 +736,20 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             for (var i = 0; i < markersArr.length; i++) {
                 map.removeLayer(markersArr[i]);
             }
+
+
+
             map.removeLayer(oms);
+            // функция удаления с карты маркеров пушей
+
+            if(!gpsPushMarkers || gpsPushMarkers.length==0) return;
+            i=0;
+            while(i<gpsPushMarkers.length){
+                map.removeLayer(gpsPushMarkers[i]);
+                i++;
+            }
         }
+
 
         // установить центр карты
         console.log("Centre map");

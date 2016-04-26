@@ -243,10 +243,19 @@ router.route('/trackparts/:start/:end')
 
                 for (var i = 0; i < cached.sensors.length; i++) {
                     for (var j = 0; j < data.length; j++) {
-                        if (cached.sensors[i].GID == data[j].gid) {
+                        if (cached.sensors[i].GID == data[j].gid && data[j].data!=cached.sensors[i].real_track ) {
                             if (data[j].data.length > 0) {
+                                var stopsBefore=cached.sensors[i].real_track.length;
+
+                                console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
                                 cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                 cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
+                                var stopsAfter=cached.sensors[i].real_track.length;
+                                console.log("Car with gid=", cached.sensors[i].GID, "Now hav stops",  stopsAfter);
+                                if(stopsAfter-stopsBefore==1){
+                                   console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
+                                }
+
                             }
                             break;
                         }
@@ -474,5 +483,18 @@ router.route('/test')
         console.log(req.session.login);
         res.status(200).json({sessionLogin: req.session.login});
     });
+
+
+// догрузка стопов по маршруту на текущиймомент
+router.route('/currentStops/:gid/:from/:to')
+    .get(function (req, res) {
+        console.log("Start load stops", req.session.login);
+        tracksManager.getStops(req.params.gid,  req.params.from, req.params.to, function(rData){
+           // console.log("rData", rData, "END rDAta, mtm 475");
+            res.status(200).json(rData);
+        });
+
+    });
+
 
 module.exports = router;

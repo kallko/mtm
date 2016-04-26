@@ -3,7 +3,7 @@
     var parentForm;
     function initialize(thisForm) {
         parentForm = thisForm;
-        console.log('initialize complete');
+        console.log('initialize complete', parentForm);
     }
 </script>
 
@@ -67,6 +67,8 @@
 <!-- карта на фоне -->
 <div id="map"></div>
 
+<!-- полупрозрачное окно для отображения карты -->
+
 
 
 
@@ -128,6 +130,9 @@
 
                 <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
                     {{params.endWindowSize * 5}} минут до закрытия
+                </button>
+                <button class="btn btn-default btn-sm1" ng-show="true" id="test" ng-click="testbutton()" >
+                     Кнопка ТЕСТ
                 </button>
                 <br>
                 <input id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
@@ -272,6 +277,9 @@
         transparent-map-window
     </div>
 </template>
+
+
+
 
 <!-- панель настроек -->
 <template type="text/html" id="setting-window">
@@ -448,7 +456,7 @@
 <template type="text/html" id="close-day" >
     <div id="close-day-panel" ng-controller = "CloseDayController" >
         <button ng-click = "showCheckBoxToClose()">Готовые к закрытию</button>
-        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть выбранные</button>
+        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">!!!!!!Закрыть выбранные</button>
         <div>Имя компании: {{companyName}},
               Ответственный: {{user}},
               Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
@@ -483,7 +491,8 @@
                 </tr>
             </table>
         </div>
-        
+        <!-- полупрозрачное окно для отображения карты -->
+        <div class="title"  ng-show="clickOff" id="transparent-closeday-window" > SHADOW BLOCK {{clickOff}} complete </div>
 
         <!-- Визуальная часть закрытия дня -->
     </div>

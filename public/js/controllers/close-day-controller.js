@@ -1,6 +1,7 @@
 angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootScope', '$filter', '$timeout', function (scope, rootScope, filter, timeout) {
    init();
     scope.disabledBtnCloseDay = true; //на старте обезвреживаем кнопку "Закрыть день"
+
     var s_dataToCloseArr_general = [];    //главный массив элементов (водителей) к закрытию. Индекс - номер, значение - имя водителя
     var s_dataToCloseArr_reserve = []; // тот же массив, что и s_dataToCloseArr_general_general, но в отличие от s_dataToCloseArr_general_general, функция toggleCheckBoxToClose() не имеет права ничего удалять из него 
     scope.closeDayClick = function(){
@@ -126,6 +127,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             scope.companyName = data.companyName;
             scope.user = data.user;
             scope.serverTime = data.server_time;
+            rootScope.clickOff = false;// вызывает слой, который не дает кликать по таблице, пока не закончилась отрисовка маршрута
             // for(var i=0; i < data.routes.length; i++){
             //     data.routes[i].setDisabled = true;  //на старте по умолчаню запираем все чекбоксы
             // }

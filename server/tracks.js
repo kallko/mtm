@@ -340,12 +340,14 @@ TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
 TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);
+    console.log("tracks 343", url);
 
     request({
         url: url + '&gid=' + gid,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
+            //console.log("tracks 349 body", body, "END track.js 349");
             callback(body);
         }
     });
@@ -356,11 +358,13 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
+
     request({
         url: url + '&gid=' + gid,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
+            console.log("tracks.js 366", body, "End 366");
             callback(body);
         }
     });
@@ -655,3 +659,4 @@ function getNByGid(gid) {
 
     return 'NONE'
 }
+
