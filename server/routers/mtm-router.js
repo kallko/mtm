@@ -289,10 +289,8 @@ router.route('/saveroute/')
 
 router.route('/existdata/')
     .get(function (req, res) {
-
-
         var data=updateCacshe;
-        console.log("mtm existing data", data);
+        //console.log("mtm existing data", data);
         res.status(200).json(data);
     });
 
