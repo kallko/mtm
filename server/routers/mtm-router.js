@@ -122,12 +122,13 @@ router.route('/dailydata')
                 if (!req.query.showDate) {
                     data.lastUpdate = today12am;
                     cashedDataArr[req.session.login] = data;
+                    //console.log();
                 }
 
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
 
-
+                //console.log("This is Data:", data);
                 res.status(200).json(data);
             }
         }

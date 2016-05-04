@@ -279,6 +279,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
+
+                    //var newData=JSON.stringify(data);
+                    //var toPrint=JSON.parse(newData);
+
+                    //console.log("I load this data", toPrint);
                     linkDataParts(data);
                     if (loadParts) {
                         loadTrackParts();
@@ -578,7 +583,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обрезает ФИО до ФИ
         function cutFIO(fioStr) {
             var parts = fioStr.split(' ');
-            return parts[0] + ' ' + parts[1];
+            return parts[0] + ' ' + (parts[1] ? parts[1] : " ");
         }
 
         // обновляет статусы и делает прогнозы по слинкованным данным
@@ -1680,17 +1685,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // трека прошло updateTrackInterval секунд - догружаем новые данные
             if (route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
-               // console.log('download tracks');
+                console.log('I need download Updated tracks' );
+                console.log('before', route.real_track.length);
+
+
+
                 http.post('./gettracksbystates', {
                     states: route.real_track,
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
                 })
                     .success(function (data) {
-                        //console.log({data: data});
+                        console.log("Additional load", {data: data});
                         route.real_track = data;
 
-                        //console.log('before', route.real_track.length);
+
                         for (var k = 0; k < route.real_track.length; k++) {
                             if (route.real_track[k].coords == undefined ||
                                 route.real_track[k].coords.length == 0) {
@@ -1707,7 +1716,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);}
                         }
 
-                        //console.log('after', route.real_track.length);
+                        console.log('after', route.real_track.length);
 
                         draw(route);
                     });

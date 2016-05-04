@@ -64,7 +64,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
         started++;
         (function (ii) {
-            //console.log('load part #', ii);
+            console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
                 //console.log('done loading part #', ii);
