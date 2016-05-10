@@ -36,7 +36,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             // если трек есть и последняя задача в марщруте не выполнена - отрисовать остаток планового маршрута
-            if (route.real_track != undefined && i != route.points.length - 1) {
+            console.log("real track", route.real_track);
+            if (route.real_track != undefined && i != route.points.length - 1 && route.real_track.length>0) {
                 var lastCoords = route.real_track[route.real_track.length - 1].coords,
                     carPos = lastCoords[lastCoords.length - 1],
                     url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
@@ -1524,17 +1525,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function checkTestStops() {
             console.info(markersArr);
            // console.log("We will work with stop markers", markersArr);
-            var i=0;
-            while(markersArr[i].source!=undefined){
-                if(markersArr[i].source.servicePoints!=undefined){
-                console.log ("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
-                   
-                }
-                i++;
+            if(markersArr.length>0) {
+                var i = 0;
+                while (markersArr[i].source != undefined) {
+                    if (markersArr[i].source.servicePoints != undefined) {
+                        console.log("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
 
+                    }
+                    i++;
+                }
 
             }
-
         }
 
 
