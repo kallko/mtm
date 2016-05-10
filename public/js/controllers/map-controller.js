@@ -219,6 +219,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
 
                         scope.baseCurrentWayPoints[scope.minI].stopState=scope.currentDraggingStop.source;// тщательно оттестировать
+
+                        if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time/60) + " минут с точкой " + (scope.minI+1) + " ?")) {
+                        } else {
+                            return
+                        }
+
                         checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
 
                     });
@@ -442,7 +448,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 $('#notification_wrapper').css('opacity', '1');
                 //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
                 //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
-                // Добавить Сатрт и Енд Лат Лоны
+
             } else {
 
                 newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
