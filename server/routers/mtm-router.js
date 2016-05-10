@@ -98,7 +98,7 @@ router.route('/dailydata')
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
-                console.log('=== dataReadyCallback === send data to client ===', data);
+                console.log('=== dataReadyCallback === send data to client ===');
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
                 if (data.routes!=undefined) {
                     for (var i = 0; i < data.routes.length; i++) {

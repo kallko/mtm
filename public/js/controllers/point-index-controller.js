@@ -824,7 +824,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-
+                                    console.log("Find stop for Waypoint and change STATUS")
                                     findStatusAndWindowForPoint(tmpPoint);
 
 
@@ -1092,11 +1092,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             }
 
-            if(scope.testFlag){
-                console.log("Status for", tmpPoint.NUMBER, tmpPoint.status, 'conf', tmpPoint.rawConfirmed);
-                scope.testFlag=false;
-
-            }
+            //if(scope.testFlag){
+            //    console.log("Status for", tmpPoint.NUMBER, tmpPoint.status, 'conf', tmpPoint.rawConfirmed);
+            //    scope.testFlag=false;
+            //
+            //}
 
         }
 
@@ -1147,6 +1147,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 tmpPred,
                 now = _data.server_time;
 
+
+            // После тестирования убрать. Это насильно меняется время пришедшее с сервера на текущее на этом компе.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            now= parseInt (new Date().getTime()/1000);
+            console.log("NOW is", now);
+
+
+
+
+
+
             for (var i = 0; i < _data.routes.length; i++) {
                 route = _data.routes[i];
                 // пропускаем итерацию в случае не валидного трека
@@ -1186,6 +1196,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
                                         if (now > _route.points[j].working_window.finish) {
                                             _route.points[j].status = STATUS.TIME_OUT;
+                                            console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                                             _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                         }
                                     } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
@@ -1225,8 +1236,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         if (_route.points[j].overdue_time > 0) {
                                             if (_route.points[j].working_window.finish < now) {
                                                 _route.points[j].status = STATUS.TIME_OUT;
+                                                console.log("_route.points[j].status = STATUS.TIME_OUT;");
                                             } else {
                                                 _route.points[j].status = STATUS.DELAY;
+                                                console.log("_route.points[j].status = STATUS.DELAY;");
                                             }
                                         }
 
@@ -1436,8 +1449,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (_data.server_time > row.working_window.finish) {
                         row.status = STATUS.TIME_OUT;
+                        console.log("row.status = STATUS.TIME_OUT");
                     } else {
                         row.status = STATUS.DELAY;
+                        console.log("row.status = STATUS.DELAY");
                     }
                     rawPoint.rawConfirmed = -1;
                  //   addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
