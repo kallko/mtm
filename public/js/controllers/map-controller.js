@@ -973,7 +973,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             if(markersArr != undefined) {
                 var i = 0;
-                while (markersArr[i].source != undefined) {
+                while (markersArr[i]!=undefined && markersArr[i].source != undefined) {
                     if (markersArr[i].source.servicePoints != undefined) {
                         var servicePointsLat = markersArr[i]._latlng.lat;
                         var servicePointsLng = markersArr[i]._latlng.lng;

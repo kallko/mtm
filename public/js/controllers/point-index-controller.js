@@ -680,7 +680,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.havePush;
                     delete tmpPoint.real_arrival_time;
                     delete tmpPoint.confirmed;
-
+                    //delete tmpPoint.servicePoints;
                     delete tmpPoint.overdue_time;
 
                     
@@ -807,8 +807,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                     
 
-
-                                    tmpArrival.servicePoints.push(k);
+                                    // проверка, существует ли уже этот пуш
+                                    i=0;
+                                    var sPointExist=false;
+                                    while(i<tmpArrival.servicePoints.length){
+                                       if(tmpArrival.servicePoints[i]==k){
+                                           sPointExist=true;
+                                           break;
+                                       }
+                                        i++;
+                                    }
+                                    if(!sPointExist){
+                                    tmpArrival.servicePoints.push(k);}
 
 
 
@@ -819,6 +829,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                                 }
+
+
                             }
                         }
                     }
