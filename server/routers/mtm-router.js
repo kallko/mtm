@@ -70,12 +70,14 @@ router.route('/dailydata')
             today12am = now - (now % day);
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
-        if(updateCacshe.length==0){
-            console.log("First call for data!");
-
-        } else {
-            console.log("Repeat call for data!");
-        }
+        //console.log("!!!!!!!req.session.login!!!!!", req.session.login);
+        //
+        //if(req.session.login!=undefined && updateCacshe[req.session.login].length==0){
+        //    console.log("First call for data!, or login undefined");
+        //
+        //} else {
+        //    console.log("Repeat call for data!");
+        //}
 
 
         // при включенном флаге кешинга по сессии, ищет наличие относительно свежего кеша и отправляет в случае успеха
@@ -96,20 +98,21 @@ router.route('/dailydata')
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
-                console.log('=== dataReadyCallback === send data to client ===');
+                console.log('=== dataReadyCallback === send data to client ===', data);
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                for(var i = 0; i < data.routes.length; i++){ 
-                    if(!data.routes[i]['uniqueID']){
-                        data.routes[i]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
-                        for(var j = 0; j < data.routes[i].points.length; j++){
-                            data.routes[i].points[j]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
+                if (data.routes!=undefined) {
+                    for (var i = 0; i < data.routes.length; i++) {
+                        if (!data.routes[i]['uniqueID']) {
+                            data.routes[i]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                            for (var j = 0; j < data.routes[i].points.length; j++) {
+                                data.routes[i].points[j]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                            }
+                        } else {
+                            continue;
                         }
-                    }else{
-                        continue;
+
                     }
-
                 }
-
                 // if(todayRoutesCache[req.session.login] == undefined){
                 //     todayRoutesCache[req.session.login] = [];
                 //     todayRoutesCache[req.session.login] = JSON.parse(JSON.stringify(data.routes));
@@ -328,7 +331,12 @@ router.route('/saveroute/')
 
 router.route('/existdata/')
     .get(function (req, res) {
-        var data=updateCacshe;
+
+        if (req.session.login!=undefined) {
+        var data=updateCacshe[req.session.login];
+        } else {
+            data=[];
+        }
         //console.log("mtm existing data", data);
         res.status(200).json(data);
     });
@@ -359,8 +367,11 @@ router.route('/savewaypoint/')
 // Если какие-то данные уже были, то мы их объединяем, перезаписывая ранее сохранненные точки свежими версиями и добавлением новых точек.
 router.route('/saveupdate/')
     .post(function (req, res) {
-        if(updateCacshe.length==0){
-            updateCacshe = req.body;
+
+        console.log("!!!!!!!!Логин!!!!!!!!", [req.session.login]);
+
+        if(updateCacshe[req.session.login]==undefined || updateCacshe[req.session.login].length==0){
+            updateCacshe[req.session.login] = req.body;
             res.status(200).json({status: 'ok'});
             return;
         }
@@ -378,18 +389,18 @@ router.route('/saveupdate/')
             var j=0;
             while(j<updateCacshe.data.length){
                 var oldID;
-                if(updateCacshe.data[j] && updateCacshe.data[j].id!=undefined) oldID=""+updateCacshe.data[j].lat+updateCacshe.data[j].lon+updateCacshe.data[j].t1;
-                if(updateCacshe.data[j] && updateCacshe.data[j].TASK_NUMBER) oldID=""+updateCacshe.data[j].TASK_NUMBER+updateCacshe.data[j].TASK_DATE;
+                if(updateCacshe[req.session.login].data[j] && updateCacshe[req.session.login].data[j].id!=undefined) oldID=""+updateCacshe[req.session.login].data[j].lat+updateCacshe[req.session.login].data[j].lon+updateCacshe[req.session.login].data[j].t1;
+                if(updateCacshe[req.session.login].data[j] && updateCacshe[req.session.login].data[j].TASK_NUMBER) oldID=""+updateCacshe[req.session.login].data[j].TASK_NUMBER+updateCacshe[req.session.login].data[j].TASK_DATE;
                 if(newID==oldID){
                     //console.log("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
-                    updateCacshe.data[j]=obj.data[i];
+                    updateCacshe[req.session.login].data[j]=obj.data[i];
                     exist=true;
                 }
                 j++;
             }
             if(!exist) {
                // console.log("Adding new point/stop")
-                updateCacshe.data.push(obj.data[i])
+                updateCacshe[req.session.login].data.push(obj.data[i])
             }
             delete newID;
             i++;
