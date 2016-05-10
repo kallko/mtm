@@ -404,7 +404,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             data.routes[i].real_track != aggregatorError) {
                             len = data.routes[i].real_track.length - 1;
                             data.routes[i].car_position = data.routes[i].real_track[len]; // определение текущего положения машины
-                            console.log('data.routes[i]', data.routes[i]);
+                            //console.log('data.routes[i]', data.routes[i]);
                             if (typeof (data.routes[i].real_track)==Array) {
                             data.routes[i].real_track.splice(len, 1);} // удаление стейта с текущим положением машины
                         }
@@ -729,7 +729,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
                                 // по времени чем предыдущий детект - привязываем этот стоп к точке
 
-                                //Тестирование, почему неправильно привязывается точка 8в маршруте Гамоля
 
 
                                 if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
@@ -808,18 +807,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     
 
                                     // проверка, существует ли уже этот пуш
-                                    i=0;
+                                    var ip=0;
                                     var sPointExist=false;
-                                    while(i<tmpArrival.servicePoints.length){
-                                       if(tmpArrival.servicePoints[i]==k){
+                                    while(ip<tmpArrival.servicePoints.length){
+                                       if(tmpArrival.servicePoints[ip]==k){
                                            sPointExist=true;
                                            break;
                                        }
-                                        i++;
+                                        ip++;
                                     }
                                     if(!sPointExist){
                                     tmpArrival.servicePoints.push(k);}
 
+                                   // tmpPoint.rawConfirmed=0;
 
 
 
@@ -835,7 +835,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
 
+
+                   // console.log("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
                     lastPoint = route.points[route.lastPointIndx];
+                   // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
+
                     // проверка последней определенной точки на статус выполняется
                     if (lastPoint != null) {
                         if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
@@ -845,6 +849,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
                 }
+
+               // console.log("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
+
             }
 
             console.log("Step1 parentForm", parentForm);
@@ -1043,8 +1050,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     row.confirmed = true;
                 } else if (scope.rowCollection[i].rawConfirmed === -1) {
                     if (_data.server_time > row.working_window.finish) {
+                        console.log("row.status = STATUS.TIME_OUT");
                         row.status = STATUS.TIME_OUT;
                     } else {
+                        console.log("row.status = STATUS.DELAY");
                         row.status = STATUS.DELAY;
                     }
                 }
@@ -1156,9 +1165,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 (function (_route, _url) {
                     http.get(_url).
                         success(function (data) {
-                            if (_route.ID === "289" || _route.ID === "292" || _route.ID === "302") {
-                                console.log(_route.lastPointIndx, _route);
-                            }
+                            //if (_route.ID === "289" || _route.ID === "292" || _route.ID === "302") {
+                            //    console.log(_route.lastPointIndx, _route);
+                            //}
 
                             var lastPoint = _route.lastPointIndx + 1,
                                 nextPointTime = parseInt(data.time_table[0][1][0] / 10),
@@ -1171,6 +1180,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             for (var j = 0; j < _route.points.length; j++) {
                                 if (j < lastPoint) {
                                     // все точки до последней выполненной проверяются по факту
+                                    //console.log("Try to change status for point", _route.points[j] );
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
