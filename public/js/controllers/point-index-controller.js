@@ -46,7 +46,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function init() {
             scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
             scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
-            console.info(scope.displayCollection);
+            
             scope.filters = {};                                         // фильтры
             scope.filters.statuses = Statuses.getTextStatuses();        // фильтры по статусам
 
@@ -279,12 +279,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
+
                     linkDataParts(data);
                     if (loadParts) {
                         loadTrackParts();
-                        console.log("load track parts");
                     }
-                    console.log(data,' success data');
                 })
                 .error(function (data) {
                     console.log(data);
@@ -305,7 +304,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // слинковать данные пришедшие от сервера
         function linkDataParts(data) {
-            console.info(data);
+
             init();
 
             console.log('Start linking ...', new Date(data.server_time * 1000));
@@ -343,6 +342,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log(data);
                 return;
             }
+
+
             scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
             //console.log("PIC 323", data);
             // тестовоотладочный блок
@@ -358,12 +359,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            //data.routes.pop(); // TODO remove
-            //data.routes.pop(); // TODO remove
-            //data.routes.pop(); // TODO remove
-            //data.routes.pop(); // TODO remove
-            //data.routes.pop(); // TODO remove
-            //data.routes.pop(); // TODO remove
 
             for (i = 0; i < data.routes.length; i++) {
                 if (data.routes[i].moreThanOneSensor) problematicRoutes.push(data.routes[i]);
@@ -410,9 +405,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         break;
                     }
                 }
+                if(j == data.drivers.length){
+                    console.log(data.routes[i].DRIVER);
+                }
+
 
                 // если у маршрута нет машины или водителя - удаляем маршрут
-                if (!data.routes[i].transport || !data.routes[i].driver) {
+                if (!data.routes[i].transport) {
                     data.routes.splice(i, 1);
                     rawData.routes.splice(i, 1);
                     i--;
@@ -443,9 +442,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         scope.filters.routes.push({
                             //name: data.routes[i].transport.NAME,
-                            name: data.routes[i].transport.NAME + ' - ' + data.routes[i].driver.NAME,
+                            name: data.routes[i].transport.NAME + ' - ' + ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'),
                             value: data.routes[i].filterId,
-                            driver: data.routes[i].driver.NAME //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
 
                         });
                           //  console.log(scope.filters.routes, ' filters.routes');
@@ -577,8 +576,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обрезает ФИО до ФИ
         function cutFIO(fioStr) {
+            fioStr = fioStr.replace(/_/g, " ");
             var parts = fioStr.split(' ');
-            return parts[0] + ' ' + parts[1];
+            return ( (parts[0])? parts[0] + ' ' : "" )  + ( (parts[1])? parts[1] : "" );
+
         }
 
         // обновляет статусы и делает прогнозы по слинкованным данным
@@ -2100,7 +2101,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-        function collectDataForDayClosing(_data){
+        function collectDataForDayClosing(_data, closeDayDate){
 
             var result = {
                     routes: []
@@ -2113,14 +2114,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 endTime;
             var routesID = [];
 
-            for (var i = 0; i < _data.routes.length; i++) {
-
-                if(!_data.routes[i].getCheck){
-                    continue;
-                }
-
-                routeI = _data.routes[i];
-                routesID.push(routeI.ID);
+            for (var i = 0; i < _data.length; i++) {
+                routeI = _data[i];
+                routesID.push(routeI.uniqueID);
                 route = {
                     pointsReady: [],
                     pointsNotReady: [],
@@ -2189,7 +2185,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 route.startTimeFact = startTime === 2000000000 ? undefined : startTime;
                 route.endTimeFact = endTime === 0 ? undefined : endTime;
-
+                if(!route.startTimeFact){
+                    route.startTimeFact = Date.now();
+                }
+                if(!route.endTimeFact){
+                    route.endTimeFact = Date.now();
+                }
                 //TODO REMOVE only for test
                // route.pointsReady = route.pointsReady.concat(route.pointsUnconfirmed);
                 ///////////////////////////
@@ -2199,11 +2200,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (point.stopState) {
                         point.durationFact = point.stopState.t2 - point.stopState.t1;
                         point.arrivalTimeFact = point.stopState.t1;
+                    }else{
+                        point.arrivalTimeFact = '09.05.2016';
+                        point.durationFact = 0;
                     }
 
                     if (point.moveState) {
                         point.moveDuration = point.moveState.t2 - point.moveState.t1;
                         point.moveDistance = point.moveState.dist;
+                    }else{
+                        point.moveDistance = 0;
+                        point.moveDuration = 0;
                     }
                 }
 
@@ -2211,29 +2218,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     result.routes.push(route);
             }
 
-            //TODO REMOVE only for test
-            // for (var i = 0; i < result.routes.length; i++) {
-            //     delete result.routes[i].pointsUnconfirmed;
-            //
-            //     if (i > 1) {
-            //         result.routes.pop();
-            //         i--;
-            //     }
-            // }
-            ///////////////////////////
 
 
-            //console.log('collectDataForDayClosing >>', result);
-            //console.info(result);
             var date = new Date();
-            var day = (parseInt(date.getDate()) < 10) ? '0' + date.getDay() : date.getDate();
-            var month = (parseInt(date.getMonth())+1 < 10) ? '0' + (parseInt(date.getMonth())+1) : parseInt(date.getMonth())+1;
+            var month = parseInt(date.getMonth())+1;
+            var day = parseInt(date.getDate());
+            var year = parseInt(date.getFullYear());
+            if(month < 10){
+                month = '0'+month;
+            }
+            if(day < 10){
+                day = '0'+day;
+            }
 
-            var send = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+day+'.'+ month +'.'+ date.getFullYear() +'"><TEXTDATA>';
+            var send = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+closeDayDate+'"><TEXTDATA>';
             send += JSON.stringify(result);
             send += '</TEXTDATA></CLOSEDAY></MESSAGE>';
+            if(day+'.'+month+'.'+year == closeDayDate){
+                console.log("UPDATE DAY");
+                return {closeDayData: send, routesID: routesID, update:true}; // обновляем текущий день
+            }else{
+                console.log("OLD DAY");
+                return {closeDayData: send, routesID: routesID, update:false}; // дописываем старый день
+            }
+
             console.log(send);
-            return {closeDayData: send, routesID: routesID};
+
         }
 
         rootScope.$on('pushWaypointTo1С', function(event, data){ // инициализация отправки данных точки на сервер 1с
@@ -2244,7 +2254,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //console.log(scope.filters.route, ' filters route');
         rootScope.$on('pushCloseDayDataToServer', function(event, data){ // инициализация отправки данных на сервер для закрытия дня
            // modifyDataForCloseDay();
-            pushDataToServer(collectDataForDayClosing(data));   //пока так !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            var closeDaysSort = {};
+            for(var i = 0; i < _data.routes.length; i++) {
+                if (_data.routes[i].getCheck) {
+                    var strartTime = _data.routes[i].START_TIME.split(' ')[0];
+                    if(strartTime in closeDaysSort){
+                        closeDaysSort[strartTime].push(_data.routes[i]);
+                    }else{
+                        closeDaysSort[strartTime] = [];
+                        closeDaysSort[strartTime].push(_data.routes[i]);
+                    }
+                }
+            }
+            //console.info(closeDaysSort);
+            for(closeday in closeDaysSort){
+                pushDataToServer(collectDataForDayClosing(closeDaysSort[closeday], closeday));
+            }
+
+
+
+            //pushDataToServer(collectDataForDayClosing(data));   //пока так !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         });
         // function modifyDataForCloseDay(data){ //эта функция добавит в _data новое свойство CLOSED для определения закрыт ли маршрут
         //     for(var s=0; s<_data.routes.length; s++){
@@ -2257,16 +2286,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //
         // }
         function pushDataToServer(outgoingData){   // функция отправки данных на сервер, может быть универсальной
-            console.log(' sended');
           //  modifyDataForCloseDay();
             http.post('/closeday', outgoingData).then(successCallback, errorCallback); //отправка на url /closeday временно
             function successCallback(response){
                 rootScope.$emit('successOfPusingData');
-                // console.log(response, ' response');
+                rootScope.$emit('showNotification', {text: 'День закрыт', duration:2000});
             }
             function errorCallback(){
                 console.log('error', ' error of pushing data');
                 rootScope.$emit('serverError');
+                rootScope.$emit('showNotification', {text: 'Возникли проблемы', duration:2000});
             }
 
         }

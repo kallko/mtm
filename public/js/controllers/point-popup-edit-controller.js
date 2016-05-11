@@ -9,10 +9,12 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
         scope.deletePointFromStop=function(){
         	alert('deleted');
         };
+/*
     	rootScope.$on('pointEditingPopup', function (event, data, time) { // окошко редактирования точки
 	       // console.log(data, ' data');
 	        scope.data = data.source;
 			console.log("i recieve data", data);
+			console.log("i recieve time", time);
 	       // localServicePoints = scope.data.servicePoints;
 	       // servicePointsReserve = scope.data.servicePoints;
 	        scope.stopIndx = data.stopIndx;
@@ -29,7 +31,8 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            //console.log(data, ' data');
 				//console.log(localServicePoints, 'localServicePoints', scope.data.servicePoints, 'scope.data.servicePoints');
 	           	function buildTable(servicePoints){
-					console.log("Start Table build");
+					console.info(servicePoints);
+					//console.log("Start Table build");
 					cleanTable();
 
 		            for (var s=0; s<servicePoints.length; s++){
@@ -144,9 +147,6 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            					localSumm += parseInt($('[data-table-stop-input-'+s+']').val());
 	            				};
 	            				if(intervalSummAutoFilled-localSumm>=1){
-	            					if(parseInt($('[data-table-stop-input-'+lastItem+']').val())>(intervalSummAutoFilled-localSumm)){
-	            						
-	            					};	
 	            					$('[data-table-stop-input-'+lastItem+']').val(intervalSummAutoFilled-localSumm);
 	            				} else {
 		            				alert('Вы ввели слишком большое значение или оставили поле пустым!');
@@ -196,5 +196,66 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 	            };
     		//};
         });
+*/
+		rootScope.$on('pointEditingPopup', function (event, data, time) {
+			$('#point-editing-popup').popup('show');
+			scope.stopIndx = data.stopIndx;
+			scope.data = data.source;
 
+			scope.start = parseInt(scope.data.t1/60)*60; // избавляемся от "лишних" секунд
+			scope.delta = parseInt(scope.data.time/60)*60;
+			scope.fin = scope.start+scope.delta;
+
+			scope.servisPoints = [];
+			scope.emmitServisPoints = []; // массив который будем эмитировать
+			scope.calculationStopTime = function(){
+				var servisPointsLng = scope.data.servicePoints.length;
+				if (scope.delta / servisPointsLng >= 60) { //время стопа в секундах, разделяется между точками обслуживания и переводиться в минуты
+					wayPointTimeInteger = parseInt((scope.delta / servisPointsLng) / (60)); // время обслуживания точки (целое)
+				} else {
+					wayPointTimeInteger = 1;
+				}
+				scope.disabled = false;
+				for (var i = 0; servisPointsLng > i; i++) {
+					scope.servisPoints[i] = {};
+					scope.servisPoints[i].error = false;
+					scope.servisPoints[i].wayPoint = (scope.data.servicePoints[i] * 1);
+					scope.servisPoints[i].stopTime = time[i] / 60 || wayPointTimeInteger;
+				}
+				if (servisPointsLng > 1 && (scope.delta / servisPointsLng) % 60) { // если кол-во точек больше одной и дельта не делится нацело на кол-во точек
+					scope.servisPoints[i - 1].stopTime = time[i - 1] / 60 || (scope.delta / 60) - (wayPointTimeInteger * (servisPointsLng - 1)); // считаем время стопа последней точки общее время стопа минус (сумма времени стопа каждой точки кроме последней)
+				}
+				scope.$apply();
+			};
+			if(scope.data.servicePoints && scope.data.servicePoints.length>0){
+				scope.calculationStopTime();
+			}
+			scope.cancel = function(){
+				$('#point-editing-popup').popup('hide');
+			};
+			scope.unbindPoint = function($index, $event){
+				scope.emmitServisPoints.push(scope.servisPoints.splice($index, 1)[0]);
+				scope.emmitServisPoints[scope.emmitServisPoints.length-1].stopTime = -1;
+				var servisPointsLng = scope.servisPoints.length;
+				if (scope.delta / servisPointsLng >= 60) { //время стопа в секундах, разделяется между точками обслуживания и переводиться в минуты
+					var wayPointTimeInteger = parseInt((scope.delta / servisPointsLng) / (60)); // время обслуживания точки (целое)
+				} else {
+					wayPointTimeInteger = 1;
+				}
+				for (var i = 0; servisPointsLng > i; i++) {
+					scope.servisPoints[i].stopTime = time[i] / 60 || wayPointTimeInteger;
+				}
+				if (servisPointsLng > 1 && (scope.delta / servisPointsLng) % 60) { // если кол-во точек больше одной и дельта не делится нацело на кол-во точек
+					scope.servisPoints[i - 1].stopTime = time[i - 1] / 60 || (scope.delta / 60) - (wayPointTimeInteger * (servisPointsLng - 1)); // считаем время стопа последней точки общее время стопа минус (сумма времени стопа каждой точки кроме последней)
+				}
+			};
+			scope.confirm = function(){
+				scope.emmitServisPoints = scope.emmitServisPoints.concat(scope.servisPoints);
+				rootScope.$emit('confirmViewPointEditing', scope.emmitServisPoints, scope.data);
+				scope.cancel();
+			};
+			scope.chenge = function($index, $event){
+
+			};
+		});
     }]);

@@ -338,7 +338,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR;            // список всех сенсоров (устройства передающие трек)
                 if (waypoints == undefined) return;
-
+                console.log('drivers', drivers.length);
                 log.l('waypoints.length = ' + waypoints.length);
 
                 data[nIndx].transports = [];

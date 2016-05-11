@@ -38,7 +38,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
         function showPopup(text, duration) {
             $('#notification div').html(text);
             $('#notification').popup('show');
-            if (!duration) return;       
+            if (!duration) return;
 
             timeout(function () {
                 $('#notification').popup('hide');

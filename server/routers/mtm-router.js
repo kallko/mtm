@@ -8,16 +8,44 @@ var express = require('express'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
+    CronJob = require('cron').CronJob,
 
-    cashedDataArr = [],  // глобальный кеш
+    cashedDataArr = {},  // глобальный кеш
     updateCacshe = []; // Тестовый кэш
+var oldRoutesCache = {}; // объект со всеми роутами,  кроме текущего дня
 
-var todayRoutesCache = {}, // объект с массивами роутов текущего дня
-    oldRoutesCache = {}; // объект со всеми роутами,  кроме текущего дня
+new CronJob('00 03 * * * *', function(){
+
+    for(var company in cashedDataArr){
+        for(var i = 0; cashedDataArr[company].routes.length > i; i++){
+            if( !('closeDayServer' in cashedDataArr[company].routes[i]) ){
+                if( Array.isArray(oldRoutesCache[company]) ){
+                    oldRoutesCache[company] = oldRoutesCache[company].concat( JSON.parse(JSON.stringify(cashedDataArr[company].routes[i])) );
+                }else{
+                    oldRoutesCache[company] = [];
+                    oldRoutesCache[company] = oldRoutesCache[company].concat( JSON.parse(JSON.stringify(cashedDataArr[company].routes[i])) );
+                }
+            }
+        }
+    }
+    console.log('END CRON');
+    console.log(oldRoutesCache);
+    cashedDataArr = [];
+    console.log('END CRON');
+}, null, true);
+/*
+cron.schedule('10 * * * * *', function(){
+    console.log('running a task every minute');
+});
+*/
 
 
-    demoLogin = 'demo',
-    tracksManager = new tracks(
+
+
+
+
+    var demoLogin = 'demo';
+    var tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
         config.aggregator.login,
@@ -46,6 +74,13 @@ router.route('/login')
 // загрузка данных из соапа за текущий день
 router.route('/dailydata')
     .get(function (req, res) {
+
+    var removeCloseRoutesAddtoOldRoutes = function(){
+
+        //console.log(cashedDataArr[req.session.login].date);
+
+    };
+
 
         req.session.lastLockCheck = 0;
         // проверка на включеннный демо режим
@@ -89,7 +124,12 @@ router.route('/dailydata')
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
             cashedDataArr[req.session.login].user = req.session.login;
 
-            res.status(200).json(cashedDataArr[req.session.login]);
+            var copyCashedDataArr = JSON.parse(JSON.stringify(cashedDataArr[req.session.login]));
+            if(Array.isArray(oldRoutesCache[req.session.login])){
+                copyCashedDataArr.routes = copyCashedDataArr.routes.concat(oldRoutesCache[req.session.login]);
+            }
+
+            res.status(200).json(copyCashedDataArr);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего кеша
             var soapManager = new soap(req.session.login);
@@ -97,8 +137,10 @@ router.route('/dailydata')
 
             function dataReadyCallback(data) {
                 console.log('=== dataReadyCallback === send data to client ===');
-                // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                for(var i = 0; i < data.routes.length; i++){ 
+                
+               // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
+                
+                for(var i = 0; i < data.routes.length; i++){
                     if(!data.routes[i]['uniqueID']){
                         data.routes[i]['uniqueID'] = data.ID+data.VERSION+data.routes[i].ID;
                         for(var j = 0; j < data.routes[i].points.length; j++){
@@ -110,14 +152,7 @@ router.route('/dailydata')
 
                 }
 
-                // if(todayRoutesCache[req.session.login] == undefined){
-                //     todayRoutesCache[req.session.login] = [];
-                //     todayRoutesCache[req.session.login] = JSON.parse(JSON.stringify(data.routes));
-                //     
-                // }else{
-                //     
-                //     data.routes = data.routes.concat(todayRoutesCache[req.session.login]);
-                // }
+
 
                 if (!req.query.showDate) {
                     data.lastUpdate = today12am;
@@ -127,8 +162,12 @@ router.route('/dailydata')
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
 
+                var _data_ = JSON.parse(JSON.stringify(data));
+                if(Array.isArray(oldRoutesCache[req.session.login])){
+                    _data_.routes = _data_.routes.concat(oldRoutesCache[req.session.login]);
+                }
 
-                res.status(200).json(data);
+                res.status(200).json(_data_);
             }
         }
     });
@@ -447,7 +486,29 @@ router.route('/closeday')
         if (req.session.login == null) {
             req.session.login = config.soap.defaultClientLogin;
         }
-        console.log(req.body.routesID);
+        if(req.body.update) {
+            for (var i = 0; req.body.routesID.length > i; i++) {
+                for (var j = 0; cashedDataArr[req.session.login].routes.length > j; j++) {
+                    if (req.body.routesID[i] == cashedDataArr[req.session.login].routes[j]['uniqueID']) {
+                        cashedDataArr[req.session.login].routes[j]['closeDayServer'] = true;
+                        console.log('CLOSEROUTE');
+                        break;
+                    }
+                }
+            }
+        }else{
+            for (var i = 0; req.body.routesID.length > i; i++) {
+                for (var j = 0; oldRoutesCache[req.session.login].length > j; j++) {
+                    if (req.body.routesID[i] == oldRoutesCache[req.session.login][j]['uniqueID']) {
+                        oldRoutesCache.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+        }
+        res.status(200).json({test: 'test'});
+
+/*
         var soapManager = new soap(req.session.login);
         soapManager.closeDay(req.body.closeDayData, function (data) {
             if (!data.error) {
@@ -456,7 +517,7 @@ router.route('/closeday')
             } else {
                 res.status(200).json({error: data.error});
             }
-        });
+        });*/
     });
 
 
