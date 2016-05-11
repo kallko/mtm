@@ -1012,7 +1012,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (var i = 0; i < mobilePushes.length; i++) {
                     if (mobilePushes[i].canceled) continue;
-                    if (mobilePushes[i].gps_time == undefined)
+
 
                     //var mobileString=JSON.stringify(mobilePushes[i]);
                     //console.log("mobileString", mobileString);
@@ -1037,13 +1037,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
-                                console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
+                                //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
 
                                 tmpPoint.mobile_push = mobilePushes[i];
                                 tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
                                 mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
                                 // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
-                                if (mobilePushes[i].distance <= scope.params.mobileRadius) {
+                                // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
+                                if (mobilePushes[i].distance <= scope.params.mobileRadius*2) {
                                     tmpPoint.havePush = true;
                                     tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
                                     // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной

@@ -131,7 +131,7 @@ router.route('/dailydata')
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
 
-                console.log("This is Data:", data.routes.length, "MTM 134");
+                //console.log("This is Data:", data.routes.length, "MTM 134");
                 res.status(200).json(data);
             }
         }
@@ -349,7 +349,7 @@ router.route('/existdata/')
 
 router.route('/savewaypoint/')
     .post(function (req, res) {
-        console.log('savewaypoint, req.bod', req.body);
+        //console.log('savewaypoint, req.bod', req.body);
         var soapManager = new soap(req.session.login);
         soapManager.updateWaypointCoordTo1C(req.body, function (data) {
             if (!data.error) {
@@ -387,7 +387,7 @@ router.route('/saveupdate/')
             if(obj.data[i] && obj.data[i].id!=undefined) newID=""+obj.data[i].lat+obj.data[i].lon+obj.data[i].t1;
             if(obj.data[i] && obj.data[i].TASK_NUMBER) newID=""+obj.data[i].TASK_NUMBER+obj.data[i].TASK_DATE;
             var j=0;
-            console.log("updateCacshe[req.session.login]", updateCacshe[req.session.login])
+            //console.log("updateCacshe[req.session.login]", updateCacshe[req.session.login])
             while(j<updateCacshe[req.session.login].data.length){
                 var oldID;
                 if(updateCacshe[req.session.login].data[j] && updateCacshe[req.session.login].data[j].id!=undefined) oldID=""+updateCacshe[req.session.login].data[j].lat+updateCacshe[req.session.login].data[j].lon+updateCacshe[req.session.login].data[j].t1;
