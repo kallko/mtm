@@ -184,6 +184,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         //console.log(localData, "local data");
                         rootScope.$emit('pointEditingPopup', localData , timeData);
 
+
                     });
 
 
@@ -209,13 +210,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             map.removeLayer(scope.polyline)}
                         catch (e) {
                             console.log(e);
-                        };
+                        }
 
                         try{
                             scope.spiderMarker.fire('click')}
                         catch (e) {
                             console.log(e);
-                        };
+                        }
 
                         //console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
 
@@ -476,7 +477,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         });
 
-        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
+        //rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
         // перевести timestamp в строковой формат времени минуты:часы
         function mmhh(time) {
@@ -993,8 +994,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             scope.learConnectWithStopsAndPoints = new L.layerGroup().addTo(map);
 
             if(markersArr != undefined) {
-                var i = 0;
-                while (markersArr[i]!=undefined && markersArr[i].source != undefined) {
+                for( var i = 0; i < markersArr.length; i++) {
+                    if(typeof (markersArr[i].source) == 'undefined' ){
+                        continue;
+                    }
                     if (markersArr[i].source.servicePoints != undefined) {
                         var servicePointsLat = markersArr[i]._latlng.lat;
                         var servicePointsLng = markersArr[i]._latlng.lng;
@@ -1004,7 +1007,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         while (j < markersArr.length) {
                             if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                                 for (var k = 0; arrIndexStopPoints.length > k; k++) {
-                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER){
+                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
                                         var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
                                             color: 'black',
                                             weight: 1,
@@ -1012,7 +1015,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                             smoothFactor: true
                                         });
                                         scope.learConnectWithStopsAndPoints.addLayer(polyline);
-
                                     }
                                 }
                             }
@@ -1022,9 +1024,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         //console.log ("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
                     }
-                    i++;
-
-
                 }
             }
         }

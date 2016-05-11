@@ -5,7 +5,12 @@ var myLayout = new GoldenLayout({
     settings: {
         showPopoutIcon: false,
         showCloseIcon: false,
-        hasHeaders: true
+        hasHeaders: true,
+        constrainDragToContainer:false
+    },
+    dimensions: {
+        dragProxyWidth: 0,
+        dragProxyHeight: 0
     },
     content: [{
         type: 'row',

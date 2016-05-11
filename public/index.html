@@ -8,8 +8,8 @@
 </script>
 
 <!-- файлы стилей -->
-<link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css"/>
-<link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css"/>
+<link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css"/>
+<link type="text/css" rel="stylesheet" href="./css/goldenlayout-light-theme.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
 <link rel="stylesheet" href="./css/font-awesome.min.css"/>
 <link rel="stylesheet" href="./css/application.css"/>
@@ -453,6 +453,12 @@
     </div>
 </template>
 
+<template type="text/html" id="transparent-map-window-right">
+    <div class="section"  id="transparent-map-holder-right">
+        transparent-map-window
+    </div>
+</template>
+
 <!-- панель закрытия дня -->
 <template type="text/html" id="close-day" >
     <div id="close-day-panel" ng-controller = "CloseDayController" >
@@ -477,18 +483,18 @@
                 </tr>
                 <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID)">
                     <td><input ng-click = "toggleCheckBoxToClose()"
-                               id = "close-table-checkbox-{{::item.filterId}}"
+                               id = "close-table-checkbox-{{item.filterId}}"
                                type="checkbox"
                                ng-model="item.getCheck"
                                ng-disabled="true"
                                ng-init="item.getCheck=false;">
                     </td>
-                    <td>{{::item.filterId}}</td>
-                    <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
-                    <td>{{::item.transport.NAME}}</td>
-                    <td>{{::item.END_TIME.split(' ')[1]}}</td>
+                    <td>{{item.filterId}}</td>
+                    <td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>
+                    <td>{{item.transport.NAME}}</td>
+                    <td>{{item.END_TIME.split(' ')[1]}}</td>
 
-                    <td>{{::item.START_TIME.split(' ')[0]}}</td>
+                    <td>{{item.START_TIME.split(' ')[0]}}</td>
                 </tr>
             </table>
         </div>
@@ -647,7 +653,7 @@
                     Карточка остановки
                 </div>
                 <div class = "col-md-3">
-                    <button id="btn-close" class="btn btn-danger" ng-click="cancel('#point-editing-popup')">Закрыть
+                    <button id="btn-close" class="btn btn-danger" ng-click="cancel()">Закрыть
                     </button>
                 </div>
             </div>
@@ -664,9 +670,9 @@
                 </tr>
                  <tr>
                     <td class="row-data">{{stopIndx}}</td>
-                    <td class="row-data">{{data.t1*1000 | date: "HH:mm"}}</td>
-                    <td class="row-data">{{data.t2*1000 | date: "HH:mm"}}</td>
-                    <td class="row-data">{{(data.t2-data.t1)*1000 | date: "mm"}} мин</td>
+                    <td class="row-data">{{start*1000 | date: "HH:mm"}}</td>
+                    <td class="row-data">{{fin*1000 | date: "HH:mm"}}</td>
+                    <td class="row-data">{{(delta/60)}} мин</td>
                 </tr>
             </tbody>
         </table>        
@@ -678,12 +684,19 @@
                 <td class="title">Интервал времени на обслуживание точки</td>
                 <td>Действие</td>
             </tr>
+            <tr ng-repeat="servisPoint in servisPoints">
+                <td>{{servisPoint.wayPoint+1}}</td>
+                <td>
+                    <input ng-model="servisPoint.stopTime" ng-change="chenge($index, $event)" required type="number" class="promised-text-card">
+                </td>
+                <td><button ng-click="unbindPoint($index, $event)" class="btn btn-primary btn-sm">Отвязать от стопа</button></td>
+            </tr>
         </tbody>
     </table>
     <div class = "point-view-buttons">
-        <button class="btn btn-primary btn-sm" ng-click="confirm('#point-editing-popup')">Подтвердить
+        <button class="btn btn-primary btn-sm" ng-disabled="disabled" ng-click="confirm()">Подтвердить
         </button>
-        <button class="btn btn-primary btn-sm" ng-click="cancel('#point-editing-popup')">Отменить
+        <button class="btn btn-primary btn-sm" ng-click="cancel()">Отменить
         </button>
     </div>
 </div>

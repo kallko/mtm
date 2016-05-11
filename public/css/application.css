@@ -6,7 +6,7 @@ template {
     display: none;
 }
 
-#transparent-map-holder {
+#transparent-map-holder, #transparent-map-holder-right {
     opacity: 0;
     height: 100%;
 
