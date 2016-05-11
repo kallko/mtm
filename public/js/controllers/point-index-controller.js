@@ -308,7 +308,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 _date = parts[0].split('.'),
                 _time = parts[1].split(':');
 
-            console.log(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
+            //console.log(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
 
             return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
         }
@@ -532,7 +532,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     tPoint.windows = TimeConverter.getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, data.server_time);
                     // создание обещанных окон
                     if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
-                        console.log("Create PROMISED WINDOW step1");
+                        //console.log("Create PROMISED WINDOW step1");
 
                         for (k = 0; k < tPoint.windows.length; k++) {
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
@@ -577,13 +577,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     // копируем обещанное окно без ссылок
                     if (tPoint.promised_window_changed == undefined) {
-                        console.log("Create PROMISED WINDOW step3");
+                        //console.log("Create PROMISED WINDOW step3");
                         tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
                     }
 
                     if (scope.params.workingWindowType == 0) {
                         for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
-                            console.log("Create PROMISED WINDOW step4");
+                            //console.log("Create PROMISED WINDOW step4");
                             if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
                                 tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
                                 tPoint.working_window = tPoint.windows[k];
@@ -685,7 +685,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обновление статусов
         function statusUpdate() {
-            console.log('statusUpdate');
+            //console.log('statusUpdate');
 
             var route,
                 tmpPoint,
@@ -867,7 +867,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-                                    console.log("Find stop for Waypoint and change STATUS")
+                                    //console.log("Find stop for Waypoint and change STATUS")
                                     findStatusAndWindowForPoint(tmpPoint);
 
 
@@ -1006,16 +1006,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
                     mobilePushes = JSON.parse(buttonsStr);
                 }
-                console.log('mobilePushes array', {pushes: mobilePushes});
+                //console.log('mobilePushes array', {pushes: mobilePushes});
 
                 if (mobilePushes == undefined) continue;
 
                 for (var i = 0; i < mobilePushes.length; i++) {
                     if (mobilePushes[i].canceled) continue;
+                    if (mobilePushes[i].gps_time == undefined)
+
+                    //var mobileString=JSON.stringify(mobilePushes[i]);
+                    //console.log("mobileString", mobileString);
 
                     if (mobilePushes[i].gps_time_ts == undefined) {
                         if (mobilePushes[i].gps_time) {
-                            mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);
+                            mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);//+60*60*4 Костыль для IDS у которых не настроены часовые пояса на телефонах водителей.
                         } else {
                             mobilePushes[i].gps_time_ts = 0;
                         }
@@ -1033,6 +1037,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
                             if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+                                console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
+
                                 tmpPoint.mobile_push = mobilePushes[i];
                                 tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
                                 mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
@@ -1239,9 +1245,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     if (_route.points[j].status == STATUS.SCHEDULED) {
                                         if (now > _route.points[j].working_window.finish) {
                                             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
-                                            console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
+                                            //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                                             _route.points[j].status = STATUS.TIME_OUT;
-                                            console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
+                                            //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                                             _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
                                         }
                                     } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
@@ -1281,10 +1287,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         if (_route.points[j].overdue_time > 0) {
                                             if (_route.points[j].working_window.finish < now) {
                                                 _route.points[j].status = STATUS.TIME_OUT;
-                                                console.log("_route.points[j].status = STATUS.TIME_OUT;");
+                                                //console.log("_route.points[j].status = STATUS.TIME_OUT;");
                                             } else {
                                                 _route.points[j].status = STATUS.DELAY;
-                                                console.log("_route.points[j].status = STATUS.DELAY;");
+                                                //console.log("_route.points[j].status = STATUS.DELAY;");
                                             }
                                         }
 

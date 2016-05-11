@@ -131,7 +131,7 @@ router.route('/dailydata')
                 req.session.itineraryID = data.ID;
                 data.user = req.session.login;
 
-                //console.log("This is Data:", data);
+                console.log("This is Data:", data.routes.length, "MTM 134");
                 res.status(200).json(data);
             }
         }
@@ -250,13 +250,13 @@ router.route('/trackparts/:start/:end')
                             if (data[j].data.length > 0) {
                                 var stopsBefore=cached.sensors[i].real_track.length;
 
-                                console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
+                                //console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
                                 cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                 cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                 var stopsAfter=cached.sensors[i].real_track.length;
-                                console.log("Car with gid=", cached.sensors[i].GID, "Now hav stops",  stopsAfter);
+                                //console.log("Car with gid=", cached.sensors[i].GID, "Now hav stops",  stopsAfter);
                                 if(stopsAfter-stopsBefore==1){
-                                   console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
+                                 //  console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
                                 }
 
                             }
@@ -265,9 +265,9 @@ router.route('/trackparts/:start/:end')
                     }
                 }
 
-                console.log('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
+                //console.log('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
                 cached.server_time = parseInt(Date.now() / 1000);
-                console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
+                //console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
 
                 log.toFLog('final_data.js', cached);
 
