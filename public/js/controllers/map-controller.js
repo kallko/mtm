@@ -866,15 +866,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
 
 
-                //Удаляем из старого маркера шз его сервиспоинтс indx
-                var i=0;
-                while (typeof (oldStopMarker.source.servicePoints)!='undefined' && i<oldStopMarker.source.servicePoints.length){
+                //Удаляем из старого маркера  его сервиспоинтс indx, если он есть
+                if(oldStopMarker!=undefined) {
+                    var i=0;
+                    while (typeof (oldStopMarker.source.servicePoints)!='undefined' && i<oldStopMarker.source.servicePoints.length){
 
-                    if (oldStopMarker.source.servicePoints[i]==indx){
-                        oldStopMarker.source.servicePoints.splice(i, 1);
-                        scope.$apply();
+                        if (oldStopMarker.source.servicePoints[i]==indx){
+                            oldStopMarker.source.servicePoints.splice(i, 1);
+                            scope.$apply();
+                        }
+                        i++;
                     }
-                    i++;
                 }
 
 
