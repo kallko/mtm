@@ -989,7 +989,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         });
         function drowConnectWithStopsAndPoints(){
-            console.info(markersArr);
+            //console.info(markersArr);
             scope.learConnectWithStopsAndPoints = new L.layerGroup().addTo(map);
 
             if(markersArr != undefined) {
@@ -1388,26 +1388,28 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function checkRealServiceTime(data){
             //console.log("Checking Real Time in", data);
             var times=[];
-            var i=0;
-            while (i<data.source.servicePoints.length){
-                //console.log("Hey!", data.source.servicePoints[i]+1);
-                var number=data.source.servicePoints[i]+1;
-                var j=0;
-                while(j<markersArr.length){
-                    if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
-                        //console.log('Marker real service time = ', markersArr[j].source.real_service_time);
-                        if(markersArr[j].source.real_service_time!=undefined){
-                          times.push(markersArr[j].source.real_service_time);
-                        } else {
-                            times.push(0);
-                        }
-                        }
+            if(data.source.servicePoints!=undefined){
+                var i=0;
+                while (i<data.source.servicePoints.length){
+                    //console.log("Hey!", data.source.servicePoints[i]+1);
+                    var number=data.source.servicePoints[i]+1;
+                    var j=0;
+                    while(j<markersArr.length){
+                        if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
+                            //console.log('Marker real service time = ', markersArr[j].source.real_service_time);
+                            if(markersArr[j].source.real_service_time!=undefined){
+                              times.push(markersArr[j].source.real_service_time);
+                            } else {
+                                times.push(0);
+                            }
+                            }
 
-                    j++;
+                        j++;
+                    }
+                    i++;
                 }
-                i++;
-            }
             //console.log('times', times);
+            }
             return times;
 
         }
