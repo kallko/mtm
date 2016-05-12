@@ -316,7 +316,7 @@ router.route('/recalculate')
 // сохранение в 1С маршрута
 router.route('/saveroute/')
     .post(function (req, res) {
-        console.log('saveroute, len', req.body.routes.length);
+        //console.log('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
         soapManager.saveRoutesTo1C(req.body.routes, function (data) {
             if (!data.error) {
@@ -368,7 +368,7 @@ router.route('/savewaypoint/')
 router.route('/saveupdate/')
     .post(function (req, res) {
 
-        console.log("!!!!!!!!Логин!!!!!!!!", [req.session.login]);
+        console.log("Логин : ", [req.session.login]);
 
         if(updateCacshe[req.session.login]==undefined || updateCacshe[req.session.login].length==0){
             updateCacshe[req.session.login] = req.body;
@@ -418,8 +418,7 @@ router.route('/routerdata')
             cData = cashedDataArr[req.session.login],
             sended = false,
             checkFunc = function (data, callback) {
-                console.log('checkFunc', cData.routes[routeIndx].plan_geometry_loaded,
-                    cData.routes[routeIndx].time_matrix_loaded, !sended);
+                console.log('checkFunc', cData.routes[routeIndx].plan_geometry_loaded, cData.routes[routeIndx].time_matrix_loaded, !sended);
                 if (cData.routes[routeIndx].plan_geometry_loaded && cData.routes[routeIndx].time_matrix_loaded && !sended) {
                     callback(data);
                 }

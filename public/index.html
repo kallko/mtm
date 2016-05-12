@@ -94,7 +94,8 @@
 <template type="text/html" id="template-point-table">
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
         <!-- меню -->
-        <div id="point-menu-panel">
+        <!-- Пока не выводим для пользователя, так как не реализован функционал -->
+        <div id="point-menu-panel" ng-show="false">
             <div>
                 <select id="status-select" ng-model="filters.status" class="group-select"
                         ng-options='option.value as option.name for option in filters.statuses'>
@@ -456,7 +457,7 @@
 <template type="text/html" id="close-day" >
     <div id="close-day-panel" ng-controller = "CloseDayController" >
         <button ng-click = "showCheckBoxToClose()">Готовые к закрытию</button>
-        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">!!!!!!Закрыть выбранные</button>
+        <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть выбранные</button>
         <div>Имя компании: {{companyName}},
               Ответственный: {{user}},
               Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}

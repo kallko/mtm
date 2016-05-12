@@ -364,7 +364,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            console.log("tracks.js 366", body, "End 366");
+            //console.log("tracks.js 366", body, "End 366");
             callback(body);
         }
     });
@@ -406,7 +406,7 @@ TracksManager.prototype.sendDataToSolver = function () {
                     url: _query,
                     json: true
                 }, function (error, response, body) {
-                    console.log(body, ii);
+                    //console.log(body, ii);
                 });
 
             }, (ii) * 4 );
