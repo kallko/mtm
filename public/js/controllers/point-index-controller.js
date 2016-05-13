@@ -281,10 +281,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get(url, {})
                 .success(function (data) {
 
-                    //var newData=JSON.stringify(data);
-                    //var toPrint=JSON.parse(newData);
+                    //Для отладки вывод в консоль данных полученных от 1С
+                    var newData=JSON.stringify(data);
+                    var toPrint=JSON.parse(newData);
+                    console.log("I load this data", toPrint);
 
-                    //console.log("I load this data", toPrint);
+
                     linkDataParts(data);
                     if (loadParts) {
                         loadTrackParts();
@@ -301,11 +303,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         // получить объект Date из строки
-        function strToTstamp(strDate) {
+        function strToTstamp(strDate, lockaldata) {
             //console.log(strDate, "strDate");
-            var parts = strDate.split(' '),
-                _date = parts[0].split('.'),
-                _time = parts[1].split(':');
+            var parts = strDate.split(' ');
+            var    _date = parts[0].split('.');
+            var _time;
+            var toPrint=JSON.stringify(strDate);
+            try {
+               _time = parts[1].split(':');} catch (exeption) {
+                console.log(toPrint, "Error", exeption, lockaldata);
+            }
+
+
 
             //console.log(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
 
@@ -753,6 +762,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             tmpArrival = route.real_track[j];
                             // перебираем все точки к которым
                             for (var k = 0; k < route.points.length; k++) {
+
+
                                 tmpPoint = route.points[k];
 
                                 LAT = parseFloat(tmpPoint.LAT);
@@ -767,15 +778,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                 tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
 
+
+
+
+
+
+                                // Если маршрут не просчитан, отдельно проверяем попадает ли стоп в одно из возможных временных окон  и насколько он рядом
+                                // и если да, то тоже привязываем стоп к точке
+
+                                var suit=false;   //Показывает совместимость точки и стопа для непросчитанного маршрута
+                                if (route.DISTANCE == 0 && tmpDistance < scope.params.stopRadius ) {
+                                    suit=checkUncalculateRoute(tmpPoint, tmpArrival);
+                                }
+
                                 // если стоп от точки не раньше значения timeThreshold и в пределах
                                 // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
                                 // по времени чем предыдущий детект - привязываем этот стоп к точке
 
 
 
-                                if (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
+                                if (suit || (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
                                     tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
-                                    tmpPoint.timeToStop > tmpTime)) {
+                                    tmpPoint.timeToStop > tmpTime))) {
 
                                     haveUnfinished = false;
 
@@ -802,7 +826,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                                     //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
-                                    if(tmpPoint.haveStop ==true && !findBestStop(tmpPoint, tmpArrival)){
+                                    //
+                                    if(tmpPoint.haveStop == true &&!findBestStop(tmpPoint, tmpArrival)){
                                         continue;
                                     }
 
@@ -2457,7 +2482,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function concatDailyAndExistingData (data){
 
-            //console.log('concat from Node existing data', _data, "with", scope.existData  );
+            console.log('concat from Node existing data', _data, "with", scope.existData  );
             if (!scope.existData.data) return;
             var i=0;
             while (i<_data.routes.length){
@@ -2618,6 +2643,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
+        // Функция, которая проверяет для непросчитанных маршрутов, является ли стоп валидным
+        // по времени. Попадает ли в одно из возможных временных окон.
+        function checkUncalculateRoute(point, stop){
+            var result=false;
+            var parts=point.AVAILABILITY_WINDOWS.split(";");
+            var size=parts.length;
+            var i=0;
+            while(i<size){
+                var date=point.ARRIVAL_TIME.substr(0,11);
+                var temp=parts[i].trim();
+                var before=temp.substr(0,5);
+                before=date+before+":00";
+                //console.log("before=", before);
+                var begin=strToTstamp(before, point);
+
+                var after=temp.slice(-5);
+                after=date+after+":00";
+                var end=strToTstamp(after, point);
+                if ((stop.t1> begin-scope.params.timeThreshold * 60) && (stop.t1< end+scope.params.timeThreshold * 60) ){
+                    result=true;
+                    break;
+                }
+                i++;
+            }
+
+            // Тестово отладочный блок
+            //if(point.route_id==4 && (point.NUMBER==27 || point.NUMBER==24)){
+            //    console.log("Analyze point", point, "and stop ", stop, "result=", result);
+            //}
+            //return result;
+        }
 
 
         //  транзит в мтм роутер из мэп контроллер изменнных данных

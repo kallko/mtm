@@ -165,13 +165,33 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
                     //}
 
-                    tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon],
+
+                    //tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon], - заменили эту строку на нижнюю
+                    //чтобы стоп рисовался по усредненным данным, а не по первым. В связи с этим, необходимо добавить линию от конца трека до стопа.
+
+                    tmpVar = L.marker([track[i].lat, track[i].lon],
                         {'title': tmpTitle,
                         'draggable': true});
                     tmpVar.source=track[i];
                     tmpVar.stopIndx=stopIndx;
                     tmpVar.routeRealTrackIndx=i;
                     tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
+
+                    var LAT=+track[i].coords[0].lat;
+                    var LON=+track[i].coords[0].lon;
+                    var lat=+track[i].lat;
+                    var lon=+track[i].lon;
+
+                    console.log(" LATLON",LAT, LON, lat, lon );
+
+                    var stopPolyline = new L.Polyline([[LAT, LON], [lat, lon], track[i].coords[track[i].coords.length - 1]], {
+                        color: color,
+                        weight: 3,
+                        opacity: 0.8,
+                        smoothFactor: 1
+                    });
+
+                    stopPolyline.addTo(map);
 
 
                     tmpVar.on('click', function(event){
@@ -180,7 +200,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         // if(localData.source.servicePoints == undefined ){
                         //     return;
                         // }
-                        var timeData=checkRealServiceTime(localData)
+                        var timeData=checkRealServiceTime(localData);
                         //console.log(localData, "local data");
                         rootScope.$emit('pointEditingPopup', localData , timeData);
 
@@ -196,6 +216,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
 
+                    // тестово отладочный блок
+                    //tmpVar.on('mouseover', function(event){
+                    //   console.log(event.target);
+                    //});
 
                     tmpVar.on('dragend', function(event){
 
@@ -1532,8 +1556,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             var LAT=mobilePush._latlng.lat;
             var LON=mobilePush._latlng.lng;
-            var lat=+markersArr[i].source.LAT;
-            var lon=+markersArr[i].source.LON;
+            var lat=+markersArr[i]._latlng.lat;
+            var lon=+markersArr[i]._latlng.lng;
             var line_points = [
                             [LAT, LON],
                             [lat, lon]];
