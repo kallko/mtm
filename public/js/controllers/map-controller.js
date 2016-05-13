@@ -251,6 +251,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         }
 
                         checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
+                        scope.currentDraggingStop=null;
 
                     });
 
@@ -436,7 +437,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 if (!point.confirmed && (point.status == STATUS.FINISHED ||
                     point.status == STATUS.FINISHED_LATE || point.status == STATUS.FINISHED_TOO_EARLY)) {
-                    tmpBgColor = '#5cb85c';
+                    tmpBgColor = 'yellow';
                     tmpFColor = 'black';
                 }
 
@@ -458,6 +459,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 });
 
 
+
+                //используется только для отладки и настройки
                 tmpVar.on('dblclick', function(event){
                     console.log('this is waypoint ', event.target);
                 });
@@ -1094,18 +1097,27 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
              var container;
              var i=0;
              var num;
+             console.log(markersArr, "markersArr");
              var size = markersArr.length;
              while (i<size){
                if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
                    if (markersArr[i].source.NUMBER==(indx+1)) {
                        num=markersArr[i].source.NUMBER;
                        container=markersArr[i];
+                       markersArr[i].source.confirmed=true;
+                       markersArr[i].source.rawconfirmed=1;
+                       console.log("markersArr[i]", markersArr[i]);
+                       break;
                    }
                }
                  i++;
              }
 
-             container.setIcon(getIcon(num, 14, '#5cb85c', 'black')).update();
+             container.setIcon(getIcon(num, 14, '#0a800a', 'white')).update();
+
+             //Если подтверждение точки вызвано не перетягиванием стопа, а подтверждением в таблице, то титл с реально обслуженным временем не добавляеться.
+             if (scope.currentDraggingStop== null || scope.currentDraggingStop==undefined ) return;
+
              var k= container._icon.title.indexOf("Реально обслужено");
              if (k<0){
                  container.source.autofill_service_time=scope.currentDraggingStop.source.time;
@@ -1585,6 +1597,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
+
+        rootScope.$on('makeWaypointGreen', function (event, index) {
+            console.log("Send ", (index-1));
+           makeWayPointMarkerGreen(index-1);
+        });
 
     }]);
 

@@ -1483,6 +1483,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function onChangeStatus(event, data) {
             var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
             changeStatus(data.row, rawPoint, data.option);
+            // и изменение цвета маркера
+
         }
 
         // изменение статуса
@@ -1493,11 +1495,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             switch (option) {
                 case 'confirm-status': // подтверждение сомнительного статуса
                     if (!needChanges) return;
-                    row.status = STATUS.FINISHED;
+                        //Если у точки уже есть статус Доставлено рано или доставлено поздно, оставляем его.
+                        if(row.status>2){
+                    row.status = STATUS.FINISHED;}
+
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
                     rootScope.$emit('checkInCloseDay');
-                  //  addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
+                    rootScope.$emit('makeWaypointGreen', row.NUMBER);
+                    //addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
                     break;
                 case 'not-delivered-status': // отмена сомнительного статуса
                     if (!needChanges) return;
