@@ -66,7 +66,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
             scope.filters.route = scope.filters.routes[0].value;
-            scope.filters.problem_index = -1;
+            scope.filters.problem_index = 1;
             scope.filters.promised_15m = -1;
             scope.draw_modes = [                                        // режимы отрисовки треков
                 {name: 'комбинированный трек', value: 0},
@@ -1393,7 +1393,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     target: '#context-menu',
                     onItem: deliveryRowConextMenu
                 });
-                scope.filters.problem_index = 1;
             });
 
             rootScope.$on('settingsChanged', settingsChanged);

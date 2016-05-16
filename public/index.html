@@ -242,7 +242,7 @@
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
-                    ng-if="applyFilter(row)"
+                    ng-show="applyFilter(row)"
                     on-finish-render="ngRepeatFinished"  class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
