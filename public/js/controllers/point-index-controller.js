@@ -2694,4 +2694,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         )});
 
 
+        rootScope.$on('askGPSConfirmPoint', function(event, marker){
+
+
+
+            rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
+
+            console.log("Point", marker.point.ID, "confirmed=", rootScope.gpsConfirm);
+
+        });
+
     }]);

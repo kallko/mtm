@@ -608,10 +608,10 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
 
                // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
                 client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
-                //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+                //client.runAsUser({'input_data': resXml, 'user': 'k00056.0'}, function (err, result) {
 
 
-                client.runAsUser({'input_data': resXml, 'user': 'k00056.0'}, function (err, result) {
+                client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
                     if (!err) {
                         console.log('updateWaypointCoordTo1C OK');
                         log.toFLog('afterSave.js', result);
