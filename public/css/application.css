@@ -510,6 +510,9 @@ template {
     position: relative;
 }
 .driver-select-bg {
-    background-color: lightgray;
+    background-color: #A99F9F;
 }
 
+.stopWithOutPoints {
+    text-align: center;
+ }

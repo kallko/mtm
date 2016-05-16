@@ -25,15 +25,21 @@ new CronJob('00 01 00 * * *', function(){
         }
         if(company in closeRoutesUniqueID) { // есть ли за сегодня закрытые роуты, если да, то по UniqueID удаляем их из сегодняшних роутов
             for (var i = 0; closeRoutesUniqueID[company].length > i; i++) {
-                for (var j = 0; cashedDataArr[company].length > 0; j++) {
-                    if (cashedDataArr[company][j]['uniqueID'] == closeRoutesUniqueID[company][i]) { // удаляем из кеша все закрытые маршруты
-                        cashedDataArr[company].splice(j, 1);
+                for (var j = 0; cashedDataArr[company].routes.length > 0; j++) {
+                    if (cashedDataArr[company].routes[j]['uniqueID'] == closeRoutesUniqueID[company][i]) { // удаляем из кеша все закрытые маршруты
+                        cashedDataArr[company].routes.splice(j, 1);
+                        j--;
                         break;
                     }
+
                 }
             }
         }
         if(cashedDataArr[company].routes.length > 0){ // если еще остались роуты то добавляем их к старым в oldRoutesCache
+            for(var j = 0; cashedDataArr[company].routes.length > j; j++){
+                cashedDataArr[company].routes[j].oldroute = true; // метка для старых роутов
+            }
+
             oldRoutesCache[company] = oldRoutesCache[company].concat(JSON.parse(JSON.stringify(cashedDataArr[company].routes)));
             cashedDataArr[company].routes = [];
         }
