@@ -263,6 +263,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 // колбек срабатывающий при получении развернутого решения
 function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
     if (!err) {
+        //console.log(result.return, "soap.js:266")
         parseXML(result.return, function (err, res) {
             data.iLength--;
 
@@ -329,6 +330,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
+    log.l(_xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
@@ -340,6 +342,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 if (waypoints == undefined) return;
 
                 log.l('waypoints.length = ' + waypoints.length);
+                //console.log(waypoints, "soap.js:344");
 
                 data[nIndx].transports = [];
                 if (transports === undefined) {
@@ -589,7 +592,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
 SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     log.toFLog('origWaypointBeforeSave.json', waypoint);
 
-    console.log('updateWaypointCoordTo1C');
+    console.log("!!!!!!!!!!! update Wayoint", waypoint.waypoint, "confirm", waypoint.confirm);
         me = this;
 
     var resXml;

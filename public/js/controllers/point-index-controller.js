@@ -283,6 +283,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     //Для отладки вывод в консоль данных полученных от 1С
                     var newData=JSON.stringify(data);
+                    //console.log("JSON FILE", newData);
                     var toPrint=JSON.parse(newData);
                     console.log("I load this data", toPrint);
 
@@ -482,6 +483,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             //Для непосчитанных маршрутов время прибытия считается границей окна доступности
                             tPoint.arrival_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5)+":00";
+
+                            // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
+                            if (tPoint.ARRIVAL_TIME.length<1) {
+                                tPoint.ARRIVAL_TIME=data.routes[i].points[j-1].ARRIVAL_TIME;
+                            }
                             var toDay=tPoint.ARRIVAL_TIME.substr(0, 10);
 
                             tPoint.base_arrival=toDay+" "+ tPoint.arrival_time_hhmm;
@@ -760,6 +766,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         // если статус не из будущего (в случае демо-режима) и стейт является стопом, проверяем его
                         if (route.real_track[j].t1 < _data.server_time && route.real_track[j].state == "ARRIVAL") {
                             tmpArrival = route.real_track[j];
+                            //console.log("tmpArrival",tmpArrival);
                             // перебираем все точки к которым
                             for (var k = 0; k < route.points.length; k++) {
 
@@ -905,7 +912,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             }
 
-            console.log("Step1 parentForm", parentForm);
+            //console.log("Step1 parentForm", parentForm);
 
 
 
@@ -1021,7 +1028,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var i = 0; i < mobilePushes.length; i++) {
                     if (mobilePushes[i].canceled) continue;
 
-
+                    //console.log("mobilePushes[i]", mobilePushes[i]);
                     //var mobileString=JSON.stringify(mobilePushes[i]);
                     //console.log("mobileString", mobileString);
 
@@ -1822,7 +1829,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     demoTime: scope.demoMode ? _data.server_time : -1
                 })
                     .success(function (data) {
-                        //console.log("Additional load", {data: data});
+                        console.log("Additional load", {data: data});
                         route.real_track = data;
 
 
@@ -2011,10 +2018,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-        function updateWaypoint(waypoint) {
+        function updateWaypoint(waypoint, confirm) {
 
-            console.log('sending waypoint to save', waypoint);
-            http.post('./savewaypoint/', {waypoint: waypoint}).
+            console.log('sending waypoint to save', waypoint, confirm);
+            http.post('./savewaypoint/', {waypoint: waypoint, confirm:confirm}).
                 success(function (data) {
                     console.log('Save to 1C result >>', data);
                 })
@@ -2371,9 +2378,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return {closeDayData: send, routesID: routesID};
         }
 
-        rootScope.$on('pushWaypointTo1С', function(event, data){ // инициализация отправки данных точки на сервер 1с
-            console.log(data, ' sended data');
-            updateWaypoint(data)
+        rootScope.$on('pushWaypointTo1С', function(event, data, confirm){ // инициализация отправки данных точки на сервер 1с
+            console.log(data, ' sended data', confirm);
+            updateWaypoint(data, confirm)
 
         });
         //console.log(scope.filters.route, ' filters route');

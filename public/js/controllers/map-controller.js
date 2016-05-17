@@ -106,7 +106,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 //drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия если в таблице стоит галочка.
                 drawPushes = true;  // Железно отрисовывать пуши.
 
-                stops=[];
+                //stops=[];
                 markersArr=[];
 
 
@@ -128,7 +128,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 } else if (track[i].state == 'ARRIVAL')
                 { // отрисовать стоп
                     // если отрисовка стопов выключена, пропустить итерацию
-                    stops.push(track[i]);
+                    //stops.push(track[i]);
 
                     if (!drawStops) continue;
 
@@ -173,6 +173,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         {'title': tmpTitle,
                         'draggable': true});
                     tmpVar.source=track[i];
+                    console.log("tmpVar", tmpVar);
                     tmpVar.stopIndx=stopIndx;
                     tmpVar.routeRealTrackIndx=i;
                     tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
@@ -182,7 +183,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     var lat=+track[i].lat;
                     var lon=+track[i].lon;
 
-                    console.log(" LATLON",LAT, LON, lat, lon );
+                    //console.log(" LATLON",LAT, LON, lat, lon );
 
                     var stopPolyline = new L.Polyline([[LAT, LON], [lat, lon], track[i].coords[track[i].coords.length - 1]], {
                         color: color,
@@ -462,9 +463,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                    };
 
-
-
-                    var message = "Вы собираетесь изменить координаты " + scope.dragendPoint.source.waypoint.NAME + " \n"
+                    var message = "Вы собираетесь изменить координаты " + scope.dragendPoint.source.waypoint.NAME + "\n"
                         + "Старые координаты " + scope.dragendPoint.source.waypoint.LAT + " " + scope.dragendPoint.source.waypoint.LON + "\n"
                         + "Новые координаты " + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
                     rootScope.$emit('ReqChengeCoord', {message: message});
@@ -479,10 +478,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 });
 
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
-
-                //console.log(tmpVar);
-
-
 
                 addMarker(tmpVar);
 
@@ -502,11 +497,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-        rootScope.$on('ResChengeCoord', function(event, bool){
+        rootScope.$on('ResChengeCoord', function(event, bool, confirm){
            var newMarker = scope.dragendPoint;
             if (bool == 'true'){
 
-                changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8) );
+                changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8), confirm);
                 rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
                 $('#notification_wrapper').css('opacity', '1');
                 //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
@@ -1412,7 +1407,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-        function changeWaypointCoordinates (newMarker, lat, lng){
+        function changeWaypointCoordinates (newMarker, lat, lng, confirm){
             //console.log("Start Changes", newMarker, lat, lng);
 
             // в newmarker вставить новые координаты
@@ -1426,7 +1421,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             newMarker.source.waypoint.LON=lng;
 
             //Сформировать soap data и soap запрос
-            rootScope.$emit('pushWaypointTo1С', newMarker.source.waypoint);
+            rootScope.$emit('pushWaypointTo1С', newMarker.source.waypoint, confirm);
 
 
             //var soapStr=testSoap(newMarker.source);
@@ -1601,7 +1596,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         function checkTestStops() {
-            console.info(markersArr);
+           // console.info(markersArr);
            // console.log("We will work with stop markers", markersArr);
             if(markersArr.length>0) {
                 var i = 0;

@@ -98,6 +98,7 @@ router.route('/dailydata')
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
+                //var toPrint = JSON.stringify(data)
                 console.log('=== dataReadyCallback === send data to client ===');
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
                 if (data.routes!=undefined) {
@@ -349,7 +350,8 @@ router.route('/existdata/')
 
 router.route('/savewaypoint/')
     .post(function (req, res) {
-        //console.log('savewaypoint, req.bod', req.body);
+        console.log("^^^^^^^^^ router ^^^^^^^^^");
+        console.log('savewaypoint, req.bod', req.body);
         var soapManager = new soap(req.session.login);
         soapManager.updateWaypointCoordTo1C(req.body, function (data) {
             if (!data.error) {

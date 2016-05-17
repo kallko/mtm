@@ -3,6 +3,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
     function (scope, rootScope, timeout) {
 
         //init();
+        scope.gpsConfirmation=true;
 
         rootScope.$on('showNotification', function (event, data) {
             showPopup(data.text, data.duration);
@@ -17,13 +18,17 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
         rootScope.$on('ReqChengeCoord', function(event, data){
             $('#ConfirmchengeCoord div').html(data.message);
             $('#ConfirmchengeCoord').popup('show');
+            console.log(scope.gpsConfirmation, "scope.gpsConfirmation;");
 
         });
 
         scope.chengeCoordPoint = function(bool){
-            rootScope.$emit('ResChengeCoord', bool);
+            //console.log(scope.gpsConfirmation);
+            rootScope.$emit('ResChengeCoord', bool, scope.gpsConfirmation);
             $('#ConfirmchengeCoord').popup('hide');
         };
+
+
 
 /*
         function init() {

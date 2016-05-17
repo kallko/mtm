@@ -3,7 +3,7 @@
     var parentForm;
     function initialize(thisForm) {
         parentForm = thisForm;
-        console.log('initialize complete', parentForm);
+        //console.log('initialize complete', parentForm);
     }
 </script>
 
@@ -493,7 +493,7 @@
             </table>
         </div>
         <!-- полупрозрачное окно для отображения карты -->
-        <div class="title"  ng-show="clickOff" id="transparent-closeday-window" > SHADOW BLOCK {{clickOff}} complete </div>
+        <div class="title"  ng-show="clickOff" id="transparent-closeday-window" ></div>
 
         <!-- Визуальная часть закрытия дня -->
     </div>
@@ -506,6 +506,7 @@
     </div>
     <div id="ConfirmchengeCoord">
         <div>[[текст оповещения]]</div>
+            <input type="checkbox" ng-model="gpsConfirmation" ng-checked="false"/>Координаты точки подтверждены GPS данными
             <button ng-click="chengeCoordPoint('true')" >OK</button>
             <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>

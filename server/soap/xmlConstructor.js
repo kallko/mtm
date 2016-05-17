@@ -223,13 +223,16 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
 
 // xml для записи в 1С новых координат точки
 XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
-    console.log("Constructor in process, and waypoint.waypoint.NAME =", waypoint.waypoint.NAME);
+    console.log("Constructor in process, and waypoint is", waypoint);
     var str = '';
     str += this.xml.begin;
-    str += '<WAYPOINTS> <WAYPOINT ACTION="UPDATE" ';
+    str += '<WAYPOINTS> <WAYPOINT ACTION="AUTO" ';
     str += 'ID="'+ waypoint.waypoint.ID + '" ';
     str += 'LAT="' + waypoint.waypoint.LAT + '" ';
     str += 'LON="' + waypoint.waypoint.LON + '" ';
+    if (waypoint.confirm) {
+        str += 'CONFIRMBYGPS="'+waypoint.confirm + '" ';
+    }
     str += ' /> </WAYPOINTS>'
     str += this.xml.end;
     console.log("XML Constructor res=", str);
