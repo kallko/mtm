@@ -42,14 +42,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     carPos = lastCoords[lastCoords.length - 1],
                     url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
                         + '&' + route.points[i + 1].LON;
-                http.get(url).
-                    success(function (data) {
+                http.get(url)
+                    .success(function (data) {
                         var geometry = getLatLonArr(data);
                         addPolyline(geometry, 'blue', 3, 0.5, 1, true);
                         if (carPos != null && geometry[0] != null) {
                             addPolyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], 'blue', 3, 0.5, 1, true);
                         }
                         drawPlannedRoute(route.plan_geometry, i);
+                    })
+                    .error(function(err){
+                        rootScope.errorNotification(url);
                     });
 
             }
@@ -336,7 +339,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         // отрисовать все точки (задачи) на карте
-        var dragendPoint; // объект события при драге  маркера-point
+        
         function drawAllPoints(points) {
             var tmpVar,
                 title,
@@ -424,11 +427,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 // Установка новых координат для вэйпоинта при переноске маркера-point
                 tmpVar.on('dragend', function(event){
-                    dragendPoint = event.target;
+                    scope.dragendPoint = event.target;
                    // var newMarker = event.target;
 
-                    var message = "Вы собираетесь изменить координаты " + dragendPoint.source.waypoint.NAME + " \n"
-                        + "Старые координаты " + dragendPoint.source.waypoint.LAT + " " + dragendPoint.source.waypoint.LON + "\n"
+                    var message = "Вы собираетесь изменить координаты " + scope.dragendPoint.source.waypoint.NAME + " \n"
+                        + "Старые координаты " + scope.dragendPoint.source.waypoint.LAT + " " + scope.dragendPoint.source.waypoint.LON + "\n"
                         + "Новые координаты " + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
                     rootScope.$emit('ReqChengeCoord', {message: message});
 
@@ -462,7 +465,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         }
         rootScope.$on('ResChengeCoord', function(event, bool){
-           var newMarker = dragendPoint;
+           var newMarker = scope.dragendPoint;
             if (bool == 'true'){
 
                 changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8) );
