@@ -15,10 +15,10 @@ template {
 #transparent-closeday-window{
     opacity: 0.5;
     height: 100%;
-    width: 50%;
+    width: 100%;
     position: absolute;
-    top:500px;
-    left: 0px;
+    /*top:500px;*/
+    /*left: 0px;*/
     z-index: 100;
     visibility: visible;
     background-color: whitesmoke;
@@ -498,4 +498,8 @@ template {
 .leaflet-div-icon {
     background: transparent;
     border: none;
+}
+
+.close-day-wrapper {
+    position: relative;
 }
