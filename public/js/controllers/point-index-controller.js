@@ -766,6 +766,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         // если статус не из будущего (в случае демо-режима) и стейт является стопом, проверяем его
                         if (route.real_track[j].t1 < _data.server_time && route.real_track[j].state == "ARRIVAL") {
                             tmpArrival = route.real_track[j];
+
                             //console.log("tmpArrival",tmpArrival);
                             // перебираем все точки к которым
                             for (var k = 0; k < route.points.length; k++) {

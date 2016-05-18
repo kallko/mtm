@@ -174,6 +174,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         'draggable': true});
                     tmpVar.source=track[i];
                     console.log("tmpVar", tmpVar);
+
+
+                    // удаляем в стейте лишние координаты
+                    if(tmpVar.source.coords.length>2){
+                        tmpVar.source.coords.splice(1,tmpVar.source.coords.length-2);
+                    }
+
                     tmpVar.stopIndx=stopIndx;
                     tmpVar.routeRealTrackIndx=i;
                     tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
