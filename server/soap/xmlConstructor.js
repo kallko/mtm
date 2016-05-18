@@ -230,9 +230,7 @@ XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
     str += 'ID="'+ waypoint.waypoint.ID + '" ';
     str += 'LAT="' + waypoint.waypoint.LAT + '" ';
     str += 'LON="' + waypoint.waypoint.LON + '" ';
-    if (waypoint.confirm) {
-        str += 'CONFIRMBYGPS="'+waypoint.confirm + '" ';
-    }
+    str += 'CONFIRMBYGPS="'+waypoint.confirm + '" ';
     str += ' /> </WAYPOINTS>'
     str += this.xml.end;
     console.log("XML Constructor res=", str);
