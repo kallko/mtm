@@ -19,7 +19,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
             $('#ConfirmchengeCoord div').html(data.message);
             $('#ConfirmchengeCoord').popup('show');
             console.log(scope.gpsConfirmation, "scope.gpsConfirmation;");
-
+            scope.gpsConfirmation=false;
         });
 
         scope.chengeCoordPoint = function(bool){
