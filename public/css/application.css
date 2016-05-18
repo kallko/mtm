@@ -287,6 +287,12 @@ template {
 #ConfirmchengeCoord button{
     margin: 10px;
 }
+
+#check {
+    width: 18px;
+    height: 18px;
+
+}
 .yellow-status {
     color: #95A932 !important;
 }
@@ -503,3 +509,4 @@ template {
 .close-day-wrapper {
     position: relative;
 }
+

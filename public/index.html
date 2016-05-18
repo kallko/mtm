@@ -471,7 +471,7 @@
                 <table>
                     <tr>
                         <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->
-                            <button ng-click="orderCloseDay('getCheck')"">Все</button></th>
+                            <button ng-click="orderCloseDay('getCheck')">Все</button></th>
                         <th><button ng-click="order('filterId'); orderCloseDay('getCheck')" >ID</button></th>
                         <th><button ng-click="order('driver.NAME'); orderCloseDay('getCheck')">Водитель</button></th>
                         <th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>
@@ -510,7 +510,7 @@
     </div>
     <div id="ConfirmchengeCoord">
         <div>[[текст оповещения]]</div>
-            <input type="checkbox" ng-model="gpsConfirmation" ng-checked="false"/>Координаты точки подтверждены GPS данными
+            <input type="checkbox" ng-model="gpsConfirmation" ng-checked="false" id="check"/>Подтверждаете новые координаты GPS данными?
             <button ng-click="chengeCoordPoint('true')" >OK</button>
             <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>

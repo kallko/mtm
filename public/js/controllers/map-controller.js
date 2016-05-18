@@ -173,7 +173,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         {'title': tmpTitle,
                         'draggable': true});
                     tmpVar.source=track[i];
-                    console.log("tmpVar", tmpVar);
+                    //console.log("tmpVar", tmpVar);
 
 
                     // удаляем в стейте лишние координаты
@@ -470,9 +470,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                    };
 
-                    var message = "Вы собираетесь изменить координаты " + scope.dragendPoint.source.waypoint.NAME + "\n"
-                        + "Старые координаты " + scope.dragendPoint.source.waypoint.LAT + " " + scope.dragendPoint.source.waypoint.LON + "\n"
-                        + "Новые координаты " + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
+                    var message = 'Вы собираетесь изменить координаты ' + scope.dragendPoint.source.waypoint.NAME + '\n'
+                        + 'Старые координаты ' + scope.dragendPoint.source.waypoint.LAT + " " + scope.dragendPoint.source.waypoint.LON + '\n'
+                        + 'Новые координаты ' + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
                     rootScope.$emit('ReqChengeCoord', {message: message});
 
                 });

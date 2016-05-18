@@ -2660,6 +2660,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // Функция, которая проверяет для непросчитанных маршрутов, является ли стоп валидным
         // по времени. Попадает ли в одно из возможных временных окон.
         function checkUncalculateRoute(point, stop){
+
+
             var result=false;
             var parts=point.AVAILABILITY_WINDOWS.split(";");
             var size=parts.length;
@@ -2682,11 +2684,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 i++;
             }
 
-            // Тестово отладочный блок
-            //if(point.route_id==4 && (point.NUMBER==27 || point.NUMBER==24)){
-            //    console.log("Analyze point", point, "and stop ", stop, "result=", result);
-            //}
-            //return result;
+
+            return result;
         }
 
 
