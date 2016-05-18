@@ -183,9 +183,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         // if(localData.source.servicePoints == undefined ){
                         //     return;
                         // }
-                        var timeData=checkRealServiceTime(localData)
-                        //console.log(localData, "local data");
-                        rootScope.$emit('pointEditingPopup', localData , timeData);
+                        var timeData = checkRealServiceTime(localData);
+                        var taskTime = getTaskTime(localData);
+                        console.log(taskTime);
+                        rootScope.$emit('pointEditingPopup', localData , timeData, taskTime);
 
 
                     });
@@ -229,7 +230,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         } else {
                             return
                         }
-
+                       // console.log(scope.currentDraggingStop, scope.minI);
                         checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
 
                     });
@@ -828,7 +829,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             //var oldStop= $.extend(true, {}, wayPoint.stopState);
 
-
+            wayPoint.real_service_time = 0;
 
 
             // Проверка на аккуратность и внимательность человекаю Не пытается ли он связать уже связанные точку и стоп
@@ -1411,6 +1412,36 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     i++;
                 }
             //console.log('times', times);
+            }
+            return times;
+
+        }
+        function getTaskTime(data){
+            //console.log("Checking Real Time in", data);
+            var times=[];
+            if(data.source.servicePoints!=undefined){
+                var i=0;
+                while (i<data.source.servicePoints.length){
+                    //console.log("Hey!", data.source.servicePoints[i]+1);
+                    var number=data.source.servicePoints[i]+1;
+                    var j=0;
+                    while(j<markersArr.length){
+                        if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
+                            //console.log('Marker real service time = ', markersArr[j].source.real_service_time);
+                            // if(markersArr[j].source.real_service_time!=undefined){
+                            //     times.push(markersArr[j].source.real_service_time);
+                            // } else {
+                            //     times.push(0);
+                            // }
+                            console.log(123123123);
+                            times.push(markersArr[j].source.TASK_TIME);
+                        }
+
+                        j++;
+                    }
+                    i++;
+                }
+                //console.log('times', times);
             }
             return times;
 

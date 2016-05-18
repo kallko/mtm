@@ -95,7 +95,7 @@
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
         <!-- меню -->
         <!-- Пока не выводим для пользователя, так как не реализован функционал -->
-        <div id="point-menu-panel" ng-show="false">
+        <div id="point-menu-panel" >
             <div>
                 <select id="status-select" ng-model="filters.status" class="group-select"
                         ng-options='option.value as option.name for option in filters.statuses'>
@@ -682,11 +682,13 @@
         <tbody>
             <tr class="stop-table-title">
                 <td class="title">Точка доставки:</td>
+                <td class="title">Таск тайм</td>
                 <td class="title">Интервал времени на обслуживание точки</td>
                 <td>Действие</td>
             </tr>
             <tr ng-repeat="servisPoint in servisPoints">
                 <td>{{servisPoint.wayPoint+1}}</td>
+                <td>{{servisPoint.taskTime}} мин</td>
                 <td>
                     <input ng-model="servisPoint.stopTime" ng-change="chenge($index, $event)" required type="number" class="promised-text-card">
                 </td>
