@@ -27,35 +27,38 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             drawRealRoute(route);
 
-            var i = route.points.length - 1;
-            // i будет равна первой выполненной задаче с конца маршрута
-            for (; i >= 0; i--) {
-                if (route.points[i].status == STATUS.FINISHED ||
-                    route.points[i].status == STATUS.FINISHED_LATE ||
-                    route.points[i].status == STATUS.FINISHED_TOO_EARLY) break;
-            }
+            //!!!!!!!!!!!!!Далее идет отрисовка планируемого маршрута!!!!!!!!!
+            // Мы его пока закомментируем.
 
-            // если трек есть и последняя задача в марщруте не выполнена - отрисовать остаток планового маршрута
-            //console.log("real track", route.real_track);
-            if (route.real_track != undefined && i != route.points.length - 1 && route.real_track.length>0) {
-                var lastCoords = route.real_track[route.real_track.length - 1].coords,
-                    carPos = lastCoords[lastCoords.length - 1],
-                    url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
-                        + '&' + route.points[i + 1].LON;
-                http.get(url)
-                    .success(function (data) {
-                        var geometry = getLatLonArr(data);
-                        addPolyline(geometry, 'blue', 3, 0.5, 1, true);
-                        if (carPos != null && geometry[0] != null) {
-                            addPolyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], 'blue', 3, 0.5, 1, true);
-                        }
-                        drawPlannedRoute(route.plan_geometry, i);
-                    })
-                    .error(function(err){
-                        rootScope.errorNotification(url);
-                    });
-
-            }
+            //var i = route.points.length - 1;
+            //// i будет равна первой выполненной задаче с конца маршрута
+            //for (; i >= 0; i--) {
+            //    if (route.points[i].status == STATUS.FINISHED ||
+            //        route.points[i].status == STATUS.FINISHED_LATE ||
+            //        route.points[i].status == STATUS.FINISHED_TOO_EARLY) break;
+            //}
+            //
+            //// если трек есть и последняя задача в марщруте не выполнена - отрисовать остаток планового маршрута
+            ////console.log("real track", route.real_track);
+            //if (route.real_track != undefined && i != route.points.length - 1 && route.real_track.length>0) {
+            //    var lastCoords = route.real_track[route.real_track.length - 1].coords,
+            //        carPos = lastCoords[lastCoords.length - 1],
+            //        url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
+            //            + '&' + route.points[i + 1].LON;
+            //    http.get(url)
+            //        .success(function (data) {
+            //            var geometry = getLatLonArr(data);
+            //            addPolyline(geometry, 'blue', 3, 0.5, 1, true);
+            //            if (carPos != null && geometry[0] != null) {
+            //                addPolyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], 'blue', 3, 0.5, 1, true);
+            //            }
+            //            drawPlannedRoute(route.plan_geometry, i);
+            //        })
+            //        .error(function(err){
+            //            rootScope.errorNotification(url);
+            //        });
+            //
+            //}
 
             drawAllPoints(route.points);
         }
@@ -977,7 +980,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 var LNG=parseFloat(scope.tempCurrentWayPoints[i].LON);
                 var dist=Math.sqrt((LAT-lat)*(LAT-lat)+(LNG-lng)*(LNG-lng));
 
-                if(dist<minDist){
+                if(dist<=minDist){
                     minDist=dist;
                   var  minLAT=LAT;
                   var  minLNG=LNG;
@@ -1136,7 +1139,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                        num=markersArr[i].source.NUMBER;
                        container=markersArr[i];
                        markersArr[i].source.confirmed=true;
-                       markersArr[i].source.rawconfirmed=1;
+                       markersArr[i].source.rawConfirmed=1;
                        console.log("markersArr[i]", markersArr[i]);
                        break;
                    }

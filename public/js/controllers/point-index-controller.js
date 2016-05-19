@@ -721,11 +721,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 status,
                 haveUnfinished;
 
-            // удалением всех свойств задач созданных ранее при назначении статусов перед их переназначением
+            // удалением всех свойств задач созданных ранее при назначении статусов перед их переназначением, кроме подтвержденных оператором
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
                     tmpPoint = _data.routes[i].points[j];
-
+                    if(tmpPoint.rawConfirmed==1 || tmpPoint.confirmed==true){
+                        break;
+                    }
 
 
                     tmpPoint.status = STATUS.SCHEDULED;
