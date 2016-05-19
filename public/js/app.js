@@ -5,7 +5,12 @@ var myLayout = new GoldenLayout({
     settings: {
         showPopoutIcon: false,
         showCloseIcon: false,
-        hasHeaders: true
+        hasHeaders: true,
+        constrainDragToContainer:false
+    },
+    dimensions: {
+        dragProxyWidth: 0,
+        dragProxyHeight: 0
     },
     content: [{
         type: 'row',
@@ -70,4 +75,11 @@ myLayout.on('initialised', function () {
 });
 
 myLayout.init();
+
+angular.module('MTMonitor').run(function($rootScope) {
+    $rootScope.errorNotification = function(url) {
+        $rootScope.$emit('showNotification', {text: 'Произошла ошибка при попытке обратится к '+url, duration: 5000});
+    };
+});
+
 

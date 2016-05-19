@@ -8,16 +8,56 @@ var express = require('express'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
+    CronJob = require('cron').CronJob,
 
-    cashedDataArr = [],  // глобальный кеш
-    updateCacshe = []; // Тестовый кэш
+    cashedDataArr = {},  // глобальный кеш
+    updateCacshe = {}, // Тестовый кэш
 
-var todayRoutesCache = {}, // объект с массивами роутов текущего дня
-    oldRoutesCache = {}; // объект со всеми роутами,  кроме текущего дня
+    closeRoutesUniqueID = {}, // для каждой фирмы UniqueID  сегодняшних закрытых роутов
+    cronSubscribers = {}, // хранилище подписчиков, для удаления закрытых роутов на клиенте по крону
+    oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
+    needNewReqto1C = {}; // если есть свойство с именем компани, то не запрвшивать из 1С
+
+new CronJob('00 01 00 * * *', function(){
+    for(var company in cashedDataArr){
+        if(!Array.isArray(oldRoutesCache[company])){ // есть ли старые роуты к кеше
+            oldRoutesCache[company] = [];
+        }
+        if(company in closeRoutesUniqueID) { // есть ли за сегодня закрытые роуты, если да, то по UniqueID удаляем их из сегодняшних роутов
+            for (var i = 0; closeRoutesUniqueID[company].length > i; i++) {
+                for (var j = 0; cashedDataArr[company].length > 0; j++) {
+                    if (cashedDataArr[company][j]['uniqueID'] == closeRoutesUniqueID[company][i]) { // удаляем из кеша все закрытые маршруты
+                        cashedDataArr[company].splice(j, 1);
+                        break;
+                    }
+                }
+            }
+        }
+        if(cashedDataArr[company].routes.length > 0){ // если еще остались роуты то добавляем их к старым в oldRoutesCache
+            oldRoutesCache[company] = oldRoutesCache[company].concat(JSON.parse(JSON.stringify(cashedDataArr[company].routes)));
+            cashedDataArr[company].routes = [];
+        }
+        if(company in cronSubscribers && cronSubscribers[company] > 0){ // если остались подписчики, то отсылаем ответ и удаляем закрытые роуты на клиенте
+            for(i = 0; cronSubscribers[company].length > i; i++){
+                cronSubscribers[company][i].status(200).json({remove:'ok'});
+            }
+        }
+    }
 
 
-    demoLogin = 'demo',
-    tracksManager = new tracks(
+
+    console.log('START CRON');
+    console.log(oldRoutesCache);
+    console.log('END CRON');
+    cronSubscribers = {};
+    needNewReqto1C = {};
+}, null, true);
+
+
+
+
+    var demoLogin = 'demo';
+    var tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
         config.aggregator.login,
@@ -46,7 +86,8 @@ router.route('/login')
 // загрузка данных из соапа за текущий день
 router.route('/dailydata')
     .get(function (req, res) {
-
+        console.log('---------------------------------------------------------------------------');
+         console.log(updateCacshe[req.session.login]);
         req.session.lastLockCheck = 0;
         // проверка на включеннный демо режим
         if (req.session.login == demoLogin) {
@@ -79,19 +120,23 @@ router.route('/dailydata')
         //    console.log("Repeat call for data!");
         //}
 
-
         // при включенном флаге кешинга по сессии, ищет наличие относительно свежего кеша и отправляет в случае успеха
         if (config.cashing.session
             && req.query.force == null
             && req.query.showDate == null
             && req.session.login != null
             && cashedDataArr[req.session.login] != null
-            && cashedDataArr[req.session.login].lastUpdate == today12am) {
+            && (req.session.login in needNewReqto1C)
+            /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
             console.log('=== loaded from session === send data to client ===');
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
             cashedDataArr[req.session.login].user = req.session.login;
 
-            res.status(200).json(cashedDataArr[req.session.login]);
+            var copyCashedDataArr = JSON.parse(JSON.stringify(cashedDataArr[req.session.login]));
+            if(Array.isArray(oldRoutesCache[req.session.login]) ){
+                copyCashedDataArr.routes = copyCashedDataArr.routes.concat(oldRoutesCache[req.session.login]);
+            }
+            res.status(200).json(copyCashedDataArr);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего кеша
             var soapManager = new soap(req.session.login);
@@ -101,7 +146,20 @@ router.route('/dailydata')
                 //var toPrint = JSON.stringify(data)
                 console.log('=== dataReadyCallback === send data to client ===');
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                if (data.routes!=undefined) {
+                console.log('=== dataReadyCallback === send data to client ===');
+
+                if (data.status && data.status === 'no plan') { // если на сегодня нет планов
+                    if(req.session.login in cashedDataArr){
+                        cashedDataArr[req.session.login].server_time = parseInt(Date.now()/1000);
+                    }
+                    if(oldRoutesCache[req.session.login] != undefined){  // проверка есть ли в кеше старые не закрыты роуты
+                        cashedDataArr[req.session.login].routes = cashedDataArr[req.session.login].routes.concat(oldRoutesCache[req.session.login]);
+                        res.status(200).json(cashedDataArr[req.session.login]); // возвращаем вчерашнию dailydata минус закрытые роуты
+                    }else{
+                        res.status(200).json(data);
+                    }
+                }else{
+                    needNewReqto1C[req.session.login] = true;
                     for (var i = 0; i < data.routes.length; i++) {
                         if (!data.routes[i]['uniqueID']) {
                             data.routes[i]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
@@ -111,31 +169,29 @@ router.route('/dailydata')
                         } else {
                             continue;
                         }
-
                     }
+
+                    cashedDataArr[req.session.login] = data;
+
+                    req.session.itineraryID = data.ID;
+                    data.user = req.session.login;
+
+                    var _data = JSON.parse(JSON.stringify(data));
+                    if(Array.isArray(oldRoutesCache[req.session.login]) ){
+                        _data.routes = _data.routes.concat(oldRoutesCache[req.session.login]);
+                    }
+                    res.status(200).json(_data);
                 }
-                // if(todayRoutesCache[req.session.login] == undefined){
-                //     todayRoutesCache[req.session.login] = [];
-                //     todayRoutesCache[req.session.login] = JSON.parse(JSON.stringify(data.routes));
-                //     
-                // }else{
-                //     
-                //     data.routes = data.routes.concat(todayRoutesCache[req.session.login]);
+                // if (!req.query.showDate) {
+                //     data.lastUpdate = today12am;
+                //     cashedDataArr[req.session.login] = data;
+                //     //console.log();
                 // }
 
-                if (!req.query.showDate) {
-                    data.lastUpdate = today12am;
-                    cashedDataArr[req.session.login] = data;
-                    //console.log();
-                }
 
-                req.session.itineraryID = data.ID;
-                data.user = req.session.login;
-
-                //console.log("This is Data:", data.routes.length, "MTM 134");
-                res.status(200).json(data);
             }
         }
+
     });
 
 
@@ -369,7 +425,6 @@ router.route('/savewaypoint/')
 // Если какие-то данные уже были, то мы их объединяем, перезаписывая ранее сохранненные точки свежими версиями и добавлением новых точек.
 router.route('/saveupdate/')
     .post(function (req, res) {
-
         console.log("Логин : ", [req.session.login]);
 
         if(updateCacshe[req.session.login]==undefined || updateCacshe[req.session.login].length==0){
@@ -407,6 +462,9 @@ router.route('/saveupdate/')
             }
             delete newID;
             i++;
+        }
+        for(var company in updateCacshe){
+            console.log(updateCacshe[company]);
         }
     });
 
@@ -470,17 +528,64 @@ router.route('/closeday')
         if (req.session.login == null) {
             req.session.login = config.soap.defaultClientLogin;
         }
-        console.log(req.body.routesID);
-        var soapManager = new soap(req.session.login);
-        soapManager.closeDay(req.body.closeDayData, function (data) {
-            if (!data.error) {
-                res.status(200).json({result: data.result});
 
-            } else {
-                res.status(200).json({error: data.error});
+        var xmlTop = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+req.body.closeDayDate+'"><TEXTDATA>';
+        var xmlBottom = '</TEXTDATA></CLOSEDAY></MESSAGE>';
+        console.log(xmlTop + req.body.closeDayData + xmlBottom);
+        var soapManager = new soap(req.session.login);
+            soapManager.closeDay(xmlTop + req.body.closeDayData + xmlBottom, function (data) {
+                if (!data.error) {
+                    res.status(200).json({result: data.result, closeCount:req.body.routesID.length, CloseDate:req.body.closeDayDate });
+                    if(req.body.update) { // перезаписать сегодняшний день
+                        if(!Array.isArray(closeRoutesUniqueID[req.session.login])){
+                            closeRoutesUniqueID[req.session.login] = [];
+                        }
+        loopRoutesID : for (var i = 0; req.body.routesID.length > i; i++) { // добавляем к роутам из кеша которые закрыты св-во closeDayServer
+                            for(var j = 0; closeRoutesUniqueID[req.session.login].length > j; j++){
+                                if(closeRoutesUniqueID[req.session.login][j] == req.body.routesID[i]){ // если тру, то такой роут уже был закрыт
+                                    continue loopRoutesID;
+                                }
+                            }
+                            closeRoutesUniqueID[req.session.login].push(req.body.routesID[i]);
+                        }
+                    }else {
+                        if (Array.isArray(oldRoutesCache[req.session.login])){
+                            for (var i = 0; req.body.routesID.length > i; i++) {
+                                for (var j = 0; oldRoutesCache[req.session.login].length > j; j++) {
+                                    if (req.body.routesID[i] == oldRoutesCache[req.session.login][j]['uniqueID']) {
+                                        oldRoutesCache[req.session.login].splice(j, 1);
+                                        j--;
+                                        console.log('CLOSEROUTE');
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    res.status(200).json({error: data.error});
+                }
+            });
+
+    });
+
+router.route('/cronsubscribers') // роут для приема подписчиков на удаления по крону из фронт энда закрытых маршрутов
+    .post(function (req, res) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        if(! (req.session.login in cronSubscribers) ){
+            cronSubscribers[req.session.login] = [];
+        }
+        cronSubscribers[req.session.login].push(res);
+        res.on('close', function() {
+            if( (req.session.login in cronSubscribers) && cronSubscribers[req.session.login].length > 0){
+                cronSubscribers[req.session.login].splice(cronSubscribers[req.session.login].indexOf(res), 1);
             }
         });
     });
+
+
+
+
 
 
 // логировать что-нибудь в БД

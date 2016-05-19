@@ -42,14 +42,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     carPos = lastCoords[lastCoords.length - 1],
                     url = './findpath2p/' + carPos.lat + '&' + carPos.lon + '&' + route.points[i + 1].LAT
                         + '&' + route.points[i + 1].LON;
-                http.get(url).
-                    success(function (data) {
+                http.get(url)
+                    .success(function (data) {
                         var geometry = getLatLonArr(data);
                         addPolyline(geometry, 'blue', 3, 0.5, 1, true);
                         if (carPos != null && geometry[0] != null) {
                             addPolyline([[carPos.lat, carPos.lon], [geometry[0].lat, geometry[0].lng]], 'blue', 3, 0.5, 1, true);
                         }
                         drawPlannedRoute(route.plan_geometry, i);
+                    })
+                    .error(function(err){
+                        rootScope.errorNotification(url);
                     });
 
             }
@@ -208,9 +211,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         // if(localData.source.servicePoints == undefined ){
                         //     return;
                         // }
-                        var timeData=checkRealServiceTime(localData);
-                        //console.log(localData, "local data");
-                        rootScope.$emit('pointEditingPopup', localData , timeData);
+                        var timeData = checkRealServiceTime(localData);
+                        var taskTime = getTaskTime(localData);
+                        console.log(taskTime);
+                        rootScope.$emit('pointEditingPopup', localData , timeData, taskTime);
+
 
                     });
 
@@ -224,10 +229,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
 
-                    // тестово отладочный блок
-                    //tmpVar.on('mouseover', function(event){
-                    //   console.log(event.target);
-                    //});
 
                     tmpVar.on('dragend', function(event){
 
@@ -241,13 +242,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             map.removeLayer(scope.polyline)}
                         catch (e) {
                             console.log(e);
-                        };
+                        }
 
                         try{
                             scope.spiderMarker.fire('click')}
                         catch (e) {
                             console.log(e);
-                        };
+                        }
 
                         //console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
 
@@ -257,7 +258,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         } else {
                             return
                         }
-
+                       // console.log(scope.currentDraggingStop, scope.minI);
                         checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                         scope.currentDraggingStop=null;
 
@@ -369,6 +370,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // отрисовать все точки (задачи) на карте
         //var dragendPoint;
+        
         function drawAllPoints(points) {
             var tmpVar,
                 title,
@@ -456,6 +458,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 // Установка новых координат для вэйпоинта при переноске маркера-point
                 tmpVar.on('dragend', function(event){
+                    //dragendPoint = event.target;
+                   // var newMarker = event.target;
 
                     rootScope.gpsConfirm=false;// подтверждена ли точка по GPS
                     scope.dragendPoint = event.target;// объект события при драге  маркера-point
@@ -522,7 +526,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         });
 
-        rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
+        //rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
         // перевести timestamp в строковой формат времени минуты:часы
         function mmhh(time) {
@@ -880,7 +884,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             //var oldStop= $.extend(true, {}, wayPoint.stopState);
 
-
+            wayPoint.real_service_time = 0;
 
 
             // Проверка на аккуратность и внимательность человекаю Не пытается ли он связать уже связанные точку и стоп
@@ -1049,8 +1053,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             scope.learConnectWithStopsAndPoints = new L.layerGroup().addTo(map);
 
             if(markersArr != undefined) {
-                var i = 0;
-                while (markersArr[i]!=undefined && markersArr[i].source != undefined) {
+                for( var i = 0; i < markersArr.length; i++) {
+                    if(typeof (markersArr[i].source) == 'undefined' ){
+                        continue;
+                    }
                     if (markersArr[i].source.servicePoints != undefined) {
                         var servicePointsLat = markersArr[i]._latlng.lat;
                         var servicePointsLng = markersArr[i]._latlng.lng;
@@ -1060,7 +1066,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         while (j < markersArr.length) {
                             if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                                 for (var k = 0; arrIndexStopPoints.length > k; k++) {
-                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER){
+                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
                                         var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
                                             color: 'black',
                                             weight: 1,
@@ -1068,7 +1074,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                             smoothFactor: true
                                         });
                                         scope.learConnectWithStopsAndPoints.addLayer(polyline);
-
                                     }
                                 }
                             }
@@ -1078,9 +1083,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         //console.log ("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
                     }
-                    i++;
-
-
                 }
             }
         }
@@ -1474,6 +1476,36 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     i++;
                 }
             //console.log('times', times);
+            }
+            return times;
+
+        }
+        function getTaskTime(data){
+            //console.log("Checking Real Time in", data);
+            var times=[];
+            if(data.source.servicePoints!=undefined){
+                var i=0;
+                while (i<data.source.servicePoints.length){
+                    //console.log("Hey!", data.source.servicePoints[i]+1);
+                    var number=data.source.servicePoints[i]+1;
+                    var j=0;
+                    while(j<markersArr.length){
+                        if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
+                            //console.log('Marker real service time = ', markersArr[j].source.real_service_time);
+                            // if(markersArr[j].source.real_service_time!=undefined){
+                            //     times.push(markersArr[j].source.real_service_time);
+                            // } else {
+                            //     times.push(0);
+                            // }
+                            console.log(123123123);
+                            times.push(markersArr[j].source.TASK_TIME);
+                        }
+
+                        j++;
+                    }
+                    i++;
+                }
+                //console.log('times', times);
             }
             return times;
 

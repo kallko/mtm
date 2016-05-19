@@ -83,8 +83,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 .success(function(data){
                     showLoadReasonList(data);
                 })
-                .error(function(data){
-                    return $timeout(loadReasonList, 3000);
+                .error(function(err){
+                    rootScope.errorNotification(url);
                 });
         }
         function showLoadReasonList(data){
@@ -143,6 +143,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                         } else if (data.status === 'locked') {
                             scope.$emit('showNotification', {text: 'Задание заблокировано пользователем ' + data.byUser});
                         }
+                    })
+                    .error(function(err){
+                        rootScope.errorNotification(url);
                     });
             } else {
                 url = './unlocktask/' + scope.point.itineraryID.replace('/', 'SL') + '/' + scope.point.TASK_NUMBER;
@@ -152,6 +155,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                             scope.point.locked = false;
                             scope.point.lockedByMe = false;
                         }
+                    })
+                    .error(function(err){
+                        rootScope.errorNotification(url);
                     });
             }
         };
@@ -183,6 +189,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                                 scope.route.points[i].lockedRoute = true;
                             }
                         }
+                    })
+                    .error(function(err){
+                        rootScope.errorNotification(url);
                     });
             } else {
                 http.get(url)
@@ -197,6 +206,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                             delete scope.route.points[i].lockedByMe;
                             delete scope.route.points[i].lockedRoute;
                         }
+                    })
+                    .error(function(err){
+                        rootScope.errorNotification(url);
                     });
             }
         };
@@ -245,6 +257,9 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             http.get('./openidspointwindow/' + scope.point.waypoint.ID)
                 .success(function (data) {
                     console.log(data);
+                })
+                .error(function(err){
+                    rootScope.errorNotification('./openidspointwindow/' + scope.point.waypoint.ID);
                 });
         };
     }]);
