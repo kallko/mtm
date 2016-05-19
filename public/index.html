@@ -206,48 +206,48 @@
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
-                    <td>{{::row.NUMBER}}</td>
+                    <td>{{row.NUMBER}}</td>
                     <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
-                    <td>{{::row.driver.NAME}}</td>
-                    <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
-                    <td title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
-                    <td id="{{::'status-td-' + row.row_id}}">
-                        {{::getTextStatus(row.status, row.row_id, row.confirmed, row.driver.NAME)}}
+                    <td>{{row.driver.NAME}}</td>
+                    <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
+                    <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
+                    <td id="{{'status-td-' + row.row_id}}">
+                        {{getTextStatus(row.status, row.row_id, row.confirmed, row.driver.NAME)}}
                     </td>
-                    <td id="{{::'window-td-' + row.row_id}}">{{::getTextWindow(row.windowType, row.row_id)}}</td>
-                    <td>{{::row.haveStop ? 'Есть' : ''}}</td>
-                    <td id="{{::'push-td-' + row.row_id}}"
-                        title="{{:: row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
+                    <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
+                    <td>{{row.haveStop ? 'Есть' : ''}}</td>
+                    <td id="{{'push-td-' + row.row_id}}"
+                        title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
                                 'время gps: ' + row.mobile_push.gps_time + '\n' +
                                 'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
-                        {{::((getPushStatus(row)).substr(-8)).substring(0,5)}}
+                        {{((getPushStatus(row)).substr(-8)).substring(0,5)}}
                     </td>
-                    <td>{{::row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
-                    <td>{{::row.AVAILABILITY_WINDOWS}}</td>
+                    <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+                    <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{:: row.arrival_prediction * 1000 | date:'HH:mm' }}
+                            {{ row.arrival_prediction * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{:: row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
+                            {{ row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.real_arrival_time > 0">
-                            {{:: row.real_arrival_time * 1000 | date:'HH:mm' }}
+                            {{ row.real_arrival_time * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.overdue_time > 0">
-                            {{:: row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
+                            {{ row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
-                    <td>{{::row.problem_index}}</td>
+                    <td>{{row.problem_index}}</td>
                     <td>
-                        {{::row.promised_window.start * 1000 | date:'HH:mm'}} -
-                        {{::row.promised_window.finish * 1000 | date:'HH:mm'}}
+                        {{row.promised_window.start * 1000 | date:'HH:mm'}} -
+                        {{row.promised_window.finish * 1000 | date:'HH:mm'}}
                     </td>
                     <!--<td>-->
                         <!--<input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"-->
@@ -259,12 +259,12 @@
                                <!--enter-event="changePromisedWindow(row.row_id)">-->
                         <!--</input>-->
                     <!--</td>-->
-                    <td> {{::row.change_time ? row.change_time : 0}}</td>
-                    <td>{{::row.driver.PHONE}}</td>
-                    <td>{{::row.transport.REGISTRATION_NUMBER}}</td>
-                    <td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>
-                    <td>{{::row.branchName}}</td>
-                    <td title="{{::row.waypoint.COMMENT}}">{{::row.waypoint.COMMENT}}</td>
+                    <td> {{row.change_time ? row.change_time : 0}}</td>
+                    <td>{{row.driver.PHONE}}</td>
+                    <td>{{row.transport.REGISTRATION_NUMBER}}</td>
+                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
+                    <td>{{row.branchName}}</td>
+                    <td title="{{row.waypoint.COMMENT}}">{{row.waypoint.COMMENT}}</td>
                 </tr>
                 </tbody>
             </table>
@@ -488,18 +488,18 @@
                     </tr>
                     <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
-                                   id = "close-table-checkbox-{{::item.filterId}}"
+                                   id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
                                    ng-model="item.getCheck"
                                    ng-disabled="true"
                                    ng-init="item.getCheck=false;">
                         </td>
-                        <td>{{::item.filterId}}</td>
-                        <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
-                        <td>{{::item.transport.NAME}}</td>
-                        <td>{{::item.END_TIME.split(' ')[1]}}</td>
+                        <td>{{item.filterId}}</td>
+                        <td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>
+                        <td>{{item.transport.NAME}}</td>
+                        <td>{{item.END_TIME.split(' ')[1]}}</td>
 
-                        <td>{{::item.START_TIME.split(' ')[0]}}</td>
+                        <td>{{item.START_TIME.split(' ')[0]}}</td>
                     </tr>
                 </table>
             </div>
