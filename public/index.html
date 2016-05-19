@@ -207,7 +207,7 @@
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{::row.NUMBER}}</td>
-                    <td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>
+                    <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
                     <td>{{::row.driver.NAME}}</td>
                     <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
                     <td title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
@@ -220,7 +220,7 @@
                         title="{{:: row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
                                 'время gps: ' + row.mobile_push.gps_time + '\n' +
                                 'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
-                        {{::getPushStatus(row)}}
+                        {{::((getPushStatus(row)).substr(-8)).substring(0,5)}}
                     </td>
                     <td>{{::row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{::row.AVAILABILITY_WINDOWS}}</td>
@@ -687,8 +687,8 @@
         <tbody>
             <tr class="stop-table-title">
                 <td class="title">Точка доставки:</td>
-                <td class="title">Таск тайм</td>
-                <td class="title">Интервал времени на обслуживание точки</td>
+                <td class="title">Плановое время обслуживания</td>
+                <td class="title">Реальное время обслуживание</td>
                 <td>Действие</td>
             </tr>
             <tr ng-repeat="servisPoint in servisPoints">

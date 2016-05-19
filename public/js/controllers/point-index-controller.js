@@ -386,7 +386,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (data.routes[i].moreThanOneSensor) problematicRoutes.push(data.routes[i]);
 
                 //TODO: get real branch office
-                data.routes[i].branch = i % 2 == 0 ? 'Киев ТЕСТ' : 'Одесса ТЕСТ';
+                data.routes[i].branch =data.BRANCH;
+                    //i % 2 == 0 ? 'Киев ТЕСТ' : 'Одесса ТЕСТ';
 
                 for (var j = 0; j < scope.filters.branches.length; j++) {
                     if (scope.filters.branches[j].name == data.routes[i].branch) {
