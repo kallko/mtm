@@ -2132,10 +2132,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // получить статус нажатия
         scope.getPushStatus = function (row) {
             if (row.havePush) {
-                return 'Есть';
+                return row.mobile_push.gps_time;
+                //return 'Есть';
             } else if (row.mobile_push) {
                 $('#push-td-' + row.row_id).addClass('invalid-push');
-                return 'Есть';
+                return row.mobile_push.gps_time
+                //return 'Есть';
             } else {
                 return '';
             }

@@ -223,7 +223,7 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
 
 // xml для записи в 1С новых координат точки
 XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
-    console.log("Constructor in process, and waypoint is", waypoint);
+    //console.log("Constructor in process, and waypoint is", waypoint);
     var str = '';
     str += this.xml.begin;
     str += '<WAYPOINTS> <WAYPOINT ACTION="AUTO" ';

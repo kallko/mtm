@@ -592,7 +592,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
 SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     log.toFLog('origWaypointBeforeSave.json', waypoint);
 
-    console.log("!!!!!!!!!!! update Wayoint", waypoint.waypoint, "confirm", waypoint.confirm);
+    //console.log("!!!!!!!!!!! update Wayoint", waypoint.waypoint, "confirm", waypoint.confirm);
         me = this;
 
     var resXml;
@@ -604,7 +604,7 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     // сохранение в 1С от имени авторизированного пользователя
     saveTo1C = function (resXml) {
 
-        console.log("Saveto1C me", me)
+        //console.log("Saveto1C me", me)
             soap.createClient(me.getFullUrl(), function (err, client) {
                 if (err) throw err;
 

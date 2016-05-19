@@ -95,10 +95,12 @@
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
         <!-- меню -->
         <!-- Пока не выводим для пользователя, так как не реализован функционал -->
-        <div id="point-menu-panel" ng-show="false">
+        <div id="point-menu-panel" >
             <div>
                 <select id="status-select" ng-model="filters.status" class="group-select"
-                        ng-options='option.value as option.name for option in filters.statuses'>
+                        ng-options='option.value as option.name for option in filters.statuses'
+                        <!--ng-click=""-->
+                        >
                 </select>
 
                 <!--
@@ -107,7 +109,7 @@
                 </select>
                 -->
 
-                <select id="branch-select" ng-model="filters.branch" class="group-select"
+                <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
                         ng-options='option.value as option.name for option in filters.branches'>
                 </select>
 
@@ -117,31 +119,31 @@
                         ng-options='option.value as option.name for option in draw_modes'>
                 </select>
                 -->
-                <input id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
-                <input id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
-                <button class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
+                <input ng-show="false" id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
+                <input ng-show="false" id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
+                <button ng-show="false" class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
 
-                <button class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
+                <button ng-show="false" class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
                     загрузить
                 </button>
 
-                <button class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">
+                <button ng-show="true" class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">
                     проблемные
                 </button>
 
-                <button class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
+                <button ng-show="false" class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
                     {{params.endWindowSize * 5}} минут до закрытия
                 </button>
-                <button class="btn btn-default btn-sm1" ng-show="true" id="test" ng-click="testbutton()" >
+                <button ng-show="false" class="btn btn-default btn-sm1"  id="test" ng-click="testbutton()" >
                      Кнопка ТЕСТ
                 </button>
                 <br>
-                <input id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
-                <button class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()">
+                <input ng-show="false" id="search-input" type="text" size="15" enter-event="setTextFilter()"/>
+                <button ng-show="false" class="btn btn-info btn-sm filter-btn" ng-click="setTextFilter()">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </button>
 
-                <button class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
+                <button ng-show="false" class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
                     <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
                 </button>
             </div>
@@ -164,7 +166,7 @@
                 <thead class="header">
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания">План</th>
-                    <th class="car-type-col" title="Назавание машины">Машина</th>
+
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
                     <th class="address-col" title="Адрес доставки">Адрес</th>
@@ -186,9 +188,11 @@
                         Проблемность
                     </th>
                     <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
-                    <th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>
+                    <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
+                    <th class="promised-window-changed-col" title="Количество переносов">Кол. переносов</th>
                     <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
                     <th class="car-number-col" title="Номер машины">Номер</th>
+                    <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="branch-col" title="Филиал">Филиал</th>
                     <th title="Комментарий к точке">Комментарий</th>
                 </tr>
@@ -202,7 +206,7 @@
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{row.NUMBER}}</td>
-                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
+
                     <td>{{row.driver.NAME}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
@@ -244,18 +248,20 @@
                         {{row.promised_window.start * 1000 | date:'HH:mm'}} -
                         {{row.promised_window.finish * 1000 | date:'HH:mm'}}
                     </td>
-                    <td>
-                        <input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"
-                               value="{{row.promised_window_changed.start * 1000 | date:'HH:mm'}}"
-                               enter-event="changePromisedWindow(row.row_id)">
-                        </input> -
-                        <input type="text" class="promised-text" id="{{'edit-promised-finish-' + row.row_id}}"
-                               value="{{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}"
-                               enter-event="changePromisedWindow(row.row_id)">
-                        </input>
-                    </td>
+                    <!--<td>-->
+                        <!--<input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"-->
+                               <!--value="{{row.promised_window_changed.start * 1000 | date:'HH:mm'}}"-->
+                               <!--enter-event="changePromisedWindow(row.row_id)">-->
+                        <!--</input> - -->
+                        <!--<input type="text" class="promised-text" id="{{'edit-promised-finish-' + row.row_id}}"-->
+                               <!--value="{{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}"-->
+                               <!--enter-event="changePromisedWindow(row.row_id)">-->
+                        <!--</input>-->
+                    <!--</td>-->
+                    <td> {{row.change_time ? row.change_time : 0}}</td>
                     <td>{{row.driver.PHONE}}</td>
                     <td>{{row.transport.REGISTRATION_NUMBER}}</td>
+                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
                     <td>{{row.branchName}}</td>
                     <td title="{{row.waypoint.COMMENT}}">{{row.waypoint.COMMENT}}</td>
                 </tr>

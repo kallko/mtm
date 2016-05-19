@@ -776,13 +776,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 center: new L.LatLng(50.4412776, 30.6671281),
                 zoom: 11,
                 layers: [
-                    lay1, lay2
+                    lay2, lay1
                 ]
             });
 
             L.control.scale({position: 'topleft', metric: true, imperial: false}).addTo(map);
 
-            L.control.layers({"map 1":lay1, "map 2":lay2} ,{}, {position: 'topleft'} ).addTo(map);
+            L.control.layers({"map 1":lay2, "map 2":lay1} ,{}, {position: 'topleft'} ).addTo(map);
 
             oms = new OverlappingMarkerSpiderfier(map);
             //console.log("oms",oms,oms.prototype);

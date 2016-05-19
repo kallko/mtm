@@ -49,6 +49,7 @@ function getDivIcon(param){
         "<div style = \"" + rightStyle + "\"></div>" +
         "<div style =\"" + textStyle + "\">" + param.text + "</div>";
     var code = "<div style = \"" + style + "\">" + innerHTML + "</div>";
+    //console.log("code=", code);
 
     return L.divIcon({
         iconSize    :   [width, height],
