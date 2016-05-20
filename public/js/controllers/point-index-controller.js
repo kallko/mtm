@@ -2796,7 +2796,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     return cronsubscribers();
                 }).error(function(err){
                 console.log(err);
-                rootScope.errorNotification('/cronsubscribers');
+                //rootScope.errorNotification('/cronsubscribers');
                 return cronsubscribers();
             });
         }
