@@ -312,8 +312,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-            //тестовоотладочный блок вытащенный вручную пуши.
-            //pushes = [{"number":"4400211954","time":"26.04.2016 04:08:31","canceled":false,"cancel_reason":"","lat":50.43812,"lon":30.54977,"gps_time":"26.04.2016 03:08:28","gps_time_ts":1461629308,"distance":23.6475022599009},{"number":"4400212049","time":"26.04.2016 04:40:24","canceled":false,"cancel_reason":"","lat":50.421516,"lon":30.54617,"gps_time":"26.04.2016 03:40:20","gps_time_ts":1461631220,"distance":94.34499795150076},{"number":"4400209927","time":"26.04.2016 04:40:04","canceled":false,"cancel_reason":"","lat":50.421246,"lon":30.545843,"gps_time":"26.04.2016 03:40:00","gps_time_ts":1461631200,"distance":140.8944289612977},{"number":"4400211355","time":"26.04.2016 04:45:54","canceled":false,"cancel_reason":"","lat":50.423893,"lon":30.543938,"gps_time":"26.04.2016 03:45:50","gps_time_ts":1461631550,"distance":24.041578535857116},{"number":"4400211602","time":"26.04.2016 05:13:44","canceled":false,"cancel_reason":"","lat":50.428165,"lon":30.546198,"gps_time":"26.04.2016 04:13:41","gps_time_ts":1461633221,"distance":121.91092887638787},{"number":"4400210929","time":"26.04.2016 05:10:31","canceled":false,"cancel_reason":"","lat":50.42749,"lon":30.54599,"gps_time":"26.04.2016 04:09:19","gps_time_ts":1461632959,"distance":46.717027221569836},{"number":"4400210485","time":"26.04.2016 05:23:41","canceled":false,"cancel_reason":"","lat":50.43216,"lon":30.545214,"gps_time":"26.04.2016 04:23:38","gps_time_ts":1461633818,"distance":23.932606767647098},{"number":"4400210064","time":"26.04.2016 08:58:58","canceled":false,"cancel_reason":"","lat":50.42726,"lon":30.543148,"gps_time":"26.04.2016 07:58:54","gps_time_ts":1461646734,"distance":60.14145658994281},{"number":"4400210383","time":"26.04.2016 09:57:05","canceled":false,"cancel_reason":"","lat":50.435696,"lon":30.54618,"gps_time":"26.04.2016 08:56:04","gps_time_ts":1461650164,"distance":35.59149350467806}];
+
 
             //console.log("????????????????????????? drawPushes", drawPushes, 'pushes',pushes);
 
@@ -336,22 +335,24 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 oms.addMarker(tmpVar);
                 gpsPushMarkers.push(tmpVar);
 
-                tmpVar.on('mouseover', function(event) {
+                // закомментирована функция прорисовки линии от пуша к точке при наведении на пуш.
 
-                    if (map.getZoom()>=16){
-                        drawPushLine (event.target);
-                    }
+                //tmpVar.on('mouseover', function(event) {
+                //
+                //    if (map.getZoom()>=16){
+                //        drawPushLine (event.target);
+                //    }
+                //
+                //
+                //});
 
 
-                });
-
-
-                tmpVar.on('mouseout', function(event) {
-                    if (scope.pushPolyline != undefined) {
-                        map.removeLayer(scope.pushPolyline);
-                    }
-
-                });
+                //tmpVar.on('mouseout', function(event) {
+                //    if (scope.pushPolyline != undefined) {
+                //        map.removeLayer(scope.pushPolyline);
+                //    }
+                //
+                //});
 
 
                 //addMarker(tmpVar);
@@ -1034,6 +1035,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         map.on('zoomend', function(event){
             scope.tempCurrentWayPoints=[];
             if (map.getZoom() > 17 && markersArr != undefined && !scope.drowConnect) {
+                if(scope.learConnectWithStopsAndPoints!=undefined){
+                map.removeLayer(scope.learConnectWithStopsAndPoints);}
                 drowConnectWithStopsAndPoints();
                 scope.drowConnect = true;
             }else if(scope.drowConnect && map.getZoom() <= 17) {
@@ -1048,7 +1051,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // Однако в массиве маркеров могут быть и стопы и вэйпоинты. Мы используем специальную функцию, которая выберет из маркеров только
         // вэйпоинты и передает их новые координаты в root.currentWayPoints
         oms.addListener('spiderfy', function(event) {
+            if(scope.learConnectWithStopsAndPoints!=undefined) {
+                map.removeLayer(scope.learConnectWithStopsAndPoints);
+            }
+
             createNewTempCurrentWayPoints(event);
+            if (map.getZoom() > 17) {
+                map.removeLayer(scope.learConnectWithStopsAndPoints);
+                drowConnectWithStopsAndPoints();
+            }
 
         });
         function drowConnectWithStopsAndPoints(){
@@ -1072,7 +1083,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                     if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
                                         var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
                                             color: 'black',
-                                            weight: 1,
+                                            weight: 2,
                                             opacity: 0.5,
                                             smoothFactor: true
                                         });
@@ -1088,6 +1099,40 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     }
                 }
             }
+
+            if (gpsPushMarkers !=undefined) {
+                var k=0;
+
+                while(k<gpsPushMarkers.length){
+                    var mobilePush=gpsPushMarkers[k];
+                    var i=0;
+                    while (i<markersArr.length) {
+                        if (markersArr[i].source != undefined && markersArr[i].source.TASK_NUMBER!=  undefined && markersArr[i].source.TASK_NUMBER==mobilePush.task_ID){
+                            break;
+                        }
+                        i++;
+                    }
+
+                    var LAT=mobilePush._latlng.lat;
+                    var LON=mobilePush._latlng.lng;
+                    var lat=+markersArr[i]._latlng.lat;
+                    var lon=+markersArr[i]._latlng.lng;
+                    var line_points = [
+                        [LAT, LON],
+                        [lat, lon]];
+
+                    scope.pushPolyline = new L.polyline(line_points, {
+                        color: 'orange',
+                        weight: 2,
+                        opacity: 0.5,
+                        smoothFactor: 1
+                    });
+                    scope.learConnectWithStopsAndPoints.addLayer(scope.pushPolyline);
+
+                    k++;
+                }
+
+            }
         }
 
 
@@ -1095,6 +1140,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         oms.addListener('unspiderfy', function(event) {
             scope.tempCurrentWayPoints=[];
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
+            if (map.getZoom() > 17) {
+                map.removeLayer(scope.learConnectWithStopsAndPoints);
+                drowConnectWithStopsAndPoints();
+            }
         });
 
 
@@ -1660,6 +1709,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 }
             }
         }
+
 
 
         rootScope.$on('makeWaypointGreen', function (event, index) {
