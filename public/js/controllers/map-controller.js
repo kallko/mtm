@@ -114,7 +114,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 //stops=[];
                 markersArr=[];
-
+                gpsPushMarkers=[];
 
 
             for (var i = 0; i < track.length; i++) {
@@ -492,7 +492,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     console.log('this is waypoint ', event.target);
                 });
 
+
+                if (point.TASK_NUMBER <0) {
+                    tmpVar.setIcon(getIcon(point.NUMBER, 3, 'red', tmpFColor));
+                } else {
                 tmpVar.setIcon(getIcon(point.NUMBER, 14, tmpBgColor, tmpFColor));
+                }
 
                 addMarker(tmpVar);
 

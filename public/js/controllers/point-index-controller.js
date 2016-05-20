@@ -280,7 +280,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (force)  url += '?force=true';
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
 
-            //console.log('waiting for data');
+            console.log('waiting for data', url);
 
             http.get(url, {})
                 .success(function (data) {
@@ -1012,7 +1012,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                 }
 
-               // console.log("mobilePushes recieved", mobilePushes );
+                //console.log("mobilePushes recieved", JSON.stringify(mobilePushes) );
 
                 if (mobilePushes == undefined
                     || Object.keys(mobilePushes).length == 0) {

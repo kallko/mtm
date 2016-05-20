@@ -150,9 +150,14 @@ function getIcon(numberIcon, typeIcon, colorIcon, colorText) {
         anchorIcon = [0, 13];
     };
 
-    if (typeIcon == 7) {
-        return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon, iconSize: [45, 30]});
-    } else {
+    if (typeIcon == 7  ) {
+        return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon, iconSize: [30, 24]});
+    } else
+
+    { if (typeIcon == 3) {
+        return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon, iconSize: [30, 24]});
+
+    } else
         return new L.icon({iconUrl: pathIcon, iconAnchor: anchorIcon});
     }
 }
