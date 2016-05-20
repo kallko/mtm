@@ -2783,7 +2783,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         function cronsubscribers(){
-            http.post('./cronsubscribers', {})
+            http.post('./cronsubscribers', {}, {timeout: 1000*60*60*24})
                 .success(function () {
                     console.log(_data);
                     for(var i = 0; _data.routes.length > i; i++){
@@ -2796,8 +2796,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     return cronsubscribers();
                 }).error(function(err){
                 console.log(err);
+                rootScope.errorNotification('/cronsubscribers');
                 return cronsubscribers();
-                //rootScope.errorNotification('/cronsubscribers');
             });
         }
         cronsubscribers();
