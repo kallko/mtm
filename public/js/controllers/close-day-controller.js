@@ -67,7 +67,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     scope.orderCloseDay = function(predicate){
       scope.data.routes = orderBy(scope.data.routes, predicate);
     };
-
+    
 
 
     scope.toggleCheckBoxToClose = function(){
@@ -129,8 +129,19 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             // }
         });
     }
-    scope.closeTableRowClick = function(uniqueID){
+    scope.closeTableRowClick = function(uniqueID, $index){
     	//rootScope.$emit('closeDriverName', uniqueID);
-        rootScope.$emit('closeDriverName', uniqueID);
-    }
+        if(scope.selected == $index){
+            scope.selected = -1;
+            rootScope.$emit('closeDriverName', uniqueID, false); // false не рисовать новый маршрут
+        }else{
+            scope.selected = $index;
+            rootScope.$emit('closeDriverName', uniqueID, true); // true рисовать новый маршрут
+        }
+
+    };
+    scope.selected = -1;
+
+
+
 }]);

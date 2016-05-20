@@ -509,4 +509,7 @@ template {
 .close-day-wrapper {
     position: relative;
 }
+.driver-select-bg {
+    background-color: lightgray;
+}
 

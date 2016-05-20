@@ -61,12 +61,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'Все филиалы', value: -1}
             ];
 
-            scope.filters.driver = true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            scope.filters.driver = -1; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             scope.filters.branch = scope.filters.branches[0].value;
             scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
             scope.filters.route = scope.filters.routes[0].value;
-            scope.filters.problem_index = -1;
+            scope.filters.problem_index = 1;
             scope.filters.promised_15m = -1;
             scope.draw_modes = [                                        // режимы отрисовки треков
                 {name: 'комбинированный трек', value: 0},
@@ -90,7 +90,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.params = scope.params || Settings.load();             // настройки приложения
 
-            setProblemIndexSortMode(0);                                 // сброс фильтрации по индексу проблемности
+            //setProblemIndexSortMode(0);                                 // сброс фильтрации по индексу проблемности
 
 
 
@@ -104,11 +104,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             var $problem = $('#problem-index-btn');
             // отжатие кнопки
-            if ($problem.hasClass('btn-success')) {
-                $problem.toggleClass('btn-default').toggleClass('btn-success');
-            }
+            // if ($problem.hasClass('btn-success')) {
+            //     $problem.toggleClass('btn-default').toggleClass('btn-success');
+            // }
         }
-         rootScope.$on('closeDriverName', function (event, uniqueID) {
+         rootScope.$on('closeDriverName', function (event, uniqueID, drawNewRoute) {
 
                  // scope.filters.driver = data;
                  // var driversArr = [];
@@ -116,18 +116,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  //    driversArr.push( scope.filters.routes[i].driver || null);
                  // }
                  // scope.filters.route = driversArr.indexOf(data)-1;
-
-
-             scope.filters.routeUniqueID = uniqueID;
-             for(var i = 0; _data.routes.length > i; i++){
-                 if(_data.routes[i].uniqueID == uniqueID){
-                     scope.filters.driver = _data.routes[i].driver.NAME;
-                     scope.filters.route = i;
-                     break;
+            console.log(drawNewRoute);
+             if(drawNewRoute){
+                 scope.filters.routeUniqueID = uniqueID;
+                 for(var i = 0; _data.routes.length > i; i++){
+                     if(_data.routes[i].uniqueID == uniqueID){
+                         scope.filters.driver = _data.routes[i].driver.NAME;
+                         scope.filters.route = i;
+                         break;
+                     }
                  }
+                 scope.drawRoute();
+             }else{
+                 scope.$emit('clearMap');
+                 scope.filters.driver = -1;
              }
-             scope.drawRoute();
-
          });
         // установить динамическое обновление данных
         //не понятно где используется!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1403,11 +1406,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.$on('forceCheckLocks', checkLocks);
             rootScope.$on('unlockAllRoutes', unlockAllRoutes);
 
-            $('.header .problem-index-col').on('click', function () {
-                problemSortType++;
-                problemSortType = problemSortType % 3;
-                console.log(problemSortType);
-            });
+            // $('.header .problem-index-col').on('click', function () {
+            //     problemSortType++;
+            //     problemSortType = problemSortType % 3;
+            //     console.log(problemSortType);
+            // });
         }
 
         // обработчик события изменения настроек
@@ -1575,26 +1578,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // подготовить заголовки таблицы для их фиксации при скролле
         function prepareFixedHeader() {
-            var header = $('.header'),
-                table = $('#point-table > table'),
-                headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header),
-                protoStatusTH = header.find('.status-col'),
-                protoProblemIndexTH = header.find('.problem-index-col'),
-                timeLeftTH = header.find('.prediction-arrival-left-col');
+            // var header = $('.header'),
+            //     table = $('#point-table > table'),
+            //     headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header);
+                // protoStatusTH = header.find('.status-col'),
+                // protoProblemIndexTH = header.find('.problem-index-col'),
+                // timeLeftTH = header.find('.prediction-arrival-left-col');
 
-            headerCopy.find('.status-col').on('click', function () {
-                protoStatusTH.trigger('click');
-            });
+            // headerCopy.find('.status-col').on('click', function () {
+            //     protoStatusTH.trigger('click');
+            // });
+            //
+            // headerCopy.find('.problem-index-col').on('click', function () {
+            //     protoProblemIndexTH.trigger('click');
+            // });
+            //
+            // headerCopy.find('.prediction-arrival-left-col').on('click', function () {
+            //     timeLeftTH.trigger('click');
+            // });
 
-            headerCopy.find('.problem-index-col').on('click', function () {
-                protoProblemIndexTH.trigger('click');
-            });
-
-            headerCopy.find('.prediction-arrival-left-col').on('click', function () {
-                timeLeftTH.trigger('click');
-            });
-
-            resizeHead(table);
+           // resizeHead(table);
             pointTableHolder.on("scroll", updateHeaderClip);
             updateHeaderClip();
             updateFixedHeaderPos();
@@ -1741,11 +1744,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             return '';
         };
         //фильтр по водителю
-        function driversFilter(row) {
-            //console.log(row.driver.NAME);
-            return (scope.filters.driver === false || row.driver.NAME == scope.filters.driver);
-            //переключая в этой стороке true/false мы задаем будет ли загружаться вся таблица при старте приложения
-        }
+        // function driversFilter(row) {
+        //     //console.log(row.driver.NAME);
+        //     return (scope.filters.driver === -1 || row.driver.NAME == scope.filters.driver);
+        //     //переключая в этой стороке true/false мы задаем будет ли загружаться вся таблица при старте приложения
+        // }
         // фильтр по статусу
         function statusFilter(row) {
             return (scope.filters.status == -1 || row.status == scope.filters.status);
@@ -1753,8 +1756,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по маршруту
         function routeFilter(row) {
-            //console.info(row.uniqueID, scope.filters.routeUniqueID);
-            return row.uniqueID == scope.filters.routeUniqueID;
+            return (scope.filters.driver === -1 || row.uniqueID == scope.filters.routeUniqueID);
 
         }
 
@@ -1762,6 +1764,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function problemFilter(row) {
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
         }
+
 
         // фильтр на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         function promise15MFilter(row) {
@@ -1879,27 +1882,29 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
             if (scope.filters.problem_index == -1) {
                 scope.filters.problem_index = 1;
-
-                timeout(function () {
-                    setProblemIndexSortMode(2);
-                }, 100);
+                // timeout(function () {
+                //     setProblemIndexSortMode(2);
+                // }, 100);
             } else {
                 scope.filters.problem_index = -1;
-                timeout(function () {
-                    setProblemIndexSortMode(0);
-                }, 100);
+                // timeout(function () {
+                //     setProblemIndexSortMode(0);
+                // }, 100);
             }
-        };
 
-        // задать порядок сортировки по индексу проблемности
-        function setProblemIndexSortMode(mode) {
-            timeout(function () {
-                if (mode != problemSortType) {
-                    $('.header .problem-index-col').trigger('click');
-                    setProblemIndexSortMode(mode);
-                }
-            }, 10);
-        }
+        };
+        
+        
+
+        //задать порядок сортировки по индексу проблемности
+        // function setProblemIndexSortMode(mode) {
+        //     timeout(function () {
+        //         if (mode != problemSortType) {
+        //             $('.header .problem-index-col').trigger('click');
+        //             setProblemIndexSortMode(mode);
+        //         }
+        //     }, 10);
+        // }
 
         // вкл/выкл фильтр на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         scope.togglePromised15MPoints = function () {
@@ -2112,6 +2117,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 && textFilter(row)
                 && branchFilter(row);
         };
+
+
+        var orderBy = filter('orderBy');
+        scope.order = function(predicate){
+            scope.myFilter = true;
+            scope.predicate = predicate;
+            scope.reverse = (scope.predicate === predicate) ? !scope.reverse : false;
+            scope.displayCollection = orderBy(scope.displayCollection, predicate, scope.reverse);
+
+        };
+
+        scope.myFilter = '-problem_index';
+
+
+
 
         // обновить маршрут
         function updateRoute(event, data) {
@@ -2397,14 +2417,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return day+'.'+month+'.'+year;
             };
 
-console.log(_data);
+            var xml = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+closeDayDate+'"><TEXTDATA>'+ JSON.stringify(result) +'</TEXTDATA></CLOSEDAY></MESSAGE>';
 
             if( closeDayDate == getServer_timeDateMonthYeaer() ){ // проверка сегодняшней даты закрытия дня
                 console.log("UPDATE DAY");
-                return {closeDayData: JSON.stringify(result), routesID: routesID, update:true, closeDayDate:closeDayDate, countRouters: _data.length}; // обновляем текущий день
+                return {closeDayData: xml, routesID: routesID, update:true, closeDayDate:closeDayDate, countRouters: _data.length}; // обновляем текущий день
             }else{
                 console.log("OLD DAY");
-                return {closeDayData: JSON.stringify(result), routesID: routesID, update:false, closeDayDate:closeDayDate}; // дописываем старый день
+                return {closeDayData: xml, routesID: routesID, update:false, closeDayDate:closeDayDate}; // дописываем старый день
             }
         }
 
@@ -2763,20 +2783,26 @@ console.log(_data);
         });
 
 
-        http.post('./cronsubscribers', {})
-            .success(function () {
-                console.log(_data);
-                for(var i = 0; _data.routes.length > i; i++){
-                    console.log(_data.routes[i].getCheck);
-                    if(_data.routes[i].getCheck){
-                        _data.routes.splice(i, 1);
-                        i--;
+
+        function cronsubscribers(){
+            http.post('./cronsubscribers', {}, {timeout: 1000*60*60*24})
+                .success(function () {
+                    console.log(_data);
+                    for(var i = 0; _data.routes.length > i; i++){
+                        console.log(_data.routes[i].getCheck);
+                        if(_data.routes[i].getCheck){
+                            _data.routes.splice(i, 1);
+                            i--;
+                        }
                     }
-                }
-            }).error(function(err){
+                    return cronsubscribers();
+                }).error(function(err){
                 console.log(err);
-                rootScope.errorNotification('/cronsubscribers');
+                //rootScope.errorNotification('/cronsubscribers');
+                return cronsubscribers();
             });
+        }
+        cronsubscribers();
 
 
         rootScope.$on('askGPSConfirmPoint', function(event, marker){
