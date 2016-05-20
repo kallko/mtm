@@ -528,12 +528,10 @@ router.route('/closeday')
         if (req.session.login == null) {
             req.session.login = config.soap.defaultClientLogin;
         }
+        console.log(req.body.closeDayData);
 
-        var xmlTop = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+req.body.closeDayDate+'"><TEXTDATA>';
-        var xmlBottom = '</TEXTDATA></CLOSEDAY></MESSAGE>';
-        console.log(xmlTop + req.body.closeDayData + xmlBottom);
         var soapManager = new soap(req.session.login);
-            soapManager.closeDay(xmlTop + req.body.closeDayData + xmlBottom, function (data) {
+            soapManager.closeDay(req.body.closeDayData, function (data) {
                 if (!data.error) {
                     res.status(200).json({result: data.result, closeCount:req.body.routesID.length, CloseDate:req.body.closeDayDate });
                     if(req.body.update) { // перезаписать сегодняшний день

@@ -2415,14 +2415,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return day+'.'+month+'.'+year;
             };
 
-console.log(_data);
+            var xml = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+closeDayDate+'"><TEXTDATA>'+ JSON.stringify(result) +'</TEXTDATA></CLOSEDAY></MESSAGE>';
 
             if( closeDayDate == getServer_timeDateMonthYeaer() ){ // проверка сегодняшней даты закрытия дня
                 console.log("UPDATE DAY");
-                return {closeDayData: JSON.stringify(result), routesID: routesID, update:true, closeDayDate:closeDayDate, countRouters: _data.length}; // обновляем текущий день
+                return {closeDayData: xml, routesID: routesID, update:true, closeDayDate:closeDayDate, countRouters: _data.length}; // обновляем текущий день
             }else{
                 console.log("OLD DAY");
-                return {closeDayData: JSON.stringify(result), routesID: routesID, update:false, closeDayDate:closeDayDate}; // дописываем старый день
+                return {closeDayData: xml, routesID: routesID, update:false, closeDayDate:closeDayDate}; // дописываем старый день
             }
         }
 
@@ -2781,20 +2781,26 @@ console.log(_data);
         });
 
 
-        http.post('./cronsubscribers', {})
-            .success(function () {
-                console.log(_data);
-                for(var i = 0; _data.routes.length > i; i++){
-                    console.log(_data.routes[i].getCheck);
-                    if(_data.routes[i].getCheck){
-                        _data.routes.splice(i, 1);
-                        i--;
+
+        function cronsubscribers(){
+            http.post('./cronsubscribers', {})
+                .success(function () {
+                    console.log(_data);
+                    for(var i = 0; _data.routes.length > i; i++){
+                        console.log(_data.routes[i].getCheck);
+                        if(_data.routes[i].getCheck){
+                            _data.routes.splice(i, 1);
+                            i--;
+                        }
                     }
-                }
-            }).error(function(err){
+                    return cronsubscribers();
+                }).error(function(err){
                 console.log(err);
-                rootScope.errorNotification('/cronsubscribers');
+                return cronsubscribers();
+                //rootScope.errorNotification('/cronsubscribers');
             });
+        }
+        cronsubscribers();
 
 
         rootScope.$on('askGPSConfirmPoint', function(event, marker){
