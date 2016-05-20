@@ -127,7 +127,7 @@
                     загрузить
                 </button>
 
-                <button ng-show="true" class="btn btn-default btn-sm" id="problem-index-btn" ng-click="toggleProblemPoints()">
+                <button ng-show="true" class="btn btn-default btn-sm btn-success" id="problem-index-btn" ng-click="toggleProblemPoints()">
                     проблемные
                 </button>
 
@@ -170,22 +170,24 @@
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
                     <th class="address-col" title="Адрес доставки">Адрес</th>
-                    <th class="status-col" st-sort="status" title="Статус доставки">Статус</th>
+                    <th class="status-col"  title="Статус доставки">
+                        <button ng-click="order('status')"  >Статус</button>
+                    </th>
                     <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
                     <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
-                    <th class="prediction-arrival-left-col" st-sort="arrival_left_prediction"
+                    <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
-                        Осталось до прибытия
+                        <button ng-click="order('arrival_left_prediction')">Осталось до прибытия</button>
                     </th>
                     <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
 
                     <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
-                    <th class="problem-index-col" st-sort="problem_index" title="Индекс проблемности задания">
-                        Проблемность
+                    <th class="problem-index-col"  title="Индекс проблемности задания">
+                        <button ng-click="order('problem_index')">Проблемность</button>
                     </th>
                     <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
                     <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
@@ -199,55 +201,55 @@
                 </thead>
                 <tbody>
                 <!-- заменил ng-show="applyFilter(row)" на ng-if="applyFilter(row)" -->
-                <tr ng-repeat="row in displayCollection" id="{{'point-' + row.row_id}}"
+                <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
                     ng-if="applyFilter(row)"
                     on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
-                    <td>{{::row.NUMBER}}</td>
-                    <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
-                    <td>{{::row.driver.NAME}}</td>
-                    <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
-                    <td title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
-                    <td id="{{::'status-td-' + row.row_id}}">
-                        {{::getTextStatus(row.status, row.row_id, row.confirmed, row.driver.NAME)}}
+                    <td>{{row.NUMBER}}</td>
+                    <!-- <td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td> -->
+                    <td>{{row.driver.NAME}}</td>
+                    <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
+                    <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
+                    <td id="{{'status-td-' + row.row_id}}">
+                        {{getTextStatus(row.status, row.row_id, row.confirmed, row.driver.NAME)}}
                     </td>
-                    <td id="{{::'window-td-' + row.row_id}}">{{::getTextWindow(row.windowType, row.row_id)}}</td>
-                    <td>{{::row.haveStop ? 'Есть' : ''}}</td>
-                    <td id="{{::'push-td-' + row.row_id}}"
-                        title="{{:: row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
+                    <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
+                    <td>{{row.haveStop ? 'Есть' : ''}}</td>
+                    <td id="{{'push-td-' + row.row_id}}"
+                        title="{{row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
                                 'время gps: ' + row.mobile_push.gps_time + '\n' +
                                 'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
-                        {{::((getPushStatus(row)).substr(-8)).substring(0,5)}}
+                        {{((getPushStatus(row)).substr(-8)).substring(0,5)}}
                     </td>
-                    <td>{{::row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
-                    <td>{{::row.AVAILABILITY_WINDOWS}}</td>
+                    <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+                    <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{:: row.arrival_prediction * 1000 | date:'HH:mm' }}
+                            {{row.arrival_prediction * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
-                            {{:: row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
+                            {{row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.real_arrival_time > 0">
-                            {{:: row.real_arrival_time * 1000 | date:'HH:mm' }}
+                            {{row.real_arrival_time * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.overdue_time > 0">
-                            {{:: row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
+                            {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
-                    <td>{{::row.problem_index}}</td>
+                    <td>{{row.problem_index}}</td>
                     <td>
-                        {{::row.promised_window.start * 1000 | date:'HH:mm'}} -
-                        {{::row.promised_window.finish * 1000 | date:'HH:mm'}}
+                        {{row.promised_window.start * 1000 | date:'HH:mm'}} -
+                        {{row.promised_window.finish * 1000 | date:'HH:mm'}}
                     </td>
                     <!--<td>-->
                         <!--<input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"-->
@@ -259,12 +261,12 @@
                                <!--enter-event="changePromisedWindow(row.row_id)">-->
                         <!--</input>-->
                     <!--</td>-->
-                    <td> {{::row.change_time ? row.change_time : 0}}</td>
-                    <td>{{::row.driver.PHONE}}</td>
-                    <td>{{::row.transport.REGISTRATION_NUMBER}}</td>
-                    <td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>
-                    <td>{{::row.branchName}}</td>
-                    <td title="{{::row.waypoint.COMMENT}}">{{::row.waypoint.COMMENT}}</td>
+                    <td> {{row.change_time ? row.change_time : 0}}</td>
+                    <td>{{row.driver.PHONE}}</td>
+                    <td>{{row.transport.REGISTRATION_NUMBER}}</td>
+                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
+                    <td>{{row.branchName}}</td>
+                    <td title="{{row.waypoint.COMMENT}}">{{row.waypoint.COMMENT}}</td>
                 </tr>
                 </tbody>
             </table>
@@ -486,7 +488,7 @@
                         <th><button ng-click="order('END_TIME');">Конец работы</button></th>
                         <th>Дата старта маршрута</th>
                     </tr>
-                    <tr class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID)">
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{::item.filterId}}"
                                    type="checkbox"
