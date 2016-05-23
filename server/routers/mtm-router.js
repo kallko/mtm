@@ -167,12 +167,18 @@ router.route('/dailydata')
                 }else{
                     needNewReqto1C[req.session.login] = true;
                             //здесь падала программа при длительном использовании.
+
+                    cashedDataArr[req.session.login] = data;
+
+                    req.session.itineraryID = data.ID;
+                    data.user = req.session.login;
+
                     if (data.routes !=undefined) {
                         for (var i = 0; i < data.routes.length; i++) {
                             if (!data.routes[i]['uniqueID']) {
-                                data.routes[i]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                                data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 for (var j = 0; j < data.routes[i].points.length; j++) {
-                                    data.routes[i].points[j]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                                    data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 }
                             } else {
                                 continue;
@@ -180,10 +186,6 @@ router.route('/dailydata')
                         }
 
                     }
-                    cashedDataArr[req.session.login] = data;
-
-                    req.session.itineraryID = data.ID;
-                    data.user = req.session.login;
 
                     var _data = JSON.parse(JSON.stringify(data));
                     if(Array.isArray(oldRoutesCache[req.session.login]) ){
