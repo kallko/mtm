@@ -200,13 +200,51 @@
                     <th title="Комментарий к точке">Комментарий</th>
                 </tr>
                 </thead>
+
+                <thead class="header-copy">
+                <tr class="titles-tr">
+                    <th class="number-col" title="Плановый номер задания">План</th>
+
+                    <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
+                    <th class="client-name-col" title="Название точки доставки">Название</th>
+                    <th class="address-col" title="Адрес доставки">Адрес</th>
+                    <th class="status-col"  title="Статус доставки">
+                        <button ng-click="order('status')"  >Статус</button>
+                    </th>
+                    <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
+                    <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
+                    <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
+                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
+                    <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                    <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                    <th class="prediction-arrival-left-col"
+                        title="Осталось до прогнозируемого времени прибытия" >
+                        <button ng-click="order('arrival_left_prediction')">Осталось до прибытия</button>
+                    </th>
+                    <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
+
+                    <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
+                    <th class="problem-index-col"  title="Индекс проблемности задания">
+                        <button ng-click="order('problem_index')">Проблемность</button>
+                    </th>
+                    <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
+                    <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
+                    <th class="promised-window-changed-col" title="Количество переносов">Кол. переносов</th>
+                    <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
+                    <th class="car-number-col" title="Номер машины">Номер</th>
+                    <th class="car-type-col" title="Назавание машины">Машина</th>
+                    <th class="branch-col" title="Филиал">Филиал</th>
+                    <th title="Комментарий к точке">Комментарий</th>
+                </tr>
+                </thead>
+
                 <tbody>
                 <!-- заменил ng-show="applyFilter(row)" на ng-if="applyFilter(row)" -->
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
-                    ng-if="applyFilter(row)"
-                    on-finish-render="ngRepeatFinished" data-toggle="context" class="delivery-point-row"
+                    ng-show="applyFilter(row)"
+                    on-finish-render="ngRepeatFinished"  class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{row.NUMBER}}</td>
@@ -490,13 +528,12 @@
                         <th><button ng-click="order('END_TIME');">Конец работы</button></th>
                         <th>Дата старта маршрута</th>
                     </tr>
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes" ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
                                    ng-model="item.getCheck"
-                                   ng-disabled="true"
-                                   ng-init="item.getCheck=false;">
+                                   ng-disabled="true">
                         </td>
                         <td>{{item.filterId}}</td>
                         <td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>
@@ -505,6 +542,30 @@
 
                         <td>{{item.START_TIME.split(' ')[0]}}</td>
                     </tr>
+                    <!-- <tr>
+                        <td>
+                            <select  name="" id="">
+                                <option value="123">123</option>
+                                <option value="123">123</option>
+                            </select>
+                        </td>
+                    </tr> -->
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                        <td><input ng-click = "toggleCheckBoxToClose()"
+                                   id = "close-table-checkbox-{{::item.filterId}}"
+                                   type="checkbox"
+                                   ng-model="item.getCheck"
+                                   ng-disabled="true">
+                        </td>
+                        <td>{{::item.filterId}}</td>
+                        <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
+                        <td>{{::item.transport.NAME}}</td>
+                        <td>{{::item.END_TIME.split(' ')[1]}}</td>
+
+                        <td>{{::item.START_TIME.split(' ')[0]}}</td>
+                    </tr>
+
+
                 </table>
             </div>
 
@@ -656,41 +717,44 @@
 <!--Окошко для редактирования точек и времени-->
 
 <div id="point-editing-popup" ng-controller="PointPopupEditController" style="position: absolute; visibility: hidden">
-    <div class="card-title">
-        <div id="container">
-            <div class = "row">
-                <div class = "col-md-3">
-                </div>
-                <div class = "col-md-6">
-                    Карточка остановки
-                </div>
-                <div class = "col-md-3">
-                    <button id="btn-close" class="btn btn-danger" ng-click="cancel()">Закрыть
-                    </button>
+
+        <div class="card-title">
+            <div id="container">
+                <div class = "row">
+                    <div class = "col-md-3">
+                    </div>
+                    <div class = "col-md-6">
+                        Карточка остановки
+                    </div>
+                    <div class = "col-md-3">
+                        <button id="btn-close" class="btn btn-danger" ng-click="cancel()">Закрыть
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div> 
-    </div>
-    <div>
-        <table id="stop-info-table">
-            <tbody>
+        </div>
+
+        <div>
+            <table id="stop-info-table" >
+                <tbody>
                 <tr class="stop-table-title">
                     <td>Номер стопа</td>
                     <td>Время начала</td>
                     <td>Время окончания</td>
                     <td>Продолжительность</td>
                 </tr>
-                 <tr>
+                <tr>
                     <td class="row-data">{{stopIndx}}</td>
                     <td class="row-data">{{start*1000 | date: "HH:mm"}}</td>
                     <td class="row-data">{{fin*1000 | date: "HH:mm"}}</td>
                     <td class="row-data">{{(delta/60)}} мин</td>
                 </tr>
-            </tbody>
-        </table>        
-    </div> 
-    <table id="stop-point-view-table">
-        <tbody>
+                </tbody>
+            </table>
+        </div>
+    <div ng-show="stopWithPoints" >
+        <table id="stop-point-view-table">
+            <tbody>
             <tr class="stop-table-title">
                 <td class="title">Точка доставки:</td>
                 <td class="title">Плановое время обслуживания</td>
@@ -705,12 +769,16 @@
                 </td>
                 <td><button ng-click="unbindPoint($index, $event)" class="btn btn-primary btn-sm">Отвязать от стопа</button></td>
             </tr>
-        </tbody>
-    </table>
-    <div class = "point-view-buttons">
-        <button class="btn btn-primary btn-sm" ng-disabled="disabled" ng-click="confirm()">Подтвердить
-        </button>
-        <button class="btn btn-primary btn-sm" ng-click="cancel()">Отменить
-        </button>
+            </tbody>
+        </table>
+        <div class = "point-view-buttons">
+            <button class="btn btn-primary btn-sm" ng-disabled="disabled" ng-click="confirm()">Подтвердить
+            </button>
+            <button class="btn btn-primary btn-sm" ng-click="cancel()">Отменить
+            </button>
+        </div>
+    </div>
+    <div class="stopWithOutPoints" ng-show="stopWithOutPoints">
+        К данному стопу не привязана ни одна точка
     </div>
 </div>

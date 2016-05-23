@@ -1389,9 +1389,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 updateResizeGripHeight();
             });
 
-            scope.$on('ngRepeatFinished', function () {
+            scope.$on('ngRepeatFinished', function () {  // эта функция не работает
                 updateResizeGripHeight();
-
                 $('.delivery-point-row').contextmenu({
                     target: '#context-menu',
                     onItem: deliveryRowConextMenu
@@ -1581,12 +1580,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // подготовить заголовки таблицы для их фиксации при скролле
         function prepareFixedHeader() {
-            // var header = $('.header'),
-            //     table = $('#point-table > table'),
-            //     headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header);
-                // protoStatusTH = header.find('.status-col'),
-                // protoProblemIndexTH = header.find('.problem-index-col'),
-                // timeLeftTH = header.find('.prediction-arrival-left-col');
+            var header = $('.header'),
+                table = $('#point-table > table'),
+                //headerCopy = header.clone().removeClass('header').addClass('header-copy').insertAfter(header);
+                protoStatusTH = header.find('.status-col'),
+                protoProblemIndexTH = header.find('.problem-index-col'),
+                timeLeftTH = header.find('.prediction-arrival-left-col');
 
             // headerCopy.find('.status-col').on('click', function () {
             //     protoStatusTH.trigger('click');
@@ -1600,7 +1599,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //     timeLeftTH.trigger('click');
             // });
 
-           // resizeHead(table);
+            resizeHead(table);
             pointTableHolder.on("scroll", updateHeaderClip);
             updateHeaderClip();
             updateFixedHeaderPos();
@@ -1882,7 +1881,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // вкл/выкл фильтр только проблемных точек
         scope.toggleProblemPoints = function () {
-            $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
             if (scope.filters.problem_index == -1) {
                 scope.filters.problem_index = 1;
                 // timeout(function () {
@@ -1895,6 +1893,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // }, 100);
             }
 
+            $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
         };
         
         

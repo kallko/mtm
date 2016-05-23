@@ -124,9 +124,9 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             scope.user = data.user;
             scope.serverTime = data.server_time;
             rootScope.clickOff = false;// вызывает слой, который не дает кликать по таблице, пока не закончилась отрисовка маршрута
-            // for(var i=0; i < data.routes.length; i++){
-            //     data.routes[i].setDisabled = true;  //на старте по умолчаню запираем все чекбоксы
-            // }
+            for(var i=0; i < data.routes.length; i++){
+                data.routes[i].getCheck = false;  //на старте по умолчаню выключаем все чекбоксы
+            }
         });
     }
     scope.closeTableRowClick = function(uniqueID, $index){
