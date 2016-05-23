@@ -160,17 +160,20 @@ router.route('/dailydata')
                     }
                 }else{
                     needNewReqto1C[req.session.login] = true;
-                    for (var i = 0; i < data.routes.length; i++) {
-                        if (!data.routes[i]['uniqueID']) {
-                            data.routes[i]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
-                            for (var j = 0; j < data.routes[i].points.length; j++) {
-                                data.routes[i].points[j]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                            //здесь падала программа при длительном использовании.
+                    if (data.routes !=undefined) {
+                        for (var i = 0; i < data.routes.length; i++) {
+                            if (!data.routes[i]['uniqueID']) {
+                                data.routes[i]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                                for (var j = 0; j < data.routes[i].points.length; j++) {
+                                    data.routes[i].points[j]['uniqueID'] = data.ID + data.VERSION + data.routes[i].ID;
+                                }
+                            } else {
+                                continue;
                             }
-                        } else {
-                            continue;
                         }
-                    }
 
+                    }
                     cashedDataArr[req.session.login] = data;
 
                     req.session.itineraryID = data.ID;

@@ -522,6 +522,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if (bool == 'true'){
 
                 changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8), confirm);
+                console.log("New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
+                newMarker.source.waypoint.CONFIRMBYGPS="true";
+                console.log("NEW New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
                 rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
                 $('#notification_wrapper').css('opacity', '1');
                 //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
@@ -886,7 +889,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var wayPoint=marker.source;
            // console.log("I want to connect", stop, 'with point', wayPoint, "and indx", indx);
             wayPoint.haveStop=true;
-
+            wayPoint.problem_index=0;
+            wayPoint.overdue_time=0;
 
             var oldStopTime=wayPoint.real_arrival_time;
            // console.log('oldStopTime', oldStopTime);

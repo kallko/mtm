@@ -728,7 +728,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
                     tmpPoint = _data.routes[i].points[j];
-                    if(tmpPoint.rawConfirmed==1 || tmpPoint.confirmed==true){
+                    if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
                         break;
                     }
 
@@ -1523,6 +1523,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
+                    //после подтверждения обнуляем индех проблемности и опоздывание.
+                    row.problem_index=0;
+                    row.overdue_time=0;
                     rootScope.$emit('checkInCloseDay');
                     rootScope.$emit('makeWaypointGreen', row.NUMBER);
                     //addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
@@ -2763,6 +2766,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 i++;
             }
+
+
+
+            //отладка
 
 
             return result;

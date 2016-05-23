@@ -14,6 +14,7 @@
 .car-type-col { width: 54px; }
 .car-number-col { width: 46px; }
 .client-name-col { width: 200px; }
+.gps-conf-col {width: 46px;}
 .driver-name-col { width: 130px; }
 .address-col { width: 220px; }
 .real-arrival-time-col { width: 40px; }
