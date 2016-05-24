@@ -647,10 +647,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             showPopup('Загрузка завершенна!', 2500);
+
+
+            //try {scope.$apply()}
+            //catch (exeption)
+            //{console.log("SCOPE Error", exeption)}
+
             //console.log(showPopup, ' showPopup');
 
             setColResizable();
             prepareFixedHeader();
+            //timeout(function(){
+            //    scope.$apply();
+            //}, 0);
+
         }
 
         // обрезает ФИО до ФИ
@@ -1244,6 +1254,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 url = './findtime2p/' + point.lat + '&' + point.lon + '&'
                     + route.points[route.lastPointIndx].LAT + '&' + route.points[route.lastPointIndx].LON;
 
+
+                //console.log("url",url);
                 // получаем время проезда от текущего положения машины и до следующей по плану точки
                 (function (_route, _url) {
                     http.get(_url).
@@ -1332,6 +1344,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         });
                 })(route, url);
             }
+
+
 
             for (i = 0; i < scope.rowCollection.length; i++) {
                 scope.rowCollection[i].problem_index = scope.rowCollection[i].problem_index || 0;
@@ -1787,7 +1801,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.drawRoute = function () {
             rootScope.clickOff=true;
             console.log("P-I-C recieve click", rootScope.clickOff);
-            scope.$apply;
+            //scope.$apply();
 
 
             scope.$emit('clearMap');
@@ -2169,6 +2183,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updatedRoute.change_timestamp = data.timestamp;
 
             linkDataParts(rawData);
+
         }
 
         // получить статус нажатия
@@ -2620,7 +2635,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //console.log("I m working");
                         if( scope.existData.data[l]!=null &&
                             _data.routes[i].real_track[j].id==scope.existData.data[l].id
-                           //&& _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
+                           && _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
+                            && _data.routes[i].real_track[j].id!=0
+                            && _data.routes[i].real_track[j].id!="0"
                         ) {
 
                             _data.routes[i].real_track[j]=scope.existData.data[l];
