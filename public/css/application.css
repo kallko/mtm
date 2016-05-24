@@ -323,7 +323,7 @@ template {
 }
 #point-view-table .title, #stop-info-table .title, #stop-point-view-table .title
 {
-    width: 140px;
+    width: 160px;
 }
 .stop-table-title td{
     background: #D5DBD8;

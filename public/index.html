@@ -619,6 +619,8 @@
             <td class="title">План. номер:</td>
             <td class="row-data">{{point.NUMBER}}</td>
         </tr>
+
+
         <tr>
             <td class="title">Машина:</td>
             <td class="row-data">{{point.transport.NAME}}</td>
@@ -627,6 +629,11 @@
             <td class="title">Водитель:</td>
             <td class="row-data">{{point.driver.NAME}}</td>
         </tr>
+        <tr>
+            <td class="title">Окно доступности</td>
+            <td class="row-data">{{point.waypoint.AVAILABILITY_WINDOWS}}</td>
+        </tr>
+
         <tr>
             <td class="title">Заказанное окно:</td>
             <td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>
@@ -639,7 +646,7 @@
             </td>
         </tr>
         <tr>
-            <td class="title">Изменяемое окно:</td>
+            <td class="title">Контролируемое окно:</td>
             <td class="row-data">
                 <input type="text" class="promised-text-card" id="promised-start-card"
                        enter-event="changePromisedWindow(point)"> -
@@ -660,12 +667,13 @@
             <td class="row-data">
                 {{point.textStatus}}
 
-                <div ng-show="showHideSeasonButtons">
+                <div ng-show="showHideSeasonButtons"> Доставку
                 <button id="confirm-status-task-btn"
                         ng-disabled="selectReasonList"
 
                         class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
                 </button>
+                    <br>
                 <select ng-model="selectReasonList"
                         ng-options="item.attributes.id as item.attributes.name  for item in loadReasonList">
                     <option value="" selected>--Причина отказа--</option>
