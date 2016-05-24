@@ -475,7 +475,7 @@ router.route('/saveupdate/')
             i++;
         }
         for(var company in updateCacshe){
-            console.log(updateCacshe[company]);
+           // console.log(updateCacshe[company]);
         }
     });
 
@@ -539,7 +539,7 @@ router.route('/closeday')
         if (req.session.login == null) {
             req.session.login = config.soap.defaultClientLogin;
         }
-        console.log(req.body.closeDayData);
+        //console.log(req.body.closeDayData);
 
         var soapManager = new soap(req.session.login);
             soapManager.closeDay(req.body.closeDayData, function (data) {

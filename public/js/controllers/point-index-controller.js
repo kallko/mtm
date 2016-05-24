@@ -121,7 +121,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  scope.filters.routeUniqueID = uniqueID;
                  for(var i = 0; _data.routes.length > i; i++){
                      if(_data.routes[i].uniqueID == uniqueID){
-                         scope.filters.driver = _data.routes[i].driver.NAME;
+                         scope.filters.driver = _data.routes[i].driver.NAME ? _data.routes[i].driver.NAME:"";
                          scope.filters.route = i;
                          break;
                      }
@@ -2587,10 +2587,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                        while (l<scope.existData.data.length){
 
                            if( scope.existData.data[l]!=null &&
+                               scope.existData.data[l].uniqueID !=undefined &&
+                               scope.existData.data[l].uniqueID == _data.routes[i].points[j].uniqueID &&
                                scope.existData.data[l].route_id !=undefined &&
                                scope.existData.data[l].route_id == _data.routes[i].points[j].route_id &&
                                scope.existData.data[l].route_indx == _data.routes[i].points[j].route_indx &&
                                scope.existData.data[l].row_id == _data.routes[i].points[j].row_id
+
                            ) {
                                //console.log("Its time to concat loaded", _data.routes[i].points[j], "with", scope.existData.data[l] );
                                _data.routes[i].points[j]=scope.existData.data[l];
