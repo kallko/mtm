@@ -545,7 +545,7 @@
                         <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
 
                     </tr>
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: (false)  } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
@@ -561,14 +561,23 @@
                         <td> {{ item.END_TIME.split(' ')[1]}}</td>
                         <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal": ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm' }}</td>
                     </tr>
-                    <!-- <tr>
-                        <td>
-                            <select  name="" id="">
-                                <option value="123">123</option>
-                                <option value="123">123</option>
+
+
+                    <tr>
+                        <td colspan="3" >
+                            <select ng-model="selectDeyOldRoutes"
+                                    ng-show="showSelectDayOldRoutes"
+                                    ng-change="chengeSelectDayOldRoutes()"
+                                    ng-options="day as day  for day in deysOldRoutes"
+                                    class="seleOldRoute">
+                                <option value="" selected="selected">У вас есть не закрытые дни</option>
                             </select>
                         </td>
-                    </tr> -->
+                        <td colspan="2" >
+                            <button ng-click="getCurrentday()" ng-show="showGetCurrentday">Вернуться в текущий день</button>
+                        </td>
+                    </tr>
+
                     <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{::item.filterId}}"

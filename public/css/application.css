@@ -519,3 +519,6 @@ template {
 .center{
     text-align: center;
 }
+.seleOldRoute{
+    margin: 15px 0;
+}

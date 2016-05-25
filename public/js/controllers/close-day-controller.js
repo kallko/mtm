@@ -1,12 +1,13 @@
-angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootScope', '$filter', '$timeout', function (scope, rootScope, filter, timeout) {
-   init();
+angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootScope', '$filter', '$http', function (scope, rootScope, filter, http) {
+
     scope.disabledBtnCloseDay = true; //на старте обезвреживаем кнопку "Закрыть день"
 
     var s_dataToCloseArr_general = [];    //главный массив элементов (водителей) к закрытию. Индекс - номер, значение - имя водителя
     var s_dataToCloseArr_reserve = []; // тот же массив, что и s_dataToCloseArr_general_general, но в отличие от s_dataToCloseArr_general_general, функция toggleCheckBoxToClose() не имеет права ничего удалять из него 
+    var currentDay = true; // при инициализации подгружается текущий день
     scope.closeDayClick = function(){
         scope.orderCloseDay('getCheck');
-        rootScope.$emit('pushCloseDayDataToServer', scope.data);
+        rootScope.$emit('pushCloseDayDataToServer', {data: scope.data, currentDay: currentDay });
         
         delete s_dataToCloseArr_reserve; // удаляем резервный массив, может удалим еще что-то 
     };
@@ -117,7 +118,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
 
-    function init(){
+  
         rootScope.$on('forCloseController', function (event, data) {
             scope.data = data;
             scope.companyName = data.companyName;
@@ -128,7 +129,13 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
                 data.routes[i].getCheck = false;  //на старте по умолчаню выключаем все чекбоксы
             }
         });
-    }
+
+
+
+           
+
+
+
     scope.closeTableRowClick = function(uniqueID, $index){
     	//rootScope.$emit('closeDriverName', uniqueID);
         if(scope.selected == $index){
@@ -138,10 +145,84 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             scope.selected = $index;
             rootScope.$emit('closeDriverName', uniqueID, true); // true рисовать новый маршрут
         }
-
     };
+
     scope.selected = -1;
 
 
+
+    scope.routesFilter = function(item){
+        if(item.getCheck == true || item.oldroute == true){
+            return false;
+        }
+        return true;
+    };
+
+    scope.listOldRoutes = false;
+    scope.voldRoutes = {};
+    scope.cacheOldRoutes = {};
+
+
+    scope.chengeSelectDayOldRoutes = function(){
+        console.log(scope.selectDeyOldRoutes);
+        if(scope.selectDeyOldRoutes !== null){
+            console.log(scope.selectDeyOldRoutes, 'отправка в поинт ндекс');
+            rootScope.$emit('reqOldroute',  scope.selectDeyOldRoutes);
+            currentDay = false;
+            $('#problem-index-btn').addClass('btn-success');
+        }
+    };
+
+    scope.showGetCurrentday = false;
+    rootScope.$on('thisIsOldDay', function(event, data){
+        scope.showGetCurrentday = true;
+    });
+
+    scope.getCurrentday = function(){
+        rootScope.$emit('getCurrentday');
+        scope.showGetCurrentday = false;
+        currentDay = true;
+        $('#problem-index-btn').addClass('btn-success');
+        scope.selectDeyOldRoutes = 'У вас есть не закрытые дни';
+    };
+
+
+
+    scope.showSelectDayOldRoutes = false;
+    http.get('./keysoldroutescache')
+        .success(function (data) {
+            console.log(data);
+            if(data != null && data.length != 0){
+                scope.showSelectDayOldRoutes = true;
+                scope.deysOldRoutes = data;
+            }else{
+                scope.showSelectDayOldRoutes = false;
+            }
+        })
+        .error(function(err){
+            rootScope.errorNotification('./keysoldroutescache/');
+        });
+    rootScope.$on('successCloseOldRoutes', function(event){
+        console.log(scope.data);
+        if(scope.data.routes.length == 0 ){
+            for(var i = 0; scope.deysOldRoutes.length > i; i++){
+                if(scope.deysOldRoutes[i] == scope.data.routesOfDate){
+                    scope.deysOldRoutes.splice(i, 1);
+                    break;
+                }
+            }
+            delete scope.data;
+            if(scope.deysOldRoutes.length == 0){
+                scope.showGetCurrentday = false;
+                scope.showSelectDayOldRoutes = false;
+                alert('вовзвр, текущий день');
+                rootScope.$emit('getCurrentday');
+                currentDay = true;
+
+            }else{
+                scope.selectDeyOldRoutes = 'У вас есть не закрытые дни';
+            }
+        }
+    })
 
 }]);
