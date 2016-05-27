@@ -659,7 +659,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             _data = data;
-            updateData();
+            //updateData();
             //_data = concatDailyAndExistingData (_data);
 
             //console.log('Finish linking');
@@ -2364,7 +2364,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-        function collectDataForDayClosing(data, closeDayDate){
+        function collectDataForDayClosing(data, currentDay){
 
             var result = {
                     routes: []
@@ -2616,9 +2616,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 http.post(url, {date: date})
                 .success(function (data) {
-                    //console.log(data,' existing success data');
+                    console.log(data,' existing success data');
                     scope.existData=data;
                         console.log(data);
+                        updateData();
                     //console.log("scope.existData",scope.existData);
                 })
                 .error(function (data) {

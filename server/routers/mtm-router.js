@@ -18,7 +18,7 @@ var express = require('express'),
     oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
     needNewReqto1C = {}; // если есть свойство с именем компани, то не запрвшивать из 1С
 
-new CronJob('00 42 * * * *', function() {
+new CronJob('00 23 * * * *', function() {
     for(var company in cashedDataArr){
         if (!oldRoutesCache[company]) {
             oldRoutesCache[company] = {};
@@ -185,7 +185,7 @@ router.route('/dailydata')
                                 continue;
                             }
                         }
-
+                    data.routes.length = 3;
                     cashedDataArr[req.session.login] = data;
 
                     req.session.itineraryID = data.ID;
@@ -463,7 +463,7 @@ router.route('/saveupdate/')
 
         updateCacshe[req.session.login] = {};
         updateCacshe[req.session.login][req.body.date] = {};
-        updateCacshe[req.session.login][req.body.date] = JSON.parse(JSON.stringify(req.body.data));
+        updateCacshe[req.session.login][req.body.date] = JSON.parse(JSON.stringify(req.body));
 
         console.log(updateCacshe);
 
