@@ -1224,7 +1224,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         //Функция находящая ближайший марке, находящийся в oms при приближении к нему маркера остановки
         function findAndClickMarker(obj){
-           // console.log("obj LAT LON", obj.LAT);
+            console.log("obj LAT LON", obj);
             var i=0;
             while(i<markersArr.length){
                 if (typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined' && markersArr[i].source.NUMBER==obj.NUMBER)// выбрасываем маркера остановок и машины, находи марке соответсвующий объекту
