@@ -691,6 +691,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log(" Накатываем сверху скачанные данные");
                 concatDailyAndExistingData(_data);
                 scope.existDataLoaded=true;
+                statusUpdate();
             }
 
         }
@@ -767,26 +768,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                     if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
-                        console.log("Подтверждена вручную Уходим");
+                        //console.log("Подтверждена вручную Уходим");
                         break;
                     }
 
                     if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
-                        console.log("Подтверждена пушем и стопом Уходим");
+                       // console.log("Подтверждена пушем и стопом Уходим");
                         break;
                     }
 
                     if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
-                        console.log("Подтверждена стопом. Валидных пушей нет уходим");
+                        //console.log("Подтверждена стопом. Валидных пушей нет уходим");
                         break;
                     }
 
                     if(scope.fastCalc && tmpPoint.status>2){
-                        console.log("Точка уже доставлена идем дальше");
+                        //console.log("Точка уже доставлена идем дальше");
                         break;
                     }
 
-                    console.log("Пересчет");
+                   // console.log("Пересчет");
                     tmpPoint.status = STATUS.SCHEDULED;
 
                     delete tmpPoint.distanceToStop;
@@ -826,10 +827,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route.lastPointIndx = 0;
                 if (route.real_track != undefined) {
                     for (j = 0; j < route.real_track.length; j++) {
-                        // если статус не из будущего (в случае демо-режима) и стейт является стопом, проверяем его
+                        // если статус не из будущего (в случае демо-режима) и стейт является стопом, b dhtvz проверяем его
                         if (route.real_track[j].t1 < _data.server_time && route.real_track[j].state == "ARRIVAL") {
-                            tmpArrival = route.real_track[j];
+                            //console.log("считаем стоп", _data.server_time, route.real_track[j].t1, _data.server_time-route.real_track[j].t1)
 
+
+
+
+                            tmpArrival = route.real_track[j];
 
                             //console.log("tmpArrival",tmpArrival);
                             // перебираем все точки к которым
@@ -837,6 +842,30 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                                 tmpPoint = route.points[k];
+
+                                if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
+                                    //console.log("Подтверждена вручную Уходим");
+                                    break;
+                                }
+
+                                if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
+                                    //console.log("Подтверждена пушем и стопом Уходим");
+                                    break;
+                                }
+
+                                if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
+                                   // console.log("Подтверждена стопом. Валидных пушей нет уходим");
+                                    break;
+                                }
+
+                                if(scope.fastCalc && tmpPoint.status>2){
+                                    //console.log("Точка уже доставлена идем дальше");
+                                    break;
+                                }
+
+
+
+
 
                                 LAT = parseFloat(tmpPoint.LAT);
                                 LON = parseFloat(tmpPoint.LON);
@@ -957,6 +986,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             }
                         }
+
                     }
 
 
@@ -1298,9 +1328,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 //Пока для непросчитанных маршрутов пропускаем итерацию.
-                if (route.DISTANCE==0){
-                    continue;
-                }
+                //if (route.DISTANCE==0){
+                //    continue;
+                //}
 
                 console.log("Делаем прогноз прибытия");
                 point = route.car_position;
@@ -1329,6 +1359,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (j < lastPoint) {
                                     // все точки до последней выполненной проверяются по факту
                                     //console.log("Try to change status for point", _route.points[j] );
+
+                                    // Для непросчитанных маршрутов точки могут выполняться не по порядку.
+                                    //Поэтому точки, которые уже выполнены до lastpoint мы не пересчитываем
+                                    if(_route.points[j].haveStop || _route.points[j].havePush || _route.points[j].confirmed || _route.points[j].status==8 || _route.points[j].status<3 ) {
+                                        break;
+                                    }
+
+
                                     _route.points[j].arrival_prediction = 0;
                                     _route.points[j].overdue_time = 0;
                                     if (_route.points[j].status == STATUS.SCHEDULED) {

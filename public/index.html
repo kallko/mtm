@@ -98,9 +98,7 @@
         <div id="point-menu-panel" >
             <div>
                 <select id="status-select" ng-model="filters.status" class="group-select"
-                        ng-options='option.value as option.name for option in filters.statuses'
-                        <!--ng-click=""-->
-                        >
+                        ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
                 <!--
@@ -181,7 +179,9 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна">Ост. КОК</th>
+                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна" >
+                        <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                    </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
@@ -220,7 +220,9 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна">Ост. КОК</th>
+                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна" >
+                        <button ng-click=" order('end_time_ts')">Ост. КОК</button>
+                    </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
@@ -543,7 +545,7 @@
                         <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
 
                     </tr>
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: (false) && (real_track[real_track.length-1].t2!='undefined') } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: (false)  } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
