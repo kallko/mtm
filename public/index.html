@@ -131,6 +131,8 @@
                     проблемные
                 </button>
 
+                <input ng-show="true" id="fast-calc" type="checkbox" value="false" ng-model="fastCalc" checked title="Упрощенный расчет данных">Быстрый расчет</input>
+
                 <button ng-show="false" class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
                     {{params.endWindowSize * 5}} минут до закрытия
                 </button>
@@ -179,6 +181,7 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна">Ост. КОК</th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
@@ -217,6 +220,7 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна">Ост. КОК</th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
@@ -267,6 +271,8 @@
                     </td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
+                    <td>{{(row.end_time_ts - nowTime)>0 && (row.real_arrival_time == 0 || row.real_arrival_time == undefined) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
+
                     <td>
                         <span ng-show="row.arrival_prediction > 0">
                             {{row.arrival_prediction * 1000 | date:'HH:mm' }}
@@ -425,8 +431,10 @@
     </div>
 </template>
 
-<!-- панель редактирования маршрута -->
-<template type="text/html" id="edit-route">
+<!-- панель редактирования маршрута Пока закомментирована -->
+
+
+<template   type="text/html" id="edit-route">
     <div id="edit-panel" ng-controller="EditRouteController">
         <div ng-show="route == undefined" id="edit-panel-empty">
             Маршрут для редактирования не выбран
@@ -512,10 +520,14 @@
         <div id="close-day-panel" ng-controller = "CloseDayController" >
             <button ng-click = "showCheckBoxToClose()">Готовые к закрытию</button>
             <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть выбранные</button>
-            <div>Имя компании: {{companyName}},
+
+            <!--Имя компании: {{companyName}},-->
+            <!--Время: {{(serverTime*1000) | date:"HH:MM"}}.-->
+
+            <div>
                   Ответственный: {{user}},
                   Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
-                  Время: {{(serverTime*1000) | date:"HH:MM"}}.
+
             </div>
             <div>
                 <table>
@@ -526,22 +538,26 @@
                         <th><button ng-click="order('driver.NAME'); orderCloseDay('getCheck')">Водитель</button></th>
                         <th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>
                         <!--th>Старт</th-->
-                        <th><button ng-click="order('END_TIME');">Конец работы</button></th>
-                        <th>Дата старта маршрута</th>
+                        <th class="center">Старт</th>
+                        <th><button ng-click="order('END_TIME');">Финиш</button></th>
+                        <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
+
                     </tr>
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: (false) && (real_track[real_track.length-1].t2!='undefined') } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
                                    ng-model="item.getCheck"
                                    ng-disabled="true">
                         </td>
-                        <td>{{item.filterId}}</td>
+                        <td>{{item.filterId+1}}</td>
                         <td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>
-                        <td>{{item.transport.NAME}}</td>
-                        <td>{{item.END_TIME.split(' ')[1]}}</td>
+                        <td >{{item.transport.NAME}}</td>
 
-                        <td>{{item.START_TIME.split(' ')[0]}}</td>
+
+                        <td>{{item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>
+                        <td> {{ item.END_TIME.split(' ')[1]}}</td>
+                        <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal": ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm' }}</td>
                     </tr>
                     <!-- <tr>
                         <td>
@@ -558,12 +574,14 @@
                                    ng-model="item.getCheck"
                                    ng-disabled="true">
                         </td>
-                        <td>{{::item.filterId}}</td>
+                        <td>{{item.filterId}}</td>
                         <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
-                        <td>{{::item.transport.NAME}}</td>
-                        <td>{{::item.END_TIME.split(' ')[1]}}</td>
+                        <td class="center">{{item.transport.NAME}}</td>
 
-                        <td>{{::item.START_TIME.split(' ')[0]}}</td>
+
+                        <td>{{item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} - </td>
+                        <td> {{item.END_TIME.split(' ')[1]}}</td>
+                        <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal": ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm'}}</td>
                     </tr>
 
 
@@ -686,10 +704,10 @@
                 </div>
             </td>
         </tr>
-        <tr>
-            <td class="title">Окно:</td>
-            <td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>
-        </tr>
+        <!--<tr>-->
+            <!--<td class="title">Окно:</td>-->
+            <!--<td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>-->
+        <!--</tr>-->
         <tr>
             <td class="title">Стоимость:</td>
             <td class="row-data">{{point.VALUE}}</td>
