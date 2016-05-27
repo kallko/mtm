@@ -211,7 +211,9 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 			scope.shadowDelta = (scope.delta / 60 > time.length) ? scope.delta / 60 : time.length;
 			console.log(scope.shadowDelta);
 			scope.fin = scope.start + scope.delta;
-
+			scope.cancel = function () {
+				$('#point-editing-popup').popup('hide');
+			};
 			 if('servicePoints' in scope.data && scope.data.servicePoints.length > 0) {
 
 				scope.servisPoints = [];
@@ -260,9 +262,7 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 				if (scope.data.servicePoints && scope.data.servicePoints.length > 0) {
 					scope.calculationStopTime();
 				}
-				scope.cancel = function () {
-					$('#point-editing-popup').popup('hide');
-				};
+
 				scope.unbindPoint = function ($index, $event) {
 
 					scope.emmitServisPoints.push(scope.servisPoints.splice($index, 1)[0]);
@@ -354,6 +354,9 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 							sumStop += scope.servisPoints[i].stopTime;
 						}
 						return sumStop;
+					}
+					if( Number.isNaN(scope.servisPoints[$index].stopTime)){
+						scope.disabled = true;
 					}
 
 
