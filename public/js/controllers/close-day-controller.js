@@ -169,6 +169,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             console.log(scope.selectDeyOldRoutes, 'отправка в поинт ндекс');
             rootScope.$emit('reqOldroute',  scope.selectDeyOldRoutes);
             currentDay = false;
+            $('#problem-index-btn').addClass('btn-success');
         }
     };
 
@@ -181,6 +182,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         rootScope.$emit('getCurrentday');
         scope.showGetCurrentday = false;
         currentDay = true;
+        $('#problem-index-btn').addClass('btn-success');
         scope.selectDeyOldRoutes = 'У вас есть не закрытые дни';
     };
 
@@ -189,9 +191,12 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     scope.showSelectDayOldRoutes = false;
     http.get('./keysoldroutescache')
         .success(function (data) {
-            if(data != null){
+            console.log(data);
+            if(data != null && data.length != 0){
                 scope.showSelectDayOldRoutes = true;
                 scope.deysOldRoutes = data;
+            }else{
+                scope.showSelectDayOldRoutes = false;
             }
         })
         .error(function(err){

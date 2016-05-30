@@ -304,7 +304,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             // тестовоотладочная функция проверки. Выбирает все привязанные стопы и печатает их с обслуженными точками.
-            checkTestStops();
+           // checkTestStops();
             // если не включена отрисовка нажатий - выход из функции
 
             // Закомментирован выбор рисовать или нет пуши на карте. По умолчанию рисовать.
@@ -1677,6 +1677,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
+
+
         function drawPushLine (mobilePush){
 
             //console.log("mobilePush", mobilePush);
@@ -1710,7 +1712,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
            // console.log("We will work with stop markers", markersArr);
             if(markersArr.length>0) {
                 var i = 0;
-                while (markersArr[i].source != undefined) {
+                while (markersArr[i] && markersArr[i].source != undefined) {
                     if (markersArr[i].source.servicePoints != undefined) {
                         //console.log("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
                     }

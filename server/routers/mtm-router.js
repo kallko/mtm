@@ -18,13 +18,12 @@ var express = require('express'),
     oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
     needNewReqto1C = {}; // если есть свойство с именем компани, то не запрвшивать из 1С
 
-new CronJob('00 23 * * * *', function() {
+new CronJob('00 25 * * * *', function() {
     for(var company in cashedDataArr){
         if (!oldRoutesCache[company]) {
             oldRoutesCache[company] = {};
         }
         if(company in closeRoutesUniqueID) { // есть ли за сегодня закрытые роуты, если да, то по UniqueID удаляем их из сегодняшних роутов
-            console.log(closeRoutesUniqueID[company]);
             for (var i = 0; closeRoutesUniqueID[company].length > i; i++) {
                 for (var j = 0; cashedDataArr[company].routes.length > j; j++) {
                     if (cashedDataArr[company].routes[j]['uniqueID'] == closeRoutesUniqueID[company][i]) { // удаляем из кеша все закрытые маршруты
@@ -185,7 +184,7 @@ router.route('/dailydata')
                                 continue;
                             }
                         }
-                    data.routes.length = 3;
+                    data.routes.length = 6;
                     cashedDataArr[req.session.login] = data;
 
                     req.session.itineraryID = data.ID;
@@ -446,14 +445,54 @@ router.route('/savewaypoint/')
 router.route('/saveupdate/')
     .post(function (req, res) {
         console.log('saveupdate');
-        console.log(req.body);
+        res.status(200).json({status: 'ok'});
+        if( !([req.session.login] in updateCacshe) ){
+            updateCacshe[req.session.login] = {};
+        }
+        if( !( req.body.date in updateCacshe[req.session.login]) ){
+            updateCacshe[req.session.login][req.body.date] = [];
+            updateCacshe[req.session.login][req.body.date] = req.body;
+        }else {
+            // Полученные данные нужно объедеенить с существующими на данный момент, которые были получены ранее
+            // так как иногда у стопа может быть id=0, который потом измениться, а TASK_NUMBER не уникальный, приходится создавать
+            // новые параметры newID oldID и сравнивать по ним.
+                var obj=req.body;
+                var i=0;
+                while (i<obj.data.length){
+                    var exist=false;
+                    var newID;
+                    if(obj.data[i] && obj.data[i].id!=undefined) newID=""+obj.data[i].lat+obj.data[i].lon+obj.data[i].t1;
+                    if(obj.data[i] && obj.data[i].TASK_NUMBER) newID=""+obj.data[i].TASK_NUMBER+obj.data[i].TASK_DATE;
+                    var j=0;
+                    //console.log("updateCacshe[req.session.login]", updateCacshe[req.session.login])
+                    while(j<updateCacshe[req.session.login][req.body.date].data.length){
+                        var oldID;
+                        if(updateCacshe[req.session.login][req.body.date].data[j] && updateCacshe[req.session.login][req.body.date].data[j].id!=undefined) oldID=""+updateCacshe[req.session.login][req.body.date].data[j].lat+updateCacshe[req.session.login][req.body.date].data[j].lon+updateCacshe[req.session.login][req.body.date].data[j].t1;
+                        if(updateCacshe[req.session.login][req.body.date].data[j] && updateCacshe[req.session.login][req.body.date].data[j].TASK_NUMBER) oldID=""+updateCacshe[req.session.login][req.body.date].data[j].TASK_NUMBER+updateCacshe[req.session.login][req.body.date].data[j].TASK_DATE;
+                        if(newID==oldID){
+                            //console.log("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
+                            updateCacshe[req.session.login][req.body.date].data[j]=obj.data[i];
+                            exist=true;
+                        }
+                        j++;
+                    }
+                    if(!exist) {
+                       // console.log("Adding new point/stop")
+                        updateCacshe[req.session.login][req.body.date].data.push(obj.data[i])
+                    }
+                    delete newID;
+                    i++;
+                }
+            updateCacshe[req.session.login][req.body.date] = req.body;
+
+        }
 
 
-        //
-        // if([req.session.login] in updateCacshe){
+        // if(  ([req.session.login] in updateCacshe) && (req.body.date in updateCacshe[req.session.login]) ){
+        //     updateCacshe[req.session.login] = {};
         //     updateCacshe[req.session.login] = req.body;
         // }else{
-        //     updateCacshe[req.session.login] = [];
+        //     updateCacshe[req.session.login][req.body.date] = [];
         //     updateCacshe[req.session.login] = req.body;
         // }
         // res.status(200).json({status: 'ok'});
@@ -461,14 +500,17 @@ router.route('/saveupdate/')
 
         //if(updateCacshe[req.session.login]==undefined || updateCacshe[req.session.login].length==0){
 
-        updateCacshe[req.session.login] = {};
-        updateCacshe[req.session.login][req.body.date] = {};
-        updateCacshe[req.session.login][req.body.date] = JSON.parse(JSON.stringify(req.body));
-
-        console.log(updateCacshe);
-
-            res.status(200).json({status: 'ok'});
-            return;
+        // if( !(req.session.login in updateCacshe) ){
+        //     updateCacshe[req.session.login] = {};
+        // }
+        // updateCacshe[req.session.login][req.body.date] = {};
+        // updateCacshe[req.session.login][req.body.date] = JSON.parse(JSON.stringify(req.body));
+        //
+        // console.log(updateCacshe);
+        //
+        //     res.status(200).json({status: 'ok'});
+        //     return;
+        //
         //}
         //res.status(200).json({status: 'ok'});
         // Полученные данные нужно объедеенить с существующими на данный момент, которые были получены ранее

@@ -326,6 +326,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         });
         rootScope.$on('getCurrentday', function(){
+           /* setListeners();
+            init();
+            setCheckLocksInterval(); */
             loadDailyData(false);
         });
 
@@ -2377,8 +2380,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 endTime;
             var routesID = [];
 
-            for (var i = 0; i < data.length; i++) {
-                routeI = data[i];
+            for (var i = 0; i < data.routes.length; i++) {
+                if(data.routes[i].getCheck != true){
+                    continue;
+                }
+                routeI = data.routes[i];
                 routesID.push(routeI.uniqueID);
                 route = {
                     pointsReady: [],
@@ -2613,13 +2619,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('Загружаю данные existing...');
             var url = './existdata';
             console.log('load exist data');
-
+            console.log(date);
                 http.post(url, {date: date})
                 .success(function (data) {
                     console.log(data,' existing success data');
                     scope.existData=data;
-                        console.log(data);
-                        updateData();
+                    scope.existDataLoaded=false;
+                    updateData();
                     //console.log("scope.existData",scope.existData);
                 })
                 .error(function (data) {
@@ -2632,7 +2638,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         function concatDailyAndExistingData (data){
-
+            console.log(data);
             console.log('concat from Node existing data', _data, "with", scope.existData  );
             if (!scope.existData.data) return;
             var i=0;
