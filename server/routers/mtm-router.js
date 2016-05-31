@@ -516,6 +516,16 @@ router.route('/getroutermatrix/:points')
         });
     });
 
+// получение матрицы расстояний с для всех непросчитанных роутов
+//router.route('/getroutermatrixuncalc/:points')
+//    .get(function (req, res) {
+//        console.log('getmatrix');
+//        tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
+//            res.status(200).json(data);
+//        });
+//    });
+
+
 // открытие окна задачи в 1С IDS
 router.route('/openidspointwindow/:pointId')
     .get(function (req, res) {

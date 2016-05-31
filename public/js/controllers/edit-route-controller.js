@@ -33,6 +33,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // базовая инициализация
         function init() {
+
             editPanelJ = $('#edit-panel');
 
             rootScope.$on('routeToChange', onRouteToChange);
@@ -256,6 +257,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // получить данные с роутера
         function loadRouterData(points, callback) {
+
             var pointsStr = '';
             for (var i = 0; i < points.length; i++) {
                 if (points[i].LAT != null && points[i].LON != null) {
@@ -714,6 +716,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
         };
 
+
+
+
         // обработывает ответ от математического сервера
         function processModifiedPoints(changedRoute, data) {
             console.log('Recalculate READY >>', data);
@@ -774,5 +779,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.route = undefined;
             scope.changedRoute = undefined;
         };
+
+
 
     }]);

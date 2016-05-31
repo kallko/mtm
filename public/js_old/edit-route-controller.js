@@ -38,6 +38,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             rootScope.$on('routeToChange', onRouteToChange);
             rootScope.$on('checkPoint', onPromisedChanged);
             myLayout.on('stateChanged', onResize);
+
+            console.log("EDIT ROUTE CONTROLLER INIT");
         }
 
         // пересчет ширины боксов при изменении размеров панельки
@@ -774,5 +776,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.route = undefined;
             scope.changedRoute = undefined;
         };
+
+
 
     }]);
