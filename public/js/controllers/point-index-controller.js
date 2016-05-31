@@ -2959,6 +2959,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                                 points[i].status=5;
                             }
+                            if((points[i].status==7 || points[i].status==5) && now > points[i].arrival_time_ts ){
+                                points[i].status=4;
+                            }
 
                         }
                         i++;

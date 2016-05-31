@@ -273,7 +273,7 @@
                     </td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
-                    <td>{{(row.end_time_ts - nowTime+60*2)>0 && (row.status==4 || row.status==5 ||row.status==7 || row.real_arrival_time == 0 || row.real_arrival_time == undefined) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
+                    <td>{{ (row.status==4 || row.status==5 ||row.status==7 ) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
 
                     <td>
                         <span ng-show="row.arrival_prediction >0">
@@ -570,7 +570,7 @@
                                     ng-change="chengeSelectDayOldRoutes()"
                                     ng-options="day as day  for day in deysOldRoutes"
                                     class="seleOldRoute">
-                                <option value="" selected="selected">У вас есть не закрытые дни</option>
+                                <option value="" selected="selected">У вас есть незакрытые дни</option>
                             </select>
                         </td>
                         <td colspan="2" >
