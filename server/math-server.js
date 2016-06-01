@@ -13,7 +13,7 @@ function MathServer() {
 // запрос на пересчет маршрута
 MathServer.prototype.recalculate = function (route, callback) {
     me = this;
-
+    console.log(this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route));
     log.toFLog('query.js', this.mathServerUrl + 'task?action=add&globalID=uniqGuid&task=' + JSON.stringify(route));
     request({
         url: this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route),

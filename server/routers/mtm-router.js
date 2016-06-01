@@ -184,7 +184,7 @@ router.route('/dailydata')
                                 continue;
                             }
                         }
-                    data.routes.length = 6;
+                    
                     cashedDataArr[req.session.login] = data;
 
                     req.session.itineraryID = data.ID;
