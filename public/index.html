@@ -276,7 +276,7 @@
                     <td>{{ (row.status==4 || row.status==5 ||row.status==7 ) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
 
                     <td>
-                        <span ng-show="row.arrival_prediction >0">
+                        <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8)">
                             {{row.arrival_prediction * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
@@ -295,7 +295,11 @@
                             {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
-                    <td>{{row.problem_index}}</td>
+                    <td>
+                        <!--<span ng-show="row.problem_index > 0">-->
+                        {{row.problem_index}}
+                        <!--</span>-->
+                    </td>
                     <td>
                         {{row.promised_window.start * 1000 | date:'HH:mm'}} -
                         {{row.promised_window.finish * 1000 | date:'HH:mm'}}
