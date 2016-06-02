@@ -354,9 +354,7 @@ router.route('/trackparts/:start/:end')
 router.route('/gettracksbystates/')
     .post(function (req, res) {
         console.log('gettracksbystates');
-        console.log(req.body.states);
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-
             console.log('get tracks by states DONE!');
             res.status(200).json(data);
         });

@@ -10,7 +10,7 @@
 <!-- файлы стилей -->
 <link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css"/>
 <link type="text/css" rel="stylesheet" href="./css/goldenlayout-light-theme.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
 <link rel="stylesheet" href="./css/font-awesome.min.css"/>
 <link rel="stylesheet" href="./css/application.css"/>
 <link rel="stylesheet" href="./css/columns.css"/>
@@ -26,8 +26,8 @@
 <script src="./js/vendor/goldenlayout.js"></script>
 <script src="./js/vendor/bootstrap-contextmenu.js"></script>
 <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
-<script src="https://cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+<script src="//cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
 <script src="./js/vendor/colResizable-1.5.min.js"></script>
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
@@ -98,9 +98,7 @@
         <div id="point-menu-panel" >
             <div>
                 <select id="status-select" ng-model="filters.status" class="group-select"
-                        ng-options='option.value as option.name for option in filters.statuses'
-                        <!--ng-click=""-->
-                        >
+                        ng-options='option.value as option.name for option in filters.statuses'>
                 </select>
 
                 <!--
@@ -181,7 +179,9 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна">Ост. КОК</th>
+                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна" >
+                        <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                    </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
@@ -220,7 +220,9 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна">Ост. КОК</th>
+                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна" >
+                        <button ng-click=" order('end_time_ts')">Ост. КОК</button>
+                    </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
@@ -273,20 +275,20 @@
                     </td>
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
-                    <td>{{(row.end_time_ts - nowTime)>0 && (row.real_arrival_time == 0 || row.real_arrival_time == undefined) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
+                    <td>{{ (row.status==4 || row.status==5 ||row.status==7 ) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
 
                     <td>
-                        <span ng-show="row.arrival_prediction > 0">
+                        <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8)">
                             {{row.arrival_prediction * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
                     <td>
-                        <span ng-show="row.arrival_prediction > 0">
+                        <span ng-show="row.arrival_prediction > 0 && (row.status ==7 || row.status ==4 || row.status==5)">
                             {{row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
                         </span>
                     </td>
                     <td>
-                        <span ng-show="row.real_arrival_time > 0">
+                        <span ng-show="row.real_arrival_time > 0 && (row.status ==7 || row.status ==4 || row.status==5)">
                             {{row.real_arrival_time * 1000 | date:'HH:mm' }}
                         </span>
                     </td>
@@ -295,7 +297,11 @@
                             {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
                         </span>
                     </td>
-                    <td>{{row.problem_index}}</td>
+                    <td>
+                        <span ng-show="row.problem_index > 0">
+                        {{row.problem_index}}
+                        </span>
+                    </td>
                     <td>
                         {{row.promised_window.start * 1000 | date:'HH:mm'}} -
                         {{row.promised_window.finish * 1000 | date:'HH:mm'}}
@@ -579,7 +585,7 @@
                                     ng-change="chengeSelectDayOldRoutes()"
                                     ng-options="day as day  for day in deysOldRoutes"
                                     class="seleOldRoute">
-                                <option value="" selected="selected">У вас есть не закрытые дни</option>
+                                <option value="" selected="selected">У вас есть незакрытые дни</option>
                             </select>
                         </td>
                         <td colspan="2" >
