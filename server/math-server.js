@@ -41,6 +41,7 @@ MathServer.prototype.recalculate = function (route, callback) {
                             if (body.state.status == 4) {
                                 log.toFLog('math_res2.js', body);
                                 console.log('Math ready!');
+                                console.log(body);
                                 clearInterval(intervalID);
                                 body.timestamp = parseInt(Date.now() / 1000);
                                 callback(body);

@@ -226,7 +226,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             var _now = Date.now() / 1000,
-                url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
+                url = './trackparts/' + 1464049394 + '/' + 1464130394;
 
             //console.log(url);
             http.get(url)
@@ -287,13 +287,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
-            if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
+            if (showDate)   url += (force ? '&' : '?') + 'showDate=' + 1464120000000;
 
             //console.log('waiting for data');
 
             http.get(url, {})
                 .success(function (data) {
+                    console.log(JSON.parse(JSON.stringify(data)));
 
+                    console.log(data);
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
 
@@ -1523,7 +1525,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
                 console.log('OMG!!1 New show date!');
                 scope.params = JSON.parse(JSON.stringify(params));
-                loadDailyData(false, params.showDate);
+                loadDailyData(true, params.showDate);
                 return;
             }
 
