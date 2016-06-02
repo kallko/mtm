@@ -294,9 +294,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
-                    console.log(JSON.parse(JSON.stringify(data)));
 
-                    console.log(data);
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
 
@@ -1595,7 +1593,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
                 console.log('OMG!!1 New show date!');
                 scope.params = JSON.parse(JSON.stringify(params));
-                loadDailyData(true, params.showDate);
+                loadDailyData(false, params.showDate);
                 return;
             }
 
@@ -1632,23 +1630,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     sortByRoute(row.route_indx);
                     return;
                 case 'edit':    // отправить маршрут на редактирование
-
-                    var uniqueid = $(contextJ).attr('data-uniqueid');
-
-                    //sortByRoute(row.route_indx, true);
-
-                    for(var i = 0; _data.routes.length > i; i++){
-                        if(uniqueid == _data.routes[i].uniqueID){
-                            break;
-                        }
-                    }
-
-                    // _data.routes[row.route_id].points[0].itineraryID = _data.ID;
-
-                    _data.routes[i].points[0].itineraryID = _data.ID;
+                    sortByRoute(row.route_indx, true);
+                    _data.routes[row.route_id].points[0].itineraryID = _data.ID;
 
                     scope.$emit('routeToChange', {
-                        route: _data.routes[i],
+                        route: _data.routes[row.route_id],
                         serverTime: _data.server_time,
                         demoMode: scope.demoMode,
                         workingWindow: scope.params.workingWindowType
