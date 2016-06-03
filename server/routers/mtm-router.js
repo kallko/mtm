@@ -577,7 +577,7 @@ router.route('/routerdata')
 // получение матрицы расстояний с роутера
 router.route('/getroutermatrix/:points')
     .get(function (req, res) {
-        console.log('getmatrix');
+        console.log('getmatrix', req.params.points);
         tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
             res.status(200).json(data);
         });
@@ -681,6 +681,42 @@ router.route('/currentStops/:gid/:from/:to')
         });
 
     });
+
+
+// получение треков по переданным стейтам
+router.route('/predicate/')
+    .post(function (req, res) {
+        //console.log('req body==', req.body);
+        var collection=req.body.collection;
+        var j=0;
+
+
+        while(j<collection.length){
+            console.log("Route ", j);
+            var pointsStr = '';
+            for (var  i= 0; i < collection[j].points.length; i++) {
+                if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
+                    pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
+                }
+            }
+
+            tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
+                console.log("getRouterMatrixByPoints DONE=", data);
+
+            });
+
+
+            j++;
+        }
+
+
+
+
+            res.status(200).json("Ok");
+        //});
+    });
+
+
 
 
 module.exports = router;

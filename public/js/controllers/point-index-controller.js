@@ -694,13 +694,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function updateData() {
             statusUpdate();
             predicationArrivalUpdate();
+
+            //serverPredicate();
             promised15MUpdate();
 
            // console.log("Сейчас будем апдейтить дату", scope.existDataLoaded);
 
             //накатываем сверху существующие ранее данные взятые с ноды, но только один раз при первой загрузке.
             if (!scope.existDataLoaded) {
-                console.log(" Накатываем сверху скачанные данные");
+                console.log(" Ура сейчас мы Накатываем сверху скачанные данные");
                 concatDailyAndExistingData(_data);
                 scope.existDataLoaded=true;
                 statusUpdate();
@@ -786,22 +788,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
                         //console.log("Подтверждена вручную Уходим");
-                        break;
+                        continue;
                     }
 
                     if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
                        // console.log("Подтверждена пушем и стопом Уходим");
-                        break;
+                        continue;
                     }
 
                     if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
                         //console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                        break;
+                        continue;
                     }
 
                     if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
                         //console.log("Точка уже доставлена идем дальше");
-                        break;
+                        continue;
                     }
 
                    // console.log("Пересчет");
@@ -872,22 +874,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                 if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
                                     //console.log("Подтверждена вручную Уходим");
-                                    break;
+                                    continue;
                                 }
 
                                 if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
                                     //console.log("Подтверждена пушем и стопом Уходим");
-                                    break;
+                                    continue;
                                 }
 
                                 if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
                                    // console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                                    break;
+                                    continue;
                                 }
 
                                 if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
                                     //console.log("Точка уже доставлена идем дальше");
-                                    break;
+                                    continue;
                                 }
 
 
@@ -994,9 +996,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpArrival.servicePoints.push(k);}
 
                                    // tmpPoint.rawConfirmed=0;
-
-
-
 
                                     //console.log("Find stop for Waypoint and change STATUS")
                                     findStatusAndWindowForPoint(tmpPoint);
@@ -3004,6 +3003,38 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     d.getMinutes().padLeft(),
                     d.getSeconds().padLeft()].join(':');
             return dformat;
+        }
+
+
+
+        // функция, которая запрашивает данные с сервера одним пакетом
+        // для предсказания прибытия. Чтобы клиент не тормозился большим количеством колбэков
+        function serverPredicate(){
+            console.log("BIG DATA", _data);
+            var result=[];
+            var i=0;
+            while(i<_data.routes.length) {
+                var route=_data.routes[i];
+                var indx=route.uniqueID;
+                var carPos=[{LAT:route.real_track[route.real_track.length-1].lat, LON: route.real_track[route.real_track.length-1].lat }];
+                var obj={id:indx, points:carPos.concat(route.points)};
+                result.push(obj);
+                i++;
+            }
+
+
+            http.post('./predicate', {
+                collection: result
+            })
+                .success(function (data) {
+                console.log("Additional load", {data: data});
+
+            }).error(function(err){
+                console.log(err);
+
+            });
+
+
         }
 
 
