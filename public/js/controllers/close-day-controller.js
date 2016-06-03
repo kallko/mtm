@@ -69,7 +69,11 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
       scope.data.routes = orderBy(scope.data.routes, predicate);
     };
     
-
+/*
+    scope.orderGPS = function(predicate){
+        console.log(predicate);
+    };
+*/
 
     scope.toggleCheckBoxToClose = function(){
         console.info(scope.data.routes);
@@ -120,6 +124,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
   
         rootScope.$on('forCloseController', function (event, data) {
+            scope.selected = -1;
             scope.data = data;
             scope.companyName = data.companyName;
             scope.user = data.user;
