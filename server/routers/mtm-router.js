@@ -677,10 +677,12 @@ router.route('/predicate/')
         //console.log('req body==', req.body);
         var collection=req.body.collection;
         var j=0;
-
+        var generalResult=[];
 
         while(j<collection.length){
             console.log("Route ", j);
+
+            var result=[];
             var pointsStr = '';
             for (var  i= 0; i < collection[j].points.length; i++) {
                 if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
@@ -689,10 +691,28 @@ router.route('/predicate/')
             }
 
             tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
-                console.log("getRouterMatrixByPoints DONE=", data);
+
+                //if(flag) {
+                //    console.log("getRouterMatrixByPoints DONE=", data.time_table);
+                //    flag=false;
+                //}
+                //
+                //var i=1;
+                ////console.log ("data.time_table.length", data.time_table);
+                //while(i<data.time_table.length){
+                //    console.log(j, i, "time=", data.time_table[i][0]);
+                //    result.push(data.time_table[i][0]);
+                //
+                //    i++
+                //}
+                //
+                ////console.log("TimeTable Result = ", result);
+                result=data;
 
             });
 
+            var obj={indx:collection[j].id, times:result};
+            generalResult.push(obj);
 
             j++;
         }
@@ -700,7 +720,8 @@ router.route('/predicate/')
 
 
 
-            res.status(200).json("Ok");
+
+            res.status(200).json(generalResult);
         //});
     });
 
