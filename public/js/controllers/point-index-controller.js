@@ -177,7 +177,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         refreshLocked();
                     }
                 }).error(function(){
-                    rootScope.errorNotification('/checklocks');
+                   // rootScope.errorNotification('/checklocks');
                 });
         }
 
@@ -220,7 +220,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить части трека
         function loadTrackParts() {
-
+            if(rootScope.currentDay) {
                 if (_data == null) return;
 
                 if (_data.trackUpdateTime == undefined) {
@@ -273,9 +273,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //console.log("Update Dinamicly stops for routes");
                         updateData();
                     }).error(function (err) {
-                    rootScope.errorNotification(url);
+                   // rootScope.errorNotification(url);
                 });
-
+            }
         }
 
         // насильная загрузка данных мимо кеша сервера
@@ -286,7 +286,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
-
+            $('#problem-index-btn').addClass('btn-success');
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
@@ -2967,12 +2967,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                                 points[i].status=5;
                                 points[i].overdue_time=points[i].arrival_prediction-points[i].arrival_time_ts;
-                                console.log("TIME_OUT for point", points[i]);
+                                //console.log("TIME_OUT for point", points[i]);
                             }
                             if((points[i].status==7 || points[i].status==5) && now > points[i].arrival_time_ts ){
                                 points[i].status=4;
                                 points[i].overdue_time=now-points[i].arrival_time_ts+points[i].arrival_left_prediction;
-                                console.log("DELAY for point", points[i]);
+                                //console.log("DELAY for point", points[i]);
                             }
 
                         }
