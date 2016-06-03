@@ -723,13 +723,11 @@ router.route('/predicate/')
 
             j++;
         }
-
-
-
+        fgbrgb
 
 
             res.status(200).json(generalResult);
-        //});
+
     });
 
 
