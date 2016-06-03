@@ -18,7 +18,7 @@ var express = require('express'),
     oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
     needNewReqto1C = {}; // если есть свойство с именем компани, то не запрвшивать из 1С
 
-new CronJob('00 25 * * * *', function() {
+new CronJob('01 00 00 * * *', function() {
     for(var company in cashedDataArr){
         if (!oldRoutesCache[company]) {
             oldRoutesCache[company] = {};
@@ -64,6 +64,13 @@ router.route('/')
     .get(function (req, res) {
         res.status(200);
     });
+
+
+router.route('/currentsrvertime')
+    .post(function(req, res){
+        res.status(200).json(Date.now());
+    });
+
 
 // запуск монитора диспетчера в демо-режиме
 router.route('/demo')
