@@ -681,16 +681,14 @@ router.route('/currentStops/:gid/:from/:to')
 // получение треков по переданным стейтам
 router.route('/predicate/')
     .post(function (req, res) {
-        //console.log('req body==', req.body);
+
         var collection=req.body.collection;
         var j=0;
-        var generalResult=[];
-        var strings=[];
+        var generalResult=[];  // преременная собирающая в себе все ответы
+
 
         while(j<collection.length){
-            console.log("Route ", j);
 
-            var result=[];
             var pointsStr = '';
             for (var  i= 0; i < collection[j].points.length; i++) {
                 if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
@@ -701,19 +699,18 @@ router.route('/predicate/')
             tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
                 var timeMatrix=[];
                 var i=1;
+                // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
                 while(i<data.time_table[0].length){
-                    //console.log("time", data.time_table[0][i][0]);
                     timeMatrix.push(data.time_table[0][i][0]);
-
                     i++;
                 }
 
-                //Поиск ID к полученной матрице
+                //Поиск ID к полученной матрице, на случай если ответы в колбеки придут асинхронно
                 var k=0;
                 var indx;
                 var temp=pointsStr.substring(5);
                 var k=temp.indexOf("&");
-                temp=temp.substring(0,19);
+                temp=temp.substring(0,k);
                 var parts = temp.split(',');
                 var LAT=parts[0];
                 var LON=parts[1];
@@ -724,11 +721,11 @@ router.route('/predicate/')
                         indx=collection[k].id;
                         break;
                     }
-
                     k++
                 }
-
                 generalResult.push({id:indx, time: timeMatrix});
+
+                // Проверка не является ли этот колбек последним.
                 if(generalResult.length==collection.length)
                 {
                     console.log("The cickle is finished RESULT LENGTH=", generalResult.length );
@@ -737,61 +734,11 @@ router.route('/predicate/')
                 }
 
             });
-            // strings.push(pointsStr);
+
             j++;
         }
 
-        //console.log(strings);
 
-        //var i=0;
-
-
-
-
-
-
-
-        //getPredicate (strings, function () {console.log ("I have already finished")});
-        //
-        //
-        //function getPredicate (strings, callback) {
-        //
-        //
-        //
-        //
-        //    callback();
-        //}
-
-
-        //function printList(callback) {
-        //    // do your printList work
-        //    console.log('printList is done');
-        //    callback();
-        //}
-        //
-        //function updateDB(callback) {
-        //    // do your updateDB work
-        //    console.log('updateDB is done');
-        //    callback()
-        //}
-        //
-        //function getDistanceWithLatLong(callback) {
-        //    // do your getDistanceWithLatLong work
-        //    console.log('getDistanceWithLatLong is done');
-        //    callback();
-        //}
-        //
-        //function runSearchInOrder(callback) {
-        //    getDistanceWithLatLong(function() {
-        //        updateDB(function() {
-        //            printList(callback);
-        //        });
-        //    });
-        //}
-        //
-        //runSearchInOrder(strings, function(){console.log('finished')});
-        //
-        //    res.status(200).json(generalResult);
 
     });
 

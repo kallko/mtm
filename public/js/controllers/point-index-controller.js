@@ -145,7 +145,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('setDynamicDataUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
-
+                console.log("setDynamicDataUpdate updateData")
                 updateData();
             }, seconds * 1000);
         }
@@ -270,7 +270,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
                         }
                         _data.trackUpdateTime = _now;
-                        //console.log("Update Dinamicly stops for routes");
+                        console.log("Update Dinamicly stops for routes updateData");
                         updateData();
                     }).error(function (err) {
                    // rootScope.errorNotification(url);
@@ -2096,6 +2096,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             };
 
             updateRawPromised(point);
+            console.log("scope.changePromisedWindow updateData");
             updateData();
         };
 
