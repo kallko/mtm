@@ -84,6 +84,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // загружен новый маршрут
         function onRouteToChange(event, data) {
+            console.log(data.route);
+            if( data.route.DISTANCE == 0) {
+                scope.disableRecalculate = scope.disableSaveRoutes = true;
+            }else{
+                scope.disableRecalculate = scope.disableSaveRoutes = false;
+            }
             var routeCopy = JSON.parse(JSON.stringify(data.route)); // копируем без ссылок маршрут
             baseRoute = data.route;
             serverTime = data.serverTime;
@@ -151,10 +157,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
                 return;
             }
-
+            console.log(scope.changedRoute);
             var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
-                scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1,
-                url = './findtime2p/'
+                scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1;
+            console.log(last);
+            var url = './findtime2p/'
                     + scope.changedRoute.car_position.lat + '&'
                     + scope.changedRoute.car_position.lon + '&'
                     + scope.changedRoute.points[last].LAT + '&'
@@ -711,6 +718,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 // оптравляем на пересчет
                 http.post('./recalculate/', {input: mathInput}).
                     success(function (data) {
+                    console.log(data);
                         processModifiedPoints(route, data);
                     });
             }

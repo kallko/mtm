@@ -241,15 +241,23 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
 };
 
 // получить реальные треки и стопы по всем машинам решения за весь день указанный в переданных данных в поле server_time
-TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback) {
+TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback, date, itIsToday) {
     console.log('=== getRealTracks ===');
-
-    var data = _data[nIndx],
-        now = new Date(data.server_time * 1000),
-        url = this.createParamsStr(
-            new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000,
+    var data = _data[nIndx];
+    var now = new Date(data.server_time * 1000);
+    if(itIsToday){
+        var timeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+        var timeFin = new Date().getTime() / 1000;
+    }else{
+        timeStart =   parseInt( (date / 1000) - (60 * 60 * 24), 10);
+        console.log(timeStart);
+        timeFin = parseInt(date / 1000, 10);
+        console.log(timeFin);
+    }
+    var url = this.createParamsStr(
+            timeStart,
             //new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000, //Тестово отладочный блок. Если раскомментировать строку то будет получать все данные за день. В строке ниже, получает данные только до текущего времени сервера
-            new Date().getTime() / 1000,
+            timeFin,
             this.undef_t, this.undef_d,
             this.stop_s, this.stop_d, this.move_s, this.move_d);
 

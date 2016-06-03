@@ -184,11 +184,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     // перемотать на вечер запрашиваемого дня, если выбран не текущий день
     if (date) {
         date = parseInt(date);
-        date += 21 * 3600000;
     }
 
-    date = !itIsToday ? date : Date.now();
-
+    var date = date ? date : Date.now();
+    console.log(date);
     console.log('Date >>>', new Date(date));
 
     // инициализация соап клиента
@@ -289,7 +288,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
-            me.getAdditionalData(client, data, itIsToday, nIndx, callback);
+            me.getAdditionalData(client, data, itIsToday, nIndx, callback, date);
 
         });
     } else {
@@ -326,8 +325,9 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
 };
 
 // получение дополнительных данных по полученному решению
-SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback) {
+SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback, date) {
     var me = this;
+    console.log(date);
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     log.l(_xml.additionalDataXML(data[nIndx].ID));
@@ -408,7 +408,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 }
 
                 // получение реальных треков и стопов
-                tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback);
+                tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
                 checkBeforeSend(data, callback);
@@ -483,7 +483,7 @@ SoapManager.prototype.getPlanByDate = function (timestamp, callback) {
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
         console.log('getPlansByTime', me.login);
 
-        timestamp *= 1000;
+        // timestamp *= 1000;
         me.getDailyPlan(callback, timestamp);
     });
 };

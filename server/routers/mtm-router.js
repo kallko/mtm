@@ -155,10 +155,8 @@ router.route('/dailydata')
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
-                //var toPrint = JSON.stringify(data)
                 console.log('=== dataReadyCallback === send data to client ===');
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                console.log('=== dataReadyCallback === send data to client ===');
 
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
                     res.status(200).json(data);
@@ -184,7 +182,7 @@ router.route('/dailydata')
                                 continue;
                             }
                         }
-                   // data.routes.length = 6;
+
                     cashedDataArr[req.session.login] = data;
 
                     req.session.itineraryID = data.ID;
@@ -582,16 +580,6 @@ router.route('/getroutermatrix/:points')
             res.status(200).json(data);
         });
     });
-
-// получение матрицы расстояний с для всех непросчитанных роутов
-//router.route('/getroutermatrixuncalc/:points')
-//    .get(function (req, res) {
-//        console.log('getmatrix');
-//        tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
-//            res.status(200).json(data);
-//        });
-//    });
-
 
 // открытие окна задачи в 1С IDS
 router.route('/openidspointwindow/:pointId')

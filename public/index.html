@@ -179,7 +179,7 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна" >
+                    <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
                         <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
                     </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
@@ -220,7 +220,7 @@
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="time-left-window-col" title="JОстаток до конца контролируемого окна" >
+                    <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
                         <button ng-click=" order('end_time_ts')">Ост. КОК</button>
                     </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
@@ -251,7 +251,9 @@
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
                     ng-show="applyFilter(row)"
-                    on-finish-render="ngRepeatFinished"  class="delivery-point-row"
+                    data-uniqueid="{{row.uniqueID}}"
+                    on-finish-render="ngRepeatFinished"
+                    class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{row.NUMBER}}</td>
@@ -431,7 +433,9 @@
             <div class="title">Загрузка конкретного дня</div>
             <div class="setting-row">
                 <span class="param-title">Отображаемый день</span>
-                <input type="date" id="show-date"/>
+                <input type="date"
+                       ng-model="showDate"
+                       id="show-date"/>
             </div>
         </div>
     </div>
@@ -452,11 +456,18 @@
                     ng-options='option.value as option.name for option in recalc_modes'>
             </select>
 
-            <button class="btn btn-info btn-sm" id="to-recalculate-btn" ng-click="recalculateRoute()">
+            <button class="btn btn-info btn-sm"
+                    id="to-recalculate-btn"
+                    ng-click="recalculateRoute()"
+                    ng-disabled="disableRecalculate"
+            >
                 пересчитать
             </button>
 
-            <button class="btn btn-info btn-sm" ng-click="saveRoutes()">сохранить</button>
+            <button class="btn btn-info btn-sm"
+                    ng-click="saveRoutes()"
+                    ng-disabled="disableSaveRoutes"
+            >сохранить</button>
 
             <button class="btn btn-info btn-sm" ng-click="cancelEdit()">отменить</button>
         </div>

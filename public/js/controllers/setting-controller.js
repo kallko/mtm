@@ -24,8 +24,13 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
         // обработчик кнопки сохранить, вызывается в index.html (ng-click)
         scope.saveAllParams = function () {
             console.log('settings');
-            var date = new Date($('#show-date').val());
-            scope.params.showDate = date.getTime() || -1;
+            var dateTS = scope.showDate.getTime();
+
+            scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
+            console.log(scope.params.showDate);
+            rootScope.currentDay = false;
+            rootScope.$emit('fastCalc');
+            rootScope.$emit('stateChanged');
             scope.$emit('settingsChanged', scope.params);
             Settings.saveToLocalStorage(scope.params);
         };

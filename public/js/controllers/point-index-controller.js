@@ -28,7 +28,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             },
 
             aggregatorError = "invalid parameter 'gid'. ",
-            loadParts = false,                              // догрузить новые данные сразу после загрузки интерфейса
+            loadParts = true,                              // догрузить новые данные сразу после загрузки интерфейса
             enableDynamicUpdate = true;                    // динамическая догрузка данных по заданному выше интервалу
             scope.existData=[];                                         //Хранение измененных в течение дня данных
             scope.fastCalc=false;                          // Упрощенный расчет точек
@@ -44,7 +44,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         loadDailyData(false);
 
         if (enableDynamicUpdate) {
-            setRealTrackUpdate(stopUpdateInterval);
+             setRealTrackUpdate(stopUpdateInterval);
         }
 
         // начальная инициализация
@@ -220,60 +220,62 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить части трека
         function loadTrackParts() {
-            if (_data == null) return;
 
-            if (_data.trackUpdateTime == undefined) {
-                _data.trackUpdateTime = _data.server_time;
-            }
+                if (_data == null) return;
 
-            var _now = Date.now() / 1000,
-                url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
+                if (_data.trackUpdateTime == undefined) {
+                    _data.trackUpdateTime = _data.server_time;
+                }
 
-            //console.log(url);
-            http.get(url)
-                .success(function (trackParts) {
-                    //console.log('loaded track parts');
+                var _now = Date.now() / 1000,
+                    url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
 
-                    for (var i = 0; i < trackParts.length; i++) {
-                        // если часть трека не валидна - пропускаем итерацию
-                        if (trackParts[i].data == undefined ||
-                            trackParts[i].data.length == 0 ||
-                            trackParts[i].data == aggregatorError) {
-                            continue;
-                        }
+                //console.log(url);
+                http.get(url)
+                    .success(function (trackParts) {
+                        //console.log('loaded track parts');
 
-                        // добавляем новые данные к уже существующему треку
-                        for (var j = 0; j < _data.routes.length; j++) {
-                            if (_data.routes[j].transport.gid == trackParts[i].gid) {
-                                if (trackParts[i].data.length > 0) {
+                        for (var i = 0; i < trackParts.length; i++) {
+                            // если часть трека не валидна - пропускаем итерацию
+                            if (trackParts[i].data == undefined ||
+                                trackParts[i].data.length == 0 ||
+                                trackParts[i].data == aggregatorError) {
+                                continue;
+                            }
 
+                            // добавляем новые данные к уже существующему треку
+                            for (var j = 0; j < _data.routes.length; j++) {
+                                if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                     if (trackParts[i].data.length > 0) {
-                                        trackParts[i].data[0].state = 'MOVE';
-                                        _data.routes[j].real_track = _data.routes[j].real_track || [];
-                                        _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
-                                        if (_data.routes[j].real_track[0].lastTrackUpdate != undefined) {
-                                            _data.routes[j].real_track[0].lastTrackUpdate -= updateTrackInterval * 2;
-                                        }
 
-                                        var len = _data.routes[j].real_track.length - 1;
-                                        _data.routes[j].car_position = _data.routes[j].real_track[len];
+                                        if (trackParts[i].data.length > 0) {
+                                            trackParts[i].data[0].state = 'MOVE';
+                                            _data.routes[j].real_track = _data.routes[j].real_track || [];
+                                            _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
+                                            if (_data.routes[j].real_track[0].lastTrackUpdate != undefined) {
+                                                _data.routes[j].real_track[0].lastTrackUpdate -= updateTrackInterval * 2;
+                                            }
 
-                                        if (_data.routes[i] != undefined && _data.routes[i].real_track != undefined &&
-                                            _data.routes[i].real_track.length > 0) {
-                                            _data.routes[i].real_track.splice(len, 1);
+                                            var len = _data.routes[j].real_track.length - 1;
+                                            _data.routes[j].car_position = _data.routes[j].real_track[len];
+
+                                            if (_data.routes[i] != undefined && _data.routes[i].real_track != undefined &&
+                                                _data.routes[i].real_track.length > 0) {
+                                                _data.routes[i].real_track.splice(len, 1);
+                                            }
                                         }
                                     }
+                                    break;
                                 }
-                                break;
                             }
                         }
-                    }
-                    _data.trackUpdateTime = _now;
-                    //console.log("Update Dinamicly stops for routes");
-                    updateData();
-                }).error(function(err){
+                        _data.trackUpdateTime = _now;
+                        //console.log("Update Dinamicly stops for routes");
+                        updateData();
+                    }).error(function (err) {
                     rootScope.errorNotification(url);
                 });
+
         }
 
         // насильная загрузка данных мимо кеша сервера
@@ -288,13 +290,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
+          //  if (showDate)   url += (force ? '&' : '?') + 'showDate=' + 1464132000000;
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
-
             //console.log('waiting for data');
 
             http.get(url, {})
                 .success(function (data) {
-
+                    console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
 
@@ -698,6 +700,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //serverPredicate();
             promised15MUpdate();
 
+
            // console.log("Сейчас будем апдейтить дату", scope.existDataLoaded);
 
             //накатываем сверху существующие ранее данные взятые с ноды, но только один раз при первой загрузке.
@@ -717,6 +720,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // проверка на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         function promised15MUpdate() {
             var now = _data.server_time;
+
             scope.nowTime=now;
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
@@ -750,7 +754,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function deg2rad(deg) {
             return deg * (Math.PI / 180)
         }
-
+        rootScope.$on('fastCalc', function(){
+            scope.fastCalc = false;
+        });
         // обновление статусов
         function statusUpdate() {
             //console.log('statusUpdate');
@@ -866,12 +872,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-                                //тестово отладочный блок
-                                //if (i==37){
-                                //
-                                //    console.log("TemStop",tmpArrival, "tmpPoint", tmpPoint);
-                                //}
-
                                 if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
                                     //console.log("Подтверждена вручную Уходим");
                                     continue;
@@ -942,7 +942,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                                 && status !== STATUS.FINISHED_LATE
                                                 && status !== STATUS.FINISHED_TOO_EARLY) {
                                                 haveUnfinished = true;
-                                                break;
+                                                continue;
                                             }
                                         }
 
@@ -1332,7 +1332,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // обновить предсказание прибытия к точкам
+
         function predicationArrivalUpdate() {
+
             var route,
                 url,
                 point,
@@ -1351,8 +1353,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     continue;
                 }
 
-                    if(!scope.fastCalc && route.DISTANCE == 0 )
-                {
+                    if(!scope.fastCalc && route.DISTANCE == 0 ){
                      // формируем дату для запроса. Первый элемент - текущее положение машины. Потом все поинты маршрута
                     //Назначение статусов и опредление прогноза и опоздания
                     console.log("  Predicate for uncalc", scope.fastCalc);
@@ -1363,12 +1364,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         var timeMatrix=[];
                         askTimeMatrixForRoute(points, timeMatrix , now, route);
 
-                    }
+                    } else{
+                        if (route.DISTANCE != 0 && route.points[route.lastPointIndx]) {
 
-
-            else {
-                        if (route.DISTANCE != 0) {
-
+                            console.log(route.points);
                             console.log("Делаем прогноз прибытия просчитанных маршрутов");
                             point = route.car_position;
                             url = './findtime2p/' + point.lat + '&' + point.lon + '&'
@@ -1514,7 +1513,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             // после изменений размера панельки, пересчитывать размеры таблицы и её шапки
-            myLayout.on('stateChanged', function (e) {
+            myLayout.on('stateChanged', stateChangedRightTable );
+
+            rootScope.$on('stateChanged', stateChangedRightTable );
+
+            function stateChangedRightTable(e){
                 var pointMenuPanel = $('#point-menu-panel');
                 pointTableHolder.height(pointContainer.height() - 27 - pointMenuPanel.height());
                 pointTableHolder.width(pointContainer.width() - 10);
@@ -1527,7 +1530,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 updateFixedHeaderPos();
-            });
+            }
+
+
 
             // контролировать размер таблицы после изменения фильтров для изменения размеров грипов для ресайза колонок
             scope.$watch(function () {
@@ -1592,7 +1597,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
                 console.log('OMG!!1 New show date!');
                 scope.params = JSON.parse(JSON.stringify(params));
-                loadDailyData(false, params.showDate);
+                loadDailyData(true, params.showDate);
                 return;
             }
 
@@ -2694,6 +2699,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log(data,' existing success data');
                     scope.existData=data;
                     scope.existDataLoaded=false;
+                    console.log(' loadExistData updateData');
                     updateData();
                     //console.log("scope.existData",scope.existData);
                 })
@@ -2948,7 +2954,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     pointsStr += "&loc=" + points[i].LAT + "," + points[i].LON;
                 }
             }
-
+            console.log( JSON.parse(JSON.stringify(points)) );
             http.get('./getroutermatrix/' + pointsStr)
                 .success(function (data) {
                     var i=1;
