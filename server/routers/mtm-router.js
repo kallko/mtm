@@ -697,68 +697,101 @@ router.route('/predicate/')
                     pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
                 }
             }
-             strings.push(pointsStr);
+
+            tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
+                var timeMatrix=[];
+                var i=1;
+                while(i<data.time_table[0].length){
+                    //console.log("time", data.time_table[0][i][0]);
+                    timeMatrix.push(data.time_table[0][i][0]);
+
+                    i++;
+                }
+
+                //Поиск ID к полученной матрице
+                var k=0;
+                var indx;
+                var temp=pointsStr.substring(5);
+                var k=temp.indexOf("&");
+                temp=temp.substring(0,19);
+                var parts = temp.split(',');
+                var LAT=parts[0];
+                var LON=parts[1];
+
+
+                while (k<collection.length){
+                        if(LAT==collection[k].points[0].LAT && LON==collection[k].points[0].LON){
+                        indx=collection[k].id;
+                        break;
+                    }
+
+                    k++
+                }
+
+                generalResult.push({id:indx, time: timeMatrix});
+                if(generalResult.length==collection.length)
+                {
+                    console.log("The cickle is finished RESULT LENGTH=", generalResult.length );
+                    res.status(200).json(generalResult);
+                    return;
+                }
+
+            });
+            // strings.push(pointsStr);
             j++;
         }
 
-        console.log(strings);
+        //console.log(strings);
 
-        var i=0;
-
-        if(generalResult.length==collection.length) {
-            console.log("The cickle is finished");
-            res.status(200).json(generalResult);
-            return;
-        } else {
-            tracksManager.getRouterMatrixByPoints(pointsStr);
-            i++;
-        }
+        //var i=0;
 
 
 
-        tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
-
-            result=data;
-
-            });
-
-        getPredicate (strings, function () {console.log ("I have already finished")});
 
 
-        function getPredicate (strings, callback) {
-
-        }
 
 
-        function printList(callback) {
-            // do your printList work
-            console.log('printList is done');
-            callback();
-        }
+        //getPredicate (strings, function () {console.log ("I have already finished")});
+        //
+        //
+        //function getPredicate (strings, callback) {
+        //
+        //
+        //
+        //
+        //    callback();
+        //}
 
-        function updateDB(callback) {
-            // do your updateDB work
-            console.log('updateDB is done');
-            callback()
-        }
 
-        function getDistanceWithLatLong(callback) {
-            // do your getDistanceWithLatLong work
-            console.log('getDistanceWithLatLong is done');
-            callback();
-        }
-
-        function runSearchInOrder(callback) {
-            getDistanceWithLatLong(function() {
-                updateDB(function() {
-                    printList(callback);
-                });
-            });
-        }
-
-        runSearchInOrder(strings, function(){console.log('finished')});
-
-            res.status(200).json(generalResult);
+        //function printList(callback) {
+        //    // do your printList work
+        //    console.log('printList is done');
+        //    callback();
+        //}
+        //
+        //function updateDB(callback) {
+        //    // do your updateDB work
+        //    console.log('updateDB is done');
+        //    callback()
+        //}
+        //
+        //function getDistanceWithLatLong(callback) {
+        //    // do your getDistanceWithLatLong work
+        //    console.log('getDistanceWithLatLong is done');
+        //    callback();
+        //}
+        //
+        //function runSearchInOrder(callback) {
+        //    getDistanceWithLatLong(function() {
+        //        updateDB(function() {
+        //            printList(callback);
+        //        });
+        //    });
+        //}
+        //
+        //runSearchInOrder(strings, function(){console.log('finished')});
+        //
+        //    res.status(200).json(generalResult);
 
     });
 
