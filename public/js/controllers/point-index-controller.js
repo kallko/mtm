@@ -695,9 +695,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обновляет статусы и делает прогнозы по слинкованным данным
         function updateData() {
             statusUpdate();
-            predicationArrivalUpdate();
+            //predicationArrivalUpdate();
 
-            //serverPredicate();
+            serverPredicate();
             promised15MUpdate();
 
 

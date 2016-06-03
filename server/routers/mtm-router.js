@@ -685,6 +685,7 @@ router.route('/predicate/')
         var collection=req.body.collection;
         var j=0;
         var generalResult=[];
+        var strings=[];
 
         while(j<collection.length){
             console.log("Route ", j);
@@ -696,35 +697,66 @@ router.route('/predicate/')
                     pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
                 }
             }
+             strings.push(pointsStr);
+            j++;
+        }
 
-            tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
+        console.log(strings);
 
-                //if(flag) {
-                //    console.log("getRouterMatrixByPoints DONE=", data.time_table);
-                //    flag=false;
-                //}
-                //
-                //var i=1;
-                ////console.log ("data.time_table.length", data.time_table);
-                //while(i<data.time_table.length){
-                //    console.log(j, i, "time=", data.time_table[i][0]);
-                //    result.push(data.time_table[i][0]);
-                //
-                //    i++
-                //}
-                //
-                ////console.log("TimeTable Result = ", result);
-                result=data;
+        var i=0;
+
+        if(generalResult.length==collection.length) {
+            console.log("The cickle is finished");
+            res.status(200).json(generalResult);
+            return;
+        } else {
+            tracksManager.getRouterMatrixByPoints(pointsStr);
+            i++;
+        }
+
+
+
+        tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
+
+            result=data;
 
             });
 
-            var obj={indx:collection[j].id, times:result};
-            generalResult.push(obj);
+        getPredicate (strings, function () {console.log ("I have already finished")});
 
-            j++;
+
+        function getPredicate (strings, callback) {
+
         }
-        fgbrgb
 
+
+        function printList(callback) {
+            // do your printList work
+            console.log('printList is done');
+            callback();
+        }
+
+        function updateDB(callback) {
+            // do your updateDB work
+            console.log('updateDB is done');
+            callback()
+        }
+
+        function getDistanceWithLatLong(callback) {
+            // do your getDistanceWithLatLong work
+            console.log('getDistanceWithLatLong is done');
+            callback();
+        }
+
+        function runSearchInOrder(callback) {
+            getDistanceWithLatLong(function() {
+                updateDB(function() {
+                    printList(callback);
+                });
+            });
+        }
+
+        runSearchInOrder(strings, function(){console.log('finished')});
 
             res.status(200).json(generalResult);
 
