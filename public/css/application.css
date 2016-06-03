@@ -522,3 +522,6 @@ template {
 .seleOldRoute{
     margin: 15px 0;
 }
+.dropdown-statuses{
+    list-style: none;
+}

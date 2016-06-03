@@ -68,7 +68,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.filters.driver = -1; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             scope.filters.branch = scope.filters.branches[0].value;
-            scope.filters.status = scope.filters.statuses[0].value;
+           // scope.filters.status = scope.filters.statuses[0].value;
+            scope.filters.status = {};
+            for(var i = 0; scope.filters.statuses.length > i; i++){
+                scope.filters.status[scope.filters.statuses[i].value] = true;
+            }
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
             scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = 1;
@@ -1906,7 +1910,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // }
         // фильтр по статусу
         function statusFilter(row) {
-            return (scope.filters.status == -1 || row.status == scope.filters.status);
+            if(scope.filters.status['-1']){
+                return true;
+            }else{
+                for(var status in scope.filters.status){
+                    if(scope.filters.status[status] && status == row.status){
+                        return true;
+                    }
+                }
+            }
+            return false;
+            //return (scope.filters.status == -1 || row.status == scope.filters.status);
         }
 
         // фильтр по маршруту
@@ -2955,7 +2969,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     pointsStr += "&loc=" + points[i].LAT + "," + points[i].LON;
                 }
             }
-            console.log( JSON.parse(JSON.stringify(points)) );
             http.get('./getroutermatrix/' + pointsStr)
                 .success(function (data) {
                     var i=1;
