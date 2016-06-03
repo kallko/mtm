@@ -249,9 +249,9 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
         var timeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
         var timeFin = new Date().getTime() / 1000;
     }else{
-        timeStart =   (date / 1000)  ;
+        timeStart =   parseInt( (date / 1000) - (60 * 60 * 24), 10);
         console.log(timeStart);
-        timeFin = parseInt( (date / 1000) + (60 * 60 * 24), 10);
+        timeFin = parseInt(date / 1000, 10);
         console.log(timeFin);
     }
     var url = this.createParamsStr(
