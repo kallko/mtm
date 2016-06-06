@@ -167,7 +167,7 @@ router.route('/dailydata')
 
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
                     res.status(200).json(data);
-                }else if(data.routes || data.routes.length == 0){
+                }else if( data.routes.length == 0){
                     res.status(200).json({status: 'no plan'});
                 }else{
                     needNewReqto1C[req.session.login] = true;
