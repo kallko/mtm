@@ -606,7 +606,7 @@
                         </td>
                     </tr>
 
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr  ng-class="($index == selected ? 'driver-select-bg' : ''); (item.closeRoute ? 'closeroute' : '' )" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{::item.filterId}}"
                                    type="checkbox"

@@ -2603,7 +2603,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if(!res.data.error){
                     rootScope.$emit('successOfPusingData');
                     rootScope.$emit('showNotification', {text: 'Закрыто '+res.data.closeCount+' роутов за '+res.data.CloseDate, duration:2000});
-                    console.log(outgoingData);
+
                     if(!outgoingData.update){
                         for(var i = 0; _data.routes.length > i; i++){
                             for(var j = 0; outgoingData.routesID.length > j; j++){
@@ -2616,28 +2616,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if(_data.routes.length == 0){
                             delete scope.displayCollection;
                         }else{
-                        for(i = 0; outgoingData.routesID.length > i; i++){
-                            for(j = 0; scope.displayCollection > j; j++ ){
-                                if(outgoingData.routesID[i] == scope.displayCollection[j]['uniqueID']){
-                                    scope.displayCollection.splice(j, 1);
-                                    j--;
+                            for(i = 0; outgoingData.routesID.length > i; i++){
+                                for(j = 0; scope.displayCollection > j; j++ ){
+                                    if(outgoingData.routesID[i] == scope.displayCollection[j]['uniqueID']){
+                                        scope.displayCollection.splice(j, 1);
+                                        j--;
+                                    }
                                 }
                             }
                         }
-                    }
 
                         rootScope.$emit('successCloseOldRoutes');
+                    }else{
+                        for(var i = 0; _data.routes.length > i; i++){
+                            for(var j = 0; outgoingData.routesID.length > j; j++){
+                                if(_data.routes[i]['uniqueID'] == outgoingData.routesID[j]){
+
+                                    _data.routes[i].closeRoute  = true;
+                                }
+                            }
+                        }
+
                     }
                 }else{
 
                     rootScope.$emit('showNotification', {text: 'Произошла ошибка при закрытии дня', duration:3000});
                 }
             }
-            function errorCallback(err){
-                console.log(err);
-                rootScope.errorNotification('/closeday');
-                rootScope.$emit('serverError');
-            }
+
 
         }
 
