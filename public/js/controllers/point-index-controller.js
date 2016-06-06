@@ -2645,6 +2645,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
+
         }
 
         function findBestStop(point, stop){
