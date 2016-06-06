@@ -612,7 +612,7 @@ router.route('/closeday')
             req.session.login = config.soap.defaultClientLogin;
         }
         //console.log(req.body.closeDayData);
-
+        console.log ("start working");
         var soapManager = new soap(req.session.login);
             soapManager.closeDay(req.body.closeDayData, function (data) {
                 if (!data.error) {
