@@ -678,7 +678,7 @@ router.route('/currentStops/:gid/:from/:to')
     });
 
 
-// получение треков по переданным стейтам
+// получение всех таймматриц для всех роутов одним запросом.
 router.route('/predicate/')
     .post(function (req, res) {
 
@@ -686,17 +686,18 @@ router.route('/predicate/')
         var j=0;
         var generalResult=[];  // преременная собирающая в себе все ответы
 
-
         while(j<collection.length){
-
             var pointsStr = '';
             for (var  i= 0; i < collection[j].points.length; i++) {
                 if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
                     pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
                 }
             }
+           // console.log(pointsStr);
 
-            tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
+            //запрос матрицы по одному маршруту с обработкой в колбэке.
+            tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
+                //console.log(pointsStr);
                 var timeMatrix=[];
                 var i=1;
                 // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
@@ -704,41 +705,35 @@ router.route('/predicate/')
                     timeMatrix.push(data.time_table[0][i][0]);
                     i++;
                 }
-
                 //Поиск ID к полученной матрице, на случай если ответы в колбеки придут асинхронно
-                var k=0;
                 var indx;
                 var temp=pointsStr.substring(5);
-                var k=temp.indexOf("&");
-                temp=temp.substring(0,k);
+                var b=temp.indexOf("&");
+                temp=temp.substring(0,b);
                 var parts = temp.split(',');
                 var LAT=parts[0];
                 var LON=parts[1];
-
-
+                //console.log(LAT, " ", LON);
+                var k=0;
                 while (k<collection.length){
                         if(LAT==collection[k].points[0].LAT && LON==collection[k].points[0].LON){
                         indx=collection[k].id;
+                            //console.log("find id", indx);
                         break;
                     }
                     k++
                 }
                 generalResult.push({id:indx, time: timeMatrix});
-
                 // Проверка не является ли этот колбек последним.
                 if(generalResult.length==collection.length)
                 {
-                    console.log("The cickle is finished RESULT LENGTH=", generalResult.length );
+                    //console.log("The cickle is finished RESULT LENGTH=", generalResult.length );
                     res.status(200).json(generalResult);
                     return;
                 }
-
             });
-
             j++;
         }
-
-
 
     });
 

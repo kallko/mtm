@@ -272,6 +272,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         _data.trackUpdateTime = _now;
                         console.log("Update Dinamicly stops for routes updateData");
                         updateData();
+                        serverPredicate();
                     }).error(function (err) {
                    // rootScope.errorNotification(url);
                 });
@@ -697,7 +698,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             statusUpdate();
             //predicationArrivalUpdate();
 
-            serverPredicate();
+
             promised15MUpdate();
 
 
@@ -3017,7 +3018,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // функция, которая запрашивает данные с сервера одним пакетом
         // для предсказания прибытия. Чтобы клиент не тормозился большим количеством колбэков
         function serverPredicate(){
-            console.log("BIG DATA", _data);
             var result=[];
             var i=0;
             while(i<_data.routes.length) {
@@ -3035,11 +3035,86 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
                 .success(function (data) {
                 console.log("Additional load", {data: data});
+                   predicateArrivalSecond (data);
 
             }).error(function(err){
                 console.log(err);
 
             });
+        }
+
+
+
+        //альтернативный расчет предсказаний, когда все данные получены одним запросом
+        function  predicateArrivalSecond (data) {
+            console.log("Start new predicate", data);
+            var i=0;
+            while(i<_data.routes.length){
+                  if (_data.routes[i].DISTANCE==0) {
+                      uncalcPredication(i);
+                  } else {
+                      calcPredication(i);
+                  }
+
+
+                i++
+
+            }
+
+
+            function uncalcPredication(j) {
+                var route=_data.routes[j];
+                var now=_data.server_time;
+                var time_table=[];
+                var points=route.points;
+
+                var k=0;
+                while (k<data.length){
+                    //console.log("Start serch", route.uniqueID, data[k].id );
+                    if(route.uniqueID == data[k].id){
+                      //  console.log("find Time_Table");
+                        time_table=data[k].time;
+                        break;
+                    }
+
+                    k++;
+                }
+
+
+                var i=0;
+                console.log("timeTabls",time_table)
+                while(i<time_table.length) {
+                    console.log("START PREDICATE CALCULATING", points[i]);
+
+                    if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
+
+                        points[i].arrival_left_prediction=time_table[i]/10;
+                        points[i].arrival_prediction=now+points[i].arrival_left_prediction;
+                        if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
+                            points[i].status=5;
+                            points[i].overdue_time=points[i].arrival_prediction-points[i].arrival_time_ts;
+                            //console.log("TIME_OUT for point", points[i]);
+                        }
+                        if((points[i].status==7 || points[i].status==5) && now > points[i].arrival_time_ts ){
+                            points[i].status=4;
+                            points[i].overdue_time=now-points[i].arrival_time_ts+points[i].arrival_left_prediction;
+                            //console.log("DELAY for point", points[i]);
+                        }
+
+                    }
+                    i++;
+                }
+                updateProblemIndex(route);
+
+                }
+
+
+            function calcPredication(i) {
+                var route=_data.routes[i];
+
+
+                }
+
 
 
         }
