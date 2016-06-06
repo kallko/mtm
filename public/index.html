@@ -97,9 +97,22 @@
         <!-- Пока не выводим для пользователя, так как не реализован функционал -->
         <div id="point-menu-panel" >
             <div>
-                <select id="status-select" ng-model="filters.status" class="group-select"
-                        ng-options='option.value as option.name for option in filters.statuses'>
-                </select>
+                <!---->
+                <!--<select id="status-select" ng-model="filters.status" class="group-select"-->
+                        <!--ng-options='option.value as option.name for option in filters.statuses'>-->
+                <!--</select>-->
+
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Выберете старус
+                    </button>
+                    <div class="dropdown-menu">
+                        <ul class="dropdown-statuses">
+                            <li ng-repeat="option in filters.statuses"><input type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <!--
                 <select id="route-select" ng-model="filters.route" class="group-select"
