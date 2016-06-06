@@ -2598,7 +2598,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         function pushDataToServer(outgoingData){   // функция отправки данных на сервер, может быть универсальной
-            http.post('/closeday', outgoingData).then(successCallback, errorCallback); //отправка на url /closeday временно
+            http.post('./closeday', outgoingData).then(successCallback, errorCallback); //отправка на url /closeday временно
             function successCallback(res){
                 if(!res.data.error){
                     rootScope.$emit('successOfPusingData');
