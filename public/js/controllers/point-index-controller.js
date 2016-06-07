@@ -149,7 +149,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('setDynamicDataUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
-
+                console.log("setDynamicDataUpdate updateData")
                 updateData();
             }, seconds * 1000);
         }
@@ -274,8 +274,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
                         }
                         _data.trackUpdateTime = _now;
-                        //console.log("Update Dinamicly stops for routes");
+                        console.log("Update Dinamicly stops for routes updateData");
                         updateData();
+                        serverPredicate();
                     }).error(function (err) {
                    // rootScope.errorNotification(url);
                 });
@@ -699,9 +700,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обновляет статусы и делает прогнозы по слинкованным данным
         function updateData() {
             statusUpdate();
-            predicationArrivalUpdate();
+            //predicationArrivalUpdate();
 
-            //serverPredicate();
+
             promised15MUpdate();
 
 
@@ -834,7 +835,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //delete tmpPoint.servicePoints;
                     delete tmpPoint.overdue_time;
 
-                    
+
 
 
                 }
@@ -1339,154 +1340,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function predicationArrivalUpdate() {
 
-            var route,
-                url,
-                point,
-                tmpPred,
-                now = _data.server_time;
-
-
-            for (var i = 0; i < _data.routes.length; i++) {
-                route = _data.routes[i];
-                // пропускаем итерацию в случае не валидного трека
-                if (route.real_track == undefined ||
-                    route.real_track.length == 0 ||
-                    route.real_track == aggregatorError) {
-                    route.real_track = undefined;
-                    console.log("Bad Route");
-                    continue;
-                }
-
-                    if(!scope.fastCalc && route.DISTANCE == 0 ){
-                     // формируем дату для запроса. Первый элемент - текущее положение машины. Потом все поинты маршрута
-                    //Назначение статусов и опредление прогноза и опоздания
-                    console.log("  Predicate for uncalc", scope.fastCalc);
-                        var start=[{}];
-                        var points = start.concat(route.points);
-                        points[0].LAT=route.car_position.lat;
-                        points[0].LON=route.car_position.lon;
-                        var timeMatrix=[];
-                        askTimeMatrixForRoute(points, timeMatrix , now, route);
-
-                    } else{
-                        if (route.DISTANCE != 0 && route.points[route.lastPointIndx]) {
-
-                            console.log(route.points);
-                            console.log("Делаем прогноз прибытия просчитанных маршрутов");
-                            point = route.car_position;
-                            url = './findtime2p/' + point.lat + '&' + point.lon + '&'
-                                + route.points[route.lastPointIndx].LAT + '&' + route.points[route.lastPointIndx].LON;
-
-
-                            //console.log("url",url);
-                            // получаем время проезда от текущего положения машины и до следующей по плану точки
-                            (function (_route, _url) {
-                                http.get(_url).
-                                    success(function (data) {
-                                        //if (_route.ID === "289" || _route.ID === "292" || _route.ID === "302") {
-                                        //    console.log(_route.lastPointIndx, _route);
-                                        //}
-
-                                        var lastPoint = _route.lastPointIndx + 1,
-                                            nextPointTime = parseInt(data.time_table[0][1][0] / 10),
-                                            totalWorkTime = 0,
-                                            totalTravelTime = 0,
-                                            tmpDowntime = 0,
-                                            totalDowntime = 0,
-                                            tmpTime;
-
-                                        for (var j = 0; j < _route.points.length; j++) {
-                                            if (j < lastPoint) {
-                                                // все точки до последней выполненной проверяются по факту
-                                                //console.log("Try to change status for point", _route.points[j] );
-
-                                                // Для непросчитанных маршрутов точки могут выполняться не по порядку.
-                                                //Поэтому точки, которые уже выполнены до lastpoint мы не пересчитываем
-                                                if (_route.points[j].haveStop || _route.points[j].havePush || _route.points[j].confirmed || _route.points[j].status == 8 || _route.points[j].status < 3) {
-                                                    break;
-                                                }
-
-
-                                                _route.points[j].arrival_prediction = 0;
-                                                _route.points[j].overdue_time = 0;
-                                                if (_route.points[j].status == STATUS.SCHEDULED) {
-                                                    if (now > _route.points[j].working_window.finish) {
-                                                        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
-                                                        //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
-                                                        _route.points[j].status = STATUS.TIME_OUT;
-                                                        //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
-                                                        _route.points[j].overdue_time = now - _route.points[j].arrival_time_ts;
-                                                    }
-                                                } else if (_route.points[j].status == STATUS.IN_PROGRESS) {
-                                                    totalWorkTime = parseInt(_route.points[j].TASK_TIME) - (now - _route.points[j].real_arrival_time);
-                                                }
-                                            } else {
-                                                // точки ниже последней выполненной считаются ниже
-                                                tmpTime = _route.time_matrix.time_table[0][j - 1][j];
-                                                // времена проезда от роутера приходят в десятых долях секунд
-                                                totalTravelTime += tmpTime == 2147483647 ? 0 : tmpTime / 10;
-                                                tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
-                                                tmpDowntime = _route.points[j].working_window.start - tmpPred;
-                                                if (tmpDowntime > 0) {
-                                                    totalDowntime += tmpDowntime;
-                                                    tmpPred = _route.points[j].working_window.start;
-                                                }
-
-                                                _route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
-
-                                                _route.points[j].in_plan = true;
-                                                if (_route.points[j].arrival_prediction == null) {
-                                                    _route.points[j].arrival_prediction = tmpPred;
-                                                } else {
-                                                    if (tmpPred + 300 < _route.points[j].arrival_prediction) {
-                                                        _route.points[j].in_plan = false;
-                                                    }
-
-                                                    _route.points[j].arrival_prediction = tmpPred;
-                                                }
-
-                                                _route.points[j].arrival_left_prediction = parseInt(_route.points[j].arrival_prediction - now);
-                                                // предсказываем статус опаздывает или уже опаздал
-                                                if (_route.points[j].arrival_prediction > _route.points[j].arrival_time_ts) {
-                                                    _route.points[j].overdue_time = parseInt(_route.points[j].arrival_prediction -
-                                                        _route.points[j].working_window.finish);
-
-                                                    if (_route.points[j].overdue_time > 0) {
-                                                        if (_route.points[j].working_window.finish < now) {
-                                                            _route.points[j].status = STATUS.TIME_OUT;
-                                                            //console.log("_route.points[j].status = STATUS.TIME_OUT;");
-                                                        } else {
-                                                            _route.points[j].status = STATUS.DELAY;
-                                                            //console.log("_route.points[j].status = STATUS.DELAY;");
-                                                        }
-                                                    }
-
-                                                } else {
-                                                    _route.points[j].overdue_time = 0;
-                                                }
-
-                                                totalWorkTime += parseInt(_route.points[j].TASK_TIME);
-                                            }
-                                        }
-
-                                        updateProblemIndex(_route);
-                                    }).error(function (err) {
-                                        rootScope.errorNotification(_url);
-                                    });
-                            })(route, url);
-                        }
-
-
-                    }
-
-
-            }
-
-
-            for (i = 0; i < scope.rowCollection.length; i++) {
-                scope.rowCollection[i].problem_index = scope.rowCollection[i].problem_index || 0;
-            }
-            rootScope.rowCollection = scope.rowCollection;
 
         }
 
@@ -2061,8 +1914,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
         };
-        
-        
+
+
 
         //задать порядок сортировки по индексу проблемности
         // function setProblemIndexSortMode(mode) {
@@ -2110,6 +1963,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             };
 
             updateRawPromised(point);
+            console.log("scope.changePromisedWindow updateData");
             updateData();
         };
 
@@ -3035,7 +2889,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // функция, которая запрашивает данные с сервера одним пакетом
         // для предсказания прибытия. Чтобы клиент не тормозился большим количеством колбэков
         function serverPredicate(){
-            console.log("BIG DATA", _data);
             var result=[];
             var i=0;
             while(i<_data.routes.length) {
@@ -3053,11 +2906,254 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
                 .success(function (data) {
                 console.log("Additional load", {data: data});
+                   predicateArrivalSecond (data);
 
             }).error(function(err){
                 console.log(err);
 
             });
+        }
+
+
+
+        //альтернативный расчет предсказаний, когда все данные получены одним запросом
+        function  predicateArrivalSecond (data) {
+            console.log("Start new predicate", data);
+            var i=0;
+            while(i<_data.routes.length){
+                  if (_data.routes[i].DISTANCE==0) {
+                      uncalcPredication(i);
+                  } else {
+                      calcPredication(i);
+                  }
+
+
+                i++
+
+            }
+
+
+            function uncalcPredication(j) {
+                var route=_data.routes[j];
+                var now=_data.server_time;
+                var time_table=[];
+                var points=route.points;
+
+                var k=0;
+                while (k<data.length){
+                    //console.log("Start serch", route.uniqueID, data[k].id );
+                    if(route.uniqueID == data[k].id){
+                      //  console.log("find Time_Table");
+                        time_table=data[k].time;
+                        break;
+                    }
+
+                    k++;
+                }
+
+
+                var i=0;
+                console.log("timeTabls",time_table)
+                while(i<time_table.length) {
+                    console.log("START PREDICATE CALCULATING", points[i]);
+
+                    if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
+
+                        points[i].arrival_left_prediction=time_table[i]/10;
+                        points[i].arrival_prediction=now+points[i].arrival_left_prediction;
+                        if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
+                            points[i].status=5;
+                            points[i].overdue_time=points[i].arrival_prediction-points[i].arrival_time_ts;
+                            //console.log("TIME_OUT for point", points[i]);
+                        }
+                        if((points[i].status==7 || points[i].status==5) && now > points[i].arrival_time_ts ){
+                            points[i].status=4;
+                            points[i].overdue_time=now-points[i].arrival_time_ts+points[i].arrival_left_prediction;
+                            //console.log("DELAY for point", points[i]);
+                        }
+
+                    }
+                    i++;
+                }
+                updateProblemIndex(route);
+
+                }
+
+
+            function calcPredication(idx) {
+
+                console.log("This is calculated route");
+
+                var route,
+                    point,
+                    tmpPred,
+                    now = _data.server_time;
+
+
+
+                    route = _data.routes[idx];
+                    // пропускаем итерацию в случае не валидного трека
+                    if (route.real_track == undefined ||
+                        route.real_track.length == 0 ||
+                        route.real_track == aggregatorError) {
+                        route.real_track = undefined;
+                        console.log("Bad Route");
+                        return;
+                    }
+
+                if (route.points[route.lastPointIndx]) {
+
+                            console.log(route.points);
+                            console.log("Делаем прогноз прибытия просчитанных маршрутов");
+                            point = route.car_position;
+                            console.log("POINT", point);
+
+
+                    //найти lastPointIndx
+
+                    var lastPoint=route.points.length-1;
+                    while(lastPoint>0){
+                            if(route.points[lastPoint].status <4 ){
+                               // lastPoint++;
+                                break;
+                            }
+
+
+
+                        lastPoint--;
+                    }
+
+
+
+
+
+                    console.log("Data", data, "route", route, "lastPoint", lastPoint);
+
+
+                    // Если последняя точка выполнена, прогноз уже не нужен.
+                    if(lastPoint==route.points.length-1){
+                        return;
+                    }
+
+                    var singleTimeMatrix=[];
+                    var k=0;
+                    while(k<data.length){
+                        if(data[k].id==route.uniqueID){
+
+                            singleTimeMatrix=data[k].time;
+                            break;
+                        }
+
+                        k++;
+                    }
+
+
+                        var nextPointTime = parseInt(singleTimeMatrix[lastPoint]/100),
+                        totalWorkTime = 0,
+                        totalTravelTime = 0,
+                        tmpDowntime = 0,
+                        totalDowntime = 0,
+                        tmpTime;
+
+                    console.log("Для роута", route, "Последняя выполненная", lastPoint, "Время от машины до некст поинт", nextPointTime);
+
+                    for (var j = 0; j < route.points.length; j++) {
+                        if (j <= lastPoint) {
+                            // все точки до последней выполненной проверяются по факту
+                            //console.log("Try to change status for point", _route.points[j] );
+
+
+                            route.points[j].arrival_prediction = 0;
+                            route.points[j].overdue_time = 0;
+                            if (route.points[j].status == STATUS.SCHEDULED) {
+                                if (now > route.points[j].working_window.finish) {
+                                    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
+                                    //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
+                                    route.points[j].status = STATUS.TIME_OUT;
+                                    //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
+                                    route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
+                                }
+                            } else if (route.points[j].status == STATUS.IN_PROGRESS) {
+                                totalWorkTime = parseInt(route.points[j].TASK_TIME) - (now - route.points[j].real_arrival_time);
+                            }
+                        } else {
+                            // точки ниже последней выполненной считаются ниже
+                            console.log (j, "Point for Route", route);
+                            tmpTime = route.time_matrix.time_table[0][j-1][j];
+                            // времена проезда от роутера приходят в десятых долях секунд
+                            totalTravelTime += tmpTime == 2147483647 ? 0 : parseInt(tmpTime / 10);
+                            tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
+                            tmpDowntime = route.points[j].working_window.start - tmpPred;
+                            if (tmpDowntime > 0) {
+                                totalDowntime += tmpDowntime;
+                                tmpPred = route.points[j].working_window.start;
+                            }
+
+
+
+
+                            route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
+
+                            console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
+
+                            route.points[j].in_plan = true;
+                            if (route.points[j].arrival_prediction == null) {
+                                route.points[j].arrival_prediction = tmpPred;
+                            } else {
+                                if (tmpPred + 300 < route.points[j].arrival_prediction) {
+                                    route.points[j].in_plan = false;
+                                }
+
+                                route.points[j].arrival_prediction = tmpPred;
+                            }
+
+                            route.points[j].arrival_left_prediction = parseInt(route.points[j].arrival_prediction - now);
+                            // предсказываем статус опаздывает или уже опаздал
+                            if (route.points[j].arrival_prediction > route.points[j].arrival_time_ts) {
+                                route.points[j].overdue_time = parseInt(route.points[j].arrival_prediction -
+                                    route.points[j].working_window.finish);
+
+                                if (route.points[j].overdue_time > 0) {
+                                    if (route.points[j].working_window.finish < now) {
+                                        route.points[j].status = STATUS.TIME_OUT;
+                                        //console.log("_route.points[j].status = STATUS.TIME_OUT;");
+                                    } else {
+                                        route.points[j].status = STATUS.DELAY;
+                                        //console.log("_route.points[j].status = STATUS.DELAY;");
+                                    }
+                                }
+
+                            } else {
+                                route.points[j].overdue_time = 0;
+                            }
+
+                            totalWorkTime += parseInt(route.points[j].TASK_TIME);
+                        }
+                    }
+
+                    updateProblemIndex(route);
+
+
+                        }
+
+
+
+
+
+
+
+
+                scope.rowCollection[idx].problem_index = scope.rowCollection[idx].problem_index || 0;
+
+                rootScope.rowCollection = scope.rowCollection;
+
+
+
+
+
+
+                }
+
 
 
         }

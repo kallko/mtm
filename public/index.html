@@ -190,7 +190,9 @@
                     <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
                     <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
-                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
+                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку" >
+                        <button ng-click=" order('arrival_time_ts')">План. прибытие</button>
+                    </th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
                         <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
@@ -231,8 +233,10 @@
                     <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
                     <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
-                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку">План. прибытие</th>
-                    <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку" >
+                        <button ng-click=" order('arrival_time_ts')">План. прибытие</button>
+                    </th>
+                    <th class="time-window-col" title="Заказанное клиентом окно" >Заказанное</th>
                     <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
                         <button ng-click=" order('end_time_ts')">Ост. КОК</button>
                     </th>
@@ -292,22 +296,22 @@
 
                     <td>
                         <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8)">
-                            {{row.arrival_prediction * 1000 | date:'HH:mm' }}
+                            {{row.arrival_prediction*1000 | date: 'HH:mm'  }}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.arrival_prediction > 0 && (row.status ==7 || row.status ==4 || row.status==5)">
-                            {{row.arrival_left_prediction * 1000 | date:'HH:mm' : 'UTC' }}
+                             {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'}}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.real_arrival_time > 0 && (row.status ==7 || row.status ==4 || row.status==5)">
-                            {{row.real_arrival_time * 1000 | date:'HH:mm' }}
+                            {{row.real_arrival_time |  date: 'HH:mm' : 'UTC'}}
                         </span>
                     </td>
                     <td>
                         <span ng-show="row.overdue_time > 0">
-                            {{row.overdue_time * 1000 | date:'HH:mm' : 'UTC'}}
+                            {{row.overdue_time*1000 |  date: 'HH:mm' : 'UTC' }}
                         </span>
                     </td>
                     <td>

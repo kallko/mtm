@@ -678,58 +678,63 @@ router.route('/currentStops/:gid/:from/:to')
     });
 
 
-// получение треков по переданным стейтам
+// получение всех таймматриц для всех роутов одним запросом.
 router.route('/predicate/')
     .post(function (req, res) {
-        //console.log('req body==', req.body);
+
         var collection=req.body.collection;
         var j=0;
-        var generalResult=[];
+        var generalResult=[];  // преременная собирающая в себе все ответы
 
         while(j<collection.length){
-            console.log("Route ", j);
-
-            var result=[];
             var pointsStr = '';
             for (var  i= 0; i < collection[j].points.length; i++) {
                 if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
                     pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
                 }
             }
+           // console.log(pointsStr);
 
-            tracksManager.getRouterMatrixByPoints(pointsStr, function (data) {
-
-                //if(flag) {
-                //    console.log("getRouterMatrixByPoints DONE=", data.time_table);
-                //    flag=false;
-                //}
-                //
-                //var i=1;
-                ////console.log ("data.time_table.length", data.time_table);
-                //while(i<data.time_table.length){
-                //    console.log(j, i, "time=", data.time_table[i][0]);
-                //    result.push(data.time_table[i][0]);
-                //
-                //    i++
-                //}
-                //
-                ////console.log("TimeTable Result = ", result);
-                result=data;
-
+            //запрос матрицы по одному маршруту с обработкой в колбэке.
+            tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
+                //console.log(pointsStr);
+                var timeMatrix=[];
+                var i=1;
+                // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
+                while(i<data.time_table[0].length){
+                    timeMatrix.push(data.time_table[0][i][0]);
+                    i++;
+                }
+                //Поиск ID к полученной матрице, на случай если ответы в колбеки придут асинхронно
+                var indx;
+                var temp=pointsStr.substring(5);
+                var b=temp.indexOf("&");
+                temp=temp.substring(0,b);
+                var parts = temp.split(',');
+                var LAT=parts[0];
+                var LON=parts[1];
+                //console.log(LAT, " ", LON);
+                var k=0;
+                while (k<collection.length){
+                        if(LAT==collection[k].points[0].LAT && LON==collection[k].points[0].LON){
+                        indx=collection[k].id;
+                            //console.log("find id", indx);
+                        break;
+                    }
+                    k++
+                }
+                generalResult.push({id:indx, time: timeMatrix});
+                // Проверка не является ли этот колбек последним.
+                if(generalResult.length==collection.length)
+                {
+                    //console.log("The cickle is finished RESULT LENGTH=", generalResult.length );
+                    res.status(200).json(generalResult);
+                    return;
+                }
             });
-
-            var obj={indx:collection[j].id, times:result};
-            generalResult.push(obj);
-
             j++;
         }
 
-
-
-
-
-            res.status(200).json(generalResult);
-        //});
     });
 
 
