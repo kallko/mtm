@@ -2498,6 +2498,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
+            function errorCallback(err){
+                console.log(err);
+                rootScope.errorNotification('/closeday');
+                rootScope.$emit('serverError');
+            }
 
         }
 
