@@ -5,7 +5,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             parent; // откуда было открыто окно
 
         init();
-        loadReasonList();
+        //loadReasonList();
 
         // начальная инициализация контроллера
         function init() {
@@ -77,19 +77,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // загрузить список причин отмены заявки
         scope.showReasonList = false;
         function loadReasonList(){
-            var url = './getreasonlist';
-
-            http.get(url, {})
-                .success(function(data){
-                    showLoadReasonList(data);
-                })
-                .error(function(err){
-                    rootScope.errorNotification(url);
-                });
-        }
-        function showLoadReasonList(data){
-            scope.loadReasonList = data;
-           // scope.selectReasonList = scope.loadReasonList[0].attributes.id;
+            scope.loadReasonList = rootScope.reasons;
+            console.log(scope.loadReasonList, rootScope.reasons, "Pointview 81");
             scope.showReasonList = true;
         }
        

@@ -736,7 +736,7 @@
                 </button>
                     <br>
                 <select ng-model="selectReasonList"
-                        ng-options="item.attributes.id as item.attributes.name  for item in loadReasonList">
+                        ng-options="item.ID as item.DESCRIPTION  for item in reasons">
                     <option value="" selected>--Причина отказа--</option>
                 </select>
                 <button id="cancel-status-task-btn"

@@ -80,6 +80,8 @@ SoapManager.prototype.loadDemoData = function (callback) {
 
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
+
+    //console.log(_data.reasons, "data, soap 84");
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -148,6 +150,7 @@ function checkBeforeSend(_data, callback) {
         allData.idArr.push(data[i].ID);
 
         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
+
     }
 
     // в случае, если трек есть в одном решении и его нет в сенсорах другого решения,
@@ -171,7 +174,7 @@ function checkBeforeSend(_data, callback) {
         }
     }
 
-    console.log('DONE!');
+    //console.log('DONE!', allData.reasons, "SOAP175");
     log.toFLog('final_data.js', allData);
     callback(allData);
 }
@@ -338,7 +341,12 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,   // список всего транспорта по данному клиенту
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
-                    sensors = res.MESSAGE.SENSORS[0].SENSOR;            // список всех сенсоров (устройства передающие трек)
+                    sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
+                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
+
+               // console.log(reasons, "SOAP345");
+
+
                 if (waypoints == undefined) return;
                 console.log('drivers', drivers.length);
                 log.l('waypoints.length = ' + waypoints.length);
@@ -366,6 +374,17 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 for (i = 0; i < waypoints.length; i++) {
                     data[nIndx].waypoints.push(waypoints[i].$);
                 }
+
+                data[nIndx].reasons = [];
+                if (reasons== undefined){
+                    console.log("No reasons");
+                    callback({status: 'no reasons'});
+                } else {
+                    for(i = 0; i<reasons.length; i++){
+                        data[nIndx].reasons.push(reasons[i].$);
+                    }
+                }
+
 
                 for (var j = 0; j < data[nIndx].routes.length; j++) {
                     for (i = 0; i < data[nIndx].routes[j].points.length; i++) {
@@ -398,6 +417,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     callback({status: 'no sensors'});
                 }
 
+
+
                 for (i = 0; sensors && i < sensors.length; i++) {
                     data[nIndx].sensors.push(sensors[i].$);
                 }
@@ -411,6 +432,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
+                console.log(data[nIndx].reasons, "data SOAP 429");
                 checkBeforeSend(data, callback);
             });
 
@@ -421,29 +443,29 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 };
 
 // получение списка причин отмен
-SoapManager.prototype.getReasonList = function (callback) {
-    console.log('getReasonList');
-    var config = {
-        login: 'ids.dsp',
-        pass: 'dspids'
-    };
-    // запрос идет не на обычный адрес соапа, а на его версию для кпк
-    var url = 'https://' + config.login + ':' + config.pass + this.urlPda;
-    soap.createClient(url, function (err, client) {
-        if (err) throw err;
-
-        client.setSecurity(new soap.BasicAuthSecurity(config.login, config.pass));
-        console.log(client.describe());
-        client.get_reason_list(function (err, result) {
-            if (!err) {
-                callback(result.return.reason);
-            } else {
-                console.log('err', err.body);
-                callback({error: 'SOAP error'});
-            }
-        });
-    });
-};
+//SoapManager.prototype.getReasonList = function (callback) {
+//    console.log('getReasonList');
+//    var config = {
+//        login: 'ids.dsp',
+//        pass: 'dspids'
+//    };
+//    // запрос идет не на обычный адрес соапа, а на его версию для кпк
+//    var url = 'https://' + config.login + ':' + config.pass + this.urlPda;
+//    soap.createClient(url, function (err, client) {
+//        if (err) throw err;
+//
+//        client.setSecurity(new soap.BasicAuthSecurity(config.login, config.pass));
+//        console.log(client.describe());
+//        client.get_reason_list(function (err, result) {
+//            if (!err) {
+//                callback(result.return.reason);
+//            } else {
+//                console.log('err', err.body);
+//                callback({error: 'SOAP error'});
+//            }
+//        });
+//    });
+//};
 
 // получение списка всех сенсоров для авторизированного пользователя
 SoapManager.prototype.getAllSensors = function (callback) {

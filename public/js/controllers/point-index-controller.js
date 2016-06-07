@@ -43,6 +43,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setCheckLocksInterval();
         loadDailyData(false);
 
+
         if (enableDynamicUpdate) {
              setRealTrackUpdate(stopUpdateInterval);
         }
@@ -304,6 +305,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
+                    rootScope.reasons=data.reasons;
 
                     //console.log("I load this data", toPrint);
                     linkDataParts(data);
@@ -714,7 +716,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 concatDailyAndExistingData(_data);
                 scope.existDataLoaded=true;
                 statusUpdate();
-                scope.fastCalc=true;
+               // scope.fastCalc=true;
             }
 
            // console.log("Finish CCALCULATING!!!!!");
@@ -2434,6 +2436,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(routesID);
             if( currentDay ){ // проверка сегодняшней даты закрытия дня
                 console.log("UPDATE DAY");
+                //console.log("XML == ", xml);
                 return {closeDayData: xml, routesID: routesID, update:true, closeDayDate: data.routesOfDate}; // обновляем текущий день
             }else{
                 console.log("OLD DAY");
@@ -2958,9 +2961,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                 var i=0;
-                console.log("timeTabls",time_table)
+                //console.log("timeTabls",time_table)
                 while(i<time_table.length) {
-                    console.log("START PREDICATE CALCULATING", points[i]);
+                   // console.log("START PREDICATE CALCULATING", points[i]);
 
                     if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
 

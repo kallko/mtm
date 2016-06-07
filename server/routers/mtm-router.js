@@ -598,13 +598,13 @@ router.route('/openidspointwindow/:pointId')
     });
 
 // получение списка отмен
-router.route('/getreasonlist')
-    .get(function (req, res) {
-        var soapManager = new soap(req.session.login);
-        soapManager.getReasonList(function(data) {
-            res.status(200).json(data);
-        });
-    });
+//router.route('/getreasonlist')
+//    .get(function (req, res) {
+//        var soapManager = new soap(req.session.login);
+//        soapManager.getReasonList(function(data) {
+//            res.status(200).json(data);
+//        });
+//    });
 
 router.route('/closeday')
     .post(function (req, res) {
