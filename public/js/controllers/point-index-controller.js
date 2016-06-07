@@ -315,6 +315,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log("load track parts");
                     }
                     //console.log(data,' success data');
+                    updateData();
                 })
                 .error(function (err) {
                     console.log(err);
@@ -1457,6 +1458,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('OMG!!1 New show date!');
                 scope.params = JSON.parse(JSON.stringify(params));
                 loadDailyData(true, params.showDate);
+                console.log("OMG UPDATE DATA");
+
                 return;
             }
 
