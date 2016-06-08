@@ -2873,7 +2873,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var i=0;
             while (i<pushes.length) {
 
-                var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*3 : 0;
+                var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*4 : 0;
                 pushes[i].gps_time_ts=temp;
                 //console.log(strToTstamp(pushes[i].gps_time), "New Time", temp, "Old TS", pushes[i]);
                 var date=new Date();
