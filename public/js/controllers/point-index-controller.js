@@ -2903,7 +2903,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var result=[];
             var i=0;
             while(i<_data.routes.length) {
+
                 var route=_data.routes[i];
+                if(route.real_track == undefined) {
+                    break;
+                }
                 var indx=route.uniqueID;
                 var carPos=[{LAT:route.real_track[route.real_track.length-1].lat, LON: route.real_track[route.real_track.length-1].lat }];
                 var obj={id:indx, points:carPos.concat(route.points)};
