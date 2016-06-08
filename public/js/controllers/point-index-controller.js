@@ -44,6 +44,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         loadDailyData(false);
 
 
+
         if (enableDynamicUpdate) {
              setRealTrackUpdate(stopUpdateInterval);
         }
@@ -150,7 +151,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('setDynamicDataUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
-                console.log("setDynamicDataUpdate updateData")
+                console.log("setDynamicDataUpdate updateData");
                 updateData();
             }, seconds * 1000);
         }
@@ -315,12 +316,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log("load track parts");
                     }
                     //console.log(data,' success data');
+                    console.log("!!!!!!!!!!!!Data server time = ", _data.server_time );
                     updateData();
                 })
                 .error(function (err) {
                     console.log(err);
                     rootScope.errorNotification(url);
                 });
+
+
         }
 
         rootScope.$on('reqOldroute', function(event, data){
@@ -717,6 +721,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 concatDailyAndExistingData(_data);
                 scope.existDataLoaded=true;
                 statusUpdate();
+
                // scope.fastCalc=true;
             }
 
@@ -1339,12 +1344,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
-        // обновить предсказание прибытия к точкам
-
-        function predicationArrivalUpdate() {
-
-
-        }
 
         // назначить колонки в таблице доступные для ресайза
         function setColResizable() {
@@ -2959,6 +2958,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             function uncalcPredication(j) {
                 var route=_data.routes[j];
                 var now=_data.server_time;
+
+                console.log("New now is", now);
                 var time_table=[];
                 var points=route.points;
 
@@ -2977,12 +2978,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 var i=0;
                 //console.log("timeTabls",time_table)
-                while(i<time_table.length) {
+                while(i<points.length) {
                    // console.log("START PREDICATE CALCULATING", points[i]);
 
                     if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
 
-                        points[i].arrival_left_prediction=time_table[i]/10;
+                        points[i].arrival_left_prediction=time_table[i]/10 ? time_table[i]/10 :2000000;
                         points[i].arrival_prediction=now+points[i].arrival_left_prediction;
                         if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                             points[i].status=5;
@@ -3016,13 +3017,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     route = _data.routes[idx];
                     // пропускаем итерацию в случае не валидного трека
-                    if (route.real_track == undefined ||
-                        route.real_track.length == 0 ||
-                        route.real_track == aggregatorError) {
-                        route.real_track = undefined;
-                        console.log("Bad Route");
-                        return;
-                    }
+                    //if (route.real_track == undefined ||
+                    //    route.real_track.length == 0 ||
+                    //    route.real_track == aggregatorError) {
+                    //    route.real_track = undefined;
+                    //    console.log("Bad Route");
+                    //    return;
+                    //}
 
                 if (route.points[route.lastPointIndx]) {
 
@@ -3050,13 +3051,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-                    console.log("Data", data, "route", route, "lastPoint", lastPoint);
-
 
                     // Если последняя точка выполнена, прогноз уже не нужен.
-                    if(lastPoint==route.points.length-1){
-                        return;
-                    }
+                    //if(lastPoint==route.points.length-1){
+                    //    return;
+                    //}
 
                     var singleTimeMatrix=[];
                     var k=0;
@@ -3078,7 +3077,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         totalDowntime = 0,
                         tmpTime;
 
-                    console.log("Для роута", route, "Последняя выполненная", lastPoint, "Время от машины до некст поинт", nextPointTime);
+
+                    if(route.uniqueID == "230169" ) {
+
+                        console.log("Для роута", route, "Последняя выполненная", lastPoint, "Время от машины до некст поинт", nextPointTime);
+                    }
+
 
                     for (var j = 0; j < route.points.length; j++) {
                         if (j <= lastPoint) {
@@ -3160,23 +3164,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
 
 
-
-
-
-
-
-
                 scope.rowCollection[idx].problem_index = scope.rowCollection[idx].problem_index || 0;
 
                 rootScope.rowCollection = scope.rowCollection;
 
 
 
-
-
-
                 }
 
+
+
+        }
+
+
+        function  updateDataforPast(){
+            console.log("START UPDATING FOR PAST");
+            var i=0;
+            while (i<_data.routes.length){
+                var j=0;
+                while(j<_data.routes[i].points.length){
+                    if (_data.routes[i].points[j].status>2){
+                        _data.routes[i].points[j].status=4;
+                    }
+
+                    j++;
+                }
+
+
+                i++;
+            }
 
 
         }

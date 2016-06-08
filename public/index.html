@@ -103,9 +103,16 @@
                 <!--</select>-->
 
 
+
+
                 <div class="btn-group">
+
+
+
+
                     <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Выберете старус
+                        {{nowTime*1000 | date : 'dd.MM.yyyy'}}
+                        Выберите статус
                     </button>
                     <div class="dropdown-menu">
                         <ul class="dropdown-statuses">
@@ -124,7 +131,9 @@
                         ng-options='option.value as option.name for option in filters.branches'>
                 </select>
 
+
                 <span></span>
+
                 <!--
                 <select id="draw-mode-select" ng-model="draw_mode" class="group-select"
                         ng-options='option.value as option.name for option in draw_modes'>
@@ -366,6 +375,15 @@
 <!-- панель настроек -->
 <template type="text/html" id="setting-window">
     <div class="section setting-panel" ng-controller="SettingController">
+        <div class="block">
+            <div class="title">Загрузка конкретного дня</div>
+            <div class="setting-row">
+                <span class="param-title">Отображаемый день</span>
+                <input type="date"
+                       ng-model="showDate"
+                       id="show-date"/>
+            </div>
+        </div>
         <div class="button-row">
             <button class="btn btn-info btn-sm" ng-click="saveAllParams()">Сохранить</button>
         </div>
@@ -446,15 +464,7 @@
             </div>
         </div>
 
-        <div class="block">
-            <div class="title">Загрузка конкретного дня</div>
-            <div class="setting-row">
-                <span class="param-title">Отображаемый день</span>
-                <input type="date"
-                       ng-model="showDate"
-                       id="show-date"/>
-            </div>
-        </div>
+
     </div>
 </template>
 
