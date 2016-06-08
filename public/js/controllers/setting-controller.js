@@ -9,6 +9,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
             scope.demoMd = false;
             scope.params = Settings.load();
 
+            console.log("!!!!!!!!!!!!!!!!!scope.params!!!!!!!!!!!!!!",scope.params);
+
             scope.workingWindowTypes = [
                 {name: 'Заказанное окно', value: 0},
                 {name: 'Обещанное окно', value: 1}
@@ -24,25 +26,28 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
         // обработчик кнопки сохранить, вызывается в index.html (ng-click)
         scope.saveAllParams = function () {
             console.log('settings');
-            var dateTS = scope.showDate.getTime();
-            scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
-            console.log(scope.params.showDate);
+            if(scope.showDate!=undefined)
+            {
+                var dateTS = scope.showDate.getTime();
+                scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
+                console.log(scope.params.showDate);
 
-            rootScope.$emit('fastCalc');
-            rootScope.$emit('stateChanged');
-            http.post('./currentsrvertime/')
-                .success(function (serverTime){
-                    var chooseDate = new Date(scope.params.showDate);
-                    var currentTime = new Date(serverTime);
-                    if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
-                        scope.params.showDate = null;
-                        rootScope.currentDay = true;
-                        scope.$emit('settingsChanged', scope.params);
-                    }else{
-                        scope.$emit('settingsChanged', scope.params);
-                        rootScope.currentDay = false;
-                    }
-                });
+                rootScope.$emit('fastCalc');
+                rootScope.$emit('stateChanged');
+                http.post('./currentsrvertime/')
+                    .success(function (serverTime){
+                        var chooseDate = new Date(scope.params.showDate);
+                        var currentTime = new Date(serverTime);
+                        if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
+                            scope.params.showDate = null;
+                            rootScope.currentDay = true;
+                            scope.$emit('settingsChanged', scope.params);
+                        }else{
+                            scope.$emit('settingsChanged', scope.params);
+                            rootScope.currentDay = false;
+                        }
+                    });
+            }
 
             Settings.saveToLocalStorage(scope.params);
         };

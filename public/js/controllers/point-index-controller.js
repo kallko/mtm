@@ -2974,8 +2974,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
 
-                        points[i].arrival_left_prediction=time_table[i]/10;
+                        points[i].arrival_left_prediction=time_table[i]/1000;
                         points[i].arrival_prediction=now+points[i].arrival_left_prediction;
+                        //if(points[i].TASK_NUMBER == "69563/103"){
+                        //console.log("????????????points[i].arrival_prediction", now, points[i].arrival_left_prediction );}
                         if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                             points[i].status=5;
                             points[i].overdue_time=points[i].arrival_prediction-points[i].arrival_time_ts;

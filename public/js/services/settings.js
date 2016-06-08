@@ -4,6 +4,8 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
         // выгружает настройки из локального хранилища, если они там есть, или создает новые настройки по умолчанию
         load: function() {
             var settings = localStorage['settings'] ? JSON.parse(localStorage['settings']) : undefined;
+
+            console.log("LOCAL STORAGE !!!!", settings );
             if (!settings) {
                 this.saveToLocalStorage(this.getDefaultSettings());
                 settings =  JSON.parse(localStorage['settings']);
@@ -42,7 +44,7 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
                 demoTime: 48,
                 endWindowSize: 3,
                 showDate: -1,
-                stopRadius: 150,
+                stopRadius: 80,
                 mobileRadius: 150,
                 timeThreshold: 90
             };
