@@ -596,7 +596,7 @@ router.route('/getroutermatrix/:points')
 router.route('/openidspointwindow/:pointId')
     .get(function (req, res) {
         console.log('openidspointwindow');
-        var soapManager = new soap(config.soap.defaultClientLogin);
+        var soapManager = new soap(req.session.login);
         soapManager.openPointWindow(req.session.login, req.params.pointId);
         res.status(200).json({status: 'ok'});
     });
@@ -738,6 +738,9 @@ router.route('/predicate/')
                     return;
                 }
             });
+
+
+
             j++;
         }
 

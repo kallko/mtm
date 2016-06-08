@@ -315,6 +315,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log("load track parts");
                     }
                     //console.log(data,' success data');
+                    updateData();
                 })
                 .error(function (err) {
                     console.log(err);
@@ -1457,6 +1458,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('OMG!!1 New show date!');
                 scope.params = JSON.parse(JSON.stringify(params));
                 loadDailyData(true, params.showDate);
+                console.log("OMG UPDATE DATA");
+
                 return;
             }
 
@@ -2870,7 +2873,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var i=0;
             while (i<pushes.length) {
 
-                var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*3 : 0;
+                var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*4 : 0;
                 pushes[i].gps_time_ts=temp;
                 //console.log(strToTstamp(pushes[i].gps_time), "New Time", temp, "Old TS", pushes[i]);
                 var date=new Date();
@@ -2900,14 +2903,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var result=[];
             var i=0;
             while(i<_data.routes.length) {
+
                 var route=_data.routes[i];
-                var indx=route.uniqueID;
-                var carPos=[{LAT:route.real_track[route.real_track.length-1].lat, LON: route.real_track[route.real_track.length-1].lat }];
-                var obj={id:indx, points:carPos.concat(route.points)};
-                result.push(obj);
+
+
+               if(route.real_track !=undefined && route.real_track.length>0) {
+                   var indx = route.uniqueID;
+                   var carPos = [{
+                       LAT: route.real_track[route.real_track.length - 1].lat,
+                       LON: route.real_track[route.real_track.length - 1].lon
+                   }];
+                   var obj = {id: indx, points: carPos.concat(route.points)};
+                   result.push(obj);
+                   if (route.uniqueID == 231157) {
+                       console.log("Route", route, "result", obj);
+                   }
+               }
                 i++;
             }
 
+            console.log("Result for predication=", result);
 
             http.post('./predicate', {
                 collection: result
@@ -3056,7 +3071,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
 
-                        var nextPointTime = parseInt(singleTimeMatrix[lastPoint]/100),
+                        var nextPointTime = parseInt(singleTimeMatrix[lastPoint]/10),
                         totalWorkTime = 0,
                         totalTravelTime = 0,
                         tmpDowntime = 0,
