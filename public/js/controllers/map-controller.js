@@ -325,7 +325,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpTitle += 'ID задания: ' + pushes[i].number;
 
                 tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
-                tmpVar.setIcon(getIcon('S', iconIndex, 'orange', 'black'));
+                tmpVar.setIcon(getIcon('M', iconIndex, 'orange', 'black'));
                 tmpVar.task_ID=pushes[i].number;
 
 
