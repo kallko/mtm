@@ -73,11 +73,11 @@ router.route('/currentsrvertime')
 
 
 // запуск монитора диспетчера в демо-режиме
-router.route('/demo')
-    .get(function (req, res) {
-        req.session.login = demoLogin;
-        res.sendFile('index.html', {root: './public/'});
-    });
+//router.route('/demo')
+//    .get(function (req, res) {
+//        req.session.login = demoLogin;
+//        res.sendFile('index.html', {root: './public/'});
+//    });
 
 router.route('/keysoldroutescache')
     .get(function(req, res){
@@ -122,9 +122,10 @@ router.route('/dailydata')
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
         console.log("Prepere for Conflict!!!!!!!!", req.session.login);
-        if (req.session.login == null) {
+        if (req.session.login == null || req.session.login == undefined) {
             console.log("Login", req.session.login);
-            req.session.login = config.soap.defaultClientLogin;
+            res.status(401).json({status: 'Unauthorized'});
+            //req.session.login = config.soap.defaultClientLogin;
         }
 
         var now = Date.now(),
@@ -313,7 +314,7 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
 router.route('/trackparts/:start/:end')
     .get(function (req, res) {
         console.log('trackparts', req.session.login);
-        if (req.session.login == undefined) {
+        if (req.session.login == undefined || req.session.login == null) {
             res.status(401).json({status: 'Unauthorized'});
             return;
         }
@@ -611,8 +612,10 @@ router.route('/openidspointwindow/:pointId')
 
 router.route('/closeday')
     .post(function (req, res) {
-        if (req.session.login == null) {
-            req.session.login = config.soap.defaultClientLogin;
+        if (req.session.login == null || req.session.login ==undefined) {
+            res.status(401).json({status: 'Unauthorized'});
+            return;
+            //req.session.login = config.soap.defaultClientLogin;
         }
         //console.log(req.body.closeDayData);
         console.log ("start working");
