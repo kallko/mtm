@@ -305,8 +305,8 @@
                         </span>
                     </td>
                     <td>
-                        <span ng-show="row.real_arrival_time > 0 && (row.status ==7 || row.status ==4 || row.status==5)">
-                            {{row.real_arrival_time |  date: 'HH:mm' : 'UTC'}}
+                        <span ng-show="row.real_arrival_time > 0 && (row.status <=3)">
+                            {{row.real_arrival_time*1000 |  date: 'HH:mm' }}
                         </span>
                     </td>
                     <td>
