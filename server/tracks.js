@@ -379,81 +379,81 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 };
 
 // сохранить данные обработанные в консоли анализа истории в солвер
-TracksManager.prototype.sendDataToSolver = function () {
-
-    fs.readFile('./logs/' + config.soap.defaultClientLogin + '_BigSolution.json', 'utf8', function (err, data) {
-        if (err) {
-            return console.log(err);
-        }
-
-        data = JSON.parse(data);
-
-
-        var test = {},
-            counter = 0,
-            key;
-        for (var i = 0; i < data.length; i++) {
-            key = data[i].waypoint_id.toString() + data[i].timestamp.toString();
-            if (!test[key]) {
-                test[key] = { counter: 1 };
-            }
-            else {
-                test[key].counter++;
-                counter++;
-                //console.log('REPEAT!', counter);
-                data.splice(i, 1);
-                i--;
-            }
-        }
-
-        var query;
-        var func = function (ii, _query) {
-            setTimeout(function () {
-                //console.log(_query);
-                request({
-                    url: _query,
-                    json: true
-                }, function (error, response, body) {
-                    //console.log(body, ii);
-                });
-
-            }, (ii) * 4 );
-        };
-
-        for (var i = 0; i < data.length; i++) {
-            if (i % 50 == 0) {
-                if (query != undefined) {
-                    func(i, query);
-                }
-
-                query = 'http://5.9.147.66:5500/visit?';
-                //query = 'http://5.9.147.66:5500/delete?';
-            } else {
-                query += "&";
-            }
-
-            query += 'point=' + data[i].waypoint_id +
-                '&data=' + data[i].transport_id + ';'
-                + data[i].driver_id + ';'
-                + data[i].timestamp + ';'
-                + 'true;'
-                + data[i].duration + ';'
-                + data[i].weight + ';'
-                + data[i].volume + ';'
-                + '0;'
-                + '0;'
-                + '0;0;0;0';
-
-            //query += 'point=' + data[i].waypoint_id +
-            //    '&date=' + data[i].timestamp;
-        }
-        func(i, query);
-
-
-        console.log(data.length);
-    });
-
-};
+//TracksManager.prototype.sendDataToSolver = function () {
+//
+//    fs.readFile('./logs/' + config.soap.defaultClientLogin + '_BigSolution.json', 'utf8', function (err, data) {
+//        if (err) {
+//            return console.log(err);
+//        }
+//
+//        data = JSON.parse(data);
+//
+//
+//        var test = {},
+//            counter = 0,
+//            key;
+//        for (var i = 0; i < data.length; i++) {
+//            key = data[i].waypoint_id.toString() + data[i].timestamp.toString();
+//            if (!test[key]) {
+//                test[key] = { counter: 1 };
+//            }
+//            else {
+//                test[key].counter++;
+//                counter++;
+//                //console.log('REPEAT!', counter);
+//                data.splice(i, 1);
+//                i--;
+//            }
+//        }
+//
+//        var query;
+//        var func = function (ii, _query) {
+//            setTimeout(function () {
+//                //console.log(_query);
+//                request({
+//                    url: _query,
+//                    json: true
+//                }, function (error, response, body) {
+//                    //console.log(body, ii);
+//                });
+//
+//            }, (ii) * 4 );
+//        };
+//
+//        for (var i = 0; i < data.length; i++) {
+//            if (i % 50 == 0) {
+//                if (query != undefined) {
+//                    func(i, query);
+//                }
+//
+//                query = 'http://5.9.147.66:5500/visit?';
+//                //query = 'http://5.9.147.66:5500/delete?';
+//            } else {
+//                query += "&";
+//            }
+//
+//            query += 'point=' + data[i].waypoint_id +
+//                '&data=' + data[i].transport_id + ';'
+//                + data[i].driver_id + ';'
+//                + data[i].timestamp + ';'
+//                + 'true;'
+//                + data[i].duration + ';'
+//                + data[i].weight + ';'
+//                + data[i].volume + ';'
+//                + '0;'
+//                + '0;'
+//                + '0;0;0;0';
+//
+//            //query += 'point=' + data[i].waypoint_id +
+//            //    '&date=' + data[i].timestamp;
+//        }
+//        func(i, query);
+//
+//
+//        console.log(data.length);
+//    });
+//
+//};
 
 // получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
