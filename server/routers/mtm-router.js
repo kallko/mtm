@@ -121,7 +121,9 @@ router.route('/dailydata')
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
         if (req.session.login == null) {
-            req.session.login = config.soap.defaultClientLogin;
+            console.log("There is now req.session.login, mtm 124");
+            return;
+            //req.session.login = config.soap.defaultClientLogin;
         }
 
         var now = Date.now(),
@@ -609,7 +611,9 @@ router.route('/openidspointwindow/:pointId')
 router.route('/closeday')
     .post(function (req, res) {
         if (req.session.login == null) {
-            req.session.login = config.soap.defaultClientLogin;
+            console.log("There is now client login");
+            return;
+            //req.session.login = config.soap.defaultClientLogin;
         }
         //console.log(req.body.closeDayData);
         console.log ("start working");

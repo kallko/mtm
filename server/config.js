@@ -14,7 +14,7 @@ var config = {
         login: 'soap_admin', // админский логин для клиента соапа
         password: '$o@p', // админский пароль для клиента соапа
         //defaultClientLogin: 'k00056.0' // логин для прогрузки интерфейса при запуске вне окна 1С
-        defaultClientLogin: 'ids.dsp'
+        //defaultClientLogin: 'ids.dsp'
     },
 
     aggregator: {
