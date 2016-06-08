@@ -106,6 +106,7 @@ router.route('/login')
 // загрузка данных из соапа за текущий день
 router.route('/dailydata')
     .get(function (req, res) {
+        console.log("Start Loading DailyData");
         req.session.lastLockCheck = 0;
         // проверка на включеннный демо режим
         if (req.session.login == demoLogin) {
@@ -120,9 +121,9 @@ router.route('/dailydata')
         }
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
-        console.log("Prepere for Conflict");
+        console.log("Prepere for Conflict!!!!!!!!");
         if (req.session.login == null) {
-            console.log("Login", req.session.login)
+            console.log("Login", req.session.login);
             req.session.login = config.soap.defaultClientLogin;
         }
 
