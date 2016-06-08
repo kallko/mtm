@@ -31,7 +31,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             loadParts = true,                              // догрузить новые данные сразу после загрузки интерфейса
             enableDynamicUpdate = true;                    // динамическая догрузка данных по заданному выше интервалу
             scope.existData=[];                                         //Хранение измененных в течение дня данных
-            scope.fastCalc=false;                          // Упрощенный расчет точек
+            //scope.fastCalc=false;                          // Упрощенный расчет точек
             scope.existDataLoaded=false;                     //загружены ли уже существующие ранее данные
 
             scope.parseInt = parseInt;                       //Возможность использовать parseInt во view
@@ -762,9 +762,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function deg2rad(deg) {
             return deg * (Math.PI / 180)
         }
-        rootScope.$on('fastCalc', function(){
-            scope.fastCalc = false;
-        });
+        //rootScope.$on('fastCalc', function(){
+        //    scope.fastCalc = false;
+        //});
         // обновление статусов
         function statusUpdate() {
             //console.log('statusUpdate');
@@ -804,21 +804,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //console.log("Подтверждена вручную Уходим");
                         continue;
                     }
-
-                    if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
-                       // console.log("Подтверждена пушем и стопом Уходим");
-                        continue;
-                    }
-
-                    if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
-                        //console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                        continue;
-                    }
-
-                    if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
-                        //console.log("Точка уже доставлена идем дальше");
-                        continue;
-                    }
+                    //
+                    //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
+                    //   // console.log("Подтверждена пушем и стопом Уходим");
+                    //    continue;
+                    //}
+                    //
+                    //if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
+                    //    //console.log("Подтверждена стопом. Валидных пушей нет уходим");
+                    //    continue;
+                    //}
+                    //
+                    //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
+                    //    //console.log("Точка уже доставлена идем дальше");
+                    //    continue;
+                    //}
 
                    // console.log("Пересчет");
                     tmpPoint.status = STATUS.SCHEDULED;
@@ -885,20 +885,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     continue;
                                 }
 
-                                if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
-                                    //console.log("Подтверждена пушем и стопом Уходим");
-                                    continue;
-                                }
-
-                                if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
-                                   // console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                                    continue;
-                                }
-
-                                if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
-                                    //console.log("Точка уже доставлена идем дальше");
-                                    continue;
-                                }
+                                //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
+                                //    //console.log("Подтверждена пушем и стопом Уходим");
+                                //    continue;
+                                //}
+                                //
+                                //if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
+                                //   // console.log("Подтверждена стопом. Валидных пушей нет уходим");
+                                //    continue;
+                                //}
+                                //
+                                //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
+                                //    //console.log("Точка уже доставлена идем дальше");
+                                //    continue;
+                                //}
 
 
 
@@ -1810,7 +1810,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // отрисовать маршрут
         scope.drawRoute = function () {
             rootScope.clickOff=true;
-            console.log("P-I-C recieve click", rootScope.clickOff, scope.fastCalc);
+            console.log("P-I-C recieve click", rootScope.clickOff);
             //scope.$apply();
 
 

@@ -32,7 +32,7 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                 scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
                 console.log(scope.params.showDate);
 
-                rootScope.$emit('fastCalc');
+                //rootScope.$emit('fastCalc');
                 rootScope.$emit('stateChanged');
                 http.post('./currentsrvertime/')
                     .success(function (serverTime){
