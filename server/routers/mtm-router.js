@@ -121,7 +121,7 @@ router.route('/dailydata')
         }
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
-        console.log("Prepere for Conflict!!!!!!!!");
+        console.log("Prepere for Conflict!!!!!!!!", req.session.login);
         if (req.session.login == null) {
             console.log("Login", req.session.login);
             req.session.login = config.soap.defaultClientLogin;
