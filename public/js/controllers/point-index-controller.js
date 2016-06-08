@@ -2905,16 +2905,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             while(i<_data.routes.length) {
 
                 var route=_data.routes[i];
-                if(route.real_track == undefined) {
-                    break;
-                }
-                var indx=route.uniqueID;
-                var carPos=[{LAT:route.real_track[route.real_track.length-1].lat, LON: route.real_track[route.real_track.length-1].lat }];
-                var obj={id:indx, points:carPos.concat(route.points)};
-                result.push(obj);
+
+
+               if(route.real_track !=undefined && route.real_track.length>0) {
+                   var indx = route.uniqueID;
+                   var carPos = [{
+                       LAT: route.real_track[route.real_track.length - 1].lat,
+                       LON: route.real_track[route.real_track.length - 1].lon
+                   }];
+                   var obj = {id: indx, points: carPos.concat(route.points)};
+                   result.push(obj);
+                   if (route.uniqueID == 231157) {
+                       console.log("Route", route, "result", obj);
+                   }
+               }
                 i++;
             }
 
+            console.log("Result for predication=", result);
 
             http.post('./predicate', {
                 collection: result
@@ -2974,7 +2982,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
 
-                        points[i].arrival_left_prediction=time_table[i]/1000;
+                        points[i].arrival_left_prediction=time_table[i]/10;
                         points[i].arrival_prediction=now+points[i].arrival_left_prediction;
                         if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                             points[i].status=5;
@@ -3063,7 +3071,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
 
-                        var nextPointTime = parseInt(singleTimeMatrix[lastPoint]/100),
+                        var nextPointTime = parseInt(singleTimeMatrix[lastPoint]/10),
                         totalWorkTime = 0,
                         totalTravelTime = 0,
                         tmpDowntime = 0,
