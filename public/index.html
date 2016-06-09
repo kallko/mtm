@@ -275,7 +275,7 @@
                 </thead>
 
                 <tbody>
-                <!-- заменил ng-show="applyFilter(row)" на ng-if="applyFilter(row)" -->
+
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
@@ -609,7 +609,7 @@
                         <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
 
                     </tr>
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item.filterId, $index)">
+                    <tr  ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
@@ -642,7 +642,7 @@
                         </td>
                     </tr>
 
-                    <tr  ng-class="($index == selected ? 'driver-select-bg' : ''); (item.closeRoute ? 'closeroute' : '' )" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr   ng-class="[item.closeRoute ? 'closeroute' : '', item.selected ? 'driver-select-bg' : '']   "  class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{::item.filterId}}"
                                    type="checkbox"

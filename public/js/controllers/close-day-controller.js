@@ -124,7 +124,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
   
         rootScope.$on('forCloseController', function (event, data) {
-            scope.selected = -1;
+            
             scope.data = data;
             scope.companyName = data.companyName;
             scope.user = data.user;
@@ -141,18 +141,24 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
 
-    scope.closeTableRowClick = function(filterId, $index){
-    	//rootScope.$emit('closeDriverName', uniqueID);
-        if(scope.selected == $index){
-            scope.selected = -1;
-            rootScope.$emit('closeDriverName', filterId, false); // false не рисовать новый маршрут
+    scope.closeTableRowClick = function(item){
+
+        console.log(item);
+
+
+        if(item.selected){
+            item.selected = false;
+            rootScope.$emit('closeDriverName', item.filterId, false); // false не рисовать новый маршрут
         }else{
-            scope.selected = $index;
-            rootScope.$emit('closeDriverName', filterId, true); // true рисовать новый маршрут
+            for(var i = 0; scope.data.routes.length > i; i++){
+                scope.data.routes[i].selected = false;
+            }
+            item.selected = true;
+            rootScope.$emit('closeDriverName', item.filterId, true); // true рисовать новый маршрут
         }
     };
 
-    scope.selected = -1;
+
 
 
 
