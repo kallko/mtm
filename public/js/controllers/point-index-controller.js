@@ -1988,6 +1988,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
                     rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
                     rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
+                    (rawPoints[i].change_time==undefined || rawPoints[i].change_time==null ||rawPoints[i].change_time==0) ? rawPoints[i].change_time=1 : rawPoints[i].change_time+=1;
                     break;
                 }
             }

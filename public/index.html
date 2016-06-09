@@ -308,12 +308,12 @@
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>{{ (row.status==4 || row.status==5 ||row.status==7 ) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
                     <td>
-                        <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8) && (row.real_track != undefined)">
+                        <span ng-show="(row.arrival_prediction >0) && (row.status>3 && row.status<8) && (row.transport.gid!=undefined)">
                             {{(nowTime + row.arrival_left_prediction)*1000 | date: 'HH:mm' }}
                         </span>
                     </td>
                     <td>
-                        <span ng-show="row.arrival_prediction > 0 && (row.status ==7 || row.status ==4 || row.status==5)  && (row.real_track != undefined)">
+                        <span ng-show="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5) && (row.transport.gid!=undefined)">
                              {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }} <!-- |date: 'HH:mm' : 'UTC'-->
                         </span>
                     </td>
@@ -322,23 +322,6 @@
                             {{row.real_arrival_time*1000 |  date: 'HH:mm' }}
                         </span>
                     </td>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
                     <td>
@@ -747,6 +730,8 @@
                        enter-event="changePromisedWindow(point)"> -
                 <input type="text" class="promised-text-card" id="promised-finish-card"
                        enter-event="changePromisedWindow(point)">
+                <button id="change-window-task-btn" class="btn btn-primary btn-sm" ng-click="changePromisedWindow(point)">Изменить</button>
+
             </td>
         </tr>
         <tr>

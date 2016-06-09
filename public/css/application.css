@@ -359,7 +359,7 @@ template {
     margin-left: 15px;
 }
 
-#confirm-status-task-btn, #cancel-status-task-btn {
+#confirm-status-task-btn, #cancel-status-task-btn, #change-window-task-btn{
     padding: 1px 7px;
     height: 20px;
 }
