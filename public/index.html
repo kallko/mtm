@@ -189,10 +189,9 @@
                 <thead class="header">
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания">План</th>
-
+                    <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
-                    <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
                     <th class="address-col" title="Адрес доставки">Адрес</th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
@@ -205,14 +204,16 @@
                     </th>
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
-                        <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
-                    </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                    <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                    </th>
+
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
                         <button ng-click="order('arrival_left_prediction')">Осталось до прибытия</button>
                     </th>
                     <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
+
 
                     <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
                     <th class="problem-index-col"  title="Индекс проблемности задания">
@@ -223,8 +224,9 @@
                     <th class="promised-window-changed-col" title="Количество переносов">Кол. переносов</th>
                     <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
                     <th class="car-number-col" title="Номер машины">Номер</th>
-                    <th class="car-type-col" title="Назавание машины">Машина</th>
+
                     <th class="branch-col" title="Филиал">Филиал</th>
+                    <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
                     <th title="Комментарий к точке">Комментарий</th>
                 </tr>
                 </thead>
@@ -232,10 +234,9 @@
                 <thead class="header-copy">
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания">План</th>
-
+                    <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
-                    <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
                     <th class="address-col" title="Адрес доставки">Адрес</th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
@@ -246,17 +247,17 @@
                     <th class="plan-arrival-time-col" title="Плановое прибытие на точку" >
                         <button ng-click=" order('arrival_time_ts')">План. прибытие</button>
                     </th>
-                    <th class="time-window-col" title="Заказанное клиентом окно" >Заказанное</th>
+                    <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
-                        <button ng-click=" order('end_time_ts')">Ост. КОК</button>
-                    </th>
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                    <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                    </th>
+
                     <th class="prediction-arrival-left-col"
                         title="Осталось до прогнозируемого времени прибытия" >
                         <button ng-click="order('arrival_left_prediction')">Осталось до прибытия</button>
                     </th>
                     <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
-
                     <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
                     <th class="problem-index-col"  title="Индекс проблемности задания">
                         <button ng-click="order('problem_index')">Проблемность</button>
@@ -266,8 +267,9 @@
                     <th class="promised-window-changed-col" title="Количество переносов">Кол. переносов</th>
                     <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
                     <th class="car-number-col" title="Номер машины">Номер</th>
-                    <th class="car-type-col" title="Назавание машины">Машина</th>
+
                     <th class="branch-col" title="Филиал">Филиал</th>
+                    <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
                     <th title="Комментарий к точке">Комментарий</th>
                 </tr>
                 </thead>
@@ -284,10 +286,10 @@
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
 
                     <td>{{row.NUMBER}}</td>
+                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
                     <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
                     <td>{{row.driver.NAME}}</td>
                     <td title="{{row.waypoint.NAME}}">{{row.waypoint.NAME}}</td>
-                    <td title="{{row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
                     <td title="{{row.waypoint.ADDRESS}}">{{row.waypoint.ADDRESS}}</td>
                     <td id="{{'status-td-' + row.row_id}}">
                         {{getTextStatus(row.status, row.row_id, row.confirmed, row.driver.NAME)}}
@@ -303,7 +305,6 @@
                     <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>{{ (row.status==4 || row.status==5 ||row.status==7 ) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
-
                     <td>
                         <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8)">
                             {{(nowTime + row.arrival_left_prediction)*1000 | date: 'HH:mm' }}
@@ -319,6 +320,25 @@
                             {{row.real_arrival_time*1000 |  date: 'HH:mm' }}
                         </span>
                     </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     <td>
                         <span ng-show="row.overdue_time > 0">
                             {{row.overdue_time*1000 |  date: 'HH:mm' : 'UTC' }}
@@ -346,8 +366,9 @@
                     <td> {{row.change_time ? row.change_time : 0}}</td>
                     <td>{{row.driver.PHONE}}</td>
                     <td>{{row.transport.REGISTRATION_NUMBER}}</td>
-                    <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
+
                     <td>{{row.branchName}}</td>
+                    <td title="{{row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
                     <td title="{{row.waypoint.COMMENT}}">{{row.waypoint.COMMENT}}</td>
                 </tr>
                 </tbody>

@@ -733,7 +733,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
            // console.log("Finish CCALCULATING!!!!!");
 
-
+            scope.$apply;
         }
 
         // проверка на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
