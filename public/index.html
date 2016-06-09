@@ -122,10 +122,10 @@
                 </div>
 
 
-                <select id="route-select" ng-model="filters.route" class="group-select"
+                <select id="route-select"  ng-model="selectRouteFilter" class="group-select"
                         ng-options='option.value as option.name for option in filters.routes'>
                 </select>
-                <button ng-show="true" class="btn btn-info btn-sm" ng-click="drawRoute()">Показать</button>
+                <button ng-show="true" class="btn btn-info btn-sm" ng-click="selectFilterRute(); drawRoute(); ">Показать</button>
 
 
                 <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
@@ -609,7 +609,7 @@
                         <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
 
                     </tr>
-                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item.uniqueID, $index)">
+                    <tr  ng-class="$index == selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item.filterId, $index)">
                         <td><input ng-click = "toggleCheckBoxToClose()"
                                    id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"

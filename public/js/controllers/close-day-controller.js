@@ -141,14 +141,14 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
 
-    scope.closeTableRowClick = function(uniqueID, $index){
+    scope.closeTableRowClick = function(filterId, $index){
     	//rootScope.$emit('closeDriverName', uniqueID);
         if(scope.selected == $index){
             scope.selected = -1;
-            rootScope.$emit('closeDriverName', uniqueID, false); // false не рисовать новый маршрут
+            rootScope.$emit('closeDriverName', filterId, false); // false не рисовать новый маршрут
         }else{
             scope.selected = $index;
-            rootScope.$emit('closeDriverName', uniqueID, true); // true рисовать новый маршрут
+            rootScope.$emit('closeDriverName', filterId, true); // true рисовать новый маршрут
         }
     };
 
