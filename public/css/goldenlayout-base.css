@@ -33,6 +33,7 @@
 .lm_splitter{
 	position: relative;
 	z-index: 2;
+	opacity: 0.5;
 }
 
 .lm_splitter:hover{

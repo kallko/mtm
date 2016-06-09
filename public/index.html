@@ -205,6 +205,7 @@
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                    <th>
                     <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
                     </th>
 
@@ -250,7 +251,8 @@
                     <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
                     <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
                     <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
-                    <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                    <th>
+                        <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
                     </th>
 
                     <th class="prediction-arrival-left-col"
@@ -306,12 +308,12 @@
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
                     <td>{{ (row.status==4 || row.status==5 ||row.status==7 ) ? (parseInt((row.end_time_ts - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.end_time_ts - nowTime) -(parseInt((row.end_time_ts - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
                     <td>
-                        <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8)">
+                        <span ng-show="row.arrival_prediction >0 && (row.status>3 && row.status<8) && (row.real_track != undefined)">
                             {{(nowTime + row.arrival_left_prediction)*1000 | date: 'HH:mm' }}
                         </span>
                     </td>
                     <td>
-                        <span ng-show="row.arrival_prediction > 0 && (row.status ==7 || row.status ==4 || row.status==5)">
+                        <span ng-show="row.arrival_prediction > 0 && (row.status ==7 || row.status ==4 || row.status==5)  && (row.real_track != undefined)">
                              {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }} <!-- |date: 'HH:mm' : 'UTC'-->
                         </span>
                     </td>
