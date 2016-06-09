@@ -318,6 +318,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //console.log(data,' success data');
                     console.log("!!!!!!!!!!!!Data server time = ", _data.server_time );
                     updateData();
+                    if (!rootScope.currentDay){
+                        enableDynamicUpdate=false;
+                        updateDataforPast();
+                    } else {
+                        enableDynamicUpdate=true;
+                    }
                 })
                 .error(function (err) {
                     console.log(err);
@@ -773,6 +779,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обновление статусов
         function statusUpdate() {
             //console.log('statusUpdate');
+            if (!rootScope.currentDay){
+                updateDataforPast();
+                return;
+            }
 
             var route,
                 tmpPoint,
