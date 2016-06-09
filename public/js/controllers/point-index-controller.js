@@ -2993,7 +2993,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
 
-                        points[i].arrival_left_prediction=time_table[i]/10 ? time_table[i]/10 :2000000;
+                        points[i].arrival_left_prediction=time_table[i]/10 ? time_table[i]/10 :15*60;//Если у нас нет корректного предсказания времени (нет датчика ДЖПС) точка попадает в опаздывает за 15 минут до конца КОК
                         points[i].arrival_prediction=now+points[i].arrival_left_prediction;
                         if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                             points[i].status=5;
