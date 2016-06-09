@@ -69,6 +69,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ];
 
             scope.filters.driver = -1; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            scope.filters.route = -1;
+
             scope.filters.branch = scope.filters.branches[0].value;
            // scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.status = {};
@@ -119,19 +122,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //     $problem.toggleClass('btn-default').toggleClass('btn-success');
             // }
         }
-         rootScope.$on('closeDriverName', function (event, uniqueID, drawNewRoute) {
-
+         rootScope.$on('closeDriverName', function (event, filterId, drawNewRoute) {
+                scope.selectRouteFilter = filterId;
                  // scope.filters.driver = data;
                  // var driversArr = [];
                  // for(var i=0; i<scope.filters.routes.length; i++){
                  //    driversArr.push( scope.filters.routes[i].driver || null);
                  // }
                  // scope.filters.route = driversArr.indexOf(data)-1;
-            console.log(drawNewRoute);
              if(drawNewRoute){
-                 scope.filters.routeUniqueID = uniqueID;
                  for(var i = 0; _data.routes.length > i; i++){
-                     if(_data.routes[i].uniqueID == uniqueID){
+                     if(_data.routes[i].filterId == filterId){
                          console.log("_data.routes[i]", _data.routes[i]);
                          scope.filters.driver = _data.routes[i].driver.NAME ? _data.routes[i].driver.NAME:"НЕИЗВЕСТНО";
                          scope.filters.route = i;
@@ -144,6 +145,29 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  scope.filters.driver = -1;
              }
          });
+
+        scope.selectRouteFilter = scope.filters.routes[0].value;
+        scope.selectFilterRute = function(){
+            scope.filters.route = scope.selectRouteFilter;
+            if(scope.selectRouteFilter == -1){
+                for(var j = 0; _data.routes.length > j; j++){
+                    _data.routes[j].selected = false;
+                }
+                return;
+            }
+            for(var i = 0; _data.routes.length > i; i++ ){
+                if(_data.routes[i].filterId == scope.selectRouteFilter){
+                    if(!_data.routes[i].selected){
+                        for(var j = 0; _data.routes.length > j; j++){
+                            _data.routes[j].selected = false;
+                        }
+                        _data.routes[i].selected = true;
+                    }
+                    break;
+                }
+            }
+        };
+
         // установить динамическое обновление данных
         //не понятно где используется!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         function setDynamicDataUpdate(seconds) {
@@ -290,6 +314,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log('forceLoad');
             loadDailyData(true);
         };
+
+
+
+
 
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
@@ -519,8 +547,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             //name: data.routes[i].transport.NAME,
                             name: data.routes[i].transport.NAME + ' - ' + ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'),
                             value: data.routes[i].filterId,
-                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
-
+                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                         });
                           //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
@@ -664,9 +691,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 }
 
+
                 scope.rowCollection = scope.rowCollection.concat(data.routes[i].points);
                // console.log(scope.rowCollection, ' rcol'); !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }
+
+
+            console.log(data);
+            console.log(scope.rowCollection);
 
             // оповещаем ползователя о проблемных маршрутах
             if (problematicRoutes.length > 0) {
@@ -1401,7 +1433,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 updateFixedHeaderPos();
             }
 
-
+           
 
             // контролировать размер таблицы после изменения фильтров для изменения размеров грипов для ресайза колонок
             scope.$watch(function () {
@@ -1791,8 +1823,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по маршруту
         function routeFilter(row) {
-            return (scope.filters.driver === -1 || row.uniqueID == scope.filters.routeUniqueID);
 
+            return (scope.filters.route === -1 || row.route_id == scope.filters.route);
         }
 
         // фильтр по проблемности
@@ -2147,6 +2179,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // применить все фильтры
         scope.applyFilter = function (row) {
+            console.log(routeFilter(row));
             return routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
@@ -2154,6 +2187,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 && textFilter(row)
                 && branchFilter(row);
         };
+
+        
 
 
         var orderBy = filter('orderBy');
