@@ -1600,6 +1600,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 case 'cancel-point': // отмена точки
                     console.log(row);
                     row.status = STATUS.CANCELED;
+                    row.confirmed = true;
+                    rawPoint.rawConfirmed = 1;
                     //row.reason = row.point.reason;
                     rootScope.$emit('checkInCloseDay');  // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;
@@ -2179,7 +2181,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // применить все фильтры
         scope.applyFilter = function (row) {
-            console.log(routeFilter(row));
+            //console.log(routeFilter(row));
             return routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
@@ -2870,9 +2872,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         rootScope.$on('askGPSConfirmPoint', function(event, marker){
 
 
-
-            rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
-
+            if(parentForm != undefined) {
+                rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
+            }
             console.log("Point", marker.point.ID, "confirmed=", rootScope.gpsConfirm);
 
         });

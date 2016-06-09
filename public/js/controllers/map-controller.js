@@ -264,7 +264,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                        // console.log(scope.currentDraggingStop, scope.minI);
                         checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                         scope.currentDraggingStop=null;
-
+                        rootScope.$emit('checkInCloseDay');
                     });
 
                     addMarker(tmpVar);
@@ -1722,10 +1722,39 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
+        function makeWayPointMarkerGrey(indx) {
+            var container;
+            var i=0;
+            var num;
+           // console.log(markersArr, "markersArr");
+            var size = markersArr.length;
+            while (i<size){
+                if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
+                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                        num=markersArr[i].source.NUMBER;
+                        container=markersArr[i];
+                        markersArr[i].source.confirmed=true;
+                        markersArr[i].source.rawConfirmed=1;
+                        console.log("markersArr[i]", markersArr[i]);
+                        break;
+                    }
+                }
+                i++;
+            }
+
+            container.setIcon(getIcon(num, 14, '#969696', 'white')).update();
+        }
+
 
         rootScope.$on('makeWaypointGreen', function (event, index) {
             console.log("Send ", (index-1));
            makeWayPointMarkerGreen(index-1);
+        });
+
+
+        rootScope.$on('makeWaypointGrey', function (event, index) {
+            console.log("Send ", (index-1));
+            makeWayPointMarkerGrey(index-1);
         });
 
     }]);

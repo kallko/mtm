@@ -113,6 +113,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'cancel-point'
             });
+            rootScope.$emit('makeWaypointGrey', scope.point.NUMBER );
         };
 
         // перекелючить (вкл/выкл) блокировку задачи
