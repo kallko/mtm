@@ -36,8 +36,10 @@ SoapManager.prototype.getFullUrl = function () {
 // получить все необходимые для интерфейса данные на конкретную дату
 SoapManager.prototype.getAllDailyData = function (callback, date) {
     if (!loadFromCache) {
+        console.log("Wait for Data from SOAP");
         this.getDailyPlan(callback, date);
     } else {
+        console.log("Wait for Data from Cahse");
         this.loadFromCachedJson(callback);
     }
 };
@@ -81,7 +83,7 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
-    //console.log(_data.reasons, "data, soap 84");
+    console.log( " Prepare for DATA GLUE data, soap 84");
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -140,6 +142,9 @@ function checkBeforeSend(_data, callback) {
 
     // в случае если дошло до сюда, значит необходимые данные собраны
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
+
+
+
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
         allData.NUMBER_OF_ORPHANS = parseInt(allData.NUMBER_OF_ORPHANS) + parseInt(data[i].NUMBER_OF_ORPHANS);
@@ -232,7 +237,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         (function (ii) {
                             setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
-                            }, ii * 25);
+                            }, ii * 500);
                         })(i);
                     }
 

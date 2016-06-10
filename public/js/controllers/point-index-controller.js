@@ -341,34 +341,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
                     console.log("Loaded DATA", data.date, data);
 
-                    //проверка на сегодняшний день
-                    var chooseDate = new Date(showDate);
-                    var currentTime = new Date(data.server_time*1000);
-                    var stringDate=currentTime.getFullYear()+'-';
-                    var stringMonth=currentTime.getMonth()+1;
-                    if(stringMonth<10) {
-                        stringDate+="0"+stringMonth+'-';
-                    } else {
-                        stringDate+=stringMonth+'-';
-                    }
-                    if(currentTime.getDate()<10){
-                        stringDate+='0'+currentTime.getDate();
-                    } else {
-                        stringDate+=+currentTime.getDate();
-                    }
 
-                    console.log("StringDate=", stringDate);
 
                     console.log("before chose CurrentDay", showDate, data.server_time );
                     //console.log(chooseDate, "==", currentTime, "or", showDate, "==", scope.nowTime );
                     //if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
-                    if(showDate!=undefined || chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate() ){
+                    if(rootScope.currentDay){
                         //scope.params.showDate = null;
-                        rootScope.currentDay = true;
+                        //rootScope.currentDay = true;
                         console.log("!!!!!!!!!HURA We load today DAY");
                     } else {
                         rootScope.currentDay = false;
-                        console.log("(((((( We LOAD PAST!!! Problem=" , scope.filters.problem_index);
+                        //console.log("(((((( We LOAD PAST!!! Problem=" , scope.filters.problem_index);
 
                     }
 
@@ -760,6 +744,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
+
+            console.log("Display", scope.displayCollection)
 
             saveRoutes();
             checkLocks();
@@ -1985,6 +1971,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('load tracks from cache');
                 draw(route);
             }
+
+
+
         };
 
         // вкл/выкл фильтр только проблемных точек
