@@ -108,8 +108,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-
-
             var $promised = $('#promised-15m-btn');
             // отжатие кнопки
             if ($promised.hasClass('btn-success')) {
@@ -325,13 +323,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
-            // if(rootScope.currentDay){
-            //     scope.showHideProblemButton = true;
-            //     scope.filters.problem_index = 1;
-            // }else{
-            //     scope.filters.problem_index = -1;
-            //     scope.showHideProblemButton = false;
-            // }
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
@@ -427,9 +418,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         });
         rootScope.$on('getCurrentday', function(){
-           /* setListeners();
-            init();
-            setCheckLocksInterval(); */
             loadDailyData(false);
         });
 
@@ -458,6 +446,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function linkDataParts(data) {
             //console.info(data);
             init();
+            // закоментил инит, возможно будут ошибки
             scope.routesOfDate = data.routesOfDate;
 
             //console.log('Start linking ...', new Date(data.server_time * 1000));
@@ -1902,6 +1891,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по проблемности
         function problemFilter(row) {
+            console.log(scope.filters.problem_index);
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
         }
 
@@ -2023,7 +2013,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
-        // вкл/выкл фильтр только проблемных точек
+        //вкл/выкл фильтр только проблемных точек
         scope.toggleProblemPoints = function () {
             console.log("Нажимаем на кнопку!!!!")
 
@@ -2391,7 +2381,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(_data.routes[0].points, ' dr');
             //console.log(_data);
             outer: for(var m = 0; m<_data.routes.length; m++){
-                console.log(_data.routes[m]);
                 for(var i = 0; _data.routes[m].points.length > i; i++){
                      if(!forSome(_data.routes[m].points[i].status, _data.routes[m].points[i].confirmed, _data.routes[m].points[i].haveStop)){
                             continue outer;
@@ -2570,7 +2559,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //console.log("XML == ", xml);
                 return {closeDayData: xml, routesID: routesID, update:true, closeDayDate: data.routesOfDate}; // обновляем текущий день
             }else{
-                console.log("OLD DAY");
                 return {closeDayData: xml, routesID: routesID, update:false, closeDayDate: data.routesOfDate}; // дописываем старый день
             }
         }
