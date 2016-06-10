@@ -153,12 +153,16 @@ router.route('/dailydata')
             console.log('=== loaded from session === send data to client ===');
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
             cashedDataArr[req.session.login].user = req.session.login;
-
-            var copyCashedDataArr = JSON.parse(JSON.stringify(cashedDataArr[req.session.login]));
-            if(Array.isArray(oldRoutesCache[req.session.login]) ){
-                copyCashedDataArr.routes = copyCashedDataArr.routes.concat(oldRoutesCache[req.session.login]);
+            var cache = cashedDataArr[req.session.login];
+            if(cache.currentDay){
+                cache.server_time = parseInt(new Date() / 1000);
+                cache.current_server_time = cache.server_time;
+            }else{
+                cache.current_server_time = parseInt(Date.now() / 1000);
             }
-            res.status(200).json(copyCashedDataArr);
+
+
+            res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
             cashedDataArr = {};
@@ -199,6 +203,17 @@ router.route('/dailydata')
                     req.session.itineraryID = data.ID;
                     data.user = req.session.login;
                     data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
+                    }
+                    // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
+                    data.current_server_time = parseInt(new Date() / 1000);
+                    var current_server_time = new Date();
+                    var server_time = new Date(data.server_time * 1000);
+                    console.log(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() , current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate());
+                    if(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() == current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate()){
+                        data.currentDay = true;
+                        data.current_server_time = data.server_time;
+                    }else{
+                        data.currentDay = false;
                     }
 
                     res.status(200).json(data);
@@ -352,7 +367,7 @@ router.route('/trackparts/:start/:end')
                     }
                // }
                 //console.log('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
-                cached.server_time = parseInt(Date.now() / 1000);
+                //cached.server_time = parseInt(Date.now() / 1000);
                 //console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
 
                 log.toFLog('final_data.js', cached);

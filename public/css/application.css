@@ -41,11 +41,7 @@ template {
     width: 100%;
 }
 
-#point-table table {
-    width: 100%;
-    min-width: 2400px;
-    border-bottom: 1px solid grey;
-}
+
 
 #map {
     height: 800px;
@@ -64,24 +60,7 @@ template {
     /*z-index: 0;*/
 }
 
-#point-table table tr {
-    border-left: 1px solid grey;
-    position: relative;
-}
 
-#point-table table tr td, #point-table table tr th {
-    font-size: 11px;
-    padding: 4px 3px !important;
-    margin: 0;
-    border-right: 1px solid grey;
-    border-top: 0px !important;
-    white-space: nowrap;
-}
-
-#point-table table tr th {
-    border-bottom: 1px solid grey;
-    background-color: whitesmoke;
-}
 
 .nav > li > a {
     padding: 5px !important;
@@ -113,19 +92,42 @@ template {
     background-color: #E6F562 !important;
 }
 
-#point-table-tbl tbody tr {
-    background-color: #f9f9f9 !important;
+#point-table-tbl {
+    width: 100%;
+    min-width: 2400px;
+    border-bottom: 1px solid grey;
 }
 
-#point-table-tbl tbody .row-red {
+#point-table-tbl tr {
+    border-left: 1px solid grey;
+    position: relative;
+    background-color: #f9f9f9;
+}
+
+#point-table-tbl tr td, #point-table-tbl tr th {
+    font-size: 11px;
+    padding: 4px 3px !important;
+    margin: 0;
+    border-right: 1px solid grey;
+    border-top: 0px !important;
+    white-space: nowrap;
+}
+
+#point-table-tbl tr th {
+    border-bottom: 1px solid grey;
+    background-color: whitesmoke;
+}
+
+
+#point-table-tbl  .row-red {
     background-color: #ED8585 !important;
 }
 
-#point-table-tbl tbody .row-green {
+#point-table-tbl  .row-green {
     background-color: #5BBA66 !important;
 }
 
-#point-table-tbl tbody .selected-row {
+#point-table-tbl  .selected-row {
     background-color: #90C3D4 !important;
 }
 
@@ -527,5 +529,9 @@ template {
     list-style: none;
 }
 .closeroute {
-    background-color:  #B0DEB0
+    background-color:  #B0DEB0;
+}
+.dropdown-statuses {
+    padding-left: 15px;
+    padding-right: 15px;
 }

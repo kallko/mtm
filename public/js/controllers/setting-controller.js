@@ -40,13 +40,11 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                         var currentTime = new Date(serverTime);
                         if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
                             scope.params.showDate = null;
-                            rootScope.currentDay = true;
                             scope.$emit('settingsChanged', scope.params);
                         }else{
                             scope.$emit('settingsChanged', scope.params);
-                            rootScope.currentDay = false;
                         }
-                    });
+                   });
             }
 
             Settings.saveToLocalStorage(scope.params);
