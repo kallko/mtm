@@ -306,6 +306,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }).error(function (err) {
                    // rootScope.errorNotification(url);
                 });
+            } else {
+                console.log("This is PAST Day");
             }
         }
 
@@ -335,22 +337,60 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
                     rootScope.reasons=data.reasons;
+                    scope.nowTime=data.server_time;
+                    console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
+                    console.log("Loaded DATA", data.date, data);
+
+                    //проверка на сегодняшний день
+                    var chooseDate = new Date(showDate);
+                    var currentTime = new Date(data.server_time*1000);
+                    var stringDate=currentTime.getFullYear()+'-';
+                    var stringMonth=currentTime.getMonth()+1;
+                    if(stringMonth<10) {
+                        stringDate+="0"+stringMonth+'-';
+                    } else {
+                        stringDate+=stringMonth+'-';
+                    }
+                    if(currentTime.getDate()<10){
+                        stringDate+='0'+currentTime.getDate();
+                    } else {
+                        stringDate+=+currentTime.getDate();
+                    }
+
+                    console.log("StringDate=", stringDate);
+
+                    console.log("before chose CurrentDay", showDate, data.server_time );
+                    //console.log(chooseDate, "==", currentTime, "or", showDate, "==", scope.nowTime );
+                    //if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
+                    if(showDate!=undefined || chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate() ){
+                        //scope.params.showDate = null;
+                        rootScope.currentDay = true;
+                        console.log("!!!!!!!!!HURA We load today DAY");
+                    } else {
+                        rootScope.currentDay = false;
+                        console.log("(((((( We LOAD PAST!!! Problem=" , scope.filters.problem_index);
+
+                    }
 
                     //console.log("I load this data", toPrint);
                     linkDataParts(data);
-                    loadExistData(scope.routesOfDate);
-                    if (loadParts) {
+                    if (rootScope.currentDay) {loadExistData(scope.routesOfDate);}
+
+                    if (loadParts && rootScope.currentDay) {
                         loadTrackParts();
                         console.log("load track parts");
                     }
                     //console.log(data,' success data');
-                    console.log("!!!!!!!!!!!!Data server time = ", _data.server_time );
-                    updateData();
+
+                    console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
+
                     if (!rootScope.currentDay){
                         enableDynamicUpdate=false;
+                        updateData();
                         updateDataforPast();
                     } else {
                         enableDynamicUpdate=true;
+                        updateData();
                     }
                 })
                 .error(function (err) {
@@ -772,7 +812,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function promised15MUpdate() {
             var now = _data.server_time;
 
-            scope.nowTime=now;
+            //scope.nowTime=now;
             for (var i = 0; i < _data.routes.length; i++) {
                 for (var j = 0; j < _data.routes[i].points.length; j++) {
                     _data.routes[i].points[j].promised_15m = (_data.routes[i].points[j].status == STATUS.SCHEDULED ||
@@ -811,10 +851,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обновление статусов
         function statusUpdate() {
             //console.log('statusUpdate');
-            if (!rootScope.currentDay){
-                updateDataforPast();
-                return;
-            }
+            //if (!rootScope.currentDay){
+            //    updateDataforPast();
+            //    return;
+            //}
 
             var route,
                 tmpPoint,
@@ -1357,6 +1397,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обновить индекс проблемности
         function updateProblemIndex(route) {
+           // console.log("UpdateProblem for", route);
             var point,
                 timeThreshold = 3600 * 6,
                 timeMin = 0.25,
@@ -3226,19 +3267,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         function  updateDataforPast(){
-            console.log("START UPDATING FOR PAST");
+            console.log("START UPDATING FOR PAST bun now is", scope.nowTime);
             var i=0;
             while (i<_data.routes.length){
                 var j=0;
                 while(j<_data.routes[i].points.length){
                     if (_data.routes[i].points[j].status>2){
                         _data.routes[i].points[j].status=4;
+                        _data.routes[i].points[j].overdue_time=scope.nowTime-_data.routes[i].points[j].arrival_time_ts;
                     }
 
                     j++;
                 }
 
-
+                updateProblemIndex(_data.routes[i]);
                 i++;
             }
 
