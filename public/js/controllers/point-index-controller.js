@@ -1866,7 +1866,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             return (scope.filters.route === -1 || row.route_id == scope.filters.route);
         }
-        
+
         scope.filtersOllstatuses = function(){
             if(scope.filters.status['-1']){
                 for(var status in  scope.filters.status){

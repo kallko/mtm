@@ -211,6 +211,18 @@ router.route('/dailydata')
                         data.currentDay = false;
                     }
 
+                    // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
+                    data.current_server_time = parseInt(new Date() / 1000);
+                    var current_server_time = new Date();
+                    var server_time = new Date(data.server_time * 1000);
+                    console.log(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() , current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate());
+                    if(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() == current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate()){
+                        data.currentDay = true;
+                        data.current_server_time = data.server_time;
+                    }else{
+                        data.currentDay = false;
+                    }
+
                     res.status(200).json(data);
 
                     // var _data = JSON.parse(JSON.stringify(data));
