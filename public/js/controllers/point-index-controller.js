@@ -137,7 +137,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                      if(_data.routes[i].filterId == filterId){
                          console.log("_data.routes[i]", _data.routes[i]);
                          scope.filters.driver = _data.routes[i].driver.NAME ? _data.routes[i].driver.NAME:"НЕИЗВЕСТНО";
-                         scope.filters.route = i;
+                         scope.filters.route = filterId;
                          break;
                      }
                  }
@@ -148,17 +148,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
              }
          });
 
-        scope.selectRouteFilter = scope.filters.routes[0].value;
+
+
         scope.selectFilterRute = function(){
-            scope.filters.route = scope.selectRouteFilter;
-            if(scope.selectRouteFilter == -1){
+            if(scope.filters.route == -1){
                 for(var j = 0; _data.routes.length > j; j++){
                     _data.routes[j].selected = false;
                 }
                 return;
             }
+            scope.drawRoute();
             for(var i = 0; _data.routes.length > i; i++ ){
-                if(_data.routes[i].filterId == scope.selectRouteFilter){
+                if(_data.routes[i].filterId == scope.filters.route){
                     if(!_data.routes[i].selected){
                         for(var j = 0; _data.routes.length > j; j++){
                             _data.routes[j].selected = false;
@@ -169,6 +170,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
         };
+
+
 
         // установить динамическое обновление данных
         //не понятно где используется!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -325,7 +328,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
-            $('#problem-index-btn').addClass('btn-success');
+            // if(rootScope.currentDay){
+            //     scope.showHideProblemButton = true;
+            //     scope.filters.problem_index = 1;
+            // }else{
+            //     scope.filters.problem_index = -1;
+            //     scope.showHideProblemButton = false;
+            // }
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
@@ -338,9 +347,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if(data.currentDay){
                         rootScope.currentDay = true;
                         scope.filters.problem_index = 1;
+                        $('#problem-index-btn').addClass('btn-success');
                     }else{
                         rootScope.currentDay = false;
                         scope.filters.problem_index = -1;
+                        $('#problem-index-btn').removeClass('btn-success');
                     }
                     console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
@@ -1389,7 +1400,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обновить индекс проблемности
         function updateProblemIndex(route) {
-           // console.log("UpdateProblem for", route);
             var point,
                 timeThreshold = 3600 * 6,
                 timeMin = 0.25,

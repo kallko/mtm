@@ -513,7 +513,7 @@ template {
     position: relative;
 }
 .driver-select-bg {
-    background-color: #A99F9F;
+    background-color: #A99F9F !important;
 }
 
 .stopWithOutPoints {

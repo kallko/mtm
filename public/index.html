@@ -123,10 +123,9 @@
                 </div>
 
 
-                <select id="route-select"  ng-model="selectRouteFilter" class="group-select"
+                <select id="route-select" ng-change="selectFilterRute()"  ng-model="filters.route" class="group-select"
                         ng-options='option.value as option.name for option in filters.routes'>
                 </select>
-                <button ng-show="true" class="btn btn-info btn-sm" ng-click="selectFilterRute(); drawRoute(); ">Показать</button>
 
 
                 <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
