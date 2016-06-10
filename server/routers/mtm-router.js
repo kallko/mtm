@@ -344,7 +344,7 @@ router.route('/trackparts/:start/:end')
                 var cached = cashedDataArr[req.session.login];
 
 
-               // if(cached) {
+                if(cached) {
                     for (var i = 0; i < cached.sensors.length; i++) {
                         for (var j = 0; j < data.length; j++) {
                             if (cached.sensors[i].GID == data[j].gid && data[j].data != cached.sensors[i].real_track) {
@@ -365,7 +365,7 @@ router.route('/trackparts/:start/:end')
                             }
                         }
                     }
-               // }
+                }
                 //console.log('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
                 //cached.server_time = parseInt(Date.now() / 1000);
                 //console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
