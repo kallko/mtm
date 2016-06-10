@@ -159,7 +159,7 @@ router.route('/dailydata')
                 copyCashedDataArr.routes = copyCashedDataArr.routes.concat(oldRoutesCache[req.session.login]);
             }
 
-            copyCashedDataArr.server_time = parseInt(Date.now() / 1000);
+            
             res.status(200).json(copyCashedDataArr);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
