@@ -1135,7 +1135,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log("parentFORM=", parentForm);
             if (parentForm == undefined && !scope.demoMode) {
                 checkConfirmedFromLocalStorage();
-                _data.companyName = 'IDS';
+                //_data.companyName = 'IDS';
                 scope.$emit('companyName', _data.companyName);
                 //scope.$emit('forCloseController', _data); // это реализовано около строки 308
                // console.log("RETURN?????????");
@@ -1143,7 +1143,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            //console.log("Step2");
+            console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
             var mobilePushes = [],
                 allPushes = [];
@@ -1210,7 +1210,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             // по каждому доступному решению запрашиваем нажатия
 
-            //console.log("!!!!!!Find pushes. Where are you?!!!!!!", _data);
+            console.log("!!!!!!Find pushes. Where are you?!!!!!!", _data);
 
             for (var m = 0; m < _data.idArr.length; m++) {
 
@@ -1220,7 +1220,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                 }
 
-                //console.log("mobilePushes recieved", mobilePushes );
+                console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes );
 
 
 
