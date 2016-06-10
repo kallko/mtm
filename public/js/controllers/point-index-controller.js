@@ -78,6 +78,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for(var i = 0; scope.filters.statuses.length > i; i++){
                 scope.filters.status[scope.filters.statuses[i].value] = true;
             }
+            console.log(scope.filters.statuses);
+            console.log(scope.filters.status);
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
             scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = 1;
@@ -142,7 +144,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  scope.drawRoute();
              }else{
                  scope.$emit('clearMap');
-                 scope.filters.driver = -1;
+                 scope.filters.route = -1;
              }
          });
 
@@ -1698,13 +1700,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обработчик клика на строке таблицы
         scope.rowClick = function (row) {
             //console.log("LAt/Lon", row.LAT, row.LON);
+            for(var i = 0; scope.displayCollection.length > i; i++){
+                scope.displayCollection[i].selected = false;
+            }
+            row.selected = true;
+            console.log(row);
             rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
             return;
 
             // TODO REMOVE
 
-
-            $('.selected-row').removeClass('selected-row');
 
             if (scope.selectedRow == id) {
                 scope.selectedRow = -1;
@@ -1715,7 +1720,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
 
                 scope.selectedRow = id;
-                $('#point-' + id).addClass('selected-row');
+
                 scope.$emit('highlightPointMarker', scope.displayCollection[id]);
             }
         };
@@ -1826,6 +1831,27 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             return (scope.filters.route === -1 || row.route_id == scope.filters.route);
         }
+        
+        scope.filtersOllstatuses = function(){
+            if(scope.filters.status['-1']){
+                for(var status in  scope.filters.status){
+                    scope.filters.status[status] = true;
+                }
+            }else{
+                for(var status in  scope.filters.status){
+                    scope.filters.status[status] = false;
+                }
+            }
+        };
+
+        scope.filterOnestatus = function(){
+            for(var status in  scope.filters.status){
+                if( !scope.filters.status[status]){
+                    scope.filters.status['-1'] = false;
+                    break;
+                }
+            }
+        };
 
         // фильтр по проблемности
         function problemFilter(row) {
@@ -2178,7 +2204,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // применить все фильтры
         scope.applyFilter = function (row) {
-            console.log(routeFilter(row));
+
             return routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
@@ -2382,7 +2408,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     pointsNotReady: [],
                     driver: routeI.DRIVER,
                     transport: routeI.TRANSPORT,
-                    number: routeI.NUMBER,
+                    number: routeI.ID,
                     startTimePlan: strToTstamp(routeI.START_TIME),
                     endTimePlan: strToTstamp(routeI.END_TIME),
                     totalPoints: routeI.points.length,

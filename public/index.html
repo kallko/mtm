@@ -116,7 +116,8 @@
                     </button>
                     <div class="dropdown-menu">
                         <ul class="dropdown-statuses">
-                            <li ng-repeat="option in filters.statuses"><input type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>
+                            <li><input type="checkbox" ng-change="filtersOllstatuses()" ng-model="filters.status['-1']" >{{ filters.statuses[0].name }}</li>
+                            <li ng-repeat="option in filters.statuses" ng-if="!$first" ><input ng-change="filterOnestatus()" type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>
                         </ul>
                     </div>
                 </div>
@@ -283,7 +284,7 @@
                     data-uniqueid="{{row.uniqueID}}"
                     on-finish-render="ngRepeatFinished"
                     class="delivery-point-row"
-                    ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe}">
+                    ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'waypintSelected': row.selected}">
 
                     <td>{{row.NUMBER}}</td>
                     <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>

@@ -529,3 +529,10 @@ template {
 .closeroute {
     background-color:  #B0DEB0
 }
+.waypintSelected {
+    background-color: #4cae4c;
+}
+.dropdown-statuses {
+    padding-left: 15px;
+    padding-right: 15px;
+}
