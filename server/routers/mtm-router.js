@@ -153,14 +153,16 @@ router.route('/dailydata')
             console.log('=== loaded from session === send data to client ===');
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
             cashedDataArr[req.session.login].user = req.session.login;
-
-            var copyCashedDataArr = JSON.parse(JSON.stringify(cashedDataArr[req.session.login]));
-            if(Array.isArray(oldRoutesCache[req.session.login]) ){
-                copyCashedDataArr.routes = copyCashedDataArr.routes.concat(oldRoutesCache[req.session.login]);
+            var cache = cashedDataArr[req.session.login];
+            if(cache.currentDay){
+                cache.server_time = parseInt(new Date() / 1000);
+                cache.current_server_time = cache.server_time;
+            }else{
+                cache.current_server_time = parseInt(Date.now() / 1000);
             }
 
-            
-            res.status(200).json(copyCashedDataArr);
+
+            res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
             cashedDataArr = {};
