@@ -68,8 +68,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 {name: 'Все филиалы', value: -1}
             ];
 
-            scope.filters.driver = -1; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
             scope.filters.route = -1;
 
             scope.filters.branch = scope.filters.branches[0].value;
@@ -126,7 +124,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
          rootScope.$on('closeDriverName', function (event, filterId, drawNewRoute) {
                 scope.selectRouteFilter = filterId;
-                 // scope.filters.driver = data;
+
                  // var driversArr = [];
                  // for(var i=0; i<scope.filters.routes.length; i++){
                  //    driversArr.push( scope.filters.routes[i].driver || null);
@@ -136,12 +134,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  for(var i = 0; _data.routes.length > i; i++){
                      if(_data.routes[i].filterId == filterId){
                          console.log("_data.routes[i]", _data.routes[i]);
-                         scope.filters.driver = _data.routes[i].driver.NAME ? _data.routes[i].driver.NAME:"НЕИЗВЕСТНО";
                          scope.filters.route = filterId;
                          break;
                      }
                  }
-                 scope.drawRoute();
+                 scope.drawRoute(filterId);
              }else{
                  scope.$emit('clearMap');
                  scope.filters.route = -1;
@@ -157,7 +154,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 return;
             }
-            scope.drawRoute();
+            scope.drawRoute(scope.filters.route);
             for(var i = 0; _data.routes.length > i; i++ ){
                 if(_data.routes[i].filterId == scope.filters.route){
                     if(!_data.routes[i].selected){
@@ -1848,12 +1845,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             return '';
         };
-        //фильтр по водителю
-        // function driversFilter(row) {
-        //     //console.log(row.driver.NAME);
-        //     return (scope.filters.driver === -1 || row.driver.NAME == scope.filters.driver);
-        //     //переключая в этой стороке true/false мы задаем будет ли загружаться вся таблица при старте приложения
-        // }
+
         // фильтр по статусу
         function statusFilter(row) {
             if(scope.filters.status['-1']){
@@ -1918,17 +1910,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // отрисовать маршрут
-        scope.drawRoute = function () {
+        scope.drawRoute = function (filterId) {
             rootScope.clickOff=true;
+            var route;
+            for(var i = 0; _data.routes.length > i; i++){
+                if(_data.routes[i].filterId == filterId){
+                    route = _data.routes[i];
+                    break;
+                }
+            }
+
             console.log("P-I-C recieve click", rootScope.clickOff);
             //scope.$apply();
 
 
             scope.$emit('clearMap');
 
-            var indx,
-                route,
-                draw = function (route) {
+            var draw = function (route) {
                     switch (scope.draw_mode) {
                         case scope.draw_modes[0].value: // комбинированный
                             scope.$emit('drawCombinedTrack', route);
@@ -1945,15 +1943,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 };
 
-            if (scope.filters.route != -1) {
-                indx = scope.filters.route;
-            } else if (scope.selectedRow != -1) {
-                indx = scope.displayCollection[scope.selectedRow].route_id;
-            } else {
-                return;
-            }
-
-            route = _data.routes[indx];
+            // if (scope.filters.route != -1) {
+            //     indx = scope.filters.route;
+            // } else if (scope.selectedRow != -1) {
+            //     indx = scope.displayCollection[scope.selectedRow].route_id;
+            // } else {
+            //     return;
+            // }
+            //
+            // route = _data.routes[indx];
 
             if (scope.draw_mode == scope.draw_modes[2].value) {
                 scope.$emit('drawPlannedTrack', route);

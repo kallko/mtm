@@ -232,7 +232,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         (function (ii) {
                             setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
-                            }, ii * 500);
+                            }, ii * 2000);
                         })(i);
                     }
 
