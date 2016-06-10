@@ -335,8 +335,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     if(data.currentDay){
                         rootScope.currentDay = true;
+                        scope.showHideProblemButton = true;
+                        scope.filters.problem_index = 1;
                     }else{
                         rootScope.currentDay = false;
+                        scope.showHideProblemButton = false;
+                        scope.filters.problem_index = -1;
                     }
                     console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
