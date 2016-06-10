@@ -157,6 +157,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 return;
             }
+            scope.drawRoute();
             for(var i = 0; _data.routes.length > i; i++ ){
                 if(_data.routes[i].filterId == scope.filters.route){
                     if(!_data.routes[i].selected){
