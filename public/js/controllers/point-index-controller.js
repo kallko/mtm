@@ -324,6 +324,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
             $('#problem-index-btn').addClass('btn-success');
+            // if(rootScope.currentDay){
+            //     scope.showHideProblemButton = true;
+            //     scope.filters.problem_index = 1;
+            // }else{
+            //     scope.filters.problem_index = -1;
+            //     scope.showHideProblemButton = false;
+            // }
             showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
@@ -333,6 +340,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
+                    if(data.currentDay){
+                        rootScope.currentDay = true;
+                    }else{
+                        rootScope.currentDay = false;
+                    }
                     console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
