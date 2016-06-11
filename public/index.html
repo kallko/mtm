@@ -145,7 +145,7 @@
 
 
                 <select id="route-select" ng-change="selectFilterRute()"  ng-model="filters.route" class="group-select"
-                        ng-options="option.value as option.name for option in filters.routes | orderBy : ordered ">
+                        ng-options="option.value as option[params.routeListOrderBy]   for option in filters.routes | orderBy : params.routeListOrderBy | orderBy : -'allRoutes'">
                 </select>
 
 
@@ -418,12 +418,11 @@
                 <input type="date"
                        ng-model="showDate"
                        id="show-date"/>
-
-                    <button class="btn btn-info btn-sm" ng-click="saveAllParams()">Отобразить</button>
-
             </div>
         </div>
-
+        <div class="button-row">
+            <button class="btn btn-info btn-sm" ng-click="loadOldDay()">Загрузить</button>
+        </div>
 
         <div class="block" ng-show="demoMd" id="demo-setting">
             <div class="title">Настройки демо-режима</div>
@@ -437,8 +436,8 @@
         <div class="block">
             <div class="title">Настройка сортировки выбора маршрута</div>
             <div class="setting-row">
-                <p><input type="radio" ng-model="routeListOrderBy" ng-change="changeRouteListOrder()" value="nameOrder" > По фамилии</p>
-                <p><input type="radio" ng-model="routeListOrderBy" ng-change="changeRouteListOrder()" value="carOrder" > По машине</p>
+                <p><input type="radio" ng-model="params.routeListOrderBy"  value="nameDriver" > По фамилии</p>
+                <p><input type="radio" ng-model="params.routeListOrderBy"  value="nameCar" > По машине</p>
             </div>
         </div>
 
@@ -511,6 +510,7 @@
         <div class="button-row">
             <button class="btn btn-info btn-sm" ng-click="saveAllParams()">Сохранить</button>
         </div>
+
 
     </div>
 </template>

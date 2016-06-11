@@ -173,7 +173,7 @@ router.route('/dailydata')
                if (data.routes != undefined){
                 console.log('=== dataReadyCallback === send data to client ===', data.routes.length);}
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-
+                console.log('send data to client');
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
                     res.status(200).json(data);
                 }else if( data.routes.length == 0){
@@ -216,7 +216,6 @@ router.route('/dailydata')
                     data.current_server_time = parseInt(new Date() / 1000);
                     var current_server_time = new Date();
                     var server_time = new Date(data.server_time * 1000);
-                    console.log(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() , current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate());
                     if(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() == current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate()){
                         data.currentDay = true;
                         data.current_server_time = data.server_time;
@@ -225,20 +224,7 @@ router.route('/dailydata')
                     }
 
                     res.status(200).json(data);
-
-                    // var _data = JSON.parse(JSON.stringify(data));
-                    // if(Array.isArray(oldRoutesCache[req.session.login]) ){
-                    //     _data.routes = _data.routes.concat(oldRoutesCache[req.session.login]);
-                    // }
-                    // res.status(200).json(_data);
                 }
-                // if (!req.query.showDate) {
-                //     data.lastUpdate = today12am;
-                //     cashedDataArr[req.session.login] = data;
-                //     //console.log();
-                // }
-
-
             }
         }
 
@@ -440,8 +426,6 @@ router.route('/saveroute/')
 
 router.route('/existdata/')
     .post(function(req, res){
-        console.log('existdata');
-        console.log(req.session);
         if(req.session.login in updateCacshe && req.body.date in updateCacshe[req.session.login]){
             res.status(200).json(updateCacshe[req.session.login][req.body.date]);
         } else {

@@ -78,8 +78,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
             console.log(scope.filters.statuses);
             console.log(scope.filters.status);
-
-            scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
+            scope.filters.routes = [{nameDriver: 'все маршруты', nameCar: 'все маршруты', value: -1, allRoutes:true}]; // фильтры по маршрутам
             //scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = 1;
             scope.filters.promised_15m = -1;
@@ -576,19 +575,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         scope.filters.routes.push({
                             //name: data.routes[i].transport.NAME,
-                            nameOrder: ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'),
-                            carOrder: data.routes[i].transport.NAME,
-                            name:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
+
+                            allRoutes: false,
+
+                            nameDriver:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
+                            nameCar:  data.routes[i].transport.NAME  + ' - ' +   ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') ,
+
                             value: data.routes[i].filterId,
-                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+
+
+                            car: data.routes[i].transport.NAME,
+                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                         });
                           //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
                     }
-                    rootScope.$on('changeRouteListOrder', function(event, ordered){
-                        scope.ordered = ordered;
-                    });
-                    scope.ordered = 'nameOrder';
+
 
                     try {
                         tPoint.route_indx = data.routes[i].filterId;
@@ -1558,6 +1560,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('demoTime was changed!');
                 changed = true;
             }
+            if(scope.params.routeListOrderBy !== params.routeListOrderBy){
+                changed = true;
+                console.log(scope.params.routeListOrderBy);
+            }
 
             if (params.predictMinutes !== scope.params.predictMinutes
                 || params.factMinutes !== scope.params.factMinutes
@@ -1571,21 +1577,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 changed = true;
             }
 
-            if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
-                console.log('OMG!!1 New show date!');
-                scope.params = JSON.parse(JSON.stringify(params));
-                loadDailyData(true, params.showDate);
-                console.log("OMG UPDATE DATA");
-
-                return;
-            }
-
             if (changed) {
                 scope.$emit('clearMap');
                 scope.params = JSON.parse(JSON.stringify(params));
                 linkDataParts(rawData);
             }
         }
+
+        rootScope.$on('loadOldDay', function(event, params){
+            if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
+                scope.$emit('clearMap');
+                console.log('OMG!!1 New show date!');
+                loadDailyData(true, params.showDate);
+                return;
+            }
+        });
 
         // добавить в подтвержденные
         function addToConfirmed(id, code) {
