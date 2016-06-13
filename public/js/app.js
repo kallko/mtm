@@ -22,15 +22,31 @@ var myLayout = new GoldenLayout({
                     {
                         type: 'component',
                         componentName: 'template',
+                        width: 50,
                         componentState: {templateId: 'transparent-map-window'} // id темплейта из index.html
-                    }
-                    ,
-                    // три панельки в одном стеке
+                    },
+                ]
+            },
+            {
+                type: 'column',
+                content: [
                     {
                         type: 'stack',
-                        height: 50,
-                        activeItemIndex: 2,
+                        height: 100,
+                        activeItemIndex: 0,
                         content: [
+                            {
+                                type: 'component',
+                                componentName: 'template',
+                                title: 'Точки маршрута',
+                                componentState: {templateId: 'template-point-table'}
+                            },
+                            {
+                                type: 'component',
+                                title: 'Закрытие дня',
+                                componentName: 'template',
+                                componentState: {templateId: 'close-day'}
+                            },
                             {
                                 type: 'component',
                                 title: 'Настройки',
@@ -43,23 +59,10 @@ var myLayout = new GoldenLayout({
                                 title: 'Редактирование маршрута',
                                 componentName: 'template',
                                 componentState: {templateId: 'edit-route'}
-                            },
-                            {
-                                type: 'component',
-                                title: 'Закрытие дня',
-                                componentName: 'template',
-                                componentState: {templateId: 'close-day'}
                             }
                         ]
                     }
                 ]
-            },
-            {
-                type: 'component',
-                width: 50,
-                componentName: 'template',
-                title: 'Точки маршрута',
-                componentState: {templateId: 'template-point-table'}
             }]
     }]
 });
