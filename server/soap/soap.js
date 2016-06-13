@@ -83,7 +83,7 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
-    console.log( " Prepare for DATA GLUE data, soap 84");
+   // console.log( " Prepare for DATA GLUE data, soap 84");
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -437,7 +437,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
-                console.log(data[nIndx].reasons, "data SOAP 429");
+                //console.log(data[nIndx].reasons, "data SOAP 429");
                 checkBeforeSend(data, callback);
             });
 

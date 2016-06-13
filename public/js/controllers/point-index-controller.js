@@ -343,18 +343,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     if(data.currentDay){
                         rootScope.currentDay = true;
-                        scope.filters.problem_index = 1;
-                        $('#problem-index-btn').addClass('btn-success');
+                        //scope.filters.problem_index = 1;
+                        //$('#problem-index-btn').addClass('btn-success');
                     }else{
                         rootScope.currentDay = false;
-                        scope.filters.problem_index = -1;
-                        $('#problem-index-btn').removeClass('btn-success');
+                        //scope.filters.problem_index = -1;
+                        //$('#problem-index-btn').removeClass('btn-success');
                     }
                     console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
                     rootScope.reasons=data.reasons;
-                    scope.nowTime=data.server_time;
+                    scope.nowTime=data.current_server_time;
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
                     console.log("Loaded DATA", data.date, data);
 
@@ -388,10 +388,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         enableDynamicUpdate=false;
                         updateData();
                         updateDataforPast();
+
                     } else {
                         enableDynamicUpdate=true;
                         updateData();
                     }
+
+                    if(data.currentDay){
+                        rootScope.currentDay = true;
+                        scope.filters.problem_index = 1;
+                        $('#problem-index-btn').addClass('btn-success');
+                    }else{
+                        rootScope.currentDay = false;
+                        scope.filters.problem_index = -1;
+                        $('#problem-index-btn').removeClass('btn-success');
+                    }
+
                 })
                 .error(function (err) {
                     console.log(err);
@@ -2013,6 +2025,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // вкл/выкл фильтр только проблемных точек
         scope.toggleProblemPoints = function () {
+            console.log("Нажимаем на кнопку!!!!")
+
             if (scope.filters.problem_index == -1) {
                 scope.filters.problem_index = 1;
                 // timeout(function () {
@@ -2026,6 +2040,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
+            console.log("scope.filters.problem_index", scope.filters.problem_index);
+
         };
 
 
