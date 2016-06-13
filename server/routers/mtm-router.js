@@ -170,7 +170,8 @@ router.route('/dailydata')
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
-               //console.log('=== dataReadyCallback === send data to client ===', data.routes.length);
+               if (data.routes != undefined){
+                console.log('=== dataReadyCallback === send data to client ===', data.routes.length);}
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
 
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
