@@ -23,6 +23,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // отрисовать комбинированный маршрут
         function drawCombinedRoute(route) {
+
+            console.log("I gona draw Combined track");
             markersArr=[];
 
             drawRealRoute(route);
@@ -93,10 +95,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // отрисовать фактический трек
         function drawRealRoute(route) {
 
-            //console.log("route", route)
+
 
             if (!route || !route.real_track) return;
-
+            console.log("I gona draw real route", route);
 
             var track = route.real_track,
                 pushes = route.pushes,
@@ -118,11 +120,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             for (var i = 0; i < track.length; i++) {
+               // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
                 if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
+
 
                 color = '#5cb85c';
                 // отрисовать движение
                 if (track[i].state == 'MOVE') {
+                    console.log("draw polyline");
                     polyline = new L.Polyline(track[i].coords, {
                         color: color,
                         weight: 3,

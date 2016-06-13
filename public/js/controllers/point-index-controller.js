@@ -1757,6 +1757,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
             row.selected = true;
             console.log(row);
+            // найти какому роуту принадлежит точка
+            var i=0;
+            var curRoute={};
+            while (i<_data.routes.length){
+                if (_data.routes[i].uniqueID==row.uniqueID){
+                    curRoute=_data.routes[i];
+                    break;
+                }
+
+                i++;
+            }
+            console.log("I have to draw this route:", curRoute);
+            scope.drawRoute(curRoute.filterId, false);// false - параметр  заставляющий сделать быструю отрисовку.
             rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
             return;
 
@@ -1922,7 +1935,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // отрисовать маршрут
-        scope.drawRoute = function (filterId) {
+        scope.drawRoute = function (filterId, full) {
             rootScope.clickOff=true;
             var route;
             for(var i = 0; _data.routes.length > i; i++){
@@ -1932,7 +1945,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            console.log("P-I-C recieve click", rootScope.clickOff);
+
+
+            console.log("P-I-C recieve click", rootScope.clickOff, "and gona draw", route);
             //scope.$apply();
 
 
@@ -1942,6 +1957,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     switch (scope.draw_mode) {
                         case scope.draw_modes[0].value: // комбинированный
                             scope.$emit('drawCombinedTrack', route);
+                            console.log("Send route to map");
                             break;
                         case scope.draw_modes[1].value: // фактический
                             scope.$emit('drawRealTrack', route);
@@ -1975,15 +1991,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
+            //if (full == undefined) full=true; //По умолчанию отрисовываем полный трек с обновлением
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные
-            if (route.real_track[0].lastTrackUpdate == undefined ||
+            if ( route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
 
 
                 console.log("route.real_track", route.real_track);
+
                 http.post('./gettracksbystates', {
                     states: route.real_track,
                     gid: route.transport.gid,
@@ -2018,14 +2036,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     });
                 //console.log("Troubles here");
             } else {
-                console.log('load tracks from cache');
+                console.log('load tracks from cache', scope.draw_modes);
+                scope.draw_mode=0;
+                //scope.draw_modes[0]=scope.draw_modes[0].value;
                 draw(route);
             }
         };
 
         // вкл/выкл фильтр только проблемных точек
         scope.toggleProblemPoints = function () {
-            console.log("Нажимаем на кнопку!!!!")
+            //console.log("Нажимаем на кнопку!!!!")
 
             if (scope.filters.problem_index == -1) {
                 scope.filters.problem_index = 1;
