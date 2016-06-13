@@ -1728,16 +1728,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик клика на строке таблицы
         scope.rowClick = function (row) {
-            scope.selectedCount = 0;
-            for(var i = 0; scope.displayCollection.length > i; i++){
-                if(row == scope.displayCollection[i]){
-                    break;
-                }else{
-                    scope.selectedCount++;
-                }
-            }
-            console.log(scope.selectedCount);
-
             //console.log("LAt/Lon", row.LAT, row.LON);
             for(var i = 0; scope.displayCollection.length > i; i++){
                 scope.displayCollection[i].selected = false;
@@ -1750,18 +1740,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // TODO REMOVE
 
 
-            if (scope.selectedRow == id) {
-                scope.selectedRow = -1;
-            } else {
-                scope.$emit('setMapCenter', {
-                    lat: scope.displayCollection[id].LAT,
-                    lon: scope.displayCollection[id].LON
-                });
-
-                scope.selectedRow = id;
-
-                scope.$emit('highlightPointMarker', scope.displayCollection[id]);
-            }
+            // if (scope.selectedRow == id) {
+            //     scope.selectedRow = -1;
+            // } else {
+            //     scope.$emit('setMapCenter', {
+            //         lat: scope.displayCollection[id].LAT,
+            //         lon: scope.displayCollection[id].LON
+            //     });
+            //
+            //     scope.selectedRow = id;
+            //
+            //     scope.$emit('highlightPointMarker', scope.displayCollection[id]);
+            // }
         };
 
         // обработчик даблклика на строке таблицы
@@ -2233,19 +2223,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.applyFilterCount = 0;
         // применить все фильтры
         scope.applyFilter = function (row) {
-
-            if(routeFilter(row)
+            routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
                 && textFilter(row)
-                && branchFilter(row) ){
-                row.show = true;
-                return true;
-            }else {
-                row.show = false;
-                return false
-            }
+                && branchFilter(row);
         };
 
         
@@ -2460,7 +2443,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     point = {
                         waypoint: pointJ.END_WAYPOINT,
                         taskNumber: pointJ.TASK_NUMBER,
-                        taskDay: new Date(taskDay[1]+"/"+taskDay[0]+"/"+taskDay[2]).getTime() /1000,
+                        taskDay: parseInt(new Date(taskDay[1]+"/"+taskDay[0]+"/"+taskDay[2]).getTime() /1000),
                         plannedNumber: pointJ.NUMBER,
                         weight: pointJ.WEIGHT,
                         volume: pointJ.VOLUME,
