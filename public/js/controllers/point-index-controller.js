@@ -114,7 +114,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 $promised.toggleClass('btn-default').toggleClass('btn-success');
             }
 
-            var $problem = $('#problem-index-btn');
             // отжатие кнопки
             // if ($problem.hasClass('btn-success')) {
             //     $problem.toggleClass('btn-default').toggleClass('btn-success');
@@ -332,15 +331,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
-                    if(data.currentDay){
-                        rootScope.currentDay = true;
-                        //scope.filters.problem_index = 1;
-                        //$('#problem-index-btn').addClass('btn-success');
-                    }else{
-                        rootScope.currentDay = false;
-                        //scope.filters.problem_index = -1;
-                        //$('#problem-index-btn').removeClass('btn-success');
-                    }
                     console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
@@ -388,11 +378,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if(data.currentDay){
                         rootScope.currentDay = true;
                         scope.filters.problem_index = 1;
-                        $('#problem-index-btn').addClass('btn-success');
                     }else{
                         rootScope.currentDay = false;
                         scope.filters.problem_index = -1;
-                        $('#problem-index-btn').removeClass('btn-success');
                     }
 
                 })
@@ -1649,7 +1637,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             rawPoint.checkedStatus = row.status;
-            scope.$emit('newTextStatus', scope.getTextStatus(row.status, row.row_id, row.confirmed));
+            scope.$emit('newTextStatus', scope.getTextStatus(row));
         }
 
         // сортировать по точке
@@ -1769,32 +1757,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // обработчик даблклика на строке таблицы
         scope.dblRowClick = function (row) {
 
-            row.textStatus = scope.getTextStatus(row.status, row.row_id, row.confirmed);
+            row.textStatus = scope.getTextStatus(row);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             row.itineraryID = _data.ID;
             scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
         };
 
         // получить текстовый статус для задачи с необходимыми css классами
-        scope.getTextStatus = function (statusCode, row_id, confirmed, driverName) {
-            //console.log('pusk');
-                    //console.log(row.driver.NAME, ' row');
-                 // rootScope.$on('setCheckBox', function (event){
-             //checkStatusForCheckBox(row_id, driverName, statusCode);
-        //});
+        scope.getTextStatus = function (row) {
+            row.class2 = row.status == 5 ? 'delay-status2' : '';
+            var statusCode = row.status;
+            var confirmed = row.confirmed;
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
-                    var object = $('#status-td-' + row_id);
-                    if (object) {
-                        object.removeClass();
+                    row.class = '';
                        var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
                             statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
                         if (unconfirmed) {
-                            object.addClass('yellow-status');
+                            row.class = "yellow-status ";
                         }
-                        object.addClass(scope.filters.statuses[i].class);
-                    }
-
+                        row.class += scope.filters.statuses[i].class;
                     if (scope.filters.statuses[i].table_name != undefined) {
                         return scope.filters.statuses[i].table_name + (unconfirmed ? '?' : '');
                     }
@@ -1864,7 +1846,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по маршруту
         function routeFilter(row) {
-
             return (scope.filters.route === -1 || row.route_id == scope.filters.route);
         }
 
@@ -2029,8 +2010,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // }, 100);
             }
 
-            $('#problem-index-btn').toggleClass('btn-default').toggleClass('btn-success');
-            console.log("scope.filters.problem_index", scope.filters.problem_index);
 
         };
 

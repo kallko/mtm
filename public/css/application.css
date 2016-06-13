@@ -263,6 +263,9 @@ template {
 .time-out-status, .delay-status {
     color: red;
 }
+.delay-status2 {
+    color:#EA733B !important;
+}
 
 .scheduled-status {
     color: #4482AB;
@@ -534,4 +537,16 @@ template {
 .dropdown-statuses {
     padding-left: 15px;
     padding-right: 15px;
+}
+.bulled-th {
+    width:25px !important;
+}
+.bulled {
+    text-decoration: none;
+}
+.bulled span{
+    font-size: 20px;
+    line-height: 17px;
+    text-align: center;
+    display: block;
 }
