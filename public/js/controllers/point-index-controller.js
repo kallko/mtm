@@ -2243,7 +2243,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.applyFilterCount = 0;
         // применить все фильтры
         scope.applyFilter = function (row) {
-            routeFilter(row)
+            return routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
