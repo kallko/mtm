@@ -1466,7 +1466,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             // контролировать размер таблицы после изменения фильтров для изменения размеров грипов для ресайза колонок
             scope.$watch(function () {
-                return scope.filters.route + scope.filters.status + scope.filters.promised_15m + +scope.filters.problem_index + scope.filters.branch;
+                return scope.filters.route + scope.filters.promised_15m + scope.filters.problem_index + scope.filters.branch;
             }, function () {
                 updateResizeGripHeight();
             });
@@ -1728,6 +1728,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик клика на строке таблицы
         scope.rowClick = function (row) {
+            scope.selectedCount = 0;
+            for(var i = 0; scope.displayCollection.length > i; i++){
+                if(row == scope.displayCollection[i]){
+                    break;
+                }else{
+                    scope.selectedCount++;
+                }
+            }
+            console.log(scope.selectedCount);
+
             //console.log("LAt/Lon", row.LAT, row.LON);
             for(var i = 0; scope.displayCollection.length > i; i++){
                 scope.displayCollection[i].selected = false;
@@ -1862,6 +1872,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.filterOnestatus = function(){
+            updateResizeGripHeight();
             for(var status in  scope.filters.status){
                 if( !scope.filters.status[status]){
                     scope.filters.status['-1'] = false;
@@ -1872,7 +1883,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по проблемности
         function problemFilter(row) {
-            console.log(scope.filters.problem_index);
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
         }
 
@@ -2161,8 +2171,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-
-
         function updateWaypoint(waypoint, confirm) {
 
             console.log('sending waypoint to save', waypoint, confirm);
@@ -2177,9 +2185,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             });
         }
 
-
-
-
         //function saveUpdate(points) {
         //
         //    console.log('sending update to save', points);
@@ -2191,9 +2196,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //            console.log('ERROR to Save to 1C result >>', data);
         //        });
         //}
-
-
-
 
         // назначить текстовый фильтр
         scope.setTextFilter = function () {
@@ -2228,16 +2230,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function branchFilter(row) {
             return (scope.filters.branch == -1 || row.branchIndx == scope.filters.branch);
         }
-
+        scope.applyFilterCount = 0;
         // применить все фильтры
         scope.applyFilter = function (row) {
 
-            return routeFilter(row)
+            if(routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
                 && textFilter(row)
-                && branchFilter(row);
+                && branchFilter(row) ){
+                row.show = true;
+                return true;
+            }else {
+                row.show = false;
+                return false
+            }
         };
 
         
