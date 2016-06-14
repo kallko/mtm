@@ -17,7 +17,8 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
             {
                 name: 'все статусы',
                 value: -1,
-                class: 'all-status'
+                class: 'all-status',
+                limit:80 //Точки набравшие больше предела считаются выполненными, меньше - невыполненными
             },
             {
                 name: 'доставлено',
@@ -60,7 +61,7 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
             //{name: 'под контролем', value: 4, class: 'controlled-status'},
             //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
             {
-                name: 'запланирован',
+                name: 'будет сделано',
                 value: STATUS.SCHEDULED,
                 class: 'scheduled-status',
                 color: '#4482AB'

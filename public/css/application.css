@@ -248,12 +248,12 @@ template {
 
 .delivered-late-status {
     color: red;
-    text-decoration: underline;
+    /*text-decoration: underline;*/
 }
 
 .delivered-too-early-status {
     color: red;
-    text-decoration: overline;
+    /*text-decoration: overline;*/
 }
 
 .performed-status {

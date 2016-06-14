@@ -211,6 +211,7 @@
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания">План</th>
                     <th class="bulled-th"></th>
+                    <th class="degree" title="Достоверность">%</th>
                     <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
@@ -259,6 +260,7 @@
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания">План</th>
                     <th class="bulled-th"></th>
+                    <th class="degree" title="Достоверность">%</th>
                     <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
@@ -314,6 +316,7 @@
 
                     <td>{{row.NUMBER}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
+                    <td class="degree" >{{row.limit}}</td>
                     <td title="{{row.transport.NAME}}">{{row.transport.NAME}}</td>
                     <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
                     <td>{{row.driver.NAME}}</td>
@@ -415,11 +418,12 @@
                 <input type="date"
                        ng-model="showDate"
                        id="show-date"/>
+
+                    <button class="btn btn-info btn-sm" ng-click="saveAllParams()">Отобразить</button>
+
             </div>
         </div>
-        <div class="button-row">
-            <button class="btn btn-info btn-sm" ng-click="saveAllParams()">Сохранить</button>
-        </div>
+
 
         <div class="block" ng-show="demoMd" id="demo-setting">
             <div class="title">Настройки демо-режима</div>
@@ -431,7 +435,7 @@
         </div>
 
         <div class="block">
-            <div class="title">Настрока типа рабочего окна</div>
+            <div class="title">Настройка сортировки выбора маршрута</div>
             <div class="setting-row">
                 <p><input type="radio" ng-model="routeListOrderBy" ng-change="changeRouteListOrder()" value="nameOrder" > По фамилии</p>
                 <p><input type="radio" ng-model="routeListOrderBy" ng-change="changeRouteListOrder()" value="carOrder" > По машине</p>
@@ -439,7 +443,7 @@
         </div>
 
         <div class="block">
-            <div class="title">Сортировать список роутов по</div>
+            <div class="title">Настройка типа рабочего окна</div>
             <div class="setting-row">
                 <span class="param-title">Тип рабочего окна</span>
                 <select ng-model="params.workingWindowType" class="group-select"
@@ -504,7 +508,9 @@
                 {{params.value / 10}}
             </div>
         </div>
-
+        <div class="button-row">
+            <button class="btn btn-info btn-sm" ng-click="saveAllParams()">Сохранить</button>
+        </div>
 
     </div>
 </template>

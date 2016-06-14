@@ -921,6 +921,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.confirmed;
                     //delete tmpPoint.servicePoints;
                     delete tmpPoint.overdue_time;
+                    delete tmpPoint.limit;
 
 
 
@@ -1057,6 +1058,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
+
+                                    if(suit) {
+                                        tmpPoint.limit=60;
+                                    } else { if(tmpArrival.t1 > tmpPoint.controlled_window.start && tmpArrival.t1<tmpPoint.controlled_window.finish) {
+                                        tmpPoint.limit=60;
+                                    } else{
+                                        tmpPoint.limit=45;
+                                        }
+                                    }
+
+
+
+                                    //{ if (tmpArrival.t1 > tmpPoint.controlled_window.start) && (tmpArrival.t1<tmpPoint.controlled_window.finish){
+                                    //    tmpPoint.limit=60;
+                                    //} else {tmpPoint.limit=60; } }
+
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
                                     //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
@@ -1278,12 +1295,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (mobilePushes[i].distance <= scope.params.mobileRadius*2) {
                                     tmpPoint.havePush = true;
 
+
+
                                     //TODO
                                     //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
-                                    //tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+                                    tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
 
                                     // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
                                     tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+
                                     _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                                     _data.routes[j].pushes = _data.routes[j].pushes || [];
                                     if (mobilePushes[i].gps_time_ts < _data.server_time) {
@@ -1302,7 +1322,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 allPushes = allPushes.concat(mobilePushes);
             }
 
-           // checkConfirmedFromLocalStorage();
+
 
 
 
@@ -1379,6 +1399,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             } else {
 
+            }
+
+
+            //корректировка достоверности статусов по процентам.
+            if (tmpPoint.rawConfirmed || tmpPoint.confirmed) {
+                tmpPoint.limit=100;
+                return;
+            }
+            if (tmpPoint.haveStop) {
+                tmpPoint.limit=45;
+
+                if(tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start){
+                    tmpPoint.limit=60;
+                }
+
+            }
+
+            if (tmpPoint.havePush) {
+                tmpPoint.limit+=15;
+                if(tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2+300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1 ) {
+                    tmpPoint.limit+=15;
+                }
             }
 
 
@@ -1801,9 +1843,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                         row.class += scope.filters.statuses[i].class;
                     if (scope.filters.statuses[i].table_name != undefined) {
-                        return scope.filters.statuses[i].table_name + (unconfirmed ? '?' : '');
+                        return scope.filters.statuses[i].table_name;// + (unconfirmed ? '?' : ''); убираем вопросительный знак
                     }
-                    return scope.filters.statuses[i].name + (unconfirmed ? '?' : '');
+                    return scope.filters.statuses[i].name;// + (unconfirmed ? '?' : ''); убираем вопросительный знак
                 }
             }
 
