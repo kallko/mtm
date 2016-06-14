@@ -109,6 +109,10 @@
 <!--div id = "test-popup" ng-controller = "CloseDayController" ng-show = "view">Test-popup</div-->
 <!-- таблица точек доставки -->
 <template type="text/html" id="template-point-table">
+    <!-- полупрозрачное окно для затемнения таблицы -->
+    <div class="point-table-wrapper" >
+        <div class="title"  ng-show="clickOff" id="transparent-point-table-window" ></div>
+
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
         <!-- меню -->
         <!-- Пока не выводим для пользователя, так как не реализован функционал -->

@@ -142,7 +142,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
     scope.closeTableRowClick = function(item){
-
+        rootScope.carCentre=true;// после отрисовки маршрута отцентрировать по машинеж
         console.log(item);
 
 

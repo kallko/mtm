@@ -1728,6 +1728,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик клика на строке таблицы
         scope.rowClick = function (row) {
+            rootScope.carCentre=false;
+            rootScope.clickOff=true;
             //console.log("LAt/Lon", row.LAT, row.LON);
             for(var i = 0; scope.displayCollection.length > i; i++){
                 scope.displayCollection[i].selected = false;
@@ -1973,7 +1975,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 console.log("route.real_track", route.real_track);
 
-                http.post('./gettracksbystates', {
+
+
+
+                    http.post('./gettracksbystates', {
                     states: route.real_track,
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
@@ -2005,6 +2010,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log(err);
                         rootScope.errorNotification('/gettracksbystates');
                     });
+
                 //console.log("Troubles here");
             } else {
                 console.log('load tracks from cache', scope.draw_modes);
@@ -3304,6 +3310,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         }
+
 
 
     }]);

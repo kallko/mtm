@@ -63,6 +63,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //}
 
             drawAllPoints(route.points);
+            rootScope.clickOff=false;
         }
 
         // из массива строк получить массив LatLng объектов
@@ -295,8 +296,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     //console.log(map.getZoom(), "Zoom", track[i].coords[indx].lat, track[i].coords[indx].lon);
 
                     //Установить центр карты в текущее положение машины, если оно определено.
-                    if(track[i].coords[indx].lat && track[i].coords[indx].lon) {
+                    if(track[i].coords[indx].lat && track[i].coords[indx].lon && rootScope.carCentre) {
                         setMapCenter(track[i].coords[indx].lat, track[i].coords[indx].lon, 13);
+                        rootScope.carCentre=false;
 
                     } else {
                         console.log("Something wrong with car real coord");

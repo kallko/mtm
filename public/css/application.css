@@ -12,7 +12,7 @@ template {
 
 }
 
-#transparent-closeday-window{
+#transparent-closeday-window, #transparent-point-table-window{
     opacity: 0.5;
     height: 100%;
     width: 100%;
@@ -513,6 +513,10 @@ template {
 }
 
 .close-day-wrapper {
+    position: relative;
+}
+
+.point-table-wrapper{
     position: relative;
 }
 .driver-select-bg {
