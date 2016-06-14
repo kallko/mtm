@@ -254,7 +254,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 // в итоге получено будет только одно решение, т.к. двух решений разных типов по одному id не бывает
 SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
     var me = this;
-
+    console.log('getItinerary 2');
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko')) {
         setTimeout(function () {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {

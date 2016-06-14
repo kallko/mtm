@@ -78,8 +78,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
             console.log(scope.filters.statuses);
             console.log(scope.filters.status);
+
             scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
-            scope.filters.route = scope.filters.routes[0].value;
+            //scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = 1;
             scope.filters.promised_15m = -1;
             scope.draw_modes = [                                        // режимы отрисовки треков
@@ -145,6 +146,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         scope.selectFilterRute = function(){
+            console.log(scope.filters.route);
             if(scope.filters.route == -1){
                 for(var j = 0; _data.routes.length > j; j++){
                     _data.routes[j].selected = false;
@@ -574,13 +576,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         scope.filters.routes.push({
                             //name: data.routes[i].transport.NAME,
-                            name: data.routes[i].transport.NAME + ' - ' + ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'),
+                            nameOrder: ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'),
+                            carOrder: data.routes[i].transport.NAME,
+                            name:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
                             value: data.routes[i].filterId,
                             driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                         });
                           //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
                     }
+                    rootScope.$on('changeRouteListOrder', function(event, ordered){
+                        scope.ordered = ordered;
+                    });
+                    scope.ordered = 'nameOrder';
 
                     try {
                         tPoint.route_indx = data.routes[i].filterId;
@@ -1740,18 +1748,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // TODO REMOVE
 
 
-            // if (scope.selectedRow == id) {
-            //     scope.selectedRow = -1;
-            // } else {
-            //     scope.$emit('setMapCenter', {
-            //         lat: scope.displayCollection[id].LAT,
-            //         lon: scope.displayCollection[id].LON
-            //     });
-            //
-            //     scope.selectedRow = id;
-            //
-            //     scope.$emit('highlightPointMarker', scope.displayCollection[id]);
-            // }
+            if (scope.selectedRow == id) {
+                scope.selectedRow = -1;
+            } else {
+                scope.$emit('setMapCenter', {
+                    lat: scope.displayCollection[id].LAT,
+                    lon: scope.displayCollection[id].LON
+                });
+
+                scope.selectedRow = id;
+
+                scope.$emit('highlightPointMarker', scope.displayCollection[id]);
+            }
         };
 
         // обработчик даблклика на строке таблицы
@@ -2223,7 +2231,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.applyFilterCount = 0;
         // применить все фильтры
         scope.applyFilter = function (row) {
-            routeFilter(row)
+            return routeFilter(row)
                 && statusFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
@@ -2231,7 +2239,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 && branchFilter(row);
         };
 
-        
 
 
         var orderBy = filter('orderBy');
@@ -2319,88 +2326,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
         }
-
-        // создание структуры данных для закрытия дня
-        rootScope.$on('showCheckBoxToClose', function (event) {
-            //console.log($('#main-checkbox')['context']['documentElement']['attributes'], ' attr');
-            //console.log(document.querySelector('#main-checkbox').getAttribute('checked'), ' qs');
-            //if(!(document.querySelector('#main-checkbox').getAttribute('checked'))){
-              //  document.querySelector('#main-checkbox').setAttribute('checked', 'checked');
-
-                s_showCheckBoxToClose();
-            //}else{
-              //  document.querySelector('#main-checkbox').removeAttribute('checked');
-           // }
-        });
-        function s_showCheckBoxToClose(){
-
-
-            function forSome(status, confirmed, havStop){
-                if( confirmed || ( (status == 0 || status == 1 || status == 2) && havStop  ) || status == 8){
-                    return true;
-                }
-                return false;
-                //return item == 0 || item == 1 || item == 2 || item == 8; // на тесте еще был статус 8
-            }
-
-            //var complited = [];  //массив, куда попадут водители с завершенными точками
-            var uncomplited = [];
-            var driversFromCloseTab = []; //список водителей из таблицы во вкладке закрытие дня
-            var checkBoxes = [];
-            var readyDriversToClose = [];
-            //console.log(_data.routes[0].points, ' dr');
-            //console.log(_data);
-            outer: for(var m = 0; m<_data.routes.length; m++){
-                for(var i = 0; _data.routes[m].points.length > i; i++){
-                     if(!forSome(_data.routes[m].points[i].status, _data.routes[m].points[i].confirmed, _data.routes[m].points[i].haveStop)){
-                            continue outer;
-                     }
-                }
-                //readyDriversToClose.push(_data.routes[m]);
-                //  console.log(_data.routes[m]);
-                //console.log(_data.routes);
-                rootScope.$emit('returnCheckBoxes', _data.routes[m]);
-                // for(var j = 0; _data.routes[m].points.length > j; j++){
-                //     console.log(_data.routes[m].points[j].status);
-                // }
-
-
-
-
-
-
-
-                // driversFromCloseTab.push($('#close-table-driver-'+m).html());
-                // checkBoxes.push('#close-table-checkbox-'+m);
-                // var ob = {driver:_data.routes[m].driver.NAME, statuses: []};
-                // for(var s=0; s<_data.routes[m].points.length; s++){
-                //     ob.statuses.push(_data.routes[m].points[s].status);
-                //    // console.log(_data.routes[m].points[s].status, ' status');
-                // }
-                //
-                // if(ob.statuses.every(forSome)==false){  //true - есть проблемные, false - проблемных нет
-                //    uncomplited.push(ob.driver);
-                // }
-            }
-         //   console.log(readyDriversToClose);
-            //console.log(complited, ' complited', uncomplited, ' uncomplited');
-            // for(var s=0; s<driversFromCloseTab.length; s++){
-            //     if(uncomplited.some(function(el){ return el == driversFromCloseTab[s]})==false){
-            //         //console.log(driversFromCloseTab[s]+ ' checked+,  el');
-            //         //console.log(checkBoxes, ' ch')
-            //         ///document.querySelector(checkBoxes[s]).removeAttribute('checked', 'checked');
-            //         ///document.querySelector(checkBoxes[s]).setAttribute('checked', 'checked');
-            //         //checkBoxes[s].attr('checked');
-            //         //rootScope.$emit('returnCheckBoxes', checkBoxes[s]);
-            //         rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s], ischecked:true});
-            //     }else {
-            //         rootScope.$emit('returnCheckBoxes', {checkbox: checkBoxes[s], driver: driversFromCloseTab[s], ischecked:false});
-            //     }
-            // }
-
-
-        }
-
         function collectDataForDayClosing(data, currentDay){
 
             var result = {

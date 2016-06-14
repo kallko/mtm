@@ -22,6 +22,10 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                 scope.startDemoTime = params.demoStartTime;
             });
         }
+        scope.routeListOrderBy = 'nameOrder';
+        scope.changeRouteListOrder = function(){
+            rootScope.$emit('changeRouteListOrder', scope.routeListOrderBy);
+        };
 
         // обработчик кнопки сохранить, вызывается в index.html (ng-click)
         scope.saveAllParams = function () {
