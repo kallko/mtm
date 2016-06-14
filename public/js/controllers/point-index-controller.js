@@ -1059,14 +1059,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
 
-                                    if(suit) {
-                                        tmpPoint.limit=60;
-                                    } else { if(tmpArrival.t1 > tmpPoint.controlled_window.start && tmpArrival.t1<tmpPoint.controlled_window.finish) {
-                                        tmpPoint.limit=60;
-                                    } else{
-                                        tmpPoint.limit=45;
-                                        }
-                                    }
 
 
 
