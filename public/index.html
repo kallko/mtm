@@ -145,7 +145,7 @@
 
 
                 <select id="route-select" ng-change="selectFilterRute()"  ng-model="filters.route" class="group-select"
-                        ng-options='option.value as option.name for option in filters.routes'>
+                        ng-options="option.value as option.name for option in filters.routes | orderBy : ordered ">
                 </select>
 
 
@@ -433,6 +433,14 @@
         <div class="block">
             <div class="title">Настрока типа рабочего окна</div>
             <div class="setting-row">
+                <p><input type="radio" ng-model="routeListOrderBy" ng-change="changeRouteListOrder()" value="nameOrder" > По фамилии</p>
+                <p><input type="radio" ng-model="routeListOrderBy" ng-change="changeRouteListOrder()" value="carOrder" > По машине</p>
+            </div>
+        </div>
+
+        <div class="block">
+            <div class="title">Сортировать список роутов по</div>
+            <div class="setting-row">
                 <span class="param-title">Тип рабочего окна</span>
                 <select ng-model="params.workingWindowType" class="group-select"
                         ng-options='option.value as option.name for option in workingWindowTypes'>
@@ -621,8 +629,7 @@
 
                     </tr>
                     <tr  ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item)">
-                        <td><input ng-click = "toggleCheckBoxToClose()"
-                                   id = "close-table-checkbox-{{item.filterId}}"
+                        <td><input id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
                                    ng-model="item.getCheck"
                                    ng-disabled="false">
@@ -654,8 +661,7 @@
                     </tr>
 
                     <tr   ng-class="[item.closeRoute ? 'closeroute' : '', item.selected ? 'driver-select-bg' : '']   "  class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item)">
-                        <td><input ng-click = "toggleCheckBoxToClose()"
-                                   id = "close-table-checkbox-{{::item.filterId}}"
+                        <td><input id = "close-table-checkbox-{{::item.filterId}}"
                                    type="checkbox"
                                    ng-model="item.getCheck"
                                    ng-disabled="true">

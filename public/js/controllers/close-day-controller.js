@@ -12,44 +12,23 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         delete s_dataToCloseArr_reserve; // удаляем резервный массив, может удалим еще что-то 
     };
     scope.showCheckBoxToClose = function(){    //отобразить чекбоксы тех водителей, у ктоторых нет проблем и готовых к удалению
-        //console.log(scope.setCheckAll, ' stchk');
-        //scope.setCheckAll = true;
-        //if(!scope.setCheckAll){
-         //   scope.setCheckAll = true;  // проставляем галочку на общем чекбоксе
-            rootScope.$emit('showCheckBoxToClose');  //  ------> point-index-controller
-        //}else{
-        //    scope.setCheckAll = false;   // снимаем галочку с главного чекбокса
-        //};
-    };
-    rootScope.$on('returnCheckBoxes', function (event, data){  // <-----point-index-controller
-        console.log(data);
-        for(var i = 0; i < scope.data.routes.length; i++){
-           if(scope.data.routes[i].filterId == data.filterId){
-               scope.data.routes[i].getCheck = true;
-               break;
+        var forSome = function (status, confirmed, havStop){
+            if( confirmed || ( (status == 0 || status == 1 || status == 2) && havStop  ) || status == 8){
+                return true;
             }
+            return false;
+        };
+
+        outer: for(var m = 0; m < scope.data.routes.length; m++) {
+            for (var i = 0; scope.data.routes[m].points.length > i; i++) {
+                if (scope.data.routes[m].getCheck || !forSome(scope.data.routes[m].points[i].status, scope.data.routes[m].points[i].confirmed, scope.data.routes[m].points[i].haveStop)) {
+                    continue outer;
+                }
+            }
+            scope.data.routes[m].getCheck = true;
         }
-        scope.disabledBtnCloseDay = false;
+    };
 
-
-        // var splited = data.checkbox.split('-')[3];
-        // if(data.ischecked == true) {
-        //     // console.log(splited, data.driver, ' uuuuuuuuuuuuuuuuuuuu');
-        //     scope['setCheck_' + splited] = true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //     scope['setDisabled_' + splited] = false;
-        //     if (!s_dataToCloseArr_general[splited]) s_dataToCloseArr_general[splited] = data.driver;
-        //     if (!s_dataToCloseArr_reserve[splited]) s_dataToCloseArr_reserve[splited] = data.driver;
-        //     //console.log(s_dataToCloseArr_general, 's_arr');
-        //     scope.disabledBtnCloseDay = false; //разрешаем кнопку "Закрыть день"
-        //     //scope.setCheck_7 = true;
-        // }
-        // for(var i = 0; i < scope.data.routes.length; i++){
-        //    if(scope.data.routes[i].filterId == splited){
-        //         scope.data.routes[i].ischecked = data.ischecked;
-        //         break;
-        //     }
-        // }
-    });
 
 
     rootScope.$on('checkInCloseDay', function(){ // проверка а не появились ли новые маршруты к закрытию (авто)
@@ -69,60 +48,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
       scope.data.routes = orderBy(scope.data.routes, predicate);
     };
     
-/*
-    scope.orderGPS = function(predicate){
-        console.log(predicate);
-    };
-*/
 
-    scope.toggleCheckBoxToClose = function(){
-        console.info(scope.data.routes);
-        // var splited = event.target.attributes['1'].value.split('-')[3];
-        // //console.log( scope['setCheck_'+splited], ' scope+splt');
-        // if(scope['setCheck_'+splited] == true){
-        //     if(s_dataToCloseArr_general[splited]) delete s_dataToCloseArr_general[splited]; //это удаленное значение в случае надобности можно восстановить из s_dataToCloseArr_reserve
-        //     scope['setCheck_'+splited]=false;
-        //     for(var i = 0; i < scope.data.routes.length; i++){
-        //         if(scope.data.routes[i].filterId == splited){
-        //             scope.data.routes[i].ischecked = false;
-        //             break;
-        //         }
-        //     }
-        // }else{
-        //     s_dataToCloseArr_general[splited] = s_dataToCloseArr_reserve[splited];
-        //     scope['setCheck_'+splited]=true;
-        //     for(var i = 0; i < scope.data.routes.length; i++){
-        //         if(scope.data.routes[i].filterId == splited){
-        //             scope.data.routes[i].ischecked = true;
-        //             break;
-        //         }
-        //     }
-        // }
-        //
-       // console.log(splited);
-      //  console.log(scope.data.routes);
-       // console.log(s_dataToCloseArr_general, 'sss');
-        //event.target.attributes['4'].value= (event.target.attributes['4'].value!= 'false') ? 'false' : 'true';
-
-        //for(var prop in event.target.attributes['4'])
-        //if(event.target.attributes['4'].value == 'false'){
-        //    event.target.attributes['4'].value = 'true';
-        //}else{
-        //    event.target.attributes['4'].value = 'false';
-        //}
-        //console.log(event.target.attributes['4'].value, ' ev');
-        //scope.setCheck_2 = true;
-        //console.log(scope.setCheck_2, ' ch');
-        //$('#close-table-checkbox-7').removeAttr('checked');
-        //scope.$load();
-    };
-
-
-
-
-
-
-  
         rootScope.$on('forCloseController', function (event, data) {
             
             scope.data = data;
@@ -134,13 +60,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
                 data.routes[i].getCheck = false;  //на старте по умолчаню выключаем все чекбоксы
             }
         });
-
-
-
-           
-
-
-
+    
     scope.closeTableRowClick = function(item){
         rootScope.carCentre=true;// после отрисовки маршрута отцентрировать по машинеж
         console.log(item);
