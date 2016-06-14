@@ -1418,7 +1418,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if (tmpPoint.havePush) {
                 tmpPoint.limit+=15;
-                if(tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2+300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1 ) {
+                if( tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2+300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1 ) {
                     tmpPoint.limit+=15;
                 }
             }
