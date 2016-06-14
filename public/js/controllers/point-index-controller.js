@@ -1395,6 +1395,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //корректировка достоверности статусов по процентам.
+            tmpPoint.limit=0;
             if (tmpPoint.rawConfirmed || tmpPoint.confirmed) {
                 tmpPoint.limit=100;
                 return;
