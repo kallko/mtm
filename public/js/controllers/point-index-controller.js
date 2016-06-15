@@ -258,7 +258,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 var _now = Date.now() / 1000,
-                    url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
+                    url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + ( (_data.currentDay) ? parseInt(_now) : parseInt(_data.server_time) );
 
                 //console.log(url);
                 http.get(url)

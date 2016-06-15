@@ -199,6 +199,7 @@ router.route('/dailydata')
                     data.user = req.session.login;
                     data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                     }
+                    cashedDataArr[req.session.login] = data;
                     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
                     data.current_server_time = parseInt(new Date() / 1000);
                     var current_server_time = new Date();
@@ -206,7 +207,7 @@ router.route('/dailydata')
                     if(server_time.getFullYear()+'.'+server_time.getMonth()+'.'+server_time.getDate() == current_server_time.getFullYear()+'.'+current_server_time.getMonth()+'.'+current_server_time.getDate()){
                         data.currentDay = true;
                         data.current_server_time = data.server_time;
-                        cashedDataArr[req.session.login] = data;
+                        //cashedDataArr[req.session.login] = data;
                     }else{
                         data.currentDay = false;
                     }
