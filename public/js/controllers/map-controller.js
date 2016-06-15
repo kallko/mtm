@@ -1464,18 +1464,21 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             // и времени этой заявки, соответственно марке меняет цвет и меняется подсказка маркера
             delete container.source.stopState;
             delete container.source.stop_arrival_time;
-           delete container.source.autofill_service_time;
-           delete container.source.real_service_time;
-           delete container.source.haveStop;
-           delete container.source.real_arrival_time;
+            delete container.source.autofill_service_time;
+            delete container.source.real_service_time;
+            delete container.source.haveStop;
+            delete container.source.real_arrival_time;
+            delete container.source.confirmed_by_operator;
+
             var now =  parseInt(Date.now()/1000);
             container.source.status=5;
+
             var textStatus='опаздывает';
             var color='red';
             if (now < container.source.end_time_ts){
-                container.source.status=7
-                textStatus='запланирован';
-                color='blue';
+                container.source.status=7;
+                textStatus='будет сделано';
+                color='#4482AB';
             }
             if(now>container.source.controlled_window.finish){
                 container.source.status=4;
