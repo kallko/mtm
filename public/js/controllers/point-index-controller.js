@@ -1419,8 +1419,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            if(tmpPoint.status<3 && tmpPoint.limit<80){
+            if(tmpPoint.status<3 ){
                 tmpPoint.status=6;
+                tmpPoint.problem_index=1;
+                console.log("tmpPoint.problem_index", tmpPoint.problem_index);
             }
 
 
@@ -1445,6 +1447,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point = route.points[j];
 
                 point.problem_index = 0;
+               // console.log("point.problem_index", point.problem_index);
                 if (point.overdue_time > 0) {
                     if (point.status == STATUS.TIME_OUT) {
                         point.problem_index += (_data.server_time - point.working_window.finish) * scope.params.factMinutes;
@@ -1461,6 +1464,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     point.problem_index = parseInt(point.problem_index * timeCoef);
                     point.problem_index = parseInt(point.problem_index / 100);
+
+                }
+
+                if (point.status == 6){
+                    point.problem_index = 1;
+                   // console.log("point.problem_index", point.problem_index);
                 }
             }
         }
@@ -1664,7 +1673,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rawPoint.rawConfirmed = 1;
                     //после подтверждения обнуляем индех проблемности и опоздывание.
                     row.problem_index=0;
-                    row.overdue_time=0;
+                    console.log("row.problem_index", row.problem_index);
                     rootScope.$emit('checkInCloseDay');
                     rootScope.$emit('makeWaypointGreen', row.NUMBER);
                     //addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
@@ -3254,6 +3263,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                 scope.rowCollection[idx].problem_index = scope.rowCollection[idx].problem_index || 0;
+                console.log("scope.rowCollection[idx].problem_index", scope.rowCollection[idx].problem_index);
 
                 rootScope.rowCollection = scope.rowCollection;
 
