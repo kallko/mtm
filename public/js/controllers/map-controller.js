@@ -645,7 +645,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             if (!point.confirmed && (point.status == STATUS.FINISHED ||
-                point.status == STATUS.FINISHED_LATE || point.status == STATUS.FINISHED_TOO_EARLY)) {
+                point.status == STATUS.FINISHED_LATE || point.status == STATUS.FINISHED_TOO_EARLY || point.status == STATUS.ATTENTION)) {
                 tmpBgColor = 'yellow';
                 tmpFColor = 'black';
             }
