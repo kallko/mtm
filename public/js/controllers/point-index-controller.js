@@ -1651,7 +1651,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //Если у точки уже есть статус Доставлено рано или доставлено поздно, оставляем его.
                         if(row.status>2){
                     row.status = STATUS.FINISHED;}
-
+                    row.confirmed_by_operator=true;
+                    row.limit=100;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
                     //после подтверждения обнуляем индех проблемности и опоздывание.
@@ -1679,6 +1680,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     row.status = STATUS.CANCELED;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
+                    row.confirmed_by_operator=true
+                    row.limit=100;
                     //row.reason = row.point.reason;
                     rootScope.$emit('checkInCloseDay');  // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;

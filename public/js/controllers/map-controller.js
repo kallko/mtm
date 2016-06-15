@@ -898,6 +898,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
            // console.log("I want to connect", stop, 'with point', wayPoint, "and indx", indx);
             wayPoint.haveStop=true;
             wayPoint.confirmed_by_operator=true;
+            wayPoint.limit=100;
             wayPoint.problem_index=0;
             wayPoint.overdue_time=0;
 
@@ -1469,6 +1470,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             delete container.source.haveStop;
             delete container.source.real_arrival_time;
             delete container.source.confirmed_by_operator;
+            delete container.source.limit;
 
             var now =  parseInt(Date.now()/1000);
             container.source.status=5;
