@@ -273,10 +273,12 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 					var lastUncomfirm;
 					for (var i = 0; i < scope.servisPoints.length; i++) {
 						if (scope.servisPoints[i].confirmTime > 0) {
+							console.log("Points Confirmed Time>0", scope.servisPoints[i]);
 							lengthConfirmat++;
 							sumTimeConfirmed += scope.servisPoints[i].confirmTime;
 							scope.sumStopTimeConf = sumTimeConfirmed;
 						} else {
+							console.log("Points Confirmed Time<0", scope.servisPoints[i] );
 							lastUncomfirm = i;
 						}
 					}
@@ -289,7 +291,7 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 					scope.disabled = false;
 
 					for (var i = 0; scope.servisPoints.length > i; i++) {
-						console.log("Points: ", scope.servisPoints[i]);
+						//console.log("Points: ", scope.servisPoints[i]);
 						scope.servisPoints[i].stopTime = scope.servisPoints[i].confirmTime || wayPointTimeInteger;
 					}
 					if (lastUncomfirm) {
