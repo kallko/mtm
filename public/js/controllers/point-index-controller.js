@@ -1416,7 +1416,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-
+            if(tmpPoint.status<3 && tmpPoint.limit<80){
+                tmpPoint.status=6;
+            }
 
 
         }
