@@ -252,7 +252,7 @@ template {
 }
 
 .delivered-too-early-status {
-    color: red;
+    color: green;
     /*text-decoration: overline;*/
 }
 
