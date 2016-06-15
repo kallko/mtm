@@ -1419,7 +1419,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            if(tmpPoint.status<3 && tmpPoint.limit<80 ){
+            if(tmpPoint.status<3 && tmpPoint.limit<74 ){
                 tmpPoint.status=6;
                 tmpPoint.problem_index=1;
                 console.log("tmpPoint.problem_index", tmpPoint.problem_index);
