@@ -1396,7 +1396,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //корректировка достоверности статусов по процентам.
             tmpPoint.limit=0;
-            if (tmpPoint.rawConfirmed || tmpPoint.confirmed) {
+            if (tmpPoint.confirmed_by_operator) {
                 tmpPoint.limit=100;
                 return;
             }
@@ -1630,6 +1630,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         rootScope.$on('changeConfirmation', onChangeStatus);
         function onChangeStatus(event, data) {
             var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
+            rawPoint.changeConfirmation=true;
             changeStatus(data.row, rawPoint, data.option);
             // и изменение цвета маркера
 

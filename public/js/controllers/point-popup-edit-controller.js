@@ -289,6 +289,7 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 					scope.disabled = false;
 
 					for (var i = 0; scope.servisPoints.length > i; i++) {
+						console.log("Points: ", scope.servisPoints[i]);
 						scope.servisPoints[i].stopTime = scope.servisPoints[i].confirmTime || wayPointTimeInteger;
 					}
 					if (lastUncomfirm) {

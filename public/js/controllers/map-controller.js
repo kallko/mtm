@@ -268,6 +268,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             return
                         }
                        // console.log(scope.currentDraggingStop, scope.minI);
+
                         checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                         scope.currentDraggingStop=null;
                         rootScope.$emit('checkInCloseDay');
@@ -896,6 +897,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var wayPoint=marker.source;
            // console.log("I want to connect", stop, 'with point', wayPoint, "and indx", indx);
             wayPoint.haveStop=true;
+            wayPoint.confirmed_by_operator=true;
             wayPoint.problem_index=0;
             wayPoint.overdue_time=0;
 
