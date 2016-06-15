@@ -1417,6 +1417,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
+
+
         }
 
         // получить строковую дату в формате 1С

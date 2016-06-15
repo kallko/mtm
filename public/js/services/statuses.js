@@ -8,6 +8,7 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
             IN_PROGRESS: 3,
             TIME_OUT: 4,
             DELAY: 5,
+            ATTENTION: 6,
             SCHEDULED: 7,
             CANCELED: 8
         },
@@ -60,6 +61,13 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
             },
             //{name: 'под контролем', value: 4, class: 'controlled-status'},
             //{name: 'ожидают выполнения', value: 5, class: 'awaiting-status'},
+
+            {
+                name: 'требует внимания',
+                value: STATUS.ATTENTION,
+                class: 'attention-status',
+                color: '#red'
+            },
             {
                 name: 'будет сделано',
                 value: STATUS.SCHEDULED,
