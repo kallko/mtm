@@ -265,7 +265,7 @@ template {
 }
 
 .attention-status {
-    color: #E6B732;
+    color: red;
 }
 .delay-status2 {
     color:#EA733B !important;
