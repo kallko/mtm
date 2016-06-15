@@ -145,7 +145,7 @@
 
 
                 <select id="route-select" ng-change="selectFilterRute()"  ng-model="filters.route" class="group-select"
-                        ng-options="option.value as option[params.routeListOrderBy]   for option in filters.routes | orderBy : params.routeListOrderBy | orderBy : -'allRoutes'">
+                        ng-options="option.value as option[params.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', params.routeListOrderBy]">
                 </select>
 
 
@@ -302,11 +302,11 @@
                 </thead>
 
                 <tbody>
-
+                <!--on-finish-render="ngRepeatFinished"-->
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
-                    on-finish-render="ngRepeatFinished"
+
                     ng-show="applyFilter(row)"
                     data-uniqueid="{{row.uniqueID}}"
                     class="delivery-point-row"

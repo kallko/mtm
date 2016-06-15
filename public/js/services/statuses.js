@@ -66,7 +66,7 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
                 name: 'внимание',
                 value: STATUS.ATTENTION,
                 class: 'attention-status',
-                color: '#red'
+                color: '#E6B732'
             },
             {
                 name: 'будет сделано',

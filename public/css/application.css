@@ -228,7 +228,7 @@ template {
     width: 26px;
     min-width: 26px;
 }
-
+.attention-status,
 .delivered-status,
 .performed-status,
 .time-out-status,
@@ -262,6 +262,10 @@ template {
 
 .time-out-status, .delay-status {
     color: red;
+}
+
+.attention-status {
+    color: #E6B732;
 }
 .delay-status2 {
     color:#EA733B !important;

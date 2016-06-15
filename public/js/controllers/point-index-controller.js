@@ -590,6 +590,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                           //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
                     }
+                    
 
 
                     try {
@@ -1836,6 +1837,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // получить текстовый статус для задачи с необходимыми css классами
+
         scope.getTextStatus = function (row) {
             row.class2 = row.status == 5 ? 'delay-status2' : '';
             var statusCode = row.status;
@@ -1843,11 +1845,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
                     row.class = '';
-                       var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
-                            statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
-                        if (unconfirmed) {
-                            row.class = "yellow-status ";
-                        }
+                       // var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
+                       //      statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
+                       //  if (unconfirmed) {
+                       //      row.class = "yellow-status ";
+                       //  }
                         row.class += scope.filters.statuses[i].class;
                     if (scope.filters.statuses[i].table_name != undefined) {
                         return scope.filters.statuses[i].table_name;// + (unconfirmed ? '?' : ''); убираем вопросительный знак
