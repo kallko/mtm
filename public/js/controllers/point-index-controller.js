@@ -3334,28 +3334,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //Прописывание в новый роут правильных данных
             delete routeDublicate.DRIVER;  //
-            delete routeDublicate.ID;
             delete routeDublicate.NUMBER_OF_TASKS;
             delete routeDublicate.TRANSPORT; //
             delete routeDublicate.car_position;
             delete routeDublicate.driver; //
-            delete routeDublicate.filterId;
-            delete routeDublicate.getCheck;
             delete routeDublicate.haveSensor; //
-            delete routeDublicate.itineraryID;
-            delete routeDublicate.lastPointIndx;
             delete routeDublicate.locked;
             delete routeDublicate.lockedByMe;
             delete routeDublicate.real_track;
             delete routeDublicate.transport; //
             delete routeDublicate.uniqueID;
 
+
+            routeDublicate.ID = parseInt(routeDublicate.ID) +1;
+            routeDublicate.filterId = _data.routes.length;
+            routeDublicate.getCheck = false;
+            routeDublicate.uniqueID = ""+routeDublicate.itineraryID+routeDublicate.NUMBER+routeDublicate.ID;
             //Найти нового водителя в полной базе
 
-            var tt1 = +routeDublicate.ID;
-            var tt2 = parseInt(routeDublicate.ID);
-            var tt3 = routeDublicate.ID;
-            console.log("TTTT", tt1, tt2, tt3);
+
+
 
             var i=0;
             while(i<_data.drivers.length){
