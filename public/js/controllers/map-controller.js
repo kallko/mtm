@@ -1,6 +1,6 @@
 // контроллер для работы с картой
-angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', '$http', 'Statuses',
-    function (scope, rootScope, http, Statuses) {
+angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope', '$http', 'Statuses', 'Settings',
+    function (scope, rootScope, http, Statuses, Settings) {
         var map,                                        // объект карты
             oms,                                        // слой используемый Overlapping Marker Spiderfier
             position,                                   // позиция границ прозрачного окна карты
@@ -17,6 +17,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             currentRouteID,                             //ID отображаемого в данный момент маршрута
             gpsPushMarkers=[];                          // Массив маркеров пушей текущего маршрута
 
+
+        scope.params = scope.params || Settings.load();
+        timeThreshold = scope.params.timeThreshold * 60
 
         initMap();
         addListeners();
@@ -100,6 +103,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             if (!route || !route.real_track) return;
             console.log("I gona draw real route", route);
+            var start = strToTstamp(route.START_TIME);
+            var end = strToTstamp(route.END_TIME);
+            console.log("Start", start, "End", end);
+
 
             var track = route.real_track,
                 pushes = route.pushes,
@@ -122,7 +129,19 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             for (var i = 0; i < track.length; i++) {
                // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
-                if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
+                if (track[i].coords == null || track[i].coords.constructor !== Array ) continue;
+                console.log(" track[i].time",  track[i].coords);
+
+                //TODO   Раскомментировать этот блок, когда начнут правильно утверждать маршруты с правильным стартом и финишем.
+                //if( track[i].coords[0].t < start-timeThreshold) {
+                //    //console.log("Its too early track");
+                //    continue
+                //}; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
+                //if( track[i].coords[0].t > end+timeThreshold) {
+                //    //console.log("Its too past track");
+                //    break;
+                //} //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+
 
 
                 color = '#5cb85c';
@@ -141,6 +160,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 { // отрисовать стоп
                     // если отрисовка стопов выключена, пропустить итерацию
                     //stops.push(track[i]);
+
+
+
+
+                    if( track[i].coords.t1 < start-timeThreshold) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
+                    if( track[i].coords.t1 > end+timeThreshold) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
                     if (!drawStops) continue;
 
@@ -1770,6 +1795,25 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log("Send ", (index-1));
             makeWayPointMarkerGrey(index-1);
         });
+
+        function strToTstamp(strDate, lockaldata) {
+            //console.log(strDate, "strDate");
+            var parts = strDate.split(' ');
+            var    _date = parts[0].split('.');
+            var _time;
+            var toPrint=JSON.stringify(strDate);
+            try {
+                _time = parts[1].split(':');} catch (exeption) {
+                console.log(toPrint, "Error", exeption, lockaldata);
+            }
+
+
+
+            //console.log(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
+
+            return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+        }
+
 
     }]);
 
