@@ -78,8 +78,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
             console.log(scope.filters.statuses);
             console.log(scope.filters.status);
-
-            scope.filters.routes = [{name: 'все маршруты', value: -1}]; // фильтры по маршрутам
+            scope.filters.routes = [{nameDriver: 'все маршруты', nameCar: 'все маршруты', value: -1, allRoutes:true}]; // фильтры по маршрутам
             //scope.filters.route = scope.filters.routes[0].value;
             scope.filters.problem_index = 1;
             scope.filters.promised_15m = -1;
@@ -259,7 +258,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 var _now = Date.now() / 1000,
-                    url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + parseInt(_now);
+                    url = './trackparts/' + parseInt(_data.trackUpdateTime) + '/' + ( (_data.currentDay) ? parseInt(_now) : parseInt(_data.server_time) );
 
                 //console.log(url);
                 http.get(url)
@@ -576,19 +575,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         scope.filters.routes.push({
                             //name: data.routes[i].transport.NAME,
-                            nameOrder: ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'),
-                            carOrder: data.routes[i].transport.NAME,
-                            name:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
+
+                            allRoutes: false,
+
+                            nameDriver:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
+                            nameCar:  data.routes[i].transport.NAME  + ' - ' +   ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') ,
+
                             value: data.routes[i].filterId,
-                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+
+
+                            car: data.routes[i].transport.NAME,
+                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                         });
                           //  console.log(scope.filters.routes, ' filters.routes');
                         routeId++;
                     }
-                    rootScope.$on('changeRouteListOrder', function(event, ordered){
-                        scope.ordered = ordered;
-                    });
-                    scope.ordered = 'nameOrder';
+                    
+
 
                     try {
                         tPoint.route_indx = data.routes[i].filterId;
@@ -921,6 +924,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.confirmed;
                     //delete tmpPoint.servicePoints;
                     delete tmpPoint.overdue_time;
+                    delete tmpPoint.limit;
 
 
 
@@ -1057,6 +1061,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     tmpPoint.distanceToStop = tmpDistance;
                                     tmpPoint.timeToStop = tmpTime;
                                     tmpPoint.haveStop = true;
+
+
+
+
+                                    //{ if (tmpArrival.t1 > tmpPoint.controlled_window.start) && (tmpArrival.t1<tmpPoint.controlled_window.finish){
+                                    //    tmpPoint.limit=60;
+                                    //} else {tmpPoint.limit=60; } }
+
                                     tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
                                     //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
@@ -1278,12 +1290,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (mobilePushes[i].distance <= scope.params.mobileRadius*2) {
                                     tmpPoint.havePush = true;
 
+
+
                                     //TODO
                                     //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
-                                    //tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+                                    tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
 
                                     // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
                                     tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+
                                     _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
                                     _data.routes[j].pushes = _data.routes[j].pushes || [];
                                     if (mobilePushes[i].gps_time_ts < _data.server_time) {
@@ -1302,7 +1317,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 allPushes = allPushes.concat(mobilePushes);
             }
 
-           // checkConfirmedFromLocalStorage();
+
 
 
 
@@ -1382,6 +1397,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
+            //корректировка достоверности статусов по процентам.
+            tmpPoint.limit=0;
+            if (tmpPoint.confirmed_by_operator) {
+                tmpPoint.limit=100;
+                return;
+            }
+            if (tmpPoint.haveStop) {
+                tmpPoint.limit=45;
+
+                if(tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start){
+                    tmpPoint.limit=60;
+                }
+
+            }
+
+            if (tmpPoint.havePush) {
+                tmpPoint.limit+=15;
+                if( tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2+300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1 ) {
+                    tmpPoint.limit+=15;
+                }
+            }
+
+            if(tmpPoint.status<3 && tmpPoint.limit<74 ){
+                tmpPoint.status=6;
+                tmpPoint.problem_index=1;
+                console.log("tmpPoint.problem_index", tmpPoint.problem_index);
+            }
+
+
         }
 
         // получить строковую дату в формате 1С
@@ -1403,6 +1447,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 point = route.points[j];
 
                 point.problem_index = 0;
+               // console.log("point.problem_index", point.problem_index);
                 if (point.overdue_time > 0) {
                     if (point.status == STATUS.TIME_OUT) {
                         point.problem_index += (_data.server_time - point.working_window.finish) * scope.params.factMinutes;
@@ -1419,6 +1464,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     point.problem_index = parseInt(point.problem_index * timeCoef);
                     point.problem_index = parseInt(point.problem_index / 100);
+
+                }
+
+                if (point.status == 6){
+                    point.problem_index = 1;
+                   // console.log("point.problem_index", point.problem_index);
                 }
             }
         }
@@ -1519,6 +1570,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('demoTime was changed!');
                 changed = true;
             }
+            if(scope.params.routeListOrderBy !== params.routeListOrderBy){
+                changed = true;
+                console.log(scope.params.routeListOrderBy);
+            }
 
             if (params.predictMinutes !== scope.params.predictMinutes
                 || params.factMinutes !== scope.params.factMinutes
@@ -1532,21 +1587,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 changed = true;
             }
 
-            if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
-                console.log('OMG!!1 New show date!');
-                scope.params = JSON.parse(JSON.stringify(params));
-                loadDailyData(true, params.showDate);
-                console.log("OMG UPDATE DATA");
-
-                return;
-            }
-
             if (changed) {
                 scope.$emit('clearMap');
                 scope.params = JSON.parse(JSON.stringify(params));
                 linkDataParts(rawData);
             }
         }
+
+        rootScope.$on('loadOldDay', function(event, params){
+            if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
+                scope.$emit('clearMap');
+                console.log('OMG!!1 New show date!');
+                loadDailyData(true, params.showDate);
+                return;
+            }
+        });
 
         // добавить в подтвержденные
         function addToConfirmed(id, code) {
@@ -1595,6 +1650,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         rootScope.$on('changeConfirmation', onChangeStatus);
         function onChangeStatus(event, data) {
             var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
+            rawPoint.changeConfirmation=true;
             changeStatus(data.row, rawPoint, data.option);
             // и изменение цвета маркера
 
@@ -1611,12 +1667,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //Если у точки уже есть статус Доставлено рано или доставлено поздно, оставляем его.
                         if(row.status>2){
                     row.status = STATUS.FINISHED;}
-
+                    row.confirmed_by_operator=true;
+                    row.limit=100;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
                     //после подтверждения обнуляем индех проблемности и опоздывание.
                     row.problem_index=0;
-                    row.overdue_time=0;
+                    console.log("row.problem_index", row.problem_index);
                     rootScope.$emit('checkInCloseDay');
                     rootScope.$emit('makeWaypointGreen', row.NUMBER);
                     //addToConfirmed(row.TASK_NUMBER, rawPoint.rawConfirmed);
@@ -1639,6 +1696,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     row.status = STATUS.CANCELED;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
+                    row.confirmed_by_operator=true
+                    row.limit=100;
                     //row.reason = row.point.reason;
                     rootScope.$emit('checkInCloseDay');  // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;
@@ -1787,6 +1846,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // получить текстовый статус для задачи с необходимыми css классами
+
         scope.getTextStatus = function (row) {
             row.class2 = row.status == 5 ? 'delay-status2' : '';
             var statusCode = row.status;
@@ -1794,16 +1854,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i < scope.filters.statuses.length; i++) {
                 if (scope.filters.statuses[i].value == statusCode) {
                     row.class = '';
-                       var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
-                            statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
-                        if (unconfirmed) {
-                            row.class = "yellow-status ";
-                        }
+                       // var unconfirmed = !confirmed && (statusCode == STATUS.FINISHED ||
+                       //      statusCode == STATUS.FINISHED_LATE || statusCode == STATUS.FINISHED_TOO_EARLY);
+                       //  if (unconfirmed) {
+                       //      row.class = "yellow-status ";
+                       //  }
                         row.class += scope.filters.statuses[i].class;
                     if (scope.filters.statuses[i].table_name != undefined) {
-                        return scope.filters.statuses[i].table_name + (unconfirmed ? '?' : '');
+                        return scope.filters.statuses[i].table_name;// + (unconfirmed ? '?' : ''); убираем вопросительный знак
                     }
-                    return scope.filters.statuses[i].name + (unconfirmed ? '?' : '');
+                    return scope.filters.statuses[i].name;// + (unconfirmed ? '?' : ''); убираем вопросительный знак
                 }
             }
 
@@ -3203,6 +3263,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                 scope.rowCollection[idx].problem_index = scope.rowCollection[idx].problem_index || 0;
+                console.log("scope.rowCollection[idx].problem_index", scope.rowCollection[idx].problem_index);
 
                 rootScope.rowCollection = scope.rowCollection;
 

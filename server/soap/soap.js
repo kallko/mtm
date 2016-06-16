@@ -254,7 +254,6 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 // в итоге получено будет только одно решение, т.к. двух решений разных типов по одному id не бывает
 SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
     var me = this;
-    console.log('getItinerary 2');
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko')) {
         setTimeout(function () {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
@@ -335,14 +334,12 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
 // получение дополнительных данных по полученному решению
 SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback, date) {
     var me = this;
-    console.log(date);
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     log.l(_xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
-
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,   // список всего транспорта по данному клиенту
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню

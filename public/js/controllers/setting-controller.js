@@ -22,16 +22,17 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                 scope.startDemoTime = params.demoStartTime;
             });
         }
-        scope.routeListOrderBy = 'nameOrder';
-        scope.changeRouteListOrder = function(){
-            rootScope.$emit('changeRouteListOrder', scope.routeListOrderBy);
-        };
+        // rootScope.$on('changeRouteListOrder', function(event, ordered){
+        //
+        //     scope.route_name = ordered;
+        //     scope.ordered = ordered;
+        // });
+        // scope.route_name = 'nameDriver';
+        // scope.ordered = 'nameDriver';
 
         // обработчик кнопки сохранить, вызывается в index.html (ng-click)
-        scope.saveAllParams = function () {
-            console.log('settings');
-            if(scope.showDate!=undefined)
-            {
+        scope.loadOldDay = function(){
+            if(scope.showDate!=undefined){
                 var dateTS = scope.showDate.getTime();
                 scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
                 console.log(scope.params.showDate);
@@ -44,13 +45,15 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                         var currentTime = new Date(serverTime);
                         if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
                             scope.params.showDate = null;
-                            scope.$emit('settingsChanged', scope.params);
+                            scope.$emit('loadOldDay', scope.params);
                         }else{
-                            scope.$emit('settingsChanged', scope.params);
+                            scope.$emit('loadOldDay', scope.params);
                         }
-                   });
+                    });
             }
-
+        };
+        scope.saveAllParams = function () {
             Settings.saveToLocalStorage(scope.params);
+            scope.$emit('settingsChanged', scope.params);
         };
     }]);

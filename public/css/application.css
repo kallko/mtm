@@ -228,7 +228,7 @@ template {
     width: 26px;
     min-width: 26px;
 }
-
+.attention-status,
 .delivered-status,
 .performed-status,
 .time-out-status,
@@ -248,12 +248,12 @@ template {
 
 .delivered-late-status {
     color: red;
-    text-decoration: underline;
+    /*text-decoration: underline;*/
 }
 
 .delivered-too-early-status {
-    color: red;
-    text-decoration: overline;
+    color: green;
+    /*text-decoration: overline;*/
 }
 
 .performed-status {
@@ -261,6 +261,10 @@ template {
 }
 
 .time-out-status, .delay-status {
+    color: red;
+}
+
+.attention-status {
     color: red;
 }
 .delay-status2 {

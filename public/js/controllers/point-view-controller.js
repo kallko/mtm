@@ -108,6 +108,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         scope.cancelTask = function () {
             scope.showHideSeasonButtons = false;
             console.log('cancelTask');
+            scope.point.changeConfirmation=true;
             scope.point.reason = scope.selectReasonList;
             scope.$emit('changeConfirmation', {
                 row: scope.point,
