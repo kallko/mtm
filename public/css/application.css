@@ -23,7 +23,11 @@ template {
     visibility: visible;
     background-color: whitesmoke;
 }
-
+#transparent-point-table-window p {
+    font-size: 40px;
+    text-align: center;
+    padding-top: 40%;
+}
 #point-controller-container {
     height: 100%;
 }
@@ -93,9 +97,12 @@ template {
 }
 
 #point-table-tbl {
-    width: 100%;
     min-width: 2400px;
     border-bottom: 1px solid grey;
+}
+#point-table-tbl .header,
+#point-table-tbl .header-copy {
+    min-width: 2400px;
 }
 
 #point-table-tbl tr {
@@ -162,8 +169,9 @@ template {
 
 .header-copy {
     position: absolute;
-    top: 0;
+    top: 0 !important;
     left: 0;
+    right: 0 !Important;
 }
 
 .header-copy th {
@@ -557,4 +565,11 @@ template {
     line-height: 17px;
     text-align: center;
     display: block;
+}
+.point-table-wrap {
+    position: relative;
+}
+.degree,
+.status-col {
+    text-align: center;
 }

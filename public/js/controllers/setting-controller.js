@@ -52,6 +52,9 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
                     });
             }
         };
+
+        
+
         scope.saveAllParams = function () {
             Settings.saveToLocalStorage(scope.params);
             scope.$emit('settingsChanged', scope.params);

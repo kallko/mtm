@@ -782,6 +782,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
+        scope.uppHeader = function(){
+            setColResizable();
+            prepareFixedHeader();
+        };
+
         // обновляет статусы и делает прогнозы по слинкованным данным
         function updateData() {
             statusUpdate();
@@ -1518,7 +1523,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     $('.header-copy').hide();
                 }
 
-                updateFixedHeaderPos();
+                //updateFixedHeaderPos();
             }
 
            
@@ -1530,12 +1535,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 updateResizeGripHeight();
             });
 
-            scope.$on('ngRepeatFinished', function () {  // эта функция не работает
+            scope.$on('ngRepeatFinished', function () {
+                prepareFixedHeader();
                 updateResizeGripHeight();
-                $('.delivery-point-row').contextmenu({
-                    target: '#context-menu',
-                    onItem: deliveryRowConextMenu
-                });
+                // $('.delivery-point-row').contextmenu({
+                //     target: '#context-menu',
+                //     onItem: deliveryRowConextMenu
+                // });
             });
 
             rootScope.$on('settingsChanged', settingsChanged);
@@ -1699,7 +1705,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     row.status = STATUS.CANCELED;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
-                    row.confirmed_by_operator=true
+                    row.confirmed_by_operator=true;
                     row.limit=100;
                     //row.reason = row.point.reason;
                     rootScope.$emit('checkInCloseDay');  // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
@@ -1756,32 +1762,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // });
 
             resizeHead(table);
-            pointTableHolder.on("scroll", updateHeaderClip);
             updateHeaderClip();
-            updateFixedHeaderPos();
+            //updateFixedHeaderPos();
         }
+        pointTableHolder.on("scroll", updateHeaderClip);
 
         // обновить область отрисовки заголовка таблицы
-        function updateHeaderClip() {
-            var x = pointTableHolder.scrollLeft(),
-                width = pointContainer.width() - 24;
-
+        var lastScrollLeft = 0;
+        function updateHeaderClip(e) {
+            var pointTableHolderScrollLeft = pointTableHolder.scrollLeft();
+            if(e && lastScrollLeft === pointTableHolderScrollLeft){
+                return;
+            }
+            lastScrollLeft = pointTableHolderScrollLeft;
+            var width = pointContainer.width() - 24;
             pointTableHolder.find('.header-copy').css({
-                'margin-left': -x - 1,
-                clip: 'rect(0, ' + (width + x) + 'px, auto, ' + x + 'px)'
-            });
+                    'left': - pointTableHolderScrollLeft,
+                   clip: 'rect(0, ' + (width + pointTableHolderScrollLeft) + 'px, auto, ' + pointTableHolderScrollLeft + 'px)'
+                });
         }
 
         // изменить размер заголовка таблицы
         function resizeHead($table) {
-            $table.find('thead.header > tr:first > th').each(function (i, h) {
-                $table.find('thead.header-copy > tr > th:eq(' + i + ')').css({
+           
+            $table.find('.header  th').each(function (i, h) {
+                $table.find('.header-copy  th:eq(' + i + ')').css({
                     'max-width': $(h).outerWidth(),
-                    width: $(h).outerWidth(),
-                    display: $(h).css('display')
+                    width: $(h).outerWidth()
                 });
             });
-            $table.find('thead.header-copy').css('width', $table.outerWidth());
+            //console.log($table.outerWidth());
+           // $table.find('.header-copy').css('width', $table.outerWidth());
         }
 
         // обновить позицию фиксированного заголовка таблицы
@@ -2133,16 +2144,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // перемещение элемента внутри массива
-        Array.prototype.move = function (old_index, new_index) {
-            if (new_index >= this.length) {
-                var k = new_index - this.length;
-                while ((k--) + 1) {
-                    this.push(undefined);
-                }
-            }
-            this.splice(new_index, 0, this.splice(old_index, 1)[0]);
-            return this;
-        };
+        // Array.prototype.move = function (old_index, new_index) {
+        //     if (new_index >= this.length) {
+        //         var k = new_index - this.length;
+        //         while ((k--) + 1) {
+        //             this.push(undefined);
+        //         }
+        //     }
+        //     this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+        //     return this;
+        // };
 
         // изменить обещанное окно
         scope.changePromisedWindow = function (row_id) {
@@ -3206,7 +3217,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
                         } else {
                             // точки ниже последней выполненной считаются ниже
-                            console.log (j, "Point for Route", route);
+                          //  console.log (j, "Point for Route", route);
                             tmpTime = route.time_matrix.time_table[0][j-1][j];
                             // времена проезда от роутера приходят в десятых долях секунд
                             totalTravelTime += tmpTime == 2147483647 ? 0 : parseInt(tmpTime / 10);
@@ -3222,7 +3233,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                             route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
 
-                            console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
+                           // console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
 
                             route.points[j].in_plan = true;
                             if (route.points[j].arrival_prediction == null) {

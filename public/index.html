@@ -111,7 +111,7 @@
 <template type="text/html" id="template-point-table">
     <!-- полупрозрачное окно для затемнения таблицы -->
     <div class="point-table-wrapper" >
-        <div class="title"  ng-show="clickOff" id="transparent-point-table-window" ></div>
+        <div class="title"  ng-show="clickOff" id="transparent-point-table-window" > <p>Загрузка...</p> </div>
 
     <div ng-controller="PointIndexController" class="section" id="point-controller-container">
         <!-- меню -->
@@ -131,6 +131,7 @@
 
 
 
+                    <!--<button ng-click="uppHeader()">Поправить шапку таблицы</button>-->
                     <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         {{nowTime*1000 | date : 'dd.MM.yyyy'}}
                         Выберите статус
@@ -202,6 +203,7 @@
 
 
         <!-- таблица точек -->
+        <div class="point-table-wrap">
         <div id="point-table" class="table-holder">
 
 
@@ -246,7 +248,7 @@
                     </th>
                     <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
                     <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
-                    <th class="promised-window-changed-col" title="Количество переносов">Кол. переносов</th>
+                    <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
                     <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
                     <th class="car-number-col" title="Номер машины">Номер</th>
 
@@ -291,7 +293,7 @@
                     </th>
                     <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
                     <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
-                    <th class="promised-window-changed-col" title="Количество переносов">Кол. переносов</th>
+                    <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
                     <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
                     <th class="car-number-col" title="Номер машины">Номер</th>
 
@@ -302,14 +304,14 @@
                 </thead>
 
                 <tbody>
-
+                <!--on-finish-render="ngRepeatFinished"-->
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
+                    on-finish-render="ngRepeatFinished"
                     ng-show="applyFilter(row)"
                     data-uniqueid="{{row.uniqueID}}"
                     class="delivery-point-row"
-                    on-finish-render="ngRepeatFinished"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}">
 
 
@@ -377,7 +379,7 @@
                                <!--enter-event="changePromisedWindow(row.row_id)">-->
                         <!--</input>-->
                     <!--</td>-->
-                    <td> {{row.change_time ? row.change_time : 0}}</td>
+                    <td> {{row.change_time ? row.change_time : ''}}</td>
                     <td>{{::row.driver.PHONE}}</td>
                     <td>{{::row.transport.REGISTRATION_NUMBER}}</td>
 
@@ -394,6 +396,7 @@
                     <li><a tabindex="-1" data-menu-option="edit">Редактировать маршрут</a></li>
                 </ul>
             </div>
+        </div>
         </div>
     </div>
 </template>
@@ -419,6 +422,8 @@
                        ng-model="showDate"
                        id="show-date"/>
                 <button class="btn btn-info btn-sm" ng-click="loadOldDay()">Загрузить</button>
+
+
             </div>
         </div>
 
