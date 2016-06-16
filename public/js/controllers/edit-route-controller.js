@@ -796,7 +796,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         };
 
     scope.changeDriver = function() {
-        console.log(scope.selectedDriver, scope.selectedTransport, scope.selectedStart);
+        //console.log(scope.selectedDriver, scope.selectedTransport, scope.selectedStart);
+        rootScope.$emit('changeDriver', scope.selectedDriver, scope.selectedTransport, scope.selectedStart); //эмитируем в поинтиндекс контроллер, чтобы там сделать все изменения в данных
         scope.selectedStart=false;
     }
 

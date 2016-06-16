@@ -304,7 +304,7 @@
                 </thead>
 
                 <tbody>
-                <!--on-finish-render="ngRepeatFinished"-->
+
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
@@ -312,7 +312,8 @@
                     ng-show="applyFilter(row)"
                     data-uniqueid="{{row.uniqueID}}"
                     class="delivery-point-row"
-                    ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}">
+                    ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}"
+                    on-finish-render="ngRepeatFinished">
 
 
 
@@ -632,6 +633,7 @@
 
             </div>
         </div>
+
 
     </div>
 </template>

@@ -1538,10 +1538,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$on('ngRepeatFinished', function () {
                 prepareFixedHeader();
                 updateResizeGripHeight();
-                // $('.delivery-point-row').contextmenu({
-                //     target: '#context-menu',
-                //     onItem: deliveryRowConextMenu
-                // });
+                 $('.delivery-point-row').contextmenu({
+                     target: '#context-menu',
+                     onItem: deliveryRowConextMenu
+                 });
             });
 
             rootScope.$on('settingsChanged', settingsChanged);
@@ -3311,7 +3311,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-
+        rootScope.$on('changeDriver',  function (event, driver, transport, start) {
+            console.log("PIC recieve ",  driver, transport, start);
+        });
 
     }]);
 
