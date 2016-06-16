@@ -3311,9 +3311,80 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-        rootScope.$on('changeDriver',  function (event, driver, transport, start) {
-            console.log("PIC recieve ",  driver, transport, start);
+        rootScope.$on('changeDriver',  function (event, driver, transport, start, routeID) {
+            console.log("PIC recieve and gona work",  driver, transport, start, routeID, _data);
+            changeDriveronRoute(driver, transport, start, routeID)
         });
+
+        function changeDriveronRoute(driver, transport, start, routeID) {
+            // создание дубликакта роута
+            var routeDublicate={};
+            var i=0;
+            while (i<_data.routes.length) {
+                if(_data.routes[i].uniqueID==routeID) {
+                    var tempRouteDublicate=_data.routes[i];
+                    break;
+                }
+
+                i++;
+            }
+
+            routeDublicate=JSON.parse(JSON.stringify(tempRouteDublicate));
+
+
+            //Прописывание в новый роут правильных данных
+            delete routeDublicate.DRIVER;  //
+            delete routeDublicate.ID;
+            delete routeDublicate.NUMBER_OF_TASKS;
+            delete routeDublicate.TRANSPORT; //
+            delete routeDublicate.car_position;
+            delete routeDublicate.driver; //
+            delete routeDublicate.filterId;
+            delete routeDublicate.getCheck;
+            delete routeDublicate.haveSensor; //
+            delete routeDublicate.itineraryID;
+            delete routeDublicate.lastPointIndx;
+            delete routeDublicate.locked;
+            delete routeDublicate.lockedByMe;
+            delete routeDublicate.real_track;
+            delete routeDublicate.transport; //
+            delete routeDublicate.uniqueID;
+
+            //Найти нового водителя в полной базе
+
+            var tt1 = +routeDublicate.ID;
+            var tt2 = parseInt(routeDublicate.ID);
+            var tt3 = routeDublicate.ID;
+            console.log("TTTT", tt1, tt2, tt3);
+
+            var i=0;
+            while(i<_data.drivers.length){
+                if(_data.drivers[i].ID == driver) {
+                    routeDublicate.DRIVER=driver;
+                    routeDublicate.driver=_data.drivers[i];
+                    break;
+                }
+
+                i++;
+            }
+
+            // Найти новый транспорт
+            i=0;
+            while(i<_data.transports.length){
+                if(_data.transports[i].ID == transport) {
+                    routeDublicate.TRANSPORT=transport;
+                    routeDublicate.transport=_data.transports[i];
+                    _data.transports[i].gid ? routeDublicate.haveSensor=true : routeDublicate.haveSensor=false;
+                    break;
+                }
+
+                i++;
+            }
+
+            console.log("We will change route", routeDublicate);
+
+        }
+
 
     }]);
 
