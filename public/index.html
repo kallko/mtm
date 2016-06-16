@@ -302,13 +302,14 @@
                 </thead>
 
                 <tbody>
-                <!--on-finish-render="ngRepeatFinished"-->
+
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
                     ng-click="rowClick(row)"
                     ng-dblclick="dblRowClick(row)"
-                    ng-if="applyFilter(row)"
+                    ng-show="applyFilter(row)"
                     data-uniqueid="{{row.uniqueID}}"
                     class="delivery-point-row"
+                    on-finish-render="ngRepeatFinished"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}">
 
 
@@ -593,6 +594,37 @@
                     </div>
                     <!--<div class="box end-box droppable-box" data-index="55555">END</div>-->
                 </div>
+            </div>
+        </div>
+        <div id="change-driver" ng-show="route !== undefined" >
+            <div class="block-title">Замена (Водителя/Машины) на маршруте</div>
+            <div id="change-driver-menu" > Произвести замену: <br>
+                {{route.driver.NAME}} на машине {{route.transport.NAME}} с номером {{route.transport.REGISTRATION_NUMBER}}<br>
+
+                <div id="transport-select"> Выберите транспорт:
+                    <select ng-model="selectedTransport"
+                            ng-options=" option.ID as option.NAME for option in allTransports | orderBy: 'NAME'" >
+
+                    </select>
+                    <div id="driver-select"> Выберите  водителя:&nbsp;
+                        <select ng-model="selectedDriver"
+                                ng-options="option.ID as option.NAME for option in allDrivers | orderBy: 'NAME'" >
+
+                        </select>
+
+                        <div id="start-select"> Старотовая точка:&nbsp;&nbsp;&nbsp;&nbsp;
+                            <select ng-model="selectedStart"
+                                    ng-options="option.NUMBER as option.NUMBER for option in route.points | orderBy: 'parseInt(NUMBER)'" >
+
+                            </select>
+                            <div>
+                                <button class="btn btn-info btn-sm" ng-disabled="!selectedTransport || !selectedDriver || !selectedStart" ng-click="changeDriver()" >Заменить</button>
+                            </div>
+
+                </div>
+
+
+
             </div>
         </div>
 

@@ -379,7 +379,7 @@ template {
     height: 100%;
 }
 
-#original-route, #changed-route {
+#original-route, #changed-route, #changed-driver {
     border: 1px solid grey;
     margin: 3px;
     padding: 3px;

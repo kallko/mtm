@@ -1636,7 +1636,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         route: _data.routes[row.route_id],
                         serverTime: _data.server_time,
                         demoMode: scope.demoMode,
-                        workingWindow: scope.params.workingWindowType
+                        workingWindow: scope.params.workingWindowType,
+                        allDrivers: _data.drivers,
+                        allTransports: _data.transports
+
                     });
                     break;
                 default:
