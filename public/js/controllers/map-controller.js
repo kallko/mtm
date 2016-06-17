@@ -105,7 +105,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log("I gona draw real route", route);
             var start = strToTstamp(route.START_TIME);
             var end = strToTstamp(route.END_TIME);
-            console.log("Start", start, "End", end);
+           // console.log("Start", start, "End", end);
 
 
             var track = route.real_track,
@@ -130,7 +130,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             for (var i = 0; i < track.length; i++) {
                // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
                 if (track[i].coords == null || track[i].coords.constructor !== Array ) continue;
-                console.log(" track[i].time",  track[i].coords);
+                //console.log(" track[i].time",  track[i].coords);
 
                 //TODO   Раскомментировать этот блок, когда начнут правильно утверждать маршруты с правильным стартом и финишем.
                 //if( track[i].coords[0].t < start-timeThreshold) {

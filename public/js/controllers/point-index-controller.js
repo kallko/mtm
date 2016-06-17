@@ -1822,7 +1822,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 scope.displayCollection[i].selected = false;
             }
             row.selected = true;
-            console.log(row);
+            //console.log(row);
             // найти какому роуту принадлежит точка
             var i=0;
             var curRoute={};
@@ -1834,7 +1834,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 i++;
             }
-            console.log("I have to draw this route:", curRoute);
+            //console.log("I have to draw this route:", curRoute);
             scope.drawRoute(curRoute.filterId, false);// false - параметр  заставляющий сделать быструю отрисовку.
             rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
             return;
@@ -2062,7 +2062,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 //console.log('before', route.real_track.length);
 
 
-                console.log("route.real_track", route.real_track);
+                //console.log("route.real_track", route.real_track);
 
 
 
@@ -3040,13 +3040,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 i++;
             }
 
-            console.log("Result for predication=", result);
+           // console.log("Result for predication=", result);
 
             http.post('./predicate', {
                 collection: result
             })
                 .success(function (data) {
-                console.log("Additional load", {data: data});
+                //console.log("Additional load", {data: data});
                    predicateArrivalSecond (data);
 
             }).error(function(err){
@@ -3059,7 +3059,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         //альтернативный расчет предсказаний, когда все данные получены одним запросом
         function  predicateArrivalSecond (data) {
-            console.log("Start new predicate", data);
+            //console.log("Start new predicate", data);
             var i=0;
             while(i<_data.routes.length){
                   if (_data.routes[i].DISTANCE==0) {
@@ -3394,15 +3394,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 })
                     .success(function (data) {
                         console.log("Cashe Update", {data: data});
-                        //predicateArrivalSecond (data);
 
                     }).error(function(err){
                         console.log(err);
 
                     });
                 //console.log("Changed route is", tempRouteDublicate);
-                //console.log("Check in allData", _data);
-                //TODO проверить чтобы в кеш записывались данные по изменненому маршруту
                 return;
             }
 
@@ -3494,14 +3491,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.$apply;
 
 
+            //Изменить route_id в новом маршруте во всех точках а также driver transport
+
+
+            //добавление новго выбора для селектора
+            scope.filters.routes.push({
+                //name: data.routes[i].transport.NAME,
+
+                allRoutes: false,
+
+                nameDriver:  ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') + ' - ' + routeDublicate.transport.NAME ,
+                nameCar:  routeDublicate.transport.NAME  + ' - ' +   ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') ,
+
+                value: routeDublicate.filterId,
+
+
+                car: routeDublicate.transport.NAME,
+                driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+            });
+
+
+
             //Сохраняем в кеш измененные данные. Отправляем 2 роута. Первый надо будет перезаписать, второй добавить.
             // отдельно взять точки из первого маршрута и обновить update
             http.post('./changedriver', {
                 routes: [tempRouteDublicate, routeDublicate]
             })
                 .success(function (data) {
-                    console.log("Additional load", {data: data});
-                    //predicateArrivalSecond (data);
+                    console.log("Cashe updated 2 times", {data: data});
+
 
                 }).error(function(err){
                     console.log(err);

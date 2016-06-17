@@ -768,6 +768,13 @@ router.route('/changedriver/')
         //    console.log('get tracks by states DONE!');
         //    res.status(200).json(data);
         //});
+
+        //Если произошло разделение маршрутов, нужно добавить новый к списку.
+        if(req.body.routes[1] != undefined){
+            req.body.routes[1].filterId=null;
+            cashedDataArr[req.session.login].routes.push(req.body.routes[1]);
+        }
+
         res.status(200).json("ok");
 
     });
