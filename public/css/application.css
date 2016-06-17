@@ -336,6 +336,9 @@ template {
 .filter-btn {
     height: 21px;
 }
+#point-view-table td{
+    vertical-align: middle;
+}
 #point-view-table td, #stop-info-table td, #stop-point-view-table td {
     padding: 4px 8px;
 }
@@ -371,16 +374,16 @@ template {
 #point-view .down-btn {
     width: 32.5%;
 }
-
+/*
 #confirm-status-task-btn {
     margin-left: 15px;
-}
-
+}*/
+/*
 #confirm-status-task-btn, #cancel-status-task-btn, #change-window-task-btn{
     padding: 1px 7px;
     height: 20px;
 }
-
+*/
 #edit-panel {
     padding: 7px;
     overflow-y: scroll;
@@ -572,4 +575,7 @@ template {
 .degree,
 .status-col {
     text-align: center;
+}
+.out-windows {
+    color: red;
 }

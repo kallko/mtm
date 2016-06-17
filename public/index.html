@@ -804,7 +804,7 @@
                        enter-event="changePromisedWindow(point)"> -
                 <input type="text" class="promised-text-card" id="promised-finish-card"
                        enter-event="changePromisedWindow(point)">
-                <button id="change-window-task-btn" class="btn btn-primary btn-sm" ng-click="changePromisedWindow(point)">Изменить</button>
+                <button id="change-window-task-btn" class="btn btn-primary btn-xs" ng-click="changePromisedWindow(point)">Изменить</button>
 
             </td>
         </tr>
@@ -820,26 +820,38 @@
             <td class="title">Статус:</td>
             <td class="row-data">
                 {{point.textStatus}}
-
-                <div ng-show="showHideSeasonButtons"> Доставку
-                <button id="confirm-status-task-btn"
-                        ng-disabled="selectReasonList"
-
-                        class="btn btn-primary btn-sm" ng-click="confirmStatus()">Подтвердить
-                </button>
-                    <br>
-                <select ng-model="selectReasonList"
-                        ng-options="item.ID as item.DESCRIPTION  for item in reasons">
-                    <option value="" selected>--Причина отказа--</option>
-                </select>
-                <button id="cancel-status-task-btn"
-                        ng-disabled="!selectReasonList"
-
-                        class="btn btn-primary btn-sm" ng-click="cancelTask()">Отменить
-                </button>
+        </tr>
+        <tr>
+            <td>Подтверждение</td>
+            <td>
+                <div ng-show="showHideSeasonButtons">
+                        <button id="confirm-status-task-btn"
+                                ng-disabled="selectReasonList"
+                                class="btn btn-primary btn-xs btn-success" ng-click="confirmStatus()">Подтвердить
+                        </button>
                 </div>
             </td>
         </tr>
+        <tr>
+            <td>Отмена</td>
+            <td>
+                <div class="row" ng-show="showHideSeasonButtons">
+                    <div class="col-md-5">
+                        <select ng-model="selectReasonList"
+                                ng-options="item.ID as item.DESCRIPTION  for item in reasons">
+                            <option value="" selected>--Причина отказа--</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="cancel-status-task-btn"
+                                ng-disabled="!selectReasonList"
+                                class="btn btn-primary btn-xs btn-danger" ng-click="cancelTask()">Отменить
+                        </button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+
         <!--<tr>-->
             <!--<td class="title">Окно:</td>-->
             <!--<td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>-->
