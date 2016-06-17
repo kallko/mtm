@@ -389,7 +389,9 @@ template {
     overflow-y: scroll;
     height: 100%;
 }
-
+.point-view-close-btn {
+    float: right;
+}
 #original-route, #changed-route, #changed-driver {
     border: 1px solid grey;
     margin: 3px;
@@ -578,4 +580,7 @@ template {
 }
 .out-windows {
     color: red;
+}
+.reason-list {
+    width: 210px;
 }

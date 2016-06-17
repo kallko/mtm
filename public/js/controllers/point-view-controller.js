@@ -253,4 +253,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     rootScope.errorNotification('./openidspointwindow/' + scope.point.waypoint.ID);
                 });
         };
+        scope.cancel = function () {
+            $('#point-view').popup('hide');
+        };
     }]);

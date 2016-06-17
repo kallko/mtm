@@ -743,14 +743,22 @@
 
 <!-- див для отображения окна точки -->
 <div id="point-view" ng-controller="PointViewController">
-    <div class="card-title">
-        Карточка задания
-        <button class="btn btn-primary btn-sm"
-                ng-show="companyName == 'IDS'"
-                ng-click="open1CWindow()">Открыть в 1С
-        </button>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <div class="card-title">
+                Карточка задания
+                <button class="btn btn-primary btn-sm"
+                        ng-show="companyName == 'IDS'"
+                        ng-click="open1CWindow()">Открыть в 1С
+                </button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <button  class="point-view-close-btn btn btn-danger" ng-click="cancel()">Закрыть
+            </button>
+        </div>
     </div>
-
     <table id="point-view-table" class="table table-striped">
         <tbody>
         <tr>
@@ -837,7 +845,7 @@
             <td>
                 <div class="row" ng-show="showHideSeasonButtons">
                     <div class="col-md-5">
-                        <select ng-model="selectReasonList"
+                        <select ng-model="selectReasonList" class="reason-list"
                                 ng-options="item.ID as item.DESCRIPTION  for item in reasons">
                             <option value="" selected>--Причина отказа--</option>
                         </select>
