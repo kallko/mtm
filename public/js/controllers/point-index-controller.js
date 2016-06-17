@@ -3317,8 +3317,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         function changeDriveronRoute(driver, transport, start, routeID) {
-            // создание дубликакта роута
-            var routeDublicate={};
+
+
+
+           // определение, какой роут подвергся редактированию
             var i=0;
             while (i<_data.routes.length) {
                 if(_data.routes[i].uniqueID==routeID) {
@@ -3329,6 +3331,51 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 i++;
             }
 
+            //частный случай если ничего не поменялось
+            if(tempRouteDublicate.TRANSPORT == transport && start==1 && tempRouteDublicate.DRIVER == driver){
+                console.log("It is nothing to change");
+                return;
+            }
+
+
+
+            //частный случай, если поменяли только водителя на маршруте, на котором не сделано ни одной точки
+            if(tempRouteDublicate.TRANSPORT == transport && start==1){
+                console.log("Just driver change")
+
+                tempRouteDublicate.DRIVER=driver;
+                // замена водителя
+                var i=0;
+                while(i<_data.drivers.length){
+                    if(_data.drivers[i].ID == driver) {
+
+                        tempRouteDublicate.driver= _data.drivers[i];
+                        var newDriver=_data.drivers[i];
+                        break;
+                    }
+
+                    i++;
+                }
+
+                //Замена поля driver во всех точках маршрута
+                i=0;
+                while(i< tempRouteDublicate.points.length){
+                    tempRouteDublicate.points[i].driver=newDriver;
+                    i++;
+                }
+
+
+                console.log("Changed route is", tempRouteDublicate);
+                console.log("Check in allData", _data);
+
+                //TODO проверить чтобы в кеш записывались данные по изменненому маршруту
+                return;
+            }
+
+
+
+            // создание дубликакта роута
+            var routeDublicate={};
             routeDublicate=JSON.parse(JSON.stringify(tempRouteDublicate));
 
 
@@ -3339,14 +3386,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             delete routeDublicate.car_position;
             delete routeDublicate.driver; //
             delete routeDublicate.haveSensor; //
-            delete routeDublicate.locked;
-            delete routeDublicate.lockedByMe;
+            delete routeDublicate.locked;    //
+            delete routeDublicate.lockedByMe; //
             delete routeDublicate.real_track;
             delete routeDublicate.transport; //
-            delete routeDublicate.uniqueID;
+            delete routeDublicate.uniqueID; //
+            delete routeDublicate.$$hashKey;
 
 
-            routeDublicate.ID = parseInt(routeDublicate.ID) +1;
+            routeDublicate.ID =_data.routes.length;
             routeDublicate.filterId = _data.routes.length;
             routeDublicate.getCheck = false;
             routeDublicate.uniqueID = ""+routeDublicate.itineraryID+routeDublicate.NUMBER+routeDublicate.ID;
@@ -3379,7 +3427,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 i++;
             }
 
-            console.log("We will change route", routeDublicate);
+            //Разделить между маршрутами точки, прогнозы, геометрию
+
+            var indx=start-1;// Номер точки на 1 больше чем индекс (если начинать с 1 точки, то это с 0 индекса);
+
+
+
+            // Разделение точек между маршрутами
+            var removed = tempRouteDublicate.points.slice(indx);
+            routeDublicate.points=removed;
+            tempRouteDublicate.points.length= indx;
+
+            //Разделение plan_geometry между маршрутами
+            removed = tempRouteDublicate.plan_geometry.slice(indx);
+            routeDublicate.plan_geometry=removed;
+            tempRouteDublicate.plan_geometry.length= indx;
+
+
+            //Разделение данных для предсказания
+            removed = tempRouteDublicate.time_matrix.length_table[0].slice(indx);
+            routeDublicate.time_matrix.length_table[0]=removed;
+            tempRouteDublicate.time_matrix.length_table[0].length= indx;
+
+            removed = tempRouteDublicate.time_matrix.time_table[0].slice(indx);
+            routeDublicate.time_matrix.time_table[0]=removed;
+            tempRouteDublicate.time_matrix.time_table[0].length= indx;
+
+            console.log("We will change route", routeDublicate , tempRouteDublicate);
+            _data.routes.push(routeDublicate);
+            //Сохранить
+
+            scope.$apply;
 
         }
 
