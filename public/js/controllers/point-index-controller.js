@@ -804,6 +804,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 concatDailyAndExistingData(_data);
                 scope.existDataLoaded=true;
                 statusUpdate();
+                unlockAllRoutes(null, _data);
 
                // scope.fastCalc=true;
             }
@@ -2013,6 +2014,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         case scope.draw_modes[0].value: // комбинированный
                             scope.$emit('drawCombinedTrack', route);
                             console.log("Send route to map");
+                            unlockAllRoutes(null, _data);
                             break;
                         case scope.draw_modes[1].value: // фактический
                             scope.$emit('drawRealTrack', route);
