@@ -159,7 +159,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 first = true;
             for (var i = 0; i < scope.route.points.length; i++) {
                 if (scope.route.points[i].TASK_NUMBER != '') {
-                    url += (!first ? ';' : '') + scope.route.points[i].TASK_NUMBER;
+                    url += (!first ? ';' : '') + scope.route.points[i].TASK_NUMBER.replace('/', 'SL');
                     first = false;
                 }
             }

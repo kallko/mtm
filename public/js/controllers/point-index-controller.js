@@ -3334,7 +3334,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             //частный случай если ничего не поменялось
-            if(tempRouteDublicate.TRANSPORT == transport && start==1 && tempRouteDublicate.DRIVER == driver){
+            if(tempRouteDublicate.TRANSPORT == transport  && tempRouteDublicate.DRIVER == driver){
                 console.log("It is nothing to change");
                 return;
             }
@@ -3366,10 +3366,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     i++;
                 }
 
-
-                console.log("Changed route is", tempRouteDublicate);
-                console.log("Check in allData", _data);
-
+                //console.log("Changed route is", tempRouteDublicate);
+                //console.log("Check in allData", _data);
                 //TODO проверить чтобы в кеш записывались данные по изменненому маршруту
                 return;
             }
@@ -3400,11 +3398,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             routeDublicate.filterId = _data.routes.length;
             routeDublicate.getCheck = false;
             routeDublicate.uniqueID = ""+routeDublicate.itineraryID+routeDublicate.NUMBER+routeDublicate.ID;
+
+
+
+
             //Найти нового водителя в полной базе
-
-
-
-
             var i=0;
             while(i<_data.drivers.length){
                 if(_data.drivers[i].ID == driver) {
@@ -3460,6 +3458,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //Сохранить
 
             scope.$apply;
+
+
+            //Сохраняем в кеш измененные данные. Отправляем 2 роута. Первый надо будет перезаписать, второй добавить.
+            // отдельно взять точки из первого маршрута и обновить update
+            http.post('./changedriver', {
+                routes: [tempRouteDublicate, routeDublicate]
+            })
+                .success(function (data) {
+                    console.log("Additional load", {data: data});
+                    predicateArrivalSecond (data);
+
+                }).error(function(err){
+                    console.log(err);
+
+                });
+
 
         }
 

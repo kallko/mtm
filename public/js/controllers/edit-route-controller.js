@@ -194,6 +194,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                     // после пересчета обновляем данные о блоках
                     updateBoxes(firstInit);
+                })
+                .error(function(data){
+                    console.log("This is ERROR!");
                 });
         }
 
