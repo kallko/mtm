@@ -1318,6 +1318,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     findStatusAndWindowForPoint(tmpPoint);
                                     break;
                                 } else {
+                                    _data.routes[j].pushes = _data.routes[j].pushes || [];
                                     console.log('>>> OUT of mobile radius');
                                 }
                             }
