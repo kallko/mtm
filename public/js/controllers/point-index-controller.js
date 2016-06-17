@@ -1319,6 +1319,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     break;
                                 } else {
                                     _data.routes[j].pushes = _data.routes[j].pushes || [];
+                                    if (mobilePushes[i].gps_time_ts < _data.server_time) {
+                                        _data.routes[j].pushes.push(mobilePushes[i]);
+                                    }
                                     console.log('>>> OUT of mobile radius');
                                 }
                             }
