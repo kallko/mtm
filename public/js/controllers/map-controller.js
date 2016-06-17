@@ -358,7 +358,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpTitle += 'ID задания: ' + pushes[i].number;
 
                 tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
-                tmpVar.setIcon(getIcon('M', iconIndex, 'orange', 'black'));
+                var pushColor='orange'
+                if(pushes[i].long_away){
+                    pushColor='#e01283';
+                }
+
+
+                tmpVar.setIcon(getIcon('M', iconIndex, pushColor, 'black'));
                 tmpVar.task_ID=pushes[i].number;
 
 
