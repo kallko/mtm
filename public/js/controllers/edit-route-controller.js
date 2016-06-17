@@ -84,6 +84,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // загружен новый маршрут
         function onRouteToChange(event, data) {
+            scope.selectedDriver= false;
+            scope.selectedTransport = false;
+            scope.selectedStart= false;
+            console.log("I recieve DATA", data);
+            scope.allDrivers=data.allDrivers;
+            scope.allTransports=data.allTransports;
+
             console.log(data.route);
             if( data.route.DISTANCE == 0) {
                 scope.disableRecalculate = scope.disableSaveRoutes = true;
@@ -788,6 +795,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.changedRoute = undefined;
         };
 
-
+    scope.changeDriver = function() {
+        //console.log(scope.selectedDriver, scope.selectedTransport, scope.selectedStart);
+        rootScope.$emit('changeDriver', scope.selectedDriver, scope.selectedTransport, scope.selectedStart, scope.route.uniqueID); //эмитируем в поинтиндекс контроллер, чтобы там сделать все изменения в данных
+        scope.selectedStart=false;
+    }
 
     }]);

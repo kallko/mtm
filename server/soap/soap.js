@@ -82,6 +82,7 @@ SoapManager.prototype.loadDemoData = function (callback) {
 
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
+
    // console.log( " Prepare for DATA GLUE data, soap 84");
     var data;
     for (var k = 0; k < _data.length; k++) {
@@ -181,7 +182,6 @@ function checkBeforeSend(_data, callback) {
     //console.log('DONE!', allData.reasons, "SOAP175");
     log.toFLog('final_data.js', allData);
     callback(allData);
-    console.log('checkBeforeSend');
 }
 
 // получить план на день
@@ -237,7 +237,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         (function (ii) {
                             setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
-                            }, ii * 100);
+                            }, ii * 5000);
                         })(i);
                     }
 
@@ -431,15 +431,11 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     tracksManager.getRouterData(data, i, nIndx, checkBeforeSend, callback);
                 }
 
-
-                console.log('123123123');
-
                 // получение реальных треков и стопов
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
                 //console.log(data[nIndx].reasons, "data SOAP 429");
-
                 checkBeforeSend(data, callback);
             });
 

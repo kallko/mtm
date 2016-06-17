@@ -255,12 +255,12 @@ template {
 }
 
 .delivered-late-status {
-    color: red;
+    color: #0A800A;
     /*text-decoration: underline;*/
 }
 
 .delivered-too-early-status {
-    color: green;
+    color: #0A800A;
     /*text-decoration: overline;*/
 }
 
@@ -269,14 +269,14 @@ template {
 }
 
 .time-out-status, .delay-status {
-    color: red;
+    color: rgb(234,0,0);
 }
 
 .attention-status {
     color: red;
 }
 .delay-status2 {
-    color:#EA733B !important;
+    color: rgb(234,0,0); !important;
 }
 
 .scheduled-status {
@@ -387,7 +387,7 @@ template {
     height: 100%;
 }
 
-#original-route, #changed-route {
+#original-route, #changed-route, #changed-driver {
     border: 1px solid grey;
     margin: 3px;
     padding: 3px;
