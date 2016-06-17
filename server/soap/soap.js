@@ -187,6 +187,8 @@ function checkBeforeSend(_data, callback) {
 
     //console.log('DONE!', allData.reasons, "SOAP175");
     log.toFLog('final_data.js', allData);
+
+
     callback(allData);
 }
 
@@ -232,14 +234,13 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         data = [];
 
                     data.iLength = itineraries.length;
+
                     // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
                     // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
                     if (!config.loadOnlyItineraryNew) data.iLength *= 2;
 
                     // получение развернутого решения по списку полученных ранее id решений
                     for (var i = 0; i < itineraries.length; i++) {
-                        //if (itineraries[i].$.ID == 4) continue; // TODO REMOVE
-
                         (function (ii) {
                             setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);

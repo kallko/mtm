@@ -2565,56 +2565,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             var xml = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+data.routesOfDate+'"><TEXTDATA>'+ JSON.stringify(result) +'</TEXTDATA></CLOSEDAY></MESSAGE>';
-           // var oldInfa = {
-           //     routes: [{
-           //         itenereryID: 123,
-           //         routeID: 1,
-           //         points: [
-           //             {
-           //                 stop: {
-           //                     arrival: 123,
-           //                     duration: 123
-           //                 },
-           //                 taskID: 1,
-           //                 status: false,
-           //                 reason: 123456789
-           //             },
-           //             {
-           //                 stop: {
-           //                     arrival: 123,
-           //                     duration: 123
-           //                 },
-           //                 taskID: 2,
-           //                 status: true
-           //             }
-           //         ]
-           //     },
-           //         {
-           //             itenereryID: 123,
-           //             routeID: 2,
-           //             points: [
-           //                 {
-           //                     stop: {
-           //                         arrival: 123,
-           //                         duration: 123
-           //                     },
-           //                     taskID: 1,
-           //                     status: true
-           //                 },
-           //                 {
-           //                     stop: {
-           //                         arrival: 123,
-           //                         duration: 123
-           //                     },
-           //                     taskID: 2,
-           //                     status: false,
-           //                     reason: 123456789
-           //                 }
-           //             ]
-           //         }
-           //     ]
-           // };
-           //  console.log(JSON.stringify(oldInfa));
+            
             if( currentDay ){ // проверка сегодняшней даты закрытия дня
                 console.log("UPDATE DAY");
                 //console.log("XML == ", xml);
