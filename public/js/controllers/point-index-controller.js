@@ -3492,20 +3492,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //Изменить route_id в новом маршруте во всех точках а также driver transport
+            var i=0;
+            while(i<routeDublicate.points.length){
+                routeDublicate.points[i].transport= routeDublicate.transport;
+                routeDublicate.points[i].driver= routeDublicate.driver;
+                routeDublicate.points[i].route_id = routeDublicate.filterId;
+                routeDublicate.points[i].route_indx = routeDublicate.filterId;
+                i++;
+            }
 
+            //console.log("DisplayCollection", scope.displayCollection);
 
             //добавление новго выбора для селектора
             scope.filters.routes.push({
                 //name: data.routes[i].transport.NAME,
-
                 allRoutes: false,
-
                 nameDriver:  ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') + ' - ' + routeDublicate.transport.NAME ,
                 nameCar:  routeDublicate.transport.NAME  + ' - ' +   ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') ,
-
                 value: routeDublicate.filterId,
-
-
                 car: routeDublicate.transport.NAME,
                 driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
             });
@@ -3519,7 +3523,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
                 .success(function (data) {
                     console.log("Cashe updated 2 times", {data: data});
-
 
                 }).error(function(err){
                     console.log(err);
