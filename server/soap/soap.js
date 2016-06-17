@@ -271,7 +271,6 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
     if (!err) {
         //console.log(result.return, "soap.js:266")
         parseXML(result.return, function (err, res) {
-
             data.iLength--;
 
             if (res.MESSAGE.ITINERARIES == null ||
