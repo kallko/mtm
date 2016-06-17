@@ -150,7 +150,7 @@ router.route('/dailydata')
             && cashedDataArr[req.session.login] != null
             && (req.session.login in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
-            console.log('=== loaded from session === send data to client ===');
+            console.log('=== loaded from session === send data to client === ROutes =',cashedDataArr[req.session.login].routes.length );
             req.session.itineraryID = cashedDataArr[req.session.login].ID;
             cashedDataArr[req.session.login].user = req.session.login;
             var cache = cashedDataArr[req.session.login];
@@ -744,7 +744,33 @@ router.route('/predicate/')
 
     });
 
+// получение треков по переданным стейтам
+router.route('/changedriver/')
+    .post(function (req, res) {
+        //console.log('gettracksbystates ', req.body.routes[0], "MTM 750");
+        //console.log("cashedDataArr[req.session.login]", cashedDataArr[req.session.login].routes, "MTM 751");
+        // Перезапись в кеше маршрута отредактированного в мониторинге
+        var i=0;
+        req.body.routes[0].filterId=null;
+        while(i<cashedDataArr[req.session.login].routes.length){
+            if(cashedDataArr[req.session.login].routes[i].uniqueID == req.body.routes[0].uniqueID){
+                cashedDataArr[req.session.login].routes[i] = req.body.routes[0];
+                cashedDataArr[req.session.login].routes[i].filterId=null;
+                //console.log("Overwright Route");
+                break;
+            }
 
+
+            i++;
+        }
+
+        //tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
+        //    console.log('get tracks by states DONE!');
+        //    res.status(200).json(data);
+        //});
+        res.status(200).json("ok");
+
+    });
 
 
 module.exports = router;

@@ -565,6 +565,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpTaskNumber--;
                     }
 
+
+                    //тестово отладочный блок
+                    //if(data.routes[i].driver.ID== "_____X___"){
+                    //console.log(" data.routes[i].filterId", data.routes[i].filterId)}
+
                     if (data.routes[i].filterId == null) {
                         data.routes[i].filterId = routeId;
 
@@ -1428,7 +1433,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if(tmpPoint.status<3 && tmpPoint.limit<74 ){
                 tmpPoint.status=6;
                 tmpPoint.problem_index=1;
-                console.log("tmpPoint.problem_index", tmpPoint.problem_index);
+                //console.log("tmpPoint.problem_index", tmpPoint.problem_index);
             }
 
 
@@ -3073,7 +3078,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var route=_data.routes[j];
                 var now=_data.server_time;
 
-                console.log("New now is", now);
+                //console.log("New now is", now);
                 var time_table=[];
                 var points=route.points;
 
@@ -3327,6 +3332,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             while (i<_data.routes.length) {
                 if(_data.routes[i].uniqueID==routeID) {
                     var tempRouteDublicate=_data.routes[i];
+                    //console.log("We will change",_data.routes[i].filterId );
+                    //console.log("All route", tempRouteDublicate);
                     break;
                 }
 
@@ -3343,7 +3350,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //частный случай, если поменяли только водителя на маршруте, на котором не сделано ни одной точки
             if(tempRouteDublicate.TRANSPORT == transport && start==1){
-                console.log("Just driver change")
+                console.log("Just driver change");
 
                 tempRouteDublicate.DRIVER=driver;
                 // замена водителя
@@ -3366,6 +3373,33 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     i++;
                 }
 
+                //Замена водителя в scope.filters.routes
+                i=0;
+                while(i<scope.filters.routes.length){
+                    //console.log("Start serching" , tempRouteDublicate.filterId, "=",scope.filters.routes[i].value);
+                    if (scope.filters.routes[i].value == tempRouteDublicate.filterId){
+                        scope.filters.routes[i].driver = ( tempRouteDublicate.hasOwnProperty('driver') && tempRouteDublicate.driver.hasOwnProperty('NAME') ) ? tempRouteDublicate.driver.NAME : 'без имени'+i; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                        scope.filters.routes[i].nameDriver =  ( ( tempRouteDublicate.hasOwnProperty('driver') && tempRouteDublicate.driver.hasOwnProperty('NAME') ) ? tempRouteDublicate.driver.NAME : 'без имени') + ' - ' + tempRouteDublicate.transport.NAME;
+
+                        //console.log("ReArange scope.filters.routes");
+                        break;
+                    }
+                    i++
+                }
+
+
+
+                http.post('./changedriver', {
+                    routes: [tempRouteDublicate]
+                })
+                    .success(function (data) {
+                        console.log("Cashe Update", {data: data});
+                        //predicateArrivalSecond (data);
+
+                    }).error(function(err){
+                        console.log(err);
+
+                    });
                 //console.log("Changed route is", tempRouteDublicate);
                 //console.log("Check in allData", _data);
                 //TODO проверить чтобы в кеш записывались данные по изменненому маршруту
@@ -3467,7 +3501,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
                 .success(function (data) {
                     console.log("Additional load", {data: data});
-                    predicateArrivalSecond (data);
+                    //predicateArrivalSecond (data);
 
                 }).error(function(err){
                     console.log(err);
