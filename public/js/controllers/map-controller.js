@@ -118,6 +118,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 stopIndx,
                 stopTime,
                 drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
+                //drawStops = true;
 
                 //drawPushes = $('#draw-pushes').is(':checked');  // отрисовать нажатия если в таблице стоит галочка.
                 drawPushes = true;  // Железно отрисовывать пуши.
@@ -565,6 +566,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 newMarker.source.waypoint.CONFIRMBYGPS="true";
                 console.log("NEW New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
                 rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
+                rootScope.$emit('statusUpdate');
                 $('#notification_wrapper').css('opacity', '1');
                 //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
                 //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);

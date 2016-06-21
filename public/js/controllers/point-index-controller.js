@@ -3566,7 +3566,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
-
+        rootScope.$on('statusUpdate', statusUpdate);
     }]);
 
 
