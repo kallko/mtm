@@ -118,10 +118,12 @@
         <!-- Пока не выводим для пользователя, так как не реализован функционал -->
         <div id="point-menu-panel" >
             <div class="row row-gutter-5">
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {{nowTime*1000 | date : 'dd.MM.yyyy'}}
-                        Выберите статус
+                <div class="col-md-2">
+                    <span>{{nowTime*1000 | date : 'dd.MM.yyyy'}}</span>
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Cтатус
                     </button>
                     <div class="dropdown-menu">
                         <ul class="dropdown-statuses">
@@ -130,80 +132,75 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-sm-3">
                     <select id="route-select" ng-change="selectFilterRute()"  ng-model="filters.route" class="group-select heightElement width100"
                             ng-options="option.value as option[params.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', params.routeListOrderBy]">
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-sm-2">
                     <button  class="btn btn-default btn-sm heightElement width100" ng-class="filters.problem_index == 1 ? 'btn-success' : '' " id="problem-index-btn" ng-click="toggleProblemPoints()">
                         проблемные
                     </button>
                 </div>
             </div>
             <div class="row row-gutter-5">
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    {{nowTime*1000 | date : 'H:mm:ss'}}
+                </div>
+                <div class="col-sm-3">
                     <input  id="search-input" class="heightElement" type="text" size="15" enter-event="setTextFilter()"/>
                     <button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="setTextFilter()">
                         <span class="glyphicon glyphicon-search" aria-hidden="false"></span>
                     </button>
                 </div>
-                <div class="col-md-3">
+                <div class="col-sm-3">
                     <input type="date"
                            class="width100 heightElement"
                            ng-model="showDate"
                            id="show-date"/>
                 </div>
-                <div class="col-md-2">
+                <div class="col-sm-2">
                     <button class="btn btn-info btn-sm heightElement width100" ng-click="loadOldDay()">Загрузить</button>
                 </div>
             </div>
         </div>
 
-                <!--<select id="status-select" ng-model="filters.status" class="group-select"-->
-                        <!--ng-options='option.value as option.name for option in filters.statuses'>-->
-                <!--</select>-->
+
+
+                <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
+                        ng-options='option.value as option.name for option in filters.branches'>
+                </select>
 
 
 
 
+                <select ng-show="false" id="draw-mode-select" ng-model="draw_mode" class="group-select"
+                        ng-options='option.value as option.name for option in draw_modes'>
+                </select>
+
+                <input ng-show="false" id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
+                <input ng-show="false" id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
+                <button ng-show="false" class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
+
+                <button ng-show="false" class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
+                    загрузить
+                </button>
 
 
 
-                <!--<select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"-->
-                        <!--ng-options='option.value as option.name for option in filters.branches'>-->
-                <!--</select>-->
+                <input ng-show="false" id="fast-calc" type="checkbox" value="false" ng-model="fastCalc" checked title="Упрощенный расчет данных">
+
+                <button ng-show="false" class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
+                    {{params.endWindowSize * 5}} минут до закрытия
+                </button>
+                <button ng-show="false" class="btn btn-default btn-sm1"  id="test" ng-click="testbutton()" >
+                     Кнопка ТЕСТ
+                </button>
 
 
-
-
-                <!--<select ng-show="false" id="draw-mode-select" ng-model="draw_mode" class="group-select"-->
-                        <!--ng-options='option.value as option.name for option in draw_modes'>-->
-                <!--</select>-->
-
-                <!--<input ng-show="false" id="draw-stops" type="checkbox" checked title="Отображать стопы"/>-->
-                <!--<input ng-show="false" id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>-->
-                <!--<button ng-show="false" class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>-->
-
-                <!--<button ng-show="false" class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">-->
-                    <!--загрузить-->
-                <!--</button>-->
-
-
-
-                <!--<input ng-show="false" id="fast-calc" type="checkbox" value="false" ng-model="fastCalc" checked title="Упрощенный расчет данных">Быстрый расчет</input>-->
-
-                <!--<button ng-show="false" class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">-->
-                    <!--{{params.endWindowSize * 5}} минут до закрытия-->
-                <!--</button>-->
-                <!--<button ng-show="false" class="btn btn-default btn-sm1"  id="test" ng-click="testbutton()" >-->
-                     <!--Кнопка ТЕСТ-->
-                <!--</button>-->
-
-
-                <!--<button ng-show="false" class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">-->
-                    <!--<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="false"></span>-->
-                <!--</button>-->
+                <button ng-show="false" class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
+                    <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="false"></span>
+                </button>
 
             <!-- таблица точек -->
         <div class="point-table-wrap">
