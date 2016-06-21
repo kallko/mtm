@@ -19,17 +19,17 @@ var config = {
 
     aggregator: {
         //url: 'http://192.168.9.29:20000/', // локальный путь к аггрегатору
-        url: 'http://sngtrans.com.ua/gps/', // путь к агрегатору на хосте
+        url: '//gps.s2.sngtrans.com.ua/', // путь к агрегатору на хосте
         login: 'admin',
         password: 'admin321'
     },
 
     router: {
-        url: 'http://sngtrans.com.ua:5201/'
+        url: '//router.s2.sngtrans.com.ua/'
     },
 
     mathServer: {
-        url: 'http://192.168.9.29:12032/' // локальный путь к матсерверу
+        url: 'http://192.168.9.29:12035/' // локальный путь к матсерверу
         //url: 'http://62.205.137.118:9000/' // путь к матсерверу на хосте
     }
 };
