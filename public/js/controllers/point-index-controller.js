@@ -1614,14 +1614,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         }
 
-        rootScope.$on('loadOldDay', function(event, params){
-            if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
-                scope.$emit('clearMap');
-                console.log('OMG!!1 New show date!');
-                loadDailyData(true, params.showDate);
-                return;
-            }
-        });
+        // rootScope.$on('loadOldDay', function(event, params){
+        //     if (params.showDate !== -1 && params.showDate !== scope.params.showDate) {
+        //         scope.$emit('clearMap');
+        //         console.log('OMG!!1 New show date!');
+        //         loadDailyData(true, params.showDate);
+        //         return;
+        //     }
+        // });
 
         // добавить в подтвержденные
         function addToConfirmed(id, code) {
@@ -3541,6 +3541,30 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         }
+
+
+        scope.loadOldDay = function(){
+            if(scope.showDate!=undefined){
+                var dateTS = scope.showDate.getTime();
+                scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
+
+                //rootScope.$emit('fastCalc');
+                rootScope.$emit('stateChanged');
+                http.post('./currentsrvertime/')
+                    .success(function (serverTime){
+                        var chooseDate = new Date(scope.params.showDate);
+                        var currentTime = new Date(serverTime);
+                        if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
+                            scope.params.showDate = null;
+                        }
+                        if (scope.params.showDate !== -1) {
+                            scope.$emit('clearMap');
+                            console.log('OMG!!1 New show date!');
+                            loadDailyData(true, scope.params.showDate);
+                        }
+                    });
+            }
+        };
 
 
     }]);

@@ -31,27 +31,27 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
         // scope.ordered = 'nameDriver';
 
         // обработчик кнопки сохранить, вызывается в index.html (ng-click)
-        scope.loadOldDay = function(){
-            if(scope.showDate!=undefined){
-                var dateTS = scope.showDate.getTime();
-                scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
-                console.log(scope.params.showDate);
-
-                //rootScope.$emit('fastCalc');
-                rootScope.$emit('stateChanged');
-                http.post('./currentsrvertime/')
-                    .success(function (serverTime){
-                        var chooseDate = new Date(scope.params.showDate);
-                        var currentTime = new Date(serverTime);
-                        if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
-                            scope.params.showDate = null;
-                            scope.$emit('loadOldDay', scope.params);
-                        }else{
-                            scope.$emit('loadOldDay', scope.params);
-                        }
-                    });
-            }
-        };
+        // scope.loadOldDay = function(){
+        //     if(scope.showDate!=undefined){
+        //         var dateTS = scope.showDate.getTime();
+        //         scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
+        //         console.log(scope.params.showDate);
+        //
+        //         //rootScope.$emit('fastCalc');
+        //         rootScope.$emit('stateChanged');
+        //         http.post('./currentsrvertime/')
+        //             .success(function (serverTime){
+        //                 var chooseDate = new Date(scope.params.showDate);
+        //                 var currentTime = new Date(serverTime);
+        //                 if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
+        //                     scope.params.showDate = null;
+        //                     scope.$emit('loadOldDay', scope.params);
+        //                 }else{
+        //                     scope.$emit('loadOldDay', scope.params);
+        //                 }
+        //             });
+        //     }
+        // };
 
         
 

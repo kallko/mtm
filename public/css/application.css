@@ -72,6 +72,7 @@ template {
 
 #point-menu-panel {
     margin: 10px;
+    padding-left: 10px;
 }
 
 #point-menu-panel select {
@@ -318,7 +319,6 @@ template {
 #search-input {
     margin: 0;
     padding: 0;
-    height: 22px;
 }
 
 #point-view, #point-editing-popup {
@@ -583,4 +583,25 @@ template {
 }
 .reason-list {
     width: 210px;
+}
+.loadOldDayWrap {
+    display: inline-block;
+    margin-left: 25px;
+}
+.point-view-header {
+    margin-bottom: 10px;
+}
+.heightElement,
+.searchButton {
+    height: 26px;
+}
+.searchButton {
+    width: 26px;
+}
+.width100{
+    width: 100% !important;
+}
+.row-gutter-5 [class ^= 'col-']{
+    padding-right: 5px !important;
+    padding-left: 5px !important;
 }
