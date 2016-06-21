@@ -367,8 +367,8 @@
                         </span>
                     </td>
                     <td>
-                        {{row.promised_window.start * 1000 | date:'HH:mm'}} -
-                        {{row.promised_window.finish * 1000 | date:'HH:mm'}}
+                        {{row.promised_window_changed.start * 1000 | date:'HH:mm'}} -
+                        {{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}
                     </td>
                     <!--<td>-->
                         <!--<input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"-->
@@ -509,6 +509,11 @@
                 <span class="param-title">Влияние стоимости</span>
                 <input type="range" min="0" max="100" ng-model="params.value"/>
                 {{params.value / 10}}
+            </div>
+            <div class="setting-row">
+                <span class="param-title">Влияние переносов</span>
+                <input type="range" min="0" max="100" ng-model="params.changeTime"/>
+                {{params.changeTime / 10}}
             </div>
         </div>
         <div class="button-row">

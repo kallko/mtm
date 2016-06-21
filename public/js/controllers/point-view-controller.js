@@ -239,6 +239,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             } else {
                 console.log('updateRawPromised');
                 scope.$emit('updateRawPromised', {point: point});
+                scope.cancel();
             }
         };
 

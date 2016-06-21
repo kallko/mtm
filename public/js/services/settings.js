@@ -47,6 +47,7 @@ angular.module('MTMonitor').factory('Settings', [function SettingsFactory() {
                 stopRadius: 80,
                 mobileRadius: 150,
                 timeThreshold: 90,
+                changeTime: 0,
                 routeListOrderBy: 'nameDriver'
             };
         },

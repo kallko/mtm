@@ -1477,6 +1477,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     point.problem_index += parseInt(point.WEIGHT) * scope.params.weight;
                     point.problem_index += parseInt(point.VOLUME) * scope.params.volume;
                     point.problem_index += parseInt(point.VALUE) * scope.params.value;
+                    if(point.change_time) {
+                    point.problem_index += parseInt(point.change_time)*scope.params.changeTime;}
 
                     point.problem_index = parseInt(point.problem_index * timeCoef);
                     point.problem_index = parseInt(point.problem_index / 100);
@@ -1599,6 +1601,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || params.value !== scope.params.value
                 || params.stopRadius !== scope.params.stopRadius
                 || params.mobileRadius !== scope.params.mobileRadius
+                || params.changeTime !== scope.params.changeTime
                 || params.timeThreshold !== scope.params.timeThreshold) {
                 console.log('problem index parameter was changed!');
                 changed = true;
@@ -2187,9 +2190,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // изменить обещанное окно в сырых данных
         function updateRawPromised(point) {
-            var rawPoints = rawData.routes[point.route_id].points;
+            console.log("Start change Promised Window");
+            var rawPoints = _data.routes[point.route_id].points;
             for (var i = 0; i < rawPoints.length; i++) {
                 if (rawPoints[i].TASK_NUMBER == point.TASK_NUMBER) {
+                    console.log("Find point to change", rawPoints[i]);
                     rawPoints[i].promised_window = JSON.parse(JSON.stringify(point.promised_window));
                     rawPoints[i].promised_window_changed = JSON.parse(JSON.stringify(point.promised_window_changed));
                     (rawPoints[i].change_time==undefined || rawPoints[i].change_time==null ||rawPoints[i].change_time==0) ? rawPoints[i].change_time=1 : rawPoints[i].change_time+=1;
