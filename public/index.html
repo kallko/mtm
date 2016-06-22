@@ -134,7 +134,7 @@
                     </div>
                 </div>
                 <div class="col-sm-3">
-                    <select id="route-select" ng-change="selectFilterRute()"  ng-model="filters.route" class="group-select heightElement width100"
+                    <select id="route-select"   ng-model="filters.route" class="group-select heightElement width100"
                             ng-options="option.value as option[params.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', params.routeListOrderBy]">
                     </select>
                 </div>
@@ -740,21 +740,21 @@
         <table class="statistic-table">
             <thead>
             <tr>
-                <th>Доставлено</th>
-                <th>Будет во время</th>
-                <th>Опаздывает</th>
-                <th>Время вышло</th>
-                <th>Отменено</th>
-                <th>Внимание</th>
+                <th class="scheduled-status">Будет во время</th>
+                <th class="delivered-status">Доставлено</th>
+                <th class="attention-status">Внимание</th>
+                <th class="delay-status">Опаздывает</th>
+                <th class="time-out-status">Время вышло</th>
+                <th class="canceled-status">Отменено</th>
             </tr>
             </thead>
             <tr>
-                <td>{{statistic.delivered}}</td>
-                <td>{{statistic.scheduled}}</td>
-                <td>{{statistic.delay}}</td>
-                <td>{{statistic.timeOut}}</td>
-                <td>{{statistic.canceled}}</td>
-                <td>{{statistic.attention}}</td>
+                <td class="scheduled-status">{{statistic.scheduled}}</td>
+                <td class="delivered-status">{{statistic.delivered}}</td>
+                <td class="attention-status">{{statistic.attention}}</td>
+                <td class="delay-status">{{statistic.delay}}</td>
+                <td class="time-out-status">{{statistic.timeOut}}</td>
+                <td class="canceled-status">{{statistic.canceled}}</td>
             </tr>
         </table>
     </div>

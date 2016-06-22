@@ -615,6 +615,10 @@ template {
     width: 100%;
 }
 .statistic-table {
-    width: 80%;
+    width: 95%;
     margin: 0 auto;
+}
+.statistic-table td,
+.statistic-table th{
+    text-align: center;
 }

@@ -119,7 +119,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // }
         }
          rootScope.$on('closeDriverName', function (event, filterId, drawNewRoute) {
-                scope.selectRouteFilter = filterId;
+                //scope.selectRouteFilter = filterId;
 
                  // var driversArr = [];
                  // for(var i=0; i<scope.filters.routes.length; i++){
@@ -127,43 +127,53 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                  // }
                  // scope.filters.route = driversArr.indexOf(data)-1;
              if(drawNewRoute){
-                 for(var i = 0; _data.routes.length > i; i++){
-                     if(_data.routes[i].filterId == filterId){
-                         console.log("_data.routes[i]", _data.routes[i]);
-                         scope.filters.route = filterId;
-                         break;
-                     }
-                 }
-                 scope.drawRoute(filterId);
+                 scope.filters.route = filterId;
              }else{
-                 scope.$emit('clearMap');
                  scope.filters.route = -1;
              }
          });
 
 
 
-        scope.selectFilterRute = function(){
-            console.log(scope.filters.route);
-            if(scope.filters.route == -1){
-                for(var j = 0; _data.routes.length > j; j++){
-                    _data.routes[j].selected = false;
-                }
-                return;
-            }
-            scope.drawRoute(scope.filters.route);
-            for(var i = 0; _data.routes.length > i; i++ ){
-                if(_data.routes[i].filterId == scope.filters.route){
-                    if(!_data.routes[i].selected){
-                        for(var j = 0; _data.routes.length > j; j++){
-                            _data.routes[j].selected = false;
-                        }
-                        _data.routes[i].selected = true;
+        // scope.selectFilterRute = function(){
+        //
+        //     for(var i = 0; _data.routes.length > i; i++ ){
+        //         if(_data.routes[i].filterId == scope.filters.route){
+        //             if(!_data.routes[i].selected){
+        //                 for(var j = 0; _data.routes.length > j; j++){
+        //                     _data.routes[j].selected = false;
+        //                 }
+        //                 _data.routes[i].selected = true;
+        //             }
+        //             break;
+        //         }
+        //     }
+        // };
+        scope.$watch('filters.route', function(){
+            if(_data != undefined) {
+                if (scope.filters.route == -1) {
+                    scope.$emit('clearMap');
+                    for (var j = 0; _data.routes.length > j; j++) {
+                        _data.routes[j].selected = false;
                     }
-                    break;
+                    rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
+                } else {
+                    scope.drawRoute(scope.filters.route);
+                    for (var i = 0; _data.routes.length > i; i++) {
+                        if (_data.routes[i].filterId == scope.filters.route) {
+                            if (!_data.routes[i].selected) {
+                                for (var j = 0; _data.routes.length > j; j++) {
+                                    _data.routes[j].selected = false;
+                                }
+                                _data.routes[i].selected = true;
+                            }
+                            rootScope.$emit('displayCollectionToStatistic', _data.routes[i].points);
+                            break;
+                        }
+                    }
                 }
             }
-        };
+        });
 
 
 
@@ -777,9 +787,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             setColResizable();
             prepareFixedHeader();
         }
-        scope.$watch('displayCollection', function() {
-            rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
-        }
 
         // обрезает ФИО до ФИ
         function cutFIO(fioStr) {
@@ -1158,188 +1165,191 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 scope.$emit('companyName', _data.companyName);
                 //scope.$emit('forCloseController', _data); // это реализовано около строки 308
                // console.log("RETURN?????????");
-                return;
-            }
+            }else {
 
 
-            console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            var mobilePushes = [],
-                allPushes = [];
+                var mobilePushes = [],
+                    allPushes = [];
 
-            // генерируем мобильные нажатия, если мы в демо-режиме
-            if (scope.demoMode) {
-                var rand,
-                    gpsTime,
-                    tmp,
-                    tmpLen,
-                    tmpCoord,
-                    tmpLat,
-                    tmpLon,
-                    tmpRoute;
-
-                tmpTime = undefined;
-                _data.companyName = 'Demo';
-                for (var i = 0; i < _data.routes.length; i++) {
-
-                    tmpRoute = _data.routes[i];
-                    seed = i * 122;
-                    rand = random(0, 3600);
-                    for (var j = 0; j < tmpRoute.points.length; j++) {
-                        if (_data.server_time > (tmpRoute.points[j].arrival_time_ts + (rand - 1800))) {
-                            if (random(1, 8) != 1) {
-                                tmp = (tmpRoute.points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
-                                gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
-
-                                if (tmpRoute.points[j].haveStop &&
-                                    tmpRoute.points[j].stopState != undefined &&
-                                    tmpRoute.points[j].stopState.coords &&
-                                    (tmpLen = tmpRoute.points[j].stopState.coords.length) > 0) {
-
-                                    tmpLen = tmpLen > 20 ? 20 : tmpLen;
-                                    tmpCoord = tmpRoute.points[j].stopState.coords[random(0, tmpLen)];
-                                    tmpLat = tmpCoord.lat;
-                                    tmpLon = tmpCoord.lon;
-                                } else {
-                                    tmpLat = parseFloat(tmpRoute.points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
-                                    tmpLon = parseFloat(tmpRoute.points[j].LON) + (random(0, 4) / 10000 - 0.0002);
-                                }
-
-                                mobilePushes.push({
-                                    cancel_reason: "",
-                                    canceled: false,
-                                    gps_time: gpsTime,
-                                    lat: tmpLat,
-                                    lon: tmpLon,
-                                    number: tmpRoute.points[j].TASK_NUMBER,
-                                    time: gpsTime
-                                });
-                            }
-                        }
-                    }
-                }
-            } else {
-                // получаем через 1С-ый parentForm имя клиента
-                //console.log("Step3");
-                _data.companyName = parentForm._call('getClientName');
-            }
-            //console.log( _data.companyName, ' cmpanyName');
-
-            scope.$emit('companyName', _data.companyName);
-
-            // по каждому доступному решению запрашиваем нажатия
-
-            console.log("!!!!!!Find pushes. Where are you?!!!!!!", _data);
-
-            for (var m = 0; m < _data.idArr.length; m++) {
-
+                // генерируем мобильные нажатия, если мы в демо-режиме
                 if (scope.demoMode) {
-                    m = 2000000000;
-                } else {
-                    mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
-                }
+                    var rand,
+                        gpsTime,
+                        tmp,
+                        tmpLen,
+                        tmpCoord,
+                        tmpLat,
+                        tmpLon,
+                        tmpRoute;
 
-                console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes );
+                    tmpTime = undefined;
+                    _data.companyName = 'Demo';
+                    for (var i = 0; i < _data.routes.length; i++) {
 
+                        tmpRoute = _data.routes[i];
+                        seed = i * 122;
+                        rand = random(0, 3600);
+                        for (var j = 0; j < tmpRoute.points.length; j++) {
+                            if (_data.server_time > (tmpRoute.points[j].arrival_time_ts + (rand - 1800))) {
+                                if (random(1, 8) != 1) {
+                                    tmp = (tmpRoute.points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
+                                    gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
 
+                                    if (tmpRoute.points[j].haveStop &&
+                                        tmpRoute.points[j].stopState != undefined &&
+                                        tmpRoute.points[j].stopState.coords &&
+                                        (tmpLen = tmpRoute.points[j].stopState.coords.length) > 0) {
 
-                if (mobilePushes == undefined
-                    || Object.keys(mobilePushes).length == 0) {
-                    console.log('no mobile buttons push');
-                    continue;
-                }
-
-                var buttonsStr = mobilePushes[Object.keys(mobilePushes)[0]];
-
-                if (buttonsStr == '[]') {
-                    console.log('no mobile buttons push');
-                    continue;
-                }
-
-                if (!scope.demoMode) {
-                    buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
-                    mobilePushes = JSON.parse(buttonsStr);
-                }
-                //console.log('mobilePushes array', {pushes: mobilePushes});
-
-                if (mobilePushes == undefined) continue;
-
-                checkPushesTimeGMTZone(mobilePushes);
-
-                for (var i = 0; i < mobilePushes.length; i++) {
-                    if (mobilePushes[i].canceled) continue;
-
-                    //console.log("mobilePushes[i]", mobilePushes[i]);
-                    //var mobileString=JSON.stringify(mobilePushes[i]);
-                    //console.log("mobileString", mobileString);
-
-                    //if (mobilePushes[i].gps_time_ts == undefined) {
-                    //    if (mobilePushes[i].gps_time) {
-                    //        mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);//+60*60*4 Костыль для IDS у которых не настроены часовые пояса на телефонах водителей.
-                    //    } else {
-                    //        //mobilePushes[i].gps_time_ts = 0;
-                    //    }
-                    //}
-
-                    if (mobilePushes[i].gps_time_ts > _data.server_time) continue;
-
-                    for (var j = 0; j < _data.routes.length; j++) {
-                        for (var k = 0; k < _data.routes[j].points.length; k++) {
-                            tmpPoint = _data.routes[j].points[k];
-                            LAT = parseFloat(tmpPoint.LAT);
-                            LON = parseFloat(tmpPoint.LON);
-                            lat = mobilePushes[i].lat;
-                            lon = mobilePushes[i].lon;
-
-                            // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
-                            if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
-                                //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
-
-                                tmpPoint.mobile_push = mobilePushes[i];
-                                tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                                mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
-                                // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
-                                // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
-                                if (mobilePushes[i].distance <= scope.params.mobileRadius*2) {
-                                    tmpPoint.havePush = true;
-
-
-
-                                    //TODO
-                                    //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
-                                    tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
-
-                                    // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
-                                    tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
-
-                                    _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
-                                    _data.routes[j].pushes = _data.routes[j].pushes || [];
-                                    if (mobilePushes[i].gps_time_ts < _data.server_time) {
-                                        _data.routes[j].pushes.push(mobilePushes[i]);
+                                        tmpLen = tmpLen > 20 ? 20 : tmpLen;
+                                        tmpCoord = tmpRoute.points[j].stopState.coords[random(0, tmpLen)];
+                                        tmpLat = tmpCoord.lat;
+                                        tmpLon = tmpCoord.lon;
+                                    } else {
+                                        tmpLat = parseFloat(tmpRoute.points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
+                                        tmpLon = parseFloat(tmpRoute.points[j].LON) + (random(0, 4) / 10000 - 0.0002);
                                     }
-                                    findStatusAndWindowForPoint(tmpPoint);
-                                    break;
-                                } else {
-                                    _data.routes[j].pushes = _data.routes[j].pushes || [];
-                                    if (mobilePushes[i].gps_time_ts < _data.server_time) {
-                                        mobilePushes[i].long_away = true;
-                                        _data.routes[j].pushes.push(mobilePushes[i]);
-                                    }
-                                    console.log('>>> OUT of mobile radius');
+
+                                    mobilePushes.push({
+                                        cancel_reason: "",
+                                        canceled: false,
+                                        gps_time: gpsTime,
+                                        lat: tmpLat,
+                                        lon: tmpLon,
+                                        number: tmpRoute.points[j].TASK_NUMBER,
+                                        time: gpsTime
+                                    });
                                 }
                             }
                         }
                     }
+                } else {
+                    // получаем через 1С-ый parentForm имя клиента
+                    //console.log("Step3");
+                    _data.companyName = parentForm._call('getClientName');
+                }
+                //console.log( _data.companyName, ' cmpanyName');
+
+                scope.$emit('companyName', _data.companyName);
+
+                // по каждому доступному решению запрашиваем нажатия
+
+                console.log("!!!!!!Find pushes. Where are you?!!!!!!", _data);
+
+                for (var m = 0; m < _data.idArr.length; m++) {
+
+                    if (scope.demoMode) {
+                        m = 2000000000;
+                    } else {
+                        mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
+                    }
+
+                    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
+
+
+                    if (mobilePushes == undefined
+                        || Object.keys(mobilePushes).length == 0) {
+                        console.log('no mobile buttons push');
+                        continue;
+                    }
+
+                    var buttonsStr = mobilePushes[Object.keys(mobilePushes)[0]];
+
+                    if (buttonsStr == '[]') {
+                        console.log('no mobile buttons push');
+                        continue;
+                    }
+
+                    if (!scope.demoMode) {
+                        buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
+                        mobilePushes = JSON.parse(buttonsStr);
+                    }
+                    //console.log('mobilePushes array', {pushes: mobilePushes});
+
+                    if (mobilePushes == undefined) continue;
+
+                    checkPushesTimeGMTZone(mobilePushes);
+
+                    for (var i = 0; i < mobilePushes.length; i++) {
+                        if (mobilePushes[i].canceled) continue;
+
+                        //console.log("mobilePushes[i]", mobilePushes[i]);
+                        //var mobileString=JSON.stringify(mobilePushes[i]);
+                        //console.log("mobileString", mobileString);
+
+                        //if (mobilePushes[i].gps_time_ts == undefined) {
+                        //    if (mobilePushes[i].gps_time) {
+                        //        mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);//+60*60*4 Костыль для IDS у которых не настроены часовые пояса на телефонах водителей.
+                        //    } else {
+                        //        //mobilePushes[i].gps_time_ts = 0;
+                        //    }
+                        //}
+
+                        if (mobilePushes[i].gps_time_ts > _data.server_time) continue;
+
+                        for (var j = 0; j < _data.routes.length; j++) {
+                            for (var k = 0; k < _data.routes[j].points.length; k++) {
+                                tmpPoint = _data.routes[j].points[k];
+                                LAT = parseFloat(tmpPoint.LAT);
+                                LON = parseFloat(tmpPoint.LON);
+                                lat = mobilePushes[i].lat;
+                                lon = mobilePushes[i].lon;
+
+                                // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
+                                if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+                                    //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
+
+                                    tmpPoint.mobile_push = mobilePushes[i];
+                                    tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
+                                    mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+                                    // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
+                                    // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
+                                    if (mobilePushes[i].distance <= scope.params.mobileRadius * 2) {
+                                        tmpPoint.havePush = true;
+
+
+                                        //TODO
+                                        //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
+                                        tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+
+                                        // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
+                                        tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+
+                                        _data.routes[j].lastPointIndx = k > _data.routes[j].lastPointIndx ? k : _data.routes[j].lastPointIndx;
+                                        _data.routes[j].pushes = _data.routes[j].pushes || [];
+                                        if (mobilePushes[i].gps_time_ts < _data.server_time) {
+                                            _data.routes[j].pushes.push(mobilePushes[i]);
+                                        }
+                                        findStatusAndWindowForPoint(tmpPoint);
+                                        break;
+                                    } else {
+                                        _data.routes[j].pushes = _data.routes[j].pushes || [];
+                                        if (mobilePushes[i].gps_time_ts < _data.server_time) {
+                                            mobilePushes[i].long_away = true;
+                                            _data.routes[j].pushes.push(mobilePushes[i]);
+                                        }
+                                        console.log('>>> OUT of mobile radius');
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    allPushes = allPushes.concat(mobilePushes);
                 }
 
-                allPushes = allPushes.concat(mobilePushes);
             }
-
-
-
-
-
-
+            if(scope.filters.route == -1) {
+                rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
+            }else{
+                for(var i = 0; _data.routes.length > i; i++){
+                    if(_data.routes[i].filterId == scope.filters.route){
+                        rootScope.$emit('displayCollectionToStatistic', _data.routes[i].points);
+                        break;
+                    }
+                }
+            }
         }
 
         function random(min, max) {
@@ -3121,13 +3131,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //альтернативный расчет предсказаний, когда все данные получены одним запросом
         function  predicateArrivalSecond (data) {
             //console.log("Start new predicate", data);
-            var i=0;
-            while(i<_data.routes.length){
-                  if (_data.routes[i].DISTANCE==0) {
-                      uncalcPredication(i);
-                  } else {
-                      calcPredication(i);
-                  }
+            var i = 0;
+            while (i < _data.routes.length) {
+                if (_data.routes[i].DISTANCE == 0) {
+                    uncalcPredication(i);
+                } else {
+                    calcPredication(i);
+                }
 
                 i++
 
@@ -3135,19 +3145,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             function uncalcPredication(j) {
-                var route=_data.routes[j];
-                var now=_data.server_time;
+                var route = _data.routes[j];
+                var now = _data.server_time;
 
                 //console.log("New now is", now);
-                var time_table=[];
-                var points=route.points;
+                var time_table = [];
+                var points = route.points;
 
-                var k=0;
-                while (k<data.length){
+                var k = 0;
+                while (k < data.length) {
                     //console.log("Start serch", route.uniqueID, data[k].id );
-                    if(route.uniqueID == data[k].id){
-                      //  console.log("find Time_Table");
-                        time_table=data[k].time;
+                    if (route.uniqueID == data[k].id) {
+                        //  console.log("find Time_Table");
+                        time_table = data[k].time;
                         break;
                     }
 
@@ -3155,23 +3165,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
 
-                var i=0;
+                var i = 0;
                 //console.log("timeTabls",time_table)
-                while(i<points.length) {
-                   // console.log("START PREDICATE CALCULATING", points[i]);
+                while (i < points.length) {
+                    // console.log("START PREDICATE CALCULATING", points[i]);
 
-                    if (points[i].status ==4 || points[i].status==5 || points[i].status==7){
+                    if (points[i].status == 4 || points[i].status == 5 || points[i].status == 7) {
 
-                        points[i].arrival_left_prediction=time_table[i]/10 ? time_table[i]/10 :15*60;//Если у нас нет корректного предсказания времени (нет датчика ДЖПС) точка попадает в опаздывает за 15 минут до конца КОК
-                        points[i].arrival_prediction=now+points[i].arrival_left_prediction;
-                        if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
-                            points[i].status=5;
-                            points[i].overdue_time=points[i].arrival_prediction-points[i].arrival_time_ts;
+                        points[i].arrival_left_prediction = time_table[i] / 10 ? time_table[i] / 10 : 15 * 60;//Если у нас нет корректного предсказания времени (нет датчика ДЖПС) точка попадает в опаздывает за 15 минут до конца КОК
+                        points[i].arrival_prediction = now + points[i].arrival_left_prediction;
+                        if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
+                            points[i].status = 5;
+                            points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                             //console.log("TIME_OUT for point", points[i]);
                         }
-                        if((points[i].status==7 || points[i].status==5) && now > points[i].arrival_time_ts ){
-                            points[i].status=4;
-                            points[i].overdue_time=now-points[i].arrival_time_ts+points[i].arrival_left_prediction;
+                        if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
+                            points[i].status = 4;
+                            points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
                             //console.log("DELAY for point", points[i]);
                         }
 
@@ -3180,7 +3190,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 updateProblemIndex(route);
 
-                }
+            }
 
 
             function calcPredication(idx) {
@@ -3193,16 +3203,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     now = _data.server_time;
 
 
-
-                    route = _data.routes[idx];
-                    // пропускаем итерацию в случае не валидного трека
-                    //if (route.real_track == undefined ||
-                    //    route.real_track.length == 0 ||
-                    //    route.real_track == aggregatorError) {
-                    //    route.real_track = undefined;
-                    //    console.log("Bad Route");
-                    //    return;
-                    //}
+                route = _data.routes[idx];
+                // пропускаем итерацию в случае не валидного трека
+                //if (route.real_track == undefined ||
+                //    route.real_track.length == 0 ||
+                //    route.real_track == aggregatorError) {
+                //    route.real_track = undefined;
+                //    console.log("Bad Route");
+                //    return;
+                //}
 
                 if (route.points[route.lastPointIndx]) {
 
@@ -3214,21 +3223,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     //найти lastPointIndx
 
-                    var lastPoint=route.points.length-1;
-                    while(lastPoint>0){
-                            if(route.points[lastPoint].status <4 ){
-                               // lastPoint++;
-                                break;
-                            }
-
+                    var lastPoint = route.points.length - 1;
+                    while (lastPoint > 0) {
+                        if (route.points[lastPoint].status < 4) {
+                            // lastPoint++;
+                            break;
+                        }
 
 
                         lastPoint--;
                     }
-
-
-
-
 
 
                     // Если последняя точка выполнена, прогноз уже не нужен.
@@ -3236,12 +3240,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //    return;
                     //}
 
-                    var singleTimeMatrix=[];
-                    var k=0;
-                    while(k<data.length){
-                        if(data[k].id==route.uniqueID){
+                    var singleTimeMatrix = [];
+                    var k = 0;
+                    while (k < data.length) {
+                        if (data[k].id == route.uniqueID) {
 
-                            singleTimeMatrix=data[k].time;
+                            singleTimeMatrix = data[k].time;
                             break;
                         }
 
@@ -3249,7 +3253,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
 
-                        var nextPointTime = parseInt(singleTimeMatrix[lastPoint]/10),
+                    var nextPointTime = parseInt(singleTimeMatrix[lastPoint] / 10),
                         totalWorkTime = 0,
                         totalTravelTime = 0,
                         tmpDowntime = 0,
@@ -3257,7 +3261,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpTime;
 
 
-                    if(route.uniqueID == "230169" ) {
+                    if (route.uniqueID == "230169") {
 
                         console.log("Для роута", route, "Последняя выполненная", lastPoint, "Время от машины до некст поинт", nextPointTime);
                     }
@@ -3284,8 +3288,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
                         } else {
                             // точки ниже последней выполненной считаются ниже
-                          //  console.log (j, "Point for Route", route);
-                            tmpTime = route.time_matrix.time_table[0][j-1][j];
+                            //  console.log (j, "Point for Route", route);
+                            tmpTime = route.time_matrix.time_table[0][j - 1][j];
                             // времена проезда от роутера приходят в десятых долях секунд
                             totalTravelTime += tmpTime == 2147483647 ? 0 : parseInt(tmpTime / 10);
                             tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
@@ -3296,11 +3300,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             }
 
 
-
-
                             route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
 
-                           // console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
+                            // console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
 
                             route.points[j].in_plan = true;
                             if (route.points[j].arrival_prediction == null) {
@@ -3340,7 +3342,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     updateProblemIndex(route);
 
 
-                        }
+                }
 
 
                 scope.rowCollection[idx].problem_index = scope.rowCollection[idx].problem_index || 0;
@@ -3349,11 +3351,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 rootScope.rowCollection = scope.rowCollection;
 
 
+            }
 
+
+            if (scope.filters.route == -1){
+                rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
+            }else{
+                for(var i = 0; _data.routes.length > i; i++){
+                    if(_data.routes[i].filterId == scope.filters.route){
+                        rootScope.$emit('displayCollectionToStatistic', _data.routes[i].points);
+                        break;
+                    }
                 }
-
-
-
+            }
         }
 
 
