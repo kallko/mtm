@@ -165,7 +165,6 @@ router.route('/dailydata')
             res.status(200).json(cashedDataArr[req.session.login]);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
-            cashedDataArr = {};
             var soapManager = new soap(req.session.login);
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
