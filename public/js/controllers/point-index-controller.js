@@ -764,7 +764,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
-            rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
+
             saveRoutes();
             checkLocks();
 
@@ -776,6 +776,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             setColResizable();
             prepareFixedHeader();
+        }
+        scope.$watch('displayCollection', function() {
+            rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
         }
 
         // обрезает ФИО до ФИ
