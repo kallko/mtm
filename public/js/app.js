@@ -24,7 +24,7 @@ var myLayout = new GoldenLayout({
                         componentName: 'template',
                         width: 50,
                         componentState: {templateId: 'transparent-map-window'} // id темплейта из index.html
-                    },
+                    }
                 ]
             },
             {
