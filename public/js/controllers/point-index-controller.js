@@ -3127,7 +3127,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                       calcPredication(i);
                   }
 
-
                 i++
 
             }
@@ -3184,7 +3183,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             function calcPredication(idx) {
 
-                console.log("This is calculated route");
+                //console.log("This is calculated route");
 
                 var route,
                     point,
@@ -3205,10 +3204,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 if (route.points[route.lastPointIndx]) {
 
-                            console.log(route.points);
-                            console.log("Делаем прогноз прибытия просчитанных маршрутов");
+                            //console.log(route.points);
+                            //console.log("Делаем прогноз прибытия просчитанных маршрутов");
                             point = route.car_position;
-                            console.log("POINT", point);
+                            //console.log("POINT", point);
 
 
                     //найти lastPointIndx
