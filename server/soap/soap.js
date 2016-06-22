@@ -83,7 +83,12 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
-   // console.log( " Prepare for DATA GLUE data, soap 84");
+    console.log( " Check before send started", _data.iLength);
+    if(_data.iLength != 0){
+        console.log("Рано еще, подпустим поближе!");
+        return;
+    }
+
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -144,6 +149,7 @@ function checkBeforeSend(_data, callback) {
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
 
 
+    console.log("А теперь пора!");
 
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
