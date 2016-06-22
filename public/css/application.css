@@ -614,3 +614,7 @@ template {
     height: 25px;
     width: 100%;
 }
+.statistic-table {
+    width: 80%;
+    margin: 0 auto;
+}

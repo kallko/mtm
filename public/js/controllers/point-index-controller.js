@@ -53,7 +53,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function init() {
             scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
             scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
-
             scope.filters = {};                                         // фильтры
             scope.filters.statuses = Statuses.getTextStatuses();        // фильтры по статусам
 
@@ -765,7 +764,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
-
+            rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
             saveRoutes();
             checkLocks();
 

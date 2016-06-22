@@ -735,9 +735,28 @@
 
 
 <!-- панель закрытия дня -->
-<template type="text/html">
+<template type="text/html" id="statistic-tmp">
     <div ng-controller = "StatisticController" >
-
+        <table class="statistic-table">
+            <thead>
+            <tr>
+                <th>Доставлено</th>
+                <th>Будет во время</th>
+                <th>Опаздывает</th>
+                <th>Время вышло</th>
+                <th>Отменено</th>
+                <th>Внимание</th>
+            </tr>
+            </thead>
+            <tr>
+                <td>{{statistic.delivered}}</td>
+                <td>{{statistic.scheduled}}</td>
+                <td>{{statistic.delay}}</td>
+                <td>{{statistic.timeOut}}</td>
+                <td>{{statistic.canceled}}</td>
+                <td>{{statistic.attention}}</td>
+            </tr>
+        </table>
     </div>
 </template>
 
