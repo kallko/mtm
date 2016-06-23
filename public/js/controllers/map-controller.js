@@ -110,6 +110,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             var track = route.real_track,
                 points = route.points,
+                pushes = route.pushes,
                 tmpVar,
                 polyline,
                 iconIndex = 14,
