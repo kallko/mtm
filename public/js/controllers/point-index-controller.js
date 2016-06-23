@@ -1160,6 +1160,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             console.log("parentFORM=", parentForm);
+            console.trace();
             if (parentForm == undefined && !scope.demoMode) {
                 checkConfirmedFromLocalStorage();
                 //_data.companyName = 'IDS';
