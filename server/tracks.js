@@ -366,6 +366,8 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
+    console.log(url, "Track 369");
+
 
     request({
         url: url + '&gid=' + gid,

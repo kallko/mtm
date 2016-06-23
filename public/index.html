@@ -664,21 +664,21 @@
                 <table>
                     <tr>
                         <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->
-                            <button ng-click="orderCloseDay('getCheck')">Все</button></th>
+                            <button ng-click="orderCloseDay('getCheck')">Закончен</button></th>
                         <th><button ng-click="order('filterId'); orderCloseDay('getCheck')" >ID</button></th>
                         <th><button ng-click="order('driver.NAME'); orderCloseDay('getCheck')">Водитель</button></th>
                         <th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>
                         <!--th>Старт</th-->
-                        <th class="center">Старт</th>
+                        <th class="center"><button ng-click="order('START_TIME');">СТАРТ</button></th>
                         <th><button ng-click="order('END_TIME');">Финиш</button></th>
                         <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
 
                     </tr>
-                    <tr  ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item)">
+                    <tr   ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item)">
                         <td><input id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
                                    ng-model="item.getCheck"
-                                   ng-disabled="false">
+                                   ng-disabled="true">
                         </td>
                         <td>{{::item.filterId+1}}</td>
                         <td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>

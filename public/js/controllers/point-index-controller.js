@@ -2018,6 +2018,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             console.log("P-I-C recieve click", rootScope.clickOff, "and gona draw", route);
+
+           //Проверка и подготовка роута. Удаление дублирующих Current position
+           // CheckAndPrepareRoute (route);
             //scope.$apply();
 
 
@@ -2081,7 +2084,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
                 }).success(function (data) {
-                        console.log("Additional load for Route", {data: data});
+                        //var newData = JSON.parse(JSON.stringify(data));
+                        //console.log("Additional load for Route", newData);
                         route.real_track = data;
 
 
