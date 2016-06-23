@@ -186,6 +186,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('setRealTrackUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
+                scope.nowTime  += seconds;
                 loadTrackParts();
             }, seconds * 1000);
         }
@@ -2080,7 +2081,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
                 }).success(function (data) {
-                        //console.log("Additional load", {data: data});
+                        console.log("Additional load for Route", {data: data});
                         route.real_track = data;
 
 
