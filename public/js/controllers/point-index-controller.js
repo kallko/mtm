@@ -1839,6 +1839,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.rowClick = function (row) {
             rootScope.carCentre=false;
             rootScope.clickOff=true;
+            if(row.haveStop && !row.selected){
+                rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
+            }else{
+                rootScope.$emit('drawConnectsActivePoint');
+            }
             //console.log("LAt/Lon", row.LAT, row.LON);
             for(var i = 0; scope.displayCollection.length > i; i++){
                 scope.displayCollection[i].selected = false;
@@ -1859,23 +1864,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log("I have to draw this route:", curRoute);
             scope.drawRoute(curRoute.filterId, false);// false - параметр  заставляющий сделать быструю отрисовку.
             rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
+
             return;
 
-            // TODO REMOVE
-
-
-            if (scope.selectedRow == id) {
-                scope.selectedRow = -1;
-            } else {
-                scope.$emit('setMapCenter', {
-                    lat: scope.displayCollection[id].LAT,
-                    lon: scope.displayCollection[id].LON
-                });
-
-                scope.selectedRow = id;
-
-                scope.$emit('highlightPointMarker', scope.displayCollection[id]);
-            }
         };
 
         // обработчик даблклика на строке таблицы
