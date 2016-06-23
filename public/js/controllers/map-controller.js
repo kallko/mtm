@@ -109,7 +109,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             var track = route.real_track,
-                pushes = route.pushes,
+                points = route.points,
                 tmpVar,
                 polyline,
                 iconIndex = 14,
@@ -448,7 +448,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
                 }
 
-                title += 'Время прибытия: ' + point.arrival_time_hhmm + ' (';
+                title += 'Плановое время: ' + point.arrival_time_hhmm + ' (';
                 //title += 'Время отбытия: ' + point.end_time_hhmm + '\n';
                 title +=  mmhh(point.TASK_TIME) + ')'+'\n';
                 title += 'Временное окно: ' + point.AVAILABILITY_WINDOWS + '\n';

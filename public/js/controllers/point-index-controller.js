@@ -3260,13 +3260,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         totalDowntime = 0,
                         tmpTime;
 
-
-                    if (route.uniqueID == "230169") {
-
-                        console.log("Для роута", route, "Последняя выполненная", lastPoint, "Время от машины до некст поинт", nextPointTime);
-                    }
-
-
                     for (var j = 0; j < route.points.length; j++) {
                         if (j <= lastPoint) {
                             // все точки до последней выполненной проверяются по факту
