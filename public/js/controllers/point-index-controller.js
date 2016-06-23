@@ -807,7 +807,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //накатываем сверху существующие ранее данные взятые с ноды, но только один раз при первой загрузке.
             if (!scope.existDataLoaded) {
                 console.log(" Ура сейчас мы Накатываем сверху скачанные данные");
-                concatDailyAndExistingData(_data);
+                concatDailyAndExistingData();
                 scope.existDataLoaded=true;
                 statusUpdate();
                 unlockAllRoutes(null, _data);
@@ -2779,8 +2779,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-        function concatDailyAndExistingData (data){
-            console.log(data);
+        function concatDailyAndExistingData (){
+            //console.log(data);
             console.log('concat from Node existing data', _data, "with", scope.existData  );
             if (!scope.existData.data) return;
             var i=0;
@@ -2822,14 +2822,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     var l=0;
                     while (l<scope.existData.data.length){
                         //console.log("I m working");
-                        if( scope.existData.data[l]!=null &&
-                            _data.routes[i].real_track[j].id==scope.existData.data[l].id
-                           && _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
+                        if( scope.existData.data[l]!=null
+                            && _data.routes[i].real_track[j].state == "ARRIVAL"
+                            && _data.routes[i].real_track[j].id==scope.existData.data[l].id
+                            && _data.routes[i].real_track[j].t1==scope.existData.data[l].t1
                             && _data.routes[i].real_track[j].id!=0
                             && _data.routes[i].real_track[j].id!="0"
+                            && scope.existData.data[l].servicePoints != undefined
                         ) {
 
-                            _data.routes[i].real_track[j]=scope.existData.data[l];
+                            _data.routes[i].real_track[j].servicePoints=scope.existData.data[l].servicePoints;
                             break;
 
                         }
@@ -2927,26 +2929,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-
-        scope.testbutton = function ()  {
-
-
-
-            console.log("button test was pushed", Date.now()/1000);
-            var gid=900;
-            var from=(Date.now()-(1000*60*60*3))/1000;
-            var to = Date.now()/1000;
-            http.get('./currentStops/'+gid +'/'+parseInt(from) +'/'+parseInt(to)).
-                success(function (data) {
-                    console.log('Call for current stops succesfull', data);
-                })
-                .error(function(data){
-                    rootScope.errorNotification('./currentStops/'+gid +'/'+parseInt(from) +'/'+parseInt(to));
-                    console.log('ERROR to Call for current stops >>', data);
-                });
-
-
-        };
+        //
+        //scope.testbutton = function ()  {
+        //
+        //
+        //
+        //    console.log("button test was pushed", Date.now()/1000);
+        //    var gid=900;
+        //    var from=(Date.now()-(1000*60*60*3))/1000;
+        //    var to = Date.now()/1000;
+        //    http.get('./currentStops/'+gid +'/'+parseInt(from) +'/'+parseInt(to)).
+        //        success(function (data) {
+        //            console.log('Call for current stops succesfull', data);
+        //        })
+        //        .error(function(data){
+        //            rootScope.errorNotification('./currentStops/'+gid +'/'+parseInt(from) +'/'+parseInt(to));
+        //            console.log('ERROR to Call for current stops >>', data);
+        //        });
+        //
+        //
+        //};
 
         // Функция, которая проверяет для непросчитанных маршрутов, является ли стоп валидным
         // по времени. Попадает ли в одно из возможных временных окон.
@@ -3618,6 +3620,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     });
             }
         };
+
+
 
         rootScope.$on('statusUpdate', statusUpdate);
     }]);

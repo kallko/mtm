@@ -142,7 +142,9 @@ function checkBeforeSend(_data, callback) {
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
 
-    allData.idArr = [];
+
+    //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
+    if (allData.idArr == undefined) {allData.idArr = []};
     allData.idArr.push(data[0].ID);
 
     // в случае если дошло до сюда, значит необходимые данные собраны

@@ -242,6 +242,9 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
     });
 };
 
+
+
+
 // получить реальные треки и стопы по всем машинам решения за весь день указанный в переданных данных в поле server_time
 TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback, date, itIsToday) {
     console.log('=== getRealTracks ===');
@@ -670,3 +673,5 @@ function getNByGid(gid) {
     return 'NONE'
 }
 
+//http://sngtrans.com.ua/gps/states?login=admin&pass=admin321&from=1462395600&to=1462451321&gid=749 запрос на стейты
+//http://sngtrans.com.ua/gps/messages?login=admin&pass=admin321&from=1462395600&to=1462451321&gid=749 запрос на треки
