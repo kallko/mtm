@@ -1840,6 +1840,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.rowClick = function (row) {
             rootScope.carCentre=false;
             rootScope.clickOff=true;
+            scope.drawRoute(row.route_id, false);// false - параметр  заставляющий сделать быструю отрисовку.
+            rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
+            if(row.haveStop){
+                rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
+            }else{
+                rootScope.$emit('drawConnectsActivePoint');
+            }
             //console.log("LAt/Lon", row.LAT, row.LON);
             for(var i = 0; scope.displayCollection.length > i; i++){
                 scope.displayCollection[i].selected = false;
@@ -1847,36 +1854,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             row.selected = true;
             //console.log(row);
             // найти какому роуту принадлежит точка
-            var i=0;
-            var curRoute={};
-            while (i<_data.routes.length){
-                if (_data.routes[i].uniqueID==row.uniqueID){
-                    curRoute=_data.routes[i];
-                    break;
-                }
-
-                i++;
-            }
+            // var i=0;
+            // var curRoute={};
+            // while (i<_data.routes.length){
+            //     if (_data.routes[i].uniqueID==row.uniqueID){
+            //         curRoute=_data.routes[i];
+            //         break;
+            //     }
+            //
+            //     i++;
+            // }
             //console.log("I have to draw this route:", curRoute);
-            scope.drawRoute(curRoute.filterId, false);// false - параметр  заставляющий сделать быструю отрисовку.
-            rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
-            return;
-
-            // TODO REMOVE
-
-
-            if (scope.selectedRow == id) {
-                scope.selectedRow = -1;
-            } else {
-                scope.$emit('setMapCenter', {
-                    lat: scope.displayCollection[id].LAT,
-                    lon: scope.displayCollection[id].LON
-                });
-
-                scope.selectedRow = id;
-
-                scope.$emit('highlightPointMarker', scope.displayCollection[id]);
-            }
         };
 
         // обработчик даблклика на строке таблицы
