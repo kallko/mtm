@@ -3387,9 +3387,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             while (i<_data.routes.length){
                 var j=0;
                 while(j<_data.routes[i].points.length){
-                    if (_data.routes[i].points[j].status>2){
+                    if (_data.routes[i].points[j].status>2 && _data.routes[i].points[j].status != 8){
                         _data.routes[i].points[j].status=4;
-                        _data.routes[i].points[j].overdue_time=scope.nowTime-_data.routes[i].points[j].arrival_time_ts;
+                        _data.routes[i].points[j].overdue_time=scope.nowTime -_data.routes[i].points[j].arrival_time_ts;
                     }
 
                     j++;
