@@ -1189,22 +1189,28 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         rootScope.$on('drawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER){
             if(stopState == undefined){
-                map.removeLayer(scope.xyu);
+                return;
             }
-            scope.xyu = new L.layerGroup().addTo(map);
+            if(scope.singleConnect !== undefined){
+                map.removeLayer(scope.singleConnect);
+            }
+            scope.singleConnect = new L.layerGroup().addTo(map);
                        var servicePointsLat = stopState.lat;
                        var servicePointsLng = stopState.lon;
                        var j = 0;
                        while (j < markersArr.length) {
                            if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                                    if (number == markersArr[j].source.NUMBER) {
+                                       console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
                                        var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
-                                           color: 'black',
-                                           weight: 2,
+                                           color: '#46b8da',
+                                           weight: 4,
                                            opacity: 0.5,
-                                           smoothFactor: true
+                                           smoothFactor: 1
                                        });
-                                       scope.xyu.addLayer(polyline);
+                                       scope.singleConnect.addLayer(polyline);
+                                       console.log(polyline);
+                                      // scope.singleConnect.addLayer(polyline);
                                        break;
                                    }
                            }
@@ -1223,24 +1229,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                 [LAT, LON],
                                 [lat, lon]];
 
-                            scope.pushPolyline = new L.polyline(line_points, {
-                                color: 'orange',
-                                weight: 2,
+                            var qwe = new L.polyline(line_points, {
+                                color: '#46b8da',
+                                weight: 4,
                                 opacity: 0.5,
                                 smoothFactor: 1
                             });
-                            scope.xyu.addLayer(scope.pushPolyline);
+                            scope.xyu.addLayer(qwe);
                             break;
                         }
                 }
 
             }
-
-
-
-
-                        //console.log ("This is stop", markersArr[i].stopIndx, "and its serve", markersArr[i].source.servicePoints);
-
         });
 
 
@@ -1661,7 +1661,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             // } else {
                             //     times.push(0);
                             // }
-                            console.log(123123123);
                             times.push(markersArr[j].source.TASK_TIME);
                         }
 

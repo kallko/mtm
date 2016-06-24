@@ -1839,7 +1839,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.rowClick = function (row) {
             rootScope.carCentre=false;
             rootScope.clickOff=true;
-            if(row.haveStop && !row.selected){
+            scope.drawRoute(row.route_id, false);// false - параметр  заставляющий сделать быструю отрисовку.
+            rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
+            if(row.haveStop){
                 rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
             }else{
                 rootScope.$emit('drawConnectsActivePoint');
@@ -1851,22 +1853,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             row.selected = true;
             //console.log(row);
             // найти какому роуту принадлежит точка
-            var i=0;
-            var curRoute={};
-            while (i<_data.routes.length){
-                if (_data.routes[i].uniqueID==row.uniqueID){
-                    curRoute=_data.routes[i];
-                    break;
-                }
-
-                i++;
-            }
+            // var i=0;
+            // var curRoute={};
+            // while (i<_data.routes.length){
+            //     if (_data.routes[i].uniqueID==row.uniqueID){
+            //         curRoute=_data.routes[i];
+            //         break;
+            //     }
+            //
+            //     i++;
+            // }
             //console.log("I have to draw this route:", curRoute);
-            scope.drawRoute(curRoute.filterId, false);// false - параметр  заставляющий сделать быструю отрисовку.
-            rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
-
-            return;
-
         };
 
         // обработчик даблклика на строке таблицы
