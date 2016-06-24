@@ -145,6 +145,7 @@ function checkBeforeSend(_data, callback) {
 
     //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
     if (allData.idArr == undefined) {allData.idArr = []};
+    //allData.idArr = [];
     allData.idArr.push(data[0].ID);
 
     // в случае если дошло до сюда, значит необходимые данные собраны

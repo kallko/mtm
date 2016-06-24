@@ -665,6 +665,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                     } catch (e) {
+                        console.log("Error", tPoint);
                         console.log(tPoint.driver.NAME, e);
                     }
 
@@ -1449,7 +1450,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            if(tmpPoint.status<3 && tmpPoint.limit<74 ){
+            if(tmpPoint.limit>0 && tmpPoint.limit<74  ){
                 tmpPoint.status=6;
                 tmpPoint.problem_index=1;
                 //console.log("tmpPoint.problem_index", tmpPoint.problem_index);
@@ -3190,6 +3191,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
                             points[i].status = 4;
                             points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
+                            if ( points[i].havePush || points[i].haveStop) {
+                                findStatusAndWindowForPoint(points[i]);
+                            }
                             //console.log("DELAY for point", points[i]);
                         }
 
@@ -3281,6 +3285,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
                                     //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                                     route.points[j].status = STATUS.TIME_OUT;
+                                    if(route.points[j].havePush || route.points[j].haveStop) {
+                                        findStatusAndWindowForPoint(route.points[j])
+                                    }
                                     //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                                     route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
                                 }
@@ -3325,9 +3332,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (route.points[j].overdue_time > 0) {
                                     if (route.points[j].working_window.finish < now) {
                                         route.points[j].status = STATUS.TIME_OUT;
+                                        if(route.points[j].havePush || route.points[j].haveStop) {
+                                            findStatusAndWindowForPoint(route.points[j])
+                                        }
                                         //console.log("_route.points[j].status = STATUS.TIME_OUT;");
                                     } else {
                                         route.points[j].status = STATUS.DELAY;
+                                        if(route.points[j].havePush || route.points[j].haveStop) {
+                                            findStatusAndWindowForPoint(route.points[j])
+                                        }
                                         //console.log("_route.points[j].status = STATUS.DELAY;");
                                     }
                                 }
