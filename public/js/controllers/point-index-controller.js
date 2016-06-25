@@ -288,7 +288,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                     if (trackParts[i].data.length > 0) {
 
-                                        if (trackParts[i].data.length > 0) {
+
+                                        ////тестово отладочный блок, поиск и удаление невалидных разрозненных стейтов.
+                                        //    var l=0;
+                                        //    while(l<trackParts[i].data.length){
+                                        //        console.log(trackParts[i].gid, "GID have state", trackParts[i].data[l].state , "this is State", trackParts[i].data[l]);
+                                        //        l++;
+                                        //    }
+
+                                            console.log("Prepere for deleting ",trackParts[i].data[0].state)
                                             trackParts[i].data[0].state = 'MOVE';
                                             _data.routes[j].real_track = _data.routes[j].real_track || [];
                                             _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
@@ -297,13 +305,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                             }
 
                                             var len = _data.routes[j].real_track.length - 1;
+
                                             _data.routes[j].car_position = _data.routes[j].real_track[len];
 
-                                            if (_data.routes[i] != undefined && _data.routes[i].real_track != undefined &&
-                                                _data.routes[i].real_track.length > 0) {
-                                                _data.routes[i].real_track.splice(len, 1);
+                                            if (_data.routes[j] != undefined && _data.routes[j].real_track != undefined &&
+                                                _data.routes[j].real_track.length > 0) {
+                                                len = _data.routes[j].real_track.length - 1;
+                                                //console.log("len", len);
+                                                //console.log("Delete last from", _data.routes[i].real_track.length, "last", _data.routes[i].real_track[_data.routes[i].real_track.length-1]  );
+                                                _data.routes[j].real_track.splice(len, 1);
+                                                //_data.routes[i].real_track.length=len;
+                                                //console.log("Delete post from", _data.routes[i].real_track.length, "last", _data.routes[i].real_track[_data.routes[i].real_track.length-1] );
                                             }
-                                        }
+
                                     }
                                     break;
                                 }
@@ -3012,7 +3026,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             if(parentForm != undefined) {
-                rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
+
+                try {
+                    //var temp = parentForm._call('getPointGpsConfirmation', [marker.point.ID]);
+                    //console.log("JSON file", temp.Ti);
+                    //rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
+                    rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).Ti)).result;
+
+
+                } catch (e) {
+
+                    console.log("Point", marker.point, e)
+                }
+
             }
             console.log("Point", marker.point.ID, "confirmed=", rootScope.gpsConfirm);
 

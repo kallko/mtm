@@ -1130,9 +1130,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         //console.log(arrIndexStopPoints);
                         var j = 0;
                         while (j < markersArr.length) {
-                            if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
+                            if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined') && (arrIndexStopPoints!=undefined)) {
                                 for (var k = 0; arrIndexStopPoints.length > k; k++) {
                                     if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
+                                        if (markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined)
+
                                         var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
                                             color: 'black',
                                             weight: 2,
