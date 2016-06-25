@@ -296,7 +296,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         //        l++;
                                         //    }
 
-                                            console.log("Prepere for deleting ",trackParts[i].data[0].state)
+                                            //console.log("Prepere for deleting ",trackParts[i].data[0].state)
                                             trackParts[i].data[0].state = 'MOVE';
                                             _data.routes[j].real_track = _data.routes[j].real_track || [];
                                             _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
@@ -1262,7 +1262,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                     }
 
-                    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
+                   // console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
 
 
                     if (mobilePushes == undefined
@@ -3029,7 +3029,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 try {
                     //var temp = parentForm._call('getPointGpsConfirmation', [marker.point.ID]);
-                    //console.log("JSON file", temp.Ti);
+                    //console.log("JSON file", temp);
                     //rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
                     rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).Ti)).result;
 
@@ -3127,9 +3127,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                    }];
                    var obj = {id: indx, points: carPos.concat(route.points)};
                    result.push(obj);
-                   if (route.uniqueID == 231157) {
-                       console.log("Route", route, "result", obj);
-                   }
+                   //if (route.uniqueID == 231157) {
+                   //    console.log("Route", route, "result", obj);
+                   //}
                }
                 i++;
             }
@@ -3168,10 +3168,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             function uncalcPredication(j) {
+
                 var route = _data.routes[j];
                 var now = _data.server_time;
 
-                //console.log("New now is", now);
+
                 var time_table = [];
                 var points = route.points;
 
@@ -3230,6 +3231,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                 route = _data.routes[idx];
+                //console.log("Predication for ", route.driver.NAME);
                 // пропускаем итерацию в случае не валидного трека
                 //if (route.real_track == undefined ||
                 //    route.real_track.length == 0 ||
@@ -3267,16 +3269,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //}
 
                     var singleTimeMatrix = [];
-                    var k = 0;
-                    while (k < data.length) {
-                        if (data[k].id == route.uniqueID) {
 
-                            singleTimeMatrix = data[k].time;
-                            break;
+                    if(route.real_track != undefined) {
+                        var k = 0;
+                        while (k < data.length) {
+                            if (data[k].id == route.uniqueID) {
+
+                                singleTimeMatrix = data[k].time;
+                                break;
+                            }
+
+                            k++;
                         }
-
-                        k++;
                     }
+
 
 
                     var nextPointTime = parseInt(singleTimeMatrix[lastPoint] / 10),
@@ -3287,7 +3293,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         tmpTime;
 
                     for (var j = 0; j < route.points.length; j++) {
-                        if (j <= lastPoint) {
+                        //if(route.driver.NAME =="Зінчук Віталій") {
+                        //    console.log("Считаем точку Зинчука", lastPoint, route.points[j]);
+                        //}
+                        if (j <= lastPoint || route.real_track==undefined ) {
                             // все точки до последней выполненной проверяются по факту
                             //console.log("Try to change status for point", _route.points[j] );
 
@@ -3313,7 +3322,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             //  console.log (j, "Point for Route", route);
                             tmpTime = route.time_matrix.time_table[0][j - 1][j];
                             // времена проезда от роутера приходят в десятых долях секунд
-                            totalTravelTime += tmpTime == 2147483647 ? 0 : parseInt(tmpTime / 10);
+                            totalTravelTime += tmpTime == undefined ? 15*60 : parseInt(tmpTime / 10);
                             tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
                             tmpDowntime = route.points[j].working_window.start - tmpPred;
                             if (tmpDowntime > 0) {
@@ -3374,7 +3383,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                 scope.rowCollection[idx].problem_index = scope.rowCollection[idx].problem_index || 0;
-                console.log("scope.rowCollection[idx].problem_index", scope.rowCollection[idx].problem_index);
+               // console.log("scope.rowCollection[idx].problem_index", scope.rowCollection[idx].problem_index);
 
                 rootScope.rowCollection = scope.rowCollection;
 
