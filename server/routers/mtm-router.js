@@ -334,6 +334,7 @@ router.route('/trackparts/:start/:end')
                                     var stopsBefore = cached.sensors[i].real_track.length;
 
                                     //console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
+                                    //data[j].data[0].state = 'MOVE';
                                     cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                     cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     var stopsAfter = cached.sensors[i].real_track.length;

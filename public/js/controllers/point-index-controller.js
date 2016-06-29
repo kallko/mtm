@@ -312,10 +312,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                                 _data.routes[j].real_track.length > 0) {
                                                 len = _data.routes[j].real_track.length - 1;
                                                 //console.log("len", len);
-                                                //console.log("Delete last from", _data.routes[i].real_track.length, "last", _data.routes[i].real_track[_data.routes[i].real_track.length-1]  );
-                                                _data.routes[j].real_track.splice(len, 1);
-                                                //_data.routes[i].real_track.length=len;
-                                                //console.log("Delete post from", _data.routes[i].real_track.length, "last", _data.routes[i].real_track[_data.routes[i].real_track.length-1] );
+                                                //console.log("Delete last from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1]  );
+                                                //_data.routes[j].real_track.splice(len, 1);
+                                                _data.routes[j].real_track.length=len;
+                                                //console.log("Delete post from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1] );
                                             }
 
                                     }
