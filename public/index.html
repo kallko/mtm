@@ -212,7 +212,8 @@
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
                 <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания">План</th>
+                    <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
+                    <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
                     <th class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
@@ -255,7 +256,8 @@
 
                 <thead class="header-copy">
                 <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания">План</th>
+                    <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
+                    <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
                     <th class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
@@ -311,6 +313,7 @@
 
 
                     <td>{{::row.NUMBER}}</td>
+                    <td>{{row.fact_number}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
                     <td ng-class="row.class">
                         {{getTextStatus(row)}}

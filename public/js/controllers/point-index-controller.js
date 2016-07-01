@@ -195,7 +195,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log('setRealTrackUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
-                scope.nowTime  += seconds;
+                rootScope.nowTime  += seconds;
                 loadTrackParts();
             }, seconds * 1000);
         }
@@ -313,8 +313,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         var newString='';
                                         while (k<trackParts[i].data.length) {
                                             // Если в стейте есть таймстамп больше чем ранее полученное время, то мы переопределяем время.
-                                            if(scope.nowTime < trackParts[i].data[k].t2) {
-                                                scope.nowTime = trackParts[i].data[k].t2;
+                                            if(rootScope.nowTime < trackParts[i].data[k].t2) {
+                                                rootScope.nowTime = trackParts[i].data[k].t2;
 
                                             }
                                             newString += trackParts[i].data[k].state +" ";
@@ -412,7 +412,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
                     rootScope.reasons=data.reasons;
-                    scope.nowTime=data.current_server_time;
+                    rootScope.nowTime=data.current_server_time;
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
                     console.log("Loaded DATA", data.date, data);
 
@@ -736,7 +736,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
 
-
+                    tPoint.NUMBER = parseInt(tPoint.NUMBER);
                     tPoint.row_id = rowId;
                     tPoint.arrival_prediction = 0;
                     tPoint.arrival_left_prediction = 0;
@@ -2083,9 +2083,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-
+            factTimeForRoute(route);
 
             console.log("P-I-C recieve click", rootScope.clickOff, "and gona draw", route);
+
+
 
            //Проверка и подготовка роута. Удаление дублирующих Current position
            // CheckAndPrepareRoute (route);
@@ -3461,14 +3463,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         function  updateDataforPast(){
-            console.log("START UPDATING FOR PAST bun now is", scope.nowTime);
+            console.log("START UPDATING FOR PAST bun now is", rootScope.nowTime);
             var i=0;
             while (i<_data.routes.length){
                 var j=0;
                 while(j<_data.routes[i].points.length){
                     if (_data.routes[i].points[j].status>2 && _data.routes[i].points[j].status != 8){
                         _data.routes[i].points[j].status=4;
-                        _data.routes[i].points[j].overdue_time=scope.nowTime -_data.routes[i].points[j].arrival_time_ts;
+                        _data.routes[i].points[j].overdue_time=rootScope.nowTime -_data.routes[i].points[j].arrival_time_ts;
                     }
 
                     j++;
@@ -3718,6 +3720,60 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     });
             }
         };
+
+        //функция определяющая реальную последовательность посещения точек
+        function factTimeForRoute (route) {
+            //создаем три массива Доставлено / В плане / Отменено
+            //Сортируем каждый массив по своему признаку
+            // Объединяем массивы
+            // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
+
+            var deliveredPoints = [];
+            var sheduledPoints = [];
+            var canceledPoints = [];
+            var i = route.points.length;
+            while( i-- > 0){
+
+            }
+            var i=-1;
+            while(i++<route.points.length-1){
+                console.log("i=", i);
+                if(route.points[i].status < 4 || route.points[i].status ==6 ) {deliveredPoints.push(route.points[i]); continue;}
+                if(route.points[i].status < 8) {sheduledPoints.push(route.points[i]); continue;}
+                canceledPoints.push(route.points[i]);
+
+            }
+
+            function comparePlanTime (a, b){
+                return a.arrival_time_ts - b.arrival_time_ts;
+            }
+
+            function compareRealTime (a, b){
+                return a.real_arrival_time - b.real_arrival_time;
+            }
+
+            function compareCancelTime (a, b){
+                return a.cancel_time - b.cancel_time;
+            }
+
+            deliveredPoints.sort(compareRealTime);
+            sheduledPoints.sort(comparePlanTime);
+            canceledPoints.sort(compareCancelTime);
+
+            var allPoints=deliveredPoints.concat(sheduledPoints);
+            allPoints=allPoints.concat(canceledPoints);
+
+            var i=0;
+            while(i<allPoints.length){
+                allPoints[i].fact_number = i+1;
+                i++;
+            }
+
+
+
+            console.log("Combos Length", route.points.length, deliveredPoints, sheduledPoints, canceledPoints);
+
+        }
 
 
 

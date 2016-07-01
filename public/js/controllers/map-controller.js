@@ -1835,6 +1835,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         container=markersArr[i];
                         markersArr[i].source.confirmed=true;
                         markersArr[i].source.rawConfirmed=1;
+                        markersArr[i].source.cancel_time=rootScope.nowTime;
                         console.log("markersArr[i]", markersArr[i]);
                         break;
                     }
