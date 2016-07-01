@@ -288,7 +288,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if (_data.routes[j].transport.gid == trackParts[i].gid) {
                                     if (trackParts[i].data.length > 0) {
 
+                                    // Tсли последний стейт Каррент Позитион, то присваиваем ему муве
 
+                                       if ( _data.routes[j].real_track.length>0){
+                                           if (_data.routes[j].real_track[_data.routes[j].real_track.length-1].state == "CURRENT_POSITION"){
+                                               _data.routes[j].real_track[_data.routes[j].real_track.length-1].state ='MOVE';
+                                           }
+                                       }
                                         ////тестово отладочный блок, поиск и удаление невалидных разрозненных стейтов.
                                         //    var l=0;
                                         //    while(l<trackParts[i].data.length){
@@ -297,7 +303,42 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         //    }
 
                                             //console.log("Prepere for deleting ",trackParts[i].data[0].state)
+
+
+
+
+                                        // Не удалять потом, в этом блоке проверяется и устанавливается новое nowTime,
+                                        // максимум из существующего и самого большого времени в полученых стейтах
+                                        var k=0;
+                                        var newString='';
+                                        while (k<trackParts[i].data.length) {
+                                            // Если в стейте есть таймстамп больше чем ранее полученное время, то мы переопределяем время.
+                                            if(scope.nowTime < trackParts[i].data[k].t2) {
+                                                scope.nowTime = trackParts[i].data[k].t2;
+
+                                            }
+                                            newString += trackParts[i].data[k].state +" ";
+                                            k++;
+                                        }
+
+                                        if (_data.routes[j].uniqueID == "157153") {
+                                            console.log("newString", newString);
+                                        }
                                             trackParts[i].data[0].state = 'MOVE';
+
+                                        var k=0;
+                                        var proString='';
+                                        while (k<trackParts[i].data.length) {
+                                            proString += trackParts[i].data[k].state +" ";
+
+                                            k++;
+                                        }
+
+
+                                        if (_data.routes[j].uniqueID == "157153") {
+                                            console.log("proString", proString);
+                                        }
+
                                             _data.routes[j].real_track = _data.routes[j].real_track || [];
                                             _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
                                             if (_data.routes[j].real_track[0].lastTrackUpdate != undefined) {
@@ -313,11 +354,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                                 len = _data.routes[j].real_track.length - 1;
                                                 //console.log("len", len);
                                                 //console.log("Delete last from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1]  );
-                                                //_data.routes[j].real_track.splice(len, 1);
-                                                _data.routes[j].real_track.length=len;
+                                                _data.routes[j].real_track.splice(len, 1);
+                                                //_data.routes[j].real_track.length=len;
                                                 //console.log("Delete post from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1] );
                                             }
 
+                                        var k=0;
+                                        var resultString='';
+                                        while (k<_data.routes[j].real_track.length) {
+                                            resultString += _data.routes[j].real_track[k].state +" ";
+
+                                            k++;
+                                        }
+
+                                        if (_data.routes[j].uniqueID == "157153") {
+                                            console.log("resultString", resultString, "Length=", _data.routes[j].real_track.length-1 );
+                                        }
                                     }
                                     break;
                                 }
@@ -1252,7 +1304,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 // по каждому доступному решению запрашиваем нажатия
 
-                console.log("!!!!!!Find pushes. Where are you?!!!!!!", _data);
+                console.log("!!!!!!Find pushes. Where are you?!!!!!!");
 
                 for (var m = 0; m < _data.idArr.length; m++) {
 
@@ -1262,7 +1314,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                     }
 
-                   // console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
+                    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
 
 
                     if (mobilePushes == undefined
@@ -2100,8 +2152,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     gid: route.transport.gid,
                     demoTime: scope.demoMode ? _data.server_time : -1
                 }).success(function (data) {
+                        //var rRtrack = JSON.parse(JSON.stringify(route.real_track));
+                        //console.log("Existing before Additional load for Route", rRtrack);
                         //var newData = JSON.parse(JSON.stringify(data));
                         //console.log("Additional load for Route", newData);
+
+
                         route.real_track = data;
 
 
