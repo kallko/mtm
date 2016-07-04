@@ -465,7 +465,7 @@ template {
 }
 
 .promised-text-card {
-    width: 45px;
+    width: 100px;
     height: 20px;
     padding-left: 3px;
 }
@@ -613,4 +613,12 @@ template {
     border: 1px solid grey !important;
     height: 25px;
     width: 100%;
+}
+.statistic-table {
+    width: 95%;
+    margin: 0 auto;
+}
+.statistic-table td,
+.statistic-table th{
+    text-align: center;
 }

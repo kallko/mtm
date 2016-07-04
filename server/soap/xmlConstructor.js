@@ -239,3 +239,7 @@ XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
     console.log("XML Constructor res=", str);
     return str;
 };
+
+XMLConstructor.prototype.getOldDay = function (date) {
+    return '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><INSTRUCTIONS><INSTRUCTION NAME="GET_CLOSE_DAY"><PARAMETER KEY="CLOSEDATA" VALUE="'+date+'" /></INSTRUCTION></INSTRUCTIONS></MESSAGE>';
+};

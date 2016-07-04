@@ -248,7 +248,6 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 						scope.servisPoints[i].stopTime = scope.servisPoints[i].confirmTime || wayPointTimeInteger;
 						scope.sumStopTimeConf = scope.sumStopTimeConf + scope.servisPoints[i].confirmTime;
 					}
-					console.log(JSON.parse(JSON.stringify(scope.servisPoints)));
 					if (lastUncomfirm) {
 						var timelastUncomfirm = ((scope.delta - sumTimeConfirmed) / 60) - (wayPointTimeInteger * (servisPointsLng - lengthConfirmat - 1) );
 						if (timelastUncomfirm < 1) {

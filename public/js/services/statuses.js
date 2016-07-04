@@ -69,7 +69,7 @@ angular.module('MTMonitor').factory('Statuses', [function StatusesFactory() {
                 color: '#E6B732'
             },
             {
-                name: 'будет вовремя',
+                name: 'ожидается поставка',
                 value: STATUS.SCHEDULED,
                 class: 'scheduled-status',
                 color: '#4482AB'

@@ -334,6 +334,7 @@ router.route('/trackparts/:start/:end')
                                     var stopsBefore = cached.sensors[i].real_track.length;
 
                                     //console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
+                                    //data[j].data[0].state = 'MOVE';
                                     cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                     cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     var stopsAfter = cached.sensors[i].real_track.length;
@@ -361,9 +362,9 @@ router.route('/trackparts/:start/:end')
 // получение треков по переданным стейтам
 router.route('/gettracksbystates/')
     .post(function (req, res) {
-        console.log('gettracksbystates');
+        //console.log('gettracksbystates', req.body.states, req.body.gid, req.body.demoTime, "MTM 364");
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-            console.log('get tracks by states DONE!');
+           // console.log('get tracks by states DONE!', data, "MTM 366");
             res.status(200).json(data);
         });
     });
@@ -777,6 +778,10 @@ router.route('/changedriver/')
         res.status(200).json("ok");
 
     });
+
+
+
+
 
 
 module.exports = router;

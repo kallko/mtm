@@ -5,7 +5,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             parent; // откуда было открыто окно
 
         init();
-        //loadReasonList();
+
 
         // начальная инициализация контроллера
         function init() {
@@ -32,13 +32,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // показать окно с точкой
         function show(event, data) {
             scope.point = data.point;
-            $('#promised-start-card').val(filter('date')(data.point.promised_window_changed.start * 1000, 'HH:mm'));
-            $('#promised-finish-card').val(filter('date')(data.point.promised_window_changed.finish * 1000, 'HH:mm'));
+            scope.promisedStartCard = new Date(data.point.promised_window_changed.start * 1000);
+            scope.promisedFinishCard = new Date(data.point.promised_window_changed.finish * 1000);
+           // scope.promisedStartCard = filter('date')(data.point.promised_window_changed.start * 1000, 'HH/mm');
+           // scope.promisedFinishCard = filter('date')(data.point.promised_window_changed.finish * 1000, 'HH/mm');
 
             scope.route = data.route;
             parent = data.parent;
+            scope.disableConfirmBtn = true;
             $('#point-view').popup('show');
-            scope.showHideSeasonButtons = scope.point && !scope.point.confirmed  && !scope.point.reason;
+            scope.showHideReasonButtons = scope.point && !scope.point.confirmed  && !scope.point.reason;
             if(scope.point && !scope.point.confirmed){
                 scope.selectReasonList = "";
             }
@@ -76,17 +79,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // загрузить список причин отмены заявки
         scope.showReasonList = false;
-        function loadReasonList(){
-            scope.loadReasonList = rootScope.reasons;
-            console.log(scope.loadReasonList, rootScope.reasons, "Pointview 81");
-            scope.showReasonList = true;
-        }
+
        
 
         // подтверждение статуса (генерирует событие, которое принимается в PointIndexController
         // и подтверждает сомнительный статус
         scope.confirmStatus = function () {
-            scope.showHideSeasonButtons = false;
+            scope.showHideReasonButtons = false;
             console.log('confirmStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,
@@ -96,7 +95,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // отмена сомнительного статуса
         scope.cancelStatus = function () {
-            scope.showHideSeasonButtons = false;
+            scope.showHideReasonButtons = false;
             console.log('cancelStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,
@@ -104,9 +103,17 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
+        scope.returnStatus = function(){
+            scope.showHideReasonButtons = true;
+            scope.$emit('changeConfirmation', {
+                row: scope.point,
+                option: 'return-scheduled'
+            });
+        };
+
         // отменить задачу
         scope.cancelTask = function () {
-            scope.showHideSeasonButtons = false;
+            scope.showHideReasonButtons = false;
             console.log('cancelTask');
             scope.point.changeConfirmation=true;
             scope.point.reason = scope.selectReasonList;
@@ -114,7 +121,6 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'cancel-point'
             });
-            rootScope.$emit('makeWaypointGrey', scope.point.NUMBER );
         };
 
         // перекелючить (вкл/выкл) блокировку задачи
@@ -221,18 +227,18 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // изменить обещанные окна
         scope.changePromisedWindow = function (point) {
-            var start = $('#promised-start-card').val().split(':'),
-                finish = $('#promised-finish-card').val().split(':'),
-                oldStart = new Date(point.promised_window_changed.start * 1000),
-                clearOldDate = new Date(oldStart.getFullYear(), oldStart.getMonth(), oldStart.getDate()).getTime();
 
-            point.promised_window_changed = {
-                start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
-                finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
-            };
+
+            point.promised_window_changed.start = parseInt( (scope.promisedStartCard)/1000, 10 );
+            point.promised_window_changed.finish = parseInt( (scope.promisedFinishCard)/1000, 10 );
+            // point.promised_window_changed = {
+            //     start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
+            //     finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
+            // };
 
             // в зависимости от того, откуда открыто окно данные меняются в исходных данных или
             // же только в изменяемой копии редактируемого маршрута
+            console.log(parent);
             if (parent === 'editRoute') {
                 console.log('checkPoint');
                 scope.$emit('checkPoint', point);
@@ -240,6 +246,18 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 console.log('updateRawPromised');
                 scope.$emit('updateRawPromised', {point: point});
                 scope.cancel();
+            }
+        };
+        scope.changePromisedCard = function(){
+            var date = new Date();
+            var offset = date.getTimezoneOffset();
+            var newPromisedStart = new Date(scope.promisedStartCard).getTime() /1000;
+            var newPromisedFinish = new Date(scope.promisedFinishCard).getTime()/1000;
+            
+            if(newPromisedStart >= newPromisedFinish || (newPromisedStart == scope.point.promised_window_changed.start && newPromisedFinish == scope.point.promised_window_changed.finish ) ){
+                scope.disableConfirmBtn = true;
+            }else{
+                scope.disableConfirmBtn = false;
             }
         };
 
