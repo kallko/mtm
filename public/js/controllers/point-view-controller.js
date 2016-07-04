@@ -38,7 +38,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.route = data.route;
             parent = data.parent;
             $('#point-view').popup('show');
-            scope.showHideSeasonButtons = scope.point && !scope.point.confirmed  && !scope.point.reason;
+            console.log ("Show buttons", scope.point , scope.point.confirmed , scope.point.reason);
+            scope.showHideSeasonButtons = scope.point && !scope.confirmed_by_operator && !scope.point.reason;
             if(scope.point && !scope.point.confirmed){
                 scope.selectReasonList = "";
             }

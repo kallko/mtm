@@ -1755,7 +1755,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function onChangeStatus(event, data) {
             var rawPoint = rawData.routes[data.row.route_id].points[data.row.NUMBER - 1];
             rawPoint.changeConfirmation=true;
+
+
             changeStatus(data.row, rawPoint, data.option);
+            factTimeForRoute(_data.routes[data.row.route_id], true);
             // и изменение цвета маркера
 
         }
@@ -1774,6 +1777,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     row.confirmed_by_operator=true;
                     row.limit=100;
                     row.confirmed = true;
+                    row.problem_index=0;
+                    if (row.real_arrival_time == undefined) row.real_arrival_time=rootScope.nowTime;
                     rawPoint.rawConfirmed = 1;
                     //после подтверждения обнуляем индех проблемности и опоздывание.
                     row.problem_index=0;
@@ -3721,24 +3726,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         };
 
+
+        rootScope.$on('reFact', function (event, indx){
+            var route=_data.routes[indx];
+            factTimeForRoute (route, true);
+        });
+
+
         //функция определяющая реальную последовательность посещения точек
-        function factTimeForRoute (route) {
+        function factTimeForRoute (route, sort) {
             //создаем три массива Доставлено / В плане / Отменено
             //Сортируем каждый массив по своему признаку
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
 
+            console.log("Route, to refact", route);
+
             var deliveredPoints = [];
             var sheduledPoints = [];
             var canceledPoints = [];
+            console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
             var i = route.points.length;
             while( i-- > 0){
 
             }
             var i=-1;
             while(i++<route.points.length-1){
-                console.log("i=", i);
-                if(route.points[i].status < 4 || route.points[i].status ==6 ) {deliveredPoints.push(route.points[i]); continue;}
+                //console.log("i=", i);
+                if(route.points[i].status < 4 || route.points[i].status == 6 ) {deliveredPoints.push(route.points[i]); continue;}
                 if(route.points[i].status < 8) {sheduledPoints.push(route.points[i]); continue;}
                 canceledPoints.push(route.points[i]);
 
@@ -3771,7 +3786,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-            console.log("Combos Length", route.points.length, deliveredPoints, sheduledPoints, canceledPoints);
+            console.log("Combos Length", route.points.length, deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
+
+           if (sort) {scope.order('fact_number');scope.order('fact_number');}
 
         }
 

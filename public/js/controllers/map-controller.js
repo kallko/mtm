@@ -295,6 +295,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                             checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                             scope.currentDraggingStop = null;
+                            rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
                             rootScope.$emit('checkInCloseDay');
                         });
 
