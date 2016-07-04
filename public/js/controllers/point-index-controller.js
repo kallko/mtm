@@ -998,7 +998,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //}
 
                    // console.log("Пересчет");
-                    tmpPoint.status = STATUS.SCHEDULED;
+                    //tmpPoint.status = STATUS.SCHEDULED;
 
                     delete tmpPoint.distanceToStop;
                     delete tmpPoint.timeToStop;

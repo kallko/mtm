@@ -333,7 +333,7 @@ router.route('/trackparts/:start/:end')
                                 if (data[j].data.length > 0) {
                                     var stopsBefore = cached.sensors[i].real_track.length;
 
-                                    console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
+                                   // console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
                                     //if (cached.sensors[i].GID == 9296) {
                                     //   // console.log(cached.sensors[i].real_track, " BEFORE MTM 338")
                                     //}
@@ -347,7 +347,7 @@ router.route('/trackparts/:start/:end')
                                     cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                     cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     var stopsAfter = cached.sensors[i].real_track.length;
-                                    console.log("Car with gid=", cached.sensors[i].GID, "Now have stops",  stopsAfter);
+                                   // console.log("Car with gid=", cached.sensors[i].GID, "Now have stops",  stopsAfter);
                                     //if (cached.sensors[i].GID == 9296) {
                                     //    console.log(cached.sensors[i].real_track, " AFTER MTM 338")
                                     //}

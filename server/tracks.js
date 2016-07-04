@@ -97,12 +97,12 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                 if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                     counter++;
                     (function (jj) {
-                        console.log("url=", url,  data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t2, "tracks 100" );
+                        //console.log("url=", url,  data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t2, "tracks 100" );
                         // замена стандартного времени на время нужное именно для этого роута
                         var indxBegin=url.indexOf('&from=');
                         var indxEnd=url.indexOf('&to=');
                         var newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t2 + url.substring(indxEnd);
-                        console.log("url=", newUrl);
+                        //console.log("url=", newUrl);
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true
@@ -357,7 +357,7 @@ TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
 TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);
-    console.log("tracks 343", url);
+   // console.log("tracks 343", url);
 
     request({
         url: url + '&gid=' + gid,
@@ -375,7 +375,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    console.log(url, "Track 369");
+   // console.log(url, "Track 369");
 
 
     request({
