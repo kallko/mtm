@@ -310,10 +310,66 @@
                     class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}"
                     on-finish-render="ngRepeatFinished"
-                    habra-habr
-                    row="row">
+                    >
 
+                    <td>{{::row.NUMBER}}</td>
+                    <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
+                    <td ng-class="row.class">
+                        {{getTextStatus(row)}}
+                    </td>
+                    <td class="degree" >{{row.limit}}</td>
+                    <td title="{{::row.transport.NAME}}">{{row.transport.NAME}}</td>
+                    <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
+                    <td>{{row.driver.NAME}}</td>
+                    <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
+                    <td title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
+                    <td>{{row.AVAILABILITY_WINDOWS}}</td>
+                    <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+                    <td>
+                        {{row.promised_window_changed.start * 1000 | date:'HH:mm'}} -
+                        {{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}
+                    </td>
+                    <td>{{ (row.status==4 || row.status==5 ||row.status==7 ||row.status==6) ? (parseInt((row.promised_window_changed.finish - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.promised_window_changed.finish - nowTime) -(parseInt((row.promised_window_changed.finish - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
+                    <td>
+                        <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8) && (row.transport.gid!=undefined) && (row.transport.real_track!=undefined) && (nowTime - row.transport.real_track[row.transport.real_track.length-1].t2<60*60)">
+                            {{(nowTime + row.arrival_left_prediction)*1000 | date: 'HH:mm' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5) && (row.transport.gid!=undefined) && (row.transport.real_track!=undefined) && (nowTime - row.transport.real_track[row.transport.real_track.length-1].t2<60*60)  ">
+                             {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }}<!-- |date: 'HH:mm' : 'UTC'-->
+                        </span>
+                    </td>
+                    <td>
+                        <span ng-if="row.real_arrival_time > 0 && (row.status <=3 || row.status==6)">
+                            {{row.real_arrival_time*1000 |  date: 'HH:mm' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span ng-if="row.overdue_time > 0">
+                            {{row.overdue_time*1000 |  date: 'HH:mm' : 'UTC' }}
+                        </span>
+                    </td>
+                    <td>{{row.haveStop ? 'Есть' : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}</td>
+                    <td id="{{'push-td-' + row.row_id}}"
+                        title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
+                                'время gps: ' + row.mobile_push.gps_time + '\n' +
+                                'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
+                        {{row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}
+                    </td>
+                    <td title="{{::row.waypoint.CONFIRMBYGPS}}">{{::row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
+                    <td> {{row.change_time ? row.change_time : ''}}</td>
+                    <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
 
+                    <td>{{::row.transport.REGISTRATION_NUMBER}}</td>
+                    <td>{{::row.driver.PHONE}}</td>
+                    <td>{{::row.branchName}}</td>
+                    <td>
+                        <span ng-if="row.problem_index > 0">
+                        {{row.problem_index}}
+                        </span>
+                    </td>
+                    <td title="{{::row.waypoint.COMMENT}}">{{::row.waypoint.COMMENT}}</td>
 
 
                 </tr>
