@@ -18,8 +18,8 @@ var soap = require('soap'),
 
 // класс для работы с соапом
 function SoapManager(login) {
-    this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
-    this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
+    this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl";
+    this.urlPda = "@sngtrans.com.ua/copy/ws/pda/?wsdl";
     this.login = login;
     this.admin_login = config.soap.login;
     this.password = config.soap.password;
@@ -141,6 +141,10 @@ function checkBeforeSend(_data, callback) {
 
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
+    if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
+        //console.log(data.closedRoutesFrom1C);
+        allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
+    }
 
 
     //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
@@ -201,11 +205,36 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     // перемотать на вечер запрашиваемого дня, если выбран не текущий день
     if (date) {
         date = parseInt(date);
+        var loadOldDay = true;
     }
 
     var date = date ? date : Date.now();
-    console.log(date);
+
     console.log('Date >>>', new Date(date));
+
+    // soap.createClient(me.getFullUrl(), function (err, client) {
+    //     if (err) throw err;
+    //
+    //     // авторизация с правами соап-администратора
+    //     client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+    //     // запрос в соап от имени авторизированного пользователя, но с правами администратора
+    //     // получения списка id решений на конкретную дату
+    //
+    //     if (loadOldDay) {
+    //         setTimeout(function(){
+    //             client.runAsUser({'input_data': _xml.getOldDay("15.06.2016"), 'user': me.login}, function (err, result) {
+    //                 if(err) throw err;
+    //                 parseXML(result.return, function (err, res) {
+    //                     if(err) throw err;
+    //                     console.log(JSON.porse(res.MESSAGE.JSONDATA[0]));
+    //                 });
+    //             });
+    //         }, 10000);
+    //     }
+    // });
+
+
+
 
     // инициализация соап клиента
     soap.createClient(me.getFullUrl(), function (err, client) {
@@ -218,6 +247,32 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
         // запрос в соап от имени авторизированного пользователя, но с правами администратора
         // получения списка id решений на конкретную дату
+
+        // if(loadOldDay){
+        //     console.log(_xml.getOldDay("04.06.2016"));
+        //     client.runAsUser({'input_data': _xml.getOldDay("04.06.2016"), 'user': me.login}, function (err, result) {
+        //         console.log(result);
+        //     });
+        // }
+        var data = [];
+        if (loadOldDay) {
+            var dateObj = new Date( date );
+            dateYear = dateObj.getFullYear();
+            dateMonth = dateObj.getMonth() + 1;
+            dateMonth = dateMonth < 10 ? '0'+dateMonth : dateMonth;
+            dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
+            console.log(dateDay+'.'+dateMonth+'.'+dateYear);
+            setTimeout(function(){
+                client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
+                    if(err) throw err;
+                    parseXML(result.return, function (err, res) {
+                        if(err) throw err;
+                        data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                    });
+                });
+            }, 5000);
+        }
+
         client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
                 console.log('DONE getDailyPlan');
@@ -231,8 +286,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         return;
                     }
 
-                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
-                        data = [];
+                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
 
                     data.iLength = itineraries.length;
                     // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
@@ -256,6 +310,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                 console.log(err.body);
             }
         });
+
+
+
+
     });
 };
 
