@@ -333,14 +333,27 @@ router.route('/trackparts/:start/:end')
                                 if (data[j].data.length > 0) {
                                     var stopsBefore = cached.sensors[i].real_track.length;
 
-                                    //console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
-                                    //data[j].data[0].state = 'MOVE';
+                                    console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
+                                    //if (cached.sensors[i].GID == 9296) {
+                                    //   // console.log(cached.sensors[i].real_track, " BEFORE MTM 338")
+                                    //}
+
+
+                                    var len = cached.sensors[i].real_track.length-1;
+                                    if (cached.sensors[i].real_track[len].state == 'CURRENT_POSITION') {
+                                        cached.sensors[i].real_track.length = len;
+                                    }
+                                    data[j].data[0].state = 'MOVE';
                                     cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                     cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     var stopsAfter = cached.sensors[i].real_track.length;
-                                    //console.log("Car with gid=", cached.sensors[i].GID, "Now hav stops",  stopsAfter);
+                                    console.log("Car with gid=", cached.sensors[i].GID, "Now have stops",  stopsAfter);
+                                    //if (cached.sensors[i].GID == 9296) {
+                                    //    console.log(cached.sensors[i].real_track, " AFTER MTM 338")
+                                    //}
+
                                     if (stopsAfter - stopsBefore == 1) {
-                                        //  console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
+                                          //console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
                                     }
 
                                 }

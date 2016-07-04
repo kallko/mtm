@@ -83,9 +83,9 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
-    console.log( " Check before send started", _data.iLength);
+    //console.log( " Check before send started", _data.iLength);
     if(_data.iLength != 0){
-        console.log("Рано еще, подпустим поближе!");
+        //console.log("Рано еще, подпустим поближе!");
         return;
     }
 

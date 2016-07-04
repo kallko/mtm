@@ -97,8 +97,14 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                 if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                     counter++;
                     (function (jj) {
+                        console.log("url=", url,  data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t2, "tracks 100" );
+                        // замена стандартного времени на время нужное именно для этого роута
+                        var indxBegin=url.indexOf('&from=');
+                        var indxEnd=url.indexOf('&to=');
+                        var newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t2 + url.substring(indxEnd);
+                        console.log("url=", newUrl);
                         request({
-                            url: url + '&gid=' + data.sensors[jj].GID,
+                            url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true
                         }, function (error, response, body) {
                             if (!error && response.statusCode === 200) {

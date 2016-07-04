@@ -292,7 +292,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                        if ( _data.routes[j].real_track.length>0){
                                            if (_data.routes[j].real_track[_data.routes[j].real_track.length-1].state == "CURRENT_POSITION"){
-                                               _data.routes[j].real_track[_data.routes[j].real_track.length-1].state ='MOVE';
+                                               _data.routes[j].real_track.length =_data.routes[j].real_track.length-1;
                                            }
                                        }
                                         ////тестово отладочный блок, поиск и удаление невалидных разрозненных стейтов.
@@ -321,9 +321,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                             k++;
                                         }
 
-                                        if (_data.routes[j].uniqueID == "157153") {
+                                        if (_data.routes[j].uniqueID == "162119") {
                                             console.log("newString", newString);
                                         }
+
+
                                             trackParts[i].data[0].state = 'MOVE';
 
                                         var k=0;
@@ -335,7 +337,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         }
 
 
-                                        if (_data.routes[j].uniqueID == "157153") {
+                                        if (_data.routes[j].uniqueID == "162119") {
                                             console.log("proString", proString);
                                         }
 
@@ -367,8 +369,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                             k++;
                                         }
 
-                                        if (_data.routes[j].uniqueID == "157153") {
-                                            console.log("resultString", resultString, "Length=", _data.routes[j].real_track.length-1 );
+                                        if (_data.routes[j].uniqueID == "162119") {
+                                            console.log("resultString", resultString, "Length=", _data.routes[j].real_track.length );
                                         }
                                     }
                                     break;
@@ -3788,7 +3790,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             console.log("Combos Length", route.points.length, deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
 
-           if (sort) {scope.order('fact_number');scope.order('fact_number');}
+           if (sort) {scope.order('fact_number');scope.order('fact_number');}// сортировка 2 раза, чтобы итоговая сортировка оставалась начальной.
 
         }
 
