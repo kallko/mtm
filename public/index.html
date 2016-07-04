@@ -305,10 +305,8 @@
                     on-finish-render="ngRepeatFinished"
                     ng-show="applyFilter(row)"
                     data-uniqueid="{{row.uniqueID}}"
-                    on-finish-render="ngRepeatFinished"
                     class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}"
-                    on-finish-render="ngRepeatFinished"
                     >
                     <td>{{::row.NUMBER}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
