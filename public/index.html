@@ -356,7 +356,7 @@
                                 'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
                         {{row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}
                     </td>
-                    <td title="{{::row.waypoint.CONFIRMBYGPS}}">{{::row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
+                    <td title="{{::row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
                     <td> {{row.change_time ? row.change_time : ''}}</td>
                     <td id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
 

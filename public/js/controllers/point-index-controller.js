@@ -1411,6 +1411,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     } else {
                                         _data.routes[j].pushes = _data.routes[j].pushes || [];
                                         if (mobilePushes[i].gps_time_ts < _data.server_time) {
+                                            tmpPoint.havePush = true;
                                             mobilePushes[i].long_away = true;
                                             _data.routes[j].pushes.push(mobilePushes[i]);
                                         }
@@ -3285,12 +3286,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
                             points[i].status = 4;
                             points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
-                            if ( points[i].havePush || points[i].haveStop) {
-                                findStatusAndWindowForPoint(points[i]);
-                            }
+
                             //console.log("DELAY for point", points[i]);
                         }
-
+                        if ( points[i].havePush || points[i].haveStop) {
+                            findStatusAndWindowForPoint(points[i]);
+                        }
                     }
                     i++;
                 }
