@@ -101,7 +101,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                         // замена стандартного времени на время нужное именно для этого роута
                         var indxBegin=url.indexOf('&from=');
                         var indxEnd=url.indexOf('&to=');
-                        var newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t2 + url.substring(indxEnd);
+                        var newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t1 + url.substring(indxEnd);
                         //console.log("url=", newUrl);
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,

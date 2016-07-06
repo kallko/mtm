@@ -16,6 +16,7 @@ var express = require('express'),
     closeRoutesUniqueID = {}, // для каждой фирмы UniqueID  сегодняшних закрытых роутов
 
     oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
+    companyLogins = {},   // Список логинов на компании
     needNewReqto1C = {}; // если есть свойство с именем компани, то не запрвшивать из 1С
 
 new CronJob('01 00 00 * * *', function() {
@@ -81,9 +82,11 @@ router.route('/currentsrvertime')
 
 router.route('/keysoldroutescache')
     .get(function(req, res){
-        if(req.session.login in oldRoutesCache){
-            console.log(Object.keys(oldRoutesCache[req.session.login]));
-            res.status(200).json( Object.keys(oldRoutesCache[req.session.login]) );
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        if(currentCompany in oldRoutesCache){
+            console.log(Object.keys(oldRoutesCache[currentCompany]));
+            res.status(200).json( Object.keys(oldRoutesCache[currentCompany]) );
         }else{
             res.status(200).json(null);
         }
@@ -92,7 +95,9 @@ router.route('/keysoldroutescache')
     });
 router.route('/getoldroute')
     .post(function(req, res){
-        res.status(200).json(oldRoutesCache[req.session.login][req.body.date]);
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        res.status(200).json(oldRoutesCache[currentCompany][req.body.date]);
     });
 
 
@@ -131,6 +136,8 @@ router.route('/dailydata')
         var now = Date.now(),
             day = 86400000,
             today12am = now - (now % day);
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
         //console.log("!!!!!!!req.session.login!!!!!", req.session.login);
@@ -143,17 +150,20 @@ router.route('/dailydata')
         //}
 
         // при включенном флаге кешинга по сессии, ищет наличие относительно свежего кеша и отправляет в случае успеха
+
+
+
         if (config.cashing.session
             && req.query.force == null
             && req.query.showDate == null
             && req.session.login != null
-            && cashedDataArr[req.session.login] != null
-            && (req.session.login in needNewReqto1C)
+            && cashedDataArr[currentCompany] != null
+            && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
-            console.log('=== loaded from session === send data to client === ROutes =',cashedDataArr[req.session.login].routes.length );
-            req.session.itineraryID = cashedDataArr[req.session.login].ID;
-            cashedDataArr[req.session.login].user = req.session.login;
-            var cache = cashedDataArr[req.session.login];
+            console.log('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
+            req.session.itineraryID = cashedDataArr[currentCompany].ID;
+            cashedDataArr[currentCompany].user = req.session.login;
+            var cache = cashedDataArr[currentCompany];
             if(cache.currentDay){
                 cache.server_time = parseInt(new Date() / 1000);
                 cache.current_server_time = cache.server_time;
@@ -162,7 +172,7 @@ router.route('/dailydata')
             }
 
 
-            res.status(200).json(cashedDataArr[req.session.login]);
+            res.status(200).json(cashedDataArr[currentCompany]);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
             var soapManager = new soap(req.session.login);
@@ -178,6 +188,13 @@ router.route('/dailydata')
                 }else if( data.routes.length == 0){
                     res.status(200).json({status: 'no plan'});
                 }else{
+                    console.log("ReChange SessionLogin", data.CLIENT_ID);
+
+                    var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
+                    var key=""+req.session.login;
+                    companyLogins[key]=currentCompany;
+
+
                     needNewReqto1C[req.session.login] = true;
                             //здесь падала программа при длительном использовании.
                     
@@ -198,7 +215,7 @@ router.route('/dailydata')
                     data.user = req.session.login;
                     data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                     }
-                    cashedDataArr[req.session.login] = data;
+                    cashedDataArr[currentCompany] = data;
                     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
                     data.current_server_time = parseInt(new Date() / 1000);
                     var current_server_time = new Date();
@@ -317,13 +334,17 @@ router.route('/trackparts/:start/:end')
         }
 
         var first = true;
-        tracksManager.getRealTrackParts(cashedDataArr[req.session.login], req.params.start, req.params.end,
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        tracksManager.getRealTrackParts(cashedDataArr[currentCompany], req.params.start, req.params.end,
             function (data) {
                 if (!first) return;
 
                 console.log('getRealTrackParts DONE');
                 first = false;
-                var cached = cashedDataArr[req.session.login];
+                var key = ""+req.session.login;
+                var currentCompany = companyLogins[key];
+                var cached = cashedDataArr[currentCompany];
 
 
                 if(cached) {
@@ -428,8 +449,10 @@ router.route('/saveroute/')
 
 router.route('/existdata/')
     .post(function(req, res){
-        if(req.session.login in updateCacshe && req.body.date in updateCacshe[req.session.login]){
-            res.status(200).json(updateCacshe[req.session.login][req.body.date]);
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        if(currentCompany in updateCacshe && req.body.date in updateCacshe[currentCompany]){
+            res.status(200).json(updateCacshe[currentCompany][req.body.date]);
         } else {
             res.status(200).json([]);
         }
@@ -465,13 +488,15 @@ router.route('/savewaypoint/')
 router.route('/saveupdate/')
     .post(function (req, res) {
         console.log('saveupdate');
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
         res.status(200).json({status: 'ok'});
-        if( !([req.session.login] in updateCacshe) ){
-            updateCacshe[req.session.login] = {};
+        if( !([currentCompany] in updateCacshe) ){
+            updateCacshe[currentCompany] = {};
         }
-        if( !( req.body.date in updateCacshe[req.session.login]) ){
-            updateCacshe[req.session.login][req.body.date] = [];
-            updateCacshe[req.session.login][req.body.date] = req.body;
+        if( !( req.body.date in updateCacshe[currentCompany]) ){
+            updateCacshe[currentCompany][req.body.date] = [];
+            updateCacshe[currentCompany][req.body.date] = req.body;
         }else {
             // Полученные данные нужно объедеенить с существующими на данный момент, которые были получены ранее
             // так как иногда у стопа может быть id=0, который потом измениться, а TASK_NUMBER не уникальный, приходится создавать
@@ -485,25 +510,25 @@ router.route('/saveupdate/')
                     if(obj.data[i] && obj.data[i].TASK_NUMBER) newID=""+obj.data[i].TASK_NUMBER+obj.data[i].TASK_DATE;
                     var j=0;
                     //console.log("updateCacshe[req.session.login]", updateCacshe[req.session.login])
-                    while(j<updateCacshe[req.session.login][req.body.date].data.length){
+                    while(j<updateCacshe[currentCompany][req.body.date].data.length){
                         var oldID;
-                        if(updateCacshe[req.session.login][req.body.date].data[j] && updateCacshe[req.session.login][req.body.date].data[j].id!=undefined) oldID=""+updateCacshe[req.session.login][req.body.date].data[j].lat+updateCacshe[req.session.login][req.body.date].data[j].lon+updateCacshe[req.session.login][req.body.date].data[j].t1;
-                        if(updateCacshe[req.session.login][req.body.date].data[j] && updateCacshe[req.session.login][req.body.date].data[j].TASK_NUMBER) oldID=""+updateCacshe[req.session.login][req.body.date].data[j].TASK_NUMBER+updateCacshe[req.session.login][req.body.date].data[j].TASK_DATE;
+                        if(updateCacshe[currentCompany][req.body.date].data[j] && updateCacshe[currentCompany][req.body.date].data[j].id!=undefined) oldID=""+updateCacshe[currentCompany][req.body.date].data[j].lat+updateCacshe[currentCompany][req.body.date].data[j].lon+updateCacshe[currentCompany][req.body.date].data[j].t1;
+                        if(updateCacshe[currentCompany][req.body.date].data[j] && updateCacshe[currentCompany][req.body.date].data[j].TASK_NUMBER) oldID=""+updateCacshe[currentCompany][req.body.date].data[j].TASK_NUMBER+updateCacshe[currentCompany][req.body.date].data[j].TASK_DATE;
                         if(newID==oldID){
                             //console.log("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
-                            updateCacshe[req.session.login][req.body.date].data[j]=obj.data[i];
+                            updateCacshe[currentCompany][req.body.date].data[j]=obj.data[i];
                             exist=true;
                         }
                         j++;
                     }
                     if(!exist) {
                        // console.log("Adding new point/stop")
-                        updateCacshe[req.session.login][req.body.date].data.push(obj.data[i])
+                        updateCacshe[currentCompany][req.body.date].data.push(obj.data[i])
                     }
                     delete newID;
                     i++;
                 }
-            updateCacshe[req.session.login][req.body.date] = req.body;
+            updateCacshe[currentCompany][req.body.date] = req.body;
 
         }
 
@@ -572,8 +597,10 @@ router.route('/saveupdate/')
 // получение с роутера планового трека и времен проезда по всем маршрутам по логину в сессии
 router.route('/routerdata')
     .get(function (req, res) {
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
         var routeIndx = req.query.routeIndx,
-            cData = cashedDataArr[req.session.login],
+            cData = cashedDataArr[currentCompany],
             sended = false,
             checkFunc = function (data, callback) {
                 console.log('checkFunc', cData.routes[routeIndx].plan_geometry_loaded, cData.routes[routeIndx].time_matrix_loaded, !sended);
@@ -628,6 +655,9 @@ router.route('/closeday')
             return;
             //req.session.login = config.soap.defaultClientLogin;
         }
+
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
         //console.log(req.body.closeDayData);
         console.log ("start working");
         var soapManager = new soap(req.session.login);
@@ -635,23 +665,23 @@ router.route('/closeday')
                 if (!data.error) {
                     res.status(200).json({result: data.result, closeCount:req.body.routesID.length, CloseDate:req.body.closeDayDate });
                     if(req.body.update) { // перезаписать сегодняшний день
-                            closeRoutesUniqueID[req.session.login] = [];
+                            closeRoutesUniqueID[currentCompany] = [];
                         console.log(req.body);
-                        closeRoutesUniqueID[req.session.login] = JSON.parse(JSON.stringify(req.body.routesID));
+                        closeRoutesUniqueID[currentCompany] = JSON.parse(JSON.stringify(req.body.routesID));
                     }else {
-                        if (req.session.login in oldRoutesCache && req.body.closeDayDate in oldRoutesCache[req.session.login]){
+                        if (currentCompany in oldRoutesCache && req.body.closeDayDate in oldRoutesCache[currentCompany]){
                             for (var i = 0; req.body.routesID.length > i; i++) {
-                                for (var j = 0; oldRoutesCache[req.session.login][req.body.closeDayDate].routes.length > j; j++) {
-                                    if (req.body.routesID[i] == oldRoutesCache[req.session.login][req.body.closeDayDate].routes[j]['uniqueID']) {
-                                        oldRoutesCache[req.session.login][req.body.closeDayDate].routes.splice(j, 1);
+                                for (var j = 0; oldRoutesCache[currentCompany][req.body.closeDayDate].routes.length > j; j++) {
+                                    if (req.body.routesID[i] == oldRoutesCache[currentCompany][req.body.closeDayDate].routes[j]['uniqueID']) {
+                                        oldRoutesCache[currentCompany][req.body.closeDayDate].routes.splice(j, 1);
                                         j--;
                                         console.log('CLOSEROUTE');
                                         break;
                                     }
                                 }
                             }
-                            if(oldRoutesCache[req.session.login][req.body.closeDayDate].routes.length == 0){
-                                delete oldRoutesCache[req.session.login][req.body.closeDayDate];
+                            if(oldRoutesCache[currentCompany][req.body.closeDayDate].routes.length == 0){
+                                delete oldRoutesCache[currentCompany][req.body.closeDayDate];
                             }
                         }
                     }
@@ -765,10 +795,12 @@ router.route('/changedriver/')
         // Перезапись в кеше маршрута отредактированного в мониторинге
         var i=0;
         req.body.routes[0].filterId=null;
-        while(i<cashedDataArr[req.session.login].routes.length){
-            if(cashedDataArr[req.session.login].routes[i].uniqueID == req.body.routes[0].uniqueID){
-                cashedDataArr[req.session.login].routes[i] = req.body.routes[0];
-                cashedDataArr[req.session.login].routes[i].filterId=null;
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        while(i<cashedDataArr[currentCompany].routes.length){
+            if(cashedDataArr[currentCompany].routes[i].uniqueID == req.body.routes[0].uniqueID){
+                cashedDataArr[currentCompany].routes[i] = req.body.routes[0];
+                cashedDataArr[currentCompany].routes[i].filterId=null;
                 //console.log("Overwright Route");
                 break;
             }
@@ -785,7 +817,7 @@ router.route('/changedriver/')
         //Если произошло разделение маршрутов, нужно добавить новый к списку.
         if(req.body.routes[1] != undefined){
             req.body.routes[1].filterId=null;
-            cashedDataArr[req.session.login].routes.push(req.body.routes[1]);
+            cashedDataArr[currentCompany].routes.push(req.body.routes[1]);
         }
 
         res.status(200).json("ok");
@@ -794,6 +826,38 @@ router.route('/changedriver/')
 
 
 
+
+router.route('/checknewiten')
+    .get(function (req, res) {
+        console.log("check New Iten in Progress");
+
+        // присвоение лоина для прогрузки интерфейса при запуске вне окна  (для отладки)
+        if (req.session.login == null || req.session.login == undefined) {
+            console.log("Login", req.session.login);
+            res.status(401).json({status: 'Unauthorized'});
+            //req.session.login = config.soap.defaultClientLogin;
+        }
+
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        var cache = cashedDataArr[currentCompany];
+        var existIten = cashedDataArr[currentCompany].idArr.length;
+
+        var soapManager = new soap(req.session.login);
+        soapManager.getAdditionalDailyPlan(dataReadyCallback, req.query.showDate);
+
+
+        function dataReadyCallback (quant){
+            console.log("QUANT", quant, "req.session", cache.CLIENT_NAME, "____ ", cache.CLIENT_ID);
+            for (var key in cache){
+                console.log ("key", key);
+            }
+
+
+        }
+
+            res.status(200).json("ok");
+    });
 
 
 

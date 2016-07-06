@@ -381,6 +381,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log("Update Dinamicly stops for routes updateData");
                         updateData();
                         serverPredicate();
+                        // когда расчеты и загрузки закончены, проверяем не появились ли новые утвержденные решения.
+                        checkNewIten();
+
+
                     }).error(function (err) {
                    // rootScope.errorNotification(url);
                 });
@@ -410,7 +414,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             http.get(url, {})
                 .success(function (data) {
-                    console.log(JSON.parse(JSON.stringify(data)));
+                    //console.log(JSON.parse(JSON.stringify(data)));
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
                     rootScope.reasons=data.reasons;
@@ -420,17 +424,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     //проверка на сегодняшний день
 
-                    console.log("before chose CurrentDay", rootScope.currentDay, data.server_time );
+                    //console.log("before chose CurrentDay", rootScope.currentDay, data.server_time );
                     //console.log(chooseDate, "==", currentTime, "or", showDate, "==", scope.nowTime );
                     //if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
-                    if(rootScope.currentDay){
-
-                        console.log("!!!!!!!!!HURA We load today DAY");
-                    } else {
-
-                        console.log("(((((( We LOAD PAST!!! Problem=" , scope.filters.problem_index);
-
-                    }
+                    //if(rootScope.currentDay){
+                    //
+                    //    console.log("!!!!!!!!!HURA We load today DAY");
+                    //} else {
+                    //
+                    //    console.log("(((((( We LOAD PAST!!! Problem=" , scope.filters.problem_index);
+                    //
+                    //}
 
                     //console.log("I load this data", toPrint);
                     linkDataParts(data);
@@ -821,8 +825,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            console.log(data);
-            console.log(scope.rowCollection);
+            //console.log(data);
+            //console.log(scope.rowCollection);
 
             // оповещаем ползователя о проблемных маршрутах
             if (problematicRoutes.length > 0) {
@@ -851,7 +855,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             scope.$emit('forCloseController', data); //отправляем дату, имя компании и прочее в close-day-controller
 
-            showPopup('Загрузка завершенна!', 500);
+            showPopup('Загрузка завершенна!', 200);
             //console.log(showPopup, ' showPopup');
 
             setColResizable();
@@ -945,6 +949,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //    updateDataforPast();
             //    return;
             //}
+
 
             var route,
                 tmpPoint,
@@ -3794,7 +3799,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
-
+        function checkNewIten(){
+            http.get('./checknewiten')
+        }
 
         rootScope.$on('statusUpdate', statusUpdate);
     }]);

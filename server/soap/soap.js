@@ -89,6 +89,8 @@ function checkBeforeSend(_data, callback) {
         return;
     }
 
+    //console.log("NEW KEYS = ", _data.CLIENT_ID, "&&&&&", _data.CLIENT_NAME);
+
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -235,6 +237,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         data = [];
 
                     data.iLength = itineraries.length;
+
+                    //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
                     // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
                     // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
                     if (!config.loadOnlyItineraryNew) data.iLength *= 2;
@@ -353,7 +357,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
-                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
+                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE; // список причин отмены заказа
+                   // clientid = res.MESSAGE.CLIENT_ID[0].CLIENT_ID,
 
                // console.log(reasons, "SOAP345");
 
@@ -701,3 +706,60 @@ SoapManager.prototype.closeDay = function (closeDayData, callback) {
 
     saveTo1C(closeDayData); //Снять комментарий и можно записывать
 };
+
+SoapManager.prototype.getAdditionalDailyPlan = function (callback, date) {
+
+    var me = this;
+    var date = date ? date : Date.now();
+    soap.createClient(me.getFullUrl(), function (err, client) {
+        if (err) throw err;
+
+        // авторизация с правами соап-администратора
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        console.log(me.login);
+        console.log(_xml.dailyPlanXML(date));
+
+        // запрос в соап от имени авторизированного пользователя, но с правами администратора
+        // получения списка id решений на конкретную дату
+        client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
+            if (!err) {
+                console.log('Its ALL Iten for now');
+                console.log(result.return);
+
+                // парсинг ответа соапа из xml в json
+                parseXML(result.return, function (err, res) {
+                    if (res.MESSAGE.PLANS == null) {
+                        console.log('NO PLANS!');
+                        callback({status: 'no plan'});
+                        return;
+                    }
+
+                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
+                        data = [];
+
+                    data.iLength = itineraries.length;
+                    console.log("Quantity of Iten is", data.iLength);
+                    callback(data.iLength);
+                    // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
+                    // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
+                    //if (!config.loadOnlyItineraryNew) data.iLength *= 2;
+
+                    // получение развернутого решения по списку полученных ранее id решений
+                    //for (var i = 0; i < itineraries.length; i++) {
+                    //    //if (itineraries[i].$.ID == 4) continue; // TODO REMOVE
+                    //
+                    //    (function (ii) {
+                    //        setTimeout(function () {
+                    //            me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
+                    //        }, ii * 5000);
+                    //    })(i);
+                    //}
+
+                });
+            } else {
+                console.log('getDailyPlan ERROR');
+                console.log(err.body);
+            }
+        });
+    });
+}
