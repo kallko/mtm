@@ -1138,7 +1138,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                             status = route.points[l].status;
                                             if (status !== STATUS.FINISHED
                                                 && status !== STATUS.FINISHED_LATE
-                                                && status !== STATUS.FINISHED_TOO_EARLY) {
+                                                && status !== STATUS.FINISHED_TOO_EARLY
+                                                && status !== STATUS.ATTENTION)
+                                            {
                                                 haveUnfinished = true;
                                                 continue;
                                             }
@@ -3330,7 +3332,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     var lastPoint = route.points.length - 1;
                     while (lastPoint > 0) {
-                        if (route.points[lastPoint].status < 4) {
+                        if (route.points[lastPoint].status < 4 || route.points[lastPoint].status == 6) {
                             // lastPoint++;
                             break;
                         }
@@ -3413,7 +3415,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             // console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
 
                             route.points[j].in_plan = true;
-                            if (route.points[j].arrival_prediction == null) {
+                            if (route.points[j].arrival_prediction == null || route.points[j].arrival_prediction == 0 || route.points[j].arrival_prediction == '0' ) {
                                 route.points[j].arrival_prediction = tmpPred;
                             } else {
                                 if (tmpPred + 300 < route.points[j].arrival_prediction) {
