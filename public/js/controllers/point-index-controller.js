@@ -79,7 +79,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(scope.filters.status);
             scope.filters.routes = [{nameDriver: 'все маршруты', nameCar: 'все маршруты', value: -1, allRoutes:true}]; // фильтры по маршрутам
             //scope.filters.route = scope.filters.routes[0].value;
-           // scope.filters.problem_index = 1;
+            scope.filters.problem_index = 1;
             scope.filters.promised_15m = -1;
             scope.draw_modes = [                                        // режимы отрисовки треков
                 {name: 'комбинированный трек', value: 0},
@@ -1952,18 +1952,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var row = scope.displayCollection[i];
 
             if($event.type == "click"){
-                
                 rootScope.carCentre=false;
                 rootScope.clickOff=true;
                 scope.drawRoute(row.route_id, false);// false - параметр  заставляющий сделать быструю отрисовку.
                 rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
-                rootScope.$on('endPrepearMarkersArr', function(){
                     if(row.haveStop){
                         rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
                     }else{
                         rootScope.$emit('drawConnectsActivePoint');
                     }
-                });
                 for(var i = 0; scope.displayCollection.length > i; i++){
                     scope.displayCollection[i].selected = false;
                 }
