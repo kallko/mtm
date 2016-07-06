@@ -35,6 +35,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.existDataLoaded=false;                     //загружены ли уже существующие ранее данные
 
             scope.parseInt = parseInt;                       //Возможность использовать parseInt во view
+            scope.sortedByFact;                              // Отсортированность по фактическому исполнению
 
 
 
@@ -2145,6 +2146,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             factTimeForRoute(route);
+
+
+            if (scope.sortedByFact == undefined) {
+                scope.order('fact_number');
+                scope.order('fact_number');
+            }
+            scope.sortedByFact=!scope.sortedByFact;
+
+
 
             console.log("P-I-C recieve click", rootScope.clickOff, "and gona draw", route);
 
