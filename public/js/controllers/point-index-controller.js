@@ -1627,14 +1627,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 updateResizeGripHeight();
             });
 
-            scope.$on('ngRepeatFinished', function () {
+           /* scope.$on('ngRepeatFinished', function () {
                 prepareFixedHeader();
-                updateResizeGripHeight();
-                 $('.delivery-point-row').contextmenu({
+                updateResizeGripHeight();*/
+                 $('#point-table-tbl tbody').contextmenu({
                      target: '#context-menu',
+                     before: beforeDeliveryRowConextMenu,
                      onItem: deliveryRowConextMenu
                  });
-            });
+          /*  }); */
 
             rootScope.$on('settingsChanged', settingsChanged);
             rootScope.$on('updateRawPromised', function (event, data) {
@@ -1717,10 +1718,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // контестнео меню у строки в таблице
+        function beforeDeliveryRowConextMenu(e, context) {
+            console.log(e);
+            var target = e.target;
+            while (target.tagName != 'TR') {
+                target = target.parentNode;                
+            }
+            var id = target.id.slice(6);
+            for(var i = 0; scope.displayCollection[i].row_id != id; i++){}
+            scope.rClickRow = scope.displayCollection[i];
+            return true; 
+        }
         function deliveryRowConextMenu(context, e) {
+        
             var option = $(e.target).data("menuOption");
             var contextJ = $(context)[0],
-                row = scope.rowCollection[parseInt(contextJ.id.substr(6))],
+                row = scope.rClickRow,
                 point = rawData.routes[row.route_id].points[row.NUMBER - 1];
 
             switch (option) {
@@ -1906,24 +1919,44 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // обработчик клика на строке таблицы
-        scope.rowClick = function (row) {
-            rootScope.carCentre=false;
-            rootScope.clickOff=true;
-            scope.drawRoute(row.route_id, false);// false - параметр  заставляющий сделать быструю отрисовку.
-            rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
-            rootScope.$on('endPrepearMarkersArr', function(){
-                if(row.haveStop){
-                    rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
-                }else{
-                    rootScope.$emit('drawConnectsActivePoint');
-                }
-            });
-
-            //console.log("LAt/Lon", row.LAT, row.LON);
-            for(var i = 0; scope.displayCollection.length > i; i++){
-                scope.displayCollection[i].selected = false;
+        scope.rowClick = function ($event) {
+            
+            console.log($event);
+            var target = $event.target;
+            while (target.tagName != 'TR') {
+                target = target.parentNode;                
             }
-            row.selected = true;
+            var id = target.id.slice(6);
+            for(var i = 0; scope.displayCollection[i].row_id != id; i++){}
+            
+            var row = scope.displayCollection[i];
+
+            if($event.type == "click"){
+                
+                rootScope.carCentre=false;
+                rootScope.clickOff=true;
+                scope.drawRoute(row.route_id, false);// false - параметр  заставляющий сделать быструю отрисовку.
+                rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
+                rootScope.$on('endPrepearMarkersArr', function(){
+                    if(row.haveStop){
+                        rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
+                    }else{
+                        rootScope.$emit('drawConnectsActivePoint');
+                    }
+                });
+                for(var i = 0; scope.displayCollection.length > i; i++){
+                    scope.displayCollection[i].selected = false;
+                }
+                row.selected = true;
+
+            }else if($event.type == 'dblclick'){
+                row.textStatus = scope.getTextStatus(row);
+                row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
+                row.itineraryID = _data.ID;
+                scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
+            }
+
+
             //console.log(row);
             // найти какому роуту принадлежит точка
             // var i=0;
@@ -1940,6 +1973,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // обработчик даблклика на строке таблицы
+        /*
         scope.dblRowClick = function (row) {
 
             row.textStatus = scope.getTextStatus(row);
@@ -1947,6 +1981,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             row.itineraryID = _data.ID;
             scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
         };
+        */
 
         // получить текстовый статус для задачи с необходимыми css классами
 

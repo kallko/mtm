@@ -160,11 +160,16 @@ myLayout.on('initialised', function () {
 
 myLayout.init();
 
-angular.module('MTMonitor').run(function($rootScope) {
-    $rootScope.errorNotification = function(url) {
-        $rootScope.$emit('showNotification', {text: 'Произошла ошибка при попытке обратится к '+url, duration: 5000});
-    };
-    $rootScope.currentDay = true; // false если день не сегодняшний
-});
+angular.module('MTMonitor')
+    .run(function($rootScope) {
+        $rootScope.errorNotification = function(url) {
+            $rootScope.$emit('showNotification', {text: 'Произошла ошибка при попытке обратится к '+url, duration: 5000});
+        };
+        $rootScope.currentDay = true; // false если день не сегодняшний
+    })
+    .config(['$compileProvider', function ($compileProvider) {
+         // disable debug info
+         $compileProvider.debugInfoEnabled(false);
+    }]);
 
 

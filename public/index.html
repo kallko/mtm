@@ -297,14 +297,15 @@
                 </tr>
                 </thead>
 
-                <tbody>
+                <tbody 
+                    ng-click="rowClick($event)"
+                    ng-dblclick="rowClick($event)"
+                    >
 
-                <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
-                    ng-click="rowClick(row)"
-                    ng-dblclick="dblRowClick(row)"
+                <tr ng-repeat="row in displayCollection | orderBy : myFilter" 
+                    id="{{::'point-' + row.row_id}}"
                     on-finish-render="ngRepeatFinished"
-                    ng-show="applyFilter(row)"
-                    data-uniqueid="{{row.uniqueID}}"
+                    ng-if="applyFilter(row)"
                     class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}"
                     >
