@@ -16,6 +16,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     }
                 }
             );
+            scope.showHideReasonButtons = true;
 
             initStatuses();
 
