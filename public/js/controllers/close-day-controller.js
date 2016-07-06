@@ -13,7 +13,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     };
     scope.showCheckBoxToClose = function(){    //отобразить чекбоксы тех водителей, у ктоторых нет проблем и готовых к удалению
         var forSome = function (status, confirmed, havStop){
-            if( confirmed || ( (status == 0 || status == 1 || status == 2) && havStop  ) || status == 8){
+            if( confirmed || ( (status == 0 || status == 1 || status == 2 || status == 6) && havStop  ) || status == 8){
                 return true;
             }
             return false;
@@ -26,6 +26,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
                 }
             }
             scope.data.routes[m].getCheck = true;
+            scope.disabledBtnCloseDay = false;
         }
     };
 

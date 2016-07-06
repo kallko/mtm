@@ -74,6 +74,7 @@
 <script src="./js/directives/finish-render.js"></script>
 <script src="./js/directives/right-click.js"></script>
 <script src="./js/directives/enter-event.js"></script>
+<script src="./js/directives/tr.js"></script>
 
 <script src="./js/services/settings.js"></script>
 <script src="./js/services/statuses.js"></script>
@@ -212,8 +213,7 @@
                    st-safe-src="rowCollection" st-table="displayCollection">
                 <thead class="header">
                 <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
-                    <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
+                    <th class="number-col" title="Плановый номер задания">План</th>
                     <th class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
@@ -256,8 +256,7 @@
 
                 <thead class="header-copy">
                 <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
-                    <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
+                    <th class="number-col" title="Плановый номер задания">План</th>
                     <th class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
@@ -298,29 +297,25 @@
                 </tr>
                 </thead>
 
-                <tbody>
+                <tbody 
+                    ng-click="rowClick($event)"
+                    ng-dblclick="rowClick($event)"
+                    >
 
-                <tr ng-repeat="row in displayCollection | orderBy : myFilter" id="{{::'point-' + row.row_id}}"
-                    ng-click="rowClick(row)"
-                    ng-dblclick="dblRowClick(row)"
+                <tr ng-repeat="row in displayCollection | orderBy : myFilter" 
+                    id="{{::'point-' + row.row_id}}"
                     on-finish-render="ngRepeatFinished"
-                    ng-show="applyFilter(row)"
-                    data-uniqueid="{{row.uniqueID}}"
+                    ng-if="applyFilter(row)"
                     class="delivery-point-row"
                     ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}"
-                    on-finish-render="ngRepeatFinished">
-
-
-
+                    >
                     <td>{{::row.NUMBER}}</td>
-                    <td>{{row.fact_number}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
                     <td ng-class="row.class">
                         {{getTextStatus(row)}}
                     </td>
                     <td class="degree" >{{row.limit}}</td>
                     <td title="{{::row.transport.NAME}}">{{row.transport.NAME}}</td>
-                    <!--<td title="{{::row.transport.NAME}}">{{::row.transport.NAME}}</td>-->
                     <td>{{row.driver.NAME}}</td>
                     <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
                     <td title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
@@ -351,24 +346,6 @@
                             {{row.overdue_time*1000 |  date: 'HH:mm' : 'UTC' }}
                         </span>
                     </td>
-
-
-
-
-                    <!--<td>-->
-                        <!--<input type="text" class="promised-text" id="{{'edit-promised-start-' + row.row_id}}"-->
-                               <!--value="{{row.promised_window_changed.start * 1000 | date:'HH:mm'}}"-->
-                               <!--enter-event="changePromisedWindow(row.row_id)">-->
-                        <!--</input> - -->
-                        <!--<input type="text" class="promised-text" id="{{'edit-promised-finish-' + row.row_id}}"-->
-                               <!--value="{{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}"-->
-                               <!--enter-event="changePromisedWindow(row.row_id)">-->
-                        <!--</input>-->
-                    <!--</td>-->
-
-
-
-
                     <td>{{row.haveStop ? 'Есть' : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}</td>
                     <td id="{{'push-td-' + row.row_id}}"
                         title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
@@ -389,6 +366,9 @@
                         </span>
                     </td>
                     <td title="{{::row.waypoint.COMMENT}}">{{::row.waypoint.COMMENT}}</td>
+
+
+
                 </tr>
                 </tbody>
             </table>
@@ -741,7 +721,7 @@
         <table class="statistic-table">
             <thead>
             <tr>
-                <th class="scheduled-status">Ожидается поставка</th>
+                <th class="scheduled-status">Будет вовремя</th>
                 <th class="delivered-status">Доставлено</th>
                 <th class="attention-status">Внимание</th>
                 <th class="delay-status">Опаздывает</th>
@@ -841,11 +821,16 @@
         <tr>
             <td class="title">Контролируемое окно:</td>
             <td class="row-data">
-                <input type="text" class="promised-text-card" id="promised-start-card"
+                <input type="time" class="promised-text-card" id="promised-start-card"
+                       ng-change="changePromisedCard()"
+                       ng-model="promisedStartCard"
                        enter-event="changePromisedWindow(point)"> -
-                <input type="text" class="promised-text-card" id="promised-finish-card"
+                <input type="time" class="promised-text-card" id="promised-finish-card"
+                       ng-change="changePromisedCard()"
+                       ng-model="promisedFinishCard"
+
                        enter-event="changePromisedWindow(point)">
-                <button id="change-window-task-btn" class="btn btn-primary btn-xs" ng-click="changePromisedWindow(point)">Изменить</button>
+                <button id="change-window-task-btn" class="btn btn-primary btn-xs" ng-disabled="disableConfirmBtn" ng-click="changePromisedWindow(point)">Изменить</button>
 
             </td>
         </tr>
@@ -865,18 +850,21 @@
         <tr>
             <td>Подтверждение</td>
             <td>
-                <div ng-show="showHideSeasonButtons">
+                <div ng-show="showHideReasonButtons">
                         <button id="confirm-status-task-btn"
                                 ng-disabled="selectReasonList"
                                 class="btn btn-primary btn-xs btn-success" ng-click="confirmStatus()">Подтвердить
                         </button>
+                </div>
+                <div ng-show="!showHideReasonButtons">
+                    <button class="btn btn-primary btn-xs btn-warning" ng-click="returnStatus()">Отменить изменение</button>
                 </div>
             </td>
         </tr>
         <tr>
             <td>Отмена</td>
             <td>
-                <div class="row" ng-show="showHideSeasonButtons">
+                <div class="row" ng-show="showHideReasonButtons">
                     <div class="col-md-5">
                         <select ng-model="selectReasonList" class="reason-list"
                                 ng-options="item.ID as item.DESCRIPTION  for item in reasons">

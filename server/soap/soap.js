@@ -89,8 +89,6 @@ function checkBeforeSend(_data, callback) {
         return;
     }
 
-    //console.log("NEW KEYS = ", _data.CLIENT_ID, "&&&&&", _data.CLIENT_NAME);
-
     var data;
     for (var k = 0; k < _data.length; k++) {
         data = _data[k];
@@ -143,6 +141,10 @@ function checkBeforeSend(_data, callback) {
 
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
+    if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
+        //console.log(data.closedRoutesFrom1C);
+        allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
+    }
 
 
     //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
@@ -192,6 +194,8 @@ function checkBeforeSend(_data, callback) {
 
     //console.log('DONE!', allData.reasons, "SOAP175");
     log.toFLog('final_data.js', allData);
+
+
     callback(allData);
 }
 
@@ -203,11 +207,36 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     // перемотать на вечер запрашиваемого дня, если выбран не текущий день
     if (date) {
         date = parseInt(date);
+        var loadOldDay = true;
     }
 
     var date = date ? date : Date.now();
-    console.log(date);
+
     console.log('Date >>>', new Date(date));
+
+    // soap.createClient(me.getFullUrl(), function (err, client) {
+    //     if (err) throw err;
+    //
+    //     // авторизация с правами соап-администратора
+    //     client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+    //     // запрос в соап от имени авторизированного пользователя, но с правами администратора
+    //     // получения списка id решений на конкретную дату
+    //
+    //     if (loadOldDay) {
+    //         setTimeout(function(){
+    //             client.runAsUser({'input_data': _xml.getOldDay("15.06.2016"), 'user': me.login}, function (err, result) {
+    //                 if(err) throw err;
+    //                 parseXML(result.return, function (err, res) {
+    //                     if(err) throw err;
+    //                     console.log(JSON.porse(res.MESSAGE.JSONDATA[0]));
+    //                 });
+    //             });
+    //         }, 10000);
+    //     }
+    // });
+
+
+
 
     // инициализация соап клиента
     soap.createClient(me.getFullUrl(), function (err, client) {
@@ -220,6 +249,32 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
         // запрос в соап от имени авторизированного пользователя, но с правами администратора
         // получения списка id решений на конкретную дату
+
+        // if(loadOldDay){
+        //     console.log(_xml.getOldDay("04.06.2016"));
+        //     client.runAsUser({'input_data': _xml.getOldDay("04.06.2016"), 'user': me.login}, function (err, result) {
+        //         console.log(result);
+        //     });
+        // }
+        var data = [];
+        if (loadOldDay) {
+            var dateObj = new Date( date );
+            dateYear = dateObj.getFullYear();
+            dateMonth = dateObj.getMonth() + 1;
+            dateMonth = dateMonth < 10 ? '0'+dateMonth : dateMonth;
+            dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
+            console.log(dateDay+'.'+dateMonth+'.'+dateYear);
+            setTimeout(function(){
+                client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
+                    if(err) throw err;
+                    parseXML(result.return, function (err, res) {
+                        if(err) throw err;
+                        data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                    });
+                });
+            }, 5000);
+        }
+
         client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
                 console.log('DONE getDailyPlan');
@@ -233,10 +288,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         return;
                     }
 
-                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
-                        data = [];
+                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
 
                     data.iLength = itineraries.length;
+
 
                     //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
                     // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
@@ -245,8 +300,6 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     // получение развернутого решения по списку полученных ранее id решений
                     for (var i = 0; i < itineraries.length; i++) {
-                        //if (itineraries[i].$.ID == 4) continue; // TODO REMOVE
-
                         (function (ii) {
                             setTimeout(function () {
                                 me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
@@ -260,6 +313,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                 console.log(err.body);
             }
         });
+
+
+
+
     });
 };
 
@@ -357,8 +414,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
-                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE; // список причин отмены заказа
-                   // clientid = res.MESSAGE.CLIENT_ID[0].CLIENT_ID,
+                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
 
                // console.log(reasons, "SOAP345");
 
