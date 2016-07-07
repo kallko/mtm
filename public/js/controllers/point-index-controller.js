@@ -1943,8 +1943,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // обработчик клика на строке таблицы
+
+
         scope.rowClick = function ($event) {
-            
+
             console.log($event);
             var target = $event.target;
             while (target.tagName != 'TR') {
@@ -1952,23 +1954,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
             var id = target.id.slice(6);
             for(var i = 0; scope.displayCollection[i].row_id != id; i++){}
-            
+
             var row = scope.displayCollection[i];
 
             if($event.type == "click"){
                 rootScope.carCentre=false;
                 rootScope.clickOff=true;
-                scope.drawRoute(row.route_id, false);// false - параметр  заставляющий сделать быструю отрисовку.
+                scope.drawRoute(row.route_id, false); // false - отмена сортровки
                 rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
                     if(row.haveStop){
                         rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
                     }else{
                         rootScope.$emit('drawConnectsActivePoint');
                     }
-                for(var i = 0; scope.displayCollection.length > i; i++){
-                    scope.displayCollection[i].selected = false;
-                }
-                row.selected = true;
+
+                if(scope.activeRow) scope.activeRow.selected = false;
+                scope.activeRow = row;
+                scope.activeRow.selected = true;
+
 
             }else if($event.type == 'dblclick'){
                 row.textStatus = scope.getTextStatus(row);
@@ -1992,6 +1995,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // }
             //console.log("I have to draw this route:", curRoute);
         };
+
+        rootScope.$on('clickOnMarkerWayPiont', function(e, point){
+            if(scope.activeRow) scope.activeRow.selected = false;
+            scope.activeRow = point;
+            scope.activeRow.selected = true;
+        });
 
         // обработчик даблклика на строке таблицы
         /*
@@ -2135,7 +2144,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         // отрисовать маршрут
-        scope.drawRoute = function (filterId, full) {
+        scope.drawRoute = function (filterId, order) {
             rootScope.clickOff=true;
             var route;
             for(var i = 0; _data.routes.length > i; i++){
@@ -2149,8 +2158,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             // Два раза сортируем, чтобы в итоге были по возрастанию фактического посещения сделаны.
             // Первая сортировка просто сортирует, вторая по возрастанию.
-            scope.order('fact_number');
-            scope.order('fact_number');
+            if(order){
+                scope.order('-fact_number');
+            }
+
 
 
 
@@ -3921,7 +3932,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             console.log("Combos Length", route.points.length, deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
 
-           if (sort) {scope.order('fact_number');scope.order('fact_number');}// сортировка 2 раза, чтобы итоговая сортировка оставалась начальной.
+           if (sort) {scope.order('-fact_number');}
 
         }
 
