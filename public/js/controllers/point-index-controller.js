@@ -1947,7 +1947,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.rowClick = function ($event) {
 
-            console.log($event);
             var target = $event.target;
             while (target.tagName != 'TR') {
                 target = target.parentNode;                
@@ -2000,6 +1999,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if(scope.activeRow) scope.activeRow.selected = false;
             scope.activeRow = point;
             scope.activeRow.selected = true;
+            // scope.filters.route = point.filterId;
         });
 
         // обработчик даблклика на строке таблицы
@@ -2158,7 +2158,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             // Два раза сортируем, чтобы в итоге были по возрастанию фактического посещения сделаны.
             // Первая сортировка просто сортирует, вторая по возрастанию.
-            if(order){
+            if(order == undefined){
                 scope.order('-fact_number');
             }
 

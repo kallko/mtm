@@ -45,6 +45,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             if(scope.point && !scope.point.confirmed){
                 scope.selectReasonList = "";
             }
+            scope.disableConfirmBtn = true;
         }
 
         // заблокировать маршрут
