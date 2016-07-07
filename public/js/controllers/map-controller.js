@@ -527,6 +527,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     })
                     .on('click', function(event){
                         rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
+                        //var source = event.target.source;
+                        //scope.drawConnectsActivePoint(source.stopState, source.number, source.TASK_NUMBER);
                     });
 
 
