@@ -142,13 +142,17 @@ function checkBeforeSend(_data, callback) {
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
     if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
-        //console.log(data.closedRoutesFrom1C);
-        allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
+        console.log(data.closedRoutesFrom1C);
+        try{
+            allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
+        }catch(e){
+            console.log(e);
+        }
     }
 
 
     //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
-    if (allData.idArr == undefined) {allData.idArr = []};
+    if (allData.idArr == undefined) {allData.idArr = []}
     //allData.idArr = [];
     allData.idArr.push(data[0].ID);
 
@@ -265,14 +269,23 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
             console.log(dateDay+'.'+dateMonth+'.'+dateYear);
             setTimeout(function(){
-                client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
-                    if(err) throw err;
-                    parseXML(result.return, function (err, res) {
-                        if(err) throw err;
 
-                        data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                    client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
+                        try{
+                            if(err) throw err;
+                            parseXML(result.return, function (err, res) {
+                                try{
+                                    if(err) throw err;
+                                    data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                                }catch(e){
+                                    console.log(e);
+                                }
+                            });
+                        }catch(e){
+                            console.log(e);
+                        }
                     });
-                });
+
             }, 5000);
         }
 
