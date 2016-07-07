@@ -1958,8 +1958,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if($event.type == "click"){
                 rootScope.carCentre=false;
-                rootScope.clickOff=true;
-                scope.drawRoute(row.route_id, false); // false - отмена сортровки
+                // rootScope.clickOff=true;
+                if(scope.filters.route == -1){
+                    scope.drawRoute(row.route_id, false); // false - отмена сортровки
+                }
                 rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
                     if(row.haveStop){
                         rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
@@ -1967,9 +1969,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         rootScope.$emit('drawConnectsActivePoint');
                     }
 
-                if(scope.activeRow) scope.activeRow.selected = false;
-                scope.activeRow = row;
-                scope.activeRow.selected = true;
+                for(var i = 0; scope.displayCollection.length > i; i++){
+                    scope.displayCollection[i].selected = false;
+                }
+                row.selected = true;
 
 
             }else if($event.type == 'dblclick'){
@@ -1996,10 +1999,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         rootScope.$on('clickOnMarkerWayPiont', function(e, point){
-            if(scope.activeRow) scope.activeRow.selected = false;
-            scope.activeRow = point;
-            scope.activeRow.selected = true;
-            // scope.filters.route = point.filterId;
+            for(var i = 0; scope.displayCollection.length > i; i++){
+                scope.displayCollection[i].selected = false;
+            }
+            point.selected = true;
         });
 
         // обработчик даблклика на строке таблицы
@@ -2159,7 +2162,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // Два раза сортируем, чтобы в итоге были по возрастанию фактического посещения сделаны.
             // Первая сортировка просто сортирует, вторая по возрастанию.
             if(order == undefined){
-                scope.order('-fact_number');
+                scope.order('fact_number');
+                scope.order('fact_number');
             }
 
 
@@ -3932,7 +3936,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             console.log("Combos Length", route.points.length, deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
 
-           if (sort) {scope.order('-fact_number');}
+           if (sort) {scope.order('fact_number'); scope.order('fact_number');}
 
         }
 
