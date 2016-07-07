@@ -351,8 +351,8 @@ router.route('/trackparts/:start/:end')
                     for (var i = 0; i < cached.sensors.length; i++) {
                         for (var j = 0; j < data.length; j++) {
                             if (cached.sensors[i].GID == data[j].gid && data[j].data != cached.sensors[i].real_track) {
-                                if (data[j].data.length > 0) {
-                                    var stopsBefore = cached.sensors[i].real_track.length;
+                                if (data[j].data.length > 0 && cached.sensors[i].real_track != undefined) {
+                                    // var stopsBefore = cached.sensors[i].real_track.length;
 
                                    // console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
                                     //if (cached.sensors[i].GID == 9296) {
@@ -367,15 +367,15 @@ router.route('/trackparts/:start/:end')
                                     data[j].data[0].state = 'MOVE';
                                     cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                     cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
-                                    var stopsAfter = cached.sensors[i].real_track.length;
+                                    // var stopsAfter = cached.sensors[i].real_track.length;
                                    // console.log("Car with gid=", cached.sensors[i].GID, "Now have stops",  stopsAfter);
                                     //if (cached.sensors[i].GID == 9296) {
                                     //    console.log(cached.sensors[i].real_track, " AFTER MTM 338")
                                     //}
 
-                                    if (stopsAfter - stopsBefore == 1) {
-                                          //console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
-                                    }
+                                    // if (stopsAfter - stopsBefore == 1) {
+                                    //       //console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
+                                    // }
 
                                 }
                                 break;
