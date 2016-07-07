@@ -527,8 +527,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     })
                     .on('click', function(event){
                         rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
-                        //var source = event.target.source;
-                        //scope.drawConnectsActivePoint(source.stopState, source.number, source.TASK_NUMBER);
+                        var source = event.target.source;
+                        console.log(source);
+                        scope.drawConnectsActivePoint(source.stopState, source.NUMBER, source.TASK_NUMBER);
                     });
 
 
@@ -561,10 +562,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         rootScope.$on('eventdrawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER, routFilter){
-            if(routFilter != -1){
+            
                 scope.drawConnectsActivePoint(stopState, number, TASK_NUMBER);
-                return;
-            }
+
             scope.dataActivePoint = {
                 stopState: stopState,
                 number: number,
@@ -592,13 +592,24 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 map.removeLayer(scope.singleConnect);
             }
             scope.singleConnect = new L.layerGroup().addTo(map);
-            var servicePointsLat = stopState.lat;
-            var servicePointsLng = stopState.lon;
+
+            outer: for(var i = 0; markersArr.length > i; i++){
+                if('source' in markersArr[i] && markersArr[i].source.state == "ARRIVAL" && 'servicePoints' in markersArr[i].source){
+                    for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
+                        if(number == markersArr[i].source.servicePoints[j] + 1){
+                            var servicePointsLat = markersArr[i]._latlng.lat;
+                            var servicePointsLng = markersArr[i]._latlng.lng;
+                            break outer;
+                        }
+                    }
+                }
+            }
+
+
             var j = 0;
             while (j < markersArr.length) {
                 if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                     if (number == markersArr[j].source.NUMBER) {
-                        console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
                         var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
                             color: '#46b8da',
                             weight: 4,
@@ -1195,7 +1206,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if(scope.learConnectWithStopsAndPoints!=undefined) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
             }
-
+            scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
             createNewTempCurrentWayPoints(event);
             if (map.getZoom() > 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
@@ -1285,6 +1296,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         oms.addListener('unspiderfy', function(event) {
             scope.tempCurrentWayPoints=[];
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
+            scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
             if (map.getZoom() > 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
                 drowConnectWithStopsAndPoints();

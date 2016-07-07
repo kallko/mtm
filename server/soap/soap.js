@@ -269,18 +269,23 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
             console.log(dateDay+'.'+dateMonth+'.'+dateYear);
             setTimeout(function(){
-                try{
-                    client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
-                        if(err) throw err;
-                        parseXML(result.return, function (err, res) {
-                            if(err) throw err;
-                            data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
-                        });
 
+                    client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
+                        try{
+                            if(err) throw err;
+                            parseXML(result.return, function (err, res) {
+                                try{
+                                    if(err) throw err;
+                                    data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                                }catch(e){
+                                    console.log(e);
+                                }
+                            });
+                        }catch(e){
+                            console.log(e);
+                        }
                     });
-                }catch(err){
-                    console.log(err);
-                }
+
             }, 5000);
         }
 
