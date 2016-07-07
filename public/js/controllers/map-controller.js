@@ -525,7 +525,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     .on('dblclick', function(event){
                         console.log('this is waypoint ', event.target);
                     })
-                    .on('click', function(event){
+                    .on('mouseover', function(event){
                         rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
                         var source = event.target.source;
                         console.log(source);
@@ -561,9 +561,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         }
 
-        rootScope.$on('eventdrawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER, routFilter){
-            
-                scope.drawConnectsActivePoint(stopState, number, TASK_NUMBER);
+        rootScope.$on('eventdrawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER){
+            if(!stopState && !number){
+                return;
+            }
+
+
+            scope.drawConnectsActivePoint(stopState, number, TASK_NUMBER);
 
             scope.dataActivePoint = {
                 stopState: stopState,

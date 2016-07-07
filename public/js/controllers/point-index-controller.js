@@ -1965,7 +1965,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
                 if(row.haveStop){
-                    rootScope.$emit('eventdrawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER, scope.filters.route);
+                    rootScope.$emit('eventdrawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
                 }else{
                     rootScope.$emit('eventdrawConnectsActivePoint');
                 }
