@@ -18,8 +18,8 @@ var soap = require('soap'),
 
 // класс для работы с соапом
 function SoapManager(login) {
-    this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
-    this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
+    this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl";
+    this.urlPda = "@sngtrans.com.ua/copy/ws/pda/?wsdl";
     this.login = login;
     this.admin_login = config.soap.login;
     this.password = config.soap.password;
@@ -142,13 +142,17 @@ function checkBeforeSend(_data, callback) {
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
     if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
-        //console.log(data.closedRoutesFrom1C);
-        allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
+        console.log(data.closedRoutesFrom1C);
+        try{
+            allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
+        }catch(e){
+            console.log(e, 123123123);
+        }
     }
 
 
     //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
-    if (allData.idArr == undefined) {allData.idArr = []};
+    if (allData.idArr == undefined) {allData.idArr = []}
     //allData.idArr = [];
     allData.idArr.push(data[0].ID);
 
@@ -265,13 +269,18 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
             console.log(dateDay+'.'+dateMonth+'.'+dateYear);
             setTimeout(function(){
-                client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
-                    if(err) throw err;
-                    parseXML(result.return, function (err, res) {
+                try{
+                    client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
                         if(err) throw err;
-                        data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                        parseXML(result.return, function (err, res) {
+                            if(err) throw err;
+                            data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                        });
+
                     });
-                });
+                }catch(err){
+                    console.log(err);
+                }
             }, 5000);
         }
 

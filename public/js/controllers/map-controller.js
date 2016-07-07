@@ -540,6 +540,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             }
 
+            prepearDrawConnectsActivePoint.arr = true;
+            prepearDrawConnectsActivePoint();
+
+
+
 
             // console.log('Finish draw markersArr.', markersArr, "points", points, "Only Points", markersArr.length==points.length );
 
@@ -552,6 +557,89 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             scope.$apply;
 
         }
+
+        rootScope.$on('eventdrawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER, routFilter){
+            if(routFilter != -1){
+                scope.drawConnectsActivePoint(stopState, number, TASK_NUMBER);
+                return;
+            }
+            scope.dataActivePoint = {
+                stopState: stopState,
+                number: number,
+                teskNumber: TASK_NUMBER
+            };
+            prepearDrawConnectsActivePoint.event = true;
+            prepearDrawConnectsActivePoint();
+        });
+
+
+        function prepearDrawConnectsActivePoint(){
+            if(prepearDrawConnectsActivePoint.arr && prepearDrawConnectsActivePoint.event){
+                scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
+                prepearDrawConnectsActivePoint.arr = 0;
+                prepearDrawConnectsActivePoint.event = 0;
+            }
+        }
+
+
+        scope.drawConnectsActivePoint = function(stopState, number, TASK_NUMBER){
+            if(stopState == undefined){
+                return;
+            }
+            if(scope.singleConnect !== undefined){
+                map.removeLayer(scope.singleConnect);
+            }
+            scope.singleConnect = new L.layerGroup().addTo(map);
+            var servicePointsLat = stopState.lat;
+            var servicePointsLng = stopState.lon;
+            var j = 0;
+            while (j < markersArr.length) {
+                if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
+                    if (number == markersArr[j].source.NUMBER) {
+                        console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
+                        var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
+                            color: '#46b8da',
+                            weight: 4,
+                            opacity: 0.5,
+                            smoothFactor: 1
+                        });
+                        scope.singleConnect.addLayer(polyline);
+                        console.log(polyline);
+                        // scope.singleConnect.addLayer(polyline);
+                        break;
+                    }
+                }
+                j++;
+            }
+
+            if (gpsPushMarkers !=undefined) {
+                for(var k = 0; k<gpsPushMarkers.length; k++){
+                    var mobilePush=gpsPushMarkers[k];
+                    if (TASK_NUMBER==mobilePush.task_ID){
+                        var LAT=mobilePush._latlng.lat;
+                        var LON=mobilePush._latlng.lng;
+                        var lat=servicePointsLat;
+                        var lon=servicePointsLng;
+                        var line_points = [
+                            [LAT, LON],
+                            [lat, lon]];
+
+                        var qwe = new L.polyline(line_points, {
+                            color: '#46b8da',
+                            weight: 4,
+                            opacity: 0.5,
+                            smoothFactor: 1
+                        });
+                        scope.addLayer(qwe);
+                        break;
+                    }
+                }
+
+            }
+        };
+
+
+
 
 
         rootScope.$on('ResChengeCoord', function(event, bool, confirm){
@@ -1188,62 +1276,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
         }
 
-        rootScope.$on('drawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER){
 
-            if(stopState == undefined){
-                return;
-            }
-            if(scope.singleConnect !== undefined){
-                map.removeLayer(scope.singleConnect);
-            }
-            scope.singleConnect = new L.layerGroup().addTo(map);
-                       var servicePointsLat = stopState.lat;
-                       var servicePointsLng = stopState.lon;
-                       var j = 0;
-                       while (j < markersArr.length) {
-                           if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
-                                   if (number == markersArr[j].source.NUMBER) {
-                                       console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
-                                       var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
-                                           color: '#46b8da',
-                                           weight: 4,
-                                           opacity: 0.5,
-                                           smoothFactor: 1
-                                       });
-                                       scope.singleConnect.addLayer(polyline);
-                                       console.log(polyline);
-                                      // scope.singleConnect.addLayer(polyline);
-                                       break;
-                                   }
-                           }
-                           j++;
-                       }
-
-            if (gpsPushMarkers !=undefined) {
-                for(var k = 0; k<gpsPushMarkers.length; k++){
-                    var mobilePush=gpsPushMarkers[k];
-                        if (TASK_NUMBER==mobilePush.task_ID){
-                            var LAT=mobilePush._latlng.lat;
-                            var LON=mobilePush._latlng.lng;
-                            var lat=servicePointsLat;
-                            var lon=servicePointsLng;
-                            var line_points = [
-                                [LAT, LON],
-                                [lat, lon]];
-
-                            var qwe = new L.polyline(line_points, {
-                                color: '#46b8da',
-                                weight: 4,
-                                opacity: 0.5,
-                                smoothFactor: 1
-                            });
-                            scope.addLayer(qwe);
-                            break;
-                        }
-                }
-
-            }
-        });
 
 
         //Возврат к нормальным координатам,

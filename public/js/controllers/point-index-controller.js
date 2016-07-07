@@ -1964,11 +1964,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     scope.drawRoute(row.route_id, false); // false - отмена сортровки
                 }
                 rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
-                    if(row.haveStop){
-                        rootScope.$emit('drawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
-                    }else{
-                        rootScope.$emit('drawConnectsActivePoint');
-                    }
+                if(row.haveStop){
+                    rootScope.$emit('eventdrawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER, scope.filters.route);
+                }else{
+                    rootScope.$emit('eventdrawConnectsActivePoint');
+                }
 
                 for(var i = 0; scope.displayCollection.length > i; i++){
                     scope.displayCollection[i].selected = false;
