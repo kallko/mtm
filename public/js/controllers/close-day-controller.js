@@ -64,9 +64,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     
     scope.closeTableRowClick = function(item){
         rootScope.carCentre=true;// после отрисовки маршрута отцентрировать по машинеж
-        console.log(item);
-
-
+        
         if(item.selected){
             item.selected = false;
             rootScope.$emit('closeDriverName', item.filterId, false); // false не рисовать новый маршрут
