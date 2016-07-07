@@ -269,6 +269,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     if(err) throw err;
                     parseXML(result.return, function (err, res) {
                         if(err) throw err;
+
                         data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
                     });
                 });

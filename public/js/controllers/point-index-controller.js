@@ -288,15 +288,65 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             // добавляем новые данные к уже существующему треку
                             for (var j = 0; j < _data.routes.length; j++) {
                                 if (_data.routes[j].transport.gid == trackParts[i].gid) {
+
+                                    //console.log ('To track', _data.routes[j].real_track.length, "add", trackParts[i].data.length);
+
                                     if (trackParts[i].data.length > 0) {
 
-                                    // Tсли последний стейт Каррент Позитион, то присваиваем ему муве
+                                        if (_data.routes[j].real_track.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                            console.log ("Concat", _data.routes[j].real_track, "with", trackParts[i].data );
+                                            console.log('To track length', _data.routes[j].real_track.length, "add",  trackParts[i].data.length, "t1 for last exist", _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, "t1 for first recieved", trackParts[i].data[0].t1);
+                                        }
+                                        // Не удалять потом, в этом блоке проверяется и устанавливается новое nowTime,
+                                        // максимум из существующего и самого большого времени в полученых стейтах
+                                        var k=0;
+                                          while (k<trackParts[i].data.length) {
+                                            // Если в стейте есть таймстамп больше чем ранее полученное время, то мы переопределяем время.
+                                            if(rootScope.nowTime < trackParts[i].data[k].t2) {
+                                                rootScope.nowTime = trackParts[i].data[k].t2;
 
-                                       if ( _data.routes[j].real_track.length>0){
-                                           if (_data.routes[j].real_track[_data.routes[j].real_track.length-1].state == "CURRENT_POSITION"){
-                                               _data.routes[j].real_track.length =_data.routes[j].real_track.length-1;
-                                           }
-                                       }
+                                            }
+                                          k++;
+                                        }
+
+
+
+
+
+
+
+
+                                        if (_data.routes[j].real_track.length>0 && trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                            console.log('times', _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, trackParts[i].data[0].t1)
+                                        }
+
+
+                                        //Удаляем стейты с 0 таймж
+                                        //TODO снять комментарий
+                                        var h = 0;
+
+                                        while (h< trackParts[i].data.length) {
+                                            if (trackParts[i].data[h].time == 0 ){
+                                                //console.log("State with time = 0",trackParts[i].data[h])
+                                                trackParts[i].data.splice(h,1);
+                                                h--;
+                                            }
+
+                                            h++;
+                                        }
+
+                                        if (trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                            console.log("to concat", trackParts[i].data)
+                                        }
+
+                                        // Удаляем последний стэйт если он каррент позитион но только перед добавкой новых стейтов
+                                        if ( _data.routes[j].real_track.length>0 && trackParts[i].data.length>0){
+                                            if (_data.routes[j].real_track[_data.routes[j].real_track.length-1].state == "CURRENT_POSITION"){
+                                                _data.routes[j].car_position.lat = trackParts[i].data[trackParts[i].data.length-1].lat;
+                                                _data.routes[j].car_position.lon = trackParts[i].data[trackParts[i].data.length-1].lon;
+                                                _data.routes[j].real_track.length =_data.routes[j].real_track.length-1;
+                                            }
+                                        }
                                         ////тестово отладочный блок, поиск и удаление невалидных разрозненных стейтов.
                                         //    var l=0;
                                         //    while(l<trackParts[i].data.length){
@@ -308,44 +358,27 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
+                                        // сравниваем id первого полученного и последнего существующего.
+                                        // Если одинаковые, то перезаписываем обобщенные данные в существующий и удаляем первый из полученных
 
-                                        // Не удалять потом, в этом блоке проверяется и устанавливается новое nowTime,
-                                        // максимум из существующего и самого большого времени в полученых стейтах
-                                        var k=0;
-                                        var newString='';
-                                        while (k<trackParts[i].data.length) {
-                                            // Если в стейте есть таймстамп больше чем ранее полученное время, то мы переопределяем время.
-                                            if(rootScope.nowTime < trackParts[i].data[k].t2) {
-                                                rootScope.nowTime = trackParts[i].data[k].t2;
 
-                                            }
-                                            newString += trackParts[i].data[k].state +" ";
-                                            k++;
-                                        }
+                                        if(_data.routes[j].real_track >0 && trackParts[i].data.length>0 && trackParts[i].data[0].time>0 && _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1 == trackParts[i].data[0].t1) {
+                                            console.log("Update last state", _data.routes[j].real_track[_data.routes[j].real_track.length-1].t2,  trackParts[i].data[0].t2);
+                                            _data.routes[j].real_track[_data.routes[j].real_track.length-1].dist = trackParts[i].data[0].dist;
+                                            _data.routes[j].real_track[_data.routes[j].real_track.length-1].lat = trackParts[i].data[0].lat;
+                                            _data.routes[j].real_track[_data.routes[j].real_track.length-1].lon = trackParts[i].data[0].lon;
+                                            _data.routes[j].real_track[_data.routes[j].real_track.length-1].id = trackParts[i].data[0].id;
+                                            _data.routes[j].real_track[_data.routes[j].real_track.length-1].t2 = trackParts[i].data[0].t2;
+                                            _data.routes[j].real_track[_data.routes[j].real_track.length-1].time = trackParts[i].data[0].time;
+                                            trackParts[i].data.splice(0,1);
 
-                                        if (_data.routes[j].uniqueID == "162119") {
-                                            console.log("newString", newString);
                                         }
 
 
-                                            trackParts[i].data[0].state = 'MOVE';
-
-                                        var k=0;
-                                        var proString='';
-                                        while (k<trackParts[i].data.length) {
-                                            proString += trackParts[i].data[k].state +" ";
-
-                                            k++;
-                                        }
-
-
-                                        if (_data.routes[j].uniqueID == "162119") {
-                                            console.log("proString", proString);
-                                        }
 
                                             _data.routes[j].real_track = _data.routes[j].real_track || [];
                                             _data.routes[j].real_track = _data.routes[j].real_track.concat(trackParts[i].data);
-                                            if (_data.routes[j].real_track[0].lastTrackUpdate != undefined) {
+                                            if (_data.routes[j].real_track.length > 0 && _data.routes[j].real_track[0].lastTrackUpdate != undefined) {
                                                 _data.routes[j].real_track[0].lastTrackUpdate -= updateTrackInterval * 2;
                                             }
 
@@ -353,27 +386,30 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                                             _data.routes[j].car_position = _data.routes[j].real_track[len];
 
-                                            if (_data.routes[j] != undefined && _data.routes[j].real_track != undefined &&
-                                                _data.routes[j].real_track.length > 0) {
-                                                len = _data.routes[j].real_track.length - 1;
-                                                //console.log("len", len);
-                                                //console.log("Delete last from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1]  );
-                                                _data.routes[j].real_track.splice(len, 1);
-                                                //_data.routes[j].real_track.length=len;
-                                                //console.log("Delete post from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1] );
-                                            }
+                                            //if (_data.routes[j] != undefined && _data.routes[j].real_track != undefined &&
+                                            //    _data.routes[j].real_track.length > 0) {
+                                            //    len = _data.routes[j].real_track.length - 1;
+                                            //    //console.log("len", len);
+                                            //    //console.log("Delete last from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1]  );
+                                            //    _data.routes[j].real_track.splice(len, 1);
+                                            //    //_data.routes[j].real_track.length=len;
+                                            //    //console.log("Delete post from", _data.routes[j].real_track.length, "last", _data.routes[j].real_track[_data.routes[j].real_track.length-1] );
+                                            //}
 
-                                        var k=0;
-                                        var resultString='';
-                                        while (k<_data.routes[j].real_track.length) {
-                                            resultString += _data.routes[j].real_track[k].state +" ";
-
-                                            k++;
-                                        }
-
-                                        if (_data.routes[j].uniqueID == "162119") {
-                                            console.log("resultString", resultString, "Length=", _data.routes[j].real_track.length );
-                                        }
+                                        //var k=0;
+                                        //var resultString='';
+                                        //while (k<_data.routes[j].real_track.length) {
+                                        //    resultString += _data.routes[j].real_track[k].state +" ";
+                                        //
+                                        //    k++;
+                                        //}
+                                        //
+                                        //if (_data.routes[j].uniqueID == "162119") {
+                                        //    console.log("resultString", resultString, "Length=", _data.routes[j].real_track.length );
+                                        //}
+                                    }
+                                    if((_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                        console.log('Result', _data.routes[j].real_track.length, "added", trackParts[i].data.length);
                                     }
                                     break;
                                 }
@@ -1224,7 +1260,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                    // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
 
                     // проверка последней определенной точки на статус выполняется
-                    if (lastPoint != null) {
+                    if (lastPoint != null && route.car_position !=  undefined) {
+                       // console.log("Route", route);
                         if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
                             && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
                                 lastPoint.LAT, lastPoint.LON) < scope.params.stopRadius) {
