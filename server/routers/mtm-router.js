@@ -17,7 +17,8 @@ var express = require('express'),
 
     oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
     companyLogins = {},   // Список логинов на компании
-    needNewReqto1C = {}; // если есть свойство с именем компани, то не запрвшивать из 1С
+    needNewReqto1C = {}, // если есть свойство с именем компани, то не запрвшивать из 1С
+    blockedRoutes = []; // список заблокированных маршрутов
 
 new CronJob('01 00 00 * * *', function() {
     for(var company in cashedDataArr){
@@ -396,6 +397,54 @@ router.route('/trackparts/:start/:end')
 // получение треков по переданным стейтам
 router.route('/gettracksbystates/')
     .post(function (req, res) {
+        // проверяем не заблокирован ли этот маршрут другим пользователемъ
+        // Задача 1 найти этот роут в заблокированных
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        var i=0;
+        var blocked=false;
+        var dataB;
+        blockedRoutes.push({id:"168113", company:currentCompany, login:key});
+
+        while( i<blockedRoutes.length){
+            if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany ){
+                blocked=true;
+                dataB = {
+                    result: 'blocked',
+                    user: blockedRoutes[i].login
+                }
+                break;
+            }
+
+            i++;
+        }
+
+        if(blocked) {
+            res.status(200).json(dataB);
+            return;
+        } else {
+            // заменяем блокировку, если таковая была или создаем новую, если это первое обращение этого логина
+            i=0;
+            var created=false;
+            while(i<blockedRoutes.length){
+                if(blockedRoutes[i].login == req.session.login) {
+                    blockedRoutes[i].id=req.body.id;
+                    created = true;
+                    break;
+                }
+
+                if(!created){
+                    blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key})
+                }
+
+                i++;
+            }
+
+
+
+        }
+
+        //req.body.id
         //console.log('gettracksbystates', req.body.states, req.body.gid, req.body.demoTime, "MTM 364");
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
            // console.log('get tracks by states DONE!', data, "MTM 366");

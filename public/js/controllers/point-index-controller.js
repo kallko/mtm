@@ -292,8 +292,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     //console.log ('To track', _data.routes[j].real_track.length, "add", trackParts[i].data.length);
 
                                     if (trackParts[i].data.length > 0) {
+                                        _data.routes[j].last_signal=trackParts[i].data[trackParts[i].data.length-1].t1;
 
-                                        if (_data.routes[j].real_track.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+
+                                        if (_data.routes[j].real_track.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24'|| _data.routes[j].ID == '38')) {
                                             console.log ("Concat", _data.routes[j].real_track, "with", trackParts[i].data );
                                             console.log('To track length', _data.routes[j].real_track.length, "add",  trackParts[i].data.length, "t1 for last exist", _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, "t1 for first recieved", trackParts[i].data[0].t1);
                                         }
@@ -313,10 +315,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-
-
-
-                                        if (_data.routes[j].real_track.length>0 && trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                        if (_data.routes[j].real_track.length>0 && trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24' || _data.routes[j].ID == '38')) {
                                             console.log('times', _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, trackParts[i].data[0].t1)
                                         }
 
@@ -335,7 +334,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                             h++;
                                         }
 
-                                        if (trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                        if (trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24'|| _data.routes[j].ID == '38')) {
                                             console.log("to concat", trackParts[i].data)
                                         }
 
@@ -408,7 +407,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         //    console.log("resultString", resultString, "Length=", _data.routes[j].real_track.length );
                                         //}
                                     }
-                                    if((_data.routes[j].ID == '47' || _data.routes[j].ID == '24')) {
+                                    if((_data.routes[j].ID == '47' || _data.routes[j].ID == '24'|| _data.routes[j].ID == '38')) {
                                         console.log('Result', _data.routes[j].real_track.length, "added", trackParts[i].data.length);
                                     }
                                     break;
@@ -920,6 +919,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обновляет статусы и делает прогнозы по слинкованным данным
         function updateData() {
+            console.log("StartUpdateData");
+            console.time("step2");
             statusUpdate();
             //predicationArrivalUpdate();
 
@@ -941,8 +942,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
            // console.log("Finish CCALCULATING!!!!!");
-
-            scope.$apply;
+            console.timeEnd("step2");
+            //scope.$apply;
         }
 
         // проверка на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
@@ -2186,6 +2187,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // отрисовать маршрут
         scope.drawRoute = function (filterId, order) {
+            console.log("Start Function");
+            console.time("step1");
+            loadExistData();
+
+            //concatDailyAndExistingData();
             rootScope.clickOff=true;
             var route;
             for(var i = 0; _data.routes.length > i; i++){
@@ -2217,7 +2223,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //scope.$apply();
 
 
-            scope.$emit('clearMap');
+
 
             var draw = function (route) {
                     switch (scope.draw_mode) {
@@ -2275,6 +2281,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     http.post('./gettracksbystates', {
                     states: route.real_track,
                     gid: route.transport.gid,
+                    id: route.uniqueID,
                     demoTime: scope.demoMode ? _data.server_time : -1
                 }).success(function (data) {
                         //var rRtrack = JSON.parse(JSON.stringify(route.real_track));
@@ -2283,6 +2290,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //console.log("Additional load for Route", newData);
 
 
+                        //Маршрут заблокирован и редактируется другим пользователем
+                        if (data.result == 'blocked'){
+                            alert("Blocked by " + data.user);
+                            rootScope.clickOff=false;
+                            return;
+                        }
+
+                        alert("Unlocked");
                         route.real_track = data;
 
 
@@ -2303,7 +2318,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
 
                         //console.log('after', route.real_track.length);
-
+                        scope.$emit('clearMap');
                         draw(route);
                     }).error(function(err){
                         console.log(err);
@@ -2912,6 +2927,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log(date);
                 http.post(url, {date: date})
                 .success(function (data) {
+                        console.timeEnd("step1");
                     console.log(data,' existing success data');
                     scope.existData=data;
                     scope.existDataLoaded=false;
@@ -3983,6 +3999,45 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         rootScope.$on('statusUpdate', statusUpdate);
+
+
+        // Удаление некорректного пуша
+        rootScope.$on('cancelPush', cancelPush);
+            function cancelPush (event , point) {
+            console.log("Try to cancel push", point);
+            point.incorrect_push=point.mobile_push;
+            delete point.mobile_push;
+            delete point.havePush;
+
+            //Находим роут, соответсвующий этой точке
+                var i=0;
+                var route;
+                while (i<_data.routes.length){
+                    console.log()
+                    if( point.uniqueID==_data.routes[i].uniqueID){
+                        route=_data.routes[i];
+                        console.log("Delete push in this route", route);
+                        break;
+                    }
+
+                    i++;
+                }
+
+                // Удаляем пуш из массива пушей
+                console.log("Delete push in this route", route);
+                var ki=0;
+                while(ki<route.pushes.length){
+                    console.log("Looking looking looking", route.pushes[ki].number, point.incorrect_push.number );
+                    if(route.pushes[ki].number == point.incorrect_push.number){
+                        route.pushes.splice(ki,1);
+                        console.log("Find and kill incorrect push");
+                        break;
+                    }
+
+                    ki++;
+                }
+        };
+
     }]);
 
 

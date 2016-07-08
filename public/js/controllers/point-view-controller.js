@@ -124,6 +124,12 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
         };
 
+        scope.cancelPush = function () {
+
+            console.log('cancelPush');
+            scope.$emit('cancelPush',  scope.point); //В поинт индекс контроллер
+        };
+
         // перекелючить (вкл/выкл) блокировку задачи
         scope.toggleTaskBlock = function () {
             var url;

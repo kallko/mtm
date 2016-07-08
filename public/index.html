@@ -663,7 +663,7 @@
 
                         <td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>
                         <td> {{:: item.END_TIME.split(' ')[1]}}</td>
-                        <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal" : ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm' }}</td>
+                        <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal" : ((item.last_signal)*1000) | date :'dd.MM HH:mm' }}</td>
                     </tr>
 
 
@@ -879,6 +879,13 @@
             <!--<td class="title">Окно:</td>-->
             <!--<td class="row-data">{{point.AVAILABILITY_WINDOWS}}</td>-->
         <!--</tr>-->
+        <tr>
+            <td class="title">Моб. нажатие:</td>
+            <td class="row-data">{{point.mobile_push.time}}
+                <button id="cancel-push-btn" ng-show="point.mobile_push.time != undefined" class="btn btn-primary btn-xs btn-danger" ng-click="cancelPush()">Отменить</button>
+            </td>
+
+        </tr>
         <tr>
             <td class="title">Стоимость:</td>
             <td class="row-data">{{point.VALUE}}</td>
