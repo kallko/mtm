@@ -803,7 +803,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-            $(window).onclick(function(){
+            $(window).click(function(){
                 alert("Bye!!!!!");
             });
 
