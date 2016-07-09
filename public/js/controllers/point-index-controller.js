@@ -2267,8 +2267,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //if (full == undefined) full=true; //По умолчанию отрисовываем полный трек с обновлением
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные
+            // todo временно отправляем всегда
             if ( route.real_track[0].lastTrackUpdate == undefined ||
-                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
+                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000 || true) {
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
 
