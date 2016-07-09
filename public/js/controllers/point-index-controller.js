@@ -4042,7 +4042,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
         };
 
-        $window.$on('beforeunload', function( event ) {
+        window.on('beforeunload', function( event ) {
             var answer = confirm("Are you sure you want to leave this page?");
             alert ("!!!!!!!!!!!");
         });
