@@ -440,7 +440,7 @@ router.route('/gettracksbystates/')
 
                     j=0;
                     while (j<blockedRoutes.length){
-                        console.log("Blocked", blockedRoutes[j]);
+                        console.log("First Blocked", blockedRoutes[j]);
                         j++;
                     }
 
@@ -458,7 +458,7 @@ router.route('/gettracksbystates/')
 
             i=0;
             while (i<blockedRoutes.length){
-                console.log("Blocked", blockedRoutes[i]);
+                console.log("Second Blocked", blockedRoutes[i]);
                 i++;
             }
 
