@@ -804,6 +804,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //};
 
             $(window).click(function(){
+                ('./logout')
+                    .success(function (data) {
+                        console.log("complete");
+                    });
+
                 alert("Bye!!!!!");
             });
 

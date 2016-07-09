@@ -929,6 +929,11 @@ router.route('/checknewiten')
             res.status(200).json("ok");
     });
 
+router.route('/logout')
+    .post(function (req, res) {
+        console.log("!!!!!!!!!!LOGOUT!!!!!!!", req.session.login);
 
+
+    });
 
 module.exports = router;
