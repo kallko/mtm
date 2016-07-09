@@ -10,10 +10,9 @@
 
     }
 
-    $window.on('close', function( event ) {
-        //var answer = confirm("Are you sure you want to leave this page?");
-        alert ("!!!!!!!!!!!");
-    });
+    window.onbeforeunload = function () {
+        alert("!!!!!HALLO");
+    }
 
 
 </script>
