@@ -407,7 +407,7 @@ router.route('/gettracksbystates/')
         //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
         if (blockedRoutes.length==0){
             console.log("!!!! Create first element!!!!!!");
-            blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key});
+            blockedRoutes.push({ id: '285112', company: '292942', login: 'IDS1.dsp' });
         }
 
         while( i<blockedRoutes.length){
