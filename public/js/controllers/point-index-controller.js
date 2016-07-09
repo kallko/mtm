@@ -4042,10 +4042,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
         };
 
-        window.closed(event, function () {
-
-            alert("!!!!!!!!!!!!");
-        })
+        $(window).on('close', function() {
+            alert( 'Your own message goes here...');
+        });​
 
     }]);
 
