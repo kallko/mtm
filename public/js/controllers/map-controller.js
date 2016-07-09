@@ -794,8 +794,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).resize(resize);
             resize();
 
-            $(window).close(onclose);
-            onclose();
 
             rootScope.$on('clearMap', function () {
                 clearMap();
