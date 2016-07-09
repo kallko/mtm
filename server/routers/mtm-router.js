@@ -437,7 +437,7 @@ router.route('/gettracksbystates/')
                     console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
                     blockedRoutes[i].id=req.body.id;
                     created = true;
-                    break;
+                    return;
                 }
 
                 if(!created){
