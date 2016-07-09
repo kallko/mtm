@@ -795,7 +795,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).resize(resize);
             resize();
 
-            $(window).beforeunload(beforeunload);
+            $(window).onclose(beforeunload);
             beforeunload();
             //
 
