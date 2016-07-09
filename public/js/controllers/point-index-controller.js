@@ -3163,9 +3163,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.post('./saveupdate/', {data: markers, date: scope.routesOfDate})
                 .success(function (data) {
                    console.log('send from pic to route', data);
+                    alert("Save route success");
                 })
                 .error(function(err){
-
+                    alert("Save route ERROR!");
                 })
         });
 
