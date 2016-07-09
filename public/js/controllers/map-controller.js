@@ -741,6 +741,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 title,
                 tmpStatus,
                 tmpBgColor,
+                tmpBgColor,
                 tmpFColor,
 
             //for (var i = 0; i < points.length; i++) {
@@ -796,6 +797,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             $(window).beforeunload(beforeunload);
             beforeunload();
+            //
 
             rootScope.$on('clearMap', function () {
                 clearMap();
