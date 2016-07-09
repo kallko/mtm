@@ -4042,6 +4042,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
         };
 
+        window.closed(event, function () {
+
+            alert("!!!!!!!!!!!!");
+        })
+
     }]);
 
 
