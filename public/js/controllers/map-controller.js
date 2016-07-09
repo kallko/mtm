@@ -803,7 +803,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-            $(window).onclick = function(){
+            $(window).click(function() {
                 http.post('./logout')
                     .success(function (data) {
                         console.log("complete");
@@ -811,7 +811,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 alert("Bye!!!!!");
                 //event.returnValue = "Write something clever here..";
-            }
+        });
 
 
 
