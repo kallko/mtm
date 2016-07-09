@@ -803,7 +803,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-            $(window).onbeforeunload(function(){
+            $(window).onbeforeunload = function(){
                 http.post('./logout')
                     .success(function (data) {
                         console.log("complete");
@@ -811,7 +811,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 alert("Bye!!!!!");
                 event.returnValue = "Write something clever here..";
-            });
+            }
+
+
+
+            //$(window).onbeforeunload = function(){
+            //    if (confirm('Are you sure you want to leave this page?')){
+            //        // user leaves
+            //    }
+            //    else{
+            //        // your code
+            //    }
+            //};
 
             rootScope.$on('clearMap', function () {
                 clearMap();
