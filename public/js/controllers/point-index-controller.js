@@ -2322,7 +2322,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         draw(route);
                     }).error(function(err){
                         console.log(err);
-                        rootScope.errorNotification('Пропала связь с агрегатором /gettracksbystates');
+                        rootScope.errorNotification(' к агрегатору /gettracksbystates. Нет актуального трека');
                         rootScope.clickOff=false;
                         return;
                     });

@@ -444,7 +444,7 @@ router.route('/gettracksbystates/')
                         j++;
                     }
 
-                    return;
+                    break;
                 }
 
                 if(!created){
