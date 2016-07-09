@@ -411,8 +411,8 @@ router.route('/gettracksbystates/')
         }
 
         while( i<blockedRoutes.length){
-            if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany ){
-                console.log("Try accept blocked route")
+            if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany && ""+blockedRoutes[i].login != ""+req.session.login){
+                console.log("Try accept blocked route");
                 blocked=true;
                 dataB = {
                     result: 'blocked',
