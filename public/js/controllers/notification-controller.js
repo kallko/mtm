@@ -49,6 +49,10 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
                 $('#notification').popup('hide');
             }, duration);
         }
+
+        rootScope.shownot = function () {
+            showPopup('Окно сработало', 5000);
+        }
         
     }]);
 /*
