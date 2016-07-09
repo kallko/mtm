@@ -4042,7 +4042,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
         };
 
-
+        scope.$on("$locationChangeStart", function(){
+            alert("Hey Hoorey");
+        });
 
     }]);
 
