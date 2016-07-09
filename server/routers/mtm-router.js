@@ -441,6 +441,12 @@ router.route('/gettracksbystates/')
             }
 
 
+            i=0;
+            while (i<blockedRoutes.length){
+                console.log("Blocked", blockedRoutes[i]);
+                i++;
+            }
+
 
         }
 
