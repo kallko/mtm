@@ -405,6 +405,9 @@ router.route('/gettracksbystates/')
         var blocked=false;
         var dataB;
         //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
+        if (blockedRoutes.length==0){
+            blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key});
+        }
 
         while( i<blockedRoutes.length){
             if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany ){
