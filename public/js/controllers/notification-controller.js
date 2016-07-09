@@ -50,9 +50,7 @@ angular.module('MTMonitor').controller('NotificationController', ['$scope', '$ro
             }, duration);
         }
 
-        rootScope.shownot = function () {
-            showPopup('Окно сработало', 5000);
-        }
+
         
     }]);
 /*

@@ -810,6 +810,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     });
 
                 alert("Bye!!!!!");
+                event.returnValue = "Write something clever here..";
             });
 
             rootScope.$on('clearMap', function () {
