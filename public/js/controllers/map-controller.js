@@ -803,14 +803,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-            $(window).click = function(){
+            $(window).onclick = function(){
                 http.post('./logout')
                     .success(function (data) {
                         console.log("complete");
                     });
 
                 alert("Bye!!!!!");
-                event.returnValue = "Write something clever here..";
+                //event.returnValue = "Write something clever here..";
             }
 
 
