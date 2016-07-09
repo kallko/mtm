@@ -795,9 +795,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).resize(resize);
             resize();
 
-            $(window).onclose(beforeunload);
-            beforeunload();
-            //
+            //$(window).onclose(beforeunload);
+            //beforeunload();
+            ////
 
             rootScope.$on('clearMap', function () {
                 clearMap();
@@ -967,9 +967,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-        function beforeunload(){
-            alert("HEY AM HERE");
-        }
+        //function beforeunload(){
+        //    alert("HEY AM HERE");
+        //}
 
         // очистить карту
         function clearMap() {
