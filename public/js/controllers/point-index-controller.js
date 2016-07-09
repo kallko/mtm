@@ -4042,8 +4042,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
         };
 
-        $(window).on('close', function() {
-            alert( 'Your own message goes here...');
+        $(window).on('beforeunload', function() {
+        //    console.log("tuk tuk");
+        //    alert( 'Your own message goes here...');
         });​
 
     }]);
