@@ -794,7 +794,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).resize(resize);
             resize();
 
-            $(window).close(function(){
+            $(window).onclose(function(){
                 alert("!!!!!!! WINDOW");
             });
 
