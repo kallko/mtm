@@ -428,7 +428,7 @@ router.route('/gettracksbystates/')
             var created=false;
             while(i<blockedRoutes.length){
                 console.log ("Blocked logins",blockedRoutes[i].login , req.session.login);
-                if(blockedRoutes[i].login == req.session.login) {
+                if(""+blockedRoutes[i].login == ""+req.session.login) {
                     console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
                     blockedRoutes[i].id=req.body.id;
                     created = true;
