@@ -663,7 +663,7 @@
 
                         <td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>
                         <td> {{:: item.END_TIME.split(' ')[1]}}</td>
-                        <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal" : ((item.last_signal)*1000) | date :'dd.MM HH:mm' }}</td>
+                        <td> {{ (item.real_track == undefined || item.real_track == 0 || item.last_signal == undefined) ? "No signal" : ((item.last_signal)*1000) | date :'dd.MM HH:mm' }}</td>
                     </tr>
 
 
