@@ -4042,10 +4042,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
         };
 
-        $(window).on('beforeunload', function() {
-        //    console.log("tuk tuk");
-        //    alert( 'Your own message goes here...');
-        });​
+        scope.$on('$locationChangeStart', function( event ) {
+            var answer = confirm("Are you sure you want to leave this page?")
+            if (!answer) {
+                event.preventDefault();
+            }
+        });
 
     }]);
 
