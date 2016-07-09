@@ -904,9 +904,9 @@ router.route('/checknewiten')
 
         function dataReadyCallback (quant){
             console.log("QUANT", quant, "req.session", cache.CLIENT_NAME, "____ ", cache.CLIENT_ID);
-            for (var key in cache){
-                console.log ("key", key);
-            }
+            //for (var key in cache){
+            //    console.log ("key", key);
+            //}
 
 
         }
