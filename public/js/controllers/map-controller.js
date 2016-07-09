@@ -803,7 +803,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-            $(window).onclose(function(){
+            $(window).beforeunload(function(){
                 http.post('./logout')
                     .success(function (data) {
                         console.log("complete");
