@@ -800,7 +800,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             ////
 
             $(window).onunload=function(){
-                alert("Hey Hey");
+               return "Hola"
             };
 
             rootScope.$on('clearMap', function () {
