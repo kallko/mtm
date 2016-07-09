@@ -447,14 +447,14 @@ router.route('/gettracksbystates/')
                     break;
                 }
 
-                if(!created){
-                    console.log("Не было такого логина! создаем")
-                    blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key})
-                }
 
                 i++;
             }
 
+            if(!created){
+                console.log("Не было такого логина! создаем")
+                blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key})
+            }
 
             i=0;
             while (i<blockedRoutes.length){
