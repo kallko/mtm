@@ -799,6 +799,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //beforeunload();
             ////
 
+            $(window).onunload=function(){
+                alert("Hey Hey");
+            };
+
             rootScope.$on('clearMap', function () {
                 clearMap();
             });
