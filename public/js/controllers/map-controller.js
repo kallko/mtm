@@ -794,8 +794,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).resize(resize);
             resize();
 
-            $(window).beforeunload(clomonit);
-            clomonit();
+            $(window).beforeunload(beforeunload);
+            beforeunload();
 
             rootScope.$on('clearMap', function () {
                 clearMap();
@@ -965,7 +965,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-        function clomonit(){
+        function beforeunload(){
             alert("HEY AM HERE");
         }
 
