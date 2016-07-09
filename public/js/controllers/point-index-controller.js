@@ -2292,12 +2292,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         //Маршрут заблокирован и редактируется другим пользователем
                         if (data.result == 'blocked'){
-                            alert("Blocked by " + data.user);
+                            alert("Маршрут заблокирован оператором " + data.user);
                             rootScope.clickOff=false;
                             return;
                         }
 
-                        alert("Unlocked");
+                        alert("Маршрут свободен для редактирования");
                         route.real_track = data;
 
 
