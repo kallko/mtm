@@ -102,7 +102,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                         var indxBegin=url.indexOf('&from=');
                         var indxEnd=url.indexOf('&to=');
                         var newUrl='';
-                        if (data.sensors[jj].real_track[data.sensors[jj].real_track.length-2] != undefined) {
+                        if (data.sensors[jj].real_track != undefined && data.sensors[jj].real_track[data.sensors[jj].real_track.length-2] != undefined) {
                             newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t1 + url.substring(indxEnd);
                         } else {
                             newUrl=url;
