@@ -803,8 +803,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-            $(window).unload(function(){
-                alert("Пока, пользователь!");
+            $(window).onclick(function(){
+                alert("Bye!!!!!");
             });
 
             rootScope.$on('clearMap', function () {
