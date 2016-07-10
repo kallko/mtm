@@ -486,7 +486,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         var start = stringSettings.indexOf(":");
                         var end = stringSettings.indexOf(',');
 
-                        var temp = stringSettings.substr(start, end);
+                        var temp = stringSettings.substring(start, end);
                         stringSettings = stringSettings.substring(end);
                         console.log("Start", stringSettings, start, temp);
 
