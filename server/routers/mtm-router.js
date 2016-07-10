@@ -948,7 +948,8 @@ router.route('/logout')
             console.log("Third blocking", blockedRoutes[i]);
             i++;
         }
-
+        console.log("Logout complete");
+        res.status(200).json("ok");
 
     });
 

@@ -803,15 +803,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //   return "Hola"
             //};
 
-        //    $(window).click(function() {
-        //        http.post('./logout')
-        //            .success(function (data) {
-        //                console.log("complete");
-        //            });
-        //
-        //        alert("Bye!!!!!");
-        //        //event.returnValue = "Write something clever here..";
-        //});
+            $(window).click(function() {
+                var start = Date.now()/1000;
+              rootScope.editing.start = start;
+
+
+                //event.returnValue = "Write something clever here..";
+        });
 
 
 
