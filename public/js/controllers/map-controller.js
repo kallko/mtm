@@ -806,6 +806,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).click(function() {
                 var start = Date.now()/1000;
               rootScope.editing.start = start;
+                console.log("New Editing", rootScope.editing);
 
 
                 //event.returnValue = "Write something clever here..";
