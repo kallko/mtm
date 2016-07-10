@@ -2327,7 +2327,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             route.real_track[0].lastTrackUpdate = 2000000000;
                             //route.car_position = route.real_track[route.real_track.length - 2];
                         } else {
-                            if(route.real_track[0]){
+                            if(route.real_track != undefined && route.real_track[0]){
                             route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);}
                         }
 
@@ -4066,7 +4066,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function checkTimeForEditing (){
             var end = Date.now()/1000;
-            if(rootScope.editing < end + 100) {
+            console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
+            if(rootScope.editing.start < end + 100) {
                 alert("Time out!");
             }
 
