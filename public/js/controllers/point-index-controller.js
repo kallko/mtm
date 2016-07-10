@@ -2047,7 +2047,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // обработчик даблклика на строке таблицы
 
-        scope.dblRowClick = function (row) {
+        scope.dblRowClick = function ($event) {
+            var target = $event.target;
+            while (target.tagName != 'TR') {
+                target = target.parentNode;
+            }
+            var id = target.id.slice(6);
+            for(var i = 0; scope.displayCollection[i].row_id != id; i++){}
+
+            var row = scope.displayCollection[i];
 
             row.textStatus = scope.getTextStatus(row);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
