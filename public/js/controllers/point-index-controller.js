@@ -2046,7 +2046,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         // обработчик даблклика на строке таблицы
-        /*
+
         scope.dblRowClick = function (row) {
 
             row.textStatus = scope.getTextStatus(row);
@@ -2054,7 +2054,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             row.itineraryID = _data.ID;
             scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
         };
-        */
+
 
         // получить текстовый статус для задачи с необходимыми css классами
 
