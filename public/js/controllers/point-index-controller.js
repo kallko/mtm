@@ -489,7 +489,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         var end = stringSettings.indexOf(',');
 
                         var temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         console.log("Start", stringSettings, start, temp);
                         scope.params.predictMinutes = parseInt(temp);
                         console.log("Start", stringSettings, start, temp, scope.params.predictMinutes);
@@ -501,35 +501,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         temp = stringSettings.substring(start+1, end);
 
                         console.log("second",stringSettings, start, end, "Temp, Fact", temp);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.factMinutes = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.volume = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.weight = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.value = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.changeTime = parseInt(temp);
 
 
@@ -537,42 +537,42 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.workingWindowType = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.endWindowSize = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.stopRadius = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.mobileRadius = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.timeThreshold = parseInt(temp);
 
                         start = stringSettings.indexOf(":");
                         end = stringSettings.indexOf('"\"');
 
                         temp = stringSettings.substring(start+2, end);
-                        stringSettings = stringSettings.substring(end);
+                        stringSettings = stringSettings.substring(end+1);
                         scope.params.routeListOrderBy = ""+temp;
 
                         console.log("SCOPE PARAMS", scope.params)
