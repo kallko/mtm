@@ -7,14 +7,14 @@
     function initialize(thisForm) {
         parentForm = thisForm;
         console.log('initialize complete', parentForm);
-        var newSettings = parentForm._call('getConfig');
+        newSettings = parentForm._call('getConfig()');
         console.log("NewSettings = ", newSettings);
     }
 
-    function onCloseMonitoring() {
-        window.open('http://google.com', "_blank");
-
-    }
+//    function onCloseMonitoring() {
+//        window.open('http://google.com', "_blank");
+//
+//    }
 
 //    window.onbeforeunload = function() {
 //
