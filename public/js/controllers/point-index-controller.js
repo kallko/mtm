@@ -2307,7 +2307,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         alert("Маршрут свободен для редактирования");
                         //rootScope.editing.route = route.uniqueID;
                         var start = Date.now()/1000;
-                        rootScope.start = start;
+                        rootScope.editing.start = start;
 
 
                         console.log("Editing", rootScope.editing);
