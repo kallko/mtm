@@ -500,7 +500,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         temp = stringSettings.substring(start+1, end);
 
-                        console.log("Temp, Fact", temp);
+                        console.log("second",stringSettings, start, end, "Temp, Fact", temp);
                         stringSettings = stringSettings.substring(end);
                         scope.params.factMinutes = parseInt(temp);
 
