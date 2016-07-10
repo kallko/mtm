@@ -2187,6 +2187,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // отрисовать маршрут
         scope.drawRoute = function (filterId, order) {
+            scope.$emit('clearMap');
             console.log("Start Function");
             console.time("step1");
             loadExistData();
@@ -2259,17 +2260,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            if (route.real_track == undefined) {
-                draw(route);
-                return;
-            }
+            //todo пока в виде эксперимента перенесем под сакцесс вниз
+            //if (route.real_track == undefined) {
+            //    draw(route);
+            //    return;
+            //}
 
             //if (full == undefined) full=true; //По умолчанию отрисовываем полный трек с обновлением
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные
             // todo временно отправляем всегда
-            if ( route.real_track[0].lastTrackUpdate == undefined ||
-                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000 || true) {
+            if (  true || route.real_track[0].lastTrackUpdate == undefined ||
+                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000 ) {
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
 
@@ -2296,6 +2298,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             alert("Маршрут заблокирован оператором " + data.user);
                             scope.filters.route = -1;
                             rootScope.clickOff=false;
+                            return;
+                        }
+
+                        if (route.real_track == undefined) {
+                            draw(route);
                             return;
                         }
 
