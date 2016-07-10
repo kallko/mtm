@@ -4077,10 +4077,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //event.returnValue = "Write something clever here..";
                 }
                 alert("Time out!");
+
             }
 
 
-        }
+
 
     }]);
 
