@@ -194,6 +194,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // установить динамическое обновление треков
         function setRealTrackUpdate(seconds) {
             interval(function () {
+                checkTimeForEditing();
                 console.log('setRealTrackUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
