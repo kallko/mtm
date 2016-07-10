@@ -4075,6 +4075,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         //alert("Bye!!!!!");
                         //event.returnValue = "Write something clever here..";
+                scope.filters.route = -1;
+                scope.$emit('clearMap');
+                rootScope.editing={};
+                rootScope.$emit('logoutsave');
                 alert("Time out!");
                 }
 
