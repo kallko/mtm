@@ -2330,6 +2330,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log(err);
                         rootScope.errorNotification(' к агрегатору /gettracksbystates. Нет актуального трека');
                         if (route.real_track == undefined) {
+                            scope.filters.route = route.filterId;
                             draw(route);
                             return;
                         }
