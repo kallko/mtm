@@ -494,6 +494,88 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         scope.params.predictMinutes = parseInt(temp);
                         console.log("Start", stringSettings, start, temp, scope.params.predictMinutes);
 
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.factMinutes = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.volume = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.weight = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.value = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.changeTime = parseInt(temp);
+
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.workingWindowType = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.endWindowSize = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.stopRadius = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.mobileRadius = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.timeThreshold = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf('"\"');
+
+                        temp = stringSettings.substring(start+2, end);
+                        stringSettings = stringSettings.substring(end);
+                        scope.params.routeListOrderBy = ""+temp;
+
+                        console.log("SCOPE PARAMS", scope.params)
+
+
                     }
 
                     //console.log("I load this data", toPrint);
