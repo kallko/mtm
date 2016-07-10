@@ -10,6 +10,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
             scope.params = Settings.load();
 
             console.log("!!!!!!!!!!!!!!!!!scope.params!!!!!!!!!!!!!!",scope.params);
+            var newSett = parentForm._call('getConfig');
+            console.log("newSett", newSett);
 
             scope.workingWindowTypes = [
                 {name: 'Заказанное окно', value: 0},

@@ -153,6 +153,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.$watch('filters.route', function(){
             if(_data != undefined) {
                 if (scope.filters.route == -1) {
+                    console.log("All Routes selected");
                     scope.$emit('clearMap');
                     for (var j = 0; _data.routes.length > j; j++) {
                         _data.routes[j].selected = false;
