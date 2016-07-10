@@ -499,6 +499,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         end = stringSettings.indexOf(',');
 
                         temp = stringSettings.substring(start+1, end);
+
+                        console.log("Temp, Fact", temp);
                         stringSettings = stringSettings.substring(end);
                         scope.params.factMinutes = parseInt(temp);
 
