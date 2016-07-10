@@ -7,7 +7,7 @@
     function initialize(thisForm) {
         parentForm = thisForm;
         console.log('initialize complete', parentForm);
-        var newSettings = parentForm._call('getConfig()');
+        var newSettings = parentForm._call('getConfig');
         console.log("NewSettings = ", newSettings);
     }
 
