@@ -482,7 +482,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //
                     //}
                     if (newSettings != undefined){
-                        var start = newSettings.indexOf("predictMinutes:");
+                        var stringSettings = ""+newSettings
+                        var start = stringSettings.indexOf("predictMinutes:");
                         console.log("Start", start);
 
                     }
