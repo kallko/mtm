@@ -2301,10 +2301,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             return;
                         }
 
-                        if (route.real_track == undefined) {
-                            draw(route);
-                            return;
-                        }
+
 
                         alert("Маршрут свободен для редактирования");
                         route.real_track = data;
@@ -2332,6 +2329,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }).error(function(err){
                         console.log(err);
                         rootScope.errorNotification(' к агрегатору /gettracksbystates. Нет актуального трека');
+                        if (route.real_track == undefined) {
+                            draw(route);
+                            return;
+                        }
                         rootScope.clickOff=false;
                         return;
                     });
