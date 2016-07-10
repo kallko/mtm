@@ -35,7 +35,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.existDataLoaded=false;                     //загружены ли уже существующие ранее данные
 
             scope.parseInt = parseInt;                       //Возможность использовать parseInt во view
-
+            rootScope.editing = {}                          // Контроль времени на блокировку  маршрута
 
 
 
@@ -2304,6 +2304,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                         alert("Маршрут свободен для редактирования");
+                        //rootScope.editing.route = route.uniqueID;
+                        var start = Date.now()/1000;
+                        rootScope.start = start;
+
+
+                        console.log("Editing", rootScope.editing);
+
                         route.real_track = data;
 
 
@@ -4055,6 +4062,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //scope.$on("$locationChangeStart", function(){
         //    alert("Hey Hoorey");
         //});
+
+        function checkTimeForEditing (){
+            var end = Date.now()/1000;
+            if(rootScope.editing < end + 100) {
+                alert("Time out!");
+            }
+
+
+        }
 
     }]);
 
