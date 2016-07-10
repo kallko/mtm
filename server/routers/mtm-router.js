@@ -932,6 +932,22 @@ router.route('/checknewiten')
 router.route('/logout')
     .post(function (req, res) {
         console.log("!!!!!!!!!!LOGOUT!!!!!!!", req.session.login);
+        var i=0;
+        while(i<blockedRoutes.length){
+            if( ""+blockedRoutes[i].login == ""+req.session.login){
+                console.log(req.session.login, "logouting");
+                blockedRoutes.splice(i,1);
+                break;
+            }
+
+            i++;
+        }
+
+        i=0;
+        while(i<blockedRoutes.length){
+            console.log("Third blocking", blockedRoutes[i]);
+            i++;
+        }
 
 
     });

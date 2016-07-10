@@ -4067,7 +4067,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function checkTimeForEditing (){
             var end = Date.now()/1000;
             console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
-            if(rootScope.editing.start < end + 100) {
+            if(rootScope.editing.start + 100 < end ) {
+                http.post('./logout')
+                            .success(function (data) {
+                                console.log("complete");
+                            });
+
+                        //alert("Bye!!!!!");
+                        //event.returnValue = "Write something clever here..";
+                }
                 alert("Time out!");
             }
 
