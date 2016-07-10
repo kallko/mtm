@@ -572,7 +572,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         end = stringSettings.indexOf('"\"');
 
                         temp = stringSettings.substring(start+2, end);
-                        stringSettings = stringSettings.substring(end+1);
+                        console.log("Last Params", stringSettings,start,end, temp);
                         scope.params.routeListOrderBy = ""+temp;
 
                         console.log("SCOPE PARAMS", scope.params)
