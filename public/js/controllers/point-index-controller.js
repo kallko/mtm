@@ -1362,8 +1362,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // по каждому доступному решению запрашиваем нажатия
 
                 console.log("!!!!!!Find pushes. Where are you?!!!!!!");
-                var newSettings1 = parentForm._call('getConfig()');
-                var newSettings2 = parentForm._call('getConfig');
+                //var newSettings1 = parentForm._call('getConfig()');
+                //var newSettings2 = parentForm._call('getConfig');
                 console.log("All Settings", newSettings, newSettings1, newSettings2);
 
                 for (var m = 0; m < _data.idArr.length; m++) {
