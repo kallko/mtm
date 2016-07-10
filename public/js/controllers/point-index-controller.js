@@ -517,6 +517,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 });
 
 
+            console.log("Update Settings from ParentForm", newSettings);
+
+
         }
 
         rootScope.$on('reqOldroute', function(event, data){
