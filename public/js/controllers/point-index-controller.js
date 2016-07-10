@@ -298,7 +298,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                                         if (_data.routes[j].real_track != undefined && _data.routes[j].real_track.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24'|| _data.routes[j].ID == '38')) {
-                                            console.log ("Concat", _data.routes[j].real_track, "with", trackParts[i].data );
+                                            console.log ("Concat", _data.routes[j].real_track, "with", trackParts[i].data, "and", newSettings );
                                             console.log('To track length', _data.routes[j].real_track.length, "add",  trackParts[i].data.length, "t1 for last exist", _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, "t1 for first recieved", trackParts[i].data[0].t1);
                                         }
                                         // Не удалять потом, в этом блоке проверяется и устанавливается новое nowTime,
