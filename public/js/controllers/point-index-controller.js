@@ -341,7 +341,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         }
 
                                         // Удаляем последний стэйт если он каррент позитион но только перед добавкой новых стейтов
-                                        if ( _data.routes[j].real_track.length>0 && trackParts[i].data.length>0){
+                                        if ( _data.routes[j].real_track != undefined && _data.routes[j].real_track.length>0 && trackParts[i].data.length>0){
                                             if (_data.routes[j].real_track[_data.routes[j].real_track.length-1].state == "CURRENT_POSITION"){
                                                 _data.routes[j].car_position.lat = trackParts[i].data[trackParts[i].data.length-1].lat;
                                                 _data.routes[j].car_position.lon = trackParts[i].data[trackParts[i].data.length-1].lon;
@@ -1464,7 +1464,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log("!!!!!!Find pushes. Where are you?!!!!!!");
                 //var newSettings1 = parentForm._call('getConfig()');
                 //var newSettings2 = parentForm._call('getConfig');
-                console.log("All Settings", newSettings, newSettings1, newSettings2);
+                //console.log("All Settings", newSettings, newSettings1, newSettings2);
 
                 for (var m = 0; m < _data.idArr.length; m++) {
 
