@@ -4198,7 +4198,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             }
 
-
+    function onCloseMonitoring(){}
 
 
     }]);
