@@ -1918,6 +1918,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         rootScope.$on('logoutsave', saveUpdateToNode);
+        
 
         function drawPushLine (mobilePush){
 

@@ -154,6 +154,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if(_data != undefined) {
                 if (scope.filters.route == -1) {
                     console.log("All Routes selected");
+
                     scope.$emit('clearMap');
                     for (var j = 0; _data.routes.length > j; j++) {
                         _data.routes[j].selected = false;
@@ -4180,7 +4181,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function checkTimeForEditing (){
             var end = Date.now()/1000;
             console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
-            if(rootScope.editing.start + 100 < end ) {
+            if(rootScope.editing.start + 600 < end ) {
                 http.post('./logout')
                             .success(function (data) {
                                 console.log("complete");
