@@ -2384,7 +2384,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные
             // todo временно отправляем всегда
-            if (  true || route.real_track[0].lastTrackUpdate == undefined ||
+            if (  route.uniqueID != rootScope.editing.uniqueID || route.real_track[0].lastTrackUpdate == undefined ||
                 route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000 ) {
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
@@ -2421,6 +2421,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //rootScope.editing.route = route.uniqueID;
                         var start = Date.now()/1000;
                         rootScope.editing.start = start;
+                        rootScope.routeId = route.uniqueID;
 
 
                         console.log("Editing", rootScope.editing);
