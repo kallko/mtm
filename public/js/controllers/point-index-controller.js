@@ -1566,6 +1566,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             if (tmpPoint.havePush) {
+
                 tmpPoint.limit+=15;
                 if( tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2+300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1 ) {
                     tmpPoint.limit+=15;
@@ -2297,7 +2298,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             return;
                         }
 
-                        alert("Unlocked");
+                        //alert("Unlocked");
                         route.real_track = data;
 
 
@@ -3942,12 +3943,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
 
-            console.log("Route, to refact", route);
+            //console.log("Route, to refact", route);
 
             var deliveredPoints = [];
             var sheduledPoints = [];
             var canceledPoints = [];
-            console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
+            //console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
             var i = route.points.length;
             while( i-- > 0){
 

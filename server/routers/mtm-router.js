@@ -404,7 +404,7 @@ router.route('/gettracksbystates/')
         var i=0;
         var blocked=false;
         var dataB;
-        blockedRoutes.push({id:"168113", company:currentCompany, login:key});
+        //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
 
         while( i<blockedRoutes.length){
             if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany ){
@@ -442,6 +442,13 @@ router.route('/gettracksbystates/')
 
 
 
+        }
+
+        i=0;
+        while (i<blockedRoutes.length){
+
+            console.log("Now Blocked:",blockedRoutes[i]);
+            i++;
         }
 
         //req.body.id
@@ -898,9 +905,9 @@ router.route('/checknewiten')
 
         function dataReadyCallback (quant){
             console.log("QUANT", quant, "req.session", cache.CLIENT_NAME, "____ ", cache.CLIENT_ID);
-            for (var key in cache){
-                console.log ("key", key);
-            }
+            //for (var key in cache){
+            //    console.log ("key", key);
+            //}
 
 
         }

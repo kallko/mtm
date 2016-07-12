@@ -621,7 +621,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             smoothFactor: 1
                         });
                         scope.singleConnect.addLayer(polyline);
-                        console.log(polyline);
+                        //console.log(polyline);
                         // scope.singleConnect.addLayer(polyline);
                         break;
                     }
