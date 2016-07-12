@@ -741,6 +741,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 title,
                 tmpStatus,
                 tmpBgColor,
+                tmpBgColor,
                 tmpFColor,
 
             //for (var i = 0; i < points.length; i++) {
@@ -793,6 +794,34 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function addListeners() {
             $(window).resize(resize);
             resize();
+
+            //$(window).onclose(beforeunload);
+            //beforeunload();
+            ////
+
+            //$(window).onunload=function(){
+            //   return "Hola"
+            //};
+
+            $(window).click(function() {
+                var start = Date.now()/1000;
+              rootScope.editing.start = start;
+                console.log("New Editing", rootScope.editing);
+
+
+                //event.returnValue = "Write something clever here..";
+        });
+
+
+
+            //$(window).onbeforeunload = function(){
+            //    if (confirm('Are you sure you want to leave this page?')){
+            //        // user leaves
+            //    }
+            //    else{
+            //        // your code
+            //    }
+            //};
 
             rootScope.$on('clearMap', function () {
                 clearMap();
@@ -959,6 +988,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $map.width($(window).width());
             map.invalidateSize();
         }
+
+
+
+        //function beforeunload(){
+        //    alert("HEY AM HERE");
+        //}
 
         // очистить карту
         function clearMap() {
@@ -1882,7 +1917,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-
+        rootScope.$on('logoutsave', saveUpdateToNode);
+        
 
         function drawPushLine (mobilePush){
 

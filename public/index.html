@@ -3,14 +3,25 @@
 
     console.log("~~~~~~~~~~~~~~~~~~~~~~~init");
     var parentForm;
+    var newSettings;
 
     function initialize(thisForm) {
         parentForm = thisForm;
         console.log('initialize complete', parentForm);
-
+        newSettings = parentForm._call('getConfig');
+        console.log("NewSettings = ", newSettings);
     }
 
+//    function onCloseMonitoring() {
+//        window.open('http://google.com', "_blank");
+//
+//    }
 
+//    window.onbeforeunload = function() {
+//
+//        return "Ku Ku";
+//
+//    }
 
 
 </script>
@@ -292,7 +303,7 @@
 
                 <tbody 
                     ng-click="rowClick($event)"
-                    ng-dblclick="rowClick($event)"
+                    ng-dblclick="dblRowClick($event)"
                     >
 
                 <tr ng-repeat="row in displayCollection | orderBy : myFilter" 
@@ -390,8 +401,8 @@
 
 
 <!-- панель настроек -->
-<template type="text/html" id="setting-window">
-    <div class="section setting-panel" ng-controller="SettingController">
+<template type="text/html" id="setting-window" ng-show="false" display="none"  >
+    <div class="section setting-panel" ng-show="false" ng-controller="SettingController">
         <!--<div class="block">-->
             <!--<div class="title">Загрузка конкретного дня</div>-->
             <!--<div class="setting-row">-->
@@ -663,7 +674,7 @@
 
                         <td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>
                         <td> {{:: item.END_TIME.split(' ')[1]}}</td>
-                        <td> {{ (item.real_track == undefined || item.real_track == 0) ? "No signal" : ((item.last_signal)*1000) | date :'dd.MM HH:mm' }}</td>
+                        <td> {{ (item.real_track == undefined || item.real_track == 0 || item.last_signal == undefined) ? "No signal" : ((item.last_signal)*1000) | date :'dd.MM HH:mm' }}</td>
                     </tr>
 
 

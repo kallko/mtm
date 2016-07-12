@@ -64,7 +64,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
         started++;
         (function (ii) {
-            console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
+            //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
                 //console.log('done loading part #', ii);
@@ -102,7 +102,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                         var indxBegin=url.indexOf('&from=');
                         var indxEnd=url.indexOf('&to=');
                         var newUrl='';
-                        if (data.sensors[jj].real_track[data.sensors[jj].real_track.length-2] != undefined) {
+                        if (data.sensors[jj].real_track != undefined && data.sensors[jj].real_track[data.sensors[jj].real_track.length-2] != undefined) {
                             newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t1 + url.substring(indxEnd);
                         } else {
                             newUrl=url;

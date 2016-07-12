@@ -35,7 +35,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.existDataLoaded=false;                     //загружены ли уже существующие ранее данные
 
             scope.parseInt = parseInt;                       //Возможность использовать parseInt во view
-
+            rootScope.editing = {}                          // Контроль времени на блокировку  маршрута
 
 
 
@@ -153,6 +153,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.$watch('filters.route', function(){
             if(_data != undefined) {
                 if (scope.filters.route == -1) {
+                    console.log("All Routes selected");
+                    rootScope.$emit('logoutsave');
                     scope.$emit('clearMap');
                     for (var j = 0; _data.routes.length > j; j++) {
                         _data.routes[j].selected = false;
@@ -194,6 +196,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // установить динамическое обновление треков
         function setRealTrackUpdate(seconds) {
             interval(function () {
+                checkTimeForEditing();
                 console.log('setRealTrackUpdate()');
                 if (_data == null) return;
                 _data.server_time += seconds;
@@ -295,7 +298,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         _data.routes[j].last_signal=trackParts[i].data[trackParts[i].data.length-1].t1;
 
 
-                                        if (_data.routes[j].real_track.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24'|| _data.routes[j].ID == '38')) {
+                                        if (_data.routes[j].real_track != undefined && _data.routes[j].real_track.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24'|| _data.routes[j].ID == '38')) {
                                             console.log ("Concat", _data.routes[j].real_track, "with", trackParts[i].data );
                                             console.log('To track length', _data.routes[j].real_track.length, "add",  trackParts[i].data.length, "t1 for last exist", _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, "t1 for first recieved", trackParts[i].data[0].t1);
                                         }
@@ -315,7 +318,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-                                        if (_data.routes[j].real_track.length>0 && trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24' || _data.routes[j].ID == '38')) {
+                                        if (_data.routes[j].real_track != undefined &&_data.routes[j].real_track.length>0 && trackParts[i].data.length>0 && (_data.routes[j].ID == '47' || _data.routes[j].ID == '24' || _data.routes[j].ID == '38')) {
                                             console.log('times', _data.routes[j].real_track[_data.routes[j].real_track.length - 1].t1, trackParts[i].data[0].t1)
                                         }
 
@@ -339,7 +342,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                         }
 
                                         // Удаляем последний стэйт если он каррент позитион но только перед добавкой новых стейтов
-                                        if ( _data.routes[j].real_track.length>0 && trackParts[i].data.length>0){
+                                        if ( _data.routes[j].real_track != undefined && _data.routes[j].real_track.length>0 && trackParts[i].data.length>0){
                                             if (_data.routes[j].real_track[_data.routes[j].real_track.length-1].state == "CURRENT_POSITION"){
                                                 _data.routes[j].car_position.lat = trackParts[i].data[trackParts[i].data.length-1].lat;
                                                 _data.routes[j].car_position.lon = trackParts[i].data[trackParts[i].data.length-1].lon;
@@ -479,7 +482,104 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //    console.log("(((((( We LOAD PAST!!! Problem=" , scope.filters.problem_index);
                     //
                     //}
+                    if (newSettings != undefined){
+                        var stringSettings = JSON.stringify(newSettings);
+                        var start = stringSettings.indexOf("predict");
+                        stringSettings = stringSettings.substring(start);
+                        start = stringSettings.indexOf(":");
+                        var end = stringSettings.indexOf(',');
 
+                        var temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        console.log("Start", stringSettings, start, temp);
+                        scope.params.predictMinutes = parseInt(temp);
+                        console.log("Start", stringSettings, start, temp, scope.params.predictMinutes);
+
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+
+                        console.log("second",stringSettings, start, end, "Temp, Fact", temp);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.factMinutes = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.volume = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.weight = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.value = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.changeTime = parseInt(temp);
+
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.workingWindowType = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.endWindowSize = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.stopRadius = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.mobileRadius = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf(',');
+
+                        temp = stringSettings.substring(start+1, end);
+                        stringSettings = stringSettings.substring(end+1);
+                        scope.params.timeThreshold = parseInt(temp);
+
+                        start = stringSettings.indexOf(":");
+                        end = stringSettings.indexOf('}');
+
+                        temp = stringSettings.substring(start+3, end-2);
+                        console.log("Last Params", stringSettings,start,end, temp);
+                        scope.params.routeListOrderBy = ""+temp;
+
+                        console.log("SCOPE PARAMS", scope.params);
+
+
+                    }
 
                     //console.log("I load this data", toPrint);
                     linkDataParts(data);
@@ -513,6 +613,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log(err);
                     rootScope.errorNotification(url);
                 });
+
+
+            console.log("Update Settings from ParentForm", newSettings);
 
 
         }
@@ -1057,14 +1160,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.stop_arrival_time;
                     delete tmpPoint.real_arrival_time;
                     delete tmpPoint.windowType;
-                    delete tmpPoint.mobile_push;
+                    //delete tmpPoint.mobile_push;
                     delete tmpPoint.mobile_arrival_time;
-                    delete tmpPoint.havePush;
+                    //delete tmpPoint.havePush;
                     delete tmpPoint.real_arrival_time;
                     delete tmpPoint.confirmed;
                     //delete tmpPoint.servicePoints;
                     delete tmpPoint.overdue_time;
-                    delete tmpPoint.limit;
+                    //delete tmpPoint.limit;
 
 
 
@@ -1360,6 +1463,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // по каждому доступному решению запрашиваем нажатия
 
                 console.log("!!!!!!Find pushes. Where are you?!!!!!!");
+                //var newSettings1 = parentForm._call('getConfig()');
+                //var newSettings2 = parentForm._call('getConfig');
+                //console.log("All Settings", newSettings, newSettings1, newSettings2);
 
                 for (var m = 0; m < _data.idArr.length; m++) {
 
@@ -1566,7 +1672,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             if (tmpPoint.havePush) {
-
                 tmpPoint.limit+=15;
                 if( tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2+300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1 ) {
                     tmpPoint.limit+=15;
@@ -2046,15 +2151,23 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         // обработчик даблклика на строке таблицы
-        /*
-        scope.dblRowClick = function (row) {
+
+        scope.dblRowClick = function ($event) {
+            var target = $event.target;
+            while (target.tagName != 'TR') {
+                target = target.parentNode;
+            }
+            var id = target.id.slice(6);
+            for(var i = 0; scope.displayCollection[i].row_id != id; i++){}
+
+            var row = scope.displayCollection[i];
 
             row.textStatus = scope.getTextStatus(row);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             row.itineraryID = _data.ID;
             scope.$emit('showPoint', {point: row, route: _data.routes[row.route_indx]});
         };
-        */
+
 
         // получить текстовый статус для задачи с необходимыми css классами
 
@@ -2188,6 +2301,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // отрисовать маршрут
         scope.drawRoute = function (filterId, order) {
+            scope.$emit('clearMap');
             console.log("Start Function");
             console.time("step1");
             loadExistData();
@@ -2260,16 +2374,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 return;
             }
 
-            if (route.real_track == undefined) {
-                draw(route);
-                return;
-            }
+            //todo пока в виде эксперимента перенесем под сакцесс вниз
+            //if (route.real_track == undefined) {
+            //    draw(route);
+            //    return;
+            //}
 
             //if (full == undefined) full=true; //По умолчанию отрисовываем полный трек с обновлением
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные
-            if ( route.real_track[0].lastTrackUpdate == undefined ||
-                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000) {
+            // todo временно отправляем всегда
+            if (  true || route.real_track[0].lastTrackUpdate == undefined ||
+                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000 ) {
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
 
@@ -2293,12 +2409,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         //Маршрут заблокирован и редактируется другим пользователем
                         if (data.result == 'blocked'){
-                            alert("Blocked by " + data.user);
+                            alert("Маршрут заблокирован оператором " + data.user);
+                            scope.filters.route = -1;
                             rootScope.clickOff=false;
                             return;
                         }
 
-                        //alert("Unlocked");
+
+
+                        alert("Маршрут свободен для редактирования");
+                        //rootScope.editing.route = route.uniqueID;
+                        var start = Date.now()/1000;
+                        rootScope.editing.start = start;
+
+
+                        console.log("Editing", rootScope.editing);
+
                         route.real_track = data;
 
 
@@ -2314,7 +2440,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             route.real_track[0].lastTrackUpdate = 2000000000;
                             //route.car_position = route.real_track[route.real_track.length - 2];
                         } else {
-                            if(route.real_track[0]){
+                            if(route.real_track != undefined && route.real_track[0]){
                             route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);}
                         }
 
@@ -2323,7 +2449,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         draw(route);
                     }).error(function(err){
                         console.log(err);
-                        rootScope.errorNotification('/gettracksbystates');
+                        alert("Маршрут свободен для редактирования");
+                        rootScope.errorNotification(' к агрегатору /gettracksbystates. Нет актуального трека');
+                        if (route.real_track == undefined) {
+                            scope.filters.route = route.filterId;
+                            draw(route);
+                            return;
+                        }
+                        rootScope.clickOff=false;
+                        return;
                     });
 
                 //console.log("Troubles here");
@@ -3162,9 +3296,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.post('./saveupdate/', {data: markers, date: scope.routesOfDate})
                 .success(function (data) {
                    console.log('send from pic to route', data);
+                    alert("Save route success");
                 })
                 .error(function(err){
-
+                    alert("Save route ERROR!");
                 })
         });
 
@@ -3943,12 +4078,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
 
-            //console.log("Route, to refact", route);
+            console.log("Route, to refact", route);
 
             var deliveredPoints = [];
             var sheduledPoints = [];
             var canceledPoints = [];
-            //console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
+            console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
             var i = route.points.length;
             while( i-- > 0){
 
@@ -4038,6 +4173,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     ki++;
                 }
         };
+
+        //scope.$on("$locationChangeStart", function(){
+        //    alert("Hey Hoorey");
+        //});
+
+        function checkTimeForEditing (){
+            var end = Date.now()/1000;
+            console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
+            if(rootScope.editing.start + 600 < end ) {
+                http.post('./logout')
+                            .success(function (data) {
+                                console.log("complete");
+                            });
+
+                        //alert("Bye!!!!!");
+                        //event.returnValue = "Write something clever here..";
+                scope.filters.route = -1;
+                scope.$emit('clearMap');
+                rootScope.editing={};
+                rootScope.$emit('logoutsave');
+                alert("Time out!");
+                }
+
+
+            }
+
+    function onCloseMonitoring(){}
+
 
     }]);
 

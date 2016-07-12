@@ -405,9 +405,14 @@ router.route('/gettracksbystates/')
         var blocked=false;
         var dataB;
         //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
+        if (blockedRoutes.length==0){
+            console.log("!!!! Create first element!!!!!!");
+            blockedRoutes.push({ id: '286111', company: '292942', login: 'IDS1.dsp' });
+        }
 
         while( i<blockedRoutes.length){
-            if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany ){
+            if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany && ""+blockedRoutes[i].login != ""+req.session.login){
+                console.log("Try accept blocked route");
                 blocked=true;
                 dataB = {
                     result: 'blocked',
@@ -427,28 +432,37 @@ router.route('/gettracksbystates/')
             i=0;
             var created=false;
             while(i<blockedRoutes.length){
-                if(blockedRoutes[i].login == req.session.login) {
+                console.log ("Blocked logins",blockedRoutes[i].login , req.session.login);
+                if(""+blockedRoutes[i].login == ""+req.session.login) {
+                    console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
                     blockedRoutes[i].id=req.body.id;
                     created = true;
+
+                    j=0;
+                    while (j<blockedRoutes.length){
+                        console.log("First Blocked", blockedRoutes[j]);
+                        j++;
+                    }
+
                     break;
                 }
 
-                if(!created){
-                    blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key})
-                }
 
                 i++;
             }
 
+            if(!created){
+                console.log("Не было такого логина! создаем")
+                blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key})
+            }
+
+            i=0;
+            while (i<blockedRoutes.length){
+                console.log("Second Blocked", blockedRoutes[i]);
+                i++;
+            }
 
 
-        }
-
-        i=0;
-        while (i<blockedRoutes.length){
-
-            console.log("Now Blocked:",blockedRoutes[i]);
-            i++;
         }
 
         //req.body.id
@@ -915,6 +929,28 @@ router.route('/checknewiten')
             res.status(200).json("ok");
     });
 
+router.route('/logout')
+    .post(function (req, res) {
+        console.log("!!!!!!!!!!LOGOUT!!!!!!!", req.session.login);
+        var i=0;
+        while(i<blockedRoutes.length){
+            if( ""+blockedRoutes[i].login == ""+req.session.login){
+                console.log(req.session.login, "logouting");
+                blockedRoutes.splice(i,1);
+                break;
+            }
 
+            i++;
+        }
+
+        i=0;
+        while(i<blockedRoutes.length){
+            console.log("Third blocking", blockedRoutes[i]);
+            i++;
+        }
+        console.log("Logout complete");
+        res.status(200).json("ok");
+
+    });
 
 module.exports = router;
