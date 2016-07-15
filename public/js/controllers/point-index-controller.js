@@ -35,8 +35,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.existDataLoaded=false;                     //загружены ли уже существующие ранее данные
 
             scope.parseInt = parseInt;                       //Возможность использовать parseInt во view
-            rootScope.editing = {}                          // Контроль времени на блокировку  маршрута
-
+        rootScope.editing = {};                          // Контроль времени на блокировку  маршрута
+        rootScope.loaded = undefined;
 
 
         setListeners();
@@ -49,6 +49,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         if (enableDynamicUpdate) {
              setRealTrackUpdate(stopUpdateInterval);
         }
+
+        //
+        //if (askProblemFromServer) {
+        //    setProblemUpdate();
+        //}
+
 
         // начальная инициализация
         function init() {
@@ -204,6 +210,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 loadTrackParts();
             }, seconds * 1000);
         }
+
+
+        // Запрос у сервера проблем каждые 5 секунд
+        // todo запрашивать только, если нет определенного количества нерешенных проблем у этого оператора
+        function setProblemUpdate() {
+            interval(checkProblem, 5 * 1000);
+        }
+
+
+
 
         // установить интервал обновление информации о блокировках задач
         function setCheckLocksInterval() {
@@ -616,7 +632,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             console.log("Update Settings from ParentForm", newSettings);
-
 
         }
 
@@ -1378,13 +1393,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             }
 
-            //console.log("Step1 parentForm", parentForm);
+            console.log("Step1 parentForm", parentForm);
 
 
-
-
-
-            console.log("parentFORM=", parentForm);
+            //console.log("parentFORM=", parentForm);
             console.trace();
             if (parentForm == undefined && !scope.demoMode) {
                 checkConfirmedFromLocalStorage();
@@ -1395,7 +1407,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }else {
 
 
-                console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                //console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
                 var mobilePushes = [],
                     allPushes = [];
@@ -1462,7 +1474,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 // по каждому доступному решению запрашиваем нажатия
 
-                console.log("!!!!!!Find pushes. Where are you?!!!!!!");
+                //console.log("!!!!!!Find pushes. Where are you?!!!!!!");
                 //var newSettings1 = parentForm._call('getConfig()');
                 //var newSettings2 = parentForm._call('getConfig');
                 //console.log("All Settings", newSettings, newSettings1, newSettings2);
@@ -1472,10 +1484,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (scope.demoMode) {
                         m = 2000000000;
                     } else {
+                        // console.log("$%$%$%$%$%$%$%$%Filters", scope.filters.route,  "Editing", rootScope.editing.uniqueID);
+
                         mobilePushes = parentForm._call('getDriversActions', [_data.idArr[m], getDateStrFor1C(_data.server_time * 1000)]);
                     }
 
-                    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
+                    //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
 
 
                     if (mobilePushes == undefined
@@ -2109,7 +2123,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 rootScope.$emit('findStopOnMarker', row.LAT, row.LON);
                 if(row.haveStop){
-                    rootScope.$emit('eventdrawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
+                    try {
+                        rootScope.$emit('eventdrawConnectsActivePoint', row.stopState, row.NUMBER, row.TASK_NUMBER);
+                    } catch (e) {
+                        console.log("Find error", e);
+                    }
                 }else{
                     rootScope.$emit('eventdrawConnectsActivePoint');
                 }
@@ -2301,13 +2319,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // отрисовать маршрут
         scope.drawRoute = function (filterId, order) {
+            rootScope.clickOff = true;
             scope.$emit('clearMap');
-            console.log("Start Function");
+
             console.time("step1");
-            loadExistData();
+
 
             //concatDailyAndExistingData();
-            rootScope.clickOff=true;
+
             var route;
             for(var i = 0; _data.routes.length > i; i++){
                 if(_data.routes[i].filterId == filterId){
@@ -2315,6 +2334,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     break;
                 }
             }
+            console.log("Start Function", route.uniqueID, rootScope.editing.uniqueID);
+            if (route.uniqueID != rootScope.editing.uniqueID) {
+                loadExistData();
+            }
+
 
             factTimeForRoute(route);
 
@@ -2383,9 +2407,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //if (full == undefined) full=true; //По умолчанию отрисовываем полный трек с обновлением
             // если время последнего обновления не известно или с момента последнего обновления
             // трека прошло updateTrackInterval секунд - догружаем новые данные
-            // todo временно отправляем всегда
-            if (  route.uniqueID != rootScope.editing.uniqueID || route.real_track[0].lastTrackUpdate == undefined ||
-                route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000 ) {
+            // todo временно отправляем только если это новый трек
+
+            console.log("Will i call for blocked", route.uniqueID, rootScope.editing.uniqueID);
+
+            if ("" + route.uniqueID != "" + rootScope.editing.uniqueID
+            //
+            //if (  route.uniqueID != rootScope.editing.uniqueID || route.real_track[0].lastTrackUpdate == undefined ||
+            //    route.real_track[0].lastTrackUpdate + updateTrackInterval < Date.now() / 1000
+
+            ) {
+                console.log("Я от бабушки ушел");
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
 
@@ -2421,10 +2453,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //rootScope.editing.route = route.uniqueID;
                         var start = Date.now()/1000;
                         rootScope.editing.start = start;
-                        rootScope.routeId = route.uniqueID;
+                        rootScope.editing.uniqueID = route.uniqueID;
 
 
-                        console.log("Editing", rootScope.editing);
+                        //console.log("Editing", rootScope.editing);
 
                         route.real_track = data;
 
@@ -2463,7 +2495,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 //console.log("Troubles here");
             } else {
-                console.log('load tracks from cache', scope.draw_modes);
+                // console.log('$$$$$load tracks from cache', scope.draw_modes);
+                rootScope.clickOff = false;
                 scope.draw_mode=0;
                 //scope.draw_modes[0]=scope.draw_modes[0].value;
                 draw(route);
@@ -2795,6 +2828,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete route.points[j].lockedRoute;
                 }
             }
+
+
+            if (rootScope.loaded == false) rootScope.loaded = true;
+            if (rootScope.loaded == undefined) rootScope.loaded = false;
+            if (rootScope.loaded && !rootScope.asking) scope.$emit('start'); //Первоначальная загрузка закончена, начинаем опрашивать сервер на наличие проблем в problem route controller
+
+
         }
         function collectDataForDayClosing(data, currentDay){
 
@@ -4079,12 +4119,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
 
-            console.log("Route, to refact", route);
+            //console.log("Route, to refact", route);
 
             var deliveredPoints = [];
             var sheduledPoints = [];
             var canceledPoints = [];
-            console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
+            //console.log("Rebuild fact", deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
             var i = route.points.length;
             while( i-- > 0){
 
@@ -4124,8 +4164,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-
-            console.log("Combos Length", route.points.length, deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
+            //console.log("Combos Length", route.points.length, deliveredPoints.length, sheduledPoints.length, canceledPoints.length);
 
            if (sort) {scope.order('fact_number'); scope.order('fact_number');}
 
@@ -4200,7 +4239,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             }
 
-    function onCloseMonitoring(){}
+
+        //
+        //function checkProblem() {
+        //    //console.log(" Route = ", rootScope.editing.uniqueID, scope.filters.route )
+        //    if (scope.filters.route == -1) {
+        //        console.log("Ask for problem");
+        //    }
+        //}
 
 
     }]);

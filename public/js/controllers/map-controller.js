@@ -593,11 +593,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 return;
             }
             if(scope.singleConnect !== undefined){
-                map.removeLayer(scope.singleConnect);
+                try {
+                    map.removeLayer(scope.singleConnect);
+                } catch (e) {
+                    console.log(e);
+                }
             }
             scope.singleConnect = new L.layerGroup().addTo(map);
 
-            outer: for(var i = 0; markersArr.length > i; i++){
+            //console.log(" UNDEFINED HERE map 603", markersArr );
+            outer:for (var i = 0; markersArr.length > i; i++) {
                 if('source' in markersArr[i] && markersArr[i].source.state == "ARRIVAL" && 'servicePoints' in markersArr[i].source){
                     for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
                         if(number == markersArr[i].source.servicePoints[j] + 1){
@@ -611,6 +616,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             var j = 0;
+            //console.log(" UNDEFINED HERE map 617", markersArr );
             while (j < markersArr.length) {
                 if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                     if (number == markersArr[j].source.NUMBER) {
@@ -620,7 +626,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             opacity: 0.5,
                             smoothFactor: 1
                         });
-                        scope.singleConnect.addLayer(polyline);
+                        //console.log("Polyline Undefined???", servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng );
+                        if (servicePointsLat != undefined && servicePointsLng != undefined) {
+                            scope.singleConnect.addLayer(polyline);
+                        }
                         //console.log(polyline);
                         // scope.singleConnect.addLayer(polyline);
                         break;
@@ -647,7 +656,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             opacity: 0.5,
                             smoothFactor: 1
                         });
-                        scope.addLayer(qwe);
+                        map.addLayer(qwe);
                         break;
                     }
                 }
@@ -795,9 +804,19 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).resize(resize);
             resize();
 
-            //$(window).onclose(beforeunload);
-            //beforeunload();
-            ////
+            window.initialize = function (thisForm) {
+                parentForm = thisForm;
+                console.log('initialize complete', parentForm);
+                //console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                //scope.$emit('logoutsave');
+            };
+
+
+            window.onCloseMonitoring = function () {
+                //scope.$emit('logoutsave');
+
+            };
+
 
             //$(window).onunload=function(){
             //   return "Hola"
@@ -806,7 +825,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             $(window).click(function() {
                 var start = Date.now()/1000;
               rootScope.editing.start = start;
-                console.log("New Editing", rootScope.editing);
+                //console.log("New Editing", rootScope.editing);
 
 
                 //event.returnValue = "Write something clever here..";

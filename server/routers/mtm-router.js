@@ -18,6 +18,8 @@ var express = require('express'),
     oldRoutesCache = {}, // объект со всеми роутами,  кроме текущего дня
     companyLogins = {},   // Список логинов на компании
     needNewReqto1C = {}, // если есть свойство с именем компани, то не запрвшивать из 1С
+    priority = [],
+    currentProblem = [], //неотправленные на клиента проблеммы.
     blockedRoutes = []; // список заблокированных маршрутов
 
 new CronJob('01 00 00 * * *', function() {
@@ -135,8 +137,8 @@ router.route('/dailydata')
         }
 
         var now = Date.now(),
-            day = 86400000,
-            today12am = now - (now % day);
+            day = 86400000;
+        //today12am = now - (now % day);
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
 
@@ -180,7 +182,7 @@ router.route('/dailydata')
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
             function dataReadyCallback(data) {
-               if (data.routes != undefined){
+                if (data.routes != undefined) {
                 console.log('=== dataReadyCallback === send data to client ===', data.routes.length);}
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
                 console.log('send data to client');
@@ -206,8 +208,6 @@ router.route('/dailydata')
                                 for (var j = 0; j < data.routes[i].points.length; j++) {
                                     data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 }
-                            } else {
-                                continue;
                             }
                         }
 
@@ -407,7 +407,7 @@ router.route('/gettracksbystates/')
         //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
         if (blockedRoutes.length==0){
             console.log("!!!! Create first element!!!!!!");
-            blockedRoutes.push({ id: '286111', company: '292942', login: 'IDS1.dsp' });
+            blockedRoutes.push({id: '286111', company: '292942', login: 'IDS1.dsp', time: Date.now()});
         }
 
         while( i<blockedRoutes.length){
@@ -437,10 +437,11 @@ router.route('/gettracksbystates/')
                     console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
                     blockedRoutes[i].id=req.body.id;
                     created = true;
+                    changePriority(req.body.id, currentCompany, req.session.login);
 
-                    j=0;
+                    var j = 0;
                     while (j<blockedRoutes.length){
-                        console.log("First Blocked", blockedRoutes[j]);
+                        console.log("First", blockedRoutes[j]);
                         j++;
                     }
 
@@ -452,25 +453,56 @@ router.route('/gettracksbystates/')
             }
 
             if(!created){
-                console.log("Не было такого логина! создаем")
-                blockedRoutes.push({id:""+req.body.id, company:currentCompany, login:key})
+                var ts = parseInt(Date.now());
+                console.log("Не было такого логина! создаем");
+                blockedRoutes.push({id: "" + req.body.id, company: currentCompany, login: key, time: ts});
+                changePriority(req.body.id, currentCompany, req.session.login);
             }
 
             i=0;
             while (i<blockedRoutes.length){
-                console.log("Second Blocked", blockedRoutes[i]);
+                console.log("Second ", blockedRoutes[i]);
                 i++;
             }
 
 
         }
 
-        //req.body.id
-        //console.log('gettracksbystates', req.body.states, req.body.gid, req.body.demoTime, "MTM 364");
+
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-           // console.log('get tracks by states DONE!', data, "MTM 366");
+
             res.status(200).json(data);
         });
+
+        function changePriority(id, company, login) {
+
+            //Редактировался ли этот маршрут ранее.
+            var exist = false;
+            for (var i = 0; i < priority.length; i++) {
+                if ("" + priority[i][0] == "" + id && priority[i][1] == company) {
+                    exist = true;
+                    for (j = 3; j < 6; j++) {
+                        if (priority[i][j] == login) {
+                            priority[i].splice(j, 1);
+                            break;
+                        }
+                    }
+                    priority[i].splice(3, 0, login);
+                    priority[i][2] = parseInt(Date.now());
+                    priority[i].length = 6;
+                    break;
+                }
+            }
+            if (!exist) {
+                priority.push([id, company, parseInt(Date.now() / 1000), login]);
+            }
+
+            for (i = 0; i < priority.length; i++) {
+                console.log("PRIORITY", priority[i]);
+            }
+
+        }
+
     });
 
 // получение планового трека с роутера между двумя точками
@@ -935,7 +967,7 @@ router.route('/logout')
         var i=0;
         while(i<blockedRoutes.length){
             if( ""+blockedRoutes[i].login == ""+req.session.login){
-                console.log(req.session.login, "logouting");
+                console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", req.session.login, "logouting");
                 blockedRoutes.splice(i,1);
                 break;
             }
@@ -952,5 +984,16 @@ router.route('/logout')
         res.status(200).json("ok");
 
     });
+
+
+router.route('/askforproblems')
+    .get(function (req, res) {
+        console.log("ASk For Problem", req.session.login);
+        res.status(200).json("ok");
+
+    });
+
+
+
 
 module.exports = router;

@@ -5,17 +5,21 @@
     var parentForm;
     var newSettings;
 
-    function initialize(thisForm) {
-        parentForm = thisForm;
-        console.log('initialize complete', parentForm);
-        newSettings = parentForm._call('getConfig');
-        console.log("NewSettings = ", newSettings);
-    }
-
-//    function onCloseMonitoring() {
-//        window.open('http://google.com', "_blank");
+    //    function initialize(thisForm) {
+    //        parentForm = thisForm;
+    //        console.log('initialize complete', parentForm);
+    ////      newSettings = parentForm._call('getConfig');
+    ////      console.log("NewSettings = ", newSettings);
+    //        console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    //
+    //
 //
 //    }
+
+    function onCloseMonitoring() {
+
+
+    }
 
 //    window.onbeforeunload = function() {
 //
@@ -67,6 +71,7 @@
 <script src="./js/controllers/setting-controller.js"></script>
 <script src="./js/controllers/point-view-controller.js"></script>
 <script src="./js/controllers/edit-route-controller.js"></script>
+<script src="./js/controllers/problem-route-controller.js"></script>
 <script src="./js/controllers/close-day-controller.js"></script>
 <script src="./js/controllers/point-popup-edit-controller.js"></script>
 <script src="./js/controllers/statistic-controller.js"></script>
@@ -625,7 +630,6 @@
             </div>
         </div>
 
-
     </div>
 </template>
 
@@ -931,6 +935,16 @@
     </div>
 </div>
 <!--Окошко для редактирования точек и времени-->
+
+<div id="problem-route-list" ng-controller="ProblemRouteController" style="position: absolute; bottom: 60%; left: 1%"
+     ng-model="testProblemArray">
+    <div ng-repeat="route in testProblemArray" ng-click="solveProblem(route)">
+        <div>
+            <button style="background: red">{{route[0]}}</button>
+        </div>
+        <div style="background: transparent"><br></div>
+    </div>
+</div>
 
 <div id="point-editing-popup" ng-controller="PointPopupEditController" style="position: absolute; visibility: hidden">
 
