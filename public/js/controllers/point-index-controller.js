@@ -1181,7 +1181,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.real_arrival_time;
                     delete tmpPoint.confirmed;
                     //delete tmpPoint.servicePoints;
-                    delete tmpPoint.overdue_time;
+                    //delete tmpPoint.overdue_time;
                     //delete tmpPoint.limit;
 
 

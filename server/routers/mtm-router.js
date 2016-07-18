@@ -19,8 +19,9 @@ var express = require('express'),
     companyLogins = {},   // Список логинов на компании
     needNewReqto1C = {}, // если есть свойство с именем компани, то не запрвшивать из 1С
     priority = [],
-    currentProblem = [], //неотправленные на клиента проблеммы.
-    blockedRoutes = []; // список заблокированных маршрутов
+    currentProblems = [], //неотправленные на клиента проблеммы.
+    blockedRoutes = [], // список заблокированных маршрутов
+    onlineClients = [];   // список клиентов онлайн на данный момент
 
 new CronJob('01 00 00 * * *', function() {
     for(var company in cashedDataArr){
@@ -217,6 +218,19 @@ router.route('/dailydata')
                     data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                     }
                     cashedDataArr[currentCompany] = data;
+                    // Сбор общего решения из полученных кусков
+
+                    //for (var i = 0; i < cashedDataArr[currentCompany].sensors.length; i++) {
+                    //    for (var j = 0; j < cashedDataArr[currentCompany].transports.length; j++) {
+                    //        if (cashedDataArr[currentCompany].sensors[i].TRANSPORT == cashedDataArr[currentCompany].transports[j].ID) {
+                    //            cashedDataArr[currentCompany].transports[j].gid = cashedDataArr[currentCompany].sensors[i].GID;
+                    //            cashedDataArr[currentCompany].transports[j].real_track = cashedDataArr[currentCompany].sensors[i].real_track;
+                    //        }
+                    //    }
+                    //}
+
+
+
                     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
                     data.current_server_time = parseInt(new Date() / 1000);
                     var current_server_time = new Date();
@@ -397,6 +411,17 @@ router.route('/trackparts/:start/:end')
 // получение треков по переданным стейтам
 router.route('/gettracksbystates/')
     .post(function (req, res) {
+        // проверяем все ли пользователи еще онлайн и если, кто-то "отпал", разблокируем его маршрут
+        var timeNow = parseInt(Date.now() / 1000);
+        for (var i = 0; i < onlineClients.length; i++) {
+            if (onlineClients[i].time + 60 * 3 < timeNow) {
+                unblockLogin(req.session.login);
+                onlineClients.splice(i, 1);
+                i--;
+            }
+
+        }
+
         // проверяем не заблокирован ли этот маршрут другим пользователемъ
         // Задача 1 найти этот роут в заблокированных
         var key = ""+req.session.login;
@@ -407,7 +432,7 @@ router.route('/gettracksbystates/')
         //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
         if (blockedRoutes.length==0){
             console.log("!!!! Create first element!!!!!!");
-            blockedRoutes.push({id: '286111', company: '292942', login: 'IDS1.dsp', time: Date.now()});
+            blockedRoutes.push({id: '286111', company: '292942', login: 'IDS1.dsp', time: parseInt(Date.now() / 1000)});
         }
 
         while( i<blockedRoutes.length){
@@ -439,11 +464,11 @@ router.route('/gettracksbystates/')
                     created = true;
                     changePriority(req.body.id, currentCompany, req.session.login);
 
-                    var j = 0;
-                    while (j<blockedRoutes.length){
-                        console.log("First", blockedRoutes[j]);
-                        j++;
-                    }
+                    //var j = 0;
+                    //while (j<blockedRoutes.length){
+                    //    console.log("First", blockedRoutes[j]);
+                    //    j++;
+                    //}
 
                     break;
                 }
@@ -453,7 +478,7 @@ router.route('/gettracksbystates/')
             }
 
             if(!created){
-                var ts = parseInt(Date.now());
+                var ts = parseInt(Date.now() / 1000);
                 console.log("Не было такого логина! создаем");
                 blockedRoutes.push({id: "" + req.body.id, company: currentCompany, login: key, time: ts});
                 changePriority(req.body.id, currentCompany, req.session.login);
@@ -474,6 +499,28 @@ router.route('/gettracksbystates/')
             res.status(200).json(data);
         });
 
+        function unblockLogin(login) {
+            console.log("Start unbloking");
+            for (var i = 0; i < blockedRoutes.length; i++) {
+                if ("" + blockedRoutes[i].login == "" + login) {
+                    blockedRoutes.splice(i, 1);
+                    break;
+                }
+
+            }
+
+            var nowTime = parseInt(Date.now() / 1000);
+            for (i = 0; i < blockedRoutes.length; i++) {
+                if (blockedRoutes[i].time + 60 * 3 < nowTime) {
+                    blockedRoutes.splice(i, 1);
+                    i--;
+                }
+
+            }
+
+
+        }
+
         function changePriority(id, company, login) {
 
             //Редактировался ли этот маршрут ранее.
@@ -488,7 +535,7 @@ router.route('/gettracksbystates/')
                         }
                     }
                     priority[i].splice(3, 0, login);
-                    priority[i][2] = parseInt(Date.now());
+                    priority[i][2] = parseInt(Date.now() / 1000);
                     priority[i].length = 6;
                     break;
                 }
@@ -988,12 +1035,50 @@ router.route('/logout')
 
 router.route('/askforproblems')
     .get(function (req, res) {
+
+        var key = "" + req.session.login;
+        var currentCompany = companyLogins[key];
         console.log("ASk For Problem", req.session.login);
-        res.status(200).json("ok");
+        var result = cashedDataArr[currentCompany];
+        res.status(200).json(result);
 
     });
 
 
+//Каждую минуту клиент подтверждает на сервер, что он online
+// Если такого подтверждения нет более 3 минут, считаем, что юзер закрыл клиент
+router.route('/confirmonline')
+    .get(function (req, res) {
+        console.log("online confirmed", req.session.login);
+        if (onlineClients.length == 0) {
+            var obj = {time: parseInt(Date.now() / 1000), login: req.session.login}
+            onlineClients.push(obj);
+            return;
+        }
+
+
+        var exist = false;
+        for (var i = 0; i < onlineClients.length; i++) {
+            if (onlineClients[i].login == req.session.login) {
+                onlineClients[i].time = parseInt(Date.now() / 1000);
+                exist = true;
+                break;
+            }
+
+        }
+        if (!exist) {
+            var obj = {time: parseInt(Date.now() / 1000), login: req.session.login}
+            onlineClients.push(obj);
+        }
+
+        for (var i = 0; i < onlineClients.length; i++) {
+            console.log("Online now", onlineClients[i]);
+
+        }
+
+        res.status(200).json("ok");
+
+    });
 
 
 module.exports = router;

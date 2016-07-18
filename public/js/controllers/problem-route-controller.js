@@ -7,8 +7,22 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         var askProblemFromServer = true;                                           //  запрашивать ли проблемы с сервера
         rootScope.asking = false;                                                     // Запущен ли процесс запрсов
 
+        interval(confirmOnline, 60 * 1000);
 
-        function startaAsking() {
+        function confirmOnline() {
+            console.log("confirmOnline in process");
+            http.get('./confirmonline/')
+                .success(function (data) {
+                    if (data != "ok") alert("online confirmed");
+                    var j = data;
+                }).error(function () {
+                    rootScope.errorNotification('Нет связи с сервером');
+                });
+
+
+        }
+
+        function startAsking() {
             if (askProblemFromServer && rootScope.loaded) {
                 console.log("I decide to start Asking");
                 rootScope.asking = true;
@@ -42,10 +56,11 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                 http.get('./askforproblems/')
                     .success(function (data) {
-                        if (data != "ok") alert("Problems Loaded");
-                        var j = data;
+                        if (data != "ok") console.log("Problems Loaded");
+                        var route = data;
+                        rootScope.$emit('drawproblemroute', route);
                     }).error(function () {
-                        rootScope.errorNotification('Нет связи с сервером');
+                        rootScope.errorNotification('Проблем роут контроллер');
                     });
 
                 console.log("Ask for problem");
@@ -55,7 +70,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         rootScope.$on('start', function () {
             console.log("Запускаем опрос сервера");
-            startaAsking()
+            startAsking()
         });
 
     }]);
