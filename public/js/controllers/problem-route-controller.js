@@ -16,7 +16,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     if (data != "ok") alert("online confirmed");
                     var j = data;
                 }).error(function () {
-                    rootScope.errorNotification('Нет связи с сервером');
+                    //rootScope.errorNotification('Нет связи с сервером');
                 });
 
 

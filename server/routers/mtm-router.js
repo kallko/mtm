@@ -12,6 +12,7 @@ var express = require('express'),
 
     cashedDataArr = {},  // глобальный кеш
     updateCacshe = {}, // Тестовый кэш
+    aggregatorError = "invalid parameter 'gid'. ",
 
     closeRoutesUniqueID = {}, // для каждой фирмы UniqueID  сегодняшних закрытых роутов
 
@@ -19,7 +20,7 @@ var express = require('express'),
     companyLogins = {},   // Список логинов на компании
     needNewReqto1C = {}, // если есть свойство с именем компани, то не запрвшивать из 1С
     priority = [],
-    currentProblems = [], //неотправленные на клиента проблеммы.
+    currentProblems = {}, //неотправленные на клиента проблеммы.
     blockedRoutes = [], // список заблокированных маршрутов
     onlineClients = [];   // список клиентов онлайн на данный момент
 
@@ -218,16 +219,276 @@ router.route('/dailydata')
                     data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                     }
                     cashedDataArr[currentCompany] = data;
+
+                    cashedDataArr[currentCompany].currentProblems = [];
+
                     // Сбор общего решения из полученных кусков
 
-                    //for (var i = 0; i < cashedDataArr[currentCompany].sensors.length; i++) {
-                    //    for (var j = 0; j < cashedDataArr[currentCompany].transports.length; j++) {
-                    //        if (cashedDataArr[currentCompany].sensors[i].TRANSPORT == cashedDataArr[currentCompany].transports[j].ID) {
-                    //            cashedDataArr[currentCompany].transports[j].gid = cashedDataArr[currentCompany].sensors[i].GID;
-                    //            cashedDataArr[currentCompany].transports[j].real_track = cashedDataArr[currentCompany].sensors[i].real_track;
-                    //        }
-                    //    }
-                    //}
+                    for (var i = 0; i < cashedDataArr[currentCompany].sensors.length; i++) {
+                        for (var j = 0; j < cashedDataArr[currentCompany].transports.length; j++) {
+                            if (cashedDataArr[currentCompany].sensors[i].TRANSPORT == cashedDataArr[currentCompany].transports[j].ID) {
+                                cashedDataArr[currentCompany].transports[j].gid = cashedDataArr[currentCompany].sensors[i].GID;
+                                cashedDataArr[currentCompany].transports[j].real_track = cashedDataArr[currentCompany].sensors[i].real_track;
+                            }
+                        }
+                    }
+
+
+                    for (i = 0; i < cashedDataArr[currentCompany].routes.length; i++) {
+                        if (cashedDataArr[currentCompany].routes[i].moreThanOneSensor) cashedDataArr[currentCompany].currentProblems.push([cashedDataArr[currentCompany].routes[i], 'Более одного сенсора']);
+
+                        ////TODO: get real branch office
+                        cashedDataArr[currentCompany].routes[i].branch = cashedDataArr[currentCompany].BRANCH;
+                        //i % 2 == 0 ? 'Киев ТЕСТ' : 'Одесса ТЕСТ';
+
+                        //for (var j = 0; j < scope.filters.branches.length; j++) {
+                        //    if (scope.filters.branches[j].name == data.routes[i].branch) {
+                        //        branchIndx = scope.filters.branches[j].value;
+                        //        break;
+                        //    }
+                        //    else if (j == scope.filters.branches.length - 1) {
+                        //        scope.filters.branches.push({
+                        //            name: data.routes[i].branch,
+                        //            value: scope.filters.branches.length
+                        //        });
+                        //        branchIndx = scope.filters.branches.length - 1;
+                        //    }
+                        //}
+                        //
+                        //// назначение машин и реальных треков на маршруты
+                        for (j = 0; j < cashedDataArr[currentCompany].transports.length; j++) {
+                            if (cashedDataArr[currentCompany].routes[i].TRANSPORT == cashedDataArr[currentCompany].transports[j].ID) {
+                                cashedDataArr[currentCompany].routes[i].transport = cashedDataArr[currentCompany].transports[j];
+                                cashedDataArr[currentCompany].routes[i].real_track = cashedDataArr[currentCompany].transports[j].real_track;
+
+                                if (cashedDataArr[currentCompany].transports[j].real_track != undefined &&
+                                    cashedDataArr[currentCompany].routes[i].real_track.length > 0 &&
+                                    cashedDataArr[currentCompany].routes[i].real_track != aggregatorError) {
+                                    var len = cashedDataArr[currentCompany].routes[i].real_track.length - 1;
+                                    cashedDataArr[currentCompany].routes[i].car_position = cashedDataArr[currentCompany].routes[i].real_track[len]; // определение текущего положения машины
+                                    //console.log('data.routes[i]', data.routes[i]);
+                                    if (typeof (cashedDataArr[currentCompany].routes[i].real_track) == Array) {
+                                        cashedDataArr[currentCompany].routes[i].real_track.splice(len, 1);
+                                    } // удаление стейта с текущим положением машины
+                                }
+                                break;
+                            }
+                        }
+                        //
+                        //// назначение маршрутам водитилей
+                        for (j = 0; j < data.drivers.length; j++) {
+                            if (cashedDataArr[currentCompany].routes[i].DRIVER == cashedDataArr[currentCompany].drivers[j].ID) {
+                                cashedDataArr[currentCompany].drivers[j].NAME = cutFIO(cashedDataArr[currentCompany].drivers[j].NAME);
+                                cashedDataArr[currentCompany].routes[i].driver = cashedDataArr[currentCompany].drivers[j];
+                                break;
+                            }
+                        }
+                        //if(j == data.drivers.length){
+                        //    console.log(data.routes[i].DRIVER);
+                        //}
+                        //
+                        //
+                        //// если у маршрута нет машины или водителя - удаляем маршрут
+                        //if (!data.routes[i].transport) {
+                        //    data.routes.splice(i, 1);
+                        //    rawData.routes.splice(i, 1);
+                        //    i--;
+                        //    continue;
+                        //}
+                        //
+                        //tmpPoints = data.routes[i].points;
+                        //for (j = 0; j < tmpPoints.length; j++) {
+                        //    tPoint = tmpPoints[j];
+                        //    tPoint.branchIndx = branchIndx;
+                        //    tPoint.branchName = data.routes[i].branch;
+                        //    tPoint.driver = data.routes[i].driver;
+                        //    tPoint.in_plan = true;
+                        //
+                        //    // если нет номера задачи, ставим отрицательный номер
+                        //    if (!tPoint.TASK_NUMBER) {
+                        //        tPoint.TASK_NUMBER = tmpTaskNumber;
+                        //        tmpTaskNumber--;
+                        //    }
+                        //
+                        //
+                        //    //тестово отладочный блок
+                        //    //if(data.routes[i].driver.ID== "_____X___"){
+                        //    //console.log(" data.routes[i].filterId", data.routes[i].filterId)}
+                        //
+                        //    if (data.routes[i].filterId == null) {
+                        //        data.routes[i].filterId = routeId;
+                        //
+                        //        //TODO REMOVE AFTER TESTING
+                        //        //data.routes[i].transport = data.routes[0].transport;
+                        //        //data.server_time = 1446611800;
+                        //        ///////////////////////////
+                        //
+                        //        scope.filters.routes.push({
+                        //            //name: data.routes[i].transport.NAME,
+                        //
+                        //            allRoutes: false,
+                        //
+                        //            nameDriver:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
+                        //            nameCar:  data.routes[i].transport.NAME  + ' - ' +   ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') ,
+                        //
+                        //            value: data.routes[i].filterId,
+                        //
+                        //
+                        //            car: data.routes[i].transport.NAME,
+                        //            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                        //        });
+                        //        //  console.log(scope.filters.routes, ' filters.routes');
+                        //        routeId++;
+                        //    }
+                        //
+                        //
+                        //
+                        //    try {
+                        //        tPoint.route_indx = data.routes[i].filterId;
+                        //        tPoint.transport = data.routes[i].transport;
+                        //
+                        //        if (data.routes[i].DISTANCE==0) {
+                        //            //console.log("The route is UNCALCULATE");
+                        //
+                        //
+                        //            //Для непосчитанных маршрутов время прибытия считается границей окна доступности
+                        //            tPoint.arrival_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5)+":00";
+                        //
+                        //            // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
+                        //            if (tPoint.ARRIVAL_TIME.length<1) {
+                        //                tPoint.ARRIVAL_TIME=data.routes[i].points[j-1].ARRIVAL_TIME;
+                        //            }
+                        //            var toDay=tPoint.ARRIVAL_TIME.substr(0, 10);
+                        //
+                        //            tPoint.base_arrival=toDay+" "+ tPoint.arrival_time_hhmm;
+                        //
+                        //            tPoint.arrival_time_ts = strToTstamp(toDay+" "+tPoint.arrival_time_hhmm);
+                        //            tPoint.base_arrival_ts = strToTstamp(toDay+" "+tPoint.arrival_time_hhmm);
+                        //
+                        //
+                        //
+                        //            tPoint.controlled_window = {
+                        //                start: tPoint.arrival_time_ts - controlledWindow,
+                        //                finish: tPoint.arrival_time_ts + controlledWindow
+                        //            };
+                        //
+                        //            tPoint.end_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5)+":00";
+                        //            tPoint.end_time_ts = strToTstamp(toDay+" "+tPoint.arrival_time_hhmm);
+                        //
+                        //        }
+                        //        else {
+                        //            //console.log("!!!!!The route is Very Good CALCULATE!!!!");
+                        //            tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
+                        //
+                        //
+                        //            tPoint.arrival_time_ts = strToTstamp(tPoint.ARRIVAL_TIME);
+                        //            tPoint.base_arrival_ts = strToTstamp(tPoint.base_arrival);
+                        //
+                        //
+                        //
+                        //            tPoint.controlled_window = {
+                        //                start: tPoint.arrival_time_ts - controlledWindow,
+                        //                finish: tPoint.arrival_time_ts + controlledWindow
+                        //            };
+                        //
+                        //            tPoint.end_time_hhmm = tPoint.END_TIME.substr(11, 8);
+                        //
+                        //            tPoint.end_time_ts = strToTstamp(tPoint.END_TIME);
+                        //
+                        //        }
+                        //
+                        //
+                        //
+                        //    } catch (e) {
+                        //        console.log("Error", tPoint);
+                        //        console.log(tPoint.driver.NAME, e);
+                        //    }
+                        //
+                        //
+                        //    tPoint.NUMBER = parseInt(tPoint.NUMBER);
+                        //    tPoint.row_id = rowId;
+                        //    tPoint.arrival_prediction = 0;
+                        //    tPoint.arrival_left_prediction = 0;
+                        //    tPoint.status = STATUS.SCHEDULED;
+                        //
+                        //    tPoint.route_id = i;
+                        //    rowId++;
+                        //
+                        //    tPoint.windows = TimeConverter.getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, data.server_time);
+                        //    // создание обещанных окон
+                        //    if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
+                        //        //console.log("Create PROMISED WINDOW step1");
+                        //
+                        //        for (k = 0; k < tPoint.windows.length; k++) {
+                        //            if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                        //                tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                        //                if (tPoint.arrival_time_ts + promisedWindow / 2 > tPoint.windows[k].finish) {
+                        //                    tPoint.promised_window = {
+                        //                        start: tPoint.windows[k].finish - promisedWindow,
+                        //                        finish: tPoint.windows[k].finish
+                        //                    };
+                        //                } else if (tPoint.arrival_time_ts - promisedWindow / 2 < tPoint.windows[k].start) {
+                        //                    tPoint.promised_window = {
+                        //                        start: tPoint.windows[k].start,
+                        //                        finish: tPoint.windows[k].start + promisedWindow
+                        //                    };
+                        //                }
+                        //
+                        //                break;
+                        //            }
+                        //        }
+                        //    }
+                        //
+                        //    // если обещанное окно не было созданно выше, создаем его вокруг времени прибытия и округляем
+                        //    if (tPoint.promised_window == undefined) {
+                        //        //console.log("Create PROMISED WINDOW step2");
+                        //        tPoint.promised_window = {
+                        //            start: tPoint.arrival_time_ts - promisedWindow / 2,
+                        //            finish: tPoint.arrival_time_ts + promisedWindow / 2
+                        //        };
+                        //
+                        //        tPoint.promised_window.start -= tPoint.promised_window.start % roundingNumb - roundingNumb;
+                        //        tPoint.promised_window.finish = tPoint.promised_window.start + promisedWindow;
+                        //        for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                        //            if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                        //                tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                        //                if (tPoint.windows[k].finish < tPoint.promised_window.finish) {
+                        //                    tPoint.windows[k].finish -= roundingNumb;
+                        //                }
+                        //            }
+                        //        }
+                        //
+                        //    }
+                        //
+                        //    // копируем обещанное окно без ссылок
+                        //    if (tPoint.promised_window_changed == undefined) {
+                        //        //console.log("Create PROMISED WINDOW step3");
+                        //        tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
+                        //    }
+                        //
+                        //    if (scope.params.workingWindowType == 0) {
+                        //        for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                        //            //console.log("Create PROMISED WINDOW step4");
+                        //            if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                        //                tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                        //                tPoint.working_window = tPoint.windows[k];
+                        //            }
+                        //        }
+                        //
+                        //        if (tPoint.working_window == undefined) tPoint.working_window = tPoint.promised_window_changed;
+                        //    } else if (scope.params.workingWindowType == 1) {
+                        //        tPoint.working_window = tPoint.promised_window_changed;
+                        //    }
+                        //
+                        //}
+
+                        //console.log(cashedDataArr[currentCompany].currentProblems, "Problems 485");
+
+                    }
+
+
+
+
 
 
 
@@ -241,6 +502,13 @@ router.route('/dailydata')
                         //cashedDataArr[req.session.login] = data;
                     }else{
                         data.currentDay = false;
+                    }
+
+                    function cutFIO(fioStr) {
+                        fioStr = fioStr.replace(/_/g, " ");
+                        var parts = fioStr.split(' ');
+                        return ( (parts[0]) ? parts[0] + ' ' : "" ) + ( (parts[1]) ? parts[1] : "" );
+
                     }
 
                     res.status(200).json(data);
