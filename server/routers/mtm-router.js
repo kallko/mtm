@@ -221,8 +221,18 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany] = data;
 
                     cashedDataArr[currentCompany].currentProblems = [];
+                    cashedDataArr[currentCompany].allRoutes=[];
 
                     // Сбор общего решения из полученных кусков
+                    var tmpPoints,
+                        rowId = 0,
+                        routeId = 0,
+                        len = 0,
+                        tPoint,
+                        roundingNumb = 300,         // шаг округления обещанных окон
+                        branchIndx,
+                        tmpTaskNumber = -1;
+
 
                     for (var i = 0; i < cashedDataArr[currentCompany].sensors.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].transports.length; j++) {
@@ -289,58 +299,57 @@ router.route('/dailydata')
                         //
                         //
                         //// если у маршрута нет машины или водителя - удаляем маршрут
-                        //if (!data.routes[i].transport) {
-                        //    data.routes.splice(i, 1);
-                        //    rawData.routes.splice(i, 1);
-                        //    i--;
-                        //    continue;
-                        //}
+                        if (!cashedDataArr[currentCompany].routes[i].transport) {
+                            cashedDataArr[currentCompany].routes.splice(i, 1);
+                            cashedDataArr[currentCompany].currentProblems.push([cashedDataArr[currentCompany].routes[i], 'Нет машины']);
+                            i--;
+                            continue;
+                        }
                         //
-                        //tmpPoints = data.routes[i].points;
-                        //for (j = 0; j < tmpPoints.length; j++) {
-                        //    tPoint = tmpPoints[j];
-                        //    tPoint.branchIndx = branchIndx;
-                        //    tPoint.branchName = data.routes[i].branch;
-                        //    tPoint.driver = data.routes[i].driver;
-                        //    tPoint.in_plan = true;
-                        //
-                        //    // если нет номера задачи, ставим отрицательный номер
-                        //    if (!tPoint.TASK_NUMBER) {
-                        //        tPoint.TASK_NUMBER = tmpTaskNumber;
-                        //        tmpTaskNumber--;
-                        //    }
+                        tmpPoints = cashedDataArr[currentCompany].routes[i].points;
+                        for (j = 0; j < tmpPoints.length; j++) {
+                            tPoint = tmpPoints[j];
+                            tPoint.branchIndx = branchIndx;
+                            tPoint.branchName = cashedDataArr[currentCompany].routes[i].branch;
+                            tPoint.driver = cashedDataArr[currentCompany].routes[i].driver;
+                            tPoint.in_plan = true;
+
+                            // если нет номера задачи, ставим отрицательный номер
+                            if (!tPoint.TASK_NUMBER) {
+                                tPoint.TASK_NUMBER = tmpTaskNumber;
+                                tmpTaskNumber--;
+                            }
                         //
                         //
                         //    //тестово отладочный блок
-                        //    //if(data.routes[i].driver.ID== "_____X___"){
-                        //    //console.log(" data.routes[i].filterId", data.routes[i].filterId)}
+
                         //
-                        //    if (data.routes[i].filterId == null) {
-                        //        data.routes[i].filterId = routeId;
-                        //
-                        //        //TODO REMOVE AFTER TESTING
-                        //        //data.routes[i].transport = data.routes[0].transport;
-                        //        //data.server_time = 1446611800;
-                        //        ///////////////////////////
-                        //
-                        //        scope.filters.routes.push({
-                        //            //name: data.routes[i].transport.NAME,
-                        //
-                        //            allRoutes: false,
-                        //
-                        //            nameDriver:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
-                        //            nameCar:  data.routes[i].transport.NAME  + ' - ' +   ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') ,
-                        //
-                        //            value: data.routes[i].filterId,
-                        //
-                        //
-                        //            car: data.routes[i].transport.NAME,
-                        //            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
-                        //        });
-                        //        //  console.log(scope.filters.routes, ' filters.routes');
-                        //        routeId++;
-                        //    }
-                        //
+                            if (cashedDataArr[currentCompany].routes[i].filterId == null) {
+                                cashedDataArr[currentCompany].routes[i].filterId = routeId;
+
+                                //TODO REMOVE AFTER TESTING
+                                //data.routes[i].transport = data.routes[0].transport;
+                                //data.server_time = 1446611800;
+                                ///////////////////////////
+
+                                scope.filters.routes.push({
+                                    //name: data.routes[i].transport.NAME,
+
+                                    allRoutes: false,
+
+                                    nameDriver:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + data.routes[i].transport.NAME ,
+                                    nameCar:  data.routes[i].transport.NAME  + ' - ' +   ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') ,
+
+                                    value: data.routes[i].filterId,
+
+
+                                    car: data.routes[i].transport.NAME,
+                                    driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                                });
+                                //  console.log(scope.filters.routes, ' filters.routes');
+                                routeId++;
+                            }
+
                         //
                         //
                         //    try {
@@ -480,7 +489,7 @@ router.route('/dailydata')
                         //        tPoint.working_window = tPoint.promised_window_changed;
                         //    }
                         //
-                        //}
+                        }
 
                         //console.log(cashedDataArr[currentCompany].currentProblems, "Problems 485");
 

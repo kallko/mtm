@@ -31,8 +31,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         }
 
         // Запрос у сервера проблем каждые 5 секунд
-        // todo запрашивать только, если нет определенного количества нерешенных проблем у этого оператора
-        function setProblemUpdate() {
+          function setProblemUpdate() {
             interval(checkProblem, 5 * 1000);
         }
 
