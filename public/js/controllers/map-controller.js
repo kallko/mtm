@@ -2040,11 +2040,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
-        rootScope.$on('drawproblemroute', function (event, cache) {
-            console.log("map-controller draw route from Cashe", cache);
-            // clearMap();
-            // drawRealRoute(route);
-        })
+        //rootScope.$on('receiveproblem', function (event, cache) {
+        //    console.log("map-controller draw route from Cashe", cache);
+        //    // console.log("FOR ALeXANDER", JSON.stringify(cache.routes[0].plan_geometry));
+        //    // clearMap();
+        //    // drawRealRoute(route);
+        //})
 
     }]);
 

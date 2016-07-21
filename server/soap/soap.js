@@ -20,6 +20,7 @@ var soap = require('soap'),
 function SoapManager(login) {
     this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
+    this.urlUI = "@sngtrans.com.ua/client/ws/UI/?wsdl";   //
     this.login = login;
     this.admin_login = config.soap.login;
     this.password = config.soap.password;
@@ -408,6 +409,14 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
             }
 
             // наполнение массива точек
+
+            //TODO ловля ошибочных заданий, если настроится 1сб можно убивать
+            if((routes[i].SECTION[j].$).START_TIME == '') {
+                console.log("BIG MISTAKE!!!!!!!", (routes[i].SECTION[j].$));
+
+            }
+
+
             tmpRoute.points.push(routes[i].SECTION[j].$);
         }
 
@@ -776,6 +785,86 @@ SoapManager.prototype.closeDay = function (closeDayData, callback) {
 
     saveTo1C(closeDayData); //Снять комментарий и можно записывать
 };
+
+//Метод получения настроек.
+SoapManager.prototype.getNewConfig = function (company, callback) {
+    var me = this;
+    var url  = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
+    // сохранение в 1С от имени авторизированного пользователя
+    var receiveConfig = function (company, callback) {
+        //console.log("Try to recieve config", me.login, configData);
+        soap.createClient(url, function (err, client) {
+            if (err) throw err;
+            //console.log('CLIENT', client);
+            // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
+            client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
+            //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+
+            client.getConfig({user: me.login}, function (err, result) {
+                if (!err) {
+                    console.log('GET CONFIG OK');
+                    log.toFLog('config is', result);
+                    //console.log('config is', result);
+                    callback(company, result);
+                } else {
+                    console.log('GET CONFIG  ERROR');
+                    console.log('result', err);
+                    log.toFLog('result', err);
+                    console.log(err.body);
+                    callback({error: err});
+                }
+            });
+        });
+    };
+
+    receiveConfig(company, callback); //Снять комментарий и можно записывать
+};
+
+
+
+//Получение пушей водителей
+SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
+    // получить строковую дату в формате 1С
+    function getDateStrFor1C(timestamp) {
+        var date = new Date(timestamp);
+        return date.getFullYear() +
+            ("0" + (date.getMonth() + 1)).slice(-2) +
+            ( ("0" + date.getDate())).slice(-2);
+    }
+
+    var me = this;
+    var url = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
+    // сохранение в 1С от имени авторизированного пользователя
+    var receivePushes = function (idArr, time, company, callback) {
+        //console.log("Try to recieve pushes", me.login);
+        soap.createClient(url, function (err, client) {
+            if (err) throw err;
+            //console.log('CLIENT', client);
+            // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
+            client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
+            //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
+            //console.log("STEP 1", idArr, getDateStrFor1C(time * 1000));
+            client.getDriversActions({'itenId':idArr, 'datestr':getDateStrFor1C(time * 1000), 'user': me.login}, function (err, result) {
+                if (!err) {
+                    //console.log('GET PUSHES OK');
+                    log.toFLog('PUSHES is', result);
+                    //console.log('!!!!!!!!PUSHES is', result);
+                    callback(company, result);
+                } else {
+                    console.log('GET PUSHES  ERROR');
+                    console.log('result', err);
+                    log.toFLog('result', err);
+                    //console.log(err.body);
+                    callback({error: err});
+                }
+            });
+        });
+    };
+
+    receivePushes(idArr, time, company, callback);
+
+}
+
 
 SoapManager.prototype.getAdditionalDailyPlan = function (callback, date) {
 

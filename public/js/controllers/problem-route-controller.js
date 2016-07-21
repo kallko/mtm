@@ -5,7 +5,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         // console.log("ProblemRouteController Start");
         scope.testProblemArray = [["Опоздание", 2, 3, 4], ["Долгая остановка", 6, 7, 8]]; // Тестовая база инцидентов.
         var askProblemFromServer = true;                                           //  запрашивать ли проблемы с сервера
-        rootScope.asking = false;                                                     // Запущен ли процесс запрсов
+        rootScope.asking = false;                                                   // Запущен ли процесс запрсов
+        rootScope.tempDecision;
 
         interval(confirmOnline, 60 * 1000);
 
@@ -49,15 +50,17 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
+        // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
         function checkProblem() {
             //console.log(" Route = ", rootScope.editing.uniqueID, scope.filters.route )
-            if (true) {
+            if (!rootScope.tempDecision) {
 
                 http.get('./askforproblems/')
                     .success(function (data) {
                         if (data != "ok") console.log("Problems Loaded");
-                        var route = data;
-                        rootScope.$emit('drawproblemroute', route);
+                        rootScope.tempDecision = data;
+                        if (data == undefined) return;
+                        rootScope.$emit('receiveproblem', rootScope.tempDecision);
                     }).error(function () {
                         rootScope.errorNotification('Проблем роут контроллер');
                     });

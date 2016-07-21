@@ -29,7 +29,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             aggregatorError = "invalid parameter 'gid'. ",
             loadParts = true,                              // догрузить новые данные сразу после загрузки интерфейса
-            enableDynamicUpdate = true;                    // динамическая догрузка данных по заданному выше интервалу
+            enableDynamicUpdate = false;                    // динамическая догрузка данных по заданному выше интервалу
             scope.existData=[];                                         //Хранение измененных в течение дня данных
             //scope.fastCalc=false;                          // Упрощенный расчет точек
             scope.existDataLoaded=false;                     //загружены ли уже существующие ранее данные
@@ -42,7 +42,35 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setListeners();
         init();
         setCheckLocksInterval();
-        loadDailyData(false);
+       // loadDailyData(false);
+
+        //TODO
+        console.log("Lets START");
+        var url = './dailydata';
+        //if (force)  url += '?force=true';
+        //  if (showDate)   url += (force ? '&' : '?') + 'showDate=' + 1464132000000;
+        //if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
+        //console.log('waiting for data');
+
+        http.get(url, {})
+            .success(function (data) {
+                console.log(JSON.parse(JSON.stringify(data)));
+                if (data.currentDay) {
+                    rootScope.currentDay = true;
+                    scope.filters.problem_index = 1;
+                } else {
+                    rootScope.currentDay = false;
+                    scope.filters.problem_index = -1;
+                }
+            });
+
+        rootScope.loaded = true;
+        scope.$emit('start'); // начинаем опрашивать сервер на наличие проблем в problem route controller
+        //if (rootScope.loaded == false) rootScope.loaded = true;
+        //if (rootScope.loaded == undefined) rootScope.loaded = false;
+        //if (rootScope.loaded && !rootScope.asking) scope.$emit('start'); //Первоначальная загрузка закончена, начинаем опрашивать сервер на наличие проблем в problem route controller
+
+
 
 
 
@@ -438,7 +466,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         updateData();
                         serverPredicate();
                         // когда расчеты и загрузки закончены, проверяем не появились ли новые утвержденные решения.
-                        checkNewIten();
+                        //checkNewIten();
 
 
                     }).error(function (err) {
@@ -708,7 +736,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 problematicRoutes = [],
                 branchIndx,
                 tmpTaskNumber = -1;
-            scope.rowCollection = [];
+                scope.rowCollection = [];
 
             // нет сенсоров - нет интерфейса
             if (!data.sensors) {
@@ -4247,6 +4275,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //        console.log("Ask for problem");
         //    }
         //}
+
+        rootScope.$on('receiveproblem', function (event, cache) {
+            if ( cache != undefined && cache != null && cache.length !=0) {
+                console.log("Re Display", cache);
+            scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
+            scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
+            console.log("map-controller draw route from Cashe", cache);
+            var i=0;
+            while (i<cache.routes.length){
+
+                // console.log("Update rowCollection", scope.rowCollection.length);
+                scope.rowCollection=scope.rowCollection.concat(cache.routes[i].points);
+                i++;
+            }
+            scope.displayCollection = [].concat(scope.rowCollection);
+            // console.log("FOR ALeXANDER", JSON.stringify(cache.routes[0].plan_geometry));
+            // clearMap();
+            // drawRealRoute(route);
+            rootScope.rowCollection = scope.rowCollection;
+            _data = cache;
+            }
+        })
 
 
     }]);
