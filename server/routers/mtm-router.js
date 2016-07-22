@@ -1960,7 +1960,58 @@ function startPeriodicCalculating() {
 
                     function calculateProblemIndex(company) {
                         console.log("Start calculate ProblemIndx");
+
+                        var point,
+                            timeThreshold = 3600 * 6,
+                            timeMin = 0.25,
+                            timeCoef;
+                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+                            var route = cashedDataArr[company].routes[i]
+                            for (var j = 0; j < route.points.length; j++) {
+                                point = route.points[j];
+
+                                point.problem_index = 0;
+
+                                if (point.status == 6) {
+                                    point.problem_index = 1;
+                                    // console.log("point.problem_index", point.problem_index);
+                                    continue;
+                                }
+
+                                if(point.status < 4 || point.status == 8) continue;
+
+
+                                // console.log("point.problem_index", point.problem_index);
+                                if (point.overdue_time > 0) {
+                                    if (point.status == 4) {
+                                        point.problem_index += (parseInt(Date.now()/1000) - point.working_window.finish) * cashedDataArr[company].settings.factMinutes;
+                                        timeCoef = 1;
+                                    } else {
+                                        timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
+                                        timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
+                                    }
+
+                                    point.problem_index += parseInt(point.overdue_time * cashedDataArr[company].settings.predictMinutes);
+                                    point.problem_index += parseInt(point.WEIGHT) * cashedDataArr[company].settings.weight;
+                                    point.problem_index += parseInt(point.VOLUME) * cashedDataArr[company].settings.volume;
+                                    point.problem_index += parseInt(point.VALUE) * cashedDataArr[company].settings.value;
+                                    if (point.change_time) {
+                                        point.problem_index += parseInt(point.change_time) * cashedDataArr[company].settings.changeTime;
+                                    }
+
+                                    point.problem_index = parseInt(point.problem_index * timeCoef);
+                                    point.problem_index = parseInt(point.problem_index / 100);
+
+                                }
+
+
+                            }
+                        }
                     }
+
+
+
+        }
 
                     function calculateStatistic (company){
                         console.log("Start calculate Statistic");
@@ -1990,7 +2041,7 @@ function startPeriodicCalculating() {
 
             }
         }
-    }
+
 }
 
 

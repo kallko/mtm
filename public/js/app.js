@@ -94,7 +94,7 @@ var myLayout = new GoldenLayout({
                     ,
                     {
                         type: 'stack',
-                        height: 10,
+                        height: 20,
                         activeItemIndex: 0,
                         content: [
                             {
