@@ -206,6 +206,7 @@ function checkBeforeSend(_data, callback) {
 
 // получить план на день
 SoapManager.prototype.getDailyPlan = function (callback, date) {
+    console.log("Request Date =", date);
     var me = this,
         itIsToday = typeof date === 'undefined';
 
@@ -263,10 +264,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         // }
         var data = [];
         if (loadOldDay) {
-            var dateObj = new Date( date );
-            dateYear = dateObj.getFullYear();
-            dateMonth = dateObj.getMonth() + 1;
-            dateMonth = dateMonth < 10 ? '0'+dateMonth : dateMonth;
+            var dateObj = new Date( date),
+            dateYear = dateObj.getFullYear(),
+            dateMonth = dateObj.getMonth() + 1,
+            dateMonth = dateMonth < 10 ? '0'+dateMonth : dateMonth,
             dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
             console.log(dateDay+'.'+dateMonth+'.'+dateYear);
             setTimeout(function(){
@@ -307,6 +308,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     data.iLength = itineraries.length;
 
+                    //console.log("Решения на сейчас", itineraries[0].$);
+
 
                     //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
                     // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
@@ -346,6 +349,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
         })}, 15);
     }
 
+    //console.log("Очень очень Очень  Важные данные", id, version, me.login, data, date );
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
         itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
     });
@@ -865,54 +869,93 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
 
 }
 
-
-SoapManager.prototype.getAdditionalDailyPlan = function (callback, date) {
+// проверить наличие новых решений (июль 2016)
+SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten, company, callback) {
 
     var me = this;
-    var date = date ? date : Date.now();
+    // Проверка, запрашиваем ли мы день уже существующий или перешли в новый
+    var oldDay = serverDate.substr(0,2);
+    var date =  new Date();
+    var newDay = date.getDate();
+    var inTime = (oldDay==newDay);
+    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
+
+
+    var date =  Date.now();
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
 
         // авторизация с правами соап-администратора
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        console.log(me.login);
-        console.log(_xml.dailyPlanXML(date));
+        //console.log(me.login);
+        //console.log(_xml.dailyPlanXML(date));
 
         // запрос в соап от имени авторизированного пользователя, но с правами администратора
         // получения списка id решений на конкретную дату
         client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
-                console.log('Its ALL Iten for now');
-                console.log(result.return);
+                //console.log('Its ALL Iten for now:');
+                //console.log(result.return);
 
                 // парсинг ответа соапа из xml в json
                 parseXML(result.return, function (err, res) {
-                    if (res.MESSAGE.PLANS == null) {
-                        console.log('NO PLANS!');
-                        callback({status: 'no plan'});
+
+                    // диспетчер, что делать, если изменилось количество решений или дата дня
+
+                    // пропало утвержденное решение
+                    if (res.MESSAGE.PLANS == null && inTime && existIten>0) {
+                        //console.log('Проблемма = пропало единственное утвержденное решение');
+                        callback({status: ' loose single iten'});
+                        return;
+                    }
+
+                    // Новых решений не появилось
+                    if (res.MESSAGE.PLANS == null && inTime && existIten == 0) {
+                        //console.log('Все еще нет утвержденных решений');
+                        callback({status: 'still no plan'});
                         return;
                     }
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
                         data = [];
 
+                    data.itens=itineraries;
                     data.iLength = itineraries.length;
+                    data.company = company;
                     console.log("Quantity of Iten is", data.iLength);
-                    callback(data.iLength);
-                    // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
-                    // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
-                    //if (!config.loadOnlyItineraryNew) data.iLength *= 2;
 
-                    // получение развернутого решения по списку полученных ранее id решений
-                    //for (var i = 0; i < itineraries.length; i++) {
-                    //    //if (itineraries[i].$.ID == 4) continue; // TODO REMOVE
-                    //
-                    //    (function (ii) {
-                    //        setTimeout(function () {
-                    //            me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
-                    //        }, ii * 5000);
-                    //    })(i);
-                    //}
+
+                    // Количество решений не изменилось
+                    if (data.iLength == existIten && inTime) {
+                        //console.log("Количество решений за день не изменилось");
+                        callback({status: 'no changes'});
+                        return;
+                    }
+
+                    // Появились утвержденные планы на новый день.
+                    if(!inTime && data.iLength>0){
+                        //console.log("Появились утвержденные планы на новый день");
+                        callback({status: 'begin new day', newDayIten: data});
+                        return;
+                    }
+
+                    //Пропало одно из утвержденных решений
+                    if(inTime && data.iLength<existIten){
+                        //console.log("Проблемма. Пропало одно из утвержденных решений");
+                        callback({status: 'loose one of Iten'});
+                        return;
+                    }
+
+                    //Появились новые решения на текущий день
+                    if(inTime && data.iLength>existIten){
+                        //console.log("Появилось дополнительное утвержденное решение");
+                        callback({status: 'exist additional Iten', addIten:data});
+                        return;
+                    }
+
+                    console.log("Неопознанная проблемма. Текущий день = ", inTime, "Уже получено решений", existIten, "На 1с существует решений", data.iLength);
+                    callback({status: 'undefined problem', iten:data});
+
 
                 });
             } else {
@@ -921,4 +964,77 @@ SoapManager.prototype.getAdditionalDailyPlan = function (callback, date) {
             }
         });
     });
-}
+};
+
+
+SoapManager.prototype.getNewDayIten = function (id, version, company, callback) {
+    var me=this;
+    soap.createClient(me.getFullUrl(), function (err, client) {
+        if (err) throw err;
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        console.log("Важные данные", id, version, me.login);
+        client.runAsUser({
+            'input_data': _xml.itineraryXML(id, version, true),
+            'user': me.login
+        }, function (err, result) {
+            itineraryCallback(err, result, me, company, true, data, date, callback);
+        });
+    });
+};
+
+SoapManager.prototype.getAdditionalIten = function (id, version, company, callback) {
+    var me=this;
+    console.log("Важные данные", id, version, me.login );
+    soap.createClient(me.getFullUrl(), function (err, client) {
+        if (err) throw err;
+        client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+        client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
+
+            parseXML(result.return, function (err, res) {
+                //if (res.MESSAGE.PLANS == null) {
+                //    console.log('NO PLANS!');
+                //    callback({status: 'no plan'});
+                //    return;
+                //}
+
+                var data = [];
+                var itineraries = id;
+
+                data.iLength = 1;
+                var itIsToday = true;
+                //console.log("Решения на сейчас", itineraries[0].$);
+                var date = Date.now();
+
+                //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
+                // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
+                // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
+                //if (!config.loadOnlyItineraryNew) data.iLength *= 2;
+
+                // получение развернутого решения по списку полученных ранее id решений
+                for (var i = 0; i < itineraries.length; i++) {
+                    (function (ii) {
+                        setTimeout(function () {
+                            console.log("Подгружаем из 1с");
+                            me.getItinerary(client, id, version, itIsToday, data, date, callback);
+                        }, ii * 5000);
+                    })(i);
+                }
+
+            });
+
+
+
+
+
+
+
+
+            //console.log("Промежуточный результат", result.return);
+            //var itineraries = result.return.MESSAGE.PLANS[0].ITINERARY;
+            //data.iLength = itineraries.length;
+            //itineraryCallback(err, result, me, company, true, data, date, callback);
+        });
+    })
+
+
+};

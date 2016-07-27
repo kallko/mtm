@@ -4295,6 +4295,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // drawRealRoute(route);
             rootScope.rowCollection = scope.rowCollection;
             _data = cache;
+            rootScope.data = cache;
+                rootScope.nowTime = cache.server_time;
             }
         })
 

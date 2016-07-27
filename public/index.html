@@ -222,7 +222,7 @@
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
                     <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
-                    <th class="bulled-th">%</th>
+                    <th class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
                     </th>
@@ -665,10 +665,12 @@
                         <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
 
                     </tr>
-                    <tr   ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: false } " ng-click = "closeTableRowClick(item)">
+                    <tr   ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes " ng-click = "closeTableRowClick(item)">
+                        <!--/TODO | filter: { getCheck: false } Фильтр оставшийся с времен расчета на клиенте из строчки выше.-->
+
                         <td><input id = "close-table-checkbox-{{item.filterId}}"
                                    type="checkbox"
-                                   ng-model="item.getCheck"
+                                   ng-model="item.ready_to_close"
                                    ng-disabled="true">
                         </td>
                         <td>{{::item.filterId+1}}</td>
@@ -678,7 +680,7 @@
 
                         <td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>
                         <td> {{:: item.END_TIME.split(' ')[1]}}</td>
-                        <td> {{ (item.real_track == undefined || item.real_track == 0 || item.last_signal == undefined) ? "No signal" : ((item.last_signal)*1000) | date :'dd.MM HH:mm' }}</td>
+                        <td> {{ (item.real_track == undefined || item.real_track.length == 0) ? "No signal" : ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm' }}</td>
                     </tr>
 
 
@@ -739,12 +741,12 @@
             </tr>
             </thead>
             <tr>
-                <td class="scheduled-status">{{statistic.scheduled}}</td>
-                <td class="delivered-status">{{statistic.delivered}}</td>
-                <td class="attention-status">{{statistic.attention}}</td>
-                <td class="delay-status">{{statistic.delay}}</td>
-                <td class="time-out-status">{{statistic.timeOut}}</td>
-                <td class="canceled-status">{{statistic.canceled}}</td>
+                <td class="scheduled-status">{{statisticAll[7]}}</td>
+                <td class="delivered-status">{{statisticAll[0]+statisticAll[1]+statistic[2]+statisticAll[3]}}</td>
+                <td class="attention-status">{{statisticAll[6]}}</td>
+                <td class="delay-status">{{statisticAll[5]}}</td>
+                <td class="time-out-status">{{statisticAll[4]}}</td>
+                <td class="canceled-status">{{statisticAll[8]}}</td>
             </tr>
         </table>
     </div>
@@ -931,7 +933,7 @@
 
         <button id="cancel-task-btn" class="btn btn-danger btn-sm down-btn" ng-click="cancelTask()">Отменить задание
         </button>
-        -->
+
     </div>
 </div>
 <!--Окошко для редактирования точек и времени-->

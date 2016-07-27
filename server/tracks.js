@@ -53,6 +53,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
 
 // получение треков по переданным стейтам и гиду машины
 TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, callback) {
+    if(states == undefined || states[0] == undefined) return;
     var counter = 0,
         me = this,
         started = 0,
@@ -116,6 +117,17 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                 result.push({
                                     'gid': data.sensors[jj].GID,
                                     'data': body
+                                });
+                                reqCounter++;
+                                if (counter == reqCounter) {
+                                    console.log('Done, loading stops!');
+                                    callback(result);
+                                }
+                            } else {
+                                console.log('ERROR');
+                                result.push({
+                                    'gid': data.sensors[jj].GID,
+                                    'data': "error"
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
@@ -473,12 +485,15 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 
 // получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
+    //console.log("Пытаемся получить предсказание Tracks 488");
     request({
         url: this.routerUrl + 'table?' + pointsStr,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             callback(body, pointsStr);
+        } else {
+            console.log("ERROR TRACKS 495");
         }
     });
 };

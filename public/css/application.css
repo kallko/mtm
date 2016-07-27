@@ -42,6 +42,7 @@ template {
 
 #point-table {
     overflow-y: scroll;
+    /*overflow: auto;*/
     width: 100%;
 }
 
@@ -536,6 +537,7 @@ template {
 
 .point-table-wrapper{
     position: relative;
+
 }
 .driver-select-bg {
     background-color: #A99F9F !important;

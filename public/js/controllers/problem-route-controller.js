@@ -52,20 +52,31 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
         // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
         function checkProblem() {
+            console.log("Ask for problem");
             //console.log(" Route = ", rootScope.editing.uniqueID, scope.filters.route )
             if (!rootScope.tempDecision) {
 
                 http.get('./askforproblems/')
                     .success(function (data) {
-                        if (data != "ok") console.log("Problems Loaded");
-                        rootScope.tempDecision = data;
-                        if (data == undefined) return;
-                        rootScope.$emit('receiveproblem', rootScope.tempDecision);
+
+                        if (data == undefined) {
+                            return} else {
+                            console.log("Problems Loaded");
+                        }
+                        if(data.settings != undefined) {
+                            rootScope.tempDecision = data;
+                            rootScope.$emit('receiveproblem', rootScope.tempDecision);
+                        } else {
+                          rootScope.statisticAll = data;
+                        }
+
+
+
                     }).error(function () {
                         rootScope.errorNotification('Проблем роут контроллер');
                     });
 
-                console.log("Ask for problem");
+
             }
         }
 

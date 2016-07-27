@@ -435,8 +435,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 // Создание титла к точке. Ненужная информация закоментчена.
-                if (point.TASK_NUMBER == '') {
+                if (point.waypoint.TYPE == "WAREHOUSE") {
                     title = 'Склад\n';
+                    tmpStatus = getTextStatuses(point.status);
+                    title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
                 } else {
 
 
@@ -1264,6 +1266,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if(scope.learConnectWithStopsAndPoints!=undefined) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
             }
+
             scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
             createNewTempCurrentWayPoints(event);
             if (map.getZoom() > 17) {
