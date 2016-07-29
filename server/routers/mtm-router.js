@@ -1057,8 +1057,7 @@ router.route('/savetonode/')
         var currentCompany = companyLogins[key];
         console.log("Приступаем к сохранению роута", i, id, currentCompany);
         while(i<cashedDataArr[currentCompany].blocked_routes.length){
-            console.log(cashedDataArr[currentCompany].blocked_routes[i].filterId, ' = ', id);
-            if(cashedDataArr[currentCompany].blocked_routes[i].filterId == id){
+                if(cashedDataArr[currentCompany].blocked_routes[i].filterId == id){
                 cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                 console.log("Overwright Route");
                 cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);

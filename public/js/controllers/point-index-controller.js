@@ -4372,6 +4372,24 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 if(rootScope.data.routes[j].filterId == rId){
                                     console.log(j,"Удаляем маршрут", rId);
                                     rootScope.data.routes.splice(j,1);
+                                    scope.filters.route = -1;
+                                    //переделка дисплейколлекшина
+                                    scope.rowCollection =[];
+                                    scope.displayCollection =[];
+                                    rootScope.rowCollection =[];
+
+                                    var k=0;
+                                    while (k<rootScope.data.routes.length){
+
+                                        scope.rowCollection=scope.rowCollection.concat(rootScope.data.routes[k].points);
+                                        k++;
+                                    }
+                                    scope.displayCollection = [].concat(scope.rowCollection);
+                                    rootScope.rowCollection = scope.rowCollection;
+
+
+
+
                                     break;
                                 }
                             }
@@ -4384,7 +4402,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-        console.log("осталось", rootScope.data);
+        //todo очистить display collection
 
 
         };
