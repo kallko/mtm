@@ -64,7 +64,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             if(need<0) need='';
 
             console.log(" Go to ASK ", !rootScope.data,  need );
-            if ((!rootScope.tempDecision ) && need != 0) {
+            if ((!rootScope.tempDecision ) || need != 0) {
                 console.log("Give me", need, "the problem please! String is");
 
 
