@@ -178,7 +178,9 @@ router.route('/dailydata')
             , req.query.showDate == null
             , req.session.login != null
             , cashedDataArr[currentCompany] != null
-            , (currentCompany in needNewReqto1C), currentCompany, needNewReqto1C
+            , currentCompany
+            , (currentCompany in needNewReqto1C)
+            , currentCompany, needNewReqto1C
             );
 
         if (config.cashing.session
@@ -191,6 +193,7 @@ router.route('/dailydata')
             console.log('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
             req.session.itineraryID = cashedDataArr[currentCompany].ID;
             cashedDataArr[currentCompany].user = req.session.login;
+
             var cache = cashedDataArr[currentCompany];
             if(cache.currentDay){
                 cache.server_time = parseInt(new Date() / 1000);
@@ -199,6 +202,7 @@ router.route('/dailydata')
                 cache.current_server_time = parseInt(Date.now() / 1000);
             }
 
+             //console.log("проверка на отправку", cashedDataArr[currentCompany].settings);
              res.status(200).json(cashedDataArr[currentCompany]);
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
@@ -239,6 +243,15 @@ router.route('/dailydata')
                     needNewReqto1C[currentCompany] = true;
                     //здесь падала программа при длительном использовании.
 
+
+                    //TODO Костыль проверка грузили ли мы сегодня уже эти планы для другого юзера и если да, то не перезаписывать данные.
+                    if (cashedDataArr[currentCompany] != null){
+                        console.log("Данные по этой компани на сегодня уже получены");
+                        res.status(200).json(cashedDataArr[currentCompany].settings);
+                        return;
+                    }
+
+
                     if (data.routes !=undefined) {
                         for (var i = 0; i < data.routes.length; i++) {
                             if (!data.routes[i]['uniqueID']) {
@@ -261,10 +274,12 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].allRoutes=[];
                     cashedDataArr[currentCompany].settings = settings;
                     cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
+                    cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
 
                     //Собираем решение из частей в одну кучку
                     linkDataParts(currentCompany, req.session.login);
-
+                    //Мгновенный запуск на пересчет, после загрузки
+                    startPeriodicCalculating(currentCompany);
 
                     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
                     data.current_server_time = parseInt(new Date() / 1000);
@@ -296,7 +311,7 @@ router.route('/dailydata')
                     //    alert( 'стоп' );
                     //}, 5000);
 
-                    res.status(200).json(data);
+                    res.status(200).json(data.settings);
                 }
             }
 
@@ -499,7 +514,7 @@ router.route('/gettracksbystates/')
                 dataB = {
                     result: 'blocked',
                     user: blockedRoutes[i].login
-                }
+                };
                 break;
             }
 
@@ -653,18 +668,18 @@ router.route('/saveroute/')
 
 
 
-router.route('/existdata/')
-    .post(function(req, res){
-        var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
-        if(currentCompany in updateCacshe && req.body.date in updateCacshe[currentCompany]){
-            res.status(200).json(updateCacshe[currentCompany][req.body.date]);
-        } else {
-            res.status(200).json([]);
-        }
-
-
-    });
+//router.route('/existdata/')
+//    .post(function(req, res){
+//        var key = ""+req.session.login;
+//        var currentCompany = companyLogins[key];
+//        if(currentCompany in updateCacshe && req.body.date in updateCacshe[currentCompany]){
+//            res.status(200).json(updateCacshe[currentCompany][req.body.date]);
+//        } else {
+//            res.status(200).json([]);
+//        }
+//
+//
+//    });
 
 
 
@@ -1033,6 +1048,46 @@ router.route('/changedriver/')
 
 
 
+router.route('/savetonode/')
+    .post(function (req, res) {
+        console.log("Приступаем к сохранению роута");
+        var i=0;
+        var id = parseInt(req.body.route.filterId);
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        console.log("Приступаем к сохранению роута", i, id, currentCompany);
+        while(i<cashedDataArr[currentCompany].blocked_routes.length){
+            console.log(cashedDataArr[currentCompany].blocked_routes[i].filterId, ' = ', id);
+            if(cashedDataArr[currentCompany].blocked_routes[i].filterId == id){
+                cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
+                console.log("Overwright Route");
+                cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
+                var uniqueId = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
+                unblockRoute(key, uniqueId);
+                cashedDataArr[currentCompany].blocked_routes.splice(i,1);
+                //todo добавить разблокировку
+                res.status(200).json(id);
+                return;
+            }
+
+
+            i++;
+        }
+
+        function unblockRoute(login, uniqueId) {
+                     for (var i=0; i<blockedRoutes.length; i++) {
+                if (blockedRoutes[i].id == uniqueId && blockedRoutes[i].login == login) {
+                    blockedRoutes.splice(i, 1);
+                }
+
+            }
+
+        }
+
+        res.status(200).json("error");
+
+    });
+
 
 //router.route('/checknewiten')
 //    .get(function (req, res) {
@@ -1091,26 +1146,143 @@ router.route('/logout')
 
     });
 
-
-router.route('/askforproblems')
+//need - количество необходимых оператору проблем. Указывается в настройках
+router.route('/askforproblems/:need')
     .get(function (req, res) {
-        var result;
+        console.log("пришел запроc", req.params.need);
+        var result = {};
         var key = "" + req.session.login;
+        var login=key;
         var currentCompany = companyLogins[key];
-        console.log("ASk For Problem", req.session.login);
+        var need = parseInt((req.params.need).substring(1));
+        console.log("ASk For ", need, "Problem", req.session.login);
         if (cashedDataArr[currentCompany] == undefined) {
-            res.status(200).json("");
+            res.status(200).json("Company undefined");
+            return;
+        }
+
+        if (cashedDataArr[currentCompany].line_routes == undefined || cashedDataArr[currentCompany].line_routes.length ==0){
+            result ={};
+            result.statistic=cashedDataArr[currentCompany].statistic;
+            res.status(200).json(result);
             return;
         }
 
         //TODO переписать условие когда начнет правильно формировать очередь проблемных роутов
-        if (cashedDataArr[currentCompany].problem_route == undefined && false) {
-            result = cashedDataArr[currentCompany].statistic;
-        } else {
-            result = cashedDataArr[currentCompany];
-        }
+        if (cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length>0) {
+            console.log("Ищем проблемму для для оператора");
+            result = {};
+            result.routes = [];
+            //Сначала просмотрим в заблокированных роутах. Возможно этот роут уже был выбран оператором и он случайно нажал эскейп, не сохранившись
+            if(cashedDataArr[currentCompany].blocked_routes != undefined) {
+                console.log("Ищем не блокировал ли этот оператор маршруты?");
+                var toOperator = [];
+                for (var i = 0; i < blockedRoutes.length; i++) {
+                    if (blockedRoutes[i].company == currentCompany && blockedRoutes[i].login == login) {
+                        toOperator.push(blockedRoutes[i].id);
+                    }
+                }
 
 
+
+                if (toOperator.length > 0) {
+
+
+                    result.ID = cashedDataArr[currentCompany].ID;
+                    result.server_time = parseInt(Date.now() / 1000);
+                    result.allRoutes = [];
+                    result.allRoutes = cashedDataArr[currentCompany].allRoutes;
+                    result.settings=cashedDataArr[currentCompany].settings;
+
+                    for (i = 0; i < toOperator.length; i++) {
+                        for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
+                            console.log("" + toOperator[i] , ""+cashedDataArr[currentCompany].blocked_routes[j].uniqueID)
+                            if ("" + toOperator[i] == ""+cashedDataArr[currentCompany].blocked_routes[j].uniqueID) {
+                                console.log("Добавляем маршрут");
+                                result.routes.push(cashedDataArr[currentCompany].blocked_routes[j]);
+                                //result.allRoutes.push({
+                                //
+                                //    allRoutes: false,
+                                //
+                                //    nameDriver: ( ( cashedDataArr[currentCompany].blocked_routes[j].hasOwnProperty('driver') && cashedDataArr[currentCompany].blocked_routes[j].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].blocked_routes[j].driver.NAME : 'без имени') + ' - ' + cashedDataArr[currentCompany].blocked_routes[j].transport.NAME,
+                                //    nameCar: cashedDataArr[currentCompany].blocked_routes[j].transport.NAME + ' - ' + ( ( cashedDataArr[currentCompany].blocked_routes[j].hasOwnProperty('driver') && cashedDataArr[currentCompany].blocked_routes[j].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].blocked_routes[j].driver.NAME : 'без имени'),
+                                //
+                                //    value: cashedDataArr[currentCompany].blocked_routes[j].filterId,
+                                //    uniqueID: cashedDataArr[currentCompany].blocked_routes[j].uniqueID,
+                                //
+                                //
+                                //    car: cashedDataArr[currentCompany].blocked_routes[j].transport.NAME,
+                                //    driver: ( cashedDataArr[currentCompany].blocked_routes[j].hasOwnProperty('driver') && cashedDataArr[currentCompany].blocked_routes[j].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].blocked_routes[j].driver.NAME : 'без имени' + i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                                //});
+                            }
+                        }
+
+
+                    }
+
+                   // console.log("Result", result.routes[0].uniqueID);
+                    if (result.routes.length == need){
+                        console.log("Все запрашиваемые маршруты уже были заблокированы этим пользователем");
+                        res.status(200).json(result);
+                        return;
+                    }
+
+
+
+                }
+            }
+
+
+
+            if (result.routes == undefined || result.routes.length ==0 ){
+                result.routes = [];
+                result.allRoutes=[];
+            }
+            console.log("Need*3=", need*3);
+            while(result.routes.length<need){
+                //Если у оператора нет заблокированного маршрута ищем, что ему дать из проблем
+                console.log("Выбираем новую проблемму");
+                 i = choseRouteForOperator(currentCompany, login);
+
+                if (i<0) {
+                    res.status(200).json("All problem routes blocked");
+                    return;
+                }
+
+
+
+                result.ID = cashedDataArr[currentCompany].ID;
+                result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
+                result.server_time = parseInt(Date.now()/1000);
+
+                result.settings=cashedDataArr[currentCompany].settings;
+                //result.allRoutes.push({
+                //    //name: data.routes[i].transport.NAME,
+                //
+                //    allRoutes: false,
+                //
+                //    nameDriver: ( ( cashedDataArr[currentCompany].line_routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].line_routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].line_routes[i].driver.NAME : 'без имени') + ' - ' + cashedDataArr[currentCompany].line_routes[i].transport.NAME,
+                //    nameCar: cashedDataArr[currentCompany].line_routes[i].transport.NAME + ' - ' + ( ( cashedDataArr[currentCompany].line_routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].line_routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].line_routes[i].driver.NAME : 'без имени'),
+                //
+                //    value: cashedDataArr[currentCompany].line_routes[i].filterId,
+                //    uniqueID: cashedDataArr[currentCompany].line_routes[i].uniqueID,
+                //
+                //
+                //    car: cashedDataArr[currentCompany].line_routes[i].transport.NAME,
+                //    driver: ( cashedDataArr[currentCompany].line_routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].line_routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].line_routes[i].driver.NAME : 'без имени' + i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                //});
+
+                cashedDataArr[currentCompany].line_routes.splice(result, 1);
+
+            } }
+
+
+        else {
+                result = cashedDataArr[currentCompany];
+            }
+
+        result.allRoutes = cashedDataArr[currentCompany].allRoutes
+        console.log("Result", result.routes[0].uniqueID);
         res.status(200).json(result);
 
     });
@@ -1146,6 +1318,10 @@ router.route('/confirmonline')
 
         for (var i = 0; i < onlineClients.length; i++) {
             console.log("Online now", onlineClients[i]);
+
+        }
+        for (var i = 0; i < blockedRoutes.length; i++) {
+            console.log("Blocked now", blockedRoutes[i]);
 
         }
 
@@ -1667,8 +1843,13 @@ function startPeriodicCalculating() {
                                         cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].state == data[j].data[0].state;
                                     }
 
-                                    console.log("Ищем ошибку здесь", data[j].data);
+                                    //console.log("Ищем ошибку здесь", data[j].data);
+                                   try {
                                     data[j].data.splice(0,1);
+                                   } catch (e) {
+                                       console.log("ОШИБКА", e, data[j].data );
+                                   }
+
                                     if(data[j].data.length>0){
                                         console.log("Дописываем новые стейты");
                                         cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
@@ -1724,7 +1905,7 @@ function startPeriodicCalculating() {
                         calculateStatistic (company);
                         createProblems(company)
 
-                        checkRealTrackData(company);
+                        checkRealTrackData(company); //todo убрать, после того как починят треккер
                         lookForNewIten();
                     }
 
@@ -2122,6 +2303,9 @@ function startPeriodicCalculating() {
 
                                 if (point.status == 6) {
                                     point.problem_index = 1;
+                                    if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
+                                        route.find_problem_ts = parseInt(Date.now()/1000);
+                                    }
                                    // Проверка на максимальную проблемность
                                     if(point.problem_index > route.max_problem) {
                                         route.max_problem = point.problem_index;
@@ -2144,6 +2328,10 @@ function startPeriodicCalculating() {
                                         timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
                                         timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
 
+                                    }
+
+                                    if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
+                                        route.find_problem_ts = parseInt(Date.now()/1000);
                                     }
 
                                     point.problem_index += parseInt(point.overdue_time * cashedDataArr[company].settings.predictMinutes);
@@ -2170,6 +2358,14 @@ function startPeriodicCalculating() {
 
                             }
                         }
+
+                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+                            if (cashedDataArr[company].routes.max_problem == 0 || cashedDataArr[company].routes.max_problem == undefined ) {
+                                cashedDataArr[company].routes.find_problem_ts = 0;
+                            }
+                        }
+
+
                     }
 
 
@@ -2196,6 +2392,23 @@ function startPeriodicCalculating() {
                     }
 
                     function createProblems(company) {
+                        //todo поиск и сортировка ведется по полю max_problem. А описание проблемы в поле kind_of_problem
+                        //todo дописать определение проблемности в случае, если проблемма - не точка
+                        // Задача этой функции сформировать и расставить по порядку проблеммы
+                        if (cashedDataArr[company].line_routes == undefined)
+                        {
+                            cashedDataArr[company].line_routes=cashedDataArr[company].routes;
+                        }
+
+
+
+                        cashedDataArr[company].line_routes.sort(compareNumeric);
+
+                        function compareNumeric(a, b) {
+                            return b.max_problem - a.max_problem;
+                        }
+
+
                         console.log("Start createProblems Конец рассчета, который занял", parseInt(Date.now()/1000)-superEndTime);
 
                     }
@@ -3198,6 +3411,45 @@ function lookForNewIten() {
 }
 
 
+// Функция подбирает роут для оператора
+function choseRouteForOperator(company, login){
+    console.log("Start choseRouteForOperator ");
+    var result = 0;
+    for (;result< cashedDataArr[company].line_routes.length; result++){
+        var route = cashedDataArr[company].line_routes[result];
+        //проверяем не заблокирован ли этот роут уже другим оператором
+        var blocked = false;
+        for(var j=0; j<blockedRoutes.length; j++){
+
+            if (blockedRoutes[j].id == route.uniqueID &&  blockedRoutes[j].company  == company){
+                console.log("проблемный роут уже заблокирован");
+                blocked = true;
+                break;
+            }
+        }
+
+        if(blocked) continue;
+        break;
+
+
+    }
+
+    if(result< cashedDataArr[company].line_routes.length ){
+        console.log("Отдаем оператору маршрут ", result, cashedDataArr[company].line_routes[result].uniqueID );
+        blockedRoutes.push({id: "" + cashedDataArr[company].line_routes[result].uniqueID, company: company, login: login, time: parseInt(Date.now()/1000)});
+
+        if(cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes = [];
+
+        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].line_routes[result]);
+
+        console.log("Size of blocked Routes is", cashedDataArr[company].blocked_routes.length);
+        return result;
+    } else {
+        return -1;
+    }
+
+
+}
 
 
 module.exports = router;

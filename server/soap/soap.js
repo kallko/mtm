@@ -84,6 +84,8 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
+    //console.log("START CHECK BEFORE SEND");
+
     //console.log( " Check before send started", _data.iLength);
     if(_data.iLength != 0){
         //console.log("Рано еще, подпустим поближе!");
@@ -305,6 +307,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     }
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
+
+
 
                     data.iLength = itineraries.length;
 

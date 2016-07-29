@@ -32,42 +32,58 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         }
 
         // Запрос у сервера проблем каждые 5 секунд
+        //todo поменять 110 секунд на 5 после тестов
           function setProblemUpdate() {
-            interval(checkProblem, 5 * 1000);
+            interval(checkProblem, 10 * 1000);
         }
 
 
-        scope.solveProblem = function (route) {
-            alert("Hellow");
-            console.log("Event", route);
-            for (var i = 0; i < scope.testProblemArray.length; i++) {
-                if (route == scope.testProblemArray[i]) {
-                    scope.testProblemArray.splice(i, 1);
-                    break;
-                }
-            }
-        }
+
 
 
         //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
         // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
         function checkProblem() {
-            console.log("Ask for problem");
-            //console.log(" Route = ", rootScope.editing.uniqueID, scope.filters.route )
-            if (!rootScope.tempDecision) {
 
-                http.get('./askforproblems/')
+            if (rootScope.tempDecision != undefined) {
+                var pQuant = rootScope.settings.problem_to_operator; //todo поставить 1. Дальнейшее число получит из настроек
+            console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
+
+            } else {
+                console.log("Ask for problem undef");
+            }
+            var need='';
+            var exist=0;
+            if (rootScope.data != undefined && rootScope.data.routes != undefined){
+                exist = rootScope.data.routes.length;
+            }
+            if(rootScope.settings != undefined) {
+                need = parseInt(rootScope.settings.problems_to_operator) - exist;
+            }
+
+            if(need<0) need='';
+
+            console.log(" Go to ASK ", !rootScope.data,  need );
+            if ((!rootScope.tempDecision ) && need != 0) {
+                console.log("Give me", need, "the problem please! String is");
+
+
+                http.get('./askforproblems/:'+need)
                     .success(function (data) {
 
                         if (data == undefined) {
-                            return} else {
+                            return
+                        } else {
                             console.log("Problems Loaded");
                         }
-                        if(data.settings != undefined) {
-                            rootScope.tempDecision = data;
+                        if(data.allRoutes != undefined) {
+                            console.log("Отправляем данные на клиент", data);
+                            rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.$emit('receiveproblem', rootScope.tempDecision);
                         } else {
-                          rootScope.statisticAll = data;
+                            console.log("Общая статистика", data);
+                            rootScope.statisticAll = data.statistic;
+
                         }
 
 
@@ -85,6 +101,13 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             console.log("Запускаем опрос сервера");
             startAsking()
         });
+
+
+     scope.showProblem = function(route) {
+            alert("Я все вижу" + route.filterId);
+            scope.$emit('choseproblem', route.filterId);
+
+        }
 
     }]);
 /**
