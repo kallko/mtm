@@ -322,8 +322,10 @@
                     on-finish-render="ngRepeatFinished"
                     ng-if="applyFilter(row)"
                     class="delivery-point-row"
-                    ng-class="{'row-red': row.locked, 'row-green' : row.lockedByMe, 'selected-row': row.selected}"
+                    ng-class="{'selected-row' : row.selected}"
                     >
+
+                    <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
                     <td>{{::row.NUMBER}}</td>
                     <td>{{row.fact_number}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
@@ -936,8 +938,8 @@
         </tbody>
     </table>
 
-    <div id="point-view-setting" ng-show="locked(point)">
-        <!--
+    <!-- <div id="point-view-setting" ng-show="locked(point)">
+
         <button id="lock-route-btn" class="btn btn-primary btn-sm down-btn"
                 ng-class="point.lockedRoute ? 'btn-danger' : 'btn-primary'" ng-click="toggleRouteBlock()">
             <i class="fa fa-md" ng-class="point.lockedRoute ? 'fa-lock' : 'fa-unlock'"></i>

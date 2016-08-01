@@ -855,7 +855,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             rootScope.$on('drawCombinedTrack', function (event, route, activePoint) {
                 //console.log('i gona  draw combined route', route);
                
-                updateStoredMarkers(route);
+                //updateStoredMarkers(route);
                 drawCombinedRoute(route);
                 scope.route = route;
             });
@@ -1917,29 +1917,29 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //    return str;
         //}
 
-        function saveUpdateToNode (){
-            // тест отправки измененных данных на ноде сервер.
-            var data=[];
-            var i=0;
-            while (i<allMarkers.length){
-                var j=0;
-                while (j<allMarkers[i].marks.length){
+        //function saveUpdateToNode (){
+        //    // тест отправки измененных данных на ноде сервер.
+        //    var data=[];
+        //    var i=0;
+        //    while (i<allMarkers.length){
+        //        var j=0;
+        //        while (j<allMarkers[i].marks.length){
+        //
+        //            if (!allMarkers[i].marks[j].source) {
+        //                //console.log("I think this is the car", allMarkers[i].marks[j])
+        //            }
+        //            data.push(allMarkers[i].marks[j].source);
+        //            j++;
+        //        }
+        //        i++;
+        //    }
+        //
+        //    //console.log("send data from map", data);
+        //    rootScope.$emit('saveUpdate', data);
+        //}
 
-                    if (!allMarkers[i].marks[j].source) {
-                        //console.log("I think this is the car", allMarkers[i].marks[j])
-                    }
-                    data.push(allMarkers[i].marks[j].source);
-                    j++;
-                }
-                i++;
-            }
 
-            //console.log("send data from map", data);
-            rootScope.$emit('saveUpdate', data);
-        }
-
-
-        rootScope.$on('logoutsave', saveUpdateToNode);
+        //rootScope.$on('logoutsave', saveUpdateToNode);
         
 
         function drawPushLine (mobilePush){

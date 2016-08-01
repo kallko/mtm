@@ -3,7 +3,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
     , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
     function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {
         // console.log("ProblemRouteController Start");
-        scope.testProblemArray = [["Опоздание", 2, 3, 4], ["Долгая остановка", 6, 7, 8]]; // Тестовая база инцидентов.
+        //scope.testProblemArray = [["Опоздание", 2, 3, 4], ["Долгая остановка", 6, 7, 8]]; // Тестовая база инцидентов.
         var askProblemFromServer = true;                                           //  запрашивать ли проблемы с сервера
         rootScope.asking = false;                                                   // Запущен ли процесс запрсов
         rootScope.tempDecision;
@@ -34,7 +34,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         // Запрос у сервера проблем каждые 5 секунд
         //todo поменять 110 секунд на 5 после тестов
           function setProblemUpdate() {
-            interval(checkProblem, 10 * 1000);
+            interval(checkProblem, 3 * 1000);
         }
 
 
@@ -44,15 +44,14 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
         // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
         function checkProblem() {
+            checkTimeForEditing();
 
             if (rootScope.tempDecision != undefined) {
-                var pQuant = rootScope.settings.problem_to_operator; //todo поставить 1. Дальнейшее число получит из настроек
+                var pQuant = rootScope.settings.problem_to_operator;
             console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
 
-            } else {
-                console.log("Ask for problem undef");
             }
-            var need='';
+            var need=0;
             var exist=0;
             if (rootScope.data != undefined && rootScope.data.routes != undefined){
                 exist = rootScope.data.routes.length;
@@ -61,10 +60,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                 need = parseInt(rootScope.settings.problems_to_operator) - exist;
             }
 
-            if(need<0) need='';
-
+            //if(need<0) need='';
+            //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
             console.log(" Go to ASK ", !rootScope.data,  need );
-            if ((!rootScope.tempDecision ) || need != 0) {
+            if ((!rootScope.data && need>0 ) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 console.log("Give me", need, "the problem please! String is");
 
 
@@ -86,7 +85,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                         }
 
-
+                    rootScope.editing.start = parseInt(Date.now()/1000);
 
                     }).error(function () {
                         rootScope.errorNotification('Проблем роут контроллер');
@@ -104,10 +103,35 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
      scope.showProblem = function(route) {
-            alert("Я все вижу" + route.filterId);
+            //alert("Я все вижу" + route.filterId);
             scope.$emit('choseproblem', route.filterId);
 
         }
+
+
+
+        function checkTimeForEditing (){
+            var end = parseInt(Date.now()/1000);
+            console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
+
+            if(rootScope.editing.start + 600 < end ) {
+                http.post('./logout')
+                    .success(function (data) {
+                        console.log("complete");
+                        rootScope.asking = false;
+                        rootScope.data.routes = [];
+                        rootScope.editing={};
+                        alert("Time out!");
+                        scope.$emit('logout');// В PIC очищение таблицы точек
+                    });
+
+
+            }
+
+
+        }
+
+
 
     }]);
 /**
