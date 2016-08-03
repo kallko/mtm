@@ -18,7 +18,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             gpsPushMarkers=[];                          // Массив маркеров пушей текущего маршрута
 
 
-        scope.params = scope.params || Settings.load();
+        scope.params = {} //scope.params || Settings.load();
         timeThreshold = scope.params.timeThreshold * 60
 
         initMap();
@@ -295,6 +295,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                             checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                             scope.currentDraggingStop = null;
+                            console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
                             rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
                             rootScope.$emit('checkInCloseDay');
                         });

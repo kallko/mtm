@@ -74,6 +74,11 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         } else {
                             console.log("Problems Loaded");
                         }
+
+                        if (data == "wait") {
+                            console.log ("Рассчет прошлого дня еще не закончен");
+                            return;
+                        }
                         if(data.allRoutes != undefined) {
                             console.log("Отправляем данные на клиент", data);
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
@@ -103,7 +108,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
      scope.showProblem = function(route) {
             //alert("Я все вижу" + route.filterId);
-            scope.$emit('choseproblem', route.filterId, route);
+            scope.$emit('choseproblem', route.filterId);
             scope.$emit('routeToChange', ('routeToChange', {
                 route: route,
                 serverTime: rootScope.data.server_time,
@@ -121,7 +126,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         function checkTimeForEditing (){
             var end = parseInt(Date.now()/1000);
-            console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
+            //console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
 
             if(rootScope.editing.start + 600 < end ) {
                 http.post('./logout')

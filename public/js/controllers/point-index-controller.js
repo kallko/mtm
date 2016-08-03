@@ -56,6 +56,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             .success(function (data) {
                 console.log("Получен объект", JSON.parse(JSON.stringify(data)));
                 rootScope.settings={};
+                rootScope.settings = JSON.parse(JSON.stringify(data));
                 rootScope.settings.problems_to_operator = data.problems_to_operator;
                 if (data.currentDay) {
                     rootScope.currentDay = true;
@@ -139,7 +140,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.text = "";                                    // текстовый фильтр таблицы
             scope.demoMode = false;                                     // активирован ли демо режим
 
-            scope.params = scope.params || Settings.load();             // настройки приложения
+            scope.params = {} //scope.params || Settings.load();             // настройки приложения
 
             //setProblemIndexSortMode(0);                                 // сброс фильтрации по индексу проблемности
 
@@ -654,28 +655,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     //console.log("I load this data", toPrint);
-                    linkDataParts(data);
-                    if (rootScope.currentDay) {
-                        loadExistData(scope.routesOfDate);
-                    }
+                    //linkDataParts(data);
+                    //if (rootScope.currentDay) {
+                    //    loadExistData(scope.routesOfDate);
+                    //}
 
-                    if (loadParts && rootScope.currentDay) {
-                        loadTrackParts();
-                        console.log("load track parts");
-                    }
+                    //if (loadParts && rootScope.currentDay) {
+                    //    loadTrackParts();
+                    //    console.log("load track parts");
+                    //}
                     //console.log(data,' success data');
 
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
 
-                    if (!rootScope.currentDay){
-                        enableDynamicUpdate=false;
-                        updateData();
-                        updateDataforPast();
-
-                    } else {
-                        enableDynamicUpdate=true;
-                        updateData();
-                    }
+                    //if (!rootScope.currentDay){
+                    //    enableDynamicUpdate=false;
+                    //    updateData();
+                    //    updateDataforPast();
+                    //
+                    //} else {
+                    //    enableDynamicUpdate=true;
+                    //    updateData();
+                    //}
 
 
 
@@ -4197,7 +4198,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         rootScope.$on('reFact', function (event, indx){
-            var route=rootScope.data.routes[indx];
+
+            var route;
+            for(var i=0; i<rootScope.data.routes.length; i++ ){
+                if (rootScope.data.routes[i].filterId == indx) {
+                   route =  rootScope.data.routes[i];
+                    break;
+                }
+            }
+
             factTimeForRoute (route, true);
         });
 
@@ -4209,7 +4218,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
 
-            //console.log("Route, to refact", route);
+            console.log("Пересчитываем фактическое время");
+            // Проверка, есть ли еще точки со статусом внимание. Нужно для пересчета роута
+            if (route.have_attention == undefined || route.have_attention == true) route.have_attention =false;
+            for (var i = 0; i<route.points.length; i++){
+                if (route.points[i].status == 6) route.have_attention = true;
+            }
+
+            console.log("Наличие статуса ВНИМАНИЕ", route.have_attention)
 
             var deliveredPoints = [];
             var sheduledPoints = [];
@@ -4427,9 +4443,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-        rootScope.$on('choseproblem', function(event, id, route){
+        rootScope.$on('choseproblem', function(event, id){
            console.log("Принял" + id);
             scope.filters.route=id;
+            var route;
+            for(var i=0; i<rootScope.data.routes.length; i++){
+                console.log(rootScope.data.routes[i].filterId,  id);
+                if(rootScope.data.routes[i].filterId == id){
+                    route = rootScope.data.routes[i];
+                    break;
+                }
+            }
+
             factTimeForRoute(route, true);
 
         });

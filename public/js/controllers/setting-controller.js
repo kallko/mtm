@@ -7,7 +7,7 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
         // начальная инициализация контроллера
         function init() {
             scope.demoMd = false;
-            scope.params = Settings.load();
+            //scope.params = Settings.load();
 
 
             console.log("!!!!!!!!!!!!!!!!!scope.params!!!!!!!!!!!!!!",scope.params, newSettings);
@@ -57,8 +57,8 @@ angular.module('MTMonitor').controller('SettingController', ['$scope', '$rootSco
 
         
 
-        scope.saveAllParams = function () {
-            Settings.saveToLocalStorage(scope.params);
-            scope.$emit('settingsChanged', scope.params);
-        };
+        //scope.saveAllParams = function () {
+        //    Settings.saveToLocalStorage(scope.params);
+        //    scope.$emit('settingsChanged', scope.params);
+        //};
     }]);

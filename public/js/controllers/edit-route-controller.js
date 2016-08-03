@@ -28,29 +28,30 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         ];
         scope.recalc_mode = scope.recalc_modes[0].value;
         scope.STATUS = STATUS;
+        scope.accept = false;
 
         init();
 
         // базовая инициализация
         function init() {
 
-            editPanelJ = $('#edit-panel');
+           // editPanelJ = $('#edit-panel');
 
             rootScope.$on('routeToChange', onRouteToChange);
             rootScope.$on('checkPoint', onPromisedChanged);
-            myLayout.on('stateChanged', onResize);
+           // myLayout.on('stateChanged', onResize);
         }
 
         // пересчет ширины боксов при изменении размеров панельки
-        function onResize(e) {
-            maxWidth = editPanelJ.width() - 30;
-
-            if (!scope.originalBoxes) return;
-
-            resetBlocksWidth(scope.originalBoxes);
-            resetBlocksWidth(scope.changebleBoxes);
-            scope.$apply();
-        }
+        //function onResize(e) {
+        //    maxWidth = editPanelJ.width() - 30;
+        //
+        //    if (!scope.originalBoxes) return;
+        //
+        //    resetBlocksWidth(scope.originalBoxes);
+        //    resetBlocksWidth(scope.changebleBoxes);
+        //    scope.$apply();
+        //}
 
         // обработчик события изменения обещанного окна
         function onPromisedChanged(event, point) {
@@ -73,23 +74,28 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         // пересчитать ширину блоков
-        function resetBlocksWidth(boxes) {
-            var widthRes;
-            for (var i = 0; i < boxes.length; i++) {
-                widthRes = scope.boxWidth(boxes[i].size, boxes[i].type);
-                boxes[i].width = widthRes.width;
-                boxes[i].tooBig = widthRes.tooBig;
-            }
-        }
+        //function resetBlocksWidth(boxes) {
+        //    var widthRes;
+        //    for (var i = 0; i < boxes.length; i++) {
+        //        widthRes = scope.boxWidth(boxes[i].size, boxes[i].type);
+        //        boxes[i].width = widthRes.width;
+        //        boxes[i].tooBig = widthRes.tooBig;
+        //    }
+        //}
 
         // загружен новый маршрут
         function onRouteToChange(event, data) {
             scope.selectedDriver= false;
             scope.selectedTransport = false;
             scope.selectedStart= false;
+            scope.accept = false;
             console.log("I recieve DATA", data);
             scope.allDrivers=data.allDrivers;
             scope.allTransports=data.allTransports;
+            var id = data.route.filterId;
+            for (var i=0; i<rootScope.data.routes.length; i++){
+                if(rootScope.data.routes[i].filterId == id ) scope.parent_route = rootScope.data.routes[i];
+            }
 
             console.log(data.route);
             if( data.route.DISTANCE == 0) {
@@ -122,6 +128,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.route = routeCopy;
             scope.changedRoute = JSON.parse(JSON.stringify(routeCopy));
 
+
             moveSkippedToEnd(scope.changedRoute);
             markWarehouses(scope.changedRoute);
             markWarehouses(scope.route);
@@ -140,10 +147,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             if (scope.changedRoute.points.length > 1) {
                 // если в маршруте остались невыполненные точки, блокируем его
-                scope.$emit('lockRoute', {
-                    route: data.route,
-                    point: data.route.points[0]
-                });
+                //scope.$emit('lockRoute', {
+                //    route: data.route,
+                //    point: data.route.points[0]
+                //});
 
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
             } else {
@@ -164,10 +171,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
                 return;
             }
-            console.log(scope.changedRoute);
+            console.log("changedRoute",  scope.changedRoute);
             var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
                 scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1;
-            console.log(last);
+            console.log("last point", last);
             var url = './findtime2p/'
                     + scope.changedRoute.car_position.lat + '&'
                     + scope.changedRoute.car_position.lon + '&'
@@ -193,7 +200,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     }
 
                     // после пересчета обновляем данные о блоках
-                    updateBoxes(firstInit);
+                    //todo рассчитать полученные данные и вывести в ХТМЛ
+                    //updateBoxes(firstInit);
                 })
                 .error(function(data){
                     console.log("This is ERROR!");
@@ -300,212 +308,212 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
         // обновить массив блоков
-        function updateBoxes(updateOriginal) {
-            if (updateOriginal) {
-                scope.originalBoxes = getBoxesFromRoute(scope.route);
-                firstInit = false;
-            }
-
-            updateIndices(scope.changedRoute.points);
-            scope.changebleBoxes = getBoxesFromRoute(scope.changedRoute);
-
-            // назначение обработчиков на пересозданных блоках
-            timeout(function () {
-                $('.draggable-box').draggable({
-                    start: onDragStartTask,
-                    stop: onDragStopTask,
-                    helper: 'clone'
-                });
-
-                $('.droppable-box').droppable({
-                    drop: onDropTask
-                    , over: function (event, ui) {
-                        $('.tmp-place').remove();
-                        hidePlaceholder = false;
-                        var dataIndex = $(this).data('index'),
-                            placeHolder = $('<div class="box tmp-place" style="width: ' + movedJ.width() + 'px;" ' +
-                                ' data-index="' + dataIndex + '" ></div>');
-                        $('#box-' + scope.BOX_TYPE.TASK + '-' + dataIndex).before(placeHolder);
-                        placeHolder.droppable({
-                            drop: onDropTask
-                        });
-                    }
-                    , out: function (event, ui) {
-                        hidePlaceholder = true;
-                        timeout(function () {
-                            if (hidePlaceholder) $('.tmp-place').remove();
-                        }, 100);
-                    }
-                });
-            }, 1);
-        }
+        //function updateBoxes(updateOriginal) {
+        //    if (updateOriginal) {
+        //        scope.originalBoxes = getBoxesFromRoute(scope.route);
+        //        firstInit = false;
+        //    }
+        //
+        //    updateIndices(scope.changedRoute.points);
+        //    scope.changebleBoxes = getBoxesFromRoute(scope.changedRoute);
+        //
+        //    // назначение обработчиков на пересозданных блоках
+        //    timeout(function () {
+        //        $('.draggable-box').draggable({
+        //            start: onDragStartTask,
+        //            stop: onDragStopTask,
+        //            helper: 'clone'
+        //        });
+        //
+        //        $('.droppable-box').droppable({
+        //            drop: onDropTask
+        //            , over: function (event, ui) {
+        //                $('.tmp-place').remove();
+        //                hidePlaceholder = false;
+        //                var dataIndex = $(this).data('index'),
+        //                    placeHolder = $('<div class="box tmp-place" style="width: ' + movedJ.width() + 'px;" ' +
+        //                        ' data-index="' + dataIndex + '" ></div>');
+        //                $('#box-' + scope.BOX_TYPE.TASK + '-' + dataIndex).before(placeHolder);
+        //                placeHolder.droppable({
+        //                    drop: onDropTask
+        //                });
+        //            }
+        //            , out: function (event, ui) {
+        //                hidePlaceholder = true;
+        //                timeout(function () {
+        //                    if (hidePlaceholder) $('.tmp-place').remove();
+        //                }, 100);
+        //            }
+        //        });
+        //    }, 1);
+        //}
 
         // обработчик события начало передвижения блока
-        function onDragStartTask(event, ui) {
-            ui.helper.css('z-index', '999999');
-            movedJ = ui.helper;
-            toHideJ = $('#box-' + scope.BOX_TYPE.TASK + '-' + movedJ.data('index'));
-            toHideJ.hide();
-        }
+        //function onDragStartTask(event, ui) {
+        //    ui.helper.css('z-index', '999999');
+        //    movedJ = ui.helper;
+        //    toHideJ = $('#box-' + scope.BOX_TYPE.TASK + '-' + movedJ.data('index'));
+        //    toHideJ.hide();
+        //}
 
         // обработчик события завершения передвижения блока
-        function onDragStopTask(event, ui) {
-            ui.helper.css('left', '0px').css('top', '0px').css('z-index', 'auto');
-            $('.tmp-place').remove();
-            toHideJ.show();
-        }
+        //function onDragStopTask(event, ui) {
+        //    ui.helper.css('left', '0px').css('top', '0px').css('z-index', 'auto');
+        //    $('.tmp-place').remove();
+        //    toHideJ.show();
+        //}
 
         // обработчик события бросания блока на другйо блок
-        function onDropTask(event, ui) {
-            var moved = ui.helper.data('index'),
-                target = $(this).data('index'),
-                point = scope.changedRoute.points.splice(moved, 1)[0];
-
-            $('.tmp-place').remove();
-            if (target == 55555) {
-                scope.changedRoute.points.push(point);
-            } else {
-                target = target > moved ? target - 1 : target;
-                scope.changedRoute.points.splice(target, 0, point);
-            }
-
-            recalculateRoute();
-        }
+        //function onDropTask(event, ui) {
+        //    var moved = ui.helper.data('index'),
+        //        target = $(this).data('index'),
+        //        point = scope.changedRoute.points.splice(moved, 1)[0];
+        //
+        //    $('.tmp-place').remove();
+        //    if (target == 55555) {
+        //        scope.changedRoute.points.push(point);
+        //    } else {
+        //        target = target > moved ? target - 1 : target;
+        //        scope.changedRoute.points.splice(target, 0, point);
+        //    }
+        //
+        //    recalculateRoute();
+        //}
 
         // сгенерировать блоки из маршрута
-        function getBoxesFromRoute(route) {
-            var boxes = [],
-                point,
-                tmpTime,
-                widthRes;
-
-            for (var i = 0; i < route.points.length; i++) {
-                point = route.points[i];
-
-                // блок проезда
-                if (point.TRAVEL_TIME != '0') {
-                    tmpTime = parseInt(point.TRAVEL_TIME);
-                    widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.TRAVEL);
-                    boxes.push({
-                        type: scope.BOX_TYPE.TRAVEL,
-                        size: tmpTime,
-                        status: point.status,
-                        index: point.index,
-                        width: widthRes.width,
-                        tooBig: widthRes.tooBig
-                    });
-                }
-
-                // блок простоя
-                if (point.DOWNTIME != '0') {
-                    tmpTime = parseInt(point.DOWNTIME);
-                    widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.DOWNTIME);
-                    boxes.push({
-                        type: scope.BOX_TYPE.DOWNTIME,
-                        size: tmpTime,
-                        status: point.status,
-                        index: point.index,
-                        width: widthRes.width,
-                        tooBig: widthRes.tooBig
-                    });
-                }
-
-                // блок задачи
-                if (point.TASK_TIME != '0') {
-                    tmpTime = parseInt(point.TASK_TIME);
-                    widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.TASK);
-                    boxes.push({
-                        type: scope.BOX_TYPE.TASK,
-                        size: tmpTime,
-                        number: point.NUMBER,
-                        arrivalStr: point.arrival_time_hhmm,
-                        endTimeStr: point.end_time_hhmm,
-                        travelTime: point.TRAVEL_TIME,
-                        downtime: point.DOWNTIME,
-                        status: point.status,
-                        index: point.index,
-                        late: point.late,
-                        windows: point.AVAILABILITY_WINDOWS,
-                        promised: point.promised_window_changed,
-                        waypointNumber: point.END_WAYPOINT,
-                        width: widthRes.width,
-                        tooBig: widthRes.tooBig,
-                        warehouse: point.warehouse
-                    });
-                }
-            }
-
-            return boxes;
-        }
-
-        // расчитать ширину блока
-        scope.boxWidth = function (size, type) {
-            var mWidth = type == scope.BOX_TYPE.TASK ? minWidth : size / widthDivider,
-                res = parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
-
-            if (res > maxWidth) {
-                res = {width: maxWidth, tooBig: true};
-            } else {
-                res = {width: res, tooBig: false};
-            }
-
-            return res;
-        };
-
-        // создание всплывающей подсказки для блока
-        scope.tooltip = function (box) {
-            var result = '';
-
-            switch (box.type) {
-                case scope.BOX_TYPE.TASK:
-                    result += 'Задача #' + box.number + '\n';
-                    break;
-                case scope.BOX_TYPE.TRAVEL:
-                    result += 'Переезд' + '\n';
-                    break;
-                case scope.BOX_TYPE.DOWNTIME:
-                    result += 'Простой' + '\n';
-                    break;
-            }
-
-            result += 'Продолжительность: ' + toMinutes(box.size) + ' мин.\n';
-
-            if (box.type == scope.BOX_TYPE.TASK) {
-                result += 'Время прибытия: ' + box.arrivalStr + '\n';
-                result += 'Время отъезда: ' + box.endTimeStr + '\n';
-                result += 'Заказанное окно: ' + box.windows + '\n';
-                result += 'Обещананое окно: ' +
-                    filter('date')(box.promised.start * 1000, 'HH:mm') +
-                    ' - ' +
-                    filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';
-                result += 'Измененное окно: ' +
-                    filter('date')(box.promised.start * 1000, 'HH:mm') +
-                    ' - ' +
-                    filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';
-                result += 'Переезд: ' + toMinutes(box.travelTime) + ' мин.\n';
-                result += 'Простой: ' + toMinutes(box.downtime) + ' мин.\n';
-            }
-
-            return result;
-        };
+        //function getBoxesFromRoute(route) {
+        //    var boxes = [],
+        //        point,
+        //        tmpTime,
+        //        widthRes;
+        //
+        //    for (var i = 0; i < route.points.length; i++) {
+        //        point = route.points[i];
+        //
+        //        // блок проезда
+        //        if (point.TRAVEL_TIME != '0') {
+        //            tmpTime = parseInt(point.TRAVEL_TIME);
+        //            widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.TRAVEL);
+        //            boxes.push({
+        //                type: scope.BOX_TYPE.TRAVEL,
+        //                size: tmpTime,
+        //                status: point.status,
+        //                index: point.index,
+        //                width: widthRes.width,
+        //                tooBig: widthRes.tooBig
+        //            });
+        //        }
+        //
+        //        // блок простоя
+        //        if (point.DOWNTIME != '0') {
+        //            tmpTime = parseInt(point.DOWNTIME);
+        //            widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.DOWNTIME);
+        //            boxes.push({
+        //                type: scope.BOX_TYPE.DOWNTIME,
+        //                size: tmpTime,
+        //                status: point.status,
+        //                index: point.index,
+        //                width: widthRes.width,
+        //                tooBig: widthRes.tooBig
+        //            });
+        //        }
+        //
+        //        // блок задачи
+        //        if (point.TASK_TIME != '0') {
+        //            tmpTime = parseInt(point.TASK_TIME);
+        //            widthRes = scope.boxWidth(tmpTime, scope.BOX_TYPE.TASK);
+        //            boxes.push({
+        //                type: scope.BOX_TYPE.TASK,
+        //                size: tmpTime,
+        //                number: point.NUMBER,
+        //                arrivalStr: point.arrival_time_hhmm,
+        //                endTimeStr: point.end_time_hhmm,
+        //                travelTime: point.TRAVEL_TIME,
+        //                downtime: point.DOWNTIME,
+        //                status: point.status,
+        //                index: point.index,
+        //                late: point.late,
+        //                windows: point.AVAILABILITY_WINDOWS,
+        //                promised: point.promised_window_changed,
+        //                waypointNumber: point.END_WAYPOINT,
+        //                width: widthRes.width,
+        //                tooBig: widthRes.tooBig,
+        //                warehouse: point.warehouse
+        //            });
+        //        }
+        //    }
+        //
+        //    return boxes;
+        //}
+        //
+        //// расчитать ширину блока
+        //scope.boxWidth = function (size, type) {
+        //    var mWidth = type == scope.BOX_TYPE.TASK ? minWidth : size / widthDivider,
+        //        res = parseInt(size / widthDivider > minWidth ? size / widthDivider : mWidth);
+        //
+        //    if (res > maxWidth) {
+        //        res = {width: maxWidth, tooBig: true};
+        //    } else {
+        //        res = {width: res, tooBig: false};
+        //    }
+        //
+        //    return res;
+        //};
+        //
+        //// создание всплывающей подсказки для блока
+        //scope.tooltip = function (box) {
+        //    var result = '';
+        //
+        //    switch (box.type) {
+        //        case scope.BOX_TYPE.TASK:
+        //            result += 'Задача #' + box.number + '\n';
+        //            break;
+        //        case scope.BOX_TYPE.TRAVEL:
+        //            result += 'Переезд' + '\n';
+        //            break;
+        //        case scope.BOX_TYPE.DOWNTIME:
+        //            result += 'Простой' + '\n';
+        //            break;
+        //    }
+        //
+        //    result += 'Продолжительность: ' + toMinutes(box.size) + ' мин.\n';
+        //
+        //    if (box.type == scope.BOX_TYPE.TASK) {
+        //        result += 'Время прибытия: ' + box.arrivalStr + '\n';
+        //        result += 'Время отъезда: ' + box.endTimeStr + '\n';
+        //        result += 'Заказанное окно: ' + box.windows + '\n';
+        //        result += 'Обещананое окно: ' +
+        //            filter('date')(box.promised.start * 1000, 'HH:mm') +
+        //            ' - ' +
+        //            filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';
+        //        result += 'Измененное окно: ' +
+        //            filter('date')(box.promised.start * 1000, 'HH:mm') +
+        //            ' - ' +
+        //            filter('date')(box.promised.finish * 1000, 'HH:mm') + '\n';
+        //        result += 'Переезд: ' + toMinutes(box.travelTime) + ' мин.\n';
+        //        result += 'Простой: ' + toMinutes(box.downtime) + ' мин.\n';
+        //    }
+        //
+        //    return result;
+        //};
 
         function toMinutes(seconds) {
             return parseInt(seconds / 60);
         }
 
         // открытие окна задачи по даблклику на блоке
-        scope.boxDblClick = function (waypointNumber) {
-            for (var i = 0; i < scope.changedRoute.points.length; i++) {
-                if (scope.changedRoute.points[i].END_WAYPOINT == waypointNumber) {
-                    scope.$emit('showPoint', {
-                        point: scope.changedRoute.points[i],
-                        route: scope.route,
-                        parent: 'editRoute'
-                    });
-                    break;
-                }
-            }
-        };
+        //scope.boxDblClick = function (waypointNumber) {
+        //    for (var i = 0; i < scope.changedRoute.points.length; i++) {
+        //        if (scope.changedRoute.points[i].END_WAYPOINT == waypointNumber) {
+        //            scope.$emit('showPoint', {
+        //                point: scope.changedRoute.points[i],
+        //                route: scope.route,
+        //                parent: 'editRoute'
+        //            });
+        //            break;
+        //        }
+        //    }
+        //};
 
         // приводит маршрут в необходимый формат и отправляетего на математический сервер для пересчета
         scope.recalculateRoute = function () {
@@ -557,7 +565,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     jobWindows,
                     timeStep = 600;                                                     // шаг расширения окон
 
-                console.log(trWindow);
+                console.log("Какое то trWindow",trWindow);
 
                 for (i = 0; i < route.points.length; i++) {
 
@@ -723,14 +731,17 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     "tr_permits": []
                 });
 
-                console.log(mathInput);
+                console.log("Big MATH INPUT",mathInput);
 
                 // оптравляем на пересчет
                 http.post('./recalculate/', {input: mathInput}).
                     success(function (data) {
-                    console.log(data);
+                    console.log("Recalculate receive DATA",data);
                         processModifiedPoints(route, data);
-                    });
+                    })
+                .error(function(data){
+                    console.log("ERROR, data");
+                });
             }
         };
 

@@ -254,15 +254,30 @@ router.route('/dailydata')
 
 
                     if (cashedDataArr[currentCompany] != null){
-                        console.log("Date", data.date, cashedDataArr[currentCompany].date);
-                        var exist = "" +cashedDataArr[currentCompany].date.substring(0,9);
+                        console.log("Date", data.date, cashedDataArr[currentCompany].date, parseInt(Date.parse(data.date)/1000));
+                        var exist = "" +cashedDataArr[currentCompany].date.substring(0,10);
                         if ((""+data.date).startsWith(exist)){
                         console.log("Данные по этой компани на сегодня уже получены");
+
                         res.status(200).json(cashedDataArr[currentCompany].settings);
                         return;
                         } else {
+
+                            console.log("Грузим день из прошлого");
                             //Если кто-то запросил данные по прошлому дню
-                            currentCompany+=""+data.date.substring(0,9);
+                            var compmpanyName=""+currentCompany;
+                            currentCompany+=""+data.date.substring(0,10);
+
+                            if(cashedDataArr[currentCompany] != undefined) {
+                                console.log("Прошлый день уже создан", cashedDataArr[currentCompany] != undefined , "и посчитан", cashedDataArr[currentCompany].ready);
+                            } else {
+                                console.log("Прошлый день еще не создан, начинаем создание");
+                            }
+
+                            if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].ready) {
+                                res.status(200).json(cashedDataArr[currentCompany]);
+                                return;
+                            }
                             if (data.routes !=undefined) {
                                 for (var i = 0; i < data.routes.length; i++) {
                                     if (!data.routes[i]['uniqueID']) {
@@ -289,17 +304,45 @@ router.route('/dailydata')
                             //Собираем решение из частей в одну кучку
                             linkDataParts(currentCompany, req.session.login);
                             //Мгновенный запуск на пересчет, после загрузки
-                           //todo Получить пуши посчитать
+                            //todo Получить пуши посчитать
+                            console.log("Собираемся получать пуши");
 
-                            // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
-                            data.current_server_time = parseInt(new Date() / 1000);
-                            var current_server_time = new Date();
-                            var server_time = new Date(data.server_time * 1000);
-                            data.currentDay = false;
-                            console.log("Отправляем прошлый день");
-                            res.status(200).json(data);
+                            //todo получить пуши по аррею решений, настроить колбек по получению всех нужных данных
+                            var soapManager = new soap(req.session.login);
+                            soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
+                                //console.log("receivePUSHES", data);
+                                var obj = JSON.parse(data.return);
+                                console.log("Obj", obj[0], "mtm 1497");
+                                //delete cashedDataArr[company].allPushes;
+                                cashedDataArr[company].allPushes=obj;
+                                console.log("GetPushes finished for company", company);
+                                // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
+                                data.current_server_time = parseInt(new Date() / 1000);
+                                data.currentDay = false;
+                                console.log("Прошлый день готов к рассчету", company);
+
+                                connectPointsAndPushes(company);
+                                connectStopsAndPoints(company);
+                                findStatusesAndWindows(company);
+                                calculateStatistic (company);
+                                checkRealTrackData(company); //todo убрать, после того как починят треккер
+
+                                console.log("Расчет прошлого дня окончен", company);
+                                cashedDataArr[company].ready = true;
+                                console.log("Готово к отдаче", cashedDataArr[company].ready);
+
+
+
+                            });
+
+
+                            res.status(200).json("wait");
                             return;
+
+
+
                         }
+
 
                     }
 
@@ -672,6 +715,7 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
 // пересчет маршрута на математике
 router.route('/recalculate')
     .post(function (req, res) {
+        console.log("Send route to recalc");
         math_server.recalculate(req.body.input, function (data) {
             console.log('MATH DATE >>', new Date());
             res.status(200).json(data);
@@ -1820,7 +1864,8 @@ function startPeriodicCalculating() {
         for (var k=0; k<companys.length; k++) {
 
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length*3; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
-        for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
+
+            for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
@@ -1839,7 +1884,7 @@ function startPeriodicCalculating() {
             //TODO Заменить на запрс свежих стейтов и треков
 
 
-            console.log('Start loading TrackParts',company);
+            console.log('Start loading TrackParts',companys[k]);
             //if (req.session.login == undefined || req.session.login == null) {
             //    res.status(401).json({status: 'Unauthorized'});
             //    return;
@@ -1848,9 +1893,9 @@ function startPeriodicCalculating() {
             //var first = true;
 
             var end = parseInt(Date.now()/1000);
-            var start = cashedDataArr[company].last_track_update;
-
-            tracksManager.getRealTrackParts(cashedDataArr[company], start, end,
+            var start = cashedDataArr[companys[k]].last_track_update;
+            var companyAsk = companys[k];
+            tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
                 function (data) {
                    // if (!first) return;
 
@@ -1873,8 +1918,8 @@ function startPeriodicCalculating() {
 
                     }
 
-                    var cached = cashedDataArr[company];
-                    cashedDataArr[company].last_track_update = parseInt(Date.now()/1000);
+                    var cached = cashedDataArr[companyAsk];
+                    cashedDataArr[companyAsk].last_track_update = parseInt(Date.now()/1000);
 
                     if(cached) {
                         for (var i = 0; i < cached.sensors.length; i++) {
@@ -1916,7 +1961,7 @@ function startPeriodicCalculating() {
                                    }
 
                                     if(data[j].data.length>0){
-                                        console.log("Дописываем новые стейты");
+                                        console.log("Дописываем новые стейты", companyAsk);
                                         cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     }
 
@@ -1943,10 +1988,10 @@ function startPeriodicCalculating() {
                         }
                     }
 
-                    cashedDataArr[company].needRequests --;
-                    console.log("Get Real TRACK finished for company", company, cashedDataArr[company].needRequests);
-                    dataForPredicate(company, startCalculateCompany);
-                    if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
+                    cashedDataArr[companyAsk].needRequests --;
+                    console.log("Get Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
+                    dataForPredicate(companyAsk, startCalculateCompany);
+                    if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
 
 
                 });
@@ -1975,256 +2020,8 @@ function startPeriodicCalculating() {
 
 
 
-                    function connectPointsAndPushes(company) {
-                        console.log("Start connectPointsAndPushes", company);
-                        var mobilePushes = cashedDataArr[company].allPushes;
 
-                        checkPushesTimeGMTZone(mobilePushes, cashedDataArr[company].CLIENT_NAME);
 
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++){
-                            cashedDataArr[company].routes[i].pushes=[];
-                        }
-
-                        for (i = 0; i<mobilePushes.length;i++){
-                            if (mobilePushes[i].gps_time == 0 ||
-                                (mobilePushes[i].lat == 0 && mobilePushes[i].lon == 0) ||
-                                 mobilePushes.gps_time > parseInt(Date.now()/1000)
-                            ) continue;
-
-
-                            if (mobilePushes[i].canceled) continue; //TODO написать функцию обработки пуша-отмены
-
-                            for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
-
-
-                                for (var k = 0; k < cashedDataArr[company].routes[j].points.length; k++) {
-                                    var tmpPoint = cashedDataArr[company].routes[j].points[k];
-                                    var LAT = parseFloat(tmpPoint.LAT);
-                                    var LON = parseFloat(tmpPoint.LON);
-                                    var lat = mobilePushes[i].lat;
-                                    var lon = mobilePushes[i].lon;
-
-                                    // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
-                                    if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
-                                        //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
-
-                                        tmpPoint.mobile_push = mobilePushes[i];
-                                        tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                                        mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
-                                        // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
-                                        // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
-                                        if (mobilePushes[i].distance <= cashedDataArr[company].settings.mobileRadius) {
-                                            tmpPoint.havePush = true;
-
-
-
-                                            //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
-                                            tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
-
-                                            // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
-                                            tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
-
-                                            cashedDataArr[company].routes[j].lastPointIndx = k > cashedDataArr[company].routes[j].lastPointIndx ? k : cashedDataArr[company].routes[j].lastPointIndx;
-                                           // cashedDataArr[company].routes[j].pushes = cashedDataArr[company].routes[j].pushes || [];
-                                            if (mobilePushes[i].gps_time_ts < parseInt(Date.now()/1000)) {
-                                                cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
-                                            }
-
-                                            break;
-                                        } else {
-                                           // cashedDataArr[company].routes[j].pushes =  cashedDataArr[company].routes[j].pushes || [];
-                                            if (mobilePushes[i].gps_time_ts < parseInt(Date.now()/1000)) {
-                                                tmpPoint.havePush = true;
-                                                mobilePushes[i].long_away = true;
-                                                cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
-                                            }
-                                            //console.log('>>> OUT of mobile radius');
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-
-
-                    }
-
-                    function connectStopsAndPoints(company) {
-                        console.log("Start connectStopsAndPushes");
-                        for (i = 0; i < cashedDataArr[company].routes.length; i++) {
-                           var route = cashedDataArr[company].routes[i];
-                            //console.log ("route.driver.name", route.driver.NAME);
-                            route.lastPointIndx = 0;
-                            if (route.real_track != undefined) {
-                                for (var j = 0; j < route.real_track.length; j++) {
-                                    // если статус не из будущего (в случае демо-режима) и стейт является стопом, b dhtvz проверяем его
-                                    if (route.real_track[j].t1 < parseInt(Date.now()/1000) && route.real_track[j].state == "ARRIVAL") {
-                                        //console.log("считаем стоп", _data.server_time, route.real_track[j].t1, _data.server_time-route.real_track[j].t1)
-
-
-
-                                        var tmpArrival = route.real_track[j];
-
-                                        //console.log("tmpArrival",tmpArrival);
-                                        // перебираем все точки к которым
-                                        for (var k = 0; k < route.points.length; k++) {
-
-
-
-
-                                          var  tmpPoint = route.points[k];
-
-
-                                             cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
-
-                                            if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit){
-                                                //console.log("Подтверждена вручную Уходим");
-                                                continue;
-                                            }
-
-
-                                            var LAT = parseFloat(tmpPoint.LAT);
-                                            var LON = parseFloat(tmpPoint.LON);
-                                            var lat = parseFloat(tmpArrival.lat);
-                                            var lon = parseFloat(tmpArrival.lon);
-
-                                            tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
-                                            tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
-
-                                            var tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
-
-                                            var tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
-
-
-
-
-
-
-                                            // Если маршрут не просчитан, отдельно проверяем попадает ли стоп в одно из возможных временных окон  и насколько он рядом
-                                            // и если да, то тоже привязываем стоп к точке
-
-                                            var suit=false;   //Показывает совместимость точки и стопа для непросчитанного маршрута
-                                            if (route.DISTANCE == 0 && tmpDistance < cashedDataArr[company].settings.stopRadius ) {
-                                                suit=checkUncalculateRoute(tmpPoint, tmpArrival, company);
-                                            }
-
-                                            // если стоп от точки не раньше значения timeThreshold и в пределах
-                                            // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
-                                            // по времени чем предыдущий детект - привязываем этот стоп к точке
-
-
-
-                                            if (suit || (tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold &&
-                                                tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
-                                                tmpPoint.timeToStop > tmpTime))) {
-
-                                               var haveUnfinished = false;
-
-
-
-                                                if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint != undefined && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
-                                                    for (var l = k - 1; l > 0; l--) {
-                                                        var status = route.points[l].status;
-                                                        if (status > 3 && status != 6)
-                                                        {
-                                                            haveUnfinished = true;
-                                                            continue;
-                                                        }
-                                                    }
-
-                                                    if (haveUnfinished) {
-                                                        continue;
-                                                    }
-                                                }
-
-
-
-                                                //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
-                                                //
-                                                if(tmpPoint.haveStop == true && !findBestStop(tmpPoint, tmpArrival)){
-                                                    continue;
-                                                }
-
-
-
-
-                                                tmpPoint.distanceToStop = tmpDistance;
-                                                tmpPoint.timeToStop = tmpTime;
-                                                tmpPoint.haveStop = true;
-
-
-
-
-                                                //{ if (tmpArrival.t1 > tmpPoint.controlled_window.start) && (tmpArrival.t1<tmpPoint.controlled_window.finish){
-                                                //    tmpPoint.limit=60;
-                                                //} else {tmpPoint.limit=60; } }
-
-                                                tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
-                                                tmpPoint.stopState = tmpArrival;
-                                                //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
-
-                                                route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
-                                                tmpPoint.stop_arrival_time = tmpArrival.t1;
-                                                tmpPoint.real_arrival_time = tmpArrival.t1;
-                                                tmpPoint.autofill_service_time = tmpArrival.time;
-                                                //route.points[k]
-                                                //console.log("route-point-k", route.points[k], "route" , route)
-
-                                                //if (angular.isUndefined(tmpArrival.servicePoints)==true){
-                                                //    tmpArrival.servicePoints=[];
-                                                //}
-
-                                               if(tmpArrival.servicePoints == undefined) { tmpArrival.servicePoints=[]};
-
-                                                // проверка, существует ли уже этот стоп
-                                                var ip=0;
-                                                var sPointExist=false;
-                                                while(ip<tmpArrival.servicePoints.length){
-                                                    if(tmpArrival.servicePoints[ip]==k){
-                                                        sPointExist=true;
-                                                        break;
-                                                    }
-                                                    ip++;
-                                                }
-                                                if(!sPointExist){
-                                                    tmpArrival.servicePoints.push(k);}
-
-                                                // tmpPoint.rawConfirmed=0;
-
-                                                //console.log("Find stop for Waypoint and change STATUS")
-
-
-
-                                            }
-
-
-                                        }
-                                    }
-
-                                }
-
-
-                                // console.log("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
-                                var lastPoint = route.points[route.lastPointIndx];
-                                // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
-
-                                // проверка последней определенной точки на статус выполняется
-                                if (lastPoint != null && route.car_position !=  undefined) {
-                                    // console.log("Route", route);
-                                    if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > parseInt(Date.now()/1000)
-                                        && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
-                                            lastPoint.LAT, lastPoint.LON) < cashedDataArr[company].stopRadius) {
-                                        lastPoint.status = 3;
-                                    }
-                                }
-                            }
-
-                            // console.log("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
-
-                        }
-
-
-                    }
 
                     function predicateTime(company) {
                         console.log("Start predicateTime");
@@ -2240,91 +2037,6 @@ function startPeriodicCalculating() {
                         }
                     }
 
-                    function findStatusesAndWindows(company) {
-                        console.log("Start findStatusesAndWindows");
-                        var tmpPoint;
-
-                        for(var i=0; i<cashedDataArr[company].routes.length; i++ ) {
-
-                            cashedDataArr[company].routes[i].ready_to_close=true;
-
-                            //console.log("1");
-                            for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++) {
-                                //console.log("2");
-
-                                tmpPoint = cashedDataArr[company].routes[i].points[j];
-
-                                if (tmpPoint.real_arrival_time == undefined) {
-                                    cashedDataArr[company].routes[i].ready_to_close=false;
-                                    continue;
-                                }
-                                //считаем окна только для доставленного
-                                //if (tmpPoint.status > 3 && tmpPoint.status != 6) continue;
-
-                                tmpPoint.windowType = 'Вне окон';
-                                if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
-                                    && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
-                                    tmpPoint.windowType = 'В заказанном';
-                                    //console.log('В заказанном')
-                                } else {
-                                    for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
-                                        if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time
-                                            && tmpPoint.windows[l].finish > tmpPoint.real_arrival_time) {
-                                            tmpPoint.windowType = 'В обещанном';
-                                            //console.log('В обещанном');
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                if (tmpPoint.rawConfirmed !== -1) {
-                                    if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
-                                        tmpPoint.status = 1;
-                                    } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
-                                        tmpPoint.status = 2;
-                                    } else {
-                                        tmpPoint.status = 0;
-                                    }
-                                } else {
-
-                                }
-
-
-                                //корректировка достоверности статусов по процентам.
-                                tmpPoint.limit = 0;
-                                if (tmpPoint.confirmed_by_operator) {
-                                    tmpPoint.limit = 100;
-                                    return;
-                                }
-                                if (tmpPoint.haveStop) {
-                                    tmpPoint.limit = 45;
-
-                                    if (tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start) {
-                                        tmpPoint.limit = 60;
-                                    }
-
-                                }
-
-                                if (tmpPoint.havePush) {
-                                    tmpPoint.limit += 15;
-                                    if (tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2 + 300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1) {
-                                        tmpPoint.limit += 15;
-                                    }
-                                }
-
-                                //todo вставить из настроек значение
-                                if (tmpPoint.limit > 0 && tmpPoint.limit < 74) {
-                                    tmpPoint.status = 6;
-                                    cashedDataArr[company].routes[i].ready_to_close=false;
-                                    tmpPoint.problem_index = 1;
-                                    //console.log("tmpPoint.problem_index", tmpPoint.problem_index);
-                                }
-                            }
-
-                        }
-
-
-                    }
 
 
                     function calculateProblemIndex(company) {
@@ -2418,24 +2130,6 @@ function startPeriodicCalculating() {
 
         }
 
-                    function calculateStatistic (company){
-                        console.log("Start calculate Statistic");
-                        var indx;
-                        cashedDataArr[company].statistic=[];
-                        for (var i=0; i<9; i++) {
-                            cashedDataArr[company].statistic.push(0);
-                        }
-
-
-                        for (i=0; i<cashedDataArr[company].routes.length; i++){
-                            for (var j=0; j<cashedDataArr[company].routes[i].points.length;j++){
-                                indx=parseInt(cashedDataArr[company].routes[i].points[j].status);
-                                cashedDataArr[company].statistic[indx]++;
-                            }
-                        }
-
-
-                    }
 
                     function createProblems(company) {
                         //todo поиск и сортировка ведется по полю max_problem. А описание проблемы в поле kind_of_problem
@@ -3531,5 +3225,365 @@ function choseRouteForOperator(company, login){
 
 }
 
+
+function connectPointsAndPushes(company) {
+    console.log("Start connectPointsAndPushes", company);
+    var mobilePushes = cashedDataArr[company].allPushes;
+
+    checkPushesTimeGMTZone(mobilePushes, cashedDataArr[company].CLIENT_NAME);
+
+    for (var i=0; i<cashedDataArr[company].routes.length; i++){
+        cashedDataArr[company].routes[i].pushes=[];
+    }
+
+    for (i = 0; i<mobilePushes.length;i++){
+        if (mobilePushes[i].gps_time == 0 ||
+            (mobilePushes[i].lat == 0 && mobilePushes[i].lon == 0) ||
+            mobilePushes.gps_time > parseInt(Date.now()/1000)
+        ) continue;
+
+
+        if (mobilePushes[i].canceled) continue; //TODO написать функцию обработки пуша-отмены
+
+        for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
+
+
+            for (var k = 0; k < cashedDataArr[company].routes[j].points.length; k++) {
+                var tmpPoint = cashedDataArr[company].routes[j].points[k];
+                var LAT = parseFloat(tmpPoint.LAT);
+                var LON = parseFloat(tmpPoint.LON);
+                var lat = mobilePushes[i].lat;
+                var lon = mobilePushes[i].lon;
+
+                // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
+                if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+                    //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
+
+                    tmpPoint.mobile_push = mobilePushes[i];
+                    tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
+                    mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+                    // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
+                    // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
+                    if (mobilePushes[i].distance <= cashedDataArr[company].settings.mobileRadius) {
+                        tmpPoint.havePush = true;
+
+
+
+                        //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
+                        tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+
+                        // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
+                        tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+
+                        cashedDataArr[company].routes[j].lastPointIndx = k > cashedDataArr[company].routes[j].lastPointIndx ? k : cashedDataArr[company].routes[j].lastPointIndx;
+                        // cashedDataArr[company].routes[j].pushes = cashedDataArr[company].routes[j].pushes || [];
+                        if (mobilePushes[i].gps_time_ts < parseInt(Date.now()/1000)) {
+                            cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
+                        }
+
+                        break;
+                    } else {
+                        // cashedDataArr[company].routes[j].pushes =  cashedDataArr[company].routes[j].pushes || [];
+                        if (mobilePushes[i].gps_time_ts < parseInt(Date.now()/1000)) {
+                            tmpPoint.havePush = true;
+                            mobilePushes[i].long_away = true;
+                            cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
+                        }
+                        //console.log('>>> OUT of mobile radius');
+                    }
+                }
+            }
+        }
+
+    }
+
+
+}
+
+
+function connectStopsAndPoints(company) {
+    console.log("Start connectStopsAndPushes");
+    for (i = 0; i < cashedDataArr[company].routes.length; i++) {
+        var route = cashedDataArr[company].routes[i];
+        //console.log ("route.driver.name", route.driver.NAME);
+        route.lastPointIndx = 0;
+        if (route.real_track != undefined) {
+            for (var j = 0; j < route.real_track.length; j++) {
+                // если статус не из будущего (в случае демо-режима) и стейт является стопом, b dhtvz проверяем его
+                if (route.real_track[j].t1 < parseInt(Date.now()/1000) && route.real_track[j].state == "ARRIVAL") {
+                    //console.log("считаем стоп", _data.server_time, route.real_track[j].t1, _data.server_time-route.real_track[j].t1)
+
+
+
+                    var tmpArrival = route.real_track[j];
+
+                    //console.log("tmpArrival",tmpArrival);
+                    // перебираем все точки к которым
+                    for (var k = 0; k < route.points.length; k++) {
+
+
+
+
+                        var  tmpPoint = route.points[k];
+
+
+                        cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
+
+                        if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit){
+                            //console.log("Подтверждена вручную Уходим");
+                            continue;
+                        }
+
+
+                        var LAT = parseFloat(tmpPoint.LAT);
+                        var LON = parseFloat(tmpPoint.LON);
+                        var lat = parseFloat(tmpArrival.lat);
+                        var lon = parseFloat(tmpArrival.lon);
+
+                        tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
+                        tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
+
+                        var tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+
+                        var tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
+
+
+
+
+
+
+                        // Если маршрут не просчитан, отдельно проверяем попадает ли стоп в одно из возможных временных окон  и насколько он рядом
+                        // и если да, то тоже привязываем стоп к точке
+
+                        var suit=false;   //Показывает совместимость точки и стопа для непросчитанного маршрута
+                        if (route.DISTANCE == 0 && tmpDistance < cashedDataArr[company].settings.stopRadius ) {
+                            suit=checkUncalculateRoute(tmpPoint, tmpArrival, company);
+                        }
+
+                        // если стоп от точки не раньше значения timeThreshold и в пределах
+                        // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
+                        // по времени чем предыдущий детект - привязываем этот стоп к точке
+
+
+
+                        if (suit || (tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold &&
+                            tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
+                            tmpPoint.timeToStop > tmpTime))) {
+
+                            var haveUnfinished = false;
+
+
+
+                            if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint != undefined && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
+                                for (var l = k - 1; l > 0; l--) {
+                                    var status = route.points[l].status;
+                                    if (status > 3 && status != 6)
+                                    {
+                                        haveUnfinished = true;
+                                        continue;
+                                    }
+                                }
+
+                                if (haveUnfinished) {
+                                    continue;
+                                }
+                            }
+
+
+
+                            //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
+                            //
+                            if(tmpPoint.haveStop == true && !findBestStop(tmpPoint, tmpArrival)){
+                                continue;
+                            }
+
+
+
+
+                            tmpPoint.distanceToStop = tmpDistance;
+                            tmpPoint.timeToStop = tmpTime;
+                            tmpPoint.haveStop = true;
+
+
+
+
+                            //{ if (tmpArrival.t1 > tmpPoint.controlled_window.start) && (tmpArrival.t1<tmpPoint.controlled_window.finish){
+                            //    tmpPoint.limit=60;
+                            //} else {tmpPoint.limit=60; } }
+
+                            tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
+                            tmpPoint.stopState = tmpArrival;
+                            //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
+
+                            route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                            tmpPoint.stop_arrival_time = tmpArrival.t1;
+                            tmpPoint.real_arrival_time = tmpArrival.t1;
+                            tmpPoint.autofill_service_time = tmpArrival.time;
+                            //route.points[k]
+                            //console.log("route-point-k", route.points[k], "route" , route)
+
+                            //if (angular.isUndefined(tmpArrival.servicePoints)==true){
+                            //    tmpArrival.servicePoints=[];
+                            //}
+
+                            if(tmpArrival.servicePoints == undefined) { tmpArrival.servicePoints=[]};
+
+                            // проверка, существует ли уже этот стоп
+                            var ip=0;
+                            var sPointExist=false;
+                            while(ip<tmpArrival.servicePoints.length){
+                                if(tmpArrival.servicePoints[ip]==k){
+                                    sPointExist=true;
+                                    break;
+                                }
+                                ip++;
+                            }
+                            if(!sPointExist){
+                                tmpArrival.servicePoints.push(k);}
+
+                            // tmpPoint.rawConfirmed=0;
+
+                            //console.log("Find stop for Waypoint and change STATUS")
+
+
+
+                        }
+
+
+                    }
+                }
+
+            }
+
+
+            // console.log("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
+            var lastPoint = route.points[route.lastPointIndx];
+            // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
+
+            // проверка последней определенной точки на статус выполняется
+            if (lastPoint != null && route.car_position !=  undefined) {
+                // console.log("Route", route);
+                if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > parseInt(Date.now()/1000)
+                    && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
+                        lastPoint.LAT, lastPoint.LON) < cashedDataArr[company].stopRadius) {
+                    lastPoint.status = 3;
+                }
+            }
+        }
+
+        // console.log("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
+
+    }
+
+
+}
+
+
+function findStatusesAndWindows(company) {
+    console.log("Start findStatusesAndWindows");
+    var tmpPoint;
+
+    for(var i=0; i<cashedDataArr[company].routes.length; i++ ) {
+
+        cashedDataArr[company].routes[i].ready_to_close=true;
+
+        //console.log("1");
+        for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++) {
+            //console.log("2");
+
+            tmpPoint = cashedDataArr[company].routes[i].points[j];
+
+            if (tmpPoint.real_arrival_time == undefined) {
+                cashedDataArr[company].routes[i].ready_to_close=false;
+                continue;
+            }
+            //считаем окна только для доставленного
+            //if (tmpPoint.status > 3 && tmpPoint.status != 6) continue;
+
+            tmpPoint.windowType = 'Вне окон';
+            if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
+                && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
+                tmpPoint.windowType = 'В заказанном';
+                //console.log('В заказанном')
+            } else {
+                for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
+                    if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time
+                        && tmpPoint.windows[l].finish > tmpPoint.real_arrival_time) {
+                        tmpPoint.windowType = 'В обещанном';
+                        //console.log('В обещанном');
+                        break;
+                    }
+                }
+            }
+
+            if (tmpPoint.rawConfirmed !== -1) {
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
+                    tmpPoint.status = 1;
+                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
+                    tmpPoint.status = 2;
+                } else {
+                    tmpPoint.status = 0;
+                }
+            } else {
+
+            }
+
+
+            //корректировка достоверности статусов по процентам.
+            tmpPoint.limit = 0;
+            if (tmpPoint.confirmed_by_operator) {
+                tmpPoint.limit = 100;
+                return;
+            }
+            if (tmpPoint.haveStop) {
+                tmpPoint.limit = 45;
+
+                if (tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start) {
+                    tmpPoint.limit = 60;
+                }
+
+            }
+
+            if (tmpPoint.havePush) {
+                tmpPoint.limit += 15;
+                if (tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2 + 300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1) {
+                    tmpPoint.limit += 15;
+                }
+            }
+
+            //todo вставить из настроек значение
+            if (tmpPoint.limit > 0 && tmpPoint.limit < 74) {
+                tmpPoint.status = 6;
+                cashedDataArr[company].routes[i].ready_to_close=false;
+                tmpPoint.problem_index = 1;
+                //console.log("tmpPoint.problem_index", tmpPoint.problem_index);
+            }
+        }
+
+    }
+
+
+}
+
+
+
+function calculateStatistic (company){
+    console.log("Start calculate Statistic");
+    var indx;
+    cashedDataArr[company].statistic=[];
+    for (var i=0; i<9; i++) {
+        cashedDataArr[company].statistic.push(0);
+    }
+
+
+    for (i=0; i<cashedDataArr[company].routes.length; i++){
+        for (var j=0; j<cashedDataArr[company].routes[i].points.length;j++){
+            indx=parseInt(cashedDataArr[company].routes[i].points[j].status);
+            cashedDataArr[company].statistic[indx]++;
+        }
+    }
+
+
+}
 
 module.exports = router;
