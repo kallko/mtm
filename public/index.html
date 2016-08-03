@@ -749,12 +749,12 @@
             </tr>
             </thead>
             <tr>
-                <td class="scheduled-status">{{statisticAll[7]}}</td>
-                <td class="delivered-status">{{statisticAll[0]+statisticAll[1]+statistic[2]+statisticAll[3]}}</td>
-                <td class="attention-status">{{statisticAll[6]}}</td>
-                <td class="delay-status">{{statisticAll[5]}}</td>
-                <td class="time-out-status">{{statisticAll[4]}}</td>
-                <td class="canceled-status">{{statisticAll[8]}}</td>
+                <td class="scheduled-status">{{statistic.scheduled}}</td>
+                <td class="delivered-status">{{statistic.delivered}}</td>
+                <td class="attention-status">{{statistic.attention}}</td>
+                <td class="delay-status">{{statistic.delay}}</td>
+                <td class="time-out-status">{{statistic.timeOut}}</td>
+                <td class="canceled-status">{{statistic.canceled}}</td>
             </tr>
         </table>
     </div>
@@ -766,7 +766,7 @@
 
     <div ng-repeat="route in data.routes" ng-click="showProblem(route)">
         <div>
-            <button style="background: red">{{route.kind_of_problem}}</button>
+            <button style="background: red">{{::route.kind_of_problem}} {{route.max_problem}}</button>
         </div>
         <div style="background: transparent"><br></div>
     </div>

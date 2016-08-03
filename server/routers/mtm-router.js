@@ -245,10 +245,62 @@ router.route('/dailydata')
 
 
                     //TODO Костыль проверка грузили ли мы сегодня уже эти планы для другого юзера и если да, то не перезаписывать данные.
+                    //console.log(data, "Data mtm 248");
+
+                    //for (key in data){
+                    //    console.log("Key", key);
+                    //};
+
+
+
                     if (cashedDataArr[currentCompany] != null){
+                        console.log("Date", data.date, cashedDataArr[currentCompany].date);
+                        var exist = "" +cashedDataArr[currentCompany].date.substring(0,9);
+                        if ((""+data.date).startsWith(exist)){
                         console.log("Данные по этой компани на сегодня уже получены");
                         res.status(200).json(cashedDataArr[currentCompany].settings);
                         return;
+                        } else {
+                            //Если кто-то запросил данные по прошлому дню
+                            currentCompany+=""+data.date.substring(0,9);
+                            if (data.routes !=undefined) {
+                                for (var i = 0; i < data.routes.length; i++) {
+                                    if (!data.routes[i]['uniqueID']) {
+                                        data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                        for (var j = 0; j < data.routes[i].points.length; j++) {
+                                            data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                        }
+                                    }
+                                }
+
+
+                                req.session.itineraryID = data.ID;
+                                data.user = req.session.login;
+                                data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
+                            }
+                            cashedDataArr[currentCompany] = data;
+
+                            cashedDataArr[currentCompany].currentProblems = [];
+                            cashedDataArr[currentCompany].allRoutes=[];
+                            cashedDataArr[currentCompany].settings = settings;
+                            cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
+                            cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
+
+                            //Собираем решение из частей в одну кучку
+                            linkDataParts(currentCompany, req.session.login);
+                            //Мгновенный запуск на пересчет, после загрузки
+                           //todo Получить пуши посчитать
+
+                            // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
+                            data.current_server_time = parseInt(new Date() / 1000);
+                            var current_server_time = new Date();
+                            var server_time = new Date(data.server_time * 1000);
+                            data.currentDay = false;
+                            console.log("Отправляем прошлый день");
+                            res.status(200).json(data);
+                            return;
+                        }
+
                     }
 
 
@@ -280,6 +332,7 @@ router.route('/dailydata')
                     linkDataParts(currentCompany, req.session.login);
                     //Мгновенный запуск на пересчет, после загрузки
                     startPeriodicCalculating(currentCompany);
+
 
                     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
                     data.current_server_time = parseInt(new Date() / 1000);
@@ -819,7 +872,8 @@ router.route('/routerdata')
 // получение матрицы расстояний с роутера
 router.route('/getroutermatrix/:points')
     .get(function (req, res) {
-        console.log('getmatrix', req.params.points);
+        //console.log('getmatrix', req.params.points);
+        console.log('getmatrix for route to recalc');
         tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
             res.status(200).json(data);
         });
@@ -1190,6 +1244,8 @@ router.route('/askforproblems/:need')
                     result.allRoutes = [];
                     result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                     result.settings = cashedDataArr[currentCompany].settings;
+                    result.drivers = cashedDataArr[currentCompany].drivers;
+                    result.transports = cashedDataArr[currentCompany].transports;
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
@@ -1238,6 +1294,8 @@ router.route('/askforproblems/:need')
                     result.server_time = parseInt(Date.now() / 1000);
 
                     result.settings = cashedDataArr[currentCompany].settings;
+                    result.drivers = cashedDataArr[currentCompany].drivers;
+                    result.transports = cashedDataArr[currentCompany].transports;
                     //result.allRoutes.push({
                     //    //name: data.routes[i].transport.NAME,
                     //
@@ -1273,6 +1331,8 @@ router.route('/askforproblems/:need')
                 result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
 
                 result.server_time = parseInt(Date.now() / 1000);
+                result.drivers = cashedDataArr[currentCompany].drivers;
+                result.transports = cashedDataArr[currentCompany].transports;
                 //cashedDataArr[currentCompany].blocked_routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 //blockedRoutes.push({id: "" + cashedDataArr[currentCompany].line_routes[i].uniqueID, company: currentCompany, login: login, time: parseInt(Date.now()/1000)})
                 changePriority(cashedDataArr[currentCompany].line_routes[i].uniqueID, currentCompany, login);
@@ -1835,7 +1895,7 @@ function startPeriodicCalculating() {
                                         continue;
                                     }
 
-                                    if(data[j].data[0] == undefined  ) continue;
+                                    if(data[j].data[0] == undefined) continue;
 
 
                                     cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].t2 == data[j].data[0].t2;
@@ -1908,8 +1968,7 @@ function startPeriodicCalculating() {
                         findStatusesAndWindows(company);
                         calculateProblemIndex(company);
                         calculateStatistic (company);
-                        createProblems(company)
-
+                        createProblems(company);
                         checkRealTrackData(company); //todo убрать, после того как починят треккер
                         lookForNewIten();
                     }
@@ -2022,24 +2081,6 @@ function startPeriodicCalculating() {
                                                 //console.log("Подтверждена вручную Уходим");
                                                 continue;
                                             }
-
-                                            //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
-                                            //    //console.log("Подтверждена пушем и стопом Уходим");
-                                            //    continue;
-                                            //}
-                                            //
-                                            //if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
-                                            //   // console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                                            //    continue;
-                                            //}
-                                            //
-                                            //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
-                                            //    //console.log("Точка уже доставлена идем дальше");
-                                            //    continue;
-                                            //}
-
-
-
 
 
                                             var LAT = parseFloat(tmpPoint.LAT);

@@ -191,6 +191,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if(rootScope.data != undefined) {
                 if (scope.filters.route == -1) {
                     console.log("All Routes selected");
+                    rootScope.$emit('displayCollectionToStatistic', []);//todo можно отсылать статистику по всем загруженным роутам, но нет смысла, потому что нет информативности
                     //todo пройтись по эмиту ниже и все убрать
                     //rootScope.$emit('logoutsave');
                     scope.$emit('clearMap');
@@ -4193,6 +4194,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
 
+
+
         rootScope.$on('reFact', function (event, indx){
             var route=rootScope.data.routes[indx];
             factTimeForRoute (route, true);
@@ -4424,9 +4427,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-        rootScope.$on('choseproblem', function(event, id){
+        rootScope.$on('choseproblem', function(event, id, route){
            console.log("Принял" + id);
             scope.filters.route=id;
+            factTimeForRoute(route, true);
+
         });
 
 

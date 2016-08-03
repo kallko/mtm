@@ -54,7 +54,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.route = data.route;
             scope.point = data.point;
             scope.route.lockedByMe = false;
-            scope.toggleRouteBlock();
+           // scope.toggleRouteBlock();
         }
 
         // разблокировать маршрут
@@ -62,7 +62,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.route = data.route;
             scope.point = data.point;
             scope.route.lockedByMe = true;
-            scope.toggleRouteBlock();
+           // scope.toggleRouteBlock();
         }
 
         // инициализация статусов

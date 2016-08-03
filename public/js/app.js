@@ -127,13 +127,13 @@ var myLayout = new GoldenLayout({
                                 componentName: 'template',
                                 componentState: {templateId: 'close-day'}
                             },
-                            {
-                                type: 'component',
-                                title: 'Настройки',
-                                componentName: 'template',
-                                componentState: {templateId: 'setting-window'}
-                            }
-                            ,
+                            //{
+                            //    type: 'component',
+                            //    title: 'Настройки',
+                            //    componentName: 'template',
+                            //    componentState: {templateId: 'setting-window'}
+                            //}
+                            //,
                             {
                                 type: 'component',
                                 title: 'Редактирование маршрута',

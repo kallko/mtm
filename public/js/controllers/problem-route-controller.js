@@ -32,8 +32,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         }
 
         // Запрос у сервера проблем каждые 5 секунд
-        //todo поменять 110 секунд на 5 после тестов
-          function setProblemUpdate() {
+        function setProblemUpdate() {
             interval(checkProblem, 3 * 1000);
         }
 
@@ -104,9 +103,19 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
      scope.showProblem = function(route) {
             //alert("Я все вижу" + route.filterId);
-            scope.$emit('choseproblem', route.filterId);
+            scope.$emit('choseproblem', route.filterId, route);
+            scope.$emit('routeToChange', ('routeToChange', {
+                route: route,
+                serverTime: rootScope.data.server_time,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
 
-        }
+            }));
+            rootScope.$emit('displayCollectionToStatistic', route.points);
+
+        };
 
 
 
