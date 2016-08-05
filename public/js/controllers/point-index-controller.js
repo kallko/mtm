@@ -252,7 +252,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (rootScope.data == null) return;
                 rootScope.data.server_time += seconds;
                 console.log("setDynamicDataUpdate updateData");
-                updateData();
+                //updateData();
             }, seconds * 1000);
         }
 
@@ -264,7 +264,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (rootScope.data == null) return;
                 rootScope.data.server_time += seconds;
                 rootScope.nowTime  += seconds;
-                loadTrackParts();
+                //loadTrackParts();
             }, seconds * 1000);
         }
 
@@ -492,8 +492,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                         rootScope.data.trackUpdateTime = _now;
                         console.log("Update Dinamicly stops for routes updateData");
-                        updateData();
-                        serverPredicate();
+                        //updateData();
+                        //serverPredicate();
                         // когда расчеты и загрузки закончены, проверяем не появились ли новые утвержденные решения.
                         //checkNewIten();
 
@@ -528,6 +528,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get(url, {})
                 .success(function (data) {
                     console.log(JSON.parse(JSON.stringify(data)));
+                    if (data == 'wait'){
+                        console.log("Сервер еще подготавливает данные, надо подождать");
+                        return;
+                    }
+
                     if(data.currentDay){
                         rootScope.currentDay = true;
                         scope.filters.problem_index = 1;
@@ -540,7 +545,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rootScope.reasons=data.reasons;
                     rootScope.nowTime=data.current_server_time;
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
-                    console.log("Loaded DATA", data.date, data);
+                    console.log("Loaded DATA", data.date, JSON.parse(JSON.stringify(data)));
+                    rootScope.data=data;
+                    upgradeOldDateData ();
+                    scope.rowCollection=[];
+
+                    var i=0;
+                    while (i<data.routes.length){
+
+                        scope.rowCollection=scope.rowCollection.concat(data.routes[i].points);
+                        i++;
+                    }
+                    scope.displayCollection = [].concat(scope.rowCollection);
+                    rootScope.rowCollection = scope.rowCollection;
+                    //todo заменить на проверку, реально ли это прошлый день.
+                    rootScope.currentDay=false;
 
                     //проверка на сегодняшний день
 
@@ -1096,11 +1115,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function updateData() {
             console.log("StartUpdateData");
             console.time("step2");
-            statusUpdate();
+           // statusUpdate();
             //predicationArrivalUpdate();
 
 
-            promised15MUpdate();
+           // promised15MUpdate();
 
 
            // console.log("Сейчас будем апдейтить дату", scope.existDataLoaded);
@@ -1108,9 +1127,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //накатываем сверху существующие ранее данные взятые с ноды, но только один раз при первой загрузке.
             if (!scope.existDataLoaded) {
                 console.log(" Ура сейчас мы Накатываем сверху скачанные данные");
-                concatDailyAndExistingData();
+                //concatDailyAndExistingData();
                 scope.existDataLoaded=true;
-                statusUpdate();
+               // statusUpdate();
                 unlockAllRoutes(null, rootScope.data);
 
                // scope.fastCalc=true;
@@ -4184,11 +4203,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         var currentTime = new Date(serverTime);
                         if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
                             scope.params.showDate = null;
+                            rootScope.$emit('changeasking', true);
                         }
                         if (scope.params.showDate !== -1) {
                             scope.$emit('clearMap');
                             console.log('OMG!!1 New show date!');
                             loadDailyData(true, scope.params.showDate);
+                            rootScope.$emit('changeasking', false);
                         }
                     });
             }
@@ -4209,6 +4230,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             factTimeForRoute (route, true);
         });
+
+
+        function upgradeOldDateData () {
+            console.log("Start upgrate oldday data");
+            for (var i=0; i<rootScope.data.routes.length; i++){
+                for(var j=0; j<rootScope.data.routes[i].points.length; j++ ){
+                    if (rootScope.data.routes[i].points[j].status > 3 && rootScope.data.routes[i].points[j].status !=8) {
+                        console.log("Замена статуса");
+                        rootScope.data.routes[i].points[j].status = 4;
+                    }
+                }
+            }
+        }
 
 
         //функция определяющая реальную последовательность посещения точек
@@ -4280,7 +4314,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get('./checknewiten')
         }
 
-        rootScope.$on('statusUpdate', statusUpdate);
+        //rootScope.$on('statusUpdate', statusUpdate);
 
 
         // Удаление некорректного пуша
@@ -4392,6 +4426,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         scope.solveProblem = function (id) {
+            scope.$emit('clearMap');
             console.log("Event", id);
             console.log("RootScopeData",rootScope.data);
             var result;
@@ -4423,7 +4458,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-
+                                    if(rootScope.data.routes.length == 0) delete rootScope.data;
                                     break;
                                 }
                             }

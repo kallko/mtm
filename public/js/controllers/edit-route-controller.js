@@ -92,9 +92,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             console.log("I recieve DATA", data);
             scope.allDrivers=data.allDrivers;
             scope.allTransports=data.allTransports;
-            var id = data.route.filterId;
+            scope.id = data.route.filterId;
             for (var i=0; i<rootScope.data.routes.length; i++){
-                if(rootScope.data.routes[i].filterId == id ) scope.parent_route = rootScope.data.routes[i];
+                if(rootScope.data.routes[i].filterId == scope.id ) scope.parent_route = rootScope.data.routes[i];
             }
 
             console.log(data.route);
@@ -166,6 +166,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // пересчитать маршрут (клиентская валидация маршрута)
         function recalculateRoute() {
+
+            // копируем без ссылок маршрут
             // загружаем данные с роутера, если не сделали этого раньше
             if (!routerData) {
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
@@ -247,10 +249,14 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // переместить пропущенные задачи в конец маршрута
         function moveSkippedToEnd(route) {
+            console.log("Приступаем к обработке роута", route);
             var toMoveArr = [],
                 lastTask;
+            var lastindx = route.points.length - 1;
+            console.log("Last indx = ", lastindx);
 
-            route.warehouseEnd = route.points[route.points.length - 1].waypoint.TYPE == "WAREHOUSE";
+            //todo костыль на отсутсвие парковки
+            route.warehouseEnd = route.points[lastindx].waypoint.TYPE == "WAREHOUSE";
             if (route.warehouseEnd) lastTask = route.points.pop();
 
             for (var i = 0; i < route.points.length > i && i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
@@ -263,6 +269,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
+            console.log ("Заданий на перенос", toMoveArr.length);
             route.lastPointIndx -= toMoveArr.length;
             for (var i = 0; i < toMoveArr.length; i++) {
                 toMoveArr[i].TRAVEL_TIME = '0';
@@ -517,7 +524,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // приводит маршрут в необходимый формат и отправляетего на математический сервер для пересчета
         scope.recalculateRoute = function () {
-            var route = scope.changedRoute;
+            var route;
+            for (var i=0; i<rootScope.data.routes.length; i++){
+                if(rootScope.data.routes[i].filterId == scope.id ) route = rootScope.data.routes[i];
+            }
+
 
             if (route != undefined) {
                 route.recalcIter = route.recalcIter || 0;
@@ -541,6 +552,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     pt,
                     job,
                     timeWindow,
+                    delay,
                     late;
 
                 for (var i = 0; i < route.points.length; i++) {
@@ -558,6 +570,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         });
                         break;
                     }
+                }
+
+                //Если склад не обнаружен, назначем его - последней подтвержденной точкой на маршруте
+                if(mathInput.depotList.length == 0) {
+                    findAlternativeDepot(route, mathInput);
                 }
 
                 var trWindow = TimeConverter.getTstampAvailabilityWindow('03:00 - ' +
@@ -592,41 +609,64 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                         mathInput.points.push(point);
 
-                        late = route.points[i].status == STATUS.TIME_OUT ||
-                            route.points[i].status == STATUS.DELAY;
+                        late = route.points[i].status == STATUS.TIME_OUT
+                        delay = route.points[i].status == STATUS.DELAY;
 
                         jobWindows = [];
-                        // выбор типа пересчета
-                        switch (scope.recalc_mode) {
-                            case scope.recalc_modes[0].value:   // пересчет по большим окнам
-                                jobWindows = [
-                                    {
-                                        "start": late ? serverTime : pt.promised_window_changed.start,
-                                        "finish": late ? trWindow[0].finish : pt.promised_window_changed.finish
-                                    }
-                                ];
-                                break;
-                            case scope.recalc_modes[1].value:   // пересчет по заданным окнам
-                                jobWindows = [
-                                    {
-                                        "start": pt.promised_window_changed.start,
-                                        "finish": pt.promised_window_changed.finish
-                                    }
-                                ];
-                                break;
-                            case scope.recalc_modes[2].value:   // пересчет при рекрусивном увелечении окон
-                                jobWindows = [
-                                    {
-                                        "start": pt.promised_window_changed.start - timeStep,
-                                        "finish": pt.promised_window_changed.finish + timeStep
-                                    }
-                                ];
-                                pt.promised_window_changed = jobWindows[0];
-                                break;
+                        jobWindows = [
+                            {
+                                "start": pt.promised_window_changed.start,
+                                "finish": pt.promised_window_changed.finish
+                            }];
+                        if (late){
+                            console.log("Расширяем окно для точки", pt);
+                        jobWindows = [
+                            {
+                                "start": rootScope.nowTime,
+                                "finish": rootScope.nowTime+60*60
+                            }];
                         }
 
+                        if (delay) {
+                            //jobWindows = [
+                            //    {
+                            //        "start": pt.promised_window_changed.start,
+                            //        "finish": pt.promised_window_changed.finish
+                            //    }];
+                        }
+
+                        // выбор типа пересчета
+                        //todo переделать когда будут варианты
+                        //switch (scope.recalc_mode) {
+                        //    case scope.recalc_modes[0].value:   // пересчет по большим окнам
+                        //        jobWindows = [
+                        //            {
+                        //                "start": late ? serverTime : pt.promised_window_changed.start,
+                        //                "finish": late ? trWindow[0].finish : pt.promised_window_changed.finish
+                        //            }
+                        //        ];
+                        //        break;
+                        //    case scope.recalc_modes[1].value:   // пересчет по заданным окнам
+                        //        jobWindows = [
+                        //            {
+                        //                "start": pt.promised_window_changed.start,
+                        //                "finish": pt.promised_window_changed.finish
+                        //            }
+                        //        ];
+                        //        break;
+                        //    case scope.recalc_modes[2].value:   // пересчет при рекрусивном увелечении окон
+                        //        jobWindows = [
+                        //            {
+                        //                "start": pt.promised_window_changed.start - timeStep,
+                        //                "finish": pt.promised_window_changed.finish + timeStep
+                        //            }
+                        //        ];
+                        //        pt.promised_window_changed = jobWindows[0];
+                        //        break;
+                        //}
+
                         job = {
-                            "id": i.toString(),
+                            "id": pt.NUMBER,
                             "weigth": parseInt(pt.WEIGHT),
                             "volume": parseInt(pt.VOLUME),
                             "value": parseInt(pt.VALUE),
@@ -767,6 +807,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 point,
                 tmp;
 
+            //todo собрать решение из полученного.
+
+
             // обновляем изменяемую копию маршрута
             for (var i = 0; i < newSolution.length; i++) {
                 tmp = newSolution[i].pointId;
@@ -809,10 +852,49 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.changedRoute = undefined;
         };
 
+        rootScope.$on('clearmap', function(){
+            scope.route = undefined;
+            scope.changedRoute = undefined;
+        });
+
     scope.changeDriver = function() {
         //console.log(scope.selectedDriver, scope.selectedTransport, scope.selectedStart);
         rootScope.$emit('changeDriver', scope.selectedDriver, scope.selectedTransport, scope.selectedStart, scope.route.uniqueID); //эмитируем в поинтиндекс контроллер, чтобы там сделать все изменения в данных
         scope.selectedStart=false;
-    }
+    };
+
+
+    rootScope.$on('checkInCloseDay', function () {
+        var route=scope.route;
+        if (route.have_attention == undefined || route.have_attention == true) route.have_attention =false;
+        for (var i = 0; i<route.points.length; i++){
+            if (route.points[i].status == 6) route.have_attention = true;
+        }
+
+    });
+
+
+        function  findAlternativeDepot(route, mathInput) {
+            console.log("Нет нормального склада, будем искать");
+            var warehouse = route.points[0];
+            var realTime = route.points[0].real_arrival_time == undefined ? 0 : route.points[0].real_arrival_time;
+            for (var i=0; i<route.points.length; i++){
+                if (route.points[i] != undefined && route.points[i].real_arrival_time > realTime){
+                    warehouse = route.points[i];
+                    realTime = route.points[i].real_arrival_time;
+                }
+            }
+
+            console.log("Будем считать складом", warehouse);
+            mathInput.depotList.push({
+                "id": "1",
+                "point": "-2",
+                "window": {
+                    "start": rootScope.nowTime-10*60,  //END_TIME: "30.10.2015 19:50:02"
+                    "finish": rootScope.nowTime+24*60*60  //START_TIME: "30.10.2015 06:30:00"
+                }
+            })
+
+        }
 
     }]);

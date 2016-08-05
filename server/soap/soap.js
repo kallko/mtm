@@ -831,7 +831,7 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
 
 
 //Получение пушей водителей
-SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
+SoapManager.prototype.getPushes = function (idArr, time, company, callback, tempCompany) {
     // получить строковую дату в формате 1С
     function getDateStrFor1C(timestamp) {
         var date = new Date(timestamp);
@@ -843,7 +843,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
     var me = this;
     var url = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
     // сохранение в 1С от имени авторизированного пользователя
-    var receivePushes = function (idArr, time, company, callback) {
+    var receivePushes = function (idArr, time, company, callback, tempCompany) {
         //console.log("Try to recieve pushes", me.login);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
@@ -857,7 +857,8 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
                     //console.log('GET PUSHES OK');
                     log.toFLog('PUSHES is', result);
                     //console.log('!!!!!!!!PUSHES is', result);
-                    callback(company, result);
+                    if (tempCompany == undefined) tempCompany=company;
+                    callback(tempCompany, result);
                 } else {
                     console.log('GET PUSHES  ERROR');
                     console.log('result', err);
@@ -869,7 +870,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
         });
     };
 
-    receivePushes(idArr, time, company, callback);
+    receivePushes(idArr, time, company, callback, tempCompany);
 
 }
 

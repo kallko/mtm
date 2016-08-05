@@ -160,7 +160,7 @@
             </div>
             <div class="row row-gutter-5">
                 <div class="col-md-2">
-                    {{nowTime*1000 | date : 'H:mm'}}
+                    {{nowTime*1000 | date : 'H:mm:ss'}}
                 </div>
                 <div class="col-sm-3">
                     <input  id="search-input" class="heightElement" type="text" size="15" enter-event="setTextFilter()"/>
@@ -854,26 +854,13 @@
 
 <div id="problem-route-list" ng-controller="ProblemRouteController" style="position: absolute; bottom: 60%; left: 1%"
      ng-model="data.routes"
-     ng-show="!clickOff">
+     ng-show="!clickOff && data.routesOfDate == undefined">
 
     <div ng-repeat="route in data.routes" ng-click="showProblem(route)">
         <div>
             <button style="background: red">{{::route.kind_of_problem}} {{route.max_problem}}</button>
         </div>
         <div style="background: transparent"><br></div>
-    </div>
-</div>
-
-<!-- див для оповещений -->
-<div ng-controller="NotificationController">
-    <div id="notification">
-        <div>[[текст оповещения]]</div>
-    </div>
-    <div id="ConfirmchengeCoord">
-        <div>[[текст оповещения]]</div>
-            <input type="checkbox" ng-model="gpsConfirmation" ng-checked="false" id="check"/>Подтверждаете новые координаты GPS данными?
-            <button ng-click="chengeCoordPoint('true')" >OK</button>
-            <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>
 </div>
 
@@ -1047,8 +1034,8 @@
         </button>
 
     </div>
-</div>
 <!--Окошко для редактирования точек и времени-->
+</div>
 
 
 
@@ -1116,5 +1103,19 @@
     </div>
     <div class="stopWithOutPoints" ng-show="stopWithOutPoints">
         К данному стопу не привязана ни одна точка
+    </div>
+</div>
+
+
+<!-- див для оповещений -->
+<div ng-controller="NotificationController" ng-show="popupShow">
+    <div id="notification">
+        <div>[[текст оповещения]]</div>
+    </div>
+    <div id="ConfirmchengeCoord">
+        <div>[[текст оповещения]]</div>
+        <input type="checkbox" ng-model="gpsConfirmation" ng-checked="false" id="check"/>Подтверждаете новые координаты GPS данными?
+        <button ng-click="chengeCoordPoint('true')" >OK</button>
+        <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>
 </div>

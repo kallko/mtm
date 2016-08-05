@@ -33,7 +33,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         // Запрос у сервера проблем каждые 5 секунд
         function setProblemUpdate() {
-            interval(checkProblem, 3 * 1000);
+            interval(checkProblem, 6 * 1000);
         }
 
 
@@ -45,7 +45,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         function checkProblem() {
             checkTimeForEditing();
 
-            if (rootScope.tempDecision != undefined) {
+            if (rootScope.tempDecision != undefined && rootScope.data && rootScope.data.routes) {
                 var pQuant = rootScope.settings.problem_to_operator;
             console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
 
@@ -86,7 +86,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         } else {
                             console.log("Общая статистика", data);
                             rootScope.statisticAll = data.statistic;
-
+                            rootScope.nowTime = data.nowTime;
                         }
 
                     rootScope.editing.start = parseInt(Date.now()/1000);
@@ -137,6 +137,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         rootScope.editing={};
                         alert("Time out!");
                         scope.$emit('logout');// В PIC очищение таблицы точек
+                        scope.$emit('clearMap');
                     });
 
 
@@ -144,6 +145,17 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         }
+
+
+
+        rootScope.$on('changeasking', function (event, changeAsking) {
+            console.log("Изменяем состояние опроса сервера");
+            if (changeAsking) {
+                rootScope.asking = true;
+            } else {
+                rootScope.asking = false;
+            }
+        })
 
 
 

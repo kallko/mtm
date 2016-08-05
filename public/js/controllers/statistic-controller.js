@@ -10,7 +10,18 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
         scope.statistic.timeOut = 0;
         scope.statistic.delivered = 0;
         
-        
+        rootScope.$on('clearMap', function(){
+            scope.statistic = {};
+            scope.statistic.canceled = 0;
+            scope.statistic.scheduled = 0;
+            scope.statistic.attention = 0;
+            scope.statistic.delay = 0;
+            scope.statistic.timeOut = 0;
+            scope.statistic.delivered = 0;
+        });
+
+
+
         rootScope.$on('displayCollectionToStatistic', function(e, pointsArr){
             scope.statistic.canceled = 0;
             scope.statistic.scheduled = 0;
