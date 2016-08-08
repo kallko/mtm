@@ -362,6 +362,7 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].settings = settings;
                     cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                     cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
+                    cashedDataArr[currentCompany].companyName=currentCompany;
 
                     //Собираем решение из частей в одну кучку
                     linkDataParts(currentCompany, req.session.login);
@@ -1277,6 +1278,7 @@ router.route('/askforproblems/:need')
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
+                    result.companyName = currentCompany;
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
@@ -1330,6 +1332,7 @@ router.route('/askforproblems/:need')
                     result.ID = cashedDataArr[currentCompany].ID;
                     result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
                     result.server_time = parseInt(Date.now() / 1000);
+                    result.companyName = currentCompany;
 
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
@@ -1375,6 +1378,7 @@ router.route('/askforproblems/:need')
 
                 result.ID = cashedDataArr[currentCompany].ID;
                 result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
+                result.companyName = currentCompany;
 
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
@@ -1394,6 +1398,7 @@ router.route('/askforproblems/:need')
                 result ={};
                 result.statistic=cashedDataArr[currentCompany].statistic;
                 result.nowTime = parseInt(Date.now()/1000);
+                result.companyName = currentCompany;
                 res.status(200).json(result);
                 return;
             } else {
@@ -2337,7 +2342,7 @@ function uncalcPredication(route, company) {
 
 function calcPredication(route, company) {
 
-
+    if (route.uniqueID = "34111") console.log("Начинаем считать проблемный роут", route.driver.NAME, " ", route.DISTANCE);
     //console.log("This is calculated route");
 
     var point,
@@ -2346,9 +2351,9 @@ function calcPredication(route, company) {
 
 
 
-    if (route.points[route.lastPointIndx]) {
+    if (route.points[route.lastPointIndx] || route.points[route.lastPointIndx] == 0) {
 
-
+        if (route.uniqueID = "34111") console.log("Первая проверка успешна.");
         point = route.car_position;
 
 
@@ -2373,7 +2378,7 @@ function calcPredication(route, company) {
 
         var singleTimeMatrix = [];
 
-        if (route.real_track != undefined && cashedDataArr[company].dataForPredicate != undefined) {
+        if (route.real_track != undefined && cashedDataArr[company].dataForPredicate != undefined && route.real_track.length != 0) {
             var k = 0;
 
             while (k < cashedDataArr[company].dataForPredicate.length) {
@@ -2385,6 +2390,23 @@ function calcPredication(route, company) {
 
                 k++;
             }
+        } else {
+            //Рассчитываем статусы по фактическому времение, если у нас нет трека или предсказания;
+            if (route.uniqueID = "34111") console.log("Вторая проверка успешна. Все в порядке");
+            for (var i= 0; i<route.points.length; i++ ){
+                if (now > route.points[i].working_window.finish){
+                    route.points[i].status = 4;
+                    route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
+                    continue;
+                }
+
+                if(now > route.points[i].arrival_time_ts) {
+                    route.points[i].status = 5;
+                    route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
+                    continue;
+                }
+            }
+            return;
         }
 
 
@@ -3401,12 +3423,6 @@ function connectStopsAndPoints(company) {
                             tmpPoint.timeToStop > tmpTime))) {
 
                            // var haveUnfinished = false;
-                            console.log(" Законнектили" , suit ,
-                                (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold) ||
-                                tmpPoint.arrival_time_ts)
-                                &&
-                                tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
-                                tmpPoint.timeToStop > tmpTime)), warehoseK*cashedDataArr[company].settings.timeThreshold );
 
 
 
@@ -3569,7 +3585,7 @@ function findStatusesAndWindows(company) {
             tmpPoint.limit = 0;
             if (tmpPoint.confirmed_by_operator) {
                 tmpPoint.limit = 100;
-                return;
+                continue;
             }
             if (tmpPoint.haveStop) {
                 tmpPoint.limit = 45;

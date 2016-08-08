@@ -701,12 +701,19 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
 
         // метод в соапе открывающий окно в IDS-овской 1С-ке
+        //client.OpenElement({
+        //        UserId: 'efa17485-fb45-11e2-a23d-005056a74894',
+        //        ObjectType: 'СПРАВОЧНИК',
+        //        ObjectName: 'КУБ_Точки',
+        //        ElementId: 'dcaf4733-378c-11e6-a4a7-005056a76b49'
+        //    },
         client.OpenElement({
             UserId: userIds[user],
             ObjectType: 'СПРАВОЧНИК',
             ObjectName: 'КУБ_Точки',
             ElementId: pointId
-        }, function (err, result) {
+        },
+            function (err, result) {
             if (err) console.log(err.body);
             if (result) console.log(result);
         });

@@ -436,7 +436,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 // Создание титла к точке. Ненужная информация закоментчена.
-                if (point.waypoint.TYPE == "WAREHOUSE") {
+                if(point.waypoint == undefined) {
+                    title = 'Парковка\n';
+                    tmpStatus = getTextStatuses(point.status);
+                    title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
+                }
+
+                if (point.waypoint != undefined && point.waypoint.TYPE == "WAREHOUSE") {
                     title = 'Склад\n';
                     tmpStatus = getTextStatuses(point.status);
                     title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
@@ -456,7 +462,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 //title += 'Расстояние: ' + point.DISTANCE + ' метра(ов)\n';
                 //title += 'Время на дорогу к точке: ' + mmhh(point.TRAVEL_TIME) + '\n';
 
-                if (point.waypoint != null) {
+                if (point.waypoint != null && point.waypoint != undefined) {
                     title += 'Адрес: ' + point.waypoint.ADDRESS + '\n';
                     // title += 'Клиент: ' + point.waypoint.NAME + '\n';
                     // title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';

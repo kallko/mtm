@@ -556,93 +556,108 @@
         <div ng-show="parent_route.have_attention" style="color: orangered" ng-model="accept" ng-click="accept=true">
             !!!!!!! В этом маршруте сть точки со статусом внимание !!!!!!!
         </div>
-        <div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">
 
-
-            <div class="block-title" style="color: maroon; font-weight: 600">Изменение обещанных окон в рамках заказанных</div>
-                <div>
-                    <div> Точка &nbsp&nbsp Заказанное окно &nbsp&nbsp Обещанное окно  &nbsp&nbsp План. прибытие&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp Переносов</div>
-                    <div> Иванов &nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>
-
-                    <button class="btn btn-info btn-sm"
-                            ng-click="recalculateRoute()">принять</button>
-                </div>
-
+        <div ng-show="route !== undefined">
+             Сделано попыток перерасчета {{iteration || 0}}
         </div>
-        <br>
-        <div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">
-            <div class="block-title" style="color: maroon; font-weight: 600">Перенос заказа на другое время по согласованию с получателем</div>
-
-                <div> Точка &nbsp&nbsp&nbsp&nbsp&nbsp Заказанное окно &nbsp&nbsp&nbsp&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  План. прибытие&nbsp&nbsp  Переносов</div>
-                <div> Иванов &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00  &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 11.20   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>
-                    <div> Вариант 1 &nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp14.00 - 15.00  &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 14.20    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>
-                    <button class="btn btn-info btn-sm"
-                            ng-click="saveRoutes()"
-                            ng-disabled="disableSaveRoutes">принять</button>
-                <div> Вариант 2 &nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp19.00 - 20.00  &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 19.20    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>
-                <button class="btn btn-info btn-sm"
-                        ng-click="saveRoutes()"
-                        ng-disabled="disableSaveRoutes">принять</button>
-        </div>
-
-
-        <br>
-        <div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">
-            <div class="block-title" style="color: maroon; font-weight: 600">Отмена точки и перенос на другой день</div>
-            <div class="col-sm-3">
-                <input type="date"
-                       class="width100 heightElement"
-                       ng-model="showDate"
-                       id="show-next-date"/>
-            </div>
-
-                <input type="time" class="promised-text-card" id="promised-next-start-card"
-                       ng-change="changePromisedCard()"
-                       ng-model="promisedStartCard"
-                       enter-event="changePromisedWindow(point)"> -
-                <input type="time" class="promised-text-card" id="promised-next-finish-card"
-                       ng-change="changePromisedCard()"
-                       ng-model="promisedFinishCard"
-
-                       enter-event="changePromisedWindow(point)">
+        <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
-                    ng-click="saveRoutes()"
-                    ng-disabled="disableSaveRoutes">принять</button>
+            ng-click="recalculateRoute()">Рассчитать</button>
         </div>
-
-        <br>
-        <div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">
-            <div class="block-title" style="color: maroon; font-weight: 600">Изменение порядка следования</div>
-            <div>
-                <div> Точка &nbsp&nbsp Заказанное окно &nbsp&nbsp Обещанное окно  &nbsp&nbsp План. прибытие&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp Переносов</div>
-                <div> Иванов &nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>
-                <div> Петров &nbsp&nbsp&nbsp11.00 - 16.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 15.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 15.00 -16.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>
-
-                <button class="btn btn-info btn-sm"
-                        ng-click="saveRoutes()"
-                        ng-disabled="disableSaveRoutes">принять</button>
-                <button class="btn btn-info btn-sm"
-                        ng-click="saveRoutes()"
-                        ng-disabled="disableSaveRoutes">редактировать</button>
-            </div>
-
-            <div>
-                <div> Точка &nbsp&nbsp Заказанное окно &nbsp&nbsp Обещанное окно  &nbsp&nbsp План. прибытие&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp Переносов</div>
-                <div> Иванов &nbsp&nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 0</div>
-                <div style="color: darkred"> Сидоров &nbsp&nbsp&nbsp12.00 - 16.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp12.00 - 13.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 16.20   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 0</div>
-                <div> Пупкинд &nbsp&nbsp&nbsp16.00 - 20.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp16.00 - 17.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 19.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 19.00 -20.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 0</div>
-
-
-                <button class="btn btn-info btn-sm"
-                        ng-click="saveRoutes()"
-                        ng-disabled="disableSaveRoutes">принять</button>
-                <button class="btn btn-info btn-sm"
-                        ng-click="saveRoutes()"
-                        ng-disabled="disableSaveRoutes">редактировать</button>
-            </div>
-
+        <div>
+            Предлагаемое количество новых маршрутов = {{newRoutes}}
+        </div>
+        <div ng-show="newRoutes == 1" ng-repeat="item in display">
+            {{item.exNumber}}, {{item.newNumber}}, {{item.exArrival*1000 | date:'HH:mm'}}, {{item.newArrival* 1000 | date:'HH:mm'}}
 
         </div>
+        <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->
+
+
+            <!--<div class="block-title" style="color: maroon; font-weight: 600">Изменение обещанных окон в рамках заказанных</div>-->
+                <!--<div>-->
+                    <!--<div> Точка &nbsp&nbsp Заказанное окно &nbsp&nbsp Обещанное окно  &nbsp&nbsp План. прибытие&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp Переносов</div>-->
+                    <!--<div> Иванов &nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>-->
+
+                    <!--<button class="btn btn-info btn-sm"-->
+                            <!--ng-click="recalculateRoute()">принять</button>-->
+                <!--</div>-->
+
+        <!--</div>-->
+        <!--<br>-->
+        <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->
+            <!--<div class="block-title" style="color: maroon; font-weight: 600">Перенос заказа на другое время по согласованию с получателем</div>-->
+
+                <!--<div> Точка &nbsp&nbsp&nbsp&nbsp&nbsp Заказанное окно &nbsp&nbsp&nbsp&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  План. прибытие&nbsp&nbsp  Переносов</div>-->
+                <!--<div> Иванов &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00  &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 11.20   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>-->
+                    <!--<div> Вариант 1 &nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp14.00 - 15.00  &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 14.20    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>-->
+                    <!--<button class="btn btn-info btn-sm"-->
+                            <!--ng-click="saveRoutes()"-->
+                            <!--ng-disabled="disableSaveRoutes">принять</button>-->
+                <!--<div> Вариант 2 &nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp19.00 - 20.00  &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 19.20    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>-->
+                <!--<button class="btn btn-info btn-sm"-->
+                        <!--ng-click="saveRoutes()"-->
+                        <!--ng-disabled="disableSaveRoutes">принять</button>-->
+        <!--</div>-->
+
+
+        <!--<br>-->
+        <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->
+            <!--<div class="block-title" style="color: maroon; font-weight: 600">Отмена точки и перенос на другой день</div>-->
+            <!--<div class="col-sm-3">-->
+                <!--<input type="date"-->
+                       <!--class="width100 heightElement"-->
+                       <!--ng-model="showDate"-->
+                       <!--id="show-next-date"/>-->
+            <!--</div>-->
+
+                <!--<input type="time" class="promised-text-card" id="promised-next-start-card"-->
+                       <!--ng-change="changePromisedCard()"-->
+                       <!--ng-model="promisedStartCard"-->
+                       <!--enter-event="changePromisedWindow(point)"> - -->
+                <!--<input type="time" class="promised-text-card" id="promised-next-finish-card"-->
+                       <!--ng-change="changePromisedCard()"-->
+                       <!--ng-model="promisedFinishCard"-->
+
+                       <!--enter-event="changePromisedWindow(point)">-->
+            <!--<button class="btn btn-info btn-sm"-->
+                    <!--ng-click="saveRoutes()"-->
+                    <!--ng-disabled="disableSaveRoutes">принять</button>-->
+        <!--</div>-->
+
+        <!--<br>-->
+        <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->
+            <!--<div class="block-title" style="color: maroon; font-weight: 600">Изменение порядка следования</div>-->
+            <!--<div>-->
+                <!--<div> Точка &nbsp&nbsp Заказанное окно &nbsp&nbsp Обещанное окно  &nbsp&nbsp План. прибытие&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp Переносов</div>-->
+                <!--<div> Иванов &nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>-->
+                <!--<div> Петров &nbsp&nbsp&nbsp11.00 - 16.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 15.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 15.00 -16.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 1</div>-->
+
+                <!--<button class="btn btn-info btn-sm"-->
+                        <!--ng-click="saveRoutes()"-->
+                        <!--ng-disabled="disableSaveRoutes">принять</button>-->
+                <!--<button class="btn btn-info btn-sm"-->
+                        <!--ng-click="saveRoutes()"-->
+                        <!--ng-disabled="disableSaveRoutes">редактировать</button>-->
+            <!--</div>-->
+
+            <!--<div>-->
+                <!--<div> Точка &nbsp&nbsp Заказанное окно &nbsp&nbsp Обещанное окно  &nbsp&nbsp План. прибытие&nbsp&nbsp Новое окно &nbsp&nbsp&nbsp Переносов</div>-->
+                <!--<div> Иванов &nbsp&nbsp&nbsp&nbsp&nbsp10.00 - 14.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp11.00 - 12.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 0</div>-->
+                <!--<div style="color: darkred"> Сидоров &nbsp&nbsp&nbsp12.00 - 16.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp12.00 - 13.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 16.20   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 13.00 -14.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 0</div>-->
+                <!--<div> Пупкинд &nbsp&nbsp&nbsp16.00 - 20.00  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp16.00 - 17.00   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 19.40   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 19.00 -20.00 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 0</div>-->
+
+
+                <!--<button class="btn btn-info btn-sm"-->
+                        <!--ng-click="saveRoutes()"-->
+                        <!--ng-disabled="disableSaveRoutes">принять</button>-->
+                <!--<button class="btn btn-info btn-sm"-->
+                        <!--ng-click="saveRoutes()"-->
+                        <!--ng-disabled="disableSaveRoutes">редактировать</button>-->
+            <!--</div>-->
+
+
+        <!--</div>-->
 
 
 
@@ -698,7 +713,7 @@
                 <!--</div>-->
             <!--</div>-->
         <!--</div>-->
-        <div id="change-driver" ng-show="route !== undefined" >
+        <div id="change-driver" ng-show="route !== undefined && false" >
             <div class="block-title">Замена (Водителя/Машины) на маршруте</div>
             <div id="change-driver-menu" > Произвести замену: <br>
                 {{route.driver.NAME}} на машине {{route.transport.NAME}} с номером {{route.transport.REGISTRATION_NUMBER}}<br>
@@ -872,7 +887,7 @@
             <div class="card-title">
                 Карточка задания
                 <button class="btn btn-primary btn-sm"
-                        ng-show="companyName == 'IDS'"
+                        ng-show="data.companyName == '292942'"
                         ng-click="open1CWindow()">Открыть в 1С
                 </button>
             </div>

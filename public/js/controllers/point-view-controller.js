@@ -269,9 +269,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         };
 
         // открывает окно в 1С IDS-овцев
-        scope.open1CWindow = function () {
+        rootScope.open1CWindow = function () {
             console.log('open1CWindow');
             http.get('./openidspointwindow/' + scope.point.waypoint.ID)
+            //http.get('./openidspointwindow/' + 12)
                 .success(function (data) {
                     console.log(data);
                 })
