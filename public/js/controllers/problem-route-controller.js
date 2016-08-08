@@ -3,7 +3,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
     , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
     function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {
         // console.log("ProblemRouteController Start");
-        scope.testProblemArray = [["Опоздание", 2, 3, 4], ["Долгая остановка", 6, 7, 8]]; // Тестовая база инцидентов.
+        //scope.testProblemArray = [["Опоздание", 2, 3, 4], ["Долгая остановка", 6, 7, 8]]; // Тестовая база инцидентов.
         var askProblemFromServer = true;                                           //  запрашивать ли проблемы с сервера
         rootScope.asking = false;                                                   // Запущен ли процесс запрсов
         rootScope.tempDecision;
@@ -32,45 +32,64 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         }
 
         // Запрос у сервера проблем каждые 5 секунд
-          function setProblemUpdate() {
-            interval(checkProblem, 5 * 1000);
+        function setProblemUpdate() {
+            interval(checkProblem, 6 * 1000);
         }
 
 
-        scope.solveProblem = function (route) {
-            alert("Hellow");
-            console.log("Event", route);
-            for (var i = 0; i < scope.testProblemArray.length; i++) {
-                if (route == scope.testProblemArray[i]) {
-                    scope.testProblemArray.splice(i, 1);
-                    break;
-                }
-            }
-        }
+
 
 
         //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
         // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
         function checkProblem() {
-            console.log("Ask for problem");
-            //console.log(" Route = ", rootScope.editing.uniqueID, scope.filters.route )
-            if (!rootScope.tempDecision) {
+            checkTimeForEditing();
 
-                http.get('./askforproblems/')
+            if (rootScope.tempDecision != undefined && rootScope.data && rootScope.data.routes) {
+                var pQuant = rootScope.settings.problem_to_operator;
+            console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
+
+            }
+            var need=0;
+            var exist=0;
+            if (rootScope.data != undefined && rootScope.data.routes != undefined){
+                exist = rootScope.data.routes.length;
+            }
+            if(rootScope.settings != undefined) {
+                need = parseInt(rootScope.settings.problems_to_operator) - exist;
+            }
+
+            //if(need<0) need='';
+            //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
+            console.log(" Go to ASK ", !rootScope.data,  need );
+            if ((!rootScope.data && need>0 ) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
+                console.log("Give me", need, "the problem please! String is");
+
+
+                http.get('./askforproblems/:'+need)
                     .success(function (data) {
 
                         if (data == undefined) {
-                            return} else {
+                            return
+                        } else {
                             console.log("Problems Loaded");
                         }
-                        if(data.settings != undefined) {
-                            rootScope.tempDecision = data;
+
+                        if (data == "wait") {
+                            console.log ("Рассчет прошлого дня еще не закончен");
+                            return;
+                        }
+                        if(data.allRoutes != undefined) {
+                            console.log("Отправляем данные на клиент", data);
+                            rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.$emit('receiveproblem', rootScope.tempDecision);
                         } else {
-                          rootScope.statisticAll = data;
+                            console.log("Общая статистика", data);
+                            rootScope.statisticAll = data.statistic;
+                            rootScope.nowTime = data.nowTime;
                         }
 
-
+                    rootScope.editing.start = parseInt(Date.now()/1000);
 
                     }).error(function () {
                         rootScope.errorNotification('Проблем роут контроллер');
@@ -85,6 +104,60 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             console.log("Запускаем опрос сервера");
             startAsking()
         });
+
+
+     scope.showProblem = function(route) {
+            //alert("Я все вижу" + route.filterId);
+            scope.$emit('choseproblem', route.filterId);
+            scope.$emit('routeToChange', ('routeToChange', {
+                route: route,
+                serverTime: rootScope.data.server_time,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            }));
+            rootScope.$emit('displayCollectionToStatistic', route.points);
+
+        };
+
+
+
+        function checkTimeForEditing (){
+            var end = parseInt(Date.now()/1000);
+            //console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
+
+            if(rootScope.editing.start + 600 < end ) {
+                http.post('./logout')
+                    .success(function (data) {
+                        console.log("complete");
+                        rootScope.asking = false;
+                        rootScope.data.routes = [];
+                        rootScope.editing={};
+                        alert("Time out!");
+                        scope.$emit('logout');// В PIC очищение таблицы точек
+                        scope.$emit('clearMap');
+                    });
+
+
+            }
+
+
+        }
+
+
+
+        rootScope.$on('changeasking', function (event, changeAsking) {
+            console.log("Изменяем состояние опроса сервера");
+            if (changeAsking) {
+                rootScope.asking = true;
+            } else {
+                rootScope.asking = false;
+            }
+        })
+
+
 
     }]);
 /**

@@ -18,7 +18,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             gpsPushMarkers=[];                          // Массив маркеров пушей текущего маршрута
 
 
-        scope.params = scope.params || Settings.load();
+        scope.params = {} //scope.params || Settings.load();
         timeThreshold = scope.params.timeThreshold * 60
 
         initMap();
@@ -295,6 +295,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                             checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                             scope.currentDraggingStop = null;
+                            console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
                             rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
                             rootScope.$emit('checkInCloseDay');
                         });
@@ -435,7 +436,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 // Создание титла к точке. Ненужная информация закоментчена.
-                if (point.waypoint.TYPE == "WAREHOUSE") {
+                if(point.waypoint == undefined) {
+                    title = 'Парковка\n';
+                    tmpStatus = getTextStatuses(point.status);
+                    title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
+                }
+
+                if (point.waypoint != undefined && point.waypoint.TYPE == "WAREHOUSE") {
                     title = 'Склад\n';
                     tmpStatus = getTextStatuses(point.status);
                     title += 'Статус: ' + (tmpStatus ? tmpStatus.name : 'неизвестно') + '\n';
@@ -455,7 +462,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 //title += 'Расстояние: ' + point.DISTANCE + ' метра(ов)\n';
                 //title += 'Время на дорогу к точке: ' + mmhh(point.TRAVEL_TIME) + '\n';
 
-                if (point.waypoint != null) {
+                if (point.waypoint != null && point.waypoint != undefined) {
                     title += 'Адрес: ' + point.waypoint.ADDRESS + '\n';
                     // title += 'Клиент: ' + point.waypoint.NAME + '\n';
                     // title += 'Комментарий: ' + point.waypoint.COMMENT + '\n';
@@ -488,7 +495,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     tmpBgColor = tmpStatus.color;
                 }
 
-                if (!point.confirmed && (point.status == STATUS.FINISHED ||
+                if (point.limit < rootScope.settings.limit && (point.status == STATUS.FINISHED ||
                     point.status == STATUS.FINISHED_LATE || point.status == STATUS.FINISHED_TOO_EARLY)) {
                     tmpBgColor = 'yellow';
                     tmpFColor = 'black';
@@ -855,7 +862,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             rootScope.$on('drawCombinedTrack', function (event, route, activePoint) {
                 //console.log('i gona  draw combined route', route);
                
-                updateStoredMarkers(route);
+                //updateStoredMarkers(route);
                 drawCombinedRoute(route);
                 scope.route = route;
             });
@@ -1917,29 +1924,29 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //    return str;
         //}
 
-        function saveUpdateToNode (){
-            // тест отправки измененных данных на ноде сервер.
-            var data=[];
-            var i=0;
-            while (i<allMarkers.length){
-                var j=0;
-                while (j<allMarkers[i].marks.length){
+        //function saveUpdateToNode (){
+        //    // тест отправки измененных данных на ноде сервер.
+        //    var data=[];
+        //    var i=0;
+        //    while (i<allMarkers.length){
+        //        var j=0;
+        //        while (j<allMarkers[i].marks.length){
+        //
+        //            if (!allMarkers[i].marks[j].source) {
+        //                //console.log("I think this is the car", allMarkers[i].marks[j])
+        //            }
+        //            data.push(allMarkers[i].marks[j].source);
+        //            j++;
+        //        }
+        //        i++;
+        //    }
+        //
+        //    //console.log("send data from map", data);
+        //    rootScope.$emit('saveUpdate', data);
+        //}
 
-                    if (!allMarkers[i].marks[j].source) {
-                        //console.log("I think this is the car", allMarkers[i].marks[j])
-                    }
-                    data.push(allMarkers[i].marks[j].source);
-                    j++;
-                }
-                i++;
-            }
 
-            //console.log("send data from map", data);
-            rootScope.$emit('saveUpdate', data);
-        }
-
-
-        rootScope.$on('logoutsave', saveUpdateToNode);
+        //rootScope.$on('logoutsave', saveUpdateToNode);
         
 
         function drawPushLine (mobilePush){

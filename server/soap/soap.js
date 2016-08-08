@@ -84,6 +84,8 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
+    //console.log("START CHECK BEFORE SEND");
+
     //console.log( " Check before send started", _data.iLength);
     if(_data.iLength != 0){
         //console.log("Рано еще, подпустим поближе!");
@@ -305,6 +307,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                     }
 
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
+
+
 
                     data.iLength = itineraries.length;
 
@@ -697,12 +701,19 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
 
         // метод в соапе открывающий окно в IDS-овской 1С-ке
+        //client.OpenElement({
+        //        UserId: 'efa17485-fb45-11e2-a23d-005056a74894',
+        //        ObjectType: 'СПРАВОЧНИК',
+        //        ObjectName: 'КУБ_Точки',
+        //        ElementId: 'dcaf4733-378c-11e6-a4a7-005056a76b49'
+        //    },
         client.OpenElement({
             UserId: userIds[user],
             ObjectType: 'СПРАВОЧНИК',
             ObjectName: 'КУБ_Точки',
             ElementId: pointId
-        }, function (err, result) {
+        },
+            function (err, result) {
             if (err) console.log(err.body);
             if (result) console.log(result);
         });
@@ -827,7 +838,7 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
 
 
 //Получение пушей водителей
-SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
+SoapManager.prototype.getPushes = function (idArr, time, company, callback, tempCompany) {
     // получить строковую дату в формате 1С
     function getDateStrFor1C(timestamp) {
         var date = new Date(timestamp);
@@ -839,7 +850,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
     var me = this;
     var url = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
     // сохранение в 1С от имени авторизированного пользователя
-    var receivePushes = function (idArr, time, company, callback) {
+    var receivePushes = function (idArr, time, company, callback, tempCompany) {
         //console.log("Try to recieve pushes", me.login);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
@@ -853,7 +864,8 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
                     //console.log('GET PUSHES OK');
                     log.toFLog('PUSHES is', result);
                     //console.log('!!!!!!!!PUSHES is', result);
-                    callback(company, result);
+                    if (tempCompany == undefined) tempCompany=company;
+                    callback(tempCompany, result);
                 } else {
                     console.log('GET PUSHES  ERROR');
                     console.log('result', err);
@@ -865,7 +877,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback) {
         });
     };
 
-    receivePushes(idArr, time, company, callback);
+    receivePushes(idArr, time, company, callback, tempCompany);
 
 }
 
