@@ -4382,7 +4382,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined)) {
-                console.log("Re Display", cache, "First time rotscope.data", rootScope.data);
+                console.log("Re Display", cache, "First time rotscope.data", rootScope.data );
                 if( scope.rowCollection == undefined) scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
                 if (scope.displayCollection == undefined) scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
                 console.log("PIC receive problem", cache);

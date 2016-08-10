@@ -568,9 +568,24 @@
             Предлагаемое количество новых маршрутов = {{newRoutes}}
         </div>
         <div ng-show="newRoutes == 1" ng-repeat="item in display">
-            {{item.exNumber}}, {{item.newNumber}}, {{item.exArrival*1000 | date:'HH:mm'}}, {{item.newArrival* 1000 | date:'HH:mm'}}
+            {{item.exNumber}}, {{item.status}}  {{item.startZOK* 1000 | date:'HH:mm'}}-{{item.endZOK* 1000 | date:'HH:mm'}} {{item.startKOK* 1000 | date:'HH:mm'}}-{{item.endKOK* 1000 | date:'HH:mm'}} &nbsp {{item.newArrival* 1000 | date:'HH:mm'}} {{item.changes}}
+            <button ng-click="showWindow(item)">ред.окно</button>
+            <div ng-show="item.editWindow">
 
+                <input type="time" class="promised-text-card" id="promised-start-edit"
+
+                       ng-model="newStart"> -
+                <input type="time" class="promised-text-card" id="promised-finish-edit"
+
+                       ng-model="newFinish">
+                <button ng-click="handRecalc(item, newStart, newFinish)">проверить</button>
+            </div>
+            <button>отменить</button>
         </div>
+        <button>Утвердить</button>
+        <button>Ручное редактирование</button>
+
+
         <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->
 
 

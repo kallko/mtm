@@ -3,8 +3,10 @@ var express = require('express'),
     session = require('express-session'),
     bodyParser = require('body-parser');
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.urlencoded({limit: '100mb', extended: true, parameterLimit:100000}));
+
+
 
 app.use(session({
     secret: 'keyboard cat 2',
