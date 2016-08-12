@@ -813,7 +813,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
 
                 // добавляем транспорт
-                console.log("Выбор веса", (parseInt(route.transport.MAXIMUM_WEIGHT) > route.weight+1), parseInt(route.transport.MAXIMUM_WEIGHT , route.weight+1));
+                //console.log("Выбор веса", (parseInt(route.transport.MAXIMUM_WEIGHT) > route.weight+1), parseInt(route.transport.MAXIMUM_WEIGHT , route.weight+1));
 
                 mathInput.trList.push({
                     "id": "-1",
