@@ -1926,7 +1926,7 @@ function startPeriodicCalculating() {
 
     // Не считаем те компании, у которых размер роутов равен 0
     for(var i=0; i<companysToCalc.length; i++){
-        if (cashedDataArr[companysToCalc[i]].routes.length == 0){
+        if (cashedDataArr[companysToCalc[i]].routes == undefined || cashedDataArr[companysToCalc[i]].routes.length == 0){
             console.log("У этой компании нет роутов на пересчет");
             companysToCalc.splice(i,1);
             i--;
