@@ -155,10 +155,13 @@ myLayout.registerComponent('template', function (container, state) {
 
 // ручной запуск Ангуляра после инициализации Golden Layout
 myLayout.on('initialised', function () {
+
     angular.bootstrap(document.body, ['MTMonitor']);
+
 });
 
 myLayout.init();
+
 
 angular.module('MTMonitor')
     .run(function($rootScope) {
@@ -166,6 +169,7 @@ angular.module('MTMonitor')
             $rootScope.$emit('showNotification', {text: 'Произошла ошибка при попытке обратится к '+url, duration: 5000});
         };
         $rootScope.currentDay = true; // false если день не сегодняшний
+
     })
     .config(['$compileProvider', function ($compileProvider) {
          // disable debug info

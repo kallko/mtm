@@ -47,6 +47,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             rootScope.$on('routeToChange', onRouteToChange);
             rootScope.$on('checkPoint', onPromisedChanged);
            // myLayout.on('stateChanged', onResize);
+             myLayout.on('stateChanged', function(event){
+                 console.log("Выбрали эдит роут", event, myLayout.toConfig());
+                 if (myLayout.toConfig().content[0].content[1].content[0].activeItemIndex == 2) {
+                     console.log("Активный нужный элемент");
+
+                 }
+             });
         }
 
         // пересчет ширины боксов при изменении размеров панельки
@@ -652,7 +659,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                         mathInput.points.push(point);
 
-                        late = route.points[i].status == 4;
+                        late = route.points[i].status == 4 || route.points[i].status == 6;
                         delay = route.points[i].status == 5;
 
                         jobWindows = [];
@@ -696,7 +703,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
                         }
 
-                        if (delay && route.recalcIter>1) {
+                        if (delay && route.recalcIter>1 && (pt.change_time == undefined || pt.change_time <1 )) {
 
                             jobWindows = [
                                 {
@@ -708,7 +715,21 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
 
-                        if(route.recalcIter>4){
+                        if(route.recalcIter>4 && (pt.change_time == undefined || pt.change_time <1 )){
+                            var endDay = new Date();
+                            endDay.setHours(24,0,0,0);
+                            var tsEndDay=endDay.valueOf();
+
+                            jobWindows = [
+                                {
+                                    "start": rootScope.nowTime,
+                                    "finish": tsEndDay/1000
+                                }];
+                            console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
+
+                        }
+
+                        if(route.recalcIter>5 ){
                             var endDay = new Date();
                             endDay.setHours(24,0,0,0);
                             var tsEndDay=endDay.valueOf();

@@ -4275,7 +4275,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (route.points[i].status == 6) route.have_attention = true;
             }
 
-            console.log("Наличие статуса ВНИМАНИЕ", route.have_attention)
+            console.log("Наличие статуса ВНИМАНИЕ", route.have_attention);
 
             var deliveredPoints = [];
             var sheduledPoints = [];
@@ -4614,7 +4614,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
 
                     }
+                    scope.rowCollection = scope.rowCollection.concat(data.route.points);                                   // коллекция всех задач дял отображения во вьюшке
+                    scope.displayCollection = scope.displayCollection.concat(data.route.points);
+                    rootScope.displayCollection = scope.displayCollection;
                     rootScope.clickOff =false;
+
 
             })
         }
