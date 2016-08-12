@@ -1741,16 +1741,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var now =  parseInt(Date.now()/1000);
             container.source.status=5;
 
-            //var textStatus='опаздывает';
+            var textStatus='опаздывает';
             var color='red';
             if (now < container.source.end_time_ts){
                 container.source.status=7;
-               // textStatus='будет сделано';
+                textStatus='будет сделано';
                 color='#4482AB';
             }
             if(now>container.source.controlled_window.finish){
                 container.source.status=4;
-               // textStatus='время вышло';
+                textStatus='время вышло';
             }
 
             var title=container.options.title;
