@@ -367,7 +367,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpTitle += 'ID задания: ' + pushes[i].number;
 
                 tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
-                var pushColor='orange'
+                var pushColor='orange';
                 if(pushes[i].long_away){
                     pushColor='#e01283';
                 }
@@ -1683,17 +1683,29 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         rootScope.$on('unbindPointStop', function(event, row){
-            console.log(markersArr);
+           // console.log(markersArr);
+            var uniqueID;
            ouer: for(var i = 0; markersArr.length > i; i++ ){
                 if('source' in markersArr[i] && 'servicePoints' in markersArr[i].source ){
                     for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
                         if(markersArr[i].source.servicePoints[j] == row.NUMBER-1){
+                            uniqueID = markersArr[i].source.uniqueID;
                             deleteSomePointsFromStop(row.NUMBER -1, markersArr[i].source);
                             break ouer;
                         }
                     }
                 }
             }
+
+            var reRoute;
+            for (var i = 0; i< rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == uniqueID){
+                    reRoute = rootScope.data.routes[i];
+                }
+            }
+
+            rootScope.showProblem(reRoute);
+
         });
 
 
