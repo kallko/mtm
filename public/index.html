@@ -580,7 +580,7 @@
                        ng-model="newFinish">
                 <button ng-click="handRecalc(item, newStart, newFinish, route)">проверить</button>
             </div>
-            <button>отменить</button>
+            <button ng-click ="cancelJob(item, route)">отменить</button>
         </div>
         <button ng-click="confirmEditing()">Утвердить</button>
         <button>Ручное редактирование</button>
@@ -1009,7 +1009,7 @@
                 {{point.promised_window.finish * 1000 | date:'HH:mm'}}
             </td>
         </tr>
-        <tr>
+        <tr ng-show="false">
             <td class="title">Контролируемое окно:</td>
             <td class="row-data">
                 <input type="time" class="promised-text-card" id="promised-start-card"

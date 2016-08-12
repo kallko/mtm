@@ -107,7 +107,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         });
 
 
-     scope.showProblem = function(route) {
+     rootScope.showProblem = function(route) {
             //alert("Я все вижу" + route.filterId);
             scope.$emit('choseproblem', route.filterId);
             scope.$emit('routeToChange', ('routeToChange', {

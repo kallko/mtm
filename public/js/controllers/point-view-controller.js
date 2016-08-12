@@ -3,6 +3,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
     function (scope, rootScope, http, Statuses, filter) {
         var STATUS,
             parent; // откуда было открыто окно
+            scope.showRouteId;
+
 
         init();
 
@@ -39,6 +41,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
            // scope.promisedFinishCard = filter('date')(data.point.promised_window_changed.finish * 1000, 'HH/mm');
 
             scope.route = data.route;
+            //console.log ("Назначили Роут", data.point.uniqueID);
+            scope.showRouteId = data.point.uniqueID;
             parent = data.parent;
             $('#point-view').popup('show');
             scope.showHideReasonButtons = scope.point && !scope.point.confirmed_by_operator && !scope.point.reason;
@@ -48,7 +52,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             scope.disableConfirmBtn = true;
         }
 
-        // заблокировать маршрут
+         //заблокировать маршрут
         function lockRoute(event, data) {
             scope.$emit('unlockAllRoutes', {filterId: data.route.filterId});
             scope.route = data.route;
@@ -92,6 +96,14 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'confirm-status'
             });
+
+            var reRoute;
+            for (var i=0; i< rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == scope.showRouteId){
+                    reRoute = rootScope.data.routes[i];
+                }
+            }
+            rootScope.showProblem(reRoute);
         };
 
         // отмена сомнительного статуса
@@ -102,6 +114,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'not-delivered-status'
             });
+            var reRoute;
+            for (var i=0; i< rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == scope.showRouteId){
+                    reRoute = rootScope.data.routes[i];
+                }
+            }
+            rootScope.showProblem(reRoute);
         };
 
         scope.returnStatus = function(){
@@ -110,6 +129,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'return-scheduled'
             });
+            var reRoute;
+            for (var i=0; i< rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == scope.showRouteId){
+                    reRoute = rootScope.data.routes[i];
+                }
+            }
+            rootScope.showProblem(reRoute);
         };
 
         // отменить задачу
@@ -122,6 +148,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 row: scope.point,
                 option: 'cancel-point'
             });
+            var reRoute;
+            for (var i=0; i< rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == scope.showRouteId){
+                    reRoute = rootScope.data.routes[i];
+                }
+            }
+            rootScope.showProblem(reRoute);
         };
 
         scope.cancelPush = function () {

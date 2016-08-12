@@ -301,6 +301,11 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 						scope.servisPoints[lastUncomfirm].stopTime = timelastUncomfirm;
 					}
 
+					console.log("Отвязываем точки", scope.emmitServisPoints);
+
+
+
+
 				};
 				scope.confirm = function () {
 					scope.emmitServisPoints = scope.emmitServisPoints.concat(scope.servisPoints);

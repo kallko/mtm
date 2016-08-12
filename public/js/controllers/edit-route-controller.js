@@ -572,7 +572,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                 route.recalcIter = scope.iteration || 0;
                 route.recalcIter++;
-                alert(route.recalcIter);
+                //alert(route.recalcIter);
                 scope.iteration ++;
 
                 console.log('route to rebuild', route);
@@ -882,11 +882,6 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         function processModifiedPoints(changedRoute, data) {
             console.log('Recalculate READY >>', data);
 
-            if(data.solutions[0] != undefined && data.solutions[0].routes != undefined && data.solutions[0].routes.length != undefined){
-                scope.newRoutes = data.solutions[0].routes.length
-            }
-
-            scope.newRoutes = data.solutions[0].routes.length || 'Error';
 
             // в случае если вернуло ошибку, решений ноль или в результате вернуло несколько маршрутов,
             // показываем сообщение об ошибке
@@ -895,6 +890,17 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 scope.$emit('showNotification', {text: 'Автоматический пересчет не удался.'});
                 return;
             }
+
+
+
+
+            if(data.solutions[0] != undefined && data.solutions[0].routes != undefined && data.solutions[0].routes.length != undefined){
+                scope.newRoutes = data.solutions[0].routes.length
+            }
+
+            scope.newRoutes = data.solutions[0].routes.length || 'Error';
+
+
 
             console.log('MATH DATE >> ', new Date(serverTime * 1000));
 
@@ -1038,6 +1044,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                        //console.log("Соответствие найдено");
                         console.log("Создаем и проверяем точку точку", scope.route.points[i]);
                         scope.display.push({
+                            uniqueID: scope.route.uniqueID,
+                            row_id: scope.route.points[i].row_id,
                             exNumber: scope.route.points[i].NUMBER,
                             status: getTextStatuses(scope.route.points[i].status).name,
                             changes: scope.change_time || 0,
@@ -1084,7 +1092,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             for (var i=0; i<scope.mathInputJson.jobList.length; i++){
                 if(item.gIndex == parseInt( scope.mathInputJson.jobList[i].point)) {
-                    console.log("Соответсвующая точка найдкена",scope.mathInputJson.jobList[i] );
+                    console.log("Соответсвующая точка найдена",scope.mathInputJson.jobList[i] );
                     scope.mathInputJson.jobList[i].windows[0].start = tsStart;
                     scope.mathInputJson.jobList[i].windows[0].finish = tsFinish;
                 }
@@ -1117,8 +1125,67 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         };
 
 
+        scope.cancelJob = function (item, route) {
+            scope.display =[];
+            console.log("Item", item);
+
+            for (var i=0; i<scope.mathInputJson.jobList.length; i++){
+                if(item.gIndex == parseInt( scope.mathInputJson.jobList[i].point)) {
+                    console.log("Соответсвующая точка найдена",scope.mathInputJson.jobList[i] );
+                    scope.mathInputJson.jobList.splice(i, 1);
+                }
+
+            }
+
+            var reRoute;
+            for (i=0; i<rootScope.data.routes.length;i++){
+                console.log(item.uniqueId,  rootScope.data.routes[i].uniqueID)
+                if(item.uniqueID == rootScope.data.routes[i].uniqueID){
+                    reRoute = rootScope.data.routes[i];
+                    console.log("Маршрут для отмены точки найден");
+                    for (var j = 0; j< rootScope.data.routes[i].points.length; j++){
+                        if (rootScope.data.routes[i].points[j].row_id == item.row_id) {
+                            console.log("Точка для отмены найдена");
+                            rootScope.data.routes[i].points[j].status = 8;
+                            rootScope.data.routes[i].points[j].overdue_time = 0;
+                            rootScope.data.routes[i].points[j].problem_index = 0;
+                            rootScope.data.routes[i].points[j].cancel_time = parseInt(Date.now()/1000);
+                        }
+                    }
+
+                }
+            }
+
+            console.log("NEW Big MATH INPUT",scope.mathInputJson);
+            scope.$emit('clearMap');
+            scope.$emit('drawCombinedTrack', reRoute);
+            // оптравляем на пересчет
+            http.post('./recalculate/', {input: scope.mathInputJson}).
+                success(function (data) {
+                    console.log("Recalculate receive DATA",data);
+                    processModifiedPoints(route, data);
+                })
+                .error(function(data){
+                    console.log("ERROR, data");
+                });
+
+
+
+
+        };
+
+
+
+
         scope.confirmEditing = function() {
             console.log("Существует", rootScope.data.routes, "Отредактировано", scope.changedRoute);
+            // проверка, всем ли точкам назначено новое время
+            for (var i=0; i<scope.changedRoute.points.length; i++){
+                if(scope.changedRoute.points[i].new_arrival_time == undefined) {
+                    alert("Маршут просчитан неправильно. Есть задания без времени прибытия");
+                    return;
+                }
+            };
 
             function compareNewArrivalTime (a, b){
                 return a.new_arrival_time - b.new_arrival_time;
@@ -1136,6 +1203,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
             console.log("До редактирования в роуте точек =", rootRoute.points.length, scope.changedRoute.points.length );
+
+
+
 
             //Этап 1 Убираем все пересчитанные точки из базового роута
 

@@ -298,6 +298,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
                             rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
                             rootScope.$emit('checkInCloseDay');
+
+
+                            var reRoute;
+                            for (var i=0; i< rootScope.data.routes.length; i++){
+                                if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minI].uniqueID){
+                                    reRoute = rootScope.data.routes[i];
+                                }
+                            }
+                            rootScope.showProblem(reRoute);
+
                         });
 
                         addMarker(tmpVar);
