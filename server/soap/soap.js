@@ -784,12 +784,12 @@ SoapManager.prototype.closeDay = function (closeDayData, callback) {
 
             client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
                 if (!err) {
-                    console.log('updateWaypointCoordTo1C OK');
+                    console.log('Close Route to 1C ok');
                     log.toFLog('afterSave.js', result);
                     callback({result: result});
                 } else {
                     console.log("Res.XML = ", resXml);
-                    console.log('updateWaypointCoordTo1C ERROR');
+                    console.log('Close Route to 1C ERROR');
                     log.toFLog('afterSaveError.js', err);
                     console.log(err.body);
                     callback({error: err});

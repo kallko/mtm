@@ -216,12 +216,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
 
-                    console.log("Вы выбрали маршрут из общедоступных");
+                    console.log("Вы выбрали маршрут из общедоступных", rootScope.settings);
+                    if(rootScope.data.routes.length >= rootScope.settings.problems_to_operator + 1){
+                        scope.$emit('clearMap');
+                        alert("Вы уже заблокировали предельное количество маршрутов");
+                        return;
+                    }
+                    var asking=true;
                     for (var j=0; j<rootScope.data.allRoutes.length; j++){
-                        console.log("allRoutes", rootScope.data.allRoutes[j].value);
+                        if (rootScope.data.allRoutes[j].value == scope.filters.route) {
+                            giveMeOneRoutePls(rootScope.data.allRoutes[j].uniqueID);
+                        };
                     }
 
 
+                    if (asking) return;
 
                     scope.drawRoute(scope.filters.route, false, true);
                     rootScope.carCentre=true;
@@ -2944,7 +2953,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         }
-        function collectDataForDayClosing(data, currentDay){
+        function collectDataForDayClosing( currentDay){
 
             var result = {
                     routes: []
@@ -2954,14 +2963,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route,
                 point,
                 startTime,
+                routesOfDate,
                 endTime;
             var routesID = [];
 
-            for (var i = 0; i < data.routes.length; i++) {
-                if(data.routes[i].getCheck != true){
+            for (var i = 0; i < rootScope.data.routes.length; i++) {
+                if(rootScope.data.routes[i].ready_to_close != true){
                     continue;
                 }
-                routeI = data.routes[i];
+                routeI = rootScope.data.routes[i];
+                routesOfDate = (rootScope.data.routes[i].START_TIME).substr(0,10);
                 routesID.push(routeI.uniqueID);
                 route = {
                     pointsReady: [],
@@ -3004,6 +3015,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (pointJ.real_arrival_time && pointJ.real_arrival_time > endTime) endTime = pointJ.real_arrival_time;
                     if (pointJ.real_arrival_time && pointJ.real_arrival_time < startTime) startTime = pointJ.real_arrival_time;
 
+                    point.real_arrival_time = pointJ.real_arrival_time;
+
                     point.status = {
                         promised: false,
                         ordered: false
@@ -3043,15 +3056,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 ///////////////////////////
 
                 for (var k = 0; k < route.pointsReady.length; k++) {
+                    //console.log("Обрабатываем доставленные точки");
                     point = route.pointsReady[k];
                     if (point.stopState) {
                         point.durationFact = point.stopState.t2 - point.stopState.t1;
                         point.arrivalTimeFact = point.stopState.t1;
                     }else{
-                        point.arrivalTimeFact = '09.05.2016';
+                        point.arrivalTimeFact = point.real_arrival_time;
                         point.durationFact = 0;
                     }
 
+                    //console.log("Point", point);
                     if (point.moveState) {
                         point.moveDuration = point.moveState.t2 - point.moveState.t1;
                         point.moveDistance = point.moveState.dist;
@@ -3066,14 +3081,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            var xml = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+data.routesOfDate+'"><TEXTDATA>'+ JSON.stringify(result) +'</TEXTDATA></CLOSEDAY></MESSAGE>';
+            var xml = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+routesOfDate+'"><TEXTDATA>'+ JSON.stringify(result) +'</TEXTDATA></CLOSEDAY></MESSAGE>';
             
             if( currentDay ){ // проверка сегодняшней даты закрытия дня
                 console.log("UPDATE DAY");
                 //console.log("XML == ", xml);
-                return {closeDayData: xml, routesID: routesID, update:true, closeDayDate: data.routesOfDate}; // обновляем текущий день
+                return {closeDayData: xml, routesID: routesID, update:true, closeDayDate: routesOfDate}; // обновляем текущий день
             }else{
-                return {closeDayData: xml, routesID: routesID, update:false, closeDayDate: data.routesOfDate}; // дописываем старый день
+                return {closeDayData: xml, routesID: routesID, update:false, closeDayDate: routesOfDate}; // дописываем старый день
             }
         }
 
@@ -3088,6 +3103,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
         function pushDataToServer(outgoingData){   // функция отправки данных на сервер, может быть универсальной
+            console.log("Отправляем данные с клиента");
             http.post('./closeday', outgoingData).then(successCallback, errorCallback); //отправка на url /closeday временно
             function successCallback(res){
                 if(!res.data.error){
@@ -4251,7 +4267,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //Сортируем каждый массив по своему признаку
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
-
+            if(route == undefined) return;
             console.log("Пересчитываем фактическое время");
             // Проверка, есть ли еще точки со статусом внимание. Нужно для пересчета роута
             if (route.have_attention == undefined || route.have_attention == true) route.have_attention =false;
@@ -4402,6 +4418,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rootScope.data.routes.push(cache.routes);
                 };
 
+                //Создание множественных окн доступности
+                for(var i = 0; i<rootScope.data.routes.length; i++){
+                    for(var j = 0; j<rootScope.data.routes[i].points.length; j++ ){
+                        if(rootScope.data.routes[i].points[j].orderWindows == undefined){
+                            createSeveralAviabilityWindows(rootScope.data.routes[i].points[j]);
+                        }
+                    }
+                }
+
                 //Обновление селекта
                 if(scope.filters.routes.length == 1 && cache.allRoutes != undefined){
                     for(i=0; i<cache.allRoutes.length; i++){
@@ -4424,6 +4449,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
 
+        rootScope.$on('saveRoute', function( event, id){
+            scope.solveProblem(id);
+        })
+
 
         scope.solveProblem = function (id) {
             scope.$emit('clearMap');
@@ -4433,6 +4462,34 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i<rootScope.data.routes.length; i++){
                 if(rootScope.data.routes[i].filterId == id){
                     result = rootScope.data.routes[i];
+
+
+                //Проверка, закончен ли этот маршрут и если да, то закрываем его.
+                result.ready_to_close = true;
+                for (j=0; j<result.points.length; j++){
+                    if(result.points[j].status>2 && result.points[j].status<8){
+                        result.ready_to_close=false;
+                        break;
+                    }
+
+                }
+
+                if(result.ready_to_close){
+                    var strDateOfRoute =strToTstamp(result.START_TIME);
+                    var dateOfRoute = new Date(strDateOfRoute);
+                    var dateOfDay = new Date(rootScope.nowTime);
+                    var curDay=false;
+                    if (dateOfDay.getDate() == dateOfRoute.getDate() && dateOfDay.getMonth() == dateOfRoute.getMonth() && dateOfDay.getFullYear() == dateOfRoute.getFullYear()){
+                        curDay=true;
+                    }
+                    var data = collectDataForDayClosing(curDay);
+                    alert("Закрываем маршрут, за сегодня " + curDay);
+                    console.log("предположительная дата", (""+dateOfRoute.getDate()+"."+ dateOfRoute.getMonth() + "." + dateOfRoute.getFullYear()))
+                    console.log("Data", data);
+                    pushDataToServer(data);
+                    result.closed=true;
+                }
+
                     http.post('./savetonode', {route: result})
                         .success(function (rId) {
                             console.log("Сохранено", rId);
@@ -4500,6 +4557,95 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.displayCollection =[];
             rootScope.rowCollection =[];
         });
+
+
+        rootScope.$on('updateDisplayCollection', function(){
+            scope.rowCollection =[];
+            scope.displayCollection =[];
+            rootScope.rowCollection =[];
+
+            var k=0;
+            while (k<rootScope.data.routes.length){
+
+                scope.rowCollection=scope.rowCollection.concat(rootScope.data.routes[k].points);
+                k++;
+            }
+            scope.displayCollection = [].concat(scope.rowCollection);
+            rootScope.rowCollection = scope.rowCollection;
+        });
+
+
+        rootScope.$on('loadoneroute', function (event, id) {
+            giveMeOneRoutePls(id);
+        });
+
+
+        function giveMeOneRoutePls(id){
+            console.log("Запрашиваем один роут");
+            http.post('./askforroute', {id:id})
+            .success(function(data){
+                console.log("Result", data);
+
+                    if (data.blocked != undefined) {
+                        alert("Этот маршрут уже заблокирван оператором "+ data.blocked);
+
+                        return;
+                    };
+
+
+                    if (data.route != undefined) {
+                        rootScope.data.routes.push(data.route);
+                        scope.filters.route = data.route.filterId;
+                        console.log("Раз два три четыре пять, начинаем рисовать", scope.filters.route );
+                        scope.drawRoute(scope.filters.route, true, false);
+                        rootScope.carCentre=true;
+
+                        for (var i = 0; rootScope.data.routes.length > i; i++) {
+                            if (rootScope.data.routes[i].filterId == scope.filters.route) {
+                                if (!rootScope.data.routes[i].selected) {
+                                    for (var j = 0; rootScope.data.routes.length > j; j++) {
+                                        rootScope.data.routes[j].selected = false;
+                                    }
+                                    rootScope.data.routes[i].selected = true;
+                                }
+                                rootScope.$emit('displayCollectionToStatistic', rootScope.data.routes[i].points);
+                                break;
+                            }
+                        }
+
+                    }
+                    rootScope.clickOff =false;
+
+            })
+        }
+
+        function createSeveralAviabilityWindows (point){
+
+            point.orderWindows=[];
+            //console.log("Start checkUncalculate");
+
+            var parts=point.AVAILABILITY_WINDOWS.split(";");
+            var size=parts.length;
+            var i=0;
+            while(i<size){
+                var date=point.ARRIVAL_TIME.substr(0,11);
+                var temp=parts[i].trim();
+                var before=temp.substr(0,5);
+                before=date+before+":00";
+                //console.log("before=", before);
+                var begin=strToTstamp(before, point);
+
+                var after=temp.slice(-5);
+                after=date+after+":00";
+                var end=strToTstamp(after, point);
+                point.orderWindows.push({start: begin, finish: end });
+
+
+                i++;
+            }
+
+
+        }
 
     }]);
 

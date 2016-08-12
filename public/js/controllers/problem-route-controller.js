@@ -47,7 +47,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
             if (rootScope.tempDecision != undefined && rootScope.data && rootScope.data.routes) {
                 var pQuant = rootScope.settings.problem_to_operator;
-            console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
+            //console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
 
             }
             var need=0;
@@ -61,7 +61,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
             //if(need<0) need='';
             //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
-            console.log(" Go to ASK ", !rootScope.data,  need );
+            //console.log(" Go to ASK ", !rootScope.data,  need );
             if ((!rootScope.data && need>0 ) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 console.log("Give me", need, "the problem please! String is");
 

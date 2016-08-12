@@ -123,7 +123,7 @@ var myLayout = new GoldenLayout({
                             },
                             {
                                 type: 'component',
-                                title: 'Закрытие дня',
+                                title: 'Поиск',
                                 componentName: 'template',
                                 componentState: {templateId: 'close-day'}
                             },

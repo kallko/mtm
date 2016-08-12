@@ -90,9 +90,10 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
         counter = 0,
         reqCounter = 0,
         result = [];
-
+    //console.log("Таки зашли в файл трекс", data.routes);
     if(data != undefined && data.routes != undefined) {
         for (var i = 0; i < data.routes.length; i++) {
+            //console.log("Ищем треки для ", data.routes[i].driver.NAME );
             for (var j = 0; j < data.sensors.length; j++) {
                 // запрашивать треки только по сенсорам прикрепленным к машинам имеющихся маршрутов
                 if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
@@ -137,9 +138,13 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                             }
                         });
                     })(j);
+                } else {
+                    //console.log("Нет датчика", reqCounter, counter);
                 }
             }
         }
+    } else {
+        console.log("Нечего спрашивать?");
     }
 };
 
@@ -485,12 +490,13 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 
 // получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
-    //console.log("Пытаемся получить предсказание Tracks 488");
+    console.log("Пытаемся получить предсказание Tracks 488");
     request({
         url: this.routerUrl + 'table?' + pointsStr,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
+            console.log("Данные получены")
             callback(body, pointsStr);
         } else {
             console.log("ERROR TRACKS 495");

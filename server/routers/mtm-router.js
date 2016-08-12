@@ -119,6 +119,20 @@ router.route('/getoldroute')
     });
 
 
+
+
+router.route('/nodeserch')
+    .post(function(req, res){
+        console.log("Получил запрос на поиск", req.body.data);
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        var input = req.body.data
+        var result = serchInCache(input, currentCompany);
+        res.status(200).json(result);
+    });
+
+
+
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
 router.route('/login')
     .get(function (req, res) {
@@ -412,8 +426,57 @@ router.route('/dailydata')
     });
 
 
+//Попытка запроса оператором одного роута
+router.route('/askforroute')
+    .post(function(req, res){
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        var uniqueID = req.body.id;
+        console.log("Пришел одиночный запрос на роут", uniqueID);
+
+        // проверяем не был ли этот маршрут заблокирован
+        for (var i=0; i< blockedRoutes.length; i++){
+            console.log(blockedRoutes[i]);
+            if(blockedRoutes[i].id == uniqueID && currentCompany == blockedRoutes[i].company) {
+                res.status(200).json({blocked: blockedRoutes[i].login});
+                return;
+            }
+        }
+
+        //Искать маршрут нужно в 2-х местах line_routes & routes
+        //console.log("Начинаем поиск", currentCompany, cashedDataArr[currentCompany].line_routes.length);
+        var result ={error : "Dont Found"};
+        for (var i=0; i< cashedDataArr[currentCompany].line_routes.length; i++){
+            //console.log("Ищем в проблемных");
+            if (uniqueID == cashedDataArr[currentCompany].line_routes[i].uniqueID){
+                result = cashedDataArr[currentCompany].line_routes[i];
+                cashedDataArr[currentCompany].blocked_routes.push(result);
+                cashedDataArr[currentCompany].line_routes.splice(i,1);
+                //console.log ("Маршрут найден в проблемных");
+                 break;
+            }
+        }
+
+        for (var i=0; i< cashedDataArr[currentCompany].routes.length; i++){
+            //console.log("Ищем в беспроблемных");
+            if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID){
+                result = cashedDataArr[currentCompany].routes[i];
+                cashedDataArr[currentCompany].blocked_routes.push(result);
+                cashedDataArr[currentCompany].routes.splice(i,1);
+               //console.log ("Маршрут найден в беспроблемных");
+                break
+            }
+        }
+
+        if (result.error == undefined) {
+            changePriority(result.uniqueID, currentCompany, key);
+            blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
+        }
+        res.status(200).json({route: result});
 
 
+
+    });
 
 // проверка блокировок точек и маршрутов
 router.route('/checklocks/:itineraryid')
@@ -942,6 +1005,7 @@ router.route('/closeday')
             //req.session.login = config.soap.defaultClientLogin;
         }
 
+        console.log("приняли данные на роутере");
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         //console.log(req.body.closeDayData);
@@ -950,27 +1014,27 @@ router.route('/closeday')
             soapManager.closeDay(req.body.closeDayData, function (data) {
                 if (!data.error) {
                     res.status(200).json({result: data.result, closeCount:req.body.routesID.length, CloseDate:req.body.closeDayDate });
-                    if(req.body.update) { // перезаписать сегодняшний день
-                            closeRoutesUniqueID[currentCompany] = [];
-                        console.log(req.body);
-                        closeRoutesUniqueID[currentCompany] = JSON.parse(JSON.stringify(req.body.routesID));
-                    }else {
-                        if (currentCompany in oldRoutesCache && req.body.closeDayDate in oldRoutesCache[currentCompany]){
-                            for (var i = 0; req.body.routesID.length > i; i++) {
-                                for (var j = 0; oldRoutesCache[currentCompany][req.body.closeDayDate].routes.length > j; j++) {
-                                    if (req.body.routesID[i] == oldRoutesCache[currentCompany][req.body.closeDayDate].routes[j]['uniqueID']) {
-                                        oldRoutesCache[currentCompany][req.body.closeDayDate].routes.splice(j, 1);
-                                        j--;
-                                        console.log('CLOSEROUTE');
-                                        break;
-                                    }
-                                }
-                            }
-                            if(oldRoutesCache[currentCompany][req.body.closeDayDate].routes.length == 0){
-                                delete oldRoutesCache[currentCompany][req.body.closeDayDate];
-                            }
-                        }
-                    }
+                    //if(req.body.update) { // перезаписать сегодняшний день
+                    //        closeRoutesUniqueID[currentCompany] = [];
+                    //    console.log(req.body);
+                    //    closeRoutesUniqueID[currentCompany] = JSON.parse(JSON.stringify(req.body.routesID));
+                    //}else {
+                    //    if (currentCompany in oldRoutesCache && req.body.closeDayDate in oldRoutesCache[currentCompany]){
+                    //        for (var i = 0; req.body.routesID.length > i; i++) {
+                    //            for (var j = 0; oldRoutesCache[currentCompany][req.body.closeDayDate].routes.length > j; j++) {
+                    //                if (req.body.routesID[i] == oldRoutesCache[currentCompany][req.body.closeDayDate].routes[j]['uniqueID']) {
+                    //                    oldRoutesCache[currentCompany][req.body.closeDayDate].routes.splice(j, 1);
+                    //                    j--;
+                    //                    console.log('CLOSEROUTE');
+                    //                    break;
+                    //                }
+                    //            }
+                    //        }
+                    //        if(oldRoutesCache[currentCompany][req.body.closeDayDate].routes.length == 0){
+                    //            delete oldRoutesCache[currentCompany][req.body.closeDayDate];
+                    //        }
+                    //    }
+                    //}
                 } else {
                     res.status(200).json({error: data.error});
                 }
@@ -1223,7 +1287,7 @@ router.route('/logout')
 //need - количество необходимых оператору проблем. Указывается в настройках
 router.route('/askforproblems/:need')
     .get(function (req, res) {
-        console.log("пришел запроc", req.params.need);
+        //console.log("пришел запроc", req.params.need);
         if (req.params.need == NaN) return;
         var result = {};
         var key = "" + req.session.login;
@@ -1247,7 +1311,7 @@ router.route('/askforproblems/:need')
 
 
         //TODO переписать условие когда начнет правильно формировать очередь проблемных роутов
-        if (cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length>0) {
+        if (cashedDataArr[currentCompany].line_routes != undefined) {
             console.log("Ищем проблемму для для оператора");
             result = {};
             result.routes = [];
@@ -1434,11 +1498,11 @@ router.route('/confirmonline')
         }
 
         for (var i = 0; i < onlineClients.length; i++) {
-            console.log("Online now", onlineClients[i]);
+            //console.log("Online now", onlineClients[i]);
 
         }
         for (var i = 0; i < blockedRoutes.length; i++) {
-            console.log("Blocked now", blockedRoutes[i]);
+            //console.log("Blocked now", blockedRoutes[i]);
 
         }
 
@@ -1860,6 +1924,16 @@ function startPeriodicCalculating() {
         }
     }
 
+    // Не считаем те компании, у которых размер роутов равен 0
+    for(var i=0; i<companysToCalc.length; i++){
+        if (cashedDataArr[companysToCalc[i]].routes.length == 0){
+            console.log("У этой компании нет роутов на пересчет");
+            companysToCalc.splice(i,1);
+            i--;
+        }
+    }
+
+
     for(i=0; i<companysToCalc.length; i++){
             console.log("Компания на пересчет", companysToCalc[i]);
     }
@@ -1903,6 +1977,7 @@ function startPeriodicCalculating() {
             var end = parseInt(Date.now()/1000);
             var start = cashedDataArr[companys[k]].last_track_update;
             var companyAsk = companys[k];
+                console.log("Check data", cashedDataArr[companyAsk].routes.length );
             tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
                 function (data) {
                    // if (!first) return;
@@ -2006,7 +2081,7 @@ function startPeriodicCalculating() {
 
 
 
-
+                console.log("Нежданный конец");
 
 
             //
@@ -2024,7 +2099,7 @@ function startPeriodicCalculating() {
                         calculateStatistic (company);
                         createProblems(company);
                         checkRealTrackData(company); //todo убрать, после того как починят треккер
-                        // todo снять комментарий lookForNewIten(company);
+                        lookForNewIten(company);
                         checkUniqueID (company);
                     }
 
@@ -2134,7 +2209,7 @@ function startPeriodicCalculating() {
                         //определение готовых к закрытию маршрутов
 
                         for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-                            console.log("Start looking for ready to close");
+                           // console.log("Start looking for ready to close");
                             if (cashedDataArr[company].routes[i].closed == true) continue;
 
                             if (cashedDataArr[company].routes[i].ready_to_close) {
@@ -2212,7 +2287,7 @@ function dataForPredicate(company, callback){
 
         var route=cashedDataArr[company].routes[i];
 
-
+        //console.log("Вот такой вот роут real trac", route.real_track);
         if(route.real_track !=undefined && route.real_track.length>0) {
             var indx = route.uniqueID;
             var carPos = [{
@@ -2228,12 +2303,12 @@ function dataForPredicate(company, callback){
         i++;
     }
 
-    // console.log("Result for predication=", result);
+     //console.log("Result for predication=", result);
 
     var j=0;
     var generalResult=[];                                                   // преременная собирающая в себе все ответы
         var collection = result;
-    //console.log("CONT PREDICATE FUNCTION", collection);
+    console.log("CONT PREDICATE FUNCTION", !(collection.length==0));
     while(j<collection.length){
         var pointsStr = '';
         for (var  i= 0; i < collection[j].points.length; i++) {
@@ -2246,10 +2321,10 @@ function dataForPredicate(company, callback){
 
         //запрос матрицы по одному маршруту с обработкой в колбэке.
        /* console.log("Пытаемся получить предсказание МТМ 2241");*/
-        //console.log("CONT2 PREDICATE FUNCTION");
+        console.log("CONT2 PREDICATE FUNCTION");
         tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
             //console.log(pointsStr);
-            //console.log("SUCCESS PREDICATE FUNCTION");
+         console.log("SUCCESS PREDICATE FUNCTION");
             var timeMatrix=[];
             var i=1;
             // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
@@ -2358,7 +2433,7 @@ function uncalcPredication(route, company) {
 
 function calcPredication(route, company) {
 
-    if (route.uniqueID == "34111") console.log("Начинаем считать проблемный роут", route.driver.NAME, " ", route.DISTANCE);
+
     //console.log("This is calculated route");
 
     var point,
@@ -2369,7 +2444,7 @@ function calcPredication(route, company) {
 
     if (route.points[route.lastPointIndx] || route.points[route.lastPointIndx] == 0) {
 
-        if (route.uniqueID == "34111") console.log("Первая проверка успешна.");
+
         point = route.car_position;
 
 
@@ -2408,7 +2483,7 @@ function calcPredication(route, company) {
             }
         } else {
             //Рассчитываем статусы по фактическому времение, если у нас нет трека или предсказания;
-            if (route.uniqueID == "34111") console.log("Вторая проверка успешна. Все в порядке");
+
             for (var i= 0; i<route.points.length; i++ ){
                 if (now > route.points[i].working_window.finish){
                     route.points[i].status = 4;
@@ -3653,6 +3728,16 @@ function calculateStatistic (company){
     }
 
 
+    //Подсчет общего веса для маршрута, если он не был посчитан ранее
+    for (i=0; i<cashedDataArr[company].routes.length; i++){
+        if (cashedDataArr[company].routes.weight == undefined) cashedDataArr[company].routes[i].weight = 0;
+        for (var j=0; j<cashedDataArr[company].routes[i].points.length;j++){
+            cashedDataArr[company].routes[i].weight +=parseInt(cashedDataArr[company].routes[i].points[j].WEIGHT);
+
+        }
+    }
+
+
 }
 
 function oldDayStatuses(company) {
@@ -3706,6 +3791,60 @@ function selectRoutes(company) {
     if (cashedDataArr[company].line_routes == undefined || cashedDataArr[company].line_routes == null) return;
     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].line_routes);
     cashedDataArr[company].line_routes.length=0;
+}
+
+
+
+function serchInCache(input, company) {
+
+    if(input == undefined || company == undefined || input == null || input =='') return '';
+    var hits = [];
+    var routesForSerch=[];
+
+    //Создаем область поиска
+    routesForSerch=routesForSerch.concat(cashedDataArr[company].routes);
+    routesForSerch=routesForSerch.concat(cashedDataArr[company].line_routes);
+    routesForSerch=routesForSerch.concat(cashedDataArr[company].blocked_routes);
+    //console.log("Начинаем поиск", routesForSerch.length);
+
+
+    for (var i=0; i< routesForSerch.length; i++){
+        //console.log("проверяем Водителя", routesForSerch[i].driver.NAME, " ", input)
+        if(routesForSerch[i].driver.NAME.indexOf(input)>=0){
+            //console.log("Найден водитель", routesForSerch[i].driver.NAME);
+            hits.push({driverName:routesForSerch[i].driver.NAME, uniqueID: routesForSerch[i].uniqueID, transportName: routesForSerch[i].transport.NAME });
+            continue;
+        }
+
+        for (var j=0; j< routesForSerch[i].points.length; j++){
+            var name='',
+                adress='',
+                comment='',
+                needPush=false;
+            if(routesForSerch[i].points[j].waypoint == undefined) continue;
+
+            if (routesForSerch[i].points[j].waypoint.NAME.indexOf(input)>=0){
+                name =  routesForSerch[i].points[j].waypoint.NAME;
+                needPush =true;
+            }
+
+            if (routesForSerch[i].points[j].waypoint.ADDRESS.indexOf(input)>=0){
+                adress =  routesForSerch[i].points[j].waypoint.ADDRESS;
+                needPush =true;
+            }
+
+            if (routesForSerch[i].points[j].waypoint.COMMENT.indexOf(input)>=0){
+                comment =  routesForSerch[i].points[j].waypoint.COMMENT;
+                needPush =true;
+            }
+
+            if(needPush){
+                hits.push({driverName:routesForSerch[i].driver.NAME, uniqueID: routesForSerch[i].uniqueID, transportName: routesForSerch[i].transport.NAME, name:name, adress:adress, comment:comment });
+            }
+
+        }
+    }
+    return hits;
 }
 
 function choseRouteForClose (company) {

@@ -327,7 +327,7 @@
                     >
 
                     <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
-                    <td>{{::row.NUMBER}}</td>
+                    <td>{{row.NUMBER}}</td>
                     <td>{{row.fact_number}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
                     <td ng-class="row.class">
@@ -558,7 +558,7 @@
         </div>
 
         <div ng-show="route !== undefined">
-             Сделано попыток перерасчета {{iteration || 0}}
+             Сделано попыток перерасчета {{iteration || 0}} по маршруту {{route.recalcIter}}
         </div>
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
@@ -578,11 +578,11 @@
                 <input type="time" class="promised-text-card" id="promised-finish-edit"
 
                        ng-model="newFinish">
-                <button ng-click="handRecalc(item, newStart, newFinish)">проверить</button>
+                <button ng-click="handRecalc(item, newStart, newFinish, route)">проверить</button>
             </div>
             <button>отменить</button>
         </div>
-        <button>Утвердить</button>
+        <button ng-click="confirmEditing()">Утвердить</button>
         <button>Ручное редактирование</button>
 
 
@@ -761,98 +761,149 @@
         </div>
 
     </div>
+
+            </div>
+        </div>
+
 </template>
 
 <!-- панель закрытия дня -->
 <template type="text/html" id="close-day" >
     <!-- полупрозрачное окно для затемнения таблицы -->
-    <div class="close-day-wrapper" >
-        <div class="title"  ng-show="clickOff" id="transparent-closeday-window" ></div>
+    <!--<div class="close-day-wrapper" >-->
+        <!--<div class="title"  ng-show="clickOff" id="transparent-closeday-window" ></div>-->
 
-        <div id="close-day-panel" ng-controller = "CloseDayController" >
-            <button ng-click = "showCheckBoxToClose()">Готовые к закрытию</button>
-            <button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть выбранные</button>
+        <!--<div id="close-day-panel" ng-controller = "CloseDayController" ng-show="false">-->
+            <!--<button ng-click = "showCheckBoxToClose()">Готовые к закрытию</button>-->
+            <!--<button ng-click = "closeDayClick()" ng-disabled="disabledBtnCloseDay">Закрыть выбранные</button>-->
 
-            <!--Имя компании: {{companyName}},-->
-            <!--Время: {{(serverTime*1000) | date:"HH:MM"}}.-->
+            <!--&lt;!&ndash;Имя компании: {{companyName}},&ndash;&gt;-->
+            <!--&lt;!&ndash;Время: {{(serverTime*1000) | date:"HH:MM"}}.&ndash;&gt;-->
 
-            <div>
-                  Ответственный: {{user}},
-                  Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}
+            <!--<div>-->
+                  <!--Ответственный: {{user}},-->
+                  <!--Дата :{{(serverTime*1000) | date:"dd.MMMM.y"}}-->
 
-            </div>
-            <div>
-                <table>
-                    <tr>
-                        <th><!--input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"-->
-                            <button ng-click="orderCloseDay('getCheck')">Закончен</button></th>
-                        <th><button ng-click="order('filterId'); orderCloseDay('getCheck')" >ID</button></th>
-                        <th><button ng-click="order('driver.NAME'); orderCloseDay('getCheck')">Водитель</button></th>
-                        <th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>
-                        <!--th>Старт</th-->
-                        <th class="center"><button ng-click="order('START_TIME');">СТАРТ</button></th>
-                        <th><button ng-click="order('END_TIME');">Финиш</button></th>
-                        <th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>
+            <!--</div>-->
+            <!--<div>-->
+                <!--<table>-->
+                    <!--<tr>-->
+                        <!--<th>&lt;!&ndash;input id="main-checkbox" ng-click = "showCheckBoxToClose()" type="checkbox" ng-checked = "setCheckAll" ng-model = "getCheckAll"&ndash;&gt;-->
+                            <!--<button ng-click="orderCloseDay('getCheck')">Закончен</button></th>-->
+                        <!--<th><button ng-click="order('filterId'); orderCloseDay('getCheck')" >ID</button></th>-->
+                        <!--<th><button ng-click="order('driver.NAME'); orderCloseDay('getCheck')">Водитель</button></th>-->
+                        <!--<th><button ng-click="order('transport.NAME'); orderCloseDay('getCheck')">Машина</button></th>-->
+                        <!--&lt;!&ndash;th>Старт</th&ndash;&gt;-->
+                        <!--<th class="center"><button ng-click="order('START_TIME');">СТАРТ</button></th>-->
+                        <!--<th><button ng-click="order('END_TIME');">Финиш</button></th>-->
+                        <!--<th><button ng-click="order('(real_track[real_track.length-1].t2)');">GPS сигнал</button></th>-->
 
-                    </tr>
-                    <tr   ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes " ng-click = "closeTableRowClick(item)">
-                        <!--/TODO | filter: { getCheck: false } Фильтр оставшийся с времен расчета на клиенте из строчки выше.-->
+                    <!--</tr>-->
+                    <!--<tr   ng-class="item.selected ? 'driver-select-bg' : ''" class = "close-table-row" ng-repeat="item in data.routes " ng-click = "closeTableRowClick(item)">-->
+                        <!--&lt;!&ndash;/TODO | filter: { getCheck: false } Фильтр оставшийся с времен расчета на клиенте из строчки выше.&ndash;&gt;-->
 
-                        <td><input id = "close-table-checkbox-{{item.filterId}}"
-                                   type="checkbox"
-                                   ng-model="item.ready_to_close"
-                                   ng-disabled="true">
-                        </td>
-                        <td>{{::item.filterId+1}}</td>
-                        <td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>
-                        <td >{{::item.transport.NAME}}</td>
-
-
-                        <td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>
-                        <td> {{:: item.END_TIME.split(' ')[1]}}</td>
-                        <td> {{ (item.real_track == undefined || item.real_track.length == 0) ? "No signal" : ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm' }}</td>
-                    </tr>
+                        <!--<td><input id = "close-table-checkbox-{{item.filterId}}"-->
+                                   <!--type="checkbox"-->
+                                   <!--ng-model="item.ready_to_close"-->
+                                   <!--ng-disabled="true">-->
+                        <!--</td>-->
+                        <!--<td>{{::item.filterId+1}}</td>-->
+                        <!--<td id = "close-table-driver-{{item.filterId}}">{{item.driver.NAME}}</td>-->
+                        <!--<td >{{::item.transport.NAME}}</td>-->
 
 
-                    <tr>
-                        <td colspan="3" >
-                            <select ng-model="selectDeyOldRoutes"
-                                    ng-show="showSelectDayOldRoutes"
-                                    ng-change="chengeSelectDayOldRoutes()"
-                                    ng-options="day as day  for day in deysOldRoutes"
-                                    class="seleOldRoute">
-                                <option value="" selected="selected">У вас есть незакрытые дни</option>
-                            </select>
-                        </td>
-                        <td colspan="2" >
-                            <button ng-click="getCurrentday()" ng-show="showGetCurrentday">Вернуться в текущий день</button>
-                        </td>
-                    </tr>
-
-                    <tr   ng-class="[item.closeRoute ? 'closeroute' : '', item.selected ? 'driver-select-bg' : '']   "  class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item)">
-                        <td><input id = "close-table-checkbox-{{::item.filterId}}"
-                                   type="checkbox"
-                                   ng-model="item.getCheck"
-                                   ng-disabled="true">
-                        </td>
-                        <td>{{::item.filterId}}</td>
-                        <td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>
-                        <td class="center">{{item.transport.NAME}}</td>
+                        <!--<td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{item.START_TIME.split(' ')[1]}} -&nbsp;</td>-->
+                        <!--<td> {{:: item.END_TIME.split(' ')[1]}}</td>-->
+                        <!--<td> {{ (item.real_track == undefined || item.real_track.length == 0) ? "No signal" : ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm' }}</td>-->
+                    <!--</tr>-->
 
 
-                        <td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{::item.START_TIME.split(' ')[1]}} - </td>
-                        <td> {{::item.END_TIME.split(' ')[1]}}</td>
-                        <td> {{:: (item.real_track == undefined || item.real_track == 0) ? "No signal": ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm'}}</td>
-                    </tr>
+                    <!--<tr>-->
+                        <!--<td colspan="3" >-->
+                            <!--<select ng-model="selectDeyOldRoutes"-->
+                                    <!--ng-show="showSelectDayOldRoutes"-->
+                                    <!--ng-change="chengeSelectDayOldRoutes()"-->
+                                    <!--ng-options="day as day  for day in deysOldRoutes"-->
+                                    <!--class="seleOldRoute">-->
+                                <!--<option value="" selected="selected">У вас есть незакрытые дни</option>-->
+                            <!--</select>-->
+                        <!--</td>-->
+                        <!--<td colspan="2" >-->
+                            <!--<button ng-click="getCurrentday()" ng-show="showGetCurrentday">Вернуться в текущий день</button>-->
+                        <!--</td>-->
+                    <!--</tr>-->
+
+                    <!--<tr   ng-class="[item.closeRoute ? 'closeroute' : '', item.selected ? 'driver-select-bg' : '']   "  class = "close-table-row" ng-repeat="item in data.routes | filter: { getCheck: true } " ng-click = "closeTableRowClick(item)">-->
+                        <!--<td><input id = "close-table-checkbox-{{::item.filterId}}"-->
+                                   <!--type="checkbox"-->
+                                   <!--ng-model="item.getCheck"-->
+                                   <!--ng-disabled="true">-->
+                        <!--</td>-->
+                        <!--<td>{{::item.filterId}}</td>-->
+                        <!--<td id = "close-table-driver-{{::item.filterId}}">{{::item.driver.NAME}}</td>-->
+                        <!--<td class="center">{{item.transport.NAME}}</td>-->
 
 
-                </table>
-            </div>
+                        <!--<td>{{::item.START_TIME.split(' ')[0].substring(0,5)}} {{::item.START_TIME.split(' ')[1]}} - </td>-->
+                        <!--<td> {{::item.END_TIME.split(' ')[1]}}</td>-->
+                        <!--<td> {{:: (item.real_track == undefined || item.real_track == 0) ? "No signal": ((item.real_track[item.real_track.length-1].t2)*1000) | date :'dd.MM HH:mm'}}</td>-->
+                    <!--</tr>-->
 
 
-            <!-- Визуальная часть закрытия дня -->
+                <!--</table>-->
+            <!--</div>-->
+
+
+            <!--&lt;!&ndash; Визуальная часть закрытия дня &ndash;&gt;-->
+        <!--</div>-->
+    <!--</div>-->
+
+
+    <div ng-controller = "CloseDayController">
+        <div class="block-title">
+            &nbsp&nbspПоиск по всем маршрутам
         </div>
-    </div>
+
+        <div class="col-sm-3">
+            <input  id="search-input-on-node" class="heightElement" type="text" size="50" ng-model="forNodeSerch" enter-event="startSerchOnNode()"/>
+            <!--<button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="startSerchOnNode()">-->
+                <!--<span class="glyphicon glyphicon-search" aria-hidden="false"></span>-->
+            <!--</button>-->
+        </div> <br> <br>
+
+        <div class="block-title">
+            &nbsp&nbspРезультат поиска:
+        </div>
+
+        <div class="point-table-wrap" style="overflow: auto;height: calc(100% - 92px);" >
+            <div id="serch-table" class="table-holder" >
+
+
+                <table class="table table-striped point-table" id="serch-table-tbl" >
+                    <tr class="titles-tr" style="border:1px solid black;">
+                        <th>Водитель</th>
+                        <th>Название</th>
+                        <th> Адресс</th>
+                        <th> Комментарий </th>
+                    </tr>
+
+                    <tr ng-repeat="item in serchDisplay" ng-click="loadSerchResult (item.uniqueID)"  >
+
+
+                        <td>{{item.driverName}}</td>
+                        <td>{{item.name}}</td>
+                        <td>{{item.adress}}</td>
+                        <td>{{item.comment}}</td>
+                    </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+
 </template>
 
 

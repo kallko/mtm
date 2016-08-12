@@ -92,6 +92,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // загружен новый маршрут
         function onRouteToChange(event, data) {
+            scope.display = [];
             scope.selectedDriver= false;
             scope.selectedTransport = false;
             scope.selectedStart= false;
@@ -188,6 +189,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return;
             }
             console.log("changedRoute",  scope.changedRoute);
+            if(scope.changedRoute.car_position == undefined || scope.changedRoute.car_position.lat == undefined || scope.changedRoute.car_position.lon ) createNewCarPosition(scope.changedRoute);
             //var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
             //    scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1;
 
@@ -557,16 +559,20 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.display = [];
             var route;
             for (var i=0; i<rootScope.data.routes.length; i++){
-                if(rootScope.data.routes[i].filterId == scope.id ) route = JSON.parse(JSON.stringify(rootScope.data.routes[i]));
+                if(rootScope.data.routes[i].filterId == scope.id ) {
+                    route = JSON.parse(JSON.stringify(rootScope.data.routes[i]));
+                    break;
+                }
             }
 
-
-
+            if(route.car_position == undefined || route.car_position.lat == undefined || route.car_position.lon ) createNewCarPosition(route);
+            rootScope.data.routes[i].car_position = route.car_position;
 
             if (route != undefined) {
 
                 route.recalcIter = scope.iteration || 0;
                 route.recalcIter++;
+                alert(route.recalcIter);
                 scope.iteration ++;
 
                 console.log('route to rebuild', route);
@@ -626,10 +632,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     if ((route.points[i].status > 3 && route.points[i].status != 8) ) {
                         console.log("Budem brat?", route.points[i].status);
                         pt = route.points[i];
-                        console.log("Dobavlzem tohku v peresschet", pt);
+                       // console.log("Dobavlzem tohku v peresschet", pt);
                         point = {
-                            "lat": parseFloat(pt.waypoint.LAT),
-                            "lon": parseFloat(pt.waypoint.LON),
+                            "lat": parseFloat(pt.LAT),
+                            "lon": parseFloat(pt.LON),
                             "ID": pt.waypoint.gIndex + '', //pt.waypoint.ID,
                             "servicetime": 0, //parseInt(pt.waypoint.QUEUING_TIME),
                             "add_servicetime": 0, // parseInt(pt.waypoint.EXTRA_DURATION_FOR_NEW_DRIVER),
@@ -646,22 +652,25 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                         mathInput.points.push(point);
 
-                        late = route.points[i].status == STATUS.TIME_OUT
-                        delay = route.points[i].status == STATUS.DELAY;
+                        late = route.points[i].status == 4;
+                        delay = route.points[i].status == 5;
 
                         jobWindows = [];
                         jobWindows = [
                             {
-                                "start": pt.promised_window_changed.start,
-                                "finish": pt.promised_window_changed.finish
+                                "start": pt.working_window.start,
+                                "finish": pt.working_window.finish
                             }];
+
+
                         if (late){
-                            console.log("Расширяем окно для точки", pt);
+
                         jobWindows = [
                             {
                                 "start": rootScope.nowTime,
                                 "finish": rootScope.nowTime+60*60
                             }];
+                            console.log("Расширяем окно для точки время вышло", pt, jobWindows[0].start, jobWindows[0].finish);
                         }
 
                         if(late && route.recalcIter>2) {
@@ -670,18 +679,48 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                                     "start": rootScope.nowTime,
                                     "finish": route.points[route.points.length-1].arrival_time_ts+60*30
                                 }];
+                            console.log("Расширяем окно для точки в последний раз", pt, jobWindows[0].start, jobWindows[0].finish);
                         }
 
 
-                        if (delay && route.recalcIter>1) {
-                            console.log("Расширяем окно для точки опаздывает", pt);
+                        if(late && route.recalcIter>3) {
+                            var endDay = new Date();
+                            endDay.setHours(24,0,0,0);
+                            var tsEndDay=endDay.valueOf();
+
                             jobWindows = [
                                 {
                                     "start": rootScope.nowTime,
-                                    "finish": pt.promised_window_changed.finish+30*60
+                                    "finish": tsEndDay/1000
                                 }];
+                            console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
                         }
 
+                        if (delay && route.recalcIter>1) {
+
+                            jobWindows = [
+                                {
+                                    "start": pt.working_window.start,
+                                    "finish": pt.working_window.finish+30*60
+                                }];
+                            console.log("Расширяем окно для точки опаздывает", pt, jobWindows[0].start, jobWindows[0].finish);
+                        }
+
+
+
+                        if(route.recalcIter>4){
+                            var endDay = new Date();
+                            endDay.setHours(24,0,0,0);
+                            var tsEndDay=endDay.valueOf();
+
+                            jobWindows = [
+                                {
+                                    "start": rootScope.nowTime,
+                                    "finish": tsEndDay/1000
+                                }];
+                            console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
+
+                        }
                         // выбор типа пересчета
                         //todo переделать когда будут варианты
                         //switch (scope.recalc_mode) {
@@ -730,6 +769,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     }
                 }
 
+                if(route.car_position == undefined || route.car_position.lat == undefined || route.car_position.lon ) createNewCarPosition(route);
+
                 point = {
                     "lat": parseFloat(route.car_position.lat),
                     "lon": parseFloat(route.car_position.lon),
@@ -772,12 +813,14 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
 
                 // добавляем транспорт
+                console.log("Выбор веса", (parseInt(route.transport.MAXIMUM_WEIGHT) > route.weight+1), parseInt(route.transport.MAXIMUM_WEIGHT , route.weight+1));
+
                 mathInput.trList.push({
                     "id": "-1",
                     "cost_per_hour": parseInt(route.transport.COST_PER_HOUR),
                     "cost_per_km": parseInt(route.transport.COST_PER_KILOMETER),
                     "cost_onTime": parseInt(route.transport.COST_ONE_TIME),
-                    "maxweigth": parseInt(route.transport.MAXIMUM_WEIGHT),
+                    "maxweigth": (parseInt(route.transport.MAXIMUM_WEIGHT) > route.weight+1) ? parseInt(route.transport.MAXIMUM_WEIGHT) : route.weight+1,
                     "maxvolume": parseInt(route.transport.MAXIMUM_VOLUME),
                     "maxvalue": parseInt(route.transport.MAXIMUM_VALUE),
                     "multi_use": true,
@@ -877,7 +920,21 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     if (newSolution[i].pointId == changedRoute.points[j].waypoint.gIndex) {
                         point = changedRoute.points[j];
                         point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+
+                        point.new_arrival_time = newSolution[i].arrival;
+                        console.log("New arrival.time", point.new_arrival_time);
                         updatedPoints.push(point);
+                    }
+                }
+
+                for (var j = 0; j < scope.changedRoute.points.length; j++) {
+                    if (newSolution[i].pointId == scope.changedRoute.points[j].waypoint.gIndex) {
+                        point = scope.changedRoute.points[j];
+                       // point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+
+                        point.new_arrival_time = newSolution[i].arrival;
+                        //console.log("New arrival.time", point.new_arrival_time);
+                        //updatedPoints.push(point);
                     }
                 }
             }
@@ -977,9 +1034,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 //console.log("точка не отменена и должна быть в измененном маршруте");
 
                 for (var j=0; j< scope.changedRoute.points.length; j++){
-                    if (scope.route.points[i].row_id == scope.changedRoute.points[j].row_id) {
+                    if (scope.route.points[i].row_id == scope.changedRoute.points[j].row_id ) {
                        //console.log("Соответствие найдено");
-                        //console.log("Предполагаемый статус",getTextStatuses(scope.route.points[i].status));
+                        console.log("Создаем и проверяем точку точку", scope.route.points[i]);
                         scope.display.push({
                             exNumber: scope.route.points[i].NUMBER,
                             status: getTextStatuses(scope.route.points[i].status).name,
@@ -989,7 +1046,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             startZOK : scope.route.points[i].windows[0].start,
                             endZOK : scope.route.points[i].windows[0].finish,
                             exArrival: scope.route.points[i].arrival_time_ts,
-                            newArrival: scope.changedRoute.points[j].arrival_time_ts,
+                            newArrival: scope.changedRoute.points[j].new_arrival_time,
                             editWindow: false,
                             newPromisedFinishCard:0,
                             newPromisedStartCard:0,
@@ -1010,7 +1067,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         }
 
-        scope.handRecalc = function (item, t1, t2){
+        scope.handRecalc = function (item, t1, t2, route){
             var result = new Date;
             result.setHours(0, 0, 0, 0);
             var newStart = new Date(t1).getTime() /1000;
@@ -1022,8 +1079,29 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             result.setHours(0,0,newFinish+2*60*60,0);
             var tsFinish = (result.valueOf()/1000);
             //console.log("NEW WINDOW timeStamp", tsFinish, tsStart, rootScope.nowTime);
-            console.log("Identificator tohki",item.gIndex, scope.mathInputJson.jobList[0].point);
+            console.log("Identificator tohki", item.gIndex, scope.mathInputJson.jobList[0].point);
+            //Поиск в mathinpute данной точки и замена ей временного окна.
 
+            for (var i=0; i<scope.mathInputJson.jobList.length; i++){
+                if(item.gIndex == parseInt( scope.mathInputJson.jobList[i].point)) {
+                    console.log("Соответсвующая точка найдкена",scope.mathInputJson.jobList[i] );
+                    scope.mathInputJson.jobList[i].windows[0].start = tsStart;
+                    scope.mathInputJson.jobList[i].windows[0].finish = tsFinish;
+                }
+
+            }
+
+            console.log("NEW Big MATH INPUT",scope.mathInputJson);
+
+            // оптравляем на пересчет
+            http.post('./recalculate/', {input: scope.mathInputJson}).
+                success(function (data) {
+                    console.log("Recalculate receive DATA",data);
+                    processModifiedPoints(route, data);
+                })
+                .error(function(data){
+                    console.log("ERROR, data");
+                });
 
 
         };
@@ -1037,6 +1115,89 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             var j = parseInt( (scope.item.newPromisedFinishCard)/1000, 10 );
             console.log("New TIme", i, j);
         };
+
+
+        scope.confirmEditing = function() {
+            console.log("Существует", rootScope.data.routes, "Отредактировано", scope.changedRoute);
+
+            function compareNewArrivalTime (a, b){
+                return a.new_arrival_time - b.new_arrival_time;
+            }
+
+            scope.changedRoute.points.sort(compareNewArrivalTime);
+
+            //Этап 0 Определяем, какой роут редактируем
+            var rootRoute;
+            for (var i=0; i<rootScope.data.routes.length; i++){
+                if(rootScope.data.routes[i].uniqueID == scope.changedRoute.uniqueID){
+                    rootRoute = rootScope.data.routes[i];
+                    console.log("Маршрут для редактирования выбран");
+                    break;
+                }
+            }
+            console.log("До редактирования в роуте точек =", rootRoute.points.length, scope.changedRoute.points.length );
+
+            //Этап 1 Убираем все пересчитанные точки из базового роута
+
+            for ( i=0; i<scope.changedRoute.points.length; i++){
+                for (var j=0; j<rootRoute.points.length; j++){
+                    if(scope.changedRoute.points[i].waypoint.gIndex == rootRoute.points[j].waypoint.gIndex){
+                        rootRoute.points.splice(j,1);
+                        break;
+                    }
+                }
+            }
+
+            console.log("После удаления", rootRoute.points.length, scope.changedRoute.points.length);
+            rootRoute.points=rootRoute.points.concat(scope.changedRoute.points);
+            console.log("После объединения точек в ротуе", rootRoute.points.length);
+
+
+            //Этап 2 меняем номера заданий, arrival_time_ts promised_window_changed change_time
+
+            for (var i=0; i<rootRoute.points.length; i++){
+                rootRoute.points[i].NUMBER = i+1;
+                delete rootRoute.points[i].fact_number;
+                if (rootRoute.points[i].new_arrival_time != undefined && rootRoute.points[i].new_arrival_time !=rootRoute.points[i].arrival_time_ts ){
+                    rootRoute.points[i].arrival_time_ts = rootRoute.points[i].new_arrival_time;
+                    if(rootRoute.points[i].change_time == undefined) rootRoute.points[i].change_time=0;
+                    rootRoute.points[i].change_time++;
+                    //изменение обещанного окна. Последнее утвержденное и пересчитанное окно есть  в mathinput
+                    for(var j=0; j<scope.mathInputJson.jobList.length; j++){
+                        if (rootRoute.points[i].waypoint.gIndex == scope.mathInputJson.jobList[j].point){
+                            rootRoute.points[i].promised_window_changed.start=scope.mathInputJson.jobList[j].windows[0].start;
+                            rootRoute.points[i].promised_window_changed.finish=scope.mathInputJson.jobList[j].windows[0].finish;
+                            console.log("Изменили обещанное окно", scope.mathInputJson.jobList[j].windows[0].finish);
+                        }
+                    }
+
+                }
+
+            }
+
+            console.log("Новый роут", rootRoute);
+            scope.$emit('updateDisplayCollection');
+            scope.$emit('clearMap');
+            scope.$emit('saveRoute', rootRoute.filterId);
+            scope.display = [];
+
+        };
+
+
+        function createNewCarPosition(route){
+            route.car_position = {};
+            route.car_position.lat = route.points[0].LAT;
+            route.car_position.lon = route.points[0].LON;
+
+            for (var i=0; i<route.points.length; i++){
+                if(route.points[i].status<4){
+                    route.car_position.lat = route.points[i].LAT;
+                    route.car_position.lon = route.points[i].LON;
+                }
+            }
+        }
+
+
 
 
 

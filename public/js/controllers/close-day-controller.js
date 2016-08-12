@@ -155,4 +155,44 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         }
     })
 
+    scope.forNodeSerch;
+    scope.startSerchOnNode = function (){
+       //alert("Заработало!!!" + scope.forNodeSerch)
+
+        http.post('./nodeserch', {data: scope.forNodeSerch})
+            .success(function(data) {
+                console.log("Результат поиска", data);
+                createDisplay(data);
+            })
+            .error(function(data) {
+
+            })
+    };
+
+
+    function createDisplay(data){
+        //На первом этапе в дисплей добавляется совпадение по водителюб потом название, адресб комментарий
+        scope.serchDisplay=[];
+        for (var i=0; i<data.length; i++) {
+            if (data[i].name == undefined && data[i].adress == undefined && data[i].comment == undefined){
+                scope.serchDisplay.push(data[i]);
+                data.splice(i,1);
+                i--;
+            }
+        }
+
+        scope.serchDisplay = scope.serchDisplay.concat(data);
+
+    }
+
+    scope.loadSerchResult = function(id) {
+        console.log("Работает "+id);
+        if (rootScope.data.routes.length >= rootScope.settings.problems_to_operator +1 ) {
+
+            scope.$emit('clearMap');
+            alert("Вы уже заблокировали предельное количество маршрутов");
+        }
+        else scope.$emit('loadoneroute', id);
+    }
+
 }]);
