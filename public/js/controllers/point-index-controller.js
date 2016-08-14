@@ -192,10 +192,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if(rootScope.data != undefined) {
                 if (scope.filters.route == -1) {
                     console.log("All Routes selected");
-                    rootScope.$emit('displayCollectionToStatistic', []);//todo можно отсылать статистику по всем загруженным роутам, но нет смысла, потому что нет информативности
+                    scope.$emit('clearMap');
+                    rootScope.$emit('holestatistic', rootScope.data.statistic);//todo можно отсылать статистику по всем загруженным роутам, но нет смысла, потому что нет информативности
                     //todo пройтись по эмиту ниже и все убрать
                     //rootScope.$emit('logoutsave');
-                    scope.$emit('clearMap');
+
                     for (var j = 0; rootScope.data.routes.length > j; j++) {
                         rootScope.data.routes[j].selected = false;
                     }

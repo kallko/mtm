@@ -10,14 +10,25 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
         scope.statistic.timeOut = 0;
         scope.statistic.delivered = 0;
         
-        rootScope.$on('clearMap', function(){
+        //rootScope.$on('clearMap', function(){
+        //    scope.statistic = {};
+        //    scope.statistic.canceled = 0;
+        //    scope.statistic.scheduled = 0;
+        //    scope.statistic.attention = 0;
+        //    scope.statistic.delay = 0;
+        //    scope.statistic.timeOut = 0;
+        //    scope.statistic.delivered = 0;
+        //});
+
+        rootScope.$on('holestatistic', function(event, obj) {
+            console.log("Statistic", obj);
             scope.statistic = {};
-            scope.statistic.canceled = 0;
-            scope.statistic.scheduled = 0;
-            scope.statistic.attention = 0;
-            scope.statistic.delay = 0;
-            scope.statistic.timeOut = 0;
-            scope.statistic.delivered = 0;
+            scope.statistic.canceled = obj[8];
+            scope.statistic.scheduled = obj[7];
+            scope.statistic.attention = obj[6];
+            scope.statistic.delay = obj[5];
+            scope.statistic.timeOut = obj[4];
+            scope.statistic.delivered = obj[0]+obj[1]+obj[2]+obj[3];
         });
 
 
@@ -30,6 +41,7 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
             scope.statistic.timeOut = 0;
             scope.statistic.delivered = 0;
             for(var i = 0; pointsArr.length > i; i++){
+                //console.log('Calculate statistic')
                 switch(pointsArr[i].status){
                     case 0:
                     case 1:
@@ -41,5 +53,6 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
                     case 8: scope.statistic.canceled++; break;
                 }
             }
+            console.log("Result is ", scope.statistic);
         });
     }]);

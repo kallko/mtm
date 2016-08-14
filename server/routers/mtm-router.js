@@ -1344,6 +1344,7 @@ router.route('/askforproblems/:need')
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
                     result.companyName = currentCompany;
+                    result.statistic = cashedDataArr[currentCompany].statistic
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
@@ -1408,6 +1409,7 @@ router.route('/askforproblems/:need')
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
+                    result.statistic = cashedDataArr[currentCompany].statistic
 
                     var indx = cashedDataArr[currentCompany].line_routes[i].filterId;
                     for (var k=0; k< cashedDataArr[currentCompany].routes.length; k++){
@@ -1440,6 +1442,7 @@ router.route('/askforproblems/:need')
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
                 result.transports = cashedDataArr[currentCompany].transports;
+                result.statistic = cashedDataArr[currentCompany].statistic
                 //cashedDataArr[currentCompany].blocked_routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 //blockedRoutes.push({id: "" + cashedDataArr[currentCompany].line_routes[i].uniqueID, company: currentCompany, login: login, time: parseInt(Date.now()/1000)})
                 changePriority(cashedDataArr[currentCompany].line_routes[i].uniqueID, currentCompany, login);

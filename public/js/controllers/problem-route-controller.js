@@ -84,6 +84,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.$emit('receiveproblem', rootScope.tempDecision);
                             rootScope.reasons=data.reasons;
+                            rootScope.$emit('holestatistic', rootScope.tempDecision.statistic);
                         } else {
                             console.log("Общая статистика", data);
                             rootScope.statisticAll = data.statistic;
