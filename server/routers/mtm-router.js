@@ -982,7 +982,7 @@ router.route('/getroutermatrix/:points')
 // открытие окна задачи в 1С IDS
 router.route('/openidspointwindow/:pointId')
     .get(function (req, res) {
-        console.log('openidspointwindow');
+        console.log('openidspointwindow mtm router');
         var soapManager = new soap(req.session.login);
         soapManager.openPointWindow(req.session.login, req.params.pointId);
         res.status(200).json({status: 'ok'});
@@ -3125,6 +3125,11 @@ function lookForNewIten(company) {
 
 
                             var workingWindowType = cashedDataArr[currentCompany].settings.workingWindowType;
+
+                            //todo переделать после реализации настроек в 1С
+                            if(currentCompany == "292942") {
+                                workingWindowType = 0;
+                            }
 
                             //console.log("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
 

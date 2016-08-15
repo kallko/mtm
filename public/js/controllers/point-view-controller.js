@@ -303,7 +303,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // открывает окно в 1С IDS-овцев
         rootScope.open1CWindow = function () {
-            console.log('open1CWindow');
+            console.log('Point View open1CWindow');
             http.get('./openidspointwindow/' + scope.point.waypoint.ID)
             //http.get('./openidspointwindow/' + 12)
                 .success(function (data) {
