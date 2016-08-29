@@ -19,7 +19,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         scope.params = {} //scope.params || Settings.load();
-        timeThreshold = scope.params.timeThreshold * 60
+        //timeThreshold = scope.params.timeThreshold * 60;
 
         initMap();
         addListeners();
@@ -117,6 +117,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 color = '',
                 stopIndx,
                 stopTime,
+                timeThreshold = scope.data.settings.timeThreshold * 60,
                 drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
             //drawStops = true;
 
@@ -133,7 +134,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
                     //console.log(" track[i].time",  track[i].coords);
 
-                    //TODO   Раскомментировать этот блок, когда начнут правильно утверждать маршруты с правильным стартом и финишем.
+
+                    //console.log("Времена", track[i].coords[0].t, start, timeThreshold);
                     if( track[i].coords[0].t < start-timeThreshold) {
                         //console.log("Its too early track");
                         continue
