@@ -2482,6 +2482,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             scope.$emit('drawCombinedTrack', route);
                             console.log("Send route to map");
                             //unlockAllRoutes(null, rootScope.data);
+                            scope.$emit('displayCollectionToStatistic', route.points);
                             break;
                         case scope.draw_modes[1].value: // фактический
                             scope.$emit('drawRealTrack', route);
