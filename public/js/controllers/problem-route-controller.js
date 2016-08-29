@@ -15,7 +15,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             http.get('./confirmonline/')
                 .success(function (data) {
                     if (data != "ok") alert("online confirmed");
-                    var j = data;
+                    //var j = data;
                 }).error(function () {
                     //rootScope.errorNotification('Нет связи с сервером');
                 });
@@ -31,12 +31,14 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     setProblemUpdate();
                 }, 15000); //timeout, чтобы успел произойти первый перерасчет на сервере, прежде чем запрашивать первые 3 проблеммы.
 
+
             }
         }
 
-        // Запрос у сервера проблем каждые 5 секунд
+        // Запрос у сервера проблем каждые 6 секунд
         function setProblemUpdate() {
             console.log("I decide i do it!");
+
             interval(checkProblem, 6 * 1000);
         }
 

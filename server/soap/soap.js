@@ -868,8 +868,9 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
                     callback(tempCompany, result);
                 } else {
                     console.log('GET PUSHES  ERROR');
-                    console.log('result', err);
                     log.toFLog('result', err);
+                    console.log('result', err);
+
                     //console.log(err.body);
                     callback({error: err});
                 }

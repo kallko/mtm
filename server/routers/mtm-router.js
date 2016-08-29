@@ -124,6 +124,7 @@ router.route('/getoldroute')
 router.route('/nodeserch')
     .post(function(req, res){
         console.log("Получил запрос на поиск", req.body.data);
+        log.toFLog('logging.txt', 'TEST 29.08');
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         var input = req.body.data
@@ -1955,10 +1956,11 @@ function startPeriodicCalculating() {
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
                         //console.log("receivePUSHES", data);
+                        if (data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //console.log("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
-                        cashedDataArr[company].allPushes=obj;
+                        cashedDataArr[company].allPushes=obj;}
                         cashedDataArr[company].needRequests--;
                         console.log("GetPushes finished for company", company, cashedDataArr[company].needRequests);
                         if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
@@ -2199,7 +2201,9 @@ function startPeriodicCalculating() {
                                     if(point.problem_index > route.max_problem) {
                                         route.max_problem = point.problem_index;
                                         route.problem_point=point;
-                                        route.kind_of_problem='время вышло';
+                                        if(point.status == 4 ){route.kind_of_problem='время вышло';}
+                                        if(point.status == 5 ){route.kind_of_problem='опаздывает';}
+
                                     }
 
 
