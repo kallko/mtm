@@ -155,10 +155,11 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         }
     })
 
-    scope.forNodeSerch;
+        //scope.forNodeSerch;
+
     scope.startSerchOnNode = function (){
        //alert("Заработало!!!" + scope.forNodeSerch)
-
+       console.log("Start serch in closedayController");
         http.post('./nodeserch', {data: scope.forNodeSerch})
             .success(function(data) {
                 console.log("Результат поиска", data);

@@ -27,12 +27,16 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             if (askProblemFromServer && rootScope.loaded) {
                 console.log("I decide to start Asking");
                 rootScope.asking = true;
-                setProblemUpdate();
+                timeout(function () {
+                    setProblemUpdate();
+                }, 15000); //timeout, чтобы успел произойти первый перерасчет на сервере, прежде чем запрашивать первые 3 проблеммы.
+
             }
         }
 
         // Запрос у сервера проблем каждые 5 секунд
         function setProblemUpdate() {
+            console.log("I decide i do it!");
             interval(checkProblem, 6 * 1000);
         }
 
