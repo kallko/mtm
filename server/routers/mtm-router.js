@@ -1934,12 +1934,15 @@ function startPeriodicCalculating() {
             console.log("У этой компании нет роутов на пересчет");
             companysToCalc.splice(i,1);
             i--;
+        } else {
+            cashedDataArr[companysToCalc[i]].routes = cashedDataArr[companysToCalc[i]].routes.concat(cashedDataArr[companysToCalc[i]].line_routes);
         }
     }
 
 
     for(i=0; i<companysToCalc.length; i++){
             console.log("Компания на пересчет", companysToCalc[i]);
+
     }
 
     callbackDispetcher(companysToCalc);
