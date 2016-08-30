@@ -295,6 +295,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // проверить блокировку задач
         function checkLocks() {
+            return;
             if (!rootScope.data) return;
 
             http.get('./checklocks/' + rootScope.data.ID.replace('/', 'SL'))
