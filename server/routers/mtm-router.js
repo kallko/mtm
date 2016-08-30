@@ -1928,6 +1928,16 @@ function startPeriodicCalculating() {
         }
     }
 
+    // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
+
+    for(var i=0; i<companysToCalc.length; i++){
+        if ( cashedDataArr[company].needRequests == undefined){
+            console.log("Первичный расчет еще не закончен");
+            companysToCalc.splice(i,1);
+            i--;
+        }
+    }
+
     // Не считаем те компании, у которых размер роутов равен 0
     for(var i=0; i<companysToCalc.length; i++){
         if ((cashedDataArr[companysToCalc[i]].routes == undefined || cashedDataArr[companysToCalc[i]].routes.length == 0) && (cashedDataArr[companysToCalc[i]].line_routes == undefined || cashedDataArr[companysToCalc[i]].line_routes.length == 0)){
