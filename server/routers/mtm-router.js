@@ -1374,7 +1374,7 @@ router.route('/askforproblems/:need')
 
             if (result.routes == undefined || result.routes.length == 0) {
                 result.routes = [];
-                result.allRoutes = [];
+                result.allRoutes = cashedDataArr[currentCompany].allRoutes;
             }
             console.log("Need=", need);
             if (need != 1){
