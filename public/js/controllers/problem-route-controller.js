@@ -91,10 +91,19 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             rootScope.$emit('receiveproblem', rootScope.tempDecision);
                             rootScope.reasons=data.reasons;
                             rootScope.$emit('holestatistic', rootScope.tempDecision.statistic);
-                        } else {
+                        } else
+
+
+                        {
+
+                            if (data == 'All problem routes blocked') {
+                             return;
+
+                            } else {
                             console.log("Общая статистика", data);
                             rootScope.statisticAll = data.statistic;
                             rootScope.nowTime = data.nowTime;
+                            }
                         }
 
                     rootScope.editing.start = parseInt(Date.now()/1000);
