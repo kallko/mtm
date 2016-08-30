@@ -1998,7 +1998,7 @@ function startPeriodicCalculating() {
             var end = parseInt(Date.now()/1000);
             var start = cashedDataArr[companys[k]].last_track_update;
             var companyAsk = companys[k];
-                console.log("Check data", cashedDataArr[companyAsk].routes.length, cashedDataArr[companyAsk].routes[72] );//todo убрать после тестирования
+                console.log("Check data", cashedDataArr[companyAsk].routes.length);
             tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
                 function (data) {
                    // if (!first) return;
