@@ -90,9 +90,10 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
         counter = 0,
         reqCounter = 0,
         result = [];
-    //console.log("Таки зашли в файл трекс", data.routes);
+    //console.log("Таки зашли в файл трекс", data.routes.length);
     if(data != undefined && data.routes != undefined) {
         for (var i = 0; i < data.routes.length; i++) {
+
             //console.log("Ищем треки для ", data.routes[i].driver.NAME );
             for (var j = 0; j < data.sensors.length; j++) {
                 // запрашивать треки только по сенсорам прикрепленным к машинам имеющихся маршрутов

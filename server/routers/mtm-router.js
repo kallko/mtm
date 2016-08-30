@@ -378,10 +378,11 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                     cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
                     cashedDataArr[currentCompany].companyName=currentCompany;
-
+                    cashedDataArr[currentCompany].recalc_finishing = true;
                     //Собираем решение из частей в одну кучку
                     linkDataParts(currentCompany, req.session.login);
                     //Мгновенный запуск на пересчет, после загрузки
+
                     startPeriodicCalculating(currentCompany);
 
 
@@ -1893,6 +1894,7 @@ function linkDataParts (currentCompany, login)
     }
 
     //Удаление последнего стейта если он Каррент позитион
+   // var size = cashedDataArr[currentCompany].routes.length;
     for (i=0; i<cashedDataArr[currentCompany].routes.length; i++){
 
         var route = cashedDataArr[currentCompany].routes[i];
@@ -1904,7 +1906,8 @@ function linkDataParts (currentCompany, login)
             //console.log("DELETE CURRENT POSITION");
         }
     }
-    console.log("FINISHING LINKING");
+    //cashedDataArr[currentCompany].routes.length = size;
+    console.log("FINISHING LINKING", cashedDataArr[currentCompany].routes.length);
 
 }
 
@@ -1931,7 +1934,7 @@ function startPeriodicCalculating() {
     // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
 
     for(var i=0; i<companysToCalc.length; i++){
-        if ( cashedDataArr[company].needRequests == undefined){
+        if ( !cashedDataArr[company].recalc_finishing){
             console.log("Первичный расчет еще не закончен");
             companysToCalc.splice(i,1);
             i--;
@@ -1945,7 +1948,7 @@ function startPeriodicCalculating() {
             companysToCalc.splice(i,1);
             i--;
         } else {
-            cashedDataArr[companysToCalc[i]].routes = cashedDataArr[companysToCalc[i]].routes.concat(cashedDataArr[companysToCalc[i]].line_routes);
+            if (cashedDataArr[companysToCalc[i]].line_routes != undefined) cashedDataArr[companysToCalc[i]].routes = cashedDataArr[companysToCalc[i]].routes.concat(cashedDataArr[companysToCalc[i]].line_routes);
         }
     }
 
@@ -1995,7 +1998,7 @@ function startPeriodicCalculating() {
             var end = parseInt(Date.now()/1000);
             var start = cashedDataArr[companys[k]].last_track_update;
             var companyAsk = companys[k];
-                console.log("Check data", cashedDataArr[companyAsk].routes.length );
+                console.log("Check data", cashedDataArr[companyAsk].routes.length, cashedDataArr[companyAsk].routes[72] );//todo убрать после тестирования
             tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
                 function (data) {
                    // if (!first) return;
@@ -2108,6 +2111,7 @@ function startPeriodicCalculating() {
 
                     function startCalculateCompany(company) {
                         console.log("Все данные получены, пересчитываем компанию", company);
+                        cashedDataArr[company].recalc_finishing = false;
                         selectRoutes(company);
                         connectPointsAndPushes(company);
                         connectStopsAndPoints(company);
@@ -2119,6 +2123,7 @@ function startPeriodicCalculating() {
                         checkRealTrackData(company); //todo убрать, после того как починят треккер
                         lookForNewIten(company);
                         checkUniqueID (company);
+                        cashedDataArr[company].recalc_finishing = true;
                     }
 
 
@@ -3813,6 +3818,7 @@ function checkUniqueID (company){
             }
         }
     }
+
 }
 
 function selectRoutes(company) {
