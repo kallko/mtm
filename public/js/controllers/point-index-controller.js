@@ -4397,6 +4397,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log("Мы получили", cache.routes[0].driver.NAME);
             }
 
+            //Проверка, не получили ли мы те же роуты, что у нас уже есть.
+            if (rootScope.data != undefined && cache.routes.length == 1) {
+                for (var i=0; i<rootScope.data.routes.length;i++){
+
+                    console.log(rootScope.data.routes[i].uniqueID , cache.routes[0].uniqueID);
+                    if (rootScope.data.routes[i].uniqueID == cache.routes[0].uniqueID) return;
+
+                }
+            }
 
 
             if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined)) {

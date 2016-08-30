@@ -2270,7 +2270,7 @@ function startPeriodicCalculating() {
 
 
                         console.log("Start createProblems Конец рассчета, который занял", parseInt(Date.now()/1000)-superEndTime);
-                        console.log("Общая статистика. Всего роутов", cashedDataArr[company].routes.length);
+                        console.log("Общая статистика. Беспроблемных роутов", cashedDataArr[company].routes.length);
                         console.log("Роутов с проблеммами в очереди",cashedDataArr[company].line_routes.length);
                         console.log("Роутов розданных операторам", cashedDataArr[company].blocked_routes ? cashedDataArr[company].blocked_routes.length : 0);
                         console.log("Прошлых незакрытых роутов", cashedDataArr[company].old_routes ? cashedDataArr[company].old_routes.length:0);
@@ -2316,6 +2316,12 @@ function dataForPredicate(company, callback){
     var generalResult=[];                                                   // преременная собирающая в себе все ответы
         var collection = result;
     console.log("CONT PREDICATE FUNCTION", !(collection.length==0));
+    if (collection.length==0) {
+        cashedDataArr[company].needRequests --;
+        console.log("The cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
+        if(cashedDataArr[company].needRequests == 0) callback(company);
+        return;
+    }
     while(j<collection.length){
         var pointsStr = '';
         for (var  i= 0; i < collection[j].points.length; i++) {
@@ -2377,11 +2383,8 @@ function dataForPredicate(company, callback){
     }
 
     //TODO переделать этот костыль. Сюда не должно заходить.
-    ////Если зашло сюда, значит не было данных для придиката.
-    //cashedDataArr[company].needRequests --;
-    //console.log("The cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
-    //if(cashedDataArr[company].needRequests == 0) callback(company);
-    //return;
+    //Если зашло сюда, значит не было данных для придиката.
+
 
 }
 
