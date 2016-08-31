@@ -1948,7 +1948,11 @@ function startPeriodicCalculating() {
             companysToCalc.splice(i,1);
             i--;
         } else {
-            if (cashedDataArr[companysToCalc[i]].line_routes != undefined) cashedDataArr[companysToCalc[i]].routes = cashedDataArr[companysToCalc[i]].routes.concat(cashedDataArr[companysToCalc[i]].line_routes);
+            if (cashedDataArr[companysToCalc[i]].line_routes != undefined) {
+                cashedDataArr[companysToCalc[i]].routes = cashedDataArr[companysToCalc[i]].routes.concat(cashedDataArr[companysToCalc[i]].line_routes);
+                cashedDataArr[companysToCalc[i]].line_routes.length = 0;
+            }
+
         }
     }
 
