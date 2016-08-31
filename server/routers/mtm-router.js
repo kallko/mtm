@@ -430,16 +430,16 @@ router.route('/dailydata')
 
 //Попытка запроса оператором одного роута
 router.route('/askforroute')
-    .post(function(req, res){
-        var key = ""+req.session.login;
+    .post(function(req, res) {
+        var key = "" + req.session.login;
         var currentCompany = companyLogins[key];
         var uniqueID = req.body.id;
         console.log("Пришел одиночный запрос на роут", uniqueID);
 
         // проверяем не был ли этот маршрут заблокирован
-        for (var i=0; i< blockedRoutes.length; i++){
+        for (var i = 0; i < blockedRoutes.length; i++) {
             console.log(blockedRoutes[i]);
-            if(blockedRoutes[i].id == uniqueID && currentCompany == blockedRoutes[i].company) {
+            if (blockedRoutes[i].id == uniqueID && currentCompany == blockedRoutes[i].company) {
                 res.status(200).json({blocked: blockedRoutes[i].login});
                 return;
             }
@@ -447,29 +447,33 @@ router.route('/askforroute')
 
         //Искать маршрут нужно в 2-х местах line_routes & routes
         //console.log("Начинаем поиск", currentCompany, cashedDataArr[currentCompany].line_routes.length);
-        var result ={error : "Dont Found"};
-        for (var i=0; i< cashedDataArr[currentCompany].line_routes.length; i++){
-            //console.log("Ищем в проблемных");
-            if (uniqueID == cashedDataArr[currentCompany].line_routes[i].uniqueID){
-                result = cashedDataArr[currentCompany].line_routes[i];
-                cashedDataArr[currentCompany].blocked_routes.push(result);
-                cashedDataArr[currentCompany].line_routes.splice(i,1);
-                //console.log ("Маршрут найден в проблемных");
-                 break;
+        var result = {error: "Dont Found"};
+        if (cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length >0 ) {
+
+            for (var i = 0; i < cashedDataArr[currentCompany].line_routes.length; i++) {
+                //console.log("Ищем в проблемных");
+                if (uniqueID == cashedDataArr[currentCompany].line_routes[i].uniqueID) {
+                    result = cashedDataArr[currentCompany].line_routes[i];
+                    cashedDataArr[currentCompany].blocked_routes.push(result);
+                    cashedDataArr[currentCompany].line_routes.splice(i, 1);
+                    //console.log ("Маршрут найден в проблемных");
+                    break;
+                 }
+             }
+         }
+
+        if (cashedDataArr[currentCompany].routes != undefined && cashedDataArr[currentCompany].routes.length >0 ) {
+            for (var i = 0; i < cashedDataArr[currentCompany].routes.length; i++) {
+                //console.log("Ищем в беспроблемных");
+                if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID) {
+                    result = cashedDataArr[currentCompany].routes[i];
+                    cashedDataArr[currentCompany].blocked_routes.push(result);
+                    cashedDataArr[currentCompany].routes.splice(i, 1);
+                    //console.log ("Маршрут найден в беспроблемных");
+                    break
+                }
             }
         }
-
-        for (var i=0; i< cashedDataArr[currentCompany].routes.length; i++){
-            //console.log("Ищем в беспроблемных");
-            if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID){
-                result = cashedDataArr[currentCompany].routes[i];
-                cashedDataArr[currentCompany].blocked_routes.push(result);
-                cashedDataArr[currentCompany].routes.splice(i,1);
-               //console.log ("Маршрут найден в беспроблемных");
-                break
-            }
-        }
-
         if (result.error == undefined) {
             changePriority(result.uniqueID, currentCompany, key);
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
@@ -3426,6 +3430,10 @@ function connectPointsAndPushes(company) {
 
                 // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
                 if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+
+                    //Проверка, не был ли ранее отменен этот пуш как некоректный
+                    if (tmpPoint.incorrect_push != undefined && tmpPoint.incorrect_push.number == mobilePushes[i].number) break;
+
                     //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
 
                     tmpPoint.mobile_push = mobilePushes[i];

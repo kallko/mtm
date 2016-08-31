@@ -4341,14 +4341,32 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             function cancelPush (event , point) {
             console.log("Try to cancel push", point);
             point.incorrect_push=point.mobile_push;
-            delete point.mobile_push;
-            delete point.havePush;
+                delete point.mobile_push;
+                delete point.havePush;
+                delete point.limit;
+                delete point.fact_number;
+                delete point.mobile_arrival_time;
 
+
+            // Изменить время прибытия на точку
+                if (point.stopState != undefined) {
+                        point.real_arrival_time = point.stopState.t1;
+                        point.overdue_time = point.real_arrival_time - point.base_arrival_ts;
+                        if (point.overdue_time < 0) point.overdue_time = 0;
+
+                } else {
+
+                    delete point.real_arrival_time;
+                    point.overdue_time = rootScope.nowTime - point.base_arrival_ts;
+                    if (point.overdue_time < 0) point.overdue_time = 0;
+                }
+
+                findStatusAndWindowForPoint(point);
             //Находим роут, соответсвующий этой точке
                 var i=0;
                 var route;
                 while (i<rootScope.data.routes.length){
-                    console.log()
+                    //console.log()
                     if( point.uniqueID==rootScope.data.routes[i].uniqueID){
                         route=rootScope.data.routes[i];
                         console.log("Delete push in this route", route);
