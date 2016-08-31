@@ -25,12 +25,12 @@ var config = {
     },
 
     router: {
-        url: 'https://router.s2.sngtrans.com.ua/'
+        url: 'https://router.s1.sngtrans.com.ua/'
     },
 
     mathServer: {
         //url: 'http://192.168.9.29:12035/' // локальный путь к матсерверу
-        url: 'http://math-all:9000/' // путь к матсерверу на хосте
+        url: 'http://math-all.s1.sngtrans.com.ua/' // путь к матсерверу на хосте
         //url: 'http://192.168.122.108:9000'        // новый путь к матсерверу
         //url: 'http://localhost:9000/' // путь к матсерверу на хосте
     }

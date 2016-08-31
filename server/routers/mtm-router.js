@@ -3587,7 +3587,23 @@ function connectStopsAndPoints(company) {
                             }
 
 
+                            // Проверяет не является ли данный стоп некорректным и ранее отвязанным вручную оператором
+                            var uniqueId = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
+                            var incorrect_stop = false;
+                            if(tmpPoint.incorrect_stop != undefined ){
+                                for (var si = 0; si < tmpPoint.incorrect_stop.length; si++){
 
+                                    if (tmpPoint.incorrect_stop[si] == uniqueId) {
+                                        incorrect_stop = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (incorrect_stop){
+                                console.log ("Ура, найден некорректный стоп!!!!!!");
+                                continue;
+                            }
 
                             tmpPoint.distanceToStop = tmpDistance;
                             tmpPoint.timeToStop = tmpTime;

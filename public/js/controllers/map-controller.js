@@ -1737,6 +1737,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 i++;
             }
             //console.log(stop.servicePoints, "stop.servicePoints");
+
+
+            if (container.source.incorrect_stop == undefined) container.source.incorrect_stop = [];
+            var uniqueId = "" + stop.lat + stop.lon + stop.t1;
+            container.source.incorrect_stop.push(uniqueId);
+
+
+
             container.source.stopState.servicePoints=stop.servicePoints;
             //console.log(container.source.stopState.servicePoints);
 
