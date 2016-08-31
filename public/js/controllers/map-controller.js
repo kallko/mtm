@@ -1138,6 +1138,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     i++
                 }
 
+                //Проверка не был ли ранее этот стоп помечен как некорректный, и если да, то убрать его из списка
+                if(wayPoint.incorrect_stop != undefined) {
+                    var uniqueId = "" + stop.lat + stop.lon + stop.t1;
+                    for(var si=0; si<wayPoint.incorrect_stop.length; si++ ){
+                        if (wayPoint.incorrect_stop[si] == uniqueId){
+                            wayPoint.incorrect_stop.splice(si,1);
+                            si--;
+                        }
+                    }
+                }
+
                 wayPoint.rawConfirmed =1;
                 makeWayPointMarkerGreen(indx);
                 changeFieldsAlredyConnectedPoints(wayPoint, stop);

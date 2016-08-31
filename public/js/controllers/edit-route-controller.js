@@ -663,6 +663,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         delay = route.points[i].status == 5;
 
                         jobWindows = [];
+                        var vr = "-1",
+                            pvr = pt.NUMBER,
+                            rvr =route.NUMBER;
+
+
                         jobWindows = [
                             {
                                 "start": pt.working_window.start,
@@ -779,7 +784,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             "value": parseInt(pt.VALUE),
                             "servicetime": parseInt(pt.TASK_TIME),
                             "cargo_type": "-1",
-                            "vehicle_required": "",
+                            "vehicle_required": vr,
+                            "position_vehicle_required" : parseInt(pvr),
+                            "routenumb_vehicle_required" : parseInt(rvr),
                             "penalty": 0,
                             "rest": false,
                             "backhaul": false,
@@ -1072,8 +1079,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             changes: scope.change_time || 0,
                             startKOK:scope.route.points[i].working_window.start,
                             endKOK: scope.route.points[i].working_window.finish,
-                            startZOK : scope.route.points[i].windows[0].start,
-                            endZOK : scope.route.points[i].windows[0].finish,
+                            startZOK : scope.route.points[i].windows != undefined ? scope.route.points[i].windows[0].start : 0, //todo подумать, как заменить 0 по уму
+                            endZOK : scope.route.points[i].windows != undefined ? scope.route.points[i].windows[0].finish : 0,
                             exArrival: scope.route.points[i].arrival_time_ts,
                             newArrival: scope.changedRoute.points[j].new_arrival_time,
                             editWindow: false,

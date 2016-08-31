@@ -4449,13 +4449,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 };
 
                 //Создание множественных окн доступности
-                for(var i = 0; i<rootScope.data.routes.length; i++){
-                    for(var j = 0; j<rootScope.data.routes[i].points.length; j++ ){
-                        if(rootScope.data.routes[i].points[j].orderWindows == undefined){
-                            createSeveralAviabilityWindows(rootScope.data.routes[i].points[j]);
-                        }
-                    }
-                }
+                //for(var i = 0; i<rootScope.data.routes.length; i++){
+                //    for(var j = 0; j<rootScope.data.routes[i].points.length; j++ ){
+                //        if(rootScope.data.routes[i].points[j].orderWindows == undefined){
+                //            createSeveralAviabilityWindows(rootScope.data.routes[i].points[j]);
+                //        }
+                //    }
+                //}
 
                 //Обновление селекта
                 if(scope.filters.routes.length == 1 && cache.allRoutes != undefined){
@@ -4653,33 +4653,33 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
         }
 
-        function createSeveralAviabilityWindows (point){
-
-            point.orderWindows=[];
-            //console.log("Start checkUncalculate");
-
-            var parts=point.AVAILABILITY_WINDOWS.split(";");
-            var size=parts.length;
-            var i=0;
-            while(i<size){
-                var date=point.ARRIVAL_TIME.substr(0,11);
-                var temp=parts[i].trim();
-                var before=temp.substr(0,5);
-                before=date+before+":00";
-                //console.log("before=", before);
-                var begin=strToTstamp(before, point);
-
-                var after=temp.slice(-5);
-                after=date+after+":00";
-                var end=strToTstamp(after, point);
-                point.orderWindows.push({start: begin, finish: end });
-
-
-                i++;
-            }
-
-
-        }
+        //function createSeveralAviabilityWindows (point){
+        //
+        //    point.orderWindows=[];
+        //    //console.log("Start checkUncalculate");
+        //
+        //    var parts=point.AVAILABILITY_WINDOWS.split(";");
+        //    var size=parts.length;
+        //    var i=0;
+        //    while(i<size){
+        //        var date=point.ARRIVAL_TIME.substr(0,11);
+        //        var temp=parts[i].trim();
+        //        var before=temp.substr(0,5);
+        //        before=date+before+":00";
+        //        //console.log("before=", before);
+        //        var begin=strToTstamp(before, point);
+        //
+        //        var after=temp.slice(-5);
+        //        after=date+after+":00";
+        //        var end=strToTstamp(after, point);
+        //        point.orderWindows.push({start: begin, finish: end });
+        //
+        //
+        //        i++;
+        //    }
+        //
+        //
+        //}
 
     }]);
 

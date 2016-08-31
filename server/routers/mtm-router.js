@@ -1980,7 +1980,7 @@ function startPeriodicCalculating() {
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
                         //console.log("receivePUSHES", data);
-                        if (data.error == undefined ){
+                        if (data != undefined || data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //console.log("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
@@ -2238,6 +2238,45 @@ function startPeriodicCalculating() {
 
                             }
                         }
+
+
+                        //проверка не запланировано ли прибытие в какую либо точку за пределами заказанных окон
+                        // todo придумать правильную логику, когда и как находить эту проблему. При данной реализации
+                        // todo во-первых лишний проход цикла, во вторых подумать о соотношении этой проблемы с другими
+                        // todo хотя по идее при равильной работе диспетчера он увидит эту проблему прямо утром при запуске сервиса первом пересчете
+                        // todo трудность в том, что оператор может первый раз запустить программу в середине дня
+
+                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+                            var route = cashedDataArr[company].routes[i];
+
+                            for (var j=0; j < route.points.length; j++){
+                                var point = route.points[j];
+                                var outOfWindows = true;
+                                if (point.orderWindows == undefined) {
+                                    console.log("У точки нет заказанного окна, скорее всего склад");
+                                    continue;
+                                }
+
+                                //чисто технически добавляем по минуте к границам заказанного окна
+                                for (k =0; k<point.orderWindows.length; k++){
+                                    var window = point.orderWindows[k];
+                                    if (point.arrival_time_ts  < window.finish + 60 && point.arrival_time_ts > window.start - 60 ){
+                                        outOfWindows =false;
+                                        break;
+                                    }
+                                }
+
+                                if (outOfWindows && point.waypoint.TYPE != "WAREHOUSE"){
+                                    console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
+                                    point.problem_index = route.max_problem+1;
+                                    route.max_problem = point.problem_index;
+                                    route.problem_point=point;
+                                    route.kind_of_problem='вне заказанного';
+                                }
+                            }
+                        }
+
+
 
                         //определение готовых к закрытию маршрутов
 
@@ -2879,8 +2918,39 @@ function lookForNewIten(company) {
                     var newRoutes = JSON.parse(JSON.stringify(data.routes));
                     var newWaypoints = JSON.parse(JSON.stringify(data.waypoints));
 
+                    var lastFilterId=0;
+                    //Поиск максимального filterId, чтобы далее продолжать с этого номера Может в 3 массивах
 
-                    var lastFilterId = cashedDataArr[company].routes[cashedDataArr[company].routes.length-1].filterId;
+                    if ( cashedDataArr[company].routes != undefined) {
+                        for (var i=0; i<cashedDataArr[company].routes.length; i++){
+                            if(cashedDataArr[company].routes[i].filterId > lastFilterId) {
+                                lastFilterId = cashedDataArr[company].routes[i].filterId;
+                                console.log("Новый максимальный аfilterId =", lastFilterId);
+                            }
+                        }
+
+                    }
+
+                    if ( cashedDataArr[company].line_routes != undefined) {
+                        for (var i=0; i<cashedDataArr[company].line_routes.length; i++){
+                            if(cashedDataArr[company].line_routes[i].filterId > lastFilterId) {
+                                lastFilterId = cashedDataArr[company].line_routes[i].filterId;
+                                console.log("Новый максимальный аfilterId =", lastFilterId);
+                            }
+                        }
+                    }
+
+                    if ( cashedDataArr[company].blocked_routes != undefined) {
+                        for (var i=0; i<cashedDataArr[company].blocked_routes.length; i++){
+                            if(cashedDataArr[company].blocked_routes[i].filterId > lastFilterId) {
+                                lastFilterId = cashedDataArr[company].blocked_routes[i].filterId;
+                                console.log("Новый максимальный аfilterId =", lastFilterId);
+                            }
+                        }
+                    }
+
+
+                    lastFilterId++;
 
 
                     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(newRoutes);
@@ -3000,7 +3070,7 @@ function lookForNewIten(company) {
                             }
                             //
                             //
-                            //    //тестово отладочный блок
+                            //
 
                             //
                             if (cashedDataArr[currentCompany].routes[i].filterId == null) {
@@ -3480,6 +3550,51 @@ function connectPointsAndPushes(company) {
 
 function connectStopsAndPoints(company) {
     console.log("Start connectStopsAndPushes");
+
+    // создание множественных окон доступности если их нет
+    for(var i = 0; i<cashedDataArr[company].routes.length; i++){
+        for(var j = 0; j<cashedDataArr[company].routes[i].points.length; j++ ){
+            if(cashedDataArr[company].routes[i].points[j].orderWindows == undefined){
+                createSeveralAviabilityWindows(cashedDataArr[company].routes[i].points[j]);
+            }
+        }
+    }
+
+
+    function createSeveralAviabilityWindows (point){
+
+        point.orderWindows=[];
+        //console.log("Start checkUncalculate");
+
+        if (point.AVAILABILITY_WINDOWS == undefined || point.AVAILABILITY_WINDOWS.length == 0) return;
+
+        var parts=point.AVAILABILITY_WINDOWS.split(";");
+        var size=parts.length;
+        var i=0;
+        while(i<size){
+            var date=point.ARRIVAL_TIME.substr(0,11);
+            var temp=parts[i].trim();
+            var before=temp.substr(0,5);
+            before=date+before+":00";
+            //console.log("before=", before);
+            var begin=strToTstamp(before, point);
+
+            var after=temp.slice(-5);
+            after=date+after+":00";
+            var end=strToTstamp(after, point);
+            point.orderWindows.push({start: begin, finish: end });
+
+
+            i++;
+        }
+
+
+    }
+
+
+
+
+
     for (i = 0; i < cashedDataArr[company].routes.length; i++) {
         var route = cashedDataArr[company].routes[i];
         //console.log ("route.driver.name", route.driver.NAME);
