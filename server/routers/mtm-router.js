@@ -572,7 +572,7 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
 // догрузка треков в данные по сессии по всем машинам сразу
 router.route('/trackparts/:start/:end')
     .get(function (req, res) {
-        console.log('trackparts', req.session.login);
+        console.log('догрузка треков в данные по сессии по всем машинам сразу , trackparts, ', req.session.login);
         if (req.session.login == undefined || req.session.login == null) {
             res.status(401).json({status: 'Unauthorized'});
             return;
@@ -2059,7 +2059,7 @@ function startPeriodicCalculating() {
                                         continue;
                                     }
 
-                                    //console.log("Зашли в спорный блок");
+                                    console.log("Перезапись существующего стейта", cached.sensors[i].GID );
                                     cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].t2 = data[j].data[0].t2;
                                     cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lat = data[j].data[0].lat;
                                     cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lon = data[j].data[0].lon;
@@ -2078,8 +2078,9 @@ function startPeriodicCalculating() {
                                    }
 
                                     if(data[j].data.length>0){
-                                        //console.log("Дописываем новые стейты", companyAsk);
+                                        console.log("Дописываем новые стейты", cached.sensors[i].GID, data[j].gid, "Было", cached.sensors[i].real_track.length );
                                         cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
+                                        console.log("Стало", cached.sensors[i].real_track.length, "Время", cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].time)
                                     }
 
 
@@ -2271,7 +2272,7 @@ function startPeriodicCalculating() {
                                     }
                                 }
 
-                                if (outOfWindows && point.waypoint.TYPE != "WAREHOUSE"){
+                                if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
                                     console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
                                     point.problem_index = route.max_problem+1;
                                     route.max_problem = point.problem_index;
