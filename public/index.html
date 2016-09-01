@@ -972,7 +972,7 @@
 
     <div ng-repeat="route in data.routes" ng-click="showProblem(route)">
         <div>
-            <button style="background: red">{{::route.kind_of_problem}} {{route.max_problem}}</button>
+            <button style="background: red">{{::route.max_problem == 0 ? "нет проблем" : route.kind_of_problem }} {{route.max_problem}}</button>
         </div>
         <div style="background: transparent"><br></div>
     </div>

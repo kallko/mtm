@@ -467,6 +467,7 @@ router.route('/askforroute')
                 //console.log("Ищем в беспроблемных");
                 if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID) {
                     result = cashedDataArr[currentCompany].routes[i];
+                    if (cashedDataArr[currentCompany].blocked_routes == undefined) cashedDataArr[currentCompany].blocked_routes = [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].routes.splice(i, 1);
                     //console.log ("Маршрут найден в беспроблемных");
@@ -729,27 +730,7 @@ router.route('/gettracksbystates/')
             res.status(200).json(data);
         });
 
-        function unblockLogin(login) {
-            console.log("Start unbloking");
-            for (var i = 0; i < blockedRoutes.length; i++) {
-                if ("" + blockedRoutes[i].login == "" + login) {
-                    blockedRoutes.splice(i, 1);
-                    break;
-                }
 
-            }
-
-            var nowTime = parseInt(Date.now() / 1000);
-            for (i = 0; i < blockedRoutes.length; i++) {
-                if (blockedRoutes[i].time + 60 * 3 < nowTime) {
-                    blockedRoutes.splice(i, 1);
-                    i--;
-                }
-
-            }
-
-
-        }
 
 
 
@@ -1398,10 +1379,21 @@ router.route('/askforproblems/:need')
 
 
                     if (i < 0) {
+                        result.nowTime = parseInt(Date.now()/1000);
+                        result.statistic = cashedDataArr[currentCompany].statistic;
+                        result.ID = cashedDataArr[currentCompany].ID;
+                        result.server_time = parseInt(Date.now() / 1000);
+                        result.companyName = currentCompany;
+                        result.settings = cashedDataArr[currentCompany].settings;
+                        result.drivers = cashedDataArr[currentCompany].drivers;
+                        result.transports = cashedDataArr[currentCompany].transports;
                         //надо отдать маршрут из старых на закрытие
                         //var existOld = choseRouteForClose(currentCompany);
                         //if (existOld === false) {
-                        res.status(200).json("All problem routes blocked or it s no problem");
+                        // Нет роутов на раздачу, выдаем статистику
+
+
+                        res.status(200).json(result);
                         return;
 
                     }
@@ -1415,7 +1407,7 @@ router.route('/askforproblems/:need')
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
-                    result.statistic = cashedDataArr[currentCompany].statistic
+                    result.statistic = cashedDataArr[currentCompany].statistic;
 
                     var indx = cashedDataArr[currentCompany].line_routes[i].filterId;
                     for (var k=0; k< cashedDataArr[currentCompany].routes.length; k++){
@@ -1919,6 +1911,7 @@ function linkDataParts (currentCompany, login)
 // Каждые две минуты стартует расчет, которые проходит по всем решениям, которые сейчас присутствуют в кэше
 function startPeriodicCalculating() {
     console.log("Начинаем периодический рассчет");
+
     var superEndTime = parseInt(Date.now()/1000); //TODO условный замер времени на 1 компании можно убивать, но вместе с парой, которая отмеряет финиш
     // Создаем список компаний, по которым нужно провести пересчет
     var companysToCalc=[];
@@ -1964,6 +1957,7 @@ function startPeriodicCalculating() {
 
     for(i=0; i<companysToCalc.length; i++){
             console.log("Компания на пересчет", companysToCalc[i]);
+            checkOnline(companysToCalc[i]);
 
     }
 
@@ -2079,12 +2073,12 @@ function startPeriodicCalculating() {
 
                                     if(data[j].data.length>0){
                                         console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
-                                        console.log("DATA", data[j].data);
+                                        //console.log("DATA", data[j].data);
                                         //for (var k=1; k<data[j].data.length; k++){
                                         //    console.log("Вариант стейта", data[j].data[k] );
                                         //}
                                         cached.routes[i].real_track = cached.routes[i].real_track.concat(data[j].data);
-                                        console.log("Стало", cached.routes[i].real_track.length, "Предпоследний стэйт", cached.routes[i].real_track[cached.routes[i].real_track.length-2])
+                                        console.log("Стало", cached.routes[i].real_track.length);
                                     }
 
 
@@ -2112,26 +2106,6 @@ function startPeriodicCalculating() {
                             if (cached.routes[i].real_track != undefined) res = cached.routes[i].real_track.length;
                             console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
 
-                            for ( var tester = 0; tester< cached.routes.length; tester++){
-                                //console.log("Ищем в роутах", cached.routes[tester].transport.gid , cached.sensors[i].GID);
-                                if (cached.routes[tester].transport.gid == cached.routes[i].transport.gid) {
-                                    if (cached.routes[tester].real_track != undefined) res = cached.routes[tester].real_track.length;
-                                    console.log("Стейтов в реал треке роутес", res);
-                                    break;
-                                }
-                            }
-
-                            if (cached.line_routes != undefined) {
-                                for (var test = 0; test < cached.line_routes.length; test++) {
-                                    //console.log("Ищем в лайн_роутах",cached.line_routes[test].transport.gid , cached.sensors[i].GID);
-                                    if (cached.line_routes[test].transport.gid == cached.routes[i].transport.gid) {
-                                        if (cached.line_routes[test].real_track != undefined) res = cached.line_routes[test].real_track.length;
-                                        console.log("Стейтов в реал треке роутес", res);
-                                        break;
-                                    }
-                                }
-                            }
-
                         }
                     }
 
@@ -2154,6 +2128,7 @@ function startPeriodicCalculating() {
 
                     function startCalculateCompany(company) {
                         console.log("Все данные получены, пересчитываем компанию", company);
+
                         cashedDataArr[company].recalc_finishing = false;
                         selectRoutes(company);
                         connectPointsAndPushes(company);
@@ -2167,6 +2142,7 @@ function startPeriodicCalculating() {
                         lookForNewIten(company);
                         checkUniqueID (company);
                         cashedDataArr[company].recalc_finishing = true;
+                        printData()
                     }
 
 
@@ -2863,6 +2839,7 @@ function  checkOnline(company) {
     for (var i=0; i<onlineClients.length; i++){
                 if(onlineClients[i].time + 60*3 < parseInt(Date.now()/1000)){
                     console.log(onlineClients[i].login, "Давно не был онлайн, удаляем");
+                    unblockLogin(onlineClients[i].login);
                     onlineClients.splice(i,1);
                     i--;
         }
@@ -2879,7 +2856,7 @@ function  checkOnline(company) {
     }
 
 
-    console.log("На данный момент нет никого онлайн из этой компании. Считать нет смысла");
+    console.log("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
     return result;
 
 }
@@ -4057,6 +4034,58 @@ function serchInCache(input, company) {
         }
     }
     return hits;
+}
+
+
+function printData() {
+
+    for (var i = 0; i <onlineClients.length; i++ ){
+        console.log(" Онлайн", onlineClients[i]);
+    }
+
+    for (i= 0; i<blockedRoutes.length; i ++){
+        console.log(" Блокед", blockedRoutes[i]);
+    }
+}
+
+
+function unblockInData(data){
+    //console.log("Переносим заблокированный роуты в нормальные");
+    if (cashedDataArr[data.company].blocked_routes == undefined) return;
+    //console.log("Есть заблокированные");
+    for (var i=0; i<cashedDataArr[data.company].blocked_routes.length; i++){
+        //console.log("Сравнение ", cashedDataArr[data.company].blocked_routes[i].uniqueID , data.id)
+        if (cashedDataArr[data.company].blocked_routes[i].uniqueID == data.id){
+            //console.log("Удаляем");
+            cashedDataArr[data.company].routes.concat(cashedDataArr[data.company].blocked_routes[i]);
+            cashedDataArr[data.company].blocked_routes.splice(i,1);
+            break
+        }
+    }
+}
+
+
+function unblockLogin(login) {
+    //console.log("Start unbloking");
+    for (var i = 0; i < blockedRoutes.length; i++) {
+        if ("" + blockedRoutes[i].login == "" + login) {
+            unblockInData(blockedRoutes[i]);
+            blockedRoutes.splice(i, 1);
+            i--;
+        }
+
+    }
+
+    //var nowTime = parseInt(Date.now() / 1000);
+    //for (i = 0; i < blockedRoutes.length; i++) {
+    //    if (blockedRoutes[i].time + 60 * 3 < nowTime) {
+    //        blockedRoutes.splice(i, 1);
+    //        i--;
+    //    }
+    //
+    //}
+
+
 }
 
 function choseRouteForClose (company) {
