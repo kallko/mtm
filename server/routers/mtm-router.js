@@ -1926,14 +1926,15 @@ function startPeriodicCalculating() {
         companysToCalc.push(company);
     }
 
+    //todo пока отключена функция. По правильному оставить, но дописать расчет, когда кто-то заходит онлайн, если давно не было рассчетов.
     // Удаляем из списка компаний те, пользователи которых, не находятся online
-    for(var i=0; i<companysToCalc.length; i++){
-        if (!checkOnline(companysToCalc[i])){
-            console.log("Нет пользователей онлайн");
-            companysToCalc.splice(i,1);
-            i--;
-        }
-    }
+    //for(var i=0; i<companysToCalc.length; i++){
+    //    if (!checkOnline(companysToCalc[i])){
+    //        console.log("Нет пользователей онлайн");
+    //        companysToCalc.splice(i,1);
+    //        i--;
+    //    }
+    //}
 
     // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
 
@@ -2015,14 +2016,14 @@ function startPeriodicCalculating() {
                     //first = false;
 
                     for( var i=0; i<data.length; i++){
-                           // console.log("Stage 1", i, data[i]);
+                            //console.log("Stage 1", i, data[i]);
                         if (data[i] == undefined) continue;
 
                         for (j=0; j<data[i].data.length; j++){
-                           // console.log("Stage 2");
+                            //console.log("Stage 2");
                            // console.log("Time == ", data[i].data[j].time);
                           if (data[i].data[j].time == 0 || data[i].data[j].time == '0') {
-                            //  console.log("delete 0 time state");
+                              //console.log("delete 0 time state");
                               data[i].data.splice(j,1);
                               j--;
                           }
@@ -2047,22 +2048,26 @@ function startPeriodicCalculating() {
                                    // }
 
 
-                                    if ((cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) &&(data[j].data[0] != undefined)){
+                                    if ((cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) && (data[j].data[0] != undefined)){
                                         cached.sensors[i].real_track = data[j].data;
+                                        //console.log("(cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) && (data[j].data[0] != undefined)");
                                         continue;
                                     }
 
-                                    if(data[j].data[0] == undefined) continue;
+                                    if(data[j].data[0] == undefined) {
+                                    //console.log("data[j].data[0] == undefined");
+                                        continue;
+                                    }
 
-
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].t2 == data[j].data[0].t2;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lat == data[j].data[0].lat;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lon == data[j].data[0].lon;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].dist == data[j].data[0].dist;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].time == data[j].data[0].time;
+                                    //console.log("Зашли в спорный блок");
+                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lat = data[j].data[0].lat;
+                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lon = data[j].data[0].lon;
+                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].dist = data[j].data[0].dist;
+                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].time = data[j].data[0].time;
 
                                     if (cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].state != 'START'){
-                                        cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].state == data[j].data[0].state;
+                                        cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].state = data[j].data[0].state;
                                     }
 
                                     //console.log("Ищем ошибку здесь", data[j].data);
@@ -2073,7 +2078,7 @@ function startPeriodicCalculating() {
                                    }
 
                                     if(data[j].data.length>0){
-                                        console.log("Дописываем новые стейты", companyAsk);
+                                        //console.log("Дописываем новые стейты", companyAsk);
                                         cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     }
 
