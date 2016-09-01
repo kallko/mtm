@@ -491,13 +491,13 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 
 // получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
-    console.log("Пытаемся получить предсказание Tracks 488");
+    //console.log("Пытаемся получить предсказание Tracks 488");
     request({
         url: this.routerUrl + 'table?' + pointsStr,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            console.log("Данные получены")
+            //console.log("Данные получены");
             callback(body, pointsStr);
         } else {
             console.log("ERROR TRACKS 495");

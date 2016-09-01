@@ -2078,9 +2078,13 @@ function startPeriodicCalculating() {
                                    }
 
                                     if(data[j].data.length>0){
-                                        console.log("Дописываем новые стейты", cached.sensors[i].GID, data[j].gid, "Было", cached.sensors[i].real_track.length );
+                                        console.log("Дописываем новые стейты", cached.sensors[i].GID, data[j].gid, "Было", cached.sensors[i].real_track.length, "Хотим добавить", data[j].data.length );
+                                        console.log("DATA", data[j].data);
+                                        //for (var k=1; k<data[j].data.length; k++){
+                                        //    console.log("Вариант стейта", data[j].data[k] );
+                                        //}
                                         cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
-                                        console.log("Стало", cached.sensors[i].real_track.length, "Время", cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].time)
+                                        console.log("Стало", cached.sensors[i].real_track.length, "Предпоследний стэйт", cached.sensors[i].real_track[cached.sensors[i].real_track.length-2])
                                     }
 
 
@@ -2103,6 +2107,31 @@ function startPeriodicCalculating() {
                                     //break;
                                 }
                             }
+
+                            var res;
+                            if (cached.sensors[i].real_track != undefined) res = cached.sensors[i].real_track.length;
+                            console.log("проверка и запись сенсора", cached.sensors[i].GID, "Закончена. Количество стейтов", res );
+
+                            for ( var tester = 0; tester< cached.routes.length; tester++){
+                                //console.log("Ищем в роутах", cached.routes[tester].transport.gid , cached.sensors[i].GID);
+                                if (cached.routes[tester].transport.gid == cached.sensors[i].GID) {
+                                    if (cached.routes[tester].real_track != undefined) res = cached.routes[tester].real_track.length;
+                                    console.log("Стейтов в реал треке роутес", res);
+                                    break;
+                                }
+                            }
+
+                            if (cached.line_routes != undefined) {
+                                for (var test = 0; test < cached.line_routes.length; test++) {
+                                    //console.log("Ищем в лайн_роутах",cached.line_routes[test].transport.gid , cached.sensors[i].GID);
+                                    if (cached.line_routes[test].transport.gid == cached.sensors[i].GID) {
+                                        if (cached.line_routes[test].real_track != undefined) res = cached.line_routes[test].real_track.length;
+                                        console.log("Стейтов в реал треке роутес", res);
+                                        break;
+                                    }
+                                }
+                            }
+
                         }
                     }
 
@@ -2408,7 +2437,7 @@ function dataForPredicate(company, callback){
         console.log("CONT2 PREDICATE FUNCTION");
         tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
             //console.log(pointsStr);
-         console.log("SUCCESS PREDICATE FUNCTION");
+         //console.log("SUCCESS PREDICATE FUNCTION");
             var timeMatrix=[];
             var i=1;
             // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
