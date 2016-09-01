@@ -2035,9 +2035,9 @@ function startPeriodicCalculating() {
                     cashedDataArr[companyAsk].last_track_update = parseInt(Date.now()/1000);
 
                     if(cached) {
-                        for (var i = 0; i < cached.sensors.length; i++) {
+                        for (var i = 0; i < cached.routes.length; i++) {
                             for (var j = 0; j < data.length; j++) {
-                                if (cached.sensors[i].GID == data[j].gid && data[j].data != cached.sensors[i].real_track) {
+                                if (cached.routes[i].transport.gid == data[j].gid && data[j].data != cached.routes[i].real_track) {
                                     //TODO конкатенация свежих данных.
 
                                    // var size = data[j].data.length;
@@ -2048,8 +2048,8 @@ function startPeriodicCalculating() {
                                    // }
 
 
-                                    if ((cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) && (data[j].data[0] != undefined)){
-                                        cached.sensors[i].real_track = data[j].data;
+                                    if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length == 0) && (data[j].data[0] != undefined)){
+                                        cached.routes[i].real_track = data[j].data;
                                         //console.log("(cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) && (data[j].data[0] != undefined)");
                                         continue;
                                     }
@@ -2059,15 +2059,15 @@ function startPeriodicCalculating() {
                                         continue;
                                     }
 
-                                    console.log("Перезапись существующего стейта", cached.sensors[i].GID );
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].t2 = data[j].data[0].t2;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lat = data[j].data[0].lat;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].lon = data[j].data[0].lon;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].dist = data[j].data[0].dist;
-                                    cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].time = data[j].data[0].time;
+                                    console.log("Перезапись существующего стейта", cached.routes[i].transport.gid );
+                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
+                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
+                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
+                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
 
-                                    if (cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].state != 'START'){
-                                        cached.sensors[i].real_track[cached.sensors[i].real_track.length-1].state = data[j].data[0].state;
+                                    if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].state != 'START'){
+                                        cached.routes[i].real_track[cached.routes[i].real_track.length-1].state = data[j].data[0].state;
                                     }
 
                                     //console.log("Ищем ошибку здесь", data[j].data);
@@ -2078,13 +2078,13 @@ function startPeriodicCalculating() {
                                    }
 
                                     if(data[j].data.length>0){
-                                        console.log("Дописываем новые стейты", cached.sensors[i].GID, data[j].gid, "Было", cached.sensors[i].real_track.length, "Хотим добавить", data[j].data.length );
+                                        console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
                                         console.log("DATA", data[j].data);
                                         //for (var k=1; k<data[j].data.length; k++){
                                         //    console.log("Вариант стейта", data[j].data[k] );
                                         //}
-                                        cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
-                                        console.log("Стало", cached.sensors[i].real_track.length, "Предпоследний стэйт", cached.sensors[i].real_track[cached.sensors[i].real_track.length-2])
+                                        cached.routes[i].real_track = cached.routes[i].real_track.concat(data[j].data);
+                                        console.log("Стало", cached.routes[i].real_track.length, "Предпоследний стэйт", cached.routes[i].real_track[cached.routes[i].real_track.length-2])
                                     }
 
 
@@ -2109,12 +2109,12 @@ function startPeriodicCalculating() {
                             }
 
                             var res;
-                            if (cached.sensors[i].real_track != undefined) res = cached.sensors[i].real_track.length;
-                            console.log("проверка и запись сенсора", cached.sensors[i].GID, "Закончена. Количество стейтов", res );
+                            if (cached.routes[i].real_track != undefined) res = cached.routes[i].real_track.length;
+                            console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
 
                             for ( var tester = 0; tester< cached.routes.length; tester++){
                                 //console.log("Ищем в роутах", cached.routes[tester].transport.gid , cached.sensors[i].GID);
-                                if (cached.routes[tester].transport.gid == cached.sensors[i].GID) {
+                                if (cached.routes[tester].transport.gid == cached.routes[i].transport.gid) {
                                     if (cached.routes[tester].real_track != undefined) res = cached.routes[tester].real_track.length;
                                     console.log("Стейтов в реал треке роутес", res);
                                     break;
@@ -2124,7 +2124,7 @@ function startPeriodicCalculating() {
                             if (cached.line_routes != undefined) {
                                 for (var test = 0; test < cached.line_routes.length; test++) {
                                     //console.log("Ищем в лайн_роутах",cached.line_routes[test].transport.gid , cached.sensors[i].GID);
-                                    if (cached.line_routes[test].transport.gid == cached.sensors[i].GID) {
+                                    if (cached.line_routes[test].transport.gid == cached.routes[i].transport.gid) {
                                         if (cached.line_routes[test].real_track != undefined) res = cached.line_routes[test].real_track.length;
                                         console.log("Стейтов в реал треке роутес", res);
                                         break;
