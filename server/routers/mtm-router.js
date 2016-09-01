@@ -2138,11 +2138,11 @@ function startPeriodicCalculating() {
                         calculateProblemIndex(company);
                         calculateStatistic (company);
                         createProblems(company);
-                        checkRealTrackData(company); //todo убрать, после того как починят треккер
+                        //checkRealTrackData(company); //todo убрать, после того как починят треккер
                         lookForNewIten(company);
-                        checkUniqueID (company);
+                        //checkUniqueID (company);
                         cashedDataArr[company].recalc_finishing = true;
-                        printData()
+                        //printData(); //todo статистическая функция, можно убивать
                     }
 
 
