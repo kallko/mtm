@@ -1004,8 +1004,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             });
 
             map = new L.Map('map', {
-                center: new L.LatLng(50.4412776, 30.6671281),
-                zoom: 11,
+                center: new L.LatLng(50.450475, 30.53589),
+                zoom: 15,
                 layers: [
                     lay2, lay1
                 ]
@@ -2096,8 +2096,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         function showProblemPoint(route) {
+            map.setZoom(18);
+            var temp = map.getZoom();
             if (!route || !route.problem_point || !route.problem_point.waypoint ) return;
-            console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON));
+            console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), temp);
             setMapCenter(parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), 18);
 
 

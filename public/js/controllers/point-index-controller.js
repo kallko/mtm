@@ -548,10 +548,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     //todo !!! костыль для будущих маршрутов.
-                    //if(data.status == 'no plan') {
-                    //    alert("Утвержденных планов за этот день не сохранилось");
-                    //    return;
-                    //}
+                    if(data.status == 'no plan') {
+                        alert("Утвержденных планов за этот день не сохранилось");
+                        return;
+                    }
 
                     if(data.currentDay){
                         rootScope.currentDay = true;

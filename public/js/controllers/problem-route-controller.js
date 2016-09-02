@@ -170,7 +170,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             console.log("Изменяем состояние опроса сервера");
             if (changeAsking) {
                 //todo !!! костыль для прошлых маршрутов.
-                //scope.$emit('clearDisplay');
+                scope.$emit('clearDisplay');
                 rootScope.displayCollection = [];
                 rootScope.asking = true;
                 rootScope.data = undefined;
