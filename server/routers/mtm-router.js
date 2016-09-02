@@ -2859,11 +2859,12 @@ function  checkOnline(company) {
 
 
     console.log("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
+    //todo костыль по неправильному разлогированию
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
-    if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
-        cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
-        cashedDataArr[company].blocked_routes.length = 0;
-    }
+    //if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
+    //    cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
+    //    cashedDataArr[company].blocked_routes.length = 0;
+    //}
 
     return result;
 

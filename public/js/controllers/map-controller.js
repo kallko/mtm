@@ -877,6 +877,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 //updateStoredMarkers(route);
                 drawCombinedRoute(route);
                 scope.route = route;
+                showProblemPoint(route);
             });
 
             rootScope.$on('drawRealTrack', function (event, route) {
@@ -2092,6 +2093,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
         }
 
+
+
+        function showProblemPoint(route) {
+            if (!route || !route.problem_point || !route.problem_point.waypoint ) return;
+            console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON));
+            setMapCenter(parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), 18);
+
+
+        }
 
         //rootScope.$on('receiveproblem', function (event, cache) {
         //    console.log("map-controller draw route from Cashe", cache);
