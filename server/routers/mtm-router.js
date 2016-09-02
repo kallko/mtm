@@ -2104,7 +2104,7 @@ function startPeriodicCalculating() {
                                 }
                             }
 
-                            var res;
+                            var res=0;
                             if (cached.routes[i].real_track != undefined) res = cached.routes[i].real_track.length;
                             console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
 
