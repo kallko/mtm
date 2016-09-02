@@ -373,7 +373,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
                 // оставшихся необходмыз запросов и если всё уже запрошенно, а решений всё нет и не было,
                 // значит планов нет вообще
                 if (data.iLength == 0 && !data.havePlan) {
-                    console.log('NO PLANS!');
+                    console.log('NO PLANS!!!!!!!!!');
                     callback({status: 'no plan'});
                 }
                 return;

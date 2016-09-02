@@ -67,7 +67,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
             //if(need<0) need='';
             //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
-            //console.log(" Go to ASK ", !rootScope.data,  need );
+            console.log(" Go to ASK ", !rootScope.data,  need );
             if(!rootScope.asking) return;
             if ((!rootScope.data && need>0 ) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 console.log("Give me", need, "the problem please! String is");
@@ -120,7 +120,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         rootScope.$on('start', function () {
             console.log("Запускаем опрос сервера");
-            startAsking()
+            startAsking();
         });
 
 
@@ -169,7 +169,12 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         rootScope.$on('changeasking', function (event, changeAsking) {
             console.log("Изменяем состояние опроса сервера");
             if (changeAsking) {
+                //todo !!! костыль для прошлых маршрутов.
+                //scope.$emit('clearDisplay');
+                rootScope.displayCollection = [];
                 rootScope.asking = true;
+                rootScope.data = undefined;
+                //startAsking();
             } else {
                 rootScope.asking = false;
             }

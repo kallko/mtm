@@ -529,7 +529,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // загрузить все необходимые данные для работы мониторинга
         function loadDailyData(force, showDate) {
-            showPopup('Загружаю данные...');
+
+            console.log("Стартует функция загрузки дня");
+            //showPopup('Загружаю данные...');
             var url = './dailydata';
             if (force)  url += '?force=true';
           //  if (showDate)   url += (force ? '&' : '?') + 'showDate=' + 1464132000000;
@@ -539,10 +541,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             http.get(url, {})
                 .success(function (data) {
                     console.log(JSON.parse(JSON.stringify(data)));
-                    if (data == 'wait'){
+                    if ((data == 'wait' || data.routes == undefined) && data.status != 'no plan'  ){
                         console.log("Сервер еще подготавливает данные, надо подождать");
+                        loadDailyData(false, showDate);
                         return;
                     }
+
+                    //todo !!! костыль для будущих маршрутов.
+                    //if(data.status == 'no plan') {
+                    //    alert("Утвержденных планов за этот день не сохранилось");
+                    //    return;
+                    //}
 
                     if(data.currentDay){
                         rootScope.currentDay = true;
@@ -1096,7 +1105,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log('Finish linking');
             scope.displayCollection = [].concat(scope.rowCollection);
 
-            saveRoutes();
+            //saveRoutes();
             checkLocks();
 
 
@@ -1906,7 +1915,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.$on('updateRawPromised', function (event, data) {
                 updateRawPromised(data.point);
             });
-            rootScope.$on('saveRoutes', updateRoute);
+            //rootScope.$on('saveRoutes', updateRoute);
             rootScope.$on('forceCheckLocks', checkLocks);
             rootScope.$on('unlockAllRoutes', unlockAllRoutes);
 
@@ -2723,6 +2732,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 whStart,
                 len;
             for (var i = 0; i < rootScope.data.routes.length; i++) {
+
+                console.log("Ищем маршрут для записи в 1С");
                 // все маршруты, которые помечены на сохранение, переупаковать на отправку
                 if (!rootScope.data.routes[i].toSave) continue;
 
@@ -2783,7 +2794,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 .success(function (data) {
                     console.log('Save to 1C result >>', data);
                     for (var i = 0; i < rootScope.data.routes.length; i++) {
-                        delete rootScope.data.routes[i].toSave;
+                        //delete rootScope.data.routes[i].toSave;
                     }
                 }).error(function(err){
                         console.log(err);
@@ -4214,19 +4225,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 var dateTS = scope.showDate.getTime();
                 scope.params.showDate = (dateTS + 1000*60*60*24) - 1 || -1;
 
+                console.log("Будем грзить по времени",  scope.params.showDate);
+
                 //rootScope.$emit('fastCalc');
                 rootScope.$emit('stateChanged');
                 http.post('./currentsrvertime/')
                     .success(function (serverTime){
                         var chooseDate = new Date(scope.params.showDate);
                         var currentTime = new Date(serverTime);
+                        console.log("Сверка текущего дня", chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() , currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate())
                         if(chooseDate.getFullYear()+'.'+chooseDate.getMonth()+'.'+chooseDate.getDate() == currentTime.getFullYear()+'.'+currentTime.getMonth()+'.'+currentTime.getDate()){
+                            console.log("Таки да, текущий день");
                             scope.params.showDate = null;
                             rootScope.$emit('changeasking', true);
+                            return;
                         }
                         if (scope.params.showDate !== -1) {
                             scope.$emit('clearMap');
-                            console.log('OMG!!1 New show date!');
+                            console.log('OMG!!1 New show date!', chooseDate, currentTime, currentTime>chooseDate);
+                            if (currentTime<chooseDate) {
+                                alert("Функция загрузки будущего дня пока не реализована.");
+                                return;
+                            }
                             loadDailyData(true, scope.params.showDate);
                             rootScope.$emit('changeasking', false);
                         }
@@ -4253,6 +4273,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function upgradeOldDateData () {
             console.log("Start upgrate oldday data");
+            if(rootScope.data.routes == undefined) return;
             for (var i=0; i<rootScope.data.routes.length; i++){
                 for(var j=0; j<rootScope.data.routes[i].points.length; j++ ){
                     if (rootScope.data.routes[i].points[j].status > 3 && rootScope.data.routes[i].points[j].status !=8) {
@@ -4261,6 +4282,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             }
+            rootScope.data.currentDay = false;
+            rootScope.data.statistic[4] = rootScope.data.statistic[7] + rootScope.data.statistic[6];
+            rootScope.data.statistic[6] = 0;
+            rootScope.data.statistic[7] = 0;
+            rootScope.$emit('holestatistic', rootScope.data.statistic);
+            console.log("Имеем данные", rootScope.data);
+            rootScope.asking = false;
         }
 
 
@@ -4481,7 +4509,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         rootScope.$on('saveRoute', function( event, id){
             scope.solveProblem(id);
-        })
+        });
 
 
         scope.solveProblem = function (id) {
@@ -4496,7 +4524,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 //Проверка, закончен ли этот маршрут и если да, то закрываем его.
                 result.ready_to_close = true;
-                for (j=0; j<result.points.length; j++){
+                for (var j=0; j<result.points.length; j++){
                     if(result.points[j].status>2 && result.points[j].status<8){
                         result.ready_to_close=false;
                         break;
@@ -4525,6 +4553,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             console.log("Сохранено", rId);
                             for (var j=0; j<rootScope.data.routes.length; j++){
                                 console.log("Входные данные", rootScope.data.routes[j].filterId, rId);
+
+
+
+
                                 if(rootScope.data.routes[j].filterId == rId){
                                     console.log(j,"Удаляем маршрут", rId);
                                     rootScope.data.routes.splice(j,1);
@@ -4653,6 +4685,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
         }
 
+
+        rootScope.$on('clearDisplay', function(event) {
+            console.log ("Расчищаем коллекцию");
+            scope.rowCollection = [];                          // коллекция всех задач дял отображения во вьюшке
+            scope.displayCollection = [];
+            rootScope.displayCollection = [];
+        });
         //function createSeveralAviabilityWindows (point){
         //
         //    point.orderWindows=[];

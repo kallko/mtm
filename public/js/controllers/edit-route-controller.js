@@ -980,6 +980,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // сохранить измененный маршрут в основной массив данных
         scope.saveRoutes = function () {
+            console.log("Запускаем процесс записи");
             scope.$emit('saveRoutes', {route: scope.changedRoute, timestamp: parseInt(Date.now() / 1000)});
             scope.route = undefined;
             scope.changedRoute = undefined;
@@ -1273,11 +1274,27 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             }
 
-            console.log("Новый роут", rootRoute);
+            //todo !!! костыль для непросчитанных маршрутов.
+            //console.log("Новый роут", rootRoute);
+            //rootRoute.toSave = true;
+            //rootRoute.DISTANCE = 100;
+            //rootRoute.VALUE = 100;
+            //
+            //console.log("Перед сохранением на 1С", rootRoute.data, "Маршрут", rootRoute);
+
+            //scope.$emit('saveRoutes', {route: rootRoute, timestamp: parseInt(Date.now() / 1000)});
+            //scope.route = undefined;
+            //scope.changedRoute = undefined;
+
+
             scope.$emit('updateDisplayCollection');
             scope.$emit('clearMap');
             scope.$emit('saveRoute', rootRoute.filterId);
             scope.display = [];
+
+
+
+
 
         };
 

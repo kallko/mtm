@@ -770,6 +770,7 @@ router.route('/saveroute/')
     .post(function (req, res) {
         //console.log('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
+        console.log("Отправляем в SOAP роутов", req.body.routes.length);
         soapManager.saveRoutesTo1C(req.body.routes, function (data) {
             if (!data.error) {
                 res.status(200).json({result: data.result});
@@ -1932,7 +1933,8 @@ function startPeriodicCalculating() {
     // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
 
     for(var i=0; i<companysToCalc.length; i++){
-        if ( !cashedDataArr[company].recalc_finishing){
+        console.log("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
+        if ( !cashedDataArr[companysToCalc[i]].recalc_finishing){
             console.log("Первичный расчет еще не закончен");
             companysToCalc.splice(i,1);
             i--;
@@ -2053,7 +2055,7 @@ function startPeriodicCalculating() {
                                         continue;
                                     }
 
-                                    console.log("Перезапись существующего стейта", cached.routes[i].transport.gid );
+                                    //console.log("Перезапись существующего стейта", cached.routes[i].transport.gid );
                                     cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
                                     cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
                                     cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
@@ -2072,13 +2074,13 @@ function startPeriodicCalculating() {
                                    }
 
                                     if(data[j].data.length>0){
-                                        console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
+                                        //console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
                                         //console.log("DATA", data[j].data);
                                         //for (var k=1; k<data[j].data.length; k++){
                                         //    console.log("Вариант стейта", data[j].data[k] );
                                         //}
                                         cached.routes[i].real_track = cached.routes[i].real_track.concat(data[j].data);
-                                        console.log("Стало", cached.routes[i].real_track.length);
+                                        //console.log("Стало", cached.routes[i].real_track.length);
                                     }
 
 
@@ -2142,7 +2144,7 @@ function startPeriodicCalculating() {
                         lookForNewIten(company);
                         //checkUniqueID (company);
                         cashedDataArr[company].recalc_finishing = true;
-                        //printData(); //todo статистическая функция, можно убивать
+                        printData(); //todo статистическая функция, можно убивать
                     }
 
 
@@ -2410,7 +2412,7 @@ function dataForPredicate(company, callback){
 
         //запрос матрицы по одному маршруту с обработкой в колбэке.
        /* console.log("Пытаемся получить предсказание МТМ 2241");*/
-        console.log("CONT2 PREDICATE FUNCTION");
+        //console.log("CONT2 PREDICATE FUNCTION");
         tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
             //console.log(pointsStr);
          //console.log("SUCCESS PREDICATE FUNCTION");
@@ -2857,6 +2859,12 @@ function  checkOnline(company) {
 
 
     console.log("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
+    //Функция страховка если по каким либо причинам остались заблокированные роуты.
+    if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
+        cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
+        cashedDataArr[company].blocked_routes.length = 0;
+    }
+
     return result;
 
 }
