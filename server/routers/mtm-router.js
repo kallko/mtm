@@ -1975,7 +1975,7 @@ function startPeriodicCalculating() {
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
                         //console.log("receivePUSHES", data);
-                        if (data != undefined || data.error == undefined ){
+                        if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //console.log("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
