@@ -448,7 +448,7 @@ router.route('/askforroute')
         //Искать маршрут нужно в 2-х местах line_routes & routes
         //console.log("Начинаем поиск", currentCompany, cashedDataArr[currentCompany].line_routes.length);
         var result = {error: "Dont Found"};
-        if (cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length >0 ) {
+        if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length >0 ) {
 
             for (var i = 0; i < cashedDataArr[currentCompany].line_routes.length; i++) {
                 //console.log("Ищем в проблемных");
@@ -462,7 +462,7 @@ router.route('/askforroute')
              }
          }
 
-        if (cashedDataArr[currentCompany].routes != undefined && cashedDataArr[currentCompany].routes.length >0 ) {
+        if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].routes != undefined && cashedDataArr[currentCompany].routes.length >0 ) {
             for (var i = 0; i < cashedDataArr[currentCompany].routes.length; i++) {
                 //console.log("Ищем в беспроблемных");
                 if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID) {
