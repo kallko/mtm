@@ -145,11 +145,11 @@ function checkBeforeSend(_data, callback) {
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
     if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
-        console.log(data.closedRoutesFrom1C);
+        console.log(data.closedRoutesFrom1C, "SOAP 148");
         try{
             allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
         }catch(e){
-            console.log(e);
+            console.log(e, "SOAP 152");
         }
     }
 
@@ -282,11 +282,11 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
                                 }catch(e){
-                                    console.log(e);
+                                    console.log(e, "SOAP 285");
                                 }
                             });
                         }catch(e){
-                            console.log(e);
+                            console.log(e, "SOAP 289");
                         }
                     });
 
@@ -296,7 +296,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
                 console.log('DONE getDailyPlan');
-                console.log(result.return);
+                console.log(result.return, "SOAP 299");
 
                 // парсинг ответа соапа из xml в json
                 parseXML(result.return, function (err, res) {
@@ -332,7 +332,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                 });
             } else {
                 console.log('getDailyPlan ERROR');
-                console.log(err.body);
+                console.log(err.body, "SOAP 335");
             }
         });
 
@@ -393,7 +393,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
         });
     } else {
         console.log('getItinerary ERROR');
-        console.log(err.body);
+        console.log(err.body, "SOAP 396");
     }
 }
 
@@ -540,6 +540,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
             });
 
         } else {
+            console.log("ERROR SOAP 543", err);
             log.l(err.body);
         }
     });
@@ -592,7 +593,7 @@ SoapManager.prototype.getAllSensors = function (callback) {
                 });
             } else {
                 console.log('getAllSensors ERROR');
-                console.log(err.body);
+                console.log(err.body, "SOAP 595");
             }
         });
     });
@@ -649,7 +650,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
                     } else {
                         console.log('saveRoutesTo1C ERROR');
                         log.toFLog('afterSaveError.js', err);
-                        console.log(err.body);
+                        console.log(err.body, "SOAP 652");
                         callback({error: err});
                     }
                 });
@@ -695,7 +696,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
         if (err) {
             console.log('user', user, 'pointId', pointId);
-            console.log('err.body >> ', err.body);
+            console.log('err.body >> ', err.body, "SOAP 698");
             return;
         }
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
@@ -714,8 +715,8 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
             ElementId: pointId
         },
             function (err, result) {
-            if (err) console.log(err.body);
-            if (result) console.log(result);
+            if (err) console.log(err.body, "SOAP 717");
+            if (result) console.log(result, "SOAP 718");
         });
     });
 };
@@ -755,7 +756,7 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
                         console.log("Res.XML = ", resXml);
                         console.log('updateWaypointCoordTo1C ERROR');
                         log.toFLog('afterSaveError.js', err);
-                        console.log(err.body);
+                        console.log(err.body, "SOAP 758");
                         callback({error: err});
                     }
                 });
@@ -791,7 +792,7 @@ SoapManager.prototype.closeDay = function (closeDayData, callback) {
                     console.log("Res.XML = ", resXml);
                     console.log('Close Route to 1C ERROR');
                     log.toFLog('afterSaveError.js', err);
-                    console.log(err.body);
+                    console.log(err.body, "SOAP 794");
                     callback({error: err});
                 }
             });
@@ -825,7 +826,7 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
                     console.log('GET CONFIG  ERROR');
                     console.log('result', err);
                     log.toFLog('result', err);
-                    console.log(err.body);
+                    console.log(err.body, "SOAP 828");
                     callback({error: err});
                 }
             });
@@ -869,7 +870,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
                 } else {
                     console.log('GET PUSHES  ERROR');
                     log.toFLog('result', err);
-                    console.log('result', err);
+                    console.log('result', err, "SOAP 872");
 
                     //console.log(err.body);
                     callback({error: err});
@@ -973,7 +974,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                 });
             } else {
                 console.log('getDailyPlan ERROR');
-                console.log(err.body);
+                console.log(err.body, "SOAP 976");
             }
         });
     });

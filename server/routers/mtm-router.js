@@ -321,11 +321,11 @@ router.route('/dailydata')
                             //Собираем решение из частей в одну кучку
                             linkDataParts(currentCompany, req.session.login);
                             //Мгновенный запуск на пересчет, после загрузки
-                            //todo Получить пуши посчитать
+
                             console.log("Собираемся получать пуши", currentCompany, cashedDataArr[currentCompany].idArr );
                             cashedDataArr[currentCompany].repeat = cashedDataArr[currentCompany].idArr.length;
 
-                            //todo получить пуши по аррею решений, настроить колбек по получению всех нужных данных
+
                             var soapManager = new soap(req.session.login);
                             for (var k=0; k<cashedDataArr[currentCompany].idArr.length; k++) {
                             soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
@@ -2859,18 +2859,18 @@ function  checkOnline(company) {
 
 
     console.log("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
-    //todo костыль по неправильному разлогированию
+
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
-    //if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
-    //    cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
-    //    cashedDataArr[company].blocked_routes.length = 0;
-    //}
+    if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
+        cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
+        cashedDataArr[company].blocked_routes.length = 0;
+    }
 
     return result;
 
 }
 
-//todo убрать после того, как решиться вопрос с потерянными данными.
+
 function checkRealTrackData (company) {
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
         if (cashedDataArr[company].routes[i].real_track == undefined || cashedDataArr[company].routes[i].real_track.length == 0) continue;
@@ -3250,10 +3250,7 @@ function lookForNewIten(company) {
 
                             var workingWindowType = cashedDataArr[currentCompany].settings.workingWindowType;
 
-                            //todo переделать после реализации настроек в 1С
-                            if(currentCompany == "292942") {
-                                workingWindowType = 0;
-                            }
+
 
                             //console.log("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
 
@@ -3500,19 +3497,26 @@ function connectPointsAndPushes(company) {
         cashedDataArr[company].routes[i].pushes=[];
     }
 
+
+    mark1:
+
     for (i = 0; i<mobilePushes.length;i++){
+
+
         if (mobilePushes[i].gps_time == 0 ||
             (mobilePushes[i].lat == 0 && mobilePushes[i].lon == 0) ||
             mobilePushes.gps_time > parseInt(Date.now()/1000)
         ) continue;
 
 
-        if (mobilePushes[i].canceled) continue; //TODO написать функцию обработки пуша-отмены
 
         for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
 
 
             for (var k = 0; k < cashedDataArr[company].routes[j].points.length; k++) {
+
+
+
                 var tmpPoint = cashedDataArr[company].routes[j].points[k];
                 var LAT = parseFloat(tmpPoint.LAT);
                 var LON = parseFloat(tmpPoint.LON);
@@ -3521,6 +3525,16 @@ function connectPointsAndPushes(company) {
 
                 // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
                 if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+
+
+
+                    //TODO написать функцию обработки пуша-отмены
+                    if (mobilePushes[i].canceled) {
+                        //console.log("НАЙДЕН ПУШ, который отменяет точку!!!!!!!!!!!!!", tmpPoint.driver.NAME, tmpPoint.NUMBER);
+                        cancelTaskPush(mobilePushes[i], tmpPoint, company);
+                        continue mark1;
+                    }
+
 
                     //Проверка, не был ли ранее отменен этот пуш как некоректный
                     if (tmpPoint.incorrect_push != undefined && tmpPoint.incorrect_push.number == mobilePushes[i].number) break;
@@ -3959,7 +3973,7 @@ function oldDayCalculate (company, data) {
     connectStopsAndPoints(company);
     findStatusesAndWindows(company);
     calculateStatistic (company);
-    checkRealTrackData(company); //todo убрать, после того как починят треккер
+    //checkRealTrackData(company); //todo убрать, после того как починят треккер
     //oldDayStatuses(company);
 
 
@@ -4093,6 +4107,40 @@ function unblockLogin(login) {
     //    }
     //
     //}
+
+
+}
+
+
+function cancelTaskPush(push, point, company){
+    if(push == undefined || point == undefined) {
+        console.log(point, push, "!!!!!ОШИБКА входных данных в функции cancelTaskPush 1-point, 2-push");
+        return;
+    }
+
+    //console.log("Отменяющий пуш выглядит так", push);
+    point.status = 8;
+    point.checkedStatus = 8;
+    point.class = "canceled-status";
+    point.textStatus = "отменен";
+    point.cancel_time = parseInt(Date.now()/1000);
+    point.havePush = true;
+    point.mobile_push = push;
+    point.limit = 85; //todo отфонарная цифра для тестов.
+    point.confirmed = true;
+
+    if(push.cancel_reason != undefined && push.cancel_reason.length >0) {
+        for (var i=0; i<cashedDataArr[company].reasons.length; i++ ){
+            //console.log("Ищем причину отмены задания", push.cancel_reason, cashedDataArr[company].reasons[i].DESCRIPTION);
+            if(push.cancel_reason == cashedDataArr[company].reasons[i].DESCRIPTION) {
+                point.reason = i;
+                break;
+            }
+        }
+
+    }
+
+
 
 
 }
