@@ -70,6 +70,30 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         // обработчик события изменения обещанного окна
         function onPromisedChanged(event, point) {
             console.log('point >>>', point);
+            //var sendRoute;
+
+            for(var i=0; i<rootScope.data.routes.length; i++){
+               // console.log("Поиск маршрута", point.uniqueId , rootScope.data.routes[i].uniqueId);
+                if(point.uniqueID == rootScope.data.routes[i].uniqueID){
+                   // sendRoute = JSON.parse(JSON.stringify(rootScope.data.routes[i]));
+                    break;
+                }
+            }
+
+            scope.$emit('routeToChange', {
+                route: rootScope.data.routes[i],
+                serverTime: rootScope.nowTime,
+                demoMode: scope.demoMode,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+
+           // console.log("SEND ROUTE", sendRoute);
+
+
+            scope.filtrId = rootScope.data.routes[i].filterId;
 
             point.old_promised = {
                 start: point.promised_window.start,
@@ -81,7 +105,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             if (workingWindow === 1) {
                 point.working_window = point.promised_window;
-                recalculateRoute();
+               // scope.changedRoute = sendRoute;
+                scope.recalculateRoute;
+            } else {
+                point.working_window.start = point.promised_window_changed.start;
+                point.working_window.finish = point.promised_window_changed.finish;
+               // scope.changedRoute = sendRoute;
+                scope.recalculateRoute;
             }
 
             point.promisedWasChanged = true;
@@ -172,7 +202,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 //});
 
                 //todo plесь отключили автоматический пересчет
-                //loadRouterData(scope.changedRoute.points, recalculateRoute);
+                loadRouterData(scope.changedRoute.points, recalculateRoute);
             } else {
                 // в противном случае, показываем попап и выгружаем маршрут из панели редактирования
                 //scope.$emit('showNotification', {
@@ -187,6 +217,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         // пересчитать маршрут (клиентская валидация маршрута)
         function recalculateRoute() {
 
+            console.log("Начинаем рекалкулейт");
 
 
             // копируем без ссылок маршрут
@@ -196,7 +227,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return;
             }
             console.log("changedRoute",  scope.changedRoute);
-            if(scope.changedRoute.car_position == undefined || scope.changedRoute.car_position.lat == undefined || scope.changedRoute.car_position.lon ) createNewCarPosition(scope.changedRoute);
+            if(scope.changedRoute.car_position == undefined || scope.changedRoute.car_position.lat == undefined || scope.changedRoute.car_position.lon == undefined) createNewCarPosition(scope.changedRoute);
             //var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
             //    scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1;
 
@@ -207,20 +238,25 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     + scope.changedRoute.points[0].LAT + '&'
                     + scope.changedRoute.points[0].LON;
 
+            console.log("Запрос на расстояние и время между 2 точками URL =", url);
             // получаем расстояние от текущего положения машины и до следующей в плане точки
             http.get(url)
                 .success(function (data) {
                     // пересчитываем
+                    console.log("Success data", data);
                     var fromPoint,
                         toPoint,
                         cTime;
 
                     cTime = applyTravelTimeToPoint(scope.changedRoute.points[0],
-                        parseInt(data.time_table[0][0][1] / 10), serverTime);
+                        parseInt(data.time_table[0][0][1] / 10), rootScope.nowTime);
+
+
 
                     for (var i = 1; i < scope.changedRoute.points.length; i++) {
                         fromPoint = scope.changedRoute.points[i - 1];
                         toPoint = scope.changedRoute.points[i];
+                        //console.log("RouterData", i);
                         cTime = applyTravelTimeToPoint(toPoint,
                             routerData.timeTable[fromPoint.base_index][toPoint.base_index] / 10, cTime);
                     }
@@ -236,12 +272,14 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // применить времена проезда ко всем параметрам задач
         function applyTravelTimeToPoint(point, travelTime, cTime) {
+            //console.log(" Входные данные ", point, travelTime, cTime )
             point.TRAVEL_TIME = travelTime;
             cTime += travelTime;
             point.DOWNTIME = getDowntime(cTime, point);
             cTime += point.DOWNTIME;
             point.arrival_time_ts = cTime;
             point.ARRIVAL_TIME = filter('date')(cTime * 1000, 'dd.MM.yyyy HH:mm:ss');
+            //console.log("Point ARRIVAL TIME", point.ARRIVAL_TIME)
             point.arrival_time_hhmm = point.ARRIVAL_TIME.substr(11, 8);
             cTime += parseInt(point.TASK_TIME);
             point.end_time_ts = cTime;
@@ -279,7 +317,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             var lastindx = route.points.length - 1;
             console.log("Last indx = ", lastindx);
 
-            //todo костыль на отсутсвие парковки
+
             route.warehouseEnd =false;
             if (route.points[lastindx].waypoint != undefined && undefined && route.points[lastindx].waypoint.TYPE == "WAREHOUSE") {
                 route.warehouseEnd =true;
@@ -289,15 +327,15 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
             //todo проверить что произойдет если убит нижний блок
-            //for (var i = 0; i < route.points.length > i && i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
-            //    if (route.points[i].status != scope.STATUS.FINISHED &&
-            //        route.points[i].status != scope.STATUS.FINISHED_LATE &&
-            //        route.points[i].status != scope.STATUS.FINISHED_TOO_EARLY) {
-            //        toMoveArr.push(route.points[i]);
-            //        route.points.splice(i, 1);
-            //        i--;
-            //    }
-            //}
+            for (var i = 0; i < route.points.length > i && i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
+                if (route.points[i].status != scope.STATUS.FINISHED &&
+                    route.points[i].status != scope.STATUS.FINISHED_LATE &&
+                    route.points[i].status != scope.STATUS.FINISHED_TOO_EARLY) {
+                    toMoveArr.push(route.points[i]);
+                    route.points.splice(i, 1);
+                    i--;
+                }
+            }
 
             console.log ("Заданий на перенос", toMoveArr.length);
             route.lastPointIndx -= toMoveArr.length;
@@ -319,6 +357,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // получить данные с роутера
         function loadRouterData(points, callback) {
+
+            if (points == undefined) {
+                console.log(" Ошибка данных в loadRouterData");
+            }
+
+
 
             var pointsStr = '';
             for (var i = 0; i < points.length; i++) {
@@ -1101,7 +1145,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.display.sort(compareArrivalTime);
 
 
-
+            console.log("Новый вариант маршрута", scope.display);
         }
 
         scope.handRecalc = function (item, t1, t2, route){

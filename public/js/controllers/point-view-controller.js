@@ -35,6 +35,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // показать окно с точкой
         function show(event, data) {
             scope.point = data.point;
+            console.log("Это ДАТА", data);
             scope.promisedStartCard = new Date(data.point.promised_window_changed.start * 1000);
             scope.promisedFinishCard = new Date(data.point.promised_window_changed.finish * 1000);
            // scope.promisedStartCard = filter('date')(data.point.promised_window_changed.start * 1000, 'HH/mm');
@@ -266,11 +267,14 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         };
 
         // изменить обещанные окна
-        scope.changePromisedWindow = function (point) {
+        scope.changePromisedWindow = function (data) {
 
-
+            var point = data.point;
+            parent = data.parent;
             point.promised_window_changed.start = parseInt( (scope.promisedStartCard)/1000, 10 );
             point.promised_window_changed.finish = parseInt( (scope.promisedFinishCard)/1000, 10 );
+
+            console.log("Измененные данные", point.promised_window_changed.start , point.promised_window_changed.finish);
             // point.promised_window_changed = {
             //     start: clearOldDate / 1000 + start[0] * 3600 + start[1] * 60,
             //     finish: clearOldDate / 1000 + finish[0] * 3600 + finish[1] * 60
@@ -278,7 +282,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
             // в зависимости от того, откуда открыто окно данные меняются в исходных данных или
             // же только в изменяемой копии редактируемого маршрута
-            console.log(parent);
+            console.log("Родитель", parent);
             if (parent === 'editRoute') {
                 console.log('checkPoint');
                 scope.$emit('checkPoint', point);

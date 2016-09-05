@@ -2281,7 +2281,8 @@ function startPeriodicCalculating() {
 
                                 if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
                                     console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
-                                    point.problem_index = route.max_problem+1;
+                                    point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
+                                    point.out_of_ordered = true;
                                     route.max_problem = point.problem_index;
                                     route.problem_point=point;
                                     route.kind_of_problem='вне заказанного';
@@ -2862,8 +2863,16 @@ function  checkOnline(company) {
 
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
     if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
+        console.log("Страховка сработала", ashedDataArr[company].blocked_routes.length );
         cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
         cashedDataArr[company].blocked_routes.length = 0;
+    }
+
+    for (i=0; i< blockedRoutes.length; i++){
+        if (blockedRoutes[i].company == company){
+            blockedRoutes.splice(i,1);
+            i--;
+        }
     }
 
     return result;

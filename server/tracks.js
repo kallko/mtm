@@ -342,6 +342,8 @@ TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
 
 // получить от роутера время проезда между двумя точками
 TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
+
+    console.log("Запрос на время/расстояние между точками", lat1, lon1, lat2, lon2);
     request({
         url: this.routerUrl + 'table?'
         + '&loc=' + lat1

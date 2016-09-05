@@ -339,7 +339,7 @@
                     <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
                     <td title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
                     <td>{{row.AVAILABILITY_WINDOWS}}</td>
-                    <td>{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+                    <td ng-class="row.class2">{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td>
                         {{row.promised_window_changed.start * 1000 | date:'HH:mm'}} -
                         {{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}
@@ -572,7 +572,8 @@
             <div id="recalc-table" class="table-holder" >
 
 
-                <table class="table table-striped point-table" id="recalc-table-tbl" ng-show="newRoutes == 1">
+                <table class="table table-striped point-table" id="recalc-table-tbl" >
+                    <!-- ng-show="newRoutes == 1"-->
                     <tr class="titles-tr">
                         <th>Номер</th>
                         <th>Статус</th>
@@ -1010,7 +1011,24 @@
         </tr>
         <tr>
             <td class="title">План. прибытие:</td>
-            <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+            <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}
+                <div >
+                <button class="btn btn-primary btn-xs btn-success" >Подтвердить</button>
+                <input type="time" class="promised-text-card" id="promised-start-card"
+                       ng-change="changePromisedCard()"
+                       ng-model="promisedStartCard"
+                       enter-event="changePromisedWindow(point)"> -
+                <input type="time" class="promised-text-card" id="promised-finish-card"
+                       ng-change="changePromisedCard()"
+                       ng-model="promisedFinishCard"
+
+                       enter-event="changePromisedWindow(point)">
+                <button id="change-window-task-btn" class="btn btn-primary btn-xs"  ng-click="changePromisedWindow({point:point, parent:'editRoute'})">Рассчитать</button>
+                </div>
+            </td>
+
+
+
         </tr>
         <tr>
             <td class="title">План. номер:</td>
@@ -1045,16 +1063,16 @@
         <tr ng-show="false">
             <td class="title">Контролируемое окно:</td>
             <td class="row-data">
-                <input type="time" class="promised-text-card" id="promised-start-card"
+                <input type="time" class="promised-text-card" id="altpromised-start-card"
                        ng-change="changePromisedCard()"
                        ng-model="promisedStartCard"
                        enter-event="changePromisedWindow(point)"> -
-                <input type="time" class="promised-text-card" id="promised-finish-card"
+                <input type="time" class="promised-text-card" id="altpromised-finish-card"
                        ng-change="changePromisedCard()"
                        ng-model="promisedFinishCard"
 
                        enter-event="changePromisedWindow(point)">
-                <button id="change-window-task-btn" class="btn btn-primary btn-xs" ng-disabled="disableConfirmBtn" ng-click="changePromisedWindow(point)">Изменить</button>
+                <button id="altchange-window-task-btn" class="btn btn-primary btn-xs" ng-disabled="disableConfirmBtn" ng-click="changePromisedWindow(point)">Изменить</button>
 
             </td>
         </tr>
