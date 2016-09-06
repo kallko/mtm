@@ -1063,6 +1063,21 @@ router.route('/currentStops/:gid/:from/:to')
     });
 
 
+
+
+
+
+// получение срочной заявки
+router.route('/UrgentOrder/')
+    .post(function (req, res) {
+
+            console.log("!!!!Recieve URGENT ORDER!!!! ", req.body);
+            res.status(200).json('ок');
+
+
+    });
+
+
 // получение всех таймматриц для всех роутов одним запросом.
 router.route('/predicate/')
     .post(function (req, res) {

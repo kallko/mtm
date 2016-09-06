@@ -438,6 +438,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     log.l(_xml.additionalDataXML(data[nIndx].ID));
+    console.log("Для Юры", _xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
@@ -868,12 +869,13 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
                     if (tempCompany == undefined) tempCompany=company;
                     callback(tempCompany, result);
                 } else {
+                    if (tempCompany == undefined) tempCompany=company;
                     console.log('GET PUSHES  ERROR');
                     log.toFLog('result', err);
                     console.log('result', err, "SOAP 872");
 
                     //console.log(err.body);
-                    callback({error: err});
+                    callback(tempCompany, {error: err});
                 }
             });
         });
@@ -881,7 +883,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
 
     receivePushes(idArr, time, company, callback, tempCompany);
 
-}
+};
 
 // проверить наличие новых решений (июль 2016)
 SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten, company, callback) {
