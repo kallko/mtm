@@ -4164,11 +4164,11 @@ function checkCorrectCalculating(company){
     if (cashedDataArr[company].routes != undefined) {
         for (var i=0; i<cashedDataArr[company].routes.length; i++){
             if (cashedDataArr[company].routes[i].DISTANCE == 0 || cashedDataArr[company].routes[i].check_calc == true || cashedDataArr[company].routes[i].points == undefined) continue;
-            console.log("проверка Роута");
+            //console.log("проверка Роута");
             for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
-                console.log("проверка точки в Роуте");
+                //console.log("проверка точки в Роуте");
                 if (cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME == undefined || cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME == '' || cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME.length == 0 ){
-                    console.log("Найден непросчитанный роут!!!!!");
+                    //console.log("Найден непросчитанный роут!!!!!");
                     createArrivalTime(cashedDataArr[company].routes[i].points[j], cashedDataArr[company].routes[i], cashedDataArr[company].settings.controlledWindow, company);
                     cashedDataArr[company].routes[i].DISTANCE = 0;
                     cashedDataArr[company].routes[i].check_calc = true;
@@ -4181,13 +4181,13 @@ function checkCorrectCalculating(company){
 
     if (cashedDataArr[company].line_routes != undefined) {
         for (var i=0; i<cashedDataArr[company].line_routes.length; i++){
-            console.log("проверка  лайн Роута");
+            //console.log("проверка  лайн Роута");
             if (cashedDataArr[company].line_routes[i].DISTANCE == 0 || cashedDataArr[company].line_routes[i].check_calc == true || cashedDataArr[company].line_routes[i].points == undefined) continue;
 
             for (var j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
-                console.log("проверка точки в  Лайн Роуте");
+                //console.log("проверка точки в  Лайн Роуте");
                 if (cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME == undefined || cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME == '' || cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME.length == 0 ){
-                    console.log("Найден непросчитанный роут!!!!!");
+                    //console.log("Найден непросчитанный роут!!!!!");
                     createArrivalTime(cashedDataArr[company].line_routes[i].points[j], cashedDataArr[company].line_routes[i], cashedDataArr[company].settings.controlledWindow, company);
                     cashedDataArr[company].line_routes[i].DISTANCE = 0;
                     cashedDataArr[company].line_routes[i].check_calc = true;
