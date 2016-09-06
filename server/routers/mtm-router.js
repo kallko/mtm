@@ -1905,6 +1905,7 @@ function linkDataParts (currentCompany, login)
     }
     //cashedDataArr[currentCompany].routes.length = size;
     console.log("FINISHING LINKING", cashedDataArr[currentCompany].routes.length);
+    checkCorrectCalculating(currentCompany);
 
 }
 
@@ -2131,6 +2132,7 @@ function startPeriodicCalculating() {
                     function startCalculateCompany(company) {
                         console.log("Все данные получены, пересчитываем компанию", company);
 
+                        checkCorrectCalculating(company);
                         cashedDataArr[company].recalc_finishing = false;
                         selectRoutes(company);
                         connectPointsAndPushes(company);
@@ -2281,7 +2283,8 @@ function startPeriodicCalculating() {
 
                                 if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
                                     console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
-                                    point.problem_index = route.max_problem+1;
+                                    point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
+                                    point.out_of_ordered = true;
                                     route.max_problem = point.problem_index;
                                     route.problem_point=point;
                                     route.kind_of_problem='вне заказанного';
@@ -2862,8 +2865,16 @@ function  checkOnline(company) {
 
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
     if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
+        console.log("Страховка сработала", ashedDataArr[company].blocked_routes.length );
         cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
         cashedDataArr[company].blocked_routes.length = 0;
+    }
+
+    for (i=0; i< blockedRoutes.length; i++){
+        if (blockedRoutes[i].company == company){
+            blockedRoutes.splice(i,1);
+            i--;
+        }
     }
 
     return result;
@@ -3289,11 +3300,7 @@ function lookForNewIten(company) {
 
                     cashedDataArr[currentCompany].idArr.push(cashedDataArr[currentCompany].routes[cashedDataArr[currentCompany].routes.length-1].itineraryID);
                     console.log("FINISHING SECOND LINKING");
-
-
-
-
-
+                    checkCorrectCalculating(currentCompany);
 
 
 
@@ -4079,10 +4086,11 @@ function unblockInData(data){
     for (var i=0; i<cashedDataArr[data.company].blocked_routes.length; i++){
         //console.log("Сравнение ", cashedDataArr[data.company].blocked_routes[i].uniqueID , data.id)
         if (cashedDataArr[data.company].blocked_routes[i].uniqueID == data.id){
-            //console.log("Удаляем");
-            cashedDataArr[data.company].routes.concat(cashedDataArr[data.company].blocked_routes[i]);
+            console.log("Переносим", data.id);
+            cashedDataArr[data.company].routes.push(cashedDataArr[data.company].blocked_routes[i]);
             cashedDataArr[data.company].blocked_routes.splice(i,1);
-            break
+            console.log("Роутов", cashedDataArr[data.company].routes.length, "А блокированных роутов", cashedDataArr[data.company].blocked_routes.length);
+            break;
         }
     }
 }
@@ -4142,6 +4150,98 @@ function cancelTaskPush(push, point, company){
 
 
 
+
+}
+
+
+function checkCorrectCalculating(company){
+    console.log("Проверяем корректность расчета маршрутов");
+    if (company == undefined || cashedDataArr[company] == undefined) {
+        console.log("Ошибка в функции checkCorrectCalculating ");
+        return;
+    }
+
+    if (cashedDataArr[company].routes != undefined) {
+        for (var i=0; i<cashedDataArr[company].routes.length; i++){
+            if (cashedDataArr[company].routes[i].DISTANCE == 0 || cashedDataArr[company].routes[i].check_calc == true || cashedDataArr[company].routes[i].points == undefined) continue;
+            //console.log("проверка Роута");
+            for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
+                //console.log("проверка точки в Роуте");
+                if (cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME == undefined || cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME == '' || cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME.length == 0 ){
+                    //console.log("Найден непросчитанный роут!!!!!");
+                    createArrivalTime(cashedDataArr[company].routes[i].points[j], cashedDataArr[company].routes[i], cashedDataArr[company].settings.controlledWindow, company);
+                    cashedDataArr[company].routes[i].DISTANCE = 0;
+                    cashedDataArr[company].routes[i].check_calc = true;
+                    continue;
+
+                }
+            }
+        }
+    }
+
+    if (cashedDataArr[company].line_routes != undefined) {
+        for (var i=0; i<cashedDataArr[company].line_routes.length; i++){
+            //console.log("проверка  лайн Роута");
+            if (cashedDataArr[company].line_routes[i].DISTANCE == 0 || cashedDataArr[company].line_routes[i].check_calc == true || cashedDataArr[company].line_routes[i].points == undefined) continue;
+
+            for (var j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
+                //console.log("проверка точки в  Лайн Роуте");
+                if (cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME == undefined || cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME == '' || cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME.length == 0 ){
+                    //console.log("Найден непросчитанный роут!!!!!");
+                    createArrivalTime(cashedDataArr[company].line_routes[i].points[j], cashedDataArr[company].line_routes[i], cashedDataArr[company].settings.controlledWindow, company);
+                    cashedDataArr[company].line_routes[i].DISTANCE = 0;
+                    cashedDataArr[company].line_routes[i].check_calc = true;
+                    continue;
+
+                }
+            }
+        }
+    }
+
+
+    console.log("Первичная проверка корректности расчетов окончена");
+
+}
+
+
+function createArrivalTime (tPoint, route, controlledWindow, company) {
+    //console.log("The route is UNCALCULATE");
+
+
+    //Для непосчитанных маршрутов время прибытия считается границей окна доступности
+    tPoint.arrival_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5) + ":00";
+
+    // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
+    if (tPoint.ARRIVAL_TIME.length < 1) {
+        tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME;
+    }
+    var toDay = tPoint.ARRIVAL_TIME.substr(0, 10);
+
+    tPoint.base_arrival = toDay + " " + tPoint.arrival_time_hhmm;
+
+    tPoint.arrival_time_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
+    tPoint.base_arrival_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
+
+
+    tPoint.controlled_window = {
+        start: tPoint.arrival_time_ts - controlledWindow,
+        finish: tPoint.arrival_time_ts + controlledWindow
+    };
+
+    tPoint.end_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5) + ":00";
+    tPoint.end_time_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
+
+    tPoint.promised_window.start = tPoint.arrival_time_ts - 60*30;
+    tPoint.promised_window.finish = tPoint.arrival_time_ts + 60*30;
+
+    tPoint.promised_window_changed = tPoint.promised_window;
+
+
+    if (cashedDataArr[company].settings.workingWindowTypes == 0){
+        tPoint.working_window = tPoint.orderWindows[tPoint.orderWindows.length -1];
+    }  else {
+        tPoint.working_window = tPoint.promised_window
+    }
 
 }
 

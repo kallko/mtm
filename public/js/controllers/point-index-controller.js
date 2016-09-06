@@ -2305,7 +2305,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // получить текстовый статус для задачи с необходимыми css классами
 
         scope.getTextStatus = function (row) {
-            row.class2 = row.status == 5 ? 'delay-status2' : '';
+            row.class2 = row.out_of_ordered == true ? 'delay-status2' : '';
+
             var statusCode = row.status;
             var confirmed = row.confirmed;
             for (var i = 0; i < scope.filters.statuses.length; i++) {

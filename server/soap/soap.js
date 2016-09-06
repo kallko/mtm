@@ -924,7 +924,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                     }
 
                     // Новых решений не появилось
-                    if (res.MESSAGE.PLANS == null && inTime && existIten == 0) {
+                    if ((res.MESSAGE.PLANS == null && inTime && existIten == 0) || res.MESSAGE.PLANS == undefined ) {
                         //console.log('Все еще нет утвержденных решений');
                         callback({status: 'still no plan'});
                         return;
