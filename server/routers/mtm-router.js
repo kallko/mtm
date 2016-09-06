@@ -4216,6 +4216,15 @@ function checkCorrectCalculating(company){
 
     console.log("Первичная проверка корректности расчетов окончена");
 
+    if (cashedDataArr[company].routes != undefined) {
+        for (i = 0; i < cashedDataArr[company].routes.length; i++) {
+            for (j = 0; j<cashedDataArr[company].routes[i].points.length; j++){
+                if(cashedDataArr[company].routes[i].points[j].waypoint == undefined) {
+                    console.log("Внимание, найдена точка маршрута без описания!!!");
+                }
+            }
+        }
+    }
 }
 
 
