@@ -4,7 +4,7 @@ var express = require('express'),
     soap = require('../soap/soap'),
     tracks = require('../tracks'),
     log = new (require('../logging'))('./logs'),
-    colors = require('colors'),
+    //colors = require('colors'),
     fs = require('fs'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
@@ -162,7 +162,7 @@ router.route('/dailydata')
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
         console.log("Prepere for Conflict!!!!!!!!", req.session.login);
-        console.log(colors.green('HELLO'));
+        //console.log(colors.green('HELLO'));
         if (req.session.login == null || req.session.login == undefined) {
             console.log("Login", req.session.login);
             res.status(401).json({status: 'Unauthorized'});
@@ -2702,8 +2702,8 @@ function calcPredication(route, company) {
 
 //Приведение времени PUSH к локально текущему Киев прибавляем 3 часа
 function checkPushesTimeGMTZone(pushes, company){
-    console.log(colors.green('Start reorange pushes'));
-    console.log('Тестовое сообщение зеленого цвета'.green);
+    //console.log(colors.green('Start reorange pushes'));
+    //console.log('Тестовое сообщение зеленого цвета'.green);
     var i=0;
     while (i<pushes.length) {
 
