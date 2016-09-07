@@ -7,6 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
+
     tracks = require('../tracks'),
     tracksManager = new tracks(
         config.aggregator.url,
@@ -15,6 +16,7 @@ var soap = require('soap'),
         config.aggregator.password),
 
     counter = 0;
+
 
 // класс для работы с соапом
 function SoapManager(login) {
@@ -163,7 +165,7 @@ function checkBeforeSend(_data, callback) {
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
 
 
-    console.log("А теперь пора!");
+    console.log("А теперь пора!".green);
 
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
@@ -216,6 +218,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     if (date) {
         date = parseInt(date);
         var loadOldDay = true;
+        console.log(" СОАП готов к загрузке прошлого дня");
     }
 
     var date = date ? date : Date.now();
@@ -438,7 +441,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     log.l(_xml.additionalDataXML(data[nIndx].ID));
-    console.log("Для Юры", _xml.additionalDataXML(data[nIndx].ID));
+    //console.log("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {

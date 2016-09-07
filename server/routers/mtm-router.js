@@ -4,6 +4,7 @@ var express = require('express'),
     soap = require('../soap/soap'),
     tracks = require('../tracks'),
     log = new (require('../logging'))('./logs'),
+    colors = require('colors'),
     fs = require('fs'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
@@ -161,6 +162,7 @@ router.route('/dailydata')
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
         console.log("Prepere for Conflict!!!!!!!!", req.session.login);
+        console.log(colors.green('HELLO'));
         if (req.session.login == null || req.session.login == undefined) {
             console.log("Login", req.session.login);
             res.status(401).json({status: 'Unauthorized'});
@@ -331,7 +333,7 @@ router.route('/dailydata')
                             soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
                                 //console.log("receivePUSHES", data);
                                 var obj = JSON.parse(data.return);
-                                console.log("Obj", obj[0], "mtm 1497");
+                                console.log("Obj", obj[0], "mtm 336");
                                 //delete cashedDataArr[company].allPushes;
                                 cashedDataArr[company].allPushes=obj;
                                 console.log("GetPushes finished for company", company, "получено пушей", cashedDataArr[currentCompany].idArr.length-cashedDataArr[currentCompany].repeat+1, "из", cashedDataArr[currentCompany].idArr.length );
@@ -1919,7 +1921,7 @@ function linkDataParts (currentCompany, login)
         }
     }
     //cashedDataArr[currentCompany].routes.length = size;
-    console.log("FINISHING LINKING", cashedDataArr[currentCompany].routes.length);
+    console.log("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
     checkCorrectCalculating(currentCompany);
 
 }
@@ -2700,7 +2702,8 @@ function calcPredication(route, company) {
 
 //Приведение времени PUSH к локально текущему Киев прибавляем 3 часа
 function checkPushesTimeGMTZone(pushes, company){
-    console.log("Start reorange pushes");
+    console.log(colors.green('Start reorange pushes'));
+    console.log('Тестовое сообщение зеленого цвета'.green);
     var i=0;
     while (i<pushes.length) {
 
@@ -3990,6 +3993,7 @@ function oldDayCalculate (company, data) {
     data.current_server_time = parseInt(new Date() / 1000);
     data.currentDay = false;
     console.log("Прошлый день готов к рассчету", company);
+    createFilterIdForOldDay(company);
 
     connectPointsAndPushes(company);
     connectStopsAndPoints(company);
@@ -4267,6 +4271,28 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
         tPoint.working_window = tPoint.promised_window
     }
 
+}
+
+
+function createFilterIdForOldDay(company) {
+    console.log("Start createFilterIdForOldDay");
+    if(company == undefined) {
+        console.log("ОШИБКА ВХОДНЫХ ДАННЫХ createFilterIdForOldDay");
+        return;
+    }
+
+
+    for (var i=0; i<cashedDataArr[company].routes.length; i++){
+        for (var j =0; j<cashedDataArr[company].allRoutes.length; j++ ){
+            if (cashedDataArr[company].routes[i].uniqueID == cashedDataArr[company].allRoutes[j].uniqueID) {
+                console.log("Найдено совпадение");
+                cashedDataArr[company].routes[i].filterId = cashedDataArr[company].allRoutes[j].value;
+                break;
+            }
+        }
+
+    }
+    console.log("FINISH createFilterIdForOldDay");
 }
 
 function choseRouteForClose (company) {

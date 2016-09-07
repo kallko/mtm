@@ -4288,7 +4288,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.data.statistic[6] = 0;
             rootScope.data.statistic[7] = 0;
             rootScope.$emit('holestatistic', rootScope.data.statistic);
-            console.log("Имеем данные", rootScope.data);
+            scope.filters.routes.length =1;
+            for (i=0; i<rootScope.data.allRoutes.length; i++){
+                scope.filters.routes.push(rootScope.data.allRoutes[i])
+                console.log("Значение всех маршрутов +1 =", scope.filters.routes.length);
+            }
+            console.log("Имеем данные", rootScope.data, scope.filters.routes);
+
             rootScope.asking = false;
         }
 
