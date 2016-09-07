@@ -2883,7 +2883,7 @@ function  checkOnline(company) {
 
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
     if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
-        console.log("Страховка сработала", ashedDataArr[company].blocked_routes.length );
+        console.log("Страховка сработала", cashedDataArr[company].blocked_routes.length );
         cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
         cashedDataArr[company].blocked_routes.length = 0;
     }
@@ -4155,6 +4155,7 @@ function cancelTaskPush(push, point, company){
     point.mobile_push = push;
     point.limit = 85; //todo отфонарная цифра для тестов.
     point.confirmed = true;
+    point.reason = push.cancel_reason;
 
     if(push.cancel_reason != undefined && push.cancel_reason.length >0) {
         for (var i=0; i<cashedDataArr[company].reasons.length; i++ ){

@@ -2591,11 +2591,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         route.real_track = data;
 
 
-                        for (var k = 0; k < route.real_track.length; k++) {
-                            if (route.real_track[k].coords == undefined ||
-                                route.real_track[k].coords.length == 0) {
-                                route.real_track.splice(k, 1);
-                                k--;
+                        if(typeof (route.real_track) == Array) {
+                            for (var k = 0; k < route.real_track.length; k++) {
+                                if (route.real_track[k].coords == undefined ||
+                                    route.real_track[k].coords.length == 0) {
+                                    route.real_track.splice(k, 1);
+                                    k--;
+                                }
                             }
                         }
 
@@ -2613,7 +2615,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }).error(function(err){
                         console.log(err);
                         //alert("Маршрут свободен для редактирования");
-                        rootScope.errorNotification(' к агрегатору /gettracksbystates. Нет актуального трека');
+                        rootScope.errorNotification(' к агрегатору /gettracksbystates. У этой машины нет трека');
                         if (route.real_track == undefined) {
                             scope.filters.route = route.filterId;
                             draw(route);
@@ -2996,6 +2998,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     transport: routeI.TRANSPORT,
                     itenereryID: routeI.itineraryID,
                     number: routeI.NUMBER,
+                    gid: routeI.transport.gid,
+                    uniqueId: routeI.uniqueId,
                     startTimePlan: strToTstamp(routeI.START_TIME),
                     endTimePlan: strToTstamp(routeI.END_TIME),
                     totalPoints: routeI.points.length,
@@ -3050,9 +3054,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //console.log(pointJ);
 
                     if(pointJ.status == 8){
-                        point.reasonDisp = pointJ.reason;
+                        point.reasonDisp = pointJ.reason || '';
                         point.reasonDriver = '';
+                        if (point.mobile_push != undefined && point.mobile_push.canceled == true) {
+                            point.reasonDriver = point.mobile_push.cancel_reason;
+                        }
                         route.pointsNotReady.push(point);
+
+                        //console.log("причины отмены", point.reasonDisp, point.reasonDriver);
                     } else {
                         route.pointsReady.push(point);
                     }
@@ -3073,12 +3082,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var k = 0; k < route.pointsReady.length; k++) {
                     //console.log("Обрабатываем доставленные точки");
                     point = route.pointsReady[k];
-                    point.arrivalTimeFact =0;
+                    point.arrivalTimeFact = 0;
                     if (point.stopState) {
                         point.durationFact = point.stopState.t2 - point.stopState.t1;
                         point.arrivalTimeFact = point.stopState.t1;
                     }else{
-                        point.arrivalTimeFact = point.real_arrival_time;
+                        point.arrivalTimeFact = point.real_arrival_time || 0;
                         point.durationFact = 0;
                     }
 

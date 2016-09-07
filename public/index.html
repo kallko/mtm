@@ -174,8 +174,8 @@
                            ng-model="showDate"
                            id="show-date"/>
                 </div>
-                <div class="col-sm-2">
-                    <button class="btn btn-info btn-sm heightElement width100" ng-click="loadOldDay()" >Загрузить</button>
+                <div  class="col-sm-2">
+                    <button ng-show="data.routes.length == 0" class="btn btn-info btn-sm heightElement width100" ng-click="loadOldDay()" >Загрузить</button>
                     <!--todo вставить вверх ng-show="data.routes.length == 0"-->
                 </div>
             </div>
@@ -1012,7 +1012,7 @@
         <tr>
             <td class="title">План. прибытие:</td>
             <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}
-                <div >
+                <div ng-show="false" >
                 <button class="btn btn-primary btn-xs btn-success" >Подтвердить</button>
                 <input type="time" class="promised-text-card" id="promised-start-card"
                        ng-change="changePromisedCard()"
