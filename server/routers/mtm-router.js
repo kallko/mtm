@@ -2036,7 +2036,7 @@ function startPeriodicCalculating() {
                         for (j=0; j<data[i].data.length; j++){
                             //console.log("Stage 2");
                            // console.log("Time == ", data[i].data[j].time);
-                          if (data[i].data[j].time == 0 || data[i].data[j].time == '0') {
+                          if (data[i].data[j].time == 0 || data[i].data[j].time == '0' || data[i].data[j] == "error") {
                               //console.log("delete 0 time state");
                               data[i].data.splice(j,1);
                               j--;
@@ -4285,7 +4285,7 @@ function createFilterIdForOldDay(company) {
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
         for (var j =0; j<cashedDataArr[company].allRoutes.length; j++ ){
             if (cashedDataArr[company].routes[i].uniqueID == cashedDataArr[company].allRoutes[j].uniqueID) {
-                console.log("Найдено совпадение");
+                //console.log("Найдено совпадение");
                 cashedDataArr[company].routes[i].filterId = cashedDataArr[company].allRoutes[j].value;
                 break;
             }

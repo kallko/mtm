@@ -104,7 +104,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                     reRoute = rootScope.data.routes[i];
                 }
             }
-            rootScope.showProblem(reRoute);
+            rootScope.$emit('displayCollectionToStatistic', reRoute.points);
+            //rootScope.showProblem(reRoute);
         };
 
         // отмена сомнительного статуса

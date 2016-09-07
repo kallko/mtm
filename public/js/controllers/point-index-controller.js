@@ -3073,6 +3073,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var k = 0; k < route.pointsReady.length; k++) {
                     //console.log("Обрабатываем доставленные точки");
                     point = route.pointsReady[k];
+                    point.arrivalTimeFact =0;
                     if (point.stopState) {
                         point.durationFact = point.stopState.t2 - point.stopState.t1;
                         point.arrivalTimeFact = point.stopState.t1;
@@ -4291,9 +4292,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.filters.routes.length =1;
             for (i=0; i<rootScope.data.allRoutes.length; i++){
                 scope.filters.routes.push(rootScope.data.allRoutes[i])
-                console.log("Значение всех маршрутов +1 =", scope.filters.routes.length);
+                //console.log("Значение всех маршрутов +1 =", scope.filters.routes.length);
             }
-            console.log("Имеем данные", rootScope.data, scope.filters.routes);
+            console.log("Имеем данные", rootScope.data);
 
             rootScope.asking = false;
         }
