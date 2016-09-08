@@ -463,7 +463,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                                         rootScope.data.routes[j].real_track = rootScope.data.routes[j].real_track || [];
-                                        rootScope.data.routes[j].real_track = rootScope.data.routes[j].real_track.concat(trackParts[i].data);
+                                        //rootScope.data.routes[j].real_track = rootScope.data.routes[j].real_track.concat(trackParts[i].data);
                                             if (rootScope.data.routes[j].real_track.length > 0 && rootScope.data.routes[j].real_track[0].lastTrackUpdate != undefined) {
                                                 rootScope.data.routes[j].real_track[0].lastTrackUpdate -= updateTrackInterval * 2;
                                             }
