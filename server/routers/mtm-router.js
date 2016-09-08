@@ -3729,7 +3729,7 @@ function connectStopsAndPoints(company) {
 
 
                         if (suit ||
-                            (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold))
+                            (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold) || (tmpPoint.arrival_time_ts > tmpArrival.t2 && tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold))
                             &&
                             tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                             tmpPoint.timeToStop > tmpTime))) {
