@@ -131,7 +131,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if( track!=undefined) {
                 for (var i = 0; i < track.length; i++) {
                     // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
-                    if (track[i].coords == null || track[i].coords.constructor !== Array) continue;
+                    if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) continue;
                     //console.log(" track[i].time",  track[i].coords);
 
 
