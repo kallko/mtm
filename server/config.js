@@ -19,7 +19,7 @@ var config = {
 
     aggregator: {
         //url: 'http://192.168.9.29:20000/', // локальный путь к аггрегатору
-        url: 'https://gps.s2.sngtrans.com.ua/', // путь к агрегатору на хосте
+        url: 'https://gps.s1.sngtrans.com.ua/', // путь к агрегатору на хосте
         login: 'admin',
         password: 'admin321'
     },
