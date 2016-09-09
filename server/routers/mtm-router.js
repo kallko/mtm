@@ -3727,11 +3727,13 @@ function connectStopsAndPoints(company) {
 
 
                         if (suit ||
-                            (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold))
+                            (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold*60) || (tmpPoint.arrival_time_ts > tmpArrival.t2 && tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold*60))
                             &&
                             tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                             tmpPoint.timeToStop > tmpTime))) {
 
+
+                            console.log("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
                            // var haveUnfinished = false;
 
 

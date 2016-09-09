@@ -680,10 +680,11 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
 SoapManager.prototype.openPointWindow = function (user, pointId) {
     // соотношения наших логинов с их гуидами (по человечски получать их мы пока не можем)
     var userIds = {
-        'IDS.dev': '33d45347-7834-11e3-840c-005056a70133',
-        '292942.Viktor': 'a6d774a7-fd9c-11e2-a23d-005056a74894',
+        'IDS.fedorets': '2d61f1b4-16f2-11e3-925c-005056a74894',
+        'IDS.ribak': '55e41a94-10b7-11e3-925c-005056a74894',
         'IDS.a.kravchenko': '5229eabf-f516-11e2-a23d-005056a74894',
-        'IDS.red\'kina': 'efa17485-fb45-11e2-a23d-005056a74894'
+        'IDS.kadysh': '7274255c-982f-11e5-a386-005056a76b49',
+        'IDS.shulga': '69dfeeb7-1a4d-11e5-a872-005056a77794'
     };
 
     //pointId = '2dddb7d0-c943-11e2-a05b-52540027e502';
