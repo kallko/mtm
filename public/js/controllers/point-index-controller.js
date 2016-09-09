@@ -1895,11 +1895,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             // контролировать размер таблицы после изменения фильтров для изменения размеров грипов для ресайза колонок
-            scope.$watch(function () {
-                return scope.filters.route + scope.filters.promised_15m + scope.filters.problem_index + scope.filters.branch;
-            }, function () {
-                updateResizeGripHeight();
-            });
+            //scope.$watch(function () {
+            //    return scope.filters.route + scope.filters.promised_15m + scope.filters.problem_index + scope.filters.branch;
+            //}, function () {
+            //    updateResizeGripHeight();
+            //});
 
            /* scope.$on('ngRepeatFinished', function () {
                 prepareFixedHeader();

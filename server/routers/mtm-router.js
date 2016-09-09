@@ -2068,28 +2068,117 @@ function startPeriodicCalculating() {
                                         continue;
                                     }
 
-                                    if(data[j].data[0] == undefined) {
+                                    if(data[j].data[0] == undefined || data[j].data == 'error') {
                                     //console.log("data[j].data[0] == undefined");
                                         continue;
                                     }
 
-                                    //console.log("Перезапись существующего стейта", cached.routes[i].transport.gid );
-                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
-                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
-                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
-                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
-                                    cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
 
-                                    if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].state != 'START'){
-                                        cached.routes[i].real_track[cached.routes[i].real_track.length-1].state = data[j].data[0].state;
+
+
+                                    //Убираем последний стейт в треке, если его id ==0
+                                    if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].id == 0) {
+                                        cached.routes[i].real_track.length = cached.routes[i].real_track.length-1;
                                     }
 
-                                    //console.log("Ищем ошибку здесь", data[j].data);
-                                   try {
-                                    data[j].data.splice(0,1);
-                                   } catch (e) {
-                                       console.log("ОШИБКА", e, data[j].data );
-                                   }
+
+                                    //Убираем первый стейт в полученных данных, если его id ==0
+
+                                    if (data[j].data[0].id == 0) {
+
+                                        console.log("ID первого полученного стейта 0, всего получено стейтов", data[j].data.length);
+                                        data[j].data.splice(0,1);
+                                        if(data[j].data.length == 0 ) continue;
+                                    }
+
+
+                                    //var idx = cached.routes[i].real_track.length-1;
+                                    //var flag = 0;
+                                    //while (cached.routes[i].real_track[idx] != undefined && flag<2){
+                                    //    console.log("Последние треки", cached.routes[i].real_track[idx]);
+                                    //    idx--;
+                                    //    flag++;
+                                    //}
+                                    //
+                                    //console.log("Полученные данные", data[j].data);
+
+                                    if ( data[j].data[0].id+'' == cached.routes[i].real_track[cached.routes[i].real_track.length-1].id ){
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
+                                        data[j].data.splice(0,1);
+                                        if (data[j].data.length >0) {
+                                            console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
+                                            for (var g=0; g<data[j].data.length; g++){
+                                                cached.routes[i].real_track.push(data[j].data[g]);
+                                            }
+                                            //cached.routes[i].real_track.concat(data[j].data);
+                                            console.log("Стейтов стало", cached.routes[i].real_track.length);
+                                        }
+
+                                    } else {
+                                        console.log("Какой-то невероятный случай!", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0], data[j].data.length);
+
+                                    }
+
+                                    //
+                                    //var firstIndx =undefined;
+                                    //if (cached.real_track == undefined) {
+                                    //    cached.real_track = data[j].data;
+                                    //    continue;
+                                    //}
+                                    //
+                                    //for(var n = cached.real_track.length-1; n>=0; n--) {
+                                    //    if (cached.real_track[n].t1 == data[j].data[0].t1){
+                                    //        firstIndx = n;
+                                    //        break;
+                                    //    }
+                                    //}
+                                    //
+                                    //if (cached.real_track.length>1) console.log("Найдена точка входа, для объединения треков, где всего стейтов", cached.real_track.length, "стейт в треке", n,  cached.real_track[n], "всего получено", data[j].data.length );
+
+
+
+                                    // todo визу старый вариант сверху новый
+
+
+                                   // //console.log("Перезапись существующего стейта", cached.routes[i].transport.gid );
+                                   // if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 != data[j].data[0].t1) {
+                                   //     console.log("Подозреваем ошибку здесь");
+                                   //
+                                   //     if(data[j].data[0] == cached.routes[i].real_track[cached.routes[i].real_track.length-2] ) {
+                                   //         console.log("Теория верна, Стэйты совпадают");
+                                   //
+                                   //     } else {
+                                   //         console.log("Непонятно", data[j].data.length, data[j].data[0], cached.routes[i].real_track[cached.routes[i].real_track.length-1], cached.routes[i].real_track[cached.routes[i].real_track.length-2])
+                                   //     }
+                                   //
+                                   //     //console.log("Первый трек на запись", data[j].data[0]);
+                                   //     //console.log("Крайний стейт трека", cached.routes[i].real_track[cached.routes[i].real_track.length-1]);
+                                   //     //
+                                   //     //if (cached.routes[i].real_track[cached.routes[i].real_track.length-2] != undefined) {
+                                   //     //    console.log("Предпоследний трек", cached.routes[i].real_track[cached.routes[i].real_track.length-2])
+                                   //     //}
+                                   // }
+                                   // cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                   // cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
+                                   // cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
+                                   // cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
+                                   // cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
+                                   //
+                                   // if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].state != 'START'){
+                                   //     cached.routes[i].real_track[cached.routes[i].real_track.length-1].state = data[j].data[0].state;
+                                   // }
+                                   //
+                                   // //console.log("Ищем ошибку здесь", data[j].data);
+                                   //try {
+                                   // data[j].data.splice(0,1);
+                                   //} catch (e) {
+                                   //    console.log("ОШИБКА", e, data[j].data );
+                                   //}
 
                                     if(data[j].data.length>0){
                                         //console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
@@ -2127,6 +2216,38 @@ function startPeriodicCalculating() {
                             console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
 
                         }
+
+                        console.log("начинаем проверку качества трека");
+                        for (var k=0; k<cached.routes.length; k++){
+                            if (cached.routes[k].real_track == undefined) {
+                                console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека");
+                                continue;
+                            }
+
+                            for(var l=1; l<cached.routes[k].real_track.length; l++){
+                                if (cached.routes[k].real_track[l].t1 != cached.routes[k].real_track[l-1].t2 )
+                                    if (cached.routes[k].real_track[l-1].id+'' != cached.routes[k].real_track[l].id+''
+
+
+                                    ) {
+                                        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Трек разорван !!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l-1], cached.routes[k].real_track[l] );
+                                    } else {
+                                        cached.routes[k].real_track.splice(l-1, 1);
+                                        l--;
+                                    }
+
+
+                            }
+
+
+                            for(var l=1; l<cached.routes[k].real_track.length; l++){
+                                if ( cached.routes[k].real_track[l].t1 > cached.routes[k].real_track[l].t2 )
+                                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Обратный стейт!!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l]);
+
+                            }
+
+                        }
+
                     }
 
                     cashedDataArr[companyAsk].needRequests --;
@@ -3733,7 +3854,7 @@ function connectStopsAndPoints(company) {
                             tmpPoint.timeToStop > tmpTime))) {
 
 
-                            console.log("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
+                            //console.log("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
                            // var haveUnfinished = false;
 
 

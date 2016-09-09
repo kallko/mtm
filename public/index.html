@@ -322,18 +322,25 @@
                     id="{{::'point-' + row.row_id}}"
                     on-finish-render="ngRepeatFinished"
                     ng-if="applyFilter(row)"
-                    class="delivery-point-row"
                     ng-class="{'selected-row' : row.selected}"
-                    >
+                        >
+                    <!--class="delivery-point-row"-->
+
 
                     <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
                     <td>{{row.NUMBER}}</td>
                     <td>{{row.fact_number}}</td>
                     <td ng-class="[row.class, row.class2]" class="bulled"><span>&#9899;</span></td>
-                    <td ng-class="row.class">
-                        {{getTextStatus(row)}}
+                    <td ng-class="row.class" >
+                             <span>
+                                {{getTextStatus(row)}}
+                            </span>
                     </td>
-                    <td class="degree" >{{row.limit}}</td>
+                    <td class="degree-th"  >
+                        <span>
+                          {{row.limit}}
+                        </span>
+                    </td>
                     <td title="{{::row.transport.NAME}}">{{row.transport.NAME}}</td>
                     <td>{{row.driver.NAME}}</td>
                     <td title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>

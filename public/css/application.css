@@ -563,7 +563,7 @@ template {
     padding-right: 15px;
 }
 .bulled-th {
-    width:25px !important;
+    width:24px !important;
 }
 .bulled {
     text-decoration: none;
@@ -577,9 +577,16 @@ template {
 .point-table-wrap {
     position: relative;
 }
-.degree,
+.degree{
+    text-align: center;
+    width:26px !important;
+}
+.degree-th{
+    width:26px !important;
+}
 .status-col {
     text-align: center;
+    width:118px !important;
 }
 .out-windows {
     color: red;

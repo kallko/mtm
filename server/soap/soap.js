@@ -402,6 +402,9 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
 
 // подготовка решений для дальнейшего работы с ним
 SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nIndx, callback) {
+
+
+
     var tmpRoute;
 
     data[nIndx].routes = [];
@@ -451,7 +454,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
                     reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
 
-               // console.log(reasons, "SOAP345");
+                //console.log("полученные сенсоры",sensors, "SOAP345");
 
 
                 if (waypoints == undefined) return;
