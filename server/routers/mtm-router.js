@@ -2908,9 +2908,7 @@ function checkRealTrackData (company) {
                 console.log ("Find Problem in ",cashedDataArr[company].routes[i].transport.gid, cashedDataArr[company].routes[i].real_track[j+1].t1);
                // console.log ("Find Problem in ",cashedDataArr[company].routes[i].transport.gid, cashedDataArr[company].routes[i].real_track[j], cashedDataArr[company].routes[i].real_track[j+1] , j, " from", cashedDataArr[company].routes[i].real_track.length);
             }
-
         }
-
     }
 }
 
