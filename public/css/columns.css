@@ -1,29 +1,32 @@
-.status-col { width: 90px; }
-.window-type-col { width: 83px; }
-.plan-arrival-time-col { width: 40px; }
-.prediction-arrival-time-col { width: 54px; }
-.prediction-arrival-left-col { width: 62px; }
-.overdue-col { width: 47px; }
-.problem-index-col { width: 56px; }
-.number-col { width: 38px; }
+.status-col { min-width: 118px; max-width: 118px; text-align: center; }
+.window-type-col { min-width: 83px; max-width: 83px; text-align: center; }
+.plan-arrival-time-col { min-width: 90px; max-width: 90px; text-align: center;}
+.prediction-arrival-time-col { min-width: 110px; max-width: 110px; text-align: center;}
+.prediction-arrival-left-col { min-width: 95px; max-width: 95px; text-align: center; }
+.overdue-col { min-width: 50px; max-width: 50px; text-align: center;}
+.problem-index-col { min-width: 103px; max-width: 103px; text-align: center; }
+.number-col { min-width: 50px; max-width: 50px; text-align: center; }
 .point-id-col { width: 72px; }
 .task-id-col { width: 72px; }
-.time-window-col { width: 77px; }
+.time-window-col {min-width: 77px; max-width: 77px;}
 .departure-time-col { width: 80px; }
-.driver-phone-col { width: 90px; }
-.car-type-col { width: 54px; }
-.car-number-col { width: 46px; }
-.client-name-col { width: 200px; }
-.gps-conf-col {width: 46px;}
-.driver-name-col { width: 130px; }
-.address-col { width: 220px; }
-.real-arrival-time-col { width: 40px; }
+.driver-phone-col { min-width: 95px; max-width: 95px; text-align: center; }
+.car-type-col { min-width: 65px;  max-width: 65px;}
+.car-number-col { min-width: 66px; max-width: 66px; text-align: center;}
+.client-name-col {min-width: 210px; max-width: 210px;}
+.gps-conf-col {min-width: 46px; max-width: 46px; text-align: center;}
+.driver-name-col { min-width: 130px; max-width: 130px;}
+.address-col { min-width: 220px; max-width: 220px;}
+.real-arrival-time-col { min-width: 95px; max-width: 95px; text-align: center;}
 .in-plan-col { width: 90px; }
 .controlled-window-col { width: 110px; }
-.promised-window-col { width: 80px; }
-.promised-window-changed-col { width: 90px; }
-.stop-col { width: 38px; }
-.mobile-push-col { width: 32px; }
-.branch-col { width: 80px; }
-.time-left-window-col { width: 60px; }
-.degree-th {width: 25px; }
+.promised-window-col { min-width: 80px; max-width: 80px; text-align: center;}
+.promised-window-changed-col { min-width: 66px; max-width: 66px; text-align: center;}
+.stop-col {min-width: 38px; max-width: 38px; text-align: center;}
+.mobile-push-col {min-width: 90px; max-width: 90px; text-align: center; }
+.branch-col { min-width: 80px; max-width: 80px; text-align: center; }
+.time-left-window-col { min-width: 70px; max-width: 70px; text-align: center;}
+.degree {min-width: 26px; max-width:26px; text-align: center;}
+.comment-col {min-width: 700px; max-width: 700px;}
+.bulled-th {min-width: 26px; max-width:26px; font-size: 15px !important; text-align: center;}
+

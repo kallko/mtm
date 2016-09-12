@@ -1586,13 +1586,48 @@ function cutFIO(fioStr) {
 // Перевод строковой даты в таймстамп
 function strToTstamp(strDate, lockaldata) {
     //console.log(strDate, "strDate");
+    if (lockaldata != undefined) {
+        var today = new Date();
+        var day, adding, month, year;
+
+        if(today.getDate().length<2){
+            day = "0"+today.getDate();
+        } else {
+            day = today.getDate();
+        }
+
+        month = parseInt(today.getMonth());
+        month++;
+
+        if(month<10){
+            month = "0"+month;
+        } else {
+            month = "" + month;
+
+        }
+
+        year = ('' + today.getFullYear()).substring(2);
+        //console.log("Constructor", day, month, year);
+        var adding = day+'.'+month+'.'+year;
+        if (strDate.length<10) {
+            strDate = adding + " " + strDate;
+           // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
+        }
+
+    }
     var parts = strDate.split(' ');
     var    _date = parts[0].split('.');
     var _time;
     var toPrint=JSON.stringify(strDate);
+    //for (var i=0; i<parts.length;i++){
+    //    console.log("PARTS", parts[i]);
+    //}
+    //console.log("_________________");
     try {
         _time = parts[1].split(':');} catch (exeption) {
-        console.log(toPrint, "Error", exeption, lockaldata);
+
+
+        console.log(toPrint, strDate, "Error", exeption, lockaldata);
     }
 
 
@@ -2077,20 +2112,28 @@ function startPeriodicCalculating() {
 
 
                                     //Убираем последний стейт в треке, если его id ==0
-                                    if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].id == 0) {
+                                    if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].id == '0') {
                                         cached.routes[i].real_track.length = cached.routes[i].real_track.length-1;
+                                        if(cached.routes[i].real_track.length ==0) continue;
                                     }
 
 
-                                    //Убираем первый стейт в полученных данных, если его id ==0
+                                    //Убираем первый ш последний стейт в полученных данных, если его id ==0
 
-                                    if (data[j].data[0].id == 0) {
+                                    if (data[j].data[0].id == '0') {
 
                                         console.log("ID первого полученного стейта 0, всего получено стейтов", data[j].data.length);
                                         data[j].data.splice(0,1);
                                         if(data[j].data.length == 0 ) continue;
                                     }
 
+
+                                    if (data[j].data[data[j].data.length-1].id == '0') {
+
+                                        console.log("ID последнего стейта 0, всего получено стейтов", data[j].data.length);
+                                        data[j].data.splice(data[j].data.length-1,1);
+                                        if(data[j].data.length == 0 ) continue;
+                                    }
 
                                     //var idx = cached.routes[i].real_track.length-1;
                                     //var flag = 0;
@@ -2102,7 +2145,7 @@ function startPeriodicCalculating() {
                                     //
                                     //console.log("Полученные данные", data[j].data);
 
-                                    if ( data[j].data[0].id+'' == cached.routes[i].real_track[cached.routes[i].real_track.length-1].id ){
+                                    if ( data[j].data[0].id+'' == cached.routes[i].real_track[cached.routes[i].real_track.length-1].id+"" ){
                                                 cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
                                                 cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
                                                 cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
@@ -2121,6 +2164,40 @@ function startPeriodicCalculating() {
 
                                     } else {
                                         console.log("Какой-то невероятный случай!", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0], data[j].data.length);
+
+                                        //Убираем стейты, которые мы уже получали раньше и которые у нас записаны
+                                        var t=0;
+                                        while(data[j].data[0] != undefined && ""+cached.routes[i].real_track[cached.routes[i].real_track.length-1].id != ""+data[j].data[t].id){
+                                            console.log("Сравниваем", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[t]);
+                                            if (""+cached.routes[i].real_track[cached.routes[i].real_track.length-1].id != ""+data[j].data[t].id)
+                                            {
+                                                data[j].data.splice(t,1);
+                                                t--;
+                                            }
+                                            t++;
+                                        }
+
+                                        console.log("Отбросы закончены", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0]);
+
+                                        // Если уже вручную связали этот стейт с какой либо точкой
+                                        if (data[j].data[0])
+                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
+                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
+                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
+                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
+                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
+
+                                            data[j].data.splice(0,1);
+
+                                        if (data[j].data.length >0) {
+                                            console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
+                                            for ( g=0; g<data[j].data.length; g++){
+                                                cached.routes[i].real_track.push(data[j].data[g]);
+                                            }
+                                            //cached.routes[i].real_track.concat(data[j].data);
+                                            console.log("Стейтов стало", cached.routes[i].real_track.length);
+                                        }
 
                                     }
 
@@ -2180,15 +2257,15 @@ function startPeriodicCalculating() {
                                    //    console.log("ОШИБКА", e, data[j].data );
                                    //}
 
-                                    if(data[j].data.length>0){
-                                        //console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
-                                        //console.log("DATA", data[j].data);
-                                        //for (var k=1; k<data[j].data.length; k++){
-                                        //    console.log("Вариант стейта", data[j].data[k] );
-                                        //}
-                                        cached.routes[i].real_track = cached.routes[i].real_track.concat(data[j].data);
-                                        //console.log("Стало", cached.routes[i].real_track.length);
-                                    }
+                                    //if(data[j].data.length>0){
+                                    //    //console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
+                                    //    //console.log("DATA", data[j].data);
+                                    //    //for (var k=1; k<data[j].data.length; k++){
+                                    //    //    console.log("Вариант стейта", data[j].data[k] );
+                                    //    //}
+                                    //    cached.routes[i].real_track = cached.routes[i].real_track.concat(data[j].data);
+                                    //    //console.log("Стало", cached.routes[i].real_track.length);
+                                    //}
 
 
 
@@ -3753,6 +3830,8 @@ function connectStopsAndPoints(company) {
         while(i<size){
             var date=point.ARRIVAL_TIME.substr(0,11);
             var temp=parts[i].trim();
+            //console.log("Arrival Time", point.ARRIVAL_TIME );
+            //console.log("Date", date, temp);
             var before=temp.substr(0,5);
             before=date+before+":00";
             //console.log("before=", before);
@@ -3760,6 +3839,7 @@ function connectStopsAndPoints(company) {
 
             var after=temp.slice(-5);
             after=date+after+":00";
+            //console.log("after=", after);
             var end=strToTstamp(after, point);
             point.orderWindows.push({start: begin, finish: end });
 
@@ -4362,8 +4442,17 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
     tPoint.arrival_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5) + ":00";
 
     // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
+    //todo очень злой костыль, нужно срочно найти правильное решение
+    //if (tPoint.TASK_NUMBER =='4400445735') {
+    //    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Входные данные", route.points[1] != undefined , route.points[1].ARRIVAL_TIME != undefined , route.points[1].ARRIVAL_TIME.length !='' , route.points[1].ARRIVAL_TIME.length !=0 )
+    //}
     if (tPoint.ARRIVAL_TIME.length < 1) {
-        tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME;
+        if(route.points[1] != undefined && route.points[1].ARRIVAL_TIME != undefined && route.points[1].ARRIVAL_TIME.length !='' && route.points[1].ARRIVAL_TIME.length !=0) {
+            tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME
+        } else {
+            tPoint.ARRIVAL_TIME = "12.09.2016 04:30:00";
+        }
+
     }
     var toDay = tPoint.ARRIVAL_TIME.substr(0, 10);
 

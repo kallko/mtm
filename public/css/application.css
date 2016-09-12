@@ -250,6 +250,7 @@ template {
 .delivered-late-status,
 .delivered-too-early-status {
     font-weight: bold;
+    font-size: 17px;
 }
 
 .delivered-status {
@@ -401,6 +402,7 @@ template {
     width: 100%;
     float: right;
 }
+
 
 .box {
     border: 1px solid grey;
@@ -562,9 +564,7 @@ template {
     padding-left: 15px;
     padding-right: 15px;
 }
-.bulled-th {
-    width:24px !important;
-}
+
 .bulled {
     text-decoration: none;
 }
@@ -577,16 +577,10 @@ template {
 .point-table-wrap {
     position: relative;
 }
-.degree{
-    text-align: center;
-    width:26px !important;
-}
-.degree-th{
-    width:26px !important;
-}
-.status-col {
-    text-align: center;
-    width:118px !important;
+
+.driver-name-col{
+    min-width: 130px;
+    max-width: 130px;
 }
 .out-windows {
     color: red;
