@@ -1939,7 +1939,7 @@ function linkDataParts (currentCompany, login)
             }
 
 
-
+            createSeveralAviabilityWindows(tPoint);
 
 
             var workingWindowType = cashedDataArr[currentCompany].settings.workingWindowType;
@@ -1947,15 +1947,16 @@ function linkDataParts (currentCompany, login)
             //console.log("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
 
             if (workingWindowType == 0) {
-                for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
-                    //console.log("Create PROMISED WINDOW step4");
-                    if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
-                        tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
-                        tPoint.working_window = tPoint.windows[k];
-                    }
-                }
+                tPoint.working_window = tPoint.orderWindows;
+                //for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                //    //console.log("Create PROMISED WINDOW step4");
+                //    if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                //        tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                //        tPoint.working_window = tPoint.windows[k];
+                //    }
+                //}
 
-                if (tPoint.working_window == undefined) tPoint.working_window = tPoint.promised_window_changed;
+                if (tPoint.working_window == undefined) tPoint.working_window = tPoint.orderWindows;
             } else if (workingWindowType == 1) {
                 tPoint.working_window = tPoint.promised_window_changed;
             }
@@ -2192,7 +2193,7 @@ function startPeriodicCalculating() {
                                         //Убираем стейты, которые мы уже получали раньше и которые у нас записаны
                                         var t=0;
                                         while(data[j].data[0] != undefined && ""+cached.routes[i].real_track[cached.routes[i].real_track.length-1].id != ""+data[j].data[t].id){
-                                            console.log("Сравниваем", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[t]);
+                                            //console.log("Сравниваем", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[t]);
                                             if (""+cached.routes[i].real_track[cached.routes[i].real_track.length-1].id != ""+data[j].data[t].id)
                                             {
                                                 data[j].data.splice(t,1);
@@ -2201,8 +2202,10 @@ function startPeriodicCalculating() {
                                             t++;
                                         }
 
-                                        console.log("Отбросы закончены", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0]);
+                                        //console.log("Отбросы закончены", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0]);
 
+
+                                        if(data[j].data.length == 0 || data[j].data == undefined) continue;
                                         // Если уже вручную связали этот стейт с какой либо точкой
                                         if (data[j].data[0])
                                             cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
@@ -2215,12 +2218,12 @@ function startPeriodicCalculating() {
                                             data[j].data.splice(0,1);
 
                                         if (data[j].data.length >0) {
-                                            console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
+                                            //console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
                                             for ( g=0; g<data[j].data.length; g++){
                                                 cached.routes[i].real_track.push(data[j].data[g]);
                                             }
                                             //cached.routes[i].real_track.concat(data[j].data);
-                                            console.log("Стейтов стало", cached.routes[i].real_track.length);
+                                            //console.log("Стейтов стало", cached.routes[i].real_track.length);
                                         }
 
                                     }
@@ -2452,7 +2455,13 @@ function startPeriodicCalculating() {
                                 // console.log("point.problem_index", point.problem_index);
                                 if (point.overdue_time > 0) {
                                     if (point.status == 4) {
-                                        point.problem_index += (parseInt(Date.now()/1000) - point.working_window.finish) * cashedDataArr[company].settings.factMinutes;
+                                        var koef;
+                                        if (typeof (point.working_window) == 'object') {
+                                            koef = point.working_window.finish;
+                                        } else {
+                                            koef = point.working_window[point.working_window.length-1].finish;
+                                        }
+                                        point.problem_index += (parseInt(Date.now()/1000) - koef) * cashedDataArr[company].settings.factMinutes;
                                         timeCoef = 1;
 
                                     } else {
@@ -2852,6 +2861,8 @@ function calcPredication(route, company) {
                 route.points[j].arrival_prediction = 0;
                 route.points[j].overdue_time = 0;
                 if (route.points[j].status == 7) {
+
+                    //console.log(route.points[j], "MTM2865 route.points[j].working_window.finish");
                     if (now > route.points[j].working_window.finish) {
                         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
                         //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
@@ -3496,7 +3507,7 @@ function lookForNewIten(company) {
 
 
 
-
+                            createSeveralAviabilityWindows(tPoint);
                             var workingWindowType = cashedDataArr[currentCompany].settings.workingWindowType;
 
 
@@ -3504,15 +3515,16 @@ function lookForNewIten(company) {
                             //console.log("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
 
                             if (workingWindowType == 0) {
-                                for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
-                                    //console.log("Create PROMISED WINDOW step4");
-                                    if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
-                                        tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
-                                        tPoint.working_window = tPoint.windows[k];
-                                    }
-                                }
+                                tPoint.working_window = tPoint.orderWindows;
+                                //for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
+                                //    //console.log("Create PROMISED WINDOW step4");
+                                //    if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
+                                //        tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
+                                //        tPoint.working_window = tPoint.windows[k];
+                                //    }
+                                //}
 
-                                if (tPoint.working_window == undefined) tPoint.working_window = tPoint.promised_window_changed;
+                                if (tPoint.working_window == undefined) tPoint.working_window = tPoint.orderWindows;
                             } else if (workingWindowType == 1) {
                                 tPoint.working_window = tPoint.promised_window_changed;
                             }
@@ -3841,38 +3853,6 @@ function connectStopsAndPoints(company) {
     }
 
 
-    function createSeveralAviabilityWindows (point){
-
-        point.orderWindows=[];
-        //console.log("Start checkUncalculate");
-
-        if (point.AVAILABILITY_WINDOWS == undefined || point.AVAILABILITY_WINDOWS.length == 0) return;
-
-        var parts=point.AVAILABILITY_WINDOWS.split(";");
-        var size=parts.length;
-        var i=0;
-        while(i<size){
-            var date=point.ARRIVAL_TIME.substr(0,11);
-            var temp=parts[i].trim();
-            //console.log("Arrival Time", point.ARRIVAL_TIME );
-            //console.log("Date", date, temp);
-            var before=temp.substr(0,5);
-            before=date+before+":00";
-            //console.log("before=", before);
-            var begin=strToTstamp(before, point);
-
-            var after=temp.slice(-5);
-            after=date+after+":00";
-            //console.log("after=", after);
-            var end=strToTstamp(after, point);
-            point.orderWindows.push({start: begin, finish: end });
-
-
-            i++;
-        }
-
-
-    }
 
 
 
@@ -4108,20 +4088,31 @@ function findStatusesAndWindows(company) {
             tmpPoint.windowType = 'Вне окон';
             if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
                 && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
-                tmpPoint.windowType = 'В заказанном';
+                tmpPoint.windowType = 'В обещанном';
                 //console.log('В заказанном')
             } else {
                 for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
                     if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time
                         && tmpPoint.windows[l].finish > tmpPoint.real_arrival_time) {
-                        tmpPoint.windowType = 'В обещанном';
+                        tmpPoint.windowType = 'В заказанном';
                         //console.log('В обещанном');
                         break;
                     }
                 }
             }
 
-            if (tmpPoint.rawConfirmed !== -1) {
+
+            //console.log("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
+            if (cashedDataArr[company].settings.workingWindowTypes == 1) {
+
+                if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
+                    //todo Дописать определение статуса для склада
+                    continue;
+                }
+
+
+
+
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
                     tmpPoint.status = 1;
                 } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
@@ -4129,10 +4120,62 @@ function findStatusesAndWindows(company) {
                 } else {
                     tmpPoint.status = 0;
                 }
-            } else {
+            } else{
+
+
+                if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
+                    //todo Дописать определение статуса для склада
+                    continue;
+                }
+
+                tmpPoint.status = undefined;
+                var start =1111, end =2222;
+
+
+                if (tmpPoint.working_window[0] == undefined){
+                    end = tmpPoint.working_window.finish;
+                    start = tmpPoint.working_window.start;
+                } else {
+                    end = tmpPoint.working_window[tmpPoint.working_window.length-1].finish;
+                    start = tmpPoint.working_window[0].start;
+                }
+
+
+
+                if (tmpPoint.real_arrival_time > end)
+                {
+                    tmpPoint.status = 1;
+
+                }
+
+                if (tmpPoint.real_arrival_time < start)
+                {
+                    tmpPoint.status = 2;
+                }
+
+                if (tmpPoint.status == undefined) {
+                    if (tmpPoint.working_window[0] == undefined) {
+                        tmpPoint.status = 0;
+                    } else {
+                        for (var k=0; k<tmpPoint.working_window.length; k++){
+                            if (tmpPoint.real_arrival_time > tmpPoint.working_window[k].start && tmpPoint.real_arrival_time < tmpPoint.working_window[k].finish ){
+                                tmpPoint.status = 0;
+                                break;
+                            }
+                        }
+
+
+                    }
+
+
+                    if(tmpPoint.status == undefined) {
+                        //точка где то между окнами
+                        tmpPoint.status = 1; //todo Условно присвоили статус доставлен поздно, если не попали ни в одно окно
+                    }
+
+                }
 
             }
-
 
             //корректировка достоверности статусов по процентам.
             tmpPoint.limit = 0;
@@ -4459,7 +4502,7 @@ function checkCorrectCalculating(company){
 
 
 function createArrivalTime (tPoint, route, controlledWindow, company) {
-    //console.log("The route is UNCALCULATE");
+    console.log("#############################################################The route is UNCALCULATE########################################################");
 
 
     //Для непосчитанных маршрутов время прибытия считается границей окна доступности
@@ -4473,8 +4516,6 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
     if (tPoint.ARRIVAL_TIME.length < 1) {
         if(route.points[1] != undefined && route.points[1].ARRIVAL_TIME != undefined && route.points[1].ARRIVAL_TIME.length !='' && route.points[1].ARRIVAL_TIME.length !=0) {
             tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME
-        } else {
-            tPoint.ARRIVAL_TIME = "12.09.2016 04:30:00";
         }
 
     }
@@ -4485,6 +4526,8 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
     tPoint.arrival_time_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
     tPoint.base_arrival_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
 
+
+    createSeveralAviabilityWindows(tPoint);
 
     tPoint.controlled_window = {
         start: tPoint.arrival_time_ts - controlledWindow,
@@ -4500,10 +4543,15 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
     tPoint.promised_window_changed = tPoint.promised_window;
 
 
-    if (cashedDataArr[company].settings.workingWindowTypes == 0){
+    if (cashedDataArr[company].settings.workingWindowType == 0){
+
+        console.log (tPoint, "MTM 4538");
+        console.log("Время заказанное",  tPoint.orderWindows[tPoint.orderWindows.length -1]);
         tPoint.working_window = tPoint.orderWindows[tPoint.orderWindows.length -1];
     }  else {
-        tPoint.working_window = tPoint.promised_window
+
+        console.log("Время обещанное");
+        tPoint.working_window = tPoint.orderWindows;
     }
 
 }
@@ -4529,6 +4577,42 @@ function createFilterIdForOldDay(company) {
     }
     console.log("FINISH createFilterIdForOldDay");
 }
+
+
+function createSeveralAviabilityWindows (point){
+
+    point.orderWindows=[];
+    //console.log("Start checkUncalculate");
+
+    if (point.AVAILABILITY_WINDOWS == undefined || point.AVAILABILITY_WINDOWS.length == 0) return;
+
+    var parts=point.AVAILABILITY_WINDOWS.split(";");
+    var size=parts.length;
+    var i=0;
+    while(i<size){
+        var date=point.ARRIVAL_TIME.substr(0,11);
+        var temp=parts[i].trim();
+        //console.log("Arrival Time", point.ARRIVAL_TIME );
+        //console.log("Date", date, temp);
+        var before=temp.substr(0,5);
+        before=date+before+":00";
+        //console.log("before=", before);
+        var begin=strToTstamp(before, point);
+
+        var after=temp.slice(-5);
+        after=date+after+":00";
+        //console.log("after=", after);
+        var end=strToTstamp(after, point);
+        point.orderWindows.push({start: begin, finish: end });
+
+
+        i++;
+    }
+
+
+}
+
+
 
 function choseRouteForClose (company) {
 

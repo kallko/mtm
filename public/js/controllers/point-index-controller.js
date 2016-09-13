@@ -2077,7 +2077,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (!needChanges) return;
                         //Если у точки уже есть статус Доставлено рано или доставлено поздно, оставляем его.
                         if(row.status>2){
-                    row.status = STATUS.FINISHED;}
+
+                    //row.status = STATUS.FINISHED;
+                            findNewStatus(row);
+
+                        }
                     row.confirmed_by_operator=true;
                     row.limit=100;
                     row.confirmed = true;
@@ -4702,6 +4706,70 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             })
         }
 
+
+        function findNewStatus(point) {
+            if (point == undefined) return;
+
+           console.log ("Ищем новый статус");
+
+            if (rootScope.data.settings.workingWindowType == 0) {
+                var start,end;
+                if (point.working_window[0] != undefined) {
+                    start = point.working_window[0].start;
+                    end = point.working_window[point.working_window.length-1].finish;
+                } else {
+                    start = point.working_window.start;
+                    end = point.working_window.finish;
+                }
+
+                if(point.working_window[0] == undefined) {
+                    point.status=0;
+                    if (point.real_arrival_time > end) {
+                        point.status = 1;
+                        return;
+                    }
+                    if (point.real_arrival_time < start ) {
+                        point.status = 2;
+                        return;
+                    }
+
+                } else {
+                    point.status=undefined;
+                    console.log(start, end , " Границы проверяемого окна");
+                    if (point.real_arrival_time > end) {
+                        point.status = 1;
+                        return;
+                    }
+                    if (point.real_arrival_time < start ) {
+                        point.status = 2;
+                        return;
+                    }
+
+                    for (var k=0; k<point.working_window.length; k++){
+                        if (point.real_arrival_time > point.working_window[k].start && point.real_arrival_time < point.working_window[k].finish ){
+                            point.status=0;
+                            return;
+                        }
+                    }
+
+                    point.status = 1;
+
+                }
+
+
+            } else {
+                point.status = 0 ;
+                if (point.real_arrival_time > point.promised_window_changed.finish) {
+                    point.status = 1;
+                    return;
+                }
+                 if (point.real_arrival_time < point.promised_window_changed.start ) point.status = 2;
+
+            }
+
+
+
+        }
 
         rootScope.$on('clearDisplay', function(event) {
             console.log ("Расчищаем коллекцию");

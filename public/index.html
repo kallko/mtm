@@ -381,7 +381,7 @@
                     </td>
                     <td class="gps-conf-col" title="{{::row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
                     <td class="promised-window-changed-col"> {{row.change_time ? row.change_time : ''}}</td>
-                    <td class = "window-type-col" id="{{'window-td-' + row.row_id}}">{{getTextWindow(row.windowType, row.row_id)}}</td>
+                    <td class = "window-type-col" id="{{'window-td-' + row.row_id}}">{{row.windowType}}</td>
 
                     <td class="car-number-col">{{::row.transport.REGISTRATION_NUMBER}}</td>
                     <td class="driver-phone-col">{{::row.driver.PHONE}}</td>
