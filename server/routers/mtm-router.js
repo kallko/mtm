@@ -208,24 +208,46 @@ router.route('/dailydata')
             && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
             console.log('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
-            req.session.itineraryID = cashedDataArr[currentCompany].ID;
-            cashedDataArr[currentCompany].user = req.session.login;
 
-            var cache = cashedDataArr[currentCompany];
-            if(cache.currentDay){
-                cache.server_time = parseInt(new Date() / 1000);
-                cache.current_server_time = cache.server_time;
-            }else{
-                cache.current_server_time = parseInt(Date.now() / 1000);
-            }
+            var settings={};
 
-             //console.log("проверка на отправку", cashedDataArr[currentCompany].settings);
-             res.status(200).json(cashedDataArr[currentCompany].settings);
+            // Получение настроек для конкретной компании
+            soapManager = new soap(req.session.login);
+            soapManager.getNewConfig(req.session.login, function (company, data) {
+                //console.log("receiveConfig", data);
+                settings = JSON.parse(data.return);
+                console.log("Settings Recieved",  settings, "mtm 218");
+                req.session.itineraryID = cashedDataArr[currentCompany].ID;
+                cashedDataArr[currentCompany].user = req.session.login;
+
+                var cache = cashedDataArr[currentCompany];
+                if(cache.currentDay){
+                    cache.server_time = parseInt(new Date() / 1000);
+                    cache.current_server_time = cache.server_time;
+                }else{
+                    cache.current_server_time = parseInt(Date.now() / 1000);
+                }
+
+                cashedDataArr[currentCompany].settings = settings;
+                console.log("проверка на отправку, получены ли настройки.", cashedDataArr[currentCompany].settings);
+
+                //todo Два костыля, пока настройки не прописаны в 1с
+                if(cashedDataArr[currentCompany].settings.limit == undefined ) cashedDataArr[currentCompany].settings.limit = 74;
+                if(cashedDataArr[currentCompany].settings.problems_to_operator == undefined) cashedDataArr[currentCompany].settings.problems_to_operator = 3;
+
+
+                res.status(200).json(cashedDataArr[currentCompany].settings);
+            });
+
+
+
+
+
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
             middleTime = parseInt(Date.now()/1000);
-            var soapManager = new soap(req.session.login);
-            var settings={};
+            soapManager = new soap(req.session.login);
+            settings={};
 
             // Получение настроек для конкретной компании
             soapManager.getNewConfig(req.session.login, function (company, data) {
