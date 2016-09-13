@@ -1255,6 +1255,7 @@ router.route('/savetonode/')
 
 router.route('/logout')
     .post(function (req, res) {
+        if (req.session.login == undefined) return;
         console.log("!!!!!!!!!!LOGOUT!!!!!!!", req.session.login);
         var i=0;
         while(i<blockedRoutes.length){
@@ -1492,6 +1493,7 @@ router.route('/askforproblems/:need')
 // Если такого подтверждения нет более 3 минут, считаем, что юзер закрыл клиент
 router.route('/confirmonline')
     .get(function (req, res) {
+        if(req.session.login == undefined) return;
         console.log("online confirmed", req.session.login);
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];

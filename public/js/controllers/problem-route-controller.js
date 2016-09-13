@@ -146,10 +146,11 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             var end = parseInt(Date.now()/1000);
             //console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
 
-            if(rootScope.editing.start + 600 < end ) {
+            if(rootScope.editing.start + 600 < end && end < rootScope.editing.start +1200 ) {
+
                 http.post('./logout')
                     .success(function (data) {
-                        console.log("complete");
+                        console.log("complete logout");
                         rootScope.asking = false;
                         rootScope.data.routes = [];
                         rootScope.editing={};
