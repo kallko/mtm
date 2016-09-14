@@ -3931,11 +3931,25 @@ function connectStopsAndPoints(company) {
                         }
 
 
-                        if (suit ||
-                            (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold*60) || (tmpPoint.arrival_time_ts > tmpArrival.t2 && tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold*60))
-                            &&
-                            tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
-                            tmpPoint.timeToStop > tmpTime))) {
+                        var generalSuit;
+                        // Подходит ли стоп по условиям "Обещанное окно"
+                        var promiseSuit = (((tmpPoint.arrival_time_ts < tmpArrival.t2 + warehoseK*cashedDataArr[company].settings.timeThreshold*60) || (tmpPoint.arrival_time_ts > tmpArrival.t2 && tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold*60)));
+
+
+                        // подходит ли стоп по условиям "заказанное окно"
+                        var orderSuit = checkOrderSuit (tmpPoint, tmpArrival, company);
+
+                        if (cashedDataArr[company].settings.workingWindowTypes == 1 ){
+                            generalSuit = orderSuit;
+
+                        } else {
+                            generalSuit = promiseSuit;
+                        }
+
+
+
+                        if ((suit || generalSuit)  && tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
+                        tmpPoint.timeToStop > tmpTime)) {
 
 
                             //console.log("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
@@ -4493,7 +4507,7 @@ function checkCorrectCalculating(company){
         for (i = 0; i < cashedDataArr[company].routes.length; i++) {
             for (j = 0; j<cashedDataArr[company].routes[i].points.length; j++){
                 if(cashedDataArr[company].routes[i].points[j].waypoint == undefined) {
-                    console.log("Внимание, найдена точка маршрута без описания!!!");
+                    console.log(cashedDataArr[company].routes[i].points[j], "Внимание, найдена точка маршрута без описания!!!");
                 }
             }
         }
@@ -4502,7 +4516,7 @@ function checkCorrectCalculating(company){
 
 
 function createArrivalTime (tPoint, route, controlledWindow, company) {
-    console.log("#############################################################The route is UNCALCULATE########################################################");
+    //console.log("#############################################################The route is UNCALCULATE########################################################");
 
 
     //Для непосчитанных маршрутов время прибытия считается границей окна доступности
@@ -4510,9 +4524,7 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
 
     // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
     //todo очень злой костыль, нужно срочно найти правильное решение
-    //if (tPoint.TASK_NUMBER =='4400445735') {
-    //    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Входные данные", route.points[1] != undefined , route.points[1].ARRIVAL_TIME != undefined , route.points[1].ARRIVAL_TIME.length !='' , route.points[1].ARRIVAL_TIME.length !=0 )
-    //}
+
     if (tPoint.ARRIVAL_TIME.length < 1) {
         if(route.points[1] != undefined && route.points[1].ARRIVAL_TIME != undefined && route.points[1].ARRIVAL_TIME.length !='' && route.points[1].ARRIVAL_TIME.length !=0) {
             tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME
@@ -4613,13 +4625,36 @@ function createSeveralAviabilityWindows (point){
 }
 
 
+function checkOrderSuit (point, stop, company) {
+    //console.log("Start checkOrderSuit");
+    if (point == undefined || stop == undefined) {
+        console.log(point, stop, "Ошибка данных в checkOrderSuit");
+        return false;
+    }
+    if (point.orderWindows[0] == undefined) {
 
-function choseRouteForClose (company) {
+        if (stop.t1 < point.orderWindows.finish + cashedDataArr[company].settings.timeThreshold && stop.t2 > point.orderWindows.start - cashedDataArr[company].settings.timeThreshold ) {
+            return true;
+        } else return false;
 
 
-    //этап поиск старых незакрытых маршрутов
-    if (cashedDataArr[company].oldRoutes == undefined || cashedDataArr[company].oldRoutes == null) return false;
+    } else {
+
+        for (var i=0; i<point.orderWindows.length; i++){
+            if (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold && stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold ) {
+                return true;
+            }
+        }
+        return false;
+
+    }
 
 
-}
+};
+
+
+
+
+
+
 module.exports = router;
