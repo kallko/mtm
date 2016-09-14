@@ -2188,7 +2188,7 @@ function startPeriodicCalculating() {
                                         }
 
                                     } else {
-                                        console.log("Какой-то невероятный случай!", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0], data[j].data.length);
+                                        //console.log("Какой-то невероятный случай!", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0], data[j].data.length);
 
                                         //Убираем стейты, которые мы уже получали раньше и которые у нас записаны
                                         var t=0;
@@ -2456,7 +2456,7 @@ function startPeriodicCalculating() {
                                 if (point.overdue_time > 0) {
                                     if (point.status == 4) {
                                         var koef;
-                                        if (typeof (point.working_window) == 'object') {
+                                        if (point.working_window[0] == undefined) {
                                             koef = point.working_window.finish;
                                         } else {
                                             koef = point.working_window[point.working_window.length-1].finish;

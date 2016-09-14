@@ -2455,7 +2455,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var i = 0; rootScope.data.routes.length > i; i++) {
                     if (rootScope.data.routes[i].filterId == filterId) {
                         route = rootScope.data.routes[i];
-                        console.log("МАРШРУТ ДЛЯ РИСОВАНИЯ НАЙДЕН");
+                        console.log("МАРШРУТ ДЛЯ РИСОВАНИЯ НАЙДЕН", route);
                         break;
                     }
                 }
