@@ -8,7 +8,7 @@
 .number-col { min-width: 50px; max-width: 50px; text-align: center; }
 .point-id-col { width: 72px; }
 .task-id-col { width: 72px; }
-.time-window-col {min-width: 77px; max-width: 77px;}
+.time-window-col {min-width: 100px; max-width: 100px; overflow: auto}
 .departure-time-col { width: 80px; }
 .driver-phone-col { min-width: 95px; max-width: 95px; text-align: center; }
 .car-type-col { min-width: 65px;  max-width: 65px;}

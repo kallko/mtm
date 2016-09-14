@@ -2323,7 +2323,7 @@ function startPeriodicCalculating() {
 
                         console.log("начинаем проверку качества трека");
                         for (var k=0; k<cached.routes.length; k++){
-                            if (cached.routes[k].real_track == undefined) {
+                            if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0) {
                                 console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека");
                                 continue;
                             }

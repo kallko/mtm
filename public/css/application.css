@@ -120,6 +120,7 @@ template {
     border-right: 1px solid grey;
     border-top: 0px !important;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 #point-table-tbl tr th {

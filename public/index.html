@@ -345,7 +345,7 @@
                     <td class="driver-name-col">{{row.driver.NAME}}</td>
                     <td class="client-name-col" title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
                     <td class="address-col" title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
-                    <td >{{row.AVAILABILITY_WINDOWS}}</td>
+                    <td class="time-window-col">{{row.AVAILABILITY_WINDOWS}}</td>
                     <td class="plan-arrival-time-col" ng-class="row.class2">{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
                     <td class="promised-window-col">
                         {{row.promised_window_changed.start * 1000 | date:'HH:mm'}} -
