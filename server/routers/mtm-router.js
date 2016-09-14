@@ -1871,7 +1871,7 @@ function linkDataParts (currentCompany, login)
 
 
             } catch (e) {
-                console.log("Error", tPoint);
+                console.log( tPoint, "Error mtm 1874");
                 console.log(tPoint.driver.NAME, e);
                // console.log("route", cashedDataArr[currentCompany].routes[i].points[0] );
             }
@@ -2461,7 +2461,8 @@ function startPeriodicCalculating() {
                                         } else {
                                             koef = point.working_window[point.working_window.length-1].finish;
                                         }
-                                        point.problem_index += (parseInt(Date.now()/1000) - koef) * cashedDataArr[company].settings.factMinutes;
+                                        point.problem_index += (point.overdue_time) * cashedDataArr[company].settings.factMinutes;
+
                                         timeCoef = 1;
 
                                     } else {
