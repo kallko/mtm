@@ -4476,7 +4476,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
+
+
             if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined)) {
+
+                for (var k = 1; k < cache.routes.length; k++){
+                    if (cache.routes[k].uniqueId == cache.routes[k-1].uniqueId) {
+                        console.log ("Решена проблема задвоенности роутов");
+                        cache.routes.splice(k,1);
+                        k--;
+                    }
+                }
+
+
                 console.log("Re Display", cache, "First time rotscope.data", rootScope.data );
                 if( scope.rowCollection == undefined) scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
                 if (scope.displayCollection == undefined) scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
