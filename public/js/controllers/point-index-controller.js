@@ -4480,12 +4480,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined)) {
 
-                for (var k = 1; k < cache.routes.length; k++){
-                    if (cache.routes[k].uniqueID == cache.routes[k-1].uniqueID) {
-                        console.log ("Решена проблема задвоенности роутов");
-                        cache.routes.splice(k,1);
-                        k--;
-                    }
+                for (var k = 0; k < cache.routes.length; k++){
+                   for (var l=0; l< cache.routes.length; l++) {
+                       if (k != l && cache.routes[k].uniqueID == cache.routes[l].uniqueID) {
+                           console.log ("Решена проблема задвоенности роутов");
+                           cache.routes.splice(k,1);
+                           k--;
+                       }
+                   }
+
+
                 }
 
 
