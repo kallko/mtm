@@ -14,8 +14,13 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             console.log("confirmOnline in process");
             http.get('./confirmonline/')
                 .success(function (data) {
-                    if (data != "ok") alert("online confirmed");
-                    //var j = data;
+                    if (data.status != "ok") alert("Отсутсвует связь с сервером ");
+                    console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
+                    rootScope.data.server_time = data.server_time;
+                    rootScope.data.statistic = data.statistics;
+                    rootScope.nowTime = rootScope.data.server_time;
+                    rootScope.$emit('holestatistic', rootScope.data.statistic);
+                    console.log(rootScope.data.server_time, "Статистика такая стала", rootScope.data.statistic);
                 }).error(function () {
                     //rootScope.errorNotification('Нет связи с сервером');
                 });

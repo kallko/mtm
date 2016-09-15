@@ -1549,7 +1549,12 @@ router.route('/confirmonline')
 
         }
 
-        res.status(200).json("ok");
+        var result={}
+        result.server_time = parseInt(Date.now() / 1000);
+        result.statistics = cashedDataArr[currentCompany].statistic;
+        result.status = 'ok';
+
+        res.status(200).json(result);
 
     });
 
@@ -2730,17 +2735,18 @@ function uncalcPredication(route, company) {
     var points = route.points;
 
     var k = 0;
-    while (k < cashedDataArr[company].dataForPredicate.length) {
-        //console.log("Start serch", route.uniqueID, data[k].id );
-        if (route.uniqueID == cashedDataArr[company].dataForPredicate[k].id) {
-            //  console.log("find Time_Table");
-            time_table = cashedDataArr[company].dataForPredicate[k].time;
-            break;
+    if (cashedDataArr[company].dataForPredicate != undefined) {
+        while (k < cashedDataArr[company].dataForPredicate.length) {
+            //console.log("Start serch", route.uniqueID, data[k].id );
+            if (route.uniqueID == cashedDataArr[company].dataForPredicate[k].id) {
+                //  console.log("find Time_Table");
+                time_table = cashedDataArr[company].dataForPredicate[k].time;
+                break;
+            }
+
+            k++;
         }
-
-        k++;
     }
-
 
     var i = 0;
     //console.log("timeTabls",time_table)
@@ -3647,7 +3653,7 @@ function lookForNewIten(company) {
 
 
 
-
+                    cashedDataArr[company].recalc_finishing = true;
 
                         //TODO Склейка решения закончена, включаем периодическое (раз в 2 минуты ) обновление и пересчет данных
                         //interval(startPeriodicCalculating(currentCompany), 20 * 1000);
@@ -3938,9 +3944,14 @@ function connectStopsAndPoints(company) {
 
 
                         // подходит ли стоп по условиям "заказанное окно"
+                        //if (tmpPoint.TASK_NUMBER == "4400455330" && tmpArrival.id+"" == "" + 2990767 ) {tmpPoint.checkOrderSuitSend =true;}
+
+
+
                         var orderSuit = checkOrderSuit (tmpPoint, tmpArrival, company);
 
-                        if (cashedDataArr[company].settings.workingWindowTypes == 1 ){
+
+                        if (cashedDataArr[company].settings.workingWindowType == 0 ){
                             generalSuit = orderSuit;
 
                         } else {
@@ -3948,7 +3959,7 @@ function connectStopsAndPoints(company) {
                         }
 
 
-
+                        //if (tmpPoint.TASK_NUMBER == "4400455330" && tmpArrival.id+"" == "" + 2990767  ) console.log ("Второй этап проверки",cashedDataArr[company].settings.workingWindowTypes,  orderSuit, generalSuit, tmpDistance < cashedDataArr[company].settings.stopRadius, tmpPoint.distanceToStop > tmpDistance, tmpPoint.timeToStop > tmpTime);
                         if ((suit || generalSuit)  && tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                         tmpPoint.timeToStop > tmpTime)) {
 
@@ -4632,20 +4643,34 @@ function checkOrderSuit (point, stop, company) {
         console.log(point, stop, "Ошибка данных в checkOrderSuit");
         return false;
     }
+
+
+    //if (point.TASK_NUMBER == "4400455330" && stop.id+"" == "" + 2990767 ) point.checkOrderSuit =true;
+
+
     if (point.orderWindows[0] == undefined) {
 
-        if (stop.t1 < point.orderWindows.finish + cashedDataArr[company].settings.timeThreshold && stop.t2 > point.orderWindows.start - cashedDataArr[company].settings.timeThreshold ) {
+        if (stop.t1 < point.orderWindows.finish + cashedDataArr[company].settings.timeThreshold*60 && stop.t2 > point.orderWindows.start - cashedDataArr[company].settings.timeThreshold*60 ) {
+            //point.variant = 1;
             return true;
-        } else return false;
+        } else {
+            //point.variant = 2;
+            return false;}
 
 
     } else {
 
+        //console.log("_________________________________________________________________________________________")
         for (var i=0; i<point.orderWindows.length; i++){
-            if (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold && stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold ) {
+
+            //if (point.TASK_NUMBER == "4400455330" && stop.id+"" == "" + 2990767  ) console.log("Проверяем точку", stop.t1, point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60, (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60), " и больше ", stop.t2, point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60, (stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60))
+            if (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60 && stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60 ) {
+                //console.log("Проверка удачная");
+               // point.variant = 3;
                 return true;
             }
         }
+        //point.variant = 4;
         return false;
 
     }
