@@ -2091,8 +2091,16 @@ function startPeriodicCalculating() {
                 function (data) {
                    // if (!first) return;
 
-                    console.log('getRealTrackParts DONE');
+                    console.log('getRealTrackParts DONE', data);
                     //first = false;
+
+                    if (data =='error') {
+                        cashedDataArr[companyAsk].needRequests --;
+                        console.log("Get Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
+                        dataForPredicate(companyAsk, startCalculateCompany);
+                        if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
+                        return;
+                    }
 
                     for( var i=0; i<data.length; i++){
                             //console.log("Stage 1", i, data[i]);
@@ -2759,6 +2767,7 @@ function uncalcPredication(route, company) {
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
+                points[i].variantus = 2770;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                 //console.log("TIME_OUT for point", points[i]);
             }
@@ -2831,14 +2840,21 @@ function calcPredication(route, company) {
             //Рассчитываем статусы по фактическому времение, если у нас нет трека или предсказания;
 
             for (var i= 0; i<route.points.length; i++ ){
-                if (now > route.points[i].working_window.finish){
+                if (route.points[i].working_window[0] == undefined) {
+                    console.log ("Скорее всего это склад");
+                    continue;
+                }
+                //console.log("2843 MTM", route.points[i].working_window);
+                if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
                     route.points[i].status = 4;
+                   // route.points[i].variant =1;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }
 
                 if(now > route.points[i].arrival_time_ts) {
                     route.points[i].status = 5;
+                    route.points[i].variantus = 2852;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }
@@ -2917,13 +2933,13 @@ function calcPredication(route, company) {
                         route.points[j].working_window.finish);
 
                     if (route.points[j].overdue_time > 0) {
-                        if (route.points[j].working_window.finish < now) {
+                        if (route.points[j].working_window[route.points[j].working_window.length-1].finish < now) {
                             route.points[j].status = 4;
 
                             //console.log("_route.points[j].status = STATUS.TIME_OUT;");
                         } else {
                             route.points[j].status = 5;
-
+                            route.points[j].variant = 2937;
                             //console.log("_route.points[j].status = STATUS.DELAY;");
                         }
                     }
@@ -4154,8 +4170,8 @@ function findStatusesAndWindows(company) {
                     continue;
                 }
 
-                tmpPoint.status = undefined;
-                var start =1111, end =2222;
+
+                var start, end;
 
 
                 if (tmpPoint.working_window[0] == undefined){

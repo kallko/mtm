@@ -3541,6 +3541,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             points[i].arrival_prediction=now+points[i].arrival_left_prediction;
                             if(points[i].status==7 && points[i].arrival_prediction > points[i].arrival_time_ts ){
                                 points[i].status=5;
+                                points[i].variantus = 'PIC3544';
                                 points[i].overdue_time=points[i].arrival_prediction-points[i].arrival_time_ts;
                                 //console.log("TIME_OUT for point", points[i]);
                             }
@@ -3679,6 +3680,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         points[i].arrival_prediction = now + points[i].arrival_left_prediction;
                         if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                             points[i].status = 5;
+                            points[i].variantus = "pic3683";
                             points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                             //console.log("TIME_OUT for point", points[i]);
                         }
