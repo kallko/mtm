@@ -2837,12 +2837,17 @@ function calcPredication(route, company) {
                 k++;
             }
         } else {
-            //Рассчитываем статусы по фактическому времение, если у нас нет трека или предсказания;
+            //Рассчитываем статусы по фактическому времени, если у нас нет трека или предсказания;
 
             for (var i= 0; i<route.points.length; i++ ){
                 if (route.points[i].working_window[0] == undefined) {
                     console.log ("Скорее всего это склад");
-                    continue;
+                    //todo решить проблему со складом
+                    if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
+                        route.points[i].status = 4;
+                        route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
+                    }
+                        continue;
                 }
                 //console.log("2843 MTM", route.points[i].working_window);
                 if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
@@ -2854,7 +2859,7 @@ function calcPredication(route, company) {
 
                 if(now > route.points[i].arrival_time_ts) {
                     route.points[i].status = 5;
-                    route.points[i].variantus = 2852;
+                    //route.points[i].variantus = 2852;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }

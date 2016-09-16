@@ -140,7 +140,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                         });
                     })(j);
                 } else {
-                    console.log("Нет датчика", reqCounter, counter, j);
+                    //console.log("Нет датчика", reqCounter, counter, j);
                 }
             }
         }  console.log ("Конец запросов. Результата нет");
