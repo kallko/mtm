@@ -128,7 +128,7 @@ router.route('/nodeserch')
         log.toFLog('logging.txt', 'TEST 29.08');
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
-        var input = req.body.data
+        var input = req.body.data;
         var result = serchInCache(input, currentCompany);
         res.status(200).json(result);
     });
@@ -407,6 +407,8 @@ router.route('/dailydata')
                     linkDataParts(currentCompany, req.session.login);
                     //Мгновенный запуск на пересчет, после загрузки
 
+
+                    console.log("Запуск первого расчета, после первого запрса.");
                     startPeriodicCalculating(currentCompany);
 
 
@@ -2046,6 +2048,8 @@ function startPeriodicCalculating() {
 
     }
 
+    console.log("Вызов callbackDispetcher из startPeriodicCalculating");
+
     callbackDispetcher(companysToCalc);
 
 
@@ -2054,12 +2058,12 @@ function startPeriodicCalculating() {
         for (var k=0; k<companys.length; k++) {
 
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length*3; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
-
+            console.log ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests );
             for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
-                        //console.log("receivePUSHES", data);
+                        console.log("receivePUSHES!!!!!");
                         if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //console.log("Obj", obj[0], "mtm 1497");
@@ -2091,20 +2095,20 @@ function startPeriodicCalculating() {
                 function (data) {
                    // if (!first) return;
 
-                    console.log('getRealTrackParts DONE', data);
+                    //console.log('getRealTrackParts DONE', data);
                     //first = false;
 
                     if (data =='error') {
                         cashedDataArr[companyAsk].needRequests --;
-                        console.log("Get Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
+                        console.log("Get 2103 Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
                         dataForPredicate(companyAsk, startCalculateCompany);
                         if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
-                        return;
+                        //return;
                     }
 
                     for( var i=0; i<data.length; i++){
                             //console.log("Stage 1", i, data[i]);
-                        if (data[i] == undefined) continue;
+                        if (data[i] == undefined || data[i].data == undefined) continue;
 
                         for (j=0; j<data[i].data.length; j++){
                             //console.log("Stage 2");
@@ -2330,14 +2334,14 @@ function startPeriodicCalculating() {
 
                             var res=0;
                             if (cached.routes[i].real_track != undefined) res = cached.routes[i].real_track.length;
-                            console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
+                            //console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
 
                         }
 
                         console.log("начинаем проверку качества трека");
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0) {
-                                console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека");
+                                //console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека");
                                 continue;
                             }
 
@@ -2368,7 +2372,7 @@ function startPeriodicCalculating() {
                     }
 
                     cashedDataArr[companyAsk].needRequests --;
-                    console.log("Get Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
+                    console.log("2375 Get Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
                     dataForPredicate(companyAsk, startCalculateCompany);
                     if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
 
@@ -2661,7 +2665,7 @@ function dataForPredicate(company, callback){
     console.log("CONT PREDICATE FUNCTION", !(collection.length==0));
     if (collection.length==0) {
         cashedDataArr[company].needRequests --;
-        console.log("The cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
+        console.log("The first cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
         if(cashedDataArr[company].needRequests == 0) callback(company);
         return;
     }
@@ -2713,7 +2717,7 @@ function dataForPredicate(company, callback){
 
                 cashedDataArr[company].dataForPredicate=generalResult;
                 cashedDataArr[company].needRequests --;
-                console.log("The cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
+                console.log("The Second cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
                 if(cashedDataArr[company].needRequests == 0) callback(company);
                 return;
             }

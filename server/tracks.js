@@ -94,7 +94,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
     if(data != undefined && data.routes != undefined) {
         for (var i = 0; i < data.routes.length; i++) {
 
-            console.log("Ищем треки для ", data.routes[i].driver.NAME );
+            //console.log("Ищем треки для ", data.routes[i].driver.NAME );
             for (var j = 0; j < data.sensors.length; j++) {
                 // запрашивать треки только по сенсорам прикрепленным к машинам имеющихся маршрутов
                 if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
@@ -144,7 +144,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                 }
             }
         }  console.log ("Конец запросов. Результата нет");
-        callback("error");
+        //callback("error");
     } else {
         console.log("Нечего спрашивать?");
     }
