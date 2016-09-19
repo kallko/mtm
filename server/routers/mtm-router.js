@@ -2341,7 +2341,7 @@ function startPeriodicCalculating() {
                         console.log("начинаем проверку качества трека");
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0) {
-                                //console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека");
+                                console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
                                 continue;
                             }
 
@@ -3841,6 +3841,7 @@ function connectPointsAndPushes(company) {
 
 
                         //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
+                        if (tmpPoint.real_arrival_time == undefined)  tmpPoint.real_arrival_time = {};
                         tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
 
                         // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
@@ -4129,8 +4130,10 @@ function findStatusesAndWindows(company) {
 
             tmpPoint = cashedDataArr[company].routes[i].points[j];
 
+
             if (tmpPoint.real_arrival_time == undefined) {
                 cashedDataArr[company].routes[i].ready_to_close=false;
+
                 continue;
             }
             //считаем окна только для доставленного
@@ -4232,6 +4235,7 @@ function findStatusesAndWindows(company) {
             tmpPoint.limit = 0;
             if (tmpPoint.confirmed_by_operator) {
                 tmpPoint.limit = 100;
+
                 continue;
             }
             if (tmpPoint.haveStop) {
@@ -4245,6 +4249,7 @@ function findStatusesAndWindows(company) {
 
             if (tmpPoint.havePush) {
                 tmpPoint.limit += 15;
+
                 if (tmpPoint.stopState != undefined && tmpPoint.mobile_push.gps_time_ts < tmpPoint.stopState.t2 + 300 && tmpPoint.mobile_push.gps_time_ts > tmpPoint.stopState.t1) {
                     tmpPoint.limit += 15;
                 }
