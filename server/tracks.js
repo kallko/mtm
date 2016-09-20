@@ -115,6 +115,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true
                         }, function (error, response, body) {
+                            //console.log("Ответ по треку", response.statusCode);
                             if (!error && response.statusCode === 200) {
                                 result.push({
                                     'gid': data.sensors[jj].GID,
@@ -122,8 +123,9 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
-                                    console.log('Done, loading stops!');
+                                    console.log('Done, first loading stops!');
                                     callback(result);
+
                                 }
                             } else {
                                 console.log('ERROR');
@@ -133,22 +135,24 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
-                                    console.log('Done, loading stops!');
+                                    console.log('Done, second loading stops!');
                                     callback(result);
                                 }
                             }
                         });
                     })(j);
                 } else {
-                    //console.log("Нет датчика", reqCounter, counter, j);
+                    //console.log("Если нет датчиков, то counter = 0, а сейчас counter = ", counter);
                 }
             }
-        }  console.log ("Конец запросов. Результата нет");
-        callback("error");
+        }  //console.log ("Конец запросов. Результата нет");
+        //callback("error");
     } else {
-        console.log("Нечего спрашивать?");
+        //console.log("Нечего спрашивать?");
     }
-    //callback("error");
+    //console.log("Отправлено запросов ", counter, " Получено ответов", reqCounter);
+    // Уникальный случай, когда ни у одной из машин не было датчика
+    if(counter == 0) callback("error");
 };
 
 // создать строку параметров для запроса к агрегатору
@@ -402,7 +406,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    console.log(url, "Track 401");
+    //console.log(url, "Track 401");
 
 
     request({

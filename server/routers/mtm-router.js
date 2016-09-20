@@ -1343,6 +1343,27 @@ router.route('/logout')
 
     });
 
+//тестовая функция показывает по логину kalko некоторые параметры сервера
+
+router.route('/getServerStatus')
+    .get(function(req, res) {
+        //console.log("Router");
+        var key = "" + req.session.login;
+        var login=key;
+        var currentCompany = companyLogins[key];
+        var result={};
+        result.company = currentCompany;
+        result.routes = cashedDataArr[currentCompany].routes.length;
+        result.blocked_routes = cashedDataArr[currentCompany].blocked_routes.length;
+        result.line_routes = cashedDataArr[currentCompany].line_routes.length;
+        result.old_routes = 0;
+        if (cashedDataArr[currentCompany].old_routes != undefined) result.old_routes = cashedDataArr[currentCompany].old_routes.length;
+        //console.log("Result ", result);
+        res.status(200).json({result :result});
+
+    });
+
+
 //need - количество необходимых оператору проблем. Указывается в настройках
 router.route('/askforproblems/:need')
     .get(function (req, res) {
@@ -1403,7 +1424,8 @@ router.route('/askforproblems/:need')
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
                     result.companyName = currentCompany;
-                    result.statistic = cashedDataArr[currentCompany].statistic
+                    result.statistic = cashedDataArr[currentCompany].statistic;
+                    result.settings.user = "" + req.session.login;
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
@@ -1459,6 +1481,7 @@ router.route('/askforproblems/:need')
                         result.settings = cashedDataArr[currentCompany].settings;
                         result.drivers = cashedDataArr[currentCompany].drivers;
                         result.transports = cashedDataArr[currentCompany].transports;
+                        result.settings.user = "" + req.session.login;
                         //надо отдать маршрут из старых на закрытие
                         //var existOld = choseRouteForClose(currentCompany);
                         //if (existOld === false) {
@@ -1477,6 +1500,7 @@ router.route('/askforproblems/:need')
                     result.companyName = currentCompany;
                     result.reasons = cashedDataArr[currentCompany].reasons;
                     result.settings = cashedDataArr[currentCompany].settings;
+                    result.settings.user = "" + req.session.login;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
                     result.statistic = cashedDataArr[currentCompany].statistic;
@@ -1517,6 +1541,7 @@ router.route('/askforproblems/:need')
                 //blockedRoutes.push({id: "" + cashedDataArr[currentCompany].line_routes[i].uniqueID, company: currentCompany, login: login, time: parseInt(Date.now()/1000)})
                 changePriority(cashedDataArr[currentCompany].line_routes[i].uniqueID, currentCompany, login);
                 result.settings = cashedDataArr[currentCompany].settings;
+                result.settings.user = "" + req.session.login;
                 cashedDataArr[currentCompany].line_routes.splice(result, 1);
 
             }
@@ -2128,10 +2153,10 @@ function startPeriodicCalculating() {
                     //first = false;
 
                     if (data =='error') {
-                        cashedDataArr[companyAsk].needRequests = cashedDataArr[companyAsk].needRequests+ 2+(cashedDataArr[companyAsk].idArr.length-1)*2;// todo костыль на  решения без датчиков.
-                        cashedDataArr[companyAsk].needRequests --;
-                        console.log("Get 2103 Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
-                        dataForPredicate(companyAsk, startCalculateCompany);
+                        //cashedDataArr[companyAsk].needRequests = cashedDataArr[companyAsk].needRequests+ 2+(cashedDataArr[companyAsk].idArr.length-1)*2;// todo костыль на  решения без датчиков.
+                        //cashedDataArr[companyAsk].needRequests --;
+                        console.log("Get Real TRACK finished for company Recieve ERROR", companyAsk, cashedDataArr[companyAsk].needRequests);
+                        //dataForPredicate(companyAsk, startCalculateCompany);
                         if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
                         //return;
                     }

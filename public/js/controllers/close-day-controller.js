@@ -194,6 +194,22 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             alert("Вы уже заблокировали предельное количество маршрутов");
         }
         else scope.$emit('loadoneroute', id);
+    };
+
+    scope.statuses = function () {
+        //console.log("begin");
+        http.get('./getServerStatus')
+            .success(function (data){
+                console.log("Success");
+                alert("Status компании " + data.result.company +"\n" +
+                    "Беспроблемных роутов " + data.result.routes + "\n" +
+                    "Роутов в очереди " + data.result.line_routes + "\n" +
+                    "Заблокированных роутов " + data.result.blocked_routes + "\n" +
+                    "Старых роутов " + data.result.old_routes);
+            });
+
+
+
     }
 
 }]);

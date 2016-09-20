@@ -55,7 +55,7 @@
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-<script src="./bower_components/async/async.js"></script>
+<!--<script src="./bower_components/async/async.js"></script>-->
 
 
 
@@ -915,6 +915,10 @@
                 <!--<span class="glyphicon glyphicon-search" aria-hidden="false"></span>-->
             <!--</button>-->
         </div> <br> <br>
+
+        <div>
+            <button ng-show="data != undefined && ((data.settings.user == 'ids.kalko') || (data.settings.user == 'ids.dsp') )" ng-click="statuses()"> STATUS</button>
+        </div>
 
         <div class="block-title">
             &nbsp&nbspРезультат поиска:
