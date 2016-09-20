@@ -15,6 +15,8 @@ var soap = require('soap'),
         config.aggregator.login,
         config.aggregator.password),
 
+
+
     counter = 0;
 
 

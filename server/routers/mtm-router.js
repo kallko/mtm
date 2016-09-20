@@ -10,8 +10,13 @@ var express = require('express'),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
     CronJob = require('cron').CronJob,
+    async = require("async"),
+    colors = require('colors'),
 
-    cashedDataArr = {},  // глобальный кеш
+
+
+
+cashedDataArr = {},  // глобальный кеш
     updateCacshe = {}, // Тестовый кэш
     aggregatorError = "invalid parameter 'gid'. ",
     stopUpdateInterval = 120,                       // интервал обновлений стопов
@@ -130,6 +135,30 @@ router.route('/nodeserch')
         var currentCompany = companyLogins[key];
         var input = req.body.data;
         var result = serchInCache(input, currentCompany);
+
+
+        //todo Тестовый блок асинхронности
+        async.parallel([
+             function(callback){console.log("First");
+
+                var soapManager = new soap(req.session.login);
+                soapManager.getNewConfig(req.session.login, function (company, data) {
+                    var settings = JSON.parse(data.return);
+                    console.log("Recieve first settings", settings);
+                    callback (null, settings)
+
+                })
+            },
+             function(callback){console.log("Second");
+
+                var soapManager = new soap(req.session.login);
+                soapManager.getNewConfig(req.session.login, function (company, data) {
+                    var settings = JSON.parse(data.return);
+                    console.log("Recieve second settings", settings);
+                    callback(null, settings)
+                })}
+    ],
+            function(err, results) {console.log("Third", results)});
         res.status(200).json(result);
     });
 
@@ -1551,7 +1580,7 @@ router.route('/confirmonline')
 
         }
 
-        var result={}
+        var result={};
         result.server_time = parseInt(Date.now() / 1000);
         result.statistics = cashedDataArr[currentCompany].statistic;
         result.status = 'ok';
@@ -2099,6 +2128,7 @@ function startPeriodicCalculating() {
                     //first = false;
 
                     if (data =='error') {
+                        cashedDataArr[companyAsk].needRequests = cashedDataArr[companyAsk].needRequests+ 2+(cashedDataArr[companyAsk].idArr.length-1)*2;// todo костыль на  решения без датчиков.
                         cashedDataArr[companyAsk].needRequests --;
                         console.log("Get 2103 Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
                         dataForPredicate(companyAsk, startCalculateCompany);
@@ -2389,6 +2419,7 @@ function startPeriodicCalculating() {
 
 
                     function startCalculateCompany(company) {
+                        if (cashedDataArr[company].allPushes == undefined) return;
                         console.log("Все данные получены, пересчитываем компанию", company);
 
                         checkCorrectCalculating(company);
@@ -2845,7 +2876,8 @@ function calcPredication(route, company) {
 
             for (var i= 0; i<route.points.length; i++ ){
                 if (route.points[i].working_window[0] == undefined) {
-                    console.log ("Скорее всего это склад");
+
+                    console.log ('Скорее всего это склад'.green);
                     //todo решить проблему со складом
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
@@ -2969,6 +3001,7 @@ function calcPredication(route, company) {
 function checkPushesTimeGMTZone(pushes, company){
     //console.log(colors.green('Start reorange pushes'));
     //console.log('Тестовое сообщение зеленого цвета'.green);
+    if (pushes == undefined) return;
     var i=0;
     while (i<pushes.length) {
 

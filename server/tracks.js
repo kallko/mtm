@@ -144,10 +144,11 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                 }
             }
         }  console.log ("Конец запросов. Результата нет");
-        //callback("error");
+        callback("error");
     } else {
         console.log("Нечего спрашивать?");
     }
+    //callback("error");
 };
 
 // создать строку параметров для запроса к агрегатору

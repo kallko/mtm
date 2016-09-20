@@ -18,6 +18,8 @@
     "jquery": "~2.1.4",
     "angular-route": "~1.4.7",
     "bootstrap": "~3.3.5",
-    "bootstrap-contextmenu": "~0.3.3"
+    "bootstrap-contextmenu": "~0.3.3",
+    "async": "~2.0.1",
+    "colors": "~3.0.0"
   }
 }
