@@ -10,8 +10,8 @@ var express = require('express'),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
     CronJob = require('cron').CronJob,
-    async = require('async'),
-    colors = require('colors'),
+    //async = require('async'),
+    //colors = require('colors'),
 
 
 
@@ -138,27 +138,27 @@ router.route('/nodeserch')
 
 
         //todo Тестовый блок асинхронности
-        async.parallel([
-             function(callback){console.log("First");
-
-                var soapManager = new soap(req.session.login);
-                soapManager.getNewConfig(req.session.login, function (company, data) {
-                    var settings = JSON.parse(data.return);
-                    console.log("Recieve first settings", settings);
-                    callback (null, settings)
-
-                })
-            },
-             function(callback){console.log("Second");
-
-                var soapManager = new soap(req.session.login);
-                soapManager.getNewConfig(req.session.login, function (company, data) {
-                    var settings = JSON.parse(data.return);
-                    console.log("Recieve second settings", settings);
-                    callback(null, settings)
-                })}
-    ],
-            function(err, results) {console.log("Third", results)});
+    //    async.parallel([
+    //         function(callback){console.log("First");
+    //
+    //            var soapManager = new soap(req.session.login);
+    //            soapManager.getNewConfig(req.session.login, function (company, data) {
+    //                var settings = JSON.parse(data.return);
+    //                console.log("Recieve first settings", settings);
+    //                callback (null, settings)
+    //
+    //            })
+    //        },
+    //         function(callback){console.log("Second");
+    //
+    //            var soapManager = new soap(req.session.login);
+    //            soapManager.getNewConfig(req.session.login, function (company, data) {
+    //                var settings = JSON.parse(data.return);
+    //                console.log("Recieve second settings", settings);
+    //                callback(null, settings)
+    //            })}
+    //],
+    //        function(err, results) {console.log("Third", results)});
         res.status(200).json(result);
     });
 
