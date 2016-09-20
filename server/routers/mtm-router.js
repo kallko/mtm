@@ -10,7 +10,7 @@ var express = require('express'),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
     CronJob = require('cron').CronJob,
-    async = require("async"),
+    async = require('async'),
     colors = require('colors'),
 
 
