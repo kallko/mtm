@@ -191,6 +191,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         if (rootScope.data.routes.length >= rootScope.data.settings.problems_to_operator +1 && rootScope.data.currentDay == true ) {
 
             scope.$emit('clearMap');
+
             alert("Вы уже заблокировали предельное количество маршрутов");
         }
         else scope.$emit('loadoneroute', id);
