@@ -114,6 +114,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for(var i = 0; scope.filters.statuses.length > i; i++){
                 scope.filters.status[scope.filters.statuses[i].value] = true;
             }
+            rootScope.waitNotification('Загрузка данных', 15000);
             console.log(scope.filters.statuses);
             console.log(scope.filters.status);
             scope.filters.routes = [{nameDriver: 'все маршруты', nameCar: 'все маршруты', value: -1, allRoutes:true}]; // фильтры по маршрутам

@@ -2818,8 +2818,12 @@ function uncalcPredication(route, company) {
 
     var i = 0;
     //console.log("timeTabls",time_table)
-    while (i < points.length) {
+    for ( i = 0; i < points.length; i++) {
         // console.log("START PREDICATE CALCULATING", points[i]);
+        if (points[i].real_arrival_time != undefined || points[i].havePush || points[i].haveStop) {
+
+            continue;
+        }
 
         if (points[i].status == 4 || points[i].status == 5 || points[i].status == 7) {
 
@@ -2827,19 +2831,20 @@ function uncalcPredication(route, company) {
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
-                points[i].variantus = 2770;
+                //points[i].variantus = 2770;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                 //console.log("TIME_OUT for point", points[i]);
             }
             if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
                 points[i].status = 4;
+                //points[i].variantus = 2836;
                 points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
 
                 //console.log("DELAY for point", points[i]);
             }
 
         }
-        i++;
+
     }
 
 
@@ -2906,6 +2911,7 @@ function calcPredication(route, company) {
                     //todo решить проблему со складом
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
+                        //route.points[j].variantus = 2910;
                         route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     }
                         continue;
@@ -2913,7 +2919,7 @@ function calcPredication(route, company) {
                 //console.log("2843 MTM", route.points[i].working_window);
                 if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
                     route.points[i].status = 4;
-                   // route.points[i].variant =1;
+                    //route.points[i].variantus =2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }
@@ -2956,7 +2962,7 @@ function calcPredication(route, company) {
                         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
                         //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                         route.points[j].status = 4;
-
+                        //route.points[j].variantus = 2960;
                         //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                         route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
                     }
@@ -2970,10 +2976,10 @@ function calcPredication(route, company) {
                 // времена проезда от роутера приходят в десятых долях секунд
                 totalTravelTime += tmpTime == undefined ? 15 * 60 : parseInt(tmpTime / 10);
                 tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
-                tmpDowntime = route.points[j].working_window.start - tmpPred;
+                tmpDowntime = route.points[j].working_window[0].start - tmpPred;
                 if (tmpDowntime > 0) {
                     totalDowntime += tmpDowntime;
-                    tmpPred = route.points[j].working_window.start;
+                    tmpPred = route.points[j].working_window[0].start;
                 }
 
 
@@ -2996,16 +3002,16 @@ function calcPredication(route, company) {
                 // предсказываем статус опаздывает или уже опаздал
                 if (route.points[j].arrival_prediction > route.points[j].arrival_time_ts) {
                     route.points[j].overdue_time = parseInt(route.points[j].arrival_prediction -
-                        route.points[j].working_window.finish);
+                        route.points[j].working_window[route.points[j].working_window.length-1].finish);
 
                     if (route.points[j].overdue_time > 0) {
                         if (route.points[j].working_window[route.points[j].working_window.length-1].finish < now) {
                             route.points[j].status = 4;
-
+                            //route.points[j].variantus = 3005;
                             //console.log("_route.points[j].status = STATUS.TIME_OUT;");
                         } else {
                             route.points[j].status = 5;
-                            route.points[j].variant = 2937;
+                            //route.points[j].variant = 2937;
                             //console.log("_route.points[j].status = STATUS.DELAY;");
                         }
                     }
@@ -4189,6 +4195,7 @@ function findStatusesAndWindows(company) {
             tmpPoint = cashedDataArr[company].routes[i].points[j];
 
 
+
             if (tmpPoint.real_arrival_time == undefined) {
                 cashedDataArr[company].routes[i].ready_to_close=false;
 
@@ -4215,8 +4222,8 @@ function findStatusesAndWindows(company) {
 
 
             //console.log("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
-            if (cashedDataArr[company].settings.workingWindowTypes == 1) {
-
+            if (cashedDataArr[company].settings.workingWindowType == 1) {
+                //tmpPoint.findStatus = true;
                 if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
                     //todo Дописать определение статуса для склада
                     continue;
@@ -4225,9 +4232,9 @@ function findStatusesAndWindows(company) {
 
 
 
-                if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
-                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
+                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
                     tmpPoint.status = 2;
                 } else {
                     tmpPoint.status = 0;
@@ -4242,7 +4249,7 @@ function findStatusesAndWindows(company) {
 
 
                 var start, end;
-
+                tmpPoint.status = undefined;
 
                 if (tmpPoint.working_window[0] == undefined){
                     end = tmpPoint.working_window.finish;
@@ -4253,7 +4260,8 @@ function findStatusesAndWindows(company) {
                 }
 
 
-
+                tmpPoint.start =start;
+                tmpPoint.end=end;
                 if (tmpPoint.real_arrival_time > end)
                 {
                     tmpPoint.status = 1;

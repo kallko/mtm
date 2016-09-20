@@ -168,6 +168,12 @@ angular.module('MTMonitor')
         $rootScope.errorNotification = function(url) {
             $rootScope.$emit('showNotification', {text: 'Произошла ошибка при попытке обратится к '+url, duration: 5000});
         };
+
+        $rootScope.waitNotification = function(text, duration) {
+            if (!duration) duration = 5000;
+            $rootScope.$emit('showNotification', {text: text, duration: duration});
+        };
+
         $rootScope.currentDay = true; // false если день не сегодняшний
 
     })

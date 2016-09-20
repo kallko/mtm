@@ -74,7 +74,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
             console.log(" Go to ASK ", !rootScope.data,  need );
             if(!rootScope.asking) return;
-            if (((rootScope.data == undefined || rootScope.data.routes == undefined) && (need>0 || exist ==0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
+            if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist ==0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 console.log("Give me", need, "the problem please! String is");
 
 
@@ -115,7 +115,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     rootScope.editing.start = parseInt(Date.now()/1000);
 
                     }).error(function () {
-                        rootScope.errorNotification('Проблем роут контроллер');
+                        rootScope.waitNotification('Первичный рассчет еще не закончен. Подождите немного');
                     });
 
 
