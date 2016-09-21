@@ -168,6 +168,8 @@ router.route('/nodeserch')
 router.route('/login')
     .get(function (req, res) {
         req.session.login = req.query.curuser;
+        req.session.role = req.query.role;
+
         res.sendFile('index.html', {root: './public/'});
     });
 
@@ -219,7 +221,7 @@ router.route('/dailydata')
 
 
 
-        console.log(" Should I choose Cashe?", config.cashing.session
+        console.log(" Should I choose Cashe?", req.session.login, req.session.role, config.cashing.session
             , req.query.force == null
             , req.query.showDate == null
             , req.session.login != null
@@ -244,7 +246,8 @@ router.route('/dailydata')
             soapManager = new soap(req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
                 //console.log("receiveConfig", data);
-                settings = JSON.parse(data.return);
+
+                if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
                 console.log("Settings Recieved",  settings, "mtm 218");
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
                 cashedDataArr[currentCompany].user = req.session.login;
@@ -438,7 +441,25 @@ router.route('/dailydata')
 
 
                     console.log("Запуск первого расчета, после первого запрса.");
-                    startPeriodicCalculating(currentCompany);
+                    var tt=0;
+                    for (var t=0; t< cashedDataArr[currentCompany].idArr.length; t++) {
+                        var soapManager = new soap(cashedDataArr[currentCompany].firstLogin);
+                        var iten = cashedDataArr[currentCompany].idArr[t];
+                        soapManager.getPushes(iten, parseInt(Date.now() / 1000), currentCompany, function (company, data) {
+                            console.log("receivePUSHES!!!!!");
+                            tt++;
+                            if (data != undefined && data.error == undefined) {
+                                var obj = JSON.parse(data.return);
+                                //console.log("Obj", obj[0], "mtm 1497");
+                                //delete cashedDataArr[company].allPushes;
+                                cashedDataArr[company].allPushes = obj;
+                            }
+
+                            console.log("GetPushes finished for company", company, t, tt );
+                            if (t==tt) startCalculateCompany(company);
+                        });
+
+                    }
 
 
                     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
@@ -641,12 +662,12 @@ router.route('/trackparts/:start/:end')
             function (data) {
                 if (!first) return;
 
-                console.log('getRealTrackParts DONE');
+
                 first = false;
                 var key = ""+req.session.login;
                 var currentCompany = companyLogins[key];
                 var cached = cashedDataArr[currentCompany];
-
+                console.log('getRealTrackParts DONE', currentCompany);
 
                 if(cached) {
                     for (var i = 0; i < cached.sensors.length; i++) {
@@ -688,7 +709,7 @@ router.route('/trackparts/:start/:end')
                 //cached.server_time = parseInt(Date.now() / 1000);
                 //console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
 
-                log.toFLog('final_data.js', cached);
+                //log.toFLog('final_data.js', cached);
 
                 res.status(200).json(data);
             });
@@ -1389,7 +1410,7 @@ router.route('/askforproblems/:need')
 
 
 
-
+       // console.log("Проблемных роутов", cashedDataArr[currentCompany].line_routes.length);
         //TODO переписать условие когда начнет правильно формировать очередь проблемных роутов
         if (cashedDataArr[currentCompany].line_routes != undefined) {
             console.log("Ищем проблемму для для оператора");
@@ -2146,7 +2167,7 @@ function startPeriodicCalculating() {
             var companyAsk = companys[k];
                 console.log("Check data", cashedDataArr[companyAsk].routes.length);
             tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
-                function (data) {
+                function (data, companyAsk) {
                    // if (!first) return;
 
                     //console.log('getRealTrackParts DONE', data);
@@ -2219,7 +2240,7 @@ function startPeriodicCalculating() {
 
                                     if (data[j].data[0].id == '0') {
 
-                                        console.log("ID первого полученного стейта 0, всего получено стейтов", data[j].data.length);
+                                        //console.log("ID первого полученного стейта 0, всего получено стейтов", data[j].data.length);
                                         data[j].data.splice(0,1);
                                         if(data[j].data.length == 0 ) continue;
                                     }
@@ -2227,7 +2248,7 @@ function startPeriodicCalculating() {
 
                                     if (data[j].data[data[j].data.length-1].id == '0') {
 
-                                        console.log("ID последнего стейта 0, всего получено стейтов", data[j].data.length);
+                                        //console.log("ID последнего стейта 0, всего получено стейтов", data[j].data.length);
                                         data[j].data.splice(data[j].data.length-1,1);
                                         if(data[j].data.length == 0 ) continue;
                                     }
@@ -2251,12 +2272,12 @@ function startPeriodicCalculating() {
                                                 cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
                                         data[j].data.splice(0,1);
                                         if (data[j].data.length >0) {
-                                            console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
+                                            //console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
                                             for (var g=0; g<data[j].data.length; g++){
                                                 cached.routes[i].real_track.push(data[j].data[g]);
                                             }
                                             //cached.routes[i].real_track.concat(data[j].data);
-                                            console.log("Стейтов стало", cached.routes[i].real_track.length);
+                                            //console.log("Стейтов стало", cached.routes[i].real_track.length);
                                         }
 
                                     } else {
@@ -2393,10 +2414,10 @@ function startPeriodicCalculating() {
 
                         }
 
-                        console.log("начинаем проверку качества трека");
+                        console.log("начинаем проверку качества трека", companyAsk);
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0) {
-                                console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                //console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
                                 continue;
                             }
 
@@ -2427,259 +2448,41 @@ function startPeriodicCalculating() {
                     }
 
                     cashedDataArr[companyAsk].needRequests --;
-                    console.log("2375 Get Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
+                    console.log("2375 Get and Check Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
                     dataForPredicate(companyAsk, startCalculateCompany);
                     if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
 
 
-                });
+                }, companyAsk);
 
 
 
-                console.log("Нежданный конец");
+                console.log("Конец запросов по компании", companyAsk);
 
 
             //
 
 
 
-                    function startCalculateCompany(company) {
-                        if (cashedDataArr[company].allPushes == undefined) return;
-                        console.log("Все данные получены, пересчитываем компанию", company);
-
-                        checkCorrectCalculating(company);
-                        cashedDataArr[company].recalc_finishing = false;
-                        selectRoutes(company);
-                        connectPointsAndPushes(company);
-                        connectStopsAndPoints(company);
-                        predicateTime(company);
-                        findStatusesAndWindows(company);
-                        calculateProblemIndex(company);
-                        calculateStatistic (company);
-                        createProblems(company);
-                        //checkRealTrackData(company); //todo убрать, после того как починят треккер
-                        lookForNewIten(company);
-                        //checkUniqueID (company);
-                        cashedDataArr[company].recalc_finishing = true;
-                        printData(); //todo статистическая функция, можно убивать
-                    }
 
 
 
 
 
 
-                    function predicateTime(company) {
-                        console.log("Start predicateTime");
-                        for (i=0; i< cashedDataArr[company].routes.length; i++){
-                            var route = cashedDataArr[company].routes[i];
-                            if (route.DISTANCE == 0) {
-                                uncalcPredication(route, company);
-                            } else {
-                                calcPredication(route, company);
-                            }
-
-
-                        }
-                    }
-
-
-
-                    function calculateProblemIndex(company) {
-                        console.log("Start calculate ProblemIndx");
-
-                        var point,
-                            timeThreshold = 3600 * 6,
-                            timeMin = 0.25,
-                            timeCoef;
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-                            var route = cashedDataArr[company].routes[i];
-                            route.max_problem = 0;
-                            route.problem_point={};
-                            route.kind_of_problem='';
-
-                            for (var j = 0; j < route.points.length; j++) {
-                                point = route.points[j];
-
-                                point.problem_index = 0;
-
-                                if(point.status < 4 || point.status == 8) continue;
-                                //console.log("Найдена проблемная точка");
-
-                                if (point.status == 6) {
-                                    point.problem_index = 1;
-                                    if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
-                                        route.find_problem_ts = parseInt(Date.now()/1000);
-                                    }
-                                   // Проверка на максимальную проблемность
-                                    if(point.problem_index > route.max_problem) {
-                                        route.max_problem = point.problem_index;
-                                        route.problem_point=point;
-                                        route.kind_of_problem='внимание';
-                                       // console.log("Проблемность равна  1");
-                                        continue;
-                                    }
-
-                                }
 
 
 
 
-                                // console.log("point.problem_index", point.problem_index);
-                                if (point.overdue_time > 0) {
-                                    if (point.status == 4) {
-                                        var koef;
-                                        if (point.working_window[0] == undefined) {
-                                            koef = point.working_window.finish;
-                                        } else {
-                                            koef = point.working_window[point.working_window.length-1].finish;
-                                        }
-                                        point.problem_index += (point.overdue_time) * cashedDataArr[company].settings.factMinutes;
-
-                                        timeCoef = 1;
-
-                                    } else {
-                                        timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
-                                        timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
-
-                                    }
-
-                                    if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
-                                        route.find_problem_ts = parseInt(Date.now()/1000);
-                                    }
-
-                                    point.problem_index += parseInt(point.overdue_time * cashedDataArr[company].settings.predictMinutes);
-                                    point.problem_index += parseInt(point.WEIGHT) * cashedDataArr[company].settings.weight;
-                                    point.problem_index += parseInt(point.VOLUME) * cashedDataArr[company].settings.volume;
-                                    point.problem_index += parseInt(point.VALUE) * cashedDataArr[company].settings.value;
-                                    if (point.change_time) {
-                                        point.problem_index += parseInt(point.change_time) * cashedDataArr[company].settings.changeTime;
-                                    }
-
-                                    point.problem_index = parseInt(point.problem_index * timeCoef);
-                                    point.problem_index = parseInt(point.problem_index / 100);
-
-                                   // console.log("Проблемность равна  ",  point.problem_index);
-                                    // Проверка на максимальную проблемность
-                                    if(point.problem_index > route.max_problem) {
-                                        route.max_problem = point.problem_index;
-                                        route.problem_point=point;
-                                        if(point.status == 4 ){route.kind_of_problem='время вышло';}
-                                        if(point.status == 5 ){route.kind_of_problem='опаздывает';}
-
-                                    }
 
 
-                                }
-
-
-                            }
-                        }
-
-
-                        //проверка не запланировано ли прибытие в какую либо точку за пределами заказанных окон
-                        // todo придумать правильную логику, когда и как находить эту проблему. При данной реализации
-                        // todo во-первых лишний проход цикла, во вторых подумать о соотношении этой проблемы с другими
-                        // todo хотя по идее при равильной работе диспетчера он увидит эту проблему прямо утром при запуске сервиса первом пересчете
-                        // todo трудность в том, что оператор может первый раз запустить программу в середине дня
-
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-                            var route = cashedDataArr[company].routes[i];
-
-                            for (var j=0; j < route.points.length; j++){
-                                var point = route.points[j];
-                                var outOfWindows = true;
-                                if (point.orderWindows == undefined) {
-                                    console.log("У точки нет заказанного окна, скорее всего склад");
-                                    continue;
-                                }
-
-                                //чисто технически добавляем по минуте к границам заказанного окна
-                                for (k =0; k<point.orderWindows.length; k++){
-                                    var window = point.orderWindows[k];
-                                    if (point.arrival_time_ts  < window.finish + 60 && point.arrival_time_ts > window.start - 60 ){
-                                        outOfWindows =false;
-                                        break;
-                                    }
-                                }
-
-                                if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
-                                    console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
-                                    point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
-                                    point.out_of_ordered = true;
-                                    route.max_problem = point.problem_index;
-                                    route.problem_point=point;
-                                    route.kind_of_problem='вне заказанного';
-                                }
-                            }
-                        }
-
-
-
-                        //определение готовых к закрытию маршрутов
-
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-                           // console.log("Start looking for ready to close");
-                            if (cashedDataArr[company].routes[i].closed == true) continue;
-
-                            if (cashedDataArr[company].routes[i].ready_to_close) {
-
-                                var route = cashedDataArr[company].routes[i];
-                                console.log("Find route ready to close");
-                                route.max_problem = 0.5;
-                                route.kind_of_problem='не закрыт';
-                                route.find_problem_ts = parseInt(Date.now()/1000);
-
-                            }
-
-
-                        }
-
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-                            if (cashedDataArr[company].routes[i].max_problem == 0 || cashedDataArr[company].routes.max_problem == undefined ) {
-                                cashedDataArr[company].routes[i].find_problem_ts = 0;
-                            }
-                        }
-
-
-                    }
 
 
 
         }
 
 
-                    function createProblems(company) {
-                        //todo поиск и сортировка ведется по полю max_problem. А описание проблемы в поле kind_of_problem
-                        //todo дописать определение проблемности в случае, если проблемма - не точка
-                        // Задача этой функции сформировать и расставить по порядку проблеммы
-                        cashedDataArr[company].line_routes = [];
 
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++){
-                            if (cashedDataArr[company].routes[i].max_problem >0) {
-                                cashedDataArr[company].line_routes.push(cashedDataArr[company].routes[i]);
-                                cashedDataArr[company].routes.splice(i,1);
-                                i--;
-                            }
-                        }
-
-
-
-                        cashedDataArr[company].line_routes.sort(compareNumeric);
-
-                        function compareNumeric(a, b) {
-                            return b.max_problem - a.max_problem;
-                        }
-
-
-                        console.log("Start createProblems Конец рассчета, который занял", parseInt(Date.now()/1000)-superEndTime);
-                        console.log("Общая статистика. Беспроблемных роутов", cashedDataArr[company].routes.length);
-                        console.log("Роутов с проблеммами в очереди",cashedDataArr[company].line_routes.length);
-                        console.log("Роутов розданных операторам", cashedDataArr[company].blocked_routes ? cashedDataArr[company].blocked_routes.length : 0);
-                        console.log("Прошлых незакрытых роутов", cashedDataArr[company].old_routes ? cashedDataArr[company].old_routes.length:0);
-
-
-                    }
 
 
 
@@ -2690,7 +2493,7 @@ function startPeriodicCalculating() {
 
 
 function dataForPredicate(company, callback){
-    console.log("START PREDICATE FUNCTION");
+    console.log("START PREDICATE FUNCTION", company);
     var result=[];
     var i=0;
     while(i<cashedDataArr[company].routes.length) {
@@ -2721,7 +2524,7 @@ function dataForPredicate(company, callback){
     console.log("CONT PREDICATE FUNCTION", !(collection.length==0));
     if (collection.length==0) {
         cashedDataArr[company].needRequests --;
-        console.log("The first cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
+        console.log("The first cickle is finished RESULT LENGTH =", company, generalResult.length, cashedDataArr[company].needRequests );
         if(cashedDataArr[company].needRequests == 0) callback(company);
         return;
     }
@@ -2773,7 +2576,7 @@ function dataForPredicate(company, callback){
 
                 cashedDataArr[company].dataForPredicate=generalResult;
                 cashedDataArr[company].needRequests --;
-                console.log("The Second cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests );
+                console.log("The Second cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests, company );
                 if(cashedDataArr[company].needRequests == 0) callback(company);
                 return;
             }
@@ -3039,7 +2842,7 @@ function checkPushesTimeGMTZone(pushes, company){
 
         var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*4 : 0;
         if( temp == 0) {
-            console.log("Невалидный ПУШ", company);
+            //console.log("Невалидный ПУШ", company);
         }
         pushes[i].gps_time_ts=temp;
         //console.log("New Time", temp);
@@ -3246,7 +3049,7 @@ function lookForNewIten(company) {
 
 
         var date = cashedDataArr[company].routesOfDate;
-        console.log("Start looking for new ITEN", company);
+        //console.log("Start looking for new ITEN", company);
         var soapManager = new soap(cashedDataArr[company].firstLogin);
         var existIten;
         if(cashedDataArr[company].idArr != undefined) {
@@ -3256,7 +3059,7 @@ function lookForNewIten(company) {
         }
 
         soapManager.lookAdditionalDailyPlan(date, existIten, company, function (data) {
-           console.log("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
+           //console.log("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
             // Если присутствуют новые решения в текущем дне
             if(data.addIten != undefined){
                 console.log("Начинаем догружать и объединять новые данные со старым решением " );
@@ -4260,8 +4063,7 @@ function findStatusesAndWindows(company) {
                 }
 
 
-                tmpPoint.start =start;
-                tmpPoint.end=end;
+
                 if (tmpPoint.real_arrival_time > end)
                 {
                     tmpPoint.status = 1;
@@ -4479,11 +4281,11 @@ function serchInCache(input, company) {
 function printData() {
 
     for (var i = 0; i <onlineClients.length; i++ ){
-        console.log(" Онлайн", onlineClients[i]);
+        //console.log(" Онлайн", onlineClients[i]);
     }
 
     for (i= 0; i<blockedRoutes.length; i ++){
-        console.log(" Блокед", blockedRoutes[i]);
+        //console.log(" Блокед", blockedRoutes[i]);
     }
 }
 
@@ -4775,7 +4577,235 @@ function checkOrderSuit (point, stop, company) {
 };
 
 
+function predicateTime(company) {
+    console.log("Start predicateTime");
+    for (i=0; i< cashedDataArr[company].routes.length; i++){
+        var route = cashedDataArr[company].routes[i];
+        if (route.DISTANCE == 0) {
+            uncalcPredication(route, company);
+        } else {
+            calcPredication(route, company);
+        }
 
+
+    }
+}
+
+
+
+function calculateProblemIndex(company) {
+    console.log("Start calculate ProblemIndx");
+
+    var point,
+        timeThreshold = 3600 * 6,
+        timeMin = 0.25,
+        timeCoef;
+    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+        var route = cashedDataArr[company].routes[i];
+        route.max_problem = 0;
+        route.problem_point={};
+        route.kind_of_problem='';
+
+        for (var j = 0; j < route.points.length; j++) {
+            point = route.points[j];
+
+            point.problem_index = 0;
+
+            if(point.status < 4 || point.status == 8) continue;
+            //console.log("Найдена проблемная точка");
+
+            if (point.status == 6) {
+                point.problem_index = 1;
+                if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
+                    route.find_problem_ts = parseInt(Date.now()/1000);
+                }
+                // Проверка на максимальную проблемность
+                if(point.problem_index > route.max_problem) {
+                    route.max_problem = point.problem_index;
+                    route.problem_point=point;
+                    route.kind_of_problem='внимание';
+                    // console.log("Проблемность равна  1");
+                    continue;
+                }
+
+            }
+
+
+
+
+            // console.log("point.problem_index", point.problem_index);
+            if (point.overdue_time > 0) {
+                if (point.status == 4) {
+                    var koef;
+                    if (point.working_window[0] == undefined) {
+                        koef = point.working_window.finish;
+                    } else {
+                        koef = point.working_window[point.working_window.length-1].finish;
+                    }
+                    point.problem_index += (point.overdue_time) * cashedDataArr[company].settings.factMinutes;
+
+                    timeCoef = 1;
+
+                } else {
+                    timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
+                    timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
+
+                }
+
+                if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
+                    route.find_problem_ts = parseInt(Date.now()/1000);
+                }
+
+                point.problem_index += parseInt(point.overdue_time * cashedDataArr[company].settings.predictMinutes);
+                point.problem_index += parseInt(point.WEIGHT) * cashedDataArr[company].settings.weight;
+                point.problem_index += parseInt(point.VOLUME) * cashedDataArr[company].settings.volume;
+                point.problem_index += parseInt(point.VALUE) * cashedDataArr[company].settings.value;
+                if (point.change_time) {
+                    point.problem_index += parseInt(point.change_time) * cashedDataArr[company].settings.changeTime;
+                }
+
+                point.problem_index = parseInt(point.problem_index * timeCoef);
+                point.problem_index = parseInt(point.problem_index / 100);
+
+                // console.log("Проблемность равна  ",  point.problem_index);
+                // Проверка на максимальную проблемность
+                if(point.problem_index > route.max_problem) {
+                    route.max_problem = point.problem_index;
+                    route.problem_point=point;
+                    if(point.status == 4 ){route.kind_of_problem='время вышло';}
+                    if(point.status == 5 ){route.kind_of_problem='опаздывает';}
+
+                }
+
+
+            }
+
+
+        }
+    }
+
+
+    //проверка не запланировано ли прибытие в какую либо точку за пределами заказанных окон
+    // todo придумать правильную логику, когда и как находить эту проблему. При данной реализации
+    // todo во-первых лишний проход цикла, во вторых подумать о соотношении этой проблемы с другими
+    // todo хотя по идее при равильной работе диспетчера он увидит эту проблему прямо утром при запуске сервиса первом пересчете
+    // todo трудность в том, что оператор может первый раз запустить программу в середине дня
+
+    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+        var route = cashedDataArr[company].routes[i];
+
+        for (var j=0; j < route.points.length; j++){
+            var point = route.points[j];
+            var outOfWindows = true;
+            if (point.orderWindows == undefined) {
+                console.log("У точки нет заказанного окна, скорее всего склад");
+                continue;
+            }
+
+            //чисто технически добавляем по минуте к границам заказанного окна
+            for (k =0; k<point.orderWindows.length; k++){
+                var window = point.orderWindows[k];
+                if (point.arrival_time_ts  < window.finish + 60 && point.arrival_time_ts > window.start - 60 ){
+                    outOfWindows =false;
+                    break;
+                }
+            }
+
+            if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
+                console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
+                point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
+                point.out_of_ordered = true;
+                route.max_problem = point.problem_index;
+                route.problem_point=point;
+                route.kind_of_problem='вне заказанного';
+            }
+        }
+    }
+
+
+
+    //определение готовых к закрытию маршрутов
+
+    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+        // console.log("Start looking for ready to close");
+        if (cashedDataArr[company].routes[i].closed == true) continue;
+
+        if (cashedDataArr[company].routes[i].ready_to_close) {
+
+            var route = cashedDataArr[company].routes[i];
+            console.log("Find route ready to close");
+            route.max_problem = 0.5;
+            route.kind_of_problem='не закрыт';
+            route.find_problem_ts = parseInt(Date.now()/1000);
+
+        }
+
+
+    }
+
+    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+        if (cashedDataArr[company].routes[i].max_problem == 0 || cashedDataArr[company].routes.max_problem == undefined ) {
+            cashedDataArr[company].routes[i].find_problem_ts = 0;
+        }
+    }
+
+
+}
+
+
+function createProblems(company) {
+    //todo поиск и сортировка ведется по полю max_problem. А описание проблемы в поле kind_of_problem
+    //todo дописать определение проблемности в случае, если проблемма - не точка
+    // Задача этой функции сформировать и расставить по порядку проблеммы
+    cashedDataArr[company].line_routes = [];
+
+    for (var i=0; i<cashedDataArr[company].routes.length; i++){
+        if (cashedDataArr[company].routes[i].max_problem >0) {
+            cashedDataArr[company].line_routes.push(cashedDataArr[company].routes[i]);
+            cashedDataArr[company].routes.splice(i,1);
+            i--;
+        }
+    }
+
+
+
+    cashedDataArr[company].line_routes.sort(compareNumeric);
+
+    function compareNumeric(a, b) {
+        return b.max_problem - a.max_problem;
+    }
+
+
+    console.log("!!!!!!!!Посчитана компания", company);
+    //console.log("Конец рассчета, который занял", parseInt(Date.now()/1000)-superEndTime);
+    console.log("Общая статистика. Беспроблемных роутов", cashedDataArr[company].routes.length);
+    console.log("Роутов с проблеммами в очереди",cashedDataArr[company].line_routes.length);
+    console.log("Роутов розданных операторам", cashedDataArr[company].blocked_routes ? cashedDataArr[company].blocked_routes.length : 0);
+    console.log("Прошлых незакрытых роутов", cashedDataArr[company].old_routes ? cashedDataArr[company].old_routes.length:0);
+
+
+}
+
+function startCalculateCompany(company) {
+
+    console.log("Все данные получены, пересчитываем компанию", company);
+
+    checkCorrectCalculating(company);
+    cashedDataArr[company].recalc_finishing = false;
+    selectRoutes(company);
+    connectPointsAndPushes(company);
+    connectStopsAndPoints(company);
+    predicateTime(company);
+    findStatusesAndWindows(company);
+    calculateProblemIndex(company);
+    calculateStatistic (company);
+    createProblems(company);
+    //checkRealTrackData(company); //todo убрать, после того как починят треккер
+    lookForNewIten(company);
+    //checkUniqueID (company);
+    cashedDataArr[company].recalc_finishing = true;
+    printData(); //todo статистическая функция, можно убивать
+}
 
 
 

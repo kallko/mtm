@@ -84,7 +84,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 };
 
 // получение части треков по всему склееному решению и заданному времени
-TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) {
+TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, company) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
             this.stop_d, this.move_s, this.move_d),
         counter = 0,
@@ -124,7 +124,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                 reqCounter++;
                                 if (counter == reqCounter) {
                                     console.log('Done, first loading stops!');
-                                    callback(result);
+                                    callback(result, company);
 
                                 }
                             } else {
@@ -136,7 +136,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
                                 reqCounter++;
                                 if (counter == reqCounter) {
                                     console.log('Done, second loading stops!');
-                                    callback(result);
+                                    callback(result, company);
                                 }
                             }
                         });
@@ -152,7 +152,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback) 
     }
     //console.log("Отправлено запросов ", counter, " Получено ответов", reqCounter);
     // Уникальный случай, когда ни у одной из машин не было датчика
-    if(counter == 0) callback("error");
+    if(counter == 0) callback("error", company);
 };
 
 // создать строку параметров для запроса к агрегатору

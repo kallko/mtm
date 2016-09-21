@@ -56,26 +56,28 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         function checkProblem() {
             checkTimeForEditing();
 
-            if (rootScope.tempDecision != undefined && rootScope.data && rootScope.data.routes) {
-                var pQuant = rootScope.settings.problem_to_operator;
-            //console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
+            //if (rootScope.tempDecision != undefined && rootScope.data && rootScope.data.routes) {
+            //    var pQuant = rootScope.settings.problem_to_operator;
+            ////console.log("Ask for problem?", rootScope.data.routes.length, pQuant);
 
-            }
-            var need=0;
+ //           }
+
+            var need=3;
             var exist=0;
             if (rootScope.data != undefined && rootScope.data.routes != undefined){
                 exist = rootScope.data.routes.length;
             }
             if(rootScope.settings != undefined) {
                 need = parseInt(rootScope.settings.problems_to_operator) - exist;
+
             }
 
             //if(need<0) need='';
             //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
-            console.log(" Go to ASK ", !rootScope.data,  need );
+            console.log(" Go to ASK ", !rootScope.data,  need,  rootScope.asking);
             if(!rootScope.asking) return;
             if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist ==0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
-                console.log("Give me", need, "the problem please! String is");
+                console.log("Give me", need, "the problem please! ");
 
 
                 http.get('./askforproblems/:'+need)

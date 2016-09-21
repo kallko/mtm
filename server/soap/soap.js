@@ -873,7 +873,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
             client.getDriversActions({'itenId':idArr, 'datestr':getDateStrFor1C(time * 1000), 'user': me.login}, function (err, result) {
                 if (!err) {
                     //console.log('GET PUSHES OK');
-                    log.toFLog('PUSHES is', result);
+                    //log.toFLog('PUSHES is', result);
                     //console.log('!!!!!!!!PUSHES is', result);
                     if (tempCompany == undefined) tempCompany=company;
                     callback(tempCompany, result);
@@ -903,7 +903,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var date =  new Date();
     var newDay = date.getDate();
     var inTime = (oldDay==newDay);
-    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
+    //console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
 
 
     var date =  Date.now();
@@ -947,7 +947,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                     data.itens=itineraries;
                     data.iLength = itineraries.length;
                     data.company = company;
-                    console.log("Quantity of Iten is", data.iLength);
+                    //console.log("Quantity of Iten is", data.iLength);
 
 
                     // Количество решений не изменилось
