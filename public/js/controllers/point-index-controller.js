@@ -219,7 +219,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                     console.log("Вы выбрали маршрут из общедоступных", rootScope.settings);
-                    if(rootScope.data.routes.length >= rootScope.settings.problems_to_operator + 1){
+
+                    var extra = 1; //Стандартное количество привышения количества роутов
+
+                    console.log("EXTRA", extra, rootScope.data.settings.role);
+                    if (rootScope.data.settings.role == 'admin') {
+                        console.log("Пользователь является админом");
+                        extra = 100;
+                    }
+
+
+
+                        if(rootScope.data.routes.length >= rootScope.settings.problems_to_operator + extra){
                         scope.$emit('clearMap');
                         alert("Вы уже заблокировали предельное количество маршрутов");
                         return;
@@ -228,7 +239,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     for (var j=0; j<rootScope.data.allRoutes.length; j++){
                         if (rootScope.data.allRoutes[j].value == scope.filters.route) {
                             giveMeOneRoutePls(rootScope.data.allRoutes[j].uniqueID);
-                        };
+                        }
                     }
 
 
