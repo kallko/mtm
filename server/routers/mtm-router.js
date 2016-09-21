@@ -2417,7 +2417,7 @@ function startPeriodicCalculating() {
                         console.log("начинаем проверку качества трека", companyAsk);
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0) {
-                                //console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
                                 continue;
                             }
 
@@ -2842,7 +2842,7 @@ function checkPushesTimeGMTZone(pushes, company){
 
         var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*4 : 0;
         if( temp == 0) {
-            //console.log("Невалидный ПУШ", company);
+            console.log("Невалидный ПУШ", company);
         }
         pushes[i].gps_time_ts=temp;
         //console.log("New Time", temp);
@@ -3049,7 +3049,7 @@ function lookForNewIten(company) {
 
 
         var date = cashedDataArr[company].routesOfDate;
-        //console.log("Start looking for new ITEN", company);
+        console.log("Start looking for new ITEN", company);
         var soapManager = new soap(cashedDataArr[company].firstLogin);
         var existIten;
         if(cashedDataArr[company].idArr != undefined) {
@@ -3059,7 +3059,7 @@ function lookForNewIten(company) {
         }
 
         soapManager.lookAdditionalDailyPlan(date, existIten, company, function (data) {
-           //console.log("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
+           console.log("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
             // Если присутствуют новые решения в текущем дне
             if(data.addIten != undefined){
                 console.log("Начинаем догружать и объединять новые данные со старым решением " );
@@ -4281,11 +4281,11 @@ function serchInCache(input, company) {
 function printData() {
 
     for (var i = 0; i <onlineClients.length; i++ ){
-        //console.log(" Онлайн", onlineClients[i]);
+        console.log(" Онлайн", onlineClients[i]);
     }
 
     for (i= 0; i<blockedRoutes.length; i ++){
-        //console.log(" Блокед", blockedRoutes[i]);
+        console.log(" Блокед", blockedRoutes[i]);
     }
 }
 

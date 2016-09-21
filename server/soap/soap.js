@@ -903,7 +903,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var date =  new Date();
     var newDay = date.getDate();
     var inTime = (oldDay==newDay);
-    //console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
+    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
 
 
     var date =  Date.now();
