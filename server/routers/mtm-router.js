@@ -3099,14 +3099,22 @@ function lookForNewIten(company) {
                     var newWaypoints = JSON.parse(JSON.stringify(data.waypoints));
 
                     var lastFilterId=0;
+                    var lastRowId=0;
                     //Поиск максимального filterId, чтобы далее продолжать с этого номера Может в 3 массивах
 
                     if ( cashedDataArr[company].routes != undefined) {
-                        for (var i=0; i<cashedDataArr[company].routes.length; i++){
+                        for ( i=0; i<cashedDataArr[company].routes.length; i++){
                             if(cashedDataArr[company].routes[i].filterId > lastFilterId) {
                                 lastFilterId = cashedDataArr[company].routes[i].filterId;
                                 console.log("Новый максимальный аfilterId =", lastFilterId);
                             }
+                            for (j=0; j<cashedDataArr[company].routes[i].points.length; j++){
+                                if(cashedDataArr[company].routes[i].points[j].row_id >lastRowId  ){
+                                    lastRowId = cashedDataArr[company].routes[i].points[j].row_id;
+                                    console.log("Новый максимальный rowID =", lastRowId);
+                                }
+                            }
+
                         }
 
                     }
@@ -3117,6 +3125,12 @@ function lookForNewIten(company) {
                                 lastFilterId = cashedDataArr[company].line_routes[i].filterId;
                                 console.log("Новый максимальный аfilterId =", lastFilterId);
                             }
+                            for (j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
+                                if(cashedDataArr[company].line_routes[i].points[j].row_id >lastRowId  ){
+                                    lastRowId = cashedDataArr[company].line_routes[i].points[j].row_id;
+                                    console.log("Новый максимальный rowID =", lastRowId);
+                                }
+                            }
                         }
                     }
 
@@ -3126,11 +3140,18 @@ function lookForNewIten(company) {
                                 lastFilterId = cashedDataArr[company].blocked_routes[i].filterId;
                                 console.log("Новый максимальный аfilterId =", lastFilterId);
                             }
+                            for (j=0; j<cashedDataArr[company].blocked_routes[i].points.length; j++){
+                                if(cashedDataArr[company].blocked_routes[i].points[j].row_id >lastRowId  ){
+                                    lastRowId = cashedDataArr[company].blocked_routes[i].points[j].row_id;
+                                    console.log("Новый максимальный rowID =", lastRowId);
+                                }
+                            }
                         }
                     }
 
 
                     lastFilterId++;
+                    lastRowId++
 
 
                     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(newRoutes);
@@ -3139,7 +3160,7 @@ function lookForNewIten(company) {
                     console.log("После объединения", cashedDataArr[company].routes.length, cashedDataArr[company].waypoints.length);
 
                     var tmpPoints,
-                        rowId = 0,
+                        rowId = lastRowId,
                         routeId = 0,
                         len = 0,
                         tPoint,
@@ -3354,7 +3375,7 @@ function lookForNewIten(company) {
                             tPoint.arrival_left_prediction = 0;
                             tPoint.status = 7;
 
-                            tPoint.route_id = i;
+                            //tPoint.route_id = i;
                             rowId++;
 
                             tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, cashedDataArr[currentCompany].server_time);
