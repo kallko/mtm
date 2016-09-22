@@ -76,7 +76,7 @@ cashedDataArr = {},  // глобальный кеш
 //}, null, true);
 
 
-
+    var oldRoutes;
 
     var demoLogin = 'demo';
     var tracksManager = new tracks(
@@ -3493,7 +3493,7 @@ function lookForNewIten(company) {
             if(data.newDayIten != undefined){
                 //TODO дописать и проверить работоспособность строчки ниже и всего кода.
                 console.log("Start Load NEW DAY");
-                var oldRoutes;
+
                 var login = cashedDataArr[company].firstLogin;
                 //TODO решить вопрос с обновлением настроек.
                 var settings = cashedDataArr[company].settings;
@@ -3505,7 +3505,7 @@ function lookForNewIten(company) {
                 cashedDataArr[company]={};
 
 
-
+                console.log("Старых маршрутов ", oldRoutes.length);
                 //
 
                 //Получение дневного плана для конкретной компании
