@@ -4881,6 +4881,46 @@ function createProblems(company) {
 
 }
 
+
+function checkServiceTime(company) {
+    if (company == undefined) {
+        console.log("Ошибка в checkServiceTime");
+        return;
+    }
+    for (var i=0; i<cashedDataArr[company].routes.length; i++){
+        if (cashedDataArr[company].routes[i].DISTANCE == 0 || cashedDataArr[company].routes[i].DISTANCE == '0') continue;
+        for(var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
+            if( cashedDataArr[company].routes[i].points[j].waypoint == undefined ||
+                cashedDataArr[company].routes[i].points[j].waypoint.TASK_TIME == "0" ||
+                !(cashedDataArr[company].routes[i].points[j].autofill_service_time > 0  || cashedDataArr[company].routes[i].points[j].real_service_time > 0)){
+                continue;
+            }
+            var time;
+            if(cashedDataArr[company].routes[i].points[j].real_service_time != undefined) {
+                time = cashedDataArr[company].routes[i].points[j].real_service_time
+            } else {
+                time = cashedDataArr[company].routes[i].points[j].autofill_service_time
+            }
+
+            var delta = (time/(parseInt(cashedDataArr[company].routes[i].points[j].waypoint.TASK_TIME))).toFixed(2);
+
+            if (delta < 0.7) {
+                cashedDataArr[company].routes[i].points[j].service_quality = "Меньше на " + (1-delta)*100+ "%";
+                continue;
+            }
+
+            if (delta > 1.3) {
+                cashedDataArr[company].routes[i].points[j].service_quality = "Больше на " + (delta-1)*100+ "%";
+                continue;
+            }
+
+            cashedDataArr[company].routes[i].points[j].service_quality = "Норма";
+
+        }
+    }
+}
+
+
 function startCalculateCompany(company) {
 
     console.log("Все данные получены, пересчитываем компанию", company);
@@ -4890,6 +4930,7 @@ function startCalculateCompany(company) {
     selectRoutes(company);
     connectPointsAndPushes(company);
     connectStopsAndPoints(company);
+    checkServiceTime(company);
     predicateTime(company);
     findStatusesAndWindows(company);
     calculateProblemIndex(company);

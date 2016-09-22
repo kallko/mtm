@@ -260,6 +260,8 @@
                     <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
                     <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
+                    <th class="service-time-col" title="Сравнение реального и планового времени обслуживания">Сервис</th>
+
                     <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
                     <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
                     <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
@@ -304,6 +306,7 @@
                     <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
                     <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
                     <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
+                    <th class="service-time-col" title="Сравнение реального и планового времени обслуживания">Сервис</th>
                     <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
                     <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
                     <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
@@ -383,6 +386,7 @@
                                 'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
                         {{row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}
                     </td>
+                    <td class="service-time-col" >{{row.service_quality != undefined ? row.service_quality : "Неизвестно"}}</td>
                     <td class="gps-conf-col" title="{{::row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
                     <td class="promised-window-changed-col"> {{row.change_time ? row.change_time : ''}}</td>
                     <td class = "window-type-col" id="{{'window-td-' + row.row_id}}">{{row.windowType}}</td>

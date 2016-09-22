@@ -222,11 +222,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     var extra = 1; //Стандартное количество привышения количества роутов
 
-                    console.log("EXTRA", extra, rootScope.data.settings.role);
-                    if (rootScope.data.settings.role == 'admin') {
-                        console.log("Пользователь является админом");
-                        extra = 100;
+                    for (i=0; i<rootScope.data.settings.userRoles.length; i++){
+                        if (rootScope.data.settings.userRoles[i] == 'supervisor' ||  rootScope.data.settings.userRoles[i] == 'head'){
+                            extra = 100;
+                            break;
+                        }
                     }
+                    console.log("EXTRA", extra, rootScope.data.settings.role);
+
 
 
 
@@ -4564,6 +4567,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         scope.solveProblem = function (id) {
+            rootScope.clickOff = true;
             scope.$emit('clearMap');
             console.log("Event", id);
             console.log("RootScopeData",rootScope.data);
@@ -4632,15 +4636,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     break;
                                 }
                             }
-
+                            rootScope.clickOff = false;
                         }).error(function(err){
                             console.log(err);
                             alert("Произошла ошибка записи");
+                            rootScope.clickOff = false;
                         });
                     break;
                 }
             }
 
+
+            rootScope.clickOff = true;
         //todo очистить display collection
 
 
