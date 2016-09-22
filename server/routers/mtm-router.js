@@ -168,8 +168,8 @@ router.route('/nodeserch')
 router.route('/login')
     .get(function (req, res) {
         req.session.login = req.query.curuser;
-        req.session.role = req.query.role;
-        console.log("Процесс логина", req.session.login, req.session.role)
+
+
         res.sendFile('index.html', {root: './public/'});
     });
 
@@ -221,7 +221,7 @@ router.route('/dailydata')
 
 
 
-        console.log(" Should I choose Cashe?", req.session.login, req.session.role, config.cashing.session
+        console.log(" Should I choose Cashe?", req.session.login,  config.cashing.session
             , req.query.force == null
             , req.query.showDate == null
             , req.session.login != null
@@ -266,7 +266,6 @@ router.route('/dailydata')
                 //todo Два костыля, пока настройки не прописаны в 1с
                 if(cashedDataArr[currentCompany].settings.limit == undefined ) cashedDataArr[currentCompany].settings.limit = 74;
                 if(cashedDataArr[currentCompany].settings.problems_to_operator == undefined) cashedDataArr[currentCompany].settings.problems_to_operator = 3;
-                cashedDataArr[currentCompany].settings.role = req.session.role;
 
                 res.status(200).json(cashedDataArr[currentCompany].settings);
             });
@@ -373,7 +372,6 @@ router.route('/dailydata')
                             cashedDataArr[currentCompany].settings = settings;
                             cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                             cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
-                            cashedDataArr[currentCompany].settings.role = req.session.role;
 
                             //Собираем решение из частей в одну кучку
                             linkDataParts(currentCompany, req.session.login);
@@ -435,7 +433,6 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                     cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
                     cashedDataArr[currentCompany].companyName=currentCompany;
-                    cashedDataArr[currentCompany].settings.role = req.session.role;
                     cashedDataArr[currentCompany].recalc_finishing = true;
                     //Собираем решение из частей в одну кучку
                     linkDataParts(currentCompany, req.session.login);
@@ -1449,7 +1446,6 @@ router.route('/askforproblems/:need')
                     result.companyName = currentCompany;
                     result.statistic = cashedDataArr[currentCompany].statistic;
                     result.settings.user = "" + req.session.login;
-                    result.settings.role = req.session.role;
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
@@ -1506,7 +1502,6 @@ router.route('/askforproblems/:need')
                         result.drivers = cashedDataArr[currentCompany].drivers;
                         result.transports = cashedDataArr[currentCompany].transports;
                         result.settings.user = "" + req.session.login;
-                        result.settings.role = req.session.role;
                         //надо отдать маршрут из старых на закрытие
                         //var existOld = choseRouteForClose(currentCompany);
                         //if (existOld === false) {
@@ -1526,7 +1521,6 @@ router.route('/askforproblems/:need')
                     result.reasons = cashedDataArr[currentCompany].reasons;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.settings.user = "" + req.session.login;
-                    result.settings.role = req.session.role;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
                     result.statistic = cashedDataArr[currentCompany].statistic;
@@ -1568,7 +1562,6 @@ router.route('/askforproblems/:need')
                 changePriority(cashedDataArr[currentCompany].line_routes[i].uniqueID, currentCompany, login);
                 result.settings = cashedDataArr[currentCompany].settings;
                 result.settings.user = "" + req.session.login;
-                result.settings.role = req.session.role;
                 cashedDataArr[currentCompany].line_routes.splice(result, 1);
 
             }
@@ -1581,7 +1574,6 @@ router.route('/askforproblems/:need')
                 result.statistic=cashedDataArr[currentCompany].statistic;
                 result.nowTime = parseInt(Date.now()/1000);
                 result.companyName = currentCompany;
-                //result.settings.role = req.session.role;
                 res.status(200).json(result);
                 return;
             } else {
@@ -2139,7 +2131,7 @@ function startPeriodicCalculating() {
     function callbackDispetcher(companys) {
         for (var k=0; k<companys.length; k++) {
 
-            cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length*3; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
+            cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length + 2; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
             console.log ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests );
             for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
@@ -2156,7 +2148,7 @@ function startPeriodicCalculating() {
                         if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
                     });
             //
-
+            }
 
             //TODO Заменить на запрс свежих стейтов и треков
 
@@ -2173,7 +2165,7 @@ function startPeriodicCalculating() {
             var start = cashedDataArr[companys[k]].last_track_update;
             var companyAsk = companys[k];
                 console.log("Check data", cashedDataArr[companyAsk].routes.length);
-            tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
+                tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
                 function (data, companyAsk) {
                    // if (!first) return;
 
@@ -2486,7 +2478,7 @@ function startPeriodicCalculating() {
 
 
 
-        }
+
 
 
 
@@ -2630,12 +2622,13 @@ function uncalcPredication(route, company) {
     //console.log("timeTabls",time_table)
     for ( i = 0; i < points.length; i++) {
         // console.log("START PREDICATE CALCULATING", points[i]);
-        if (points[i].real_arrival_time != undefined || points[i].haveStop) {
+        if (points[i].real_arrival_time != undefined  || points[i].haveStop) {
 
             continue;
         }
 
         if (points[i].status == 4 || points[i].status == 5 || points[i].status == 7) {
+
 
             points[i].arrival_left_prediction = time_table[i] / 10 ? time_table[i] / 10 : 15 * 60;//Если у нас нет корректного предсказания времени (нет датчика ДЖПС) точка попадает в опаздывает за 15 минут до конца КОК
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
@@ -3533,7 +3526,6 @@ function lookForNewIten(company) {
                         cashedDataArr[currentCompany].currentProblems = [];
                         cashedDataArr[currentCompany].allRoutes=[];
                         cashedDataArr[currentCompany].settings = settings;
-                        cashedDataArr[currentCompany].settings.role = req.session.role;
                         cashedDataArr[currentCompany].oldRoutes=[];
                         cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
 
@@ -4007,11 +3999,8 @@ function findStatusesAndWindows(company) {
 
 
 
-
             if (tmpPoint.real_arrival_time == undefined) {
                 cashedDataArr[company].routes[i].ready_to_close=false;
-
-
 
                 continue;
             }
@@ -4289,7 +4278,7 @@ function serchInCache(input, company) {
 }
 
 
-function printData() {
+function printData(company) {
 
     for (var i = 0; i <onlineClients.length; i++ ){
         console.log(" Онлайн", onlineClients[i]);
@@ -4298,6 +4287,101 @@ function printData() {
     for (i= 0; i<blockedRoutes.length; i ++){
         console.log(" Блокед", blockedRoutes[i]);
     }
+
+    var routesCount = 0;
+    var pointsCount = 0;
+    var canceledCount = 0;
+    var outCount = 0;
+    var orderCount = 0;
+    var undefinedCount = 0;
+    var biger15 = 0;
+
+
+    for (i=0; i<cashedDataArr[company].routes.length; i++ ){
+        if (cashedDataArr[company].routes[i].real_track == undefined || cashedDataArr[company].routes[i].real_track.length < 20) continue;
+        routesCount++;
+        for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
+            pointsCount++;
+            var point = cashedDataArr[company].routes[i].points[j];
+            if (point.windowType == "В заказанном" || point.windowType == "В обещанном" ) {
+                orderCount++;
+                continue;
+            }
+            if (point.status == 8) {
+                canceledCount++;
+                continue;
+            }
+            if (point.windowType == "Вне окон") {
+                outCount++;
+                continue;
+            }
+
+            undefinedCount++;
+
+
+        }
+    }
+
+    for (i=0; i<cashedDataArr[company].line_routes.length; i++ ){
+        if (cashedDataArr[company].line_routes[i].real_track == undefined || cashedDataArr[company].line_routes[i].real_track.length < 20) continue;
+        routesCount++;
+        for (j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
+            pointsCount++;
+            point = cashedDataArr[company].line_routes[i].points[j];
+            if (point.windowType == "В заказанном" || point.windowType == "В обещанном" ) {
+                orderCount++;
+                continue;
+            }
+            if (point.status == 8) {
+                canceledCount++;
+                continue;
+            }
+            if (point.windowType == "Вне окон") {
+                outCount++;
+                if (point.real_arrival_time < point.orderWindows[0].start-15*60 || point.real_arrival_time > point.orderWindows[point.orderWindows.length-1].finish+15*60) {
+                    biger15++;
+                    continue
+                }
+
+                continue;
+            }
+
+            undefinedCount++;
+
+        }
+    }
+
+
+
+    //for (i=0; i<cashedDataArr[company].blocked_routes.length; i++ ){
+    //    if (cashedDataArr[company].blocked_routes[i].real_track == undefined || cashedDataArr[company].blocked_routes[i].real_track.length < 20) continue;
+    //    routesCount++;
+    //    for (var j=0; j<cashedDataArr[company].blocked_routes[i].points.length; j++){
+    //        pointsCount++;
+    //        var point = cashedDataArr[company].blocked_routes[i].points[j];
+    //        if (point.windowType == "В заказанном" || point.windowType == "В обещанном" ) {
+    //            orderCount++;
+    //            continue;
+    //        }
+    //        if (point.status == 8) {
+    //            canceledCount++;
+    //            continue;
+    //        }
+    //        outCount++
+    //
+    //
+    //    }
+    //}
+
+
+    console.log ("Итоговая информация" + "\n" +
+        "Достойных роутов " + routesCount + "\n" +
+        "Точек доставки " + pointsCount + "\n" +
+        "Точек в заказанном окне " + orderCount + "\n" +
+        "Отмененных точек " + canceledCount + "\n" +
+        "Доставленных мимо " + outCount + "\n" +
+        "В том числе с разницей более 15 минут " + biger15 + "\n"+
+        "Точек с неопределенным статусом " + undefinedCount);
 }
 
 
@@ -4815,7 +4899,7 @@ function startCalculateCompany(company) {
     lookForNewIten(company);
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
-    printData(); //todo статистическая функция, можно убивать
+    printData(company); //todo статистическая функция, можно убивать
 }
 
 
