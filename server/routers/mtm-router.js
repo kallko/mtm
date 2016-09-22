@@ -2779,10 +2779,10 @@ function calcPredication(route, company) {
                 // времена проезда от роутера приходят в десятых долях секунд
                 totalTravelTime += tmpTime == undefined ? 15 * 60 : parseInt(tmpTime / 10);
                 tmpPred = now + nextPointTime + totalWorkTime + totalTravelTime + totalDowntime;
-                tmpDowntime = route.points[j].working_window[0].start - tmpPred;
+                if (tmpDowntime = route.points[j].working_window[0] != undefined) tmpDowntime = route.points[j].working_window[0].start - tmpPred;
                 if (tmpDowntime > 0) {
                     totalDowntime += tmpDowntime;
-                    tmpPred = route.points[j].working_window[0].start;
+                    if (route.points[j].working_window[0] != undefined)tmpPred = route.points[j].working_window[0].start;
                 }
 
 
