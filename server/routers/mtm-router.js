@@ -1258,12 +1258,12 @@ router.route('/savetonode/')
     .post(function (req, res) {
         console.log("Приступаем к сохранению роута");
         var i=0;
-        var id = parseInt(req.body.route.filterId);
+        var id = parseInt(req.body.route.uniqueID);
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         console.log("Приступаем к сохранению роута", i, id, currentCompany);
         while(i<cashedDataArr[currentCompany].blocked_routes.length){
-                if(cashedDataArr[currentCompany].blocked_routes[i].filterId == id){
+                if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
                     cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                     console.log("Overwright Route");
                     cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
@@ -1287,6 +1287,23 @@ router.route('/savetonode/')
             }
 
         }
+
+
+        while(i<cashedDataArr[currentCompany].old_routes.length){
+            if(cashedDataArr[currentCompany].old_routes[i].uniqueID == id){
+                cashedDataArr[currentCompany].old_routes[i] = req.body.route;
+                console.log("Overwright OLD Route");
+
+                var uniqueId = cashedDataArr[currentCompany].old_routes[i].uniqueID;
+                unblockRoute(key, uniqueId);
+
+                res.status(200).json(id);
+                return;
+            }
+
+            i++;
+        }
+
 
         res.status(200).json("error");
 
@@ -2804,11 +2821,11 @@ function calcPredication(route, company) {
                 route.points[j].arrival_left_prediction = parseInt(route.points[j].arrival_prediction - now);
                 // предсказываем статус опаздывает или уже опаздал
                 if (route.points[j].arrival_prediction > route.points[j].arrival_time_ts) {
-                    route.points[j].overdue_time = parseInt(route.points[j].arrival_prediction -
-                        route.points[j].working_window[route.points[j].working_window.length-1].finish);
+                    if (route.points[j].working_window[route.points[j].working_window.length-1] != undefined) {var minus = route.points[j].working_window[route.points[j].working_window.length-1].finish;} else {var minus =route.points[j].working_window.finish}
+                    route.points[j].overdue_time = parseInt(route.points[j].arrival_prediction - minus);
 
                     if (route.points[j].overdue_time > 0) {
-                        if (route.points[j].working_window[route.points[j].working_window.length-1].finish < now) {
+                        if (minus < now) {
                             route.points[j].status = 4;
                             //route.points[j].variantus = 3005;
                             //console.log("_route.points[j].status = STATUS.TIME_OUT;");
@@ -3498,9 +3515,16 @@ function lookForNewIten(company) {
                 //TODO решить вопрос с обновлением настроек.
                 var settings = cashedDataArr[company].settings;
                 if(cashedDataArr[company].oldRoutes != undefined) {
-                    oldRoutes = JSON.parse(JSON.stringify(cashedDataArr[company].routes.concat(cashedDataArr[company].oldRoutes)));
+                    oldRoutes = JSON.parse(JSON.stringify(cashedDataArr[company].line_routes.concat(cashedDataArr[company].oldRoutes)));
                 } else {
-                    oldRoutes =JSON.parse(JSON.stringify(cashedDataArr[company].routes));
+                    oldRoutes =JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
+                }
+
+
+                if (cashedDataArr[company].blocked_routes != undefined) {
+                    for (var k = 0; k < cashedDataArr[company].blocked_routes.length; k++) {
+                        oldRoutes.push(cashedDataArr[company].blocked_routes[k]);
+                    }
                 }
                 cashedDataArr[company]={};
 
