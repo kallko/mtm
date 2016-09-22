@@ -3253,10 +3253,16 @@ function lookForNewIten(company) {
                             //
 
                             //
-                            if (cashedDataArr[currentCompany].routes[i].filterId == null) {
+                            if (cashedDataArr[currentCompany].routes[i].filterId == null || cashedDataArr[currentCompany].routes[i].filterId == undefined ) {
                                 cashedDataArr[currentCompany].routes[i].filterId = lastFilterId;
                                 cashedDataArr[currentCompany].routes[i].uniqueID = ""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID;
                                 console.log("Prisvoen UNIQUE ID", ""+""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID);
+                                for( var k =0; k < cashedDataArr[currentCompany].routes[i].points.length; k++){
+                                    cashedDataArr[currentCompany].routes[i].points[k].uniqueID = cashedDataArr[currentCompany].routes[i].uniqueID;
+                                    cashedDataArr[currentCompany].routes[i].points[k].route_id = cashedDataArr[currentCompany].routes[i].filterId;
+                                    cashedDataArr[currentCompany].routes[i].points[k].route_indx = cashedDataArr[currentCompany].routes[i].filterId;
+                                }
+
                                 //TODO REMOVE AFTER TESTING
                                 //data.routes[i].transport = data.routes[0].transport;
                                 //data.server_time = 1446611800;

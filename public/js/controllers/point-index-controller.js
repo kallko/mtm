@@ -2392,21 +2392,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // фильтр по статусу
         function statusFilter(row) {
             if(scope.filters.status['-1']){
+                //console.log("statusFilter true");
                 return true;
             }else{
                 for(var status in scope.filters.status){
                     if(scope.filters.status[status] && status == row.status){
+                        //console.log("statusFilter true");
                         return true;
                     }
                 }
             }
+            //console.log("statusFilter false");
             return false;
             //return (scope.filters.status == -1 || row.status == scope.filters.status);
         }
 
         // фильтр по маршруту
         function routeFilter(row) {
+            //console.log("routeFilter ", (scope.filters.route === -1 || row.route_id == scope.filters.route))
             return (scope.filters.route === -1 || row.route_id == scope.filters.route);
+
         }
 
         scope.filtersOllstatuses = function(){
@@ -2433,12 +2438,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // фильтр по проблемности
         function problemFilter(row) {
+            //console.log("problemFilter ", (scope.filters.problem_index == -1 || row.problem_index > 0));
             return (scope.filters.problem_index == -1 || row.problem_index > 0);
         }
 
 
         // фильтр на попадание не выполненных точек в указанный в настройках диапазон в конце рабочего окна
         function promise15MFilter(row) {
+            //console.log("promise15MFilter ", (scope.filters.promised_15m == -1 || row.promised_15m));
             return (scope.filters.promised_15m == -1 || row.promised_15m);
         }
 
@@ -4710,7 +4717,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         alert("Этот маршрут уже заблокирван оператором "+ data.blocked);
 
                         return;
-                    };
+                    }
+
+                    //console.log("Точки коллекции", scope.rowCollection.length, scope.displayCollection.length,  data.route.points.length );
 
 
                     if (data.route != undefined) {
@@ -4738,7 +4747,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     scope.displayCollection = scope.displayCollection.concat(data.route.points);
                     rootScope.displayCollection = scope.displayCollection;
                     rootScope.clickOff =false;
-
+                    //console.log("Точки коллекции", scope.rowCollection.length, scope.displayCollection.length, rootScope.displayCollection.length, data.route.points.length );
 
             })
         }
