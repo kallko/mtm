@@ -188,7 +188,14 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
     scope.loadSerchResult = function(id) {
         console.log("Работает "+id);
-        if (rootScope.data.routes.length >= rootScope.data.settings.problems_to_operator +1 && rootScope.data.currentDay == true ) {
+        var extra = 1; //Стандартное количество привышения количества роутов
+
+        console.log("EXTRA", extra, rootScope.data.settings.role);
+        if (rootScope.data.settings.role == 'admin') {
+            console.log("Пользователь является админом");
+            extra = 100;
+        }
+        if (rootScope.data.routes.length >= rootScope.data.settings.problems_to_operator + extra && rootScope.data.currentDay == true ) {
 
             scope.$emit('clearMap');
 

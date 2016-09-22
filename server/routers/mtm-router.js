@@ -168,7 +168,7 @@ router.route('/nodeserch')
 router.route('/login')
     .get(function (req, res) {
         req.session.login = req.query.curuser;
-        req.session.role = req.query.role;
+
 
         res.sendFile('index.html', {root: './public/'});
     });
@@ -221,7 +221,7 @@ router.route('/dailydata')
 
 
 
-        console.log(" Should I choose Cashe?", req.session.login, req.session.role, config.cashing.session
+        console.log(" Should I choose Cashe?", req.session.login,  config.cashing.session
             , req.query.force == null
             , req.query.showDate == null
             , req.session.login != null
@@ -266,7 +266,6 @@ router.route('/dailydata')
                 //todo Два костыля, пока настройки не прописаны в 1с
                 if(cashedDataArr[currentCompany].settings.limit == undefined ) cashedDataArr[currentCompany].settings.limit = 74;
                 if(cashedDataArr[currentCompany].settings.problems_to_operator == undefined) cashedDataArr[currentCompany].settings.problems_to_operator = 3;
-
 
                 res.status(200).json(cashedDataArr[currentCompany].settings);
             });
@@ -3783,7 +3782,7 @@ function connectStopsAndPoints(company) {
                         var  tmpPoint = route.points[k];
 
 
-                        cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
+                        //cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
 
                         if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit){
                             //console.log("Подтверждена вручную Уходим");
