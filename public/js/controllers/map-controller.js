@@ -135,15 +135,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     //console.log(" track[i].time",  track[i].coords);
 
 
+                    //todo снять комментарий, когда правильно рассчитают время финиша
                     //console.log("Времена", track[i].coords[0].t, start, timeThreshold);
-                    if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
-                        //console.log("Its too early track");
-                        continue
-                    }; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
-                    if( track[i].coords[0].t > end+timeThreshold) {
-                        //console.log("Its too past track");
-                        break;
-                    } //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+                    //if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
+                    //    //console.log("Its too early track");
+                    //    continue
+                    //}; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
+                    //if( track[i].coords[0].t > end+timeThreshold) {
+                    //    //console.log("Its too past track");
+                    //    break;
+                    //} //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
 
                     color = '#5cb85c';
