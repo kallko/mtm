@@ -4614,12 +4614,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         .success(function (rId) {
                             console.log("Сохранено", rId);
                             for (var j=0; j<rootScope.data.routes.length; j++){
-                                console.log("Входные данные", rootScope.data.routes[j].filterId, rId);
+                                console.log("Входные данные", rootScope.data.routes[j].uniqueID, rId);
 
 
 
 
-                                if(rootScope.data.routes[j].filterId == rId){
+                                if(rootScope.data.routes[j].uniqueID == rId){
                                     console.log(j,"Удаляем маршрут", rId);
                                     rootScope.data.routes.splice(j,1);
                                     scope.filters.route = -1;
