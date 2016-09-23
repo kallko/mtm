@@ -828,7 +828,8 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
 
             client.getConfig({user: me.login}, function (err, result) {
                 if (!err) {
-                    console.log('GET CONFIG OK');
+
+                    console.log('GET CONFIG OK for', me.login);
                     log.toFLog('config is', result);
                     //console.log('config is', result);
                     callback(company, result);

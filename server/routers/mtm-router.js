@@ -244,6 +244,7 @@ router.route('/dailydata')
 
             // Получение настроек для конкретной компании
             soapManager = new soap(req.session.login);
+            console.log("Запрашиваю настройки для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
                 //console.log("receiveConfig", data);
 
@@ -281,9 +282,11 @@ router.route('/dailydata')
             settings={};
 
             // Получение настроек для конкретной компании
+            console.log("Запрашиваю настройки 285 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
                 //console.log("receiveConfig", data);
                 settings = JSON.parse(data.return);
+                //cashedDataArr[company].settings = settings;
                 //console.log("Obj",  obj.predictMinutes, "mtm 1192")
             });
 
@@ -328,7 +331,7 @@ router.route('/dailydata')
                         var exist = "" +cashedDataArr[currentCompany].date.substring(0,10);
                         if ((""+data.date).startsWith(exist)){
                         console.log("Данные по этой компани на сегодня уже получены");
-
+                            cashedDataArr[currentCompany].settings = settings;
                         res.status(200).json(cashedDataArr[currentCompany].settings);
                         return;
                         } else {
