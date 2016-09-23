@@ -1289,6 +1289,7 @@ router.route('/savetonode/')
         }
 
 
+        if (cashedDataArr[currentCompany].old_routes != undefined) {
         while(i<cashedDataArr[currentCompany].old_routes.length){
             if(cashedDataArr[currentCompany].old_routes[i].uniqueID == id){
                 cashedDataArr[currentCompany].old_routes[i] = req.body.route;
@@ -1303,7 +1304,7 @@ router.route('/savetonode/')
 
             i++;
         }
-
+        }
 
         res.status(200).json("error");
 
