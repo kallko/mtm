@@ -331,6 +331,7 @@ router.route('/dailydata')
                         var exist = "" +cashedDataArr[currentCompany].date.substring(0,10);
                         if ((""+data.date).startsWith(exist)){
                         console.log("Данные по этой компани на сегодня уже получены");
+                            //todo мина замедленного действия. Переписать, чтобы настройки записывались сразу при получении/ или явно передавались не оставаясь в области  глобальной видимости.
                             cashedDataArr[currentCompany].settings = settings;
                         res.status(200).json(cashedDataArr[currentCompany].settings);
                         return;
