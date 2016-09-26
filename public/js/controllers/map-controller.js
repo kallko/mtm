@@ -1313,7 +1313,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
             }
 
-            scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
+            if (scope.dataActivePoint != undefined) scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
             createNewTempCurrentWayPoints(event);
             if (map.getZoom() > 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
@@ -1403,7 +1403,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         oms.addListener('unspiderfy', function(event) {
             scope.tempCurrentWayPoints=[];
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
-            if (scope.dataActivePoint.stopState != undefined) scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
+            if (scope.dataActivePoint != undefined) scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
             if (map.getZoom() > 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
                 drowConnectWithStopsAndPoints();
