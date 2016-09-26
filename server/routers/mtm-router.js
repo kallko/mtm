@@ -1296,13 +1296,13 @@ router.route('/savetonode/')
         }
 
 
-        if (cashedDataArr[currentCompany].old_routes != undefined) {
-        while(i<cashedDataArr[currentCompany].old_routes.length){
-            if(cashedDataArr[currentCompany].old_routes[i].uniqueID == id){
-                cashedDataArr[currentCompany].old_routes[i] = req.body.route;
+        if (cashedDataArr[currentCompany].oldRoutes != undefined) {
+        while(i<cashedDataArr[currentCompany].oldRoutes.length){
+            if(cashedDataArr[currentCompany].oldRoutes[i].uniqueID == id){
+                cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
                 console.log("Overwright OLD Route");
 
-                var uniqueId = cashedDataArr[currentCompany].old_routes[i].uniqueID;
+                var uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
                 unblockRoute(key, uniqueId);
 
                 res.status(200).json(id);
@@ -1401,8 +1401,8 @@ router.route('/getServerStatus')
         result.routes = cashedDataArr[currentCompany].routes.length;
         result.blocked_routes = cashedDataArr[currentCompany].blocked_routes.length;
         result.line_routes = cashedDataArr[currentCompany].line_routes.length;
-        result.old_routes = 0;
-        if (cashedDataArr[currentCompany].old_routes != undefined) result.old_routes = cashedDataArr[currentCompany].old_routes.length;
+        result.oldRoutes = 0;
+        if (cashedDataArr[currentCompany].oldRoutes != undefined) result.oldRoutes = cashedDataArr[currentCompany].oldRoutes.length;
         //console.log("Result ", result);
         res.status(200).json({result :result});
 
@@ -2639,7 +2639,7 @@ function dataForPredicate(company, callback){
 
 function uncalcPredication(route, company) {
 
-
+    console.log("This is uncalc route");
     var now = parseInt(Date.now()/1000);
 
 
@@ -2699,7 +2699,7 @@ function uncalcPredication(route, company) {
 function calcPredication(route, company) {
 
 
-    //console.log("This is calculated route");
+    console.log("This is calculated route");
 
     var point,
         tmpPred,
@@ -2734,7 +2734,7 @@ function calcPredication(route, company) {
 
         var singleTimeMatrix = [];
 
-        if (route.real_track != undefined && cashedDataArr[company].dataForPredicate != undefined && route.real_track.length != 0) {
+        if (route.real_track != undefined && cashedDataArr[company].dataForPredicate != undefined && route.real_track.length != 0 && route.real_track != "invalid parameter 'gid'. ") {
             var k = 0;
 
             while (k < cashedDataArr[company].dataForPredicate.length) {
@@ -2763,6 +2763,7 @@ function calcPredication(route, company) {
                 }
                 //console.log("2843 MTM", route.points[i].working_window);
                 if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
+
                     route.points[i].status = 4;
                     //route.points[i].variantus =2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
@@ -2770,6 +2771,7 @@ function calcPredication(route, company) {
                 }
 
                 if(now > route.points[i].arrival_time_ts) {
+
                     route.points[i].status = 5;
                     //route.points[i].variantus = 2852;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
@@ -2836,6 +2838,7 @@ function calcPredication(route, company) {
                 if (route.points[j].arrival_prediction == null || route.points[j].arrival_prediction == 0 || route.points[j].arrival_prediction == '0') {
                     route.points[j].arrival_prediction = tmpPred;
                 } else {
+
                     if (tmpPred + 300 < route.points[j].arrival_prediction) {
                         route.points[j].in_plan = false;
                     }
@@ -2862,6 +2865,7 @@ function calcPredication(route, company) {
                     }
 
                 } else {
+
                     route.points[j].overdue_time = 0;
                 }
 
@@ -4755,7 +4759,7 @@ function checkOrderSuit (point, stop, company) {
 
 function predicateTime(company) {
     console.log("Start predicateTime");
-    for (i=0; i< cashedDataArr[company].routes.length; i++){
+    for (var i=0; i< cashedDataArr[company].routes.length; i++){
         var route = cashedDataArr[company].routes[i];
         if (route.DISTANCE == 0) {
             uncalcPredication(route, company);
@@ -4879,7 +4883,7 @@ function calculateProblemIndex(company) {
             }
 
             //чисто технически добавляем по минуте к границам заказанного окна
-            for (k =0; k<point.orderWindows.length; k++){
+            for (var k =0; k<point.orderWindows.length; k++){
                 var window = point.orderWindows[k];
                 if (point.arrival_time_ts  < window.finish + 60 && point.arrival_time_ts > window.start - 60 ){
                     outOfWindows =false;
@@ -4957,7 +4961,7 @@ function createProblems(company) {
     console.log("Общая статистика. Беспроблемных роутов", cashedDataArr[company].routes.length);
     console.log("Роутов с проблеммами в очереди",cashedDataArr[company].line_routes.length);
     console.log("Роутов розданных операторам", cashedDataArr[company].blocked_routes ? cashedDataArr[company].blocked_routes.length : 0);
-    console.log("Прошлых незакрытых роутов", cashedDataArr[company].old_routes ? cashedDataArr[company].old_routes.length:0);
+    console.log("Прошлых незакрытых роутов", cashedDataArr[company].oldRoutes ? cashedDataArr[company].oldRoutes.length:0);
 
 
 }
