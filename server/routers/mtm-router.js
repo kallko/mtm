@@ -2556,11 +2556,11 @@ function dataForPredicate(company, callback){
     while(j<collection.length){
         var pointsStr = '';
         //console.log(collection[j].points);
-        if (collection[j].points == undefined) {
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Точек нет!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        } else {
-            console.log(collection[j].points.length);
-        }
+        //if (collection[j].points == undefined) {
+        //    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Точек нет!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //} else {
+        //    console.log(collection[j].points.length);
+        //}
         for (i= 0; i < collection[j].points.length; i++) {
             //console.log("i=", i, collection[j].points[i].LAT, " ", collection[j].points[i].LON);
             if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
