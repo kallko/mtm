@@ -499,7 +499,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 
 // получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
-    console.log(this.routerUrl + 'table?' + pointsStr, "Пытаемся получить предсказание Tracks 488");
+    //console.log(this.routerUrl + 'table?' + pointsStr, "Пытаемся получить предсказание Tracks 488");
     request({
         url: this.routerUrl + 'table?' + pointsStr,
         json: true
