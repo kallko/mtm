@@ -508,7 +508,7 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
             //console.log("Данные получены");
             callback(body, pointsStr);
         } else {
-            console.log("ERROR TRACKS 495");
+            console.log(body, "ERROR TRACKS 495");
         }
     });
 };

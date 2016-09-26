@@ -4384,6 +4384,7 @@ function printData(company) {
         for (j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
             pointsCount++;
             point = cashedDataArr[company].line_routes[i].points[j];
+            if (point.waypoint == undefined) continue;
             if (point.windowType == "В заказанном" || point.windowType == "В обещанном" ) {
                 orderCount++;
                 continue;
@@ -4394,6 +4395,7 @@ function printData(company) {
             }
             if (point.windowType == "Вне окон") {
                 outCount++;
+                if (point.orderWindows[0] == undefined) continue;
                 if (point.real_arrival_time < point.orderWindows[0].start-15*60 || point.real_arrival_time > point.orderWindows[point.orderWindows.length-1].finish+15*60) {
                     biger15++;
                     continue
