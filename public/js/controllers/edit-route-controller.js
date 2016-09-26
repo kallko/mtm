@@ -137,7 +137,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.selectedStart= false;
             scope.accept = false;
             scope.iteration = 0;
-            console.log("I recieve DATA", data);
+            //console.log("I recieve DATA", data);
             scope.allDrivers=data.allDrivers;
             scope.allTransports=data.allTransports;
             scope.id = data.route.filterId;
@@ -219,7 +219,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         // пересчитать маршрут (клиентская валидация маршрута)
         function recalculateRoute() {
 
-            console.log("Начинаем рекалкулейт");
+            //console.log("Начинаем рекалкулейт");
 
 
             // копируем без ссылок маршрут
@@ -228,7 +228,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 loadRouterData(scope.changedRoute.points, recalculateRoute);
                 return;
             }
-            console.log("changedRoute",  scope.changedRoute);
+            //console.log("changedRoute",  scope.changedRoute);
             if(scope.changedRoute.car_position == undefined || scope.changedRoute.car_position.lat == undefined || scope.changedRoute.car_position.lon == undefined) createNewCarPosition(scope.changedRoute);
             //var last = scope.changedRoute.lastPointIndx + 1 >= scope.changedRoute.points.length ?
             //    scope.changedRoute.points.length - 1 : scope.changedRoute.lastPointIndx + 1;
@@ -240,12 +240,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     + scope.changedRoute.points[0].LAT + '&'
                     + scope.changedRoute.points[0].LON;
 
-            console.log("Запрос на расстояние и время между 2 точками URL =", url);
+            //console.log("Запрос на расстояние и время между 2 точками URL =", url);
             // получаем расстояние от текущего положения машины и до следующей в плане точки
             http.get(url)
                 .success(function (data) {
                     // пересчитываем
-                    console.log("Success data", data);
+                    //console.log("Success data", data);
                     var fromPoint,
                         toPoint,
                         cTime;
@@ -313,11 +313,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // переместить пропущенные задачи в конец маршрута
         function moveSkippedToEnd(route) {
-            console.log("Приступаем к обработке роута", route);
+            //console.log("Приступаем к обработке роута", route);
             var toMoveArr = [],
                 lastTask;
             var lastindx = route.points.length - 1;
-            console.log("Last indx = ", lastindx);
+            //console.log("Last indx = ", lastindx);
 
 
             route.warehouseEnd =false;
@@ -339,7 +339,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            console.log ("Заданий на перенос", toMoveArr.length);
+            //console.log ("Заданий на перенос", toMoveArr.length);
             route.lastPointIndx -= toMoveArr.length;
             for (var i = 0; i < toMoveArr.length; i++) {
                 toMoveArr[i].TRAVEL_TIME = '0';
@@ -581,7 +581,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         //};
 
         function getTextStatuses  (status) {
-            console.log("Looking for status", textStatuses.length);
+            //console.log("Looking for status", textStatuses.length);
             for (var i = 0; i < textStatuses.length; i++) {
                 if (textStatuses[i].value === status) return textStatuses[i];
             }
@@ -1108,7 +1108,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.display = [];
             for (var  i= 0; i< scope.route.points.length; i++){
                 if (scope.route.points[i].status <4 || scope.route.points[i].status == 8) {
-                    console.log("Точка доставлена или отменена");
+                    //console.log("Точка доставлена или отменена");
                     continue;
 
                 }
@@ -1117,7 +1117,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 for (var j=0; j< scope.changedRoute.points.length; j++){
                     if (scope.route.points[i].row_id == scope.changedRoute.points[j].row_id ) {
                        //console.log("Соответствие найдено");
-                        console.log("Создаем и проверяем точку точку", scope.route.points[i]);
+                        //console.log("Создаем и проверяем точку точку", scope.route.points[i]);
                         scope.display.push({
                             uniqueID: scope.route.uniqueID,
                             row_id: scope.route.points[i].row_id,
@@ -1147,7 +1147,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.display.sort(compareArrivalTime);
 
 
-            console.log("Новый вариант маршрута", scope.display);
+            //console.log("Новый вариант маршрута", scope.display);
         }
 
         scope.handRecalc = function (item, t1, t2, route){

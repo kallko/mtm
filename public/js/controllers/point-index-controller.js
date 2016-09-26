@@ -4505,7 +4505,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined)) {
 
                 for (var k = 0; k < cache.routes.length; k++){
-                   for (var l=0; l< cache.routes.length; l++) {
+                   for (var l=k+1; l< cache.routes.length; l++) {
+                       console.log ("Ищем задвоенность", cache.routes[k].uniqueID, cache.routes[l].uniqueID);
                        if (k != l && cache.routes[k].uniqueID == cache.routes[l].uniqueID) {
                            console.log ("Решена проблема задвоенности роутов");
                            cache.routes.splice(k,1);

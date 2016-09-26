@@ -34,7 +34,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                 rootScope.asking = true;
                 timeout(function () {
                     setProblemUpdate();
-                }, 15000); //timeout, чтобы успел произойти первый перерасчет на сервере, прежде чем запрашивать первые 3 проблеммы.
+                }, 3000); //timeout, чтобы успел произойти первый перерасчет на сервере, прежде чем запрашивать первые 3 проблеммы.
 
 
             }

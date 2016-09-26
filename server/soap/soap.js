@@ -223,7 +223,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         console.log(" СОАП готов к загрузке прошлого дня");
     }
 
-    var date = date ? date : Date.now();
+     date = date ? date : Date.now();
 
     console.log('Date >>>', new Date(date));
 

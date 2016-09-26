@@ -384,7 +384,7 @@
                         title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
                                 'время gps: ' + row.mobile_push.gps_time + '\n' +
                                 'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
-                        {{row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}
+                        {{row.mobile_push.gps_time ? (row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')) : 'Нет данных'}}
                     </td>
                     <td class="service-time-col" >{{row.service_quality != undefined ? row.service_quality : "Неизвестно"}}</td>
                     <td class="gps-conf-col" title="{{::row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>

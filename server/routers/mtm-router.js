@@ -384,15 +384,15 @@ router.route('/dailydata')
                             console.log("Собираемся получать пуши", currentCompany, cashedDataArr[currentCompany].idArr );
                             cashedDataArr[currentCompany].repeat = cashedDataArr[currentCompany].idArr.length;
 
-
+                            cashedDataArr[currentCompany].allPushes = [];
                             var soapManager = new soap(req.session.login);
                             for (var k=0; k<cashedDataArr[currentCompany].idArr.length; k++) {
                             soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
-                                //console.log("receivePUSHES", data);
+                                console.log("391 receivePUSHES!!!!! for iten", iten);
                                 var obj = JSON.parse(data.return);
                                 console.log("Obj", obj[0], "mtm 336");
                                 //delete cashedDataArr[company].allPushes;
-                                cashedDataArr[company].allPushes=obj;
+                                cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);
                                 console.log("GetPushes finished for company", company, "получено пушей", cashedDataArr[currentCompany].idArr.length-cashedDataArr[currentCompany].repeat+1, "из", cashedDataArr[currentCompany].idArr.length );
                                 cashedDataArr[currentCompany].repeat--;
                                 if (cashedDataArr[currentCompany].repeat == 0) oldDayCalculate (company, data);
@@ -443,19 +443,22 @@ router.route('/dailydata')
                     //Мгновенный запуск на пересчет, после загрузки
 
 
-                    console.log("Запуск первого расчета, после первого запрса.");
+                    console.log("Запуск первого расчета, после первого запрса.", cashedDataArr[currentCompany].idArr);
+
                     var tt=0;
+                    cashedDataArr[currentCompany].allPushes =[];
                     for (var t=0; t< cashedDataArr[currentCompany].idArr.length; t++) {
                         var soapManager = new soap(cashedDataArr[currentCompany].firstLogin);
                         var iten = cashedDataArr[currentCompany].idArr[t];
+                        console.log("Request for Itin", iten);
                         soapManager.getPushes(iten, parseInt(Date.now() / 1000), currentCompany, function (company, data) {
-                            console.log("receivePUSHES!!!!!");
+                            console.log(" 452 receivePUSHES!!!!! for iten", iten);
                             tt++;
                             if (data != undefined && data.error == undefined) {
                                 var obj = JSON.parse(data.return);
                                 //console.log("Obj", obj[0], "mtm 1497");
                                 //delete cashedDataArr[company].allPushes;
-                                cashedDataArr[company].allPushes = obj;
+                                cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
                             }
 
                             console.log("GetPushes finished for company", company, t, tt );
@@ -1620,6 +1623,12 @@ router.route('/confirmonline')
         if (onlineClients.length == 0) {
             var obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
             onlineClients.push(obj);
+            var result={};
+            result.server_time = parseInt(Date.now() / 1000);
+            result.statistics = cashedDataArr[currentCompany].statistic;
+            result.status = 'ok';
+
+            res.status(200).json(result);
             return;
         }
 
@@ -1634,15 +1643,15 @@ router.route('/confirmonline')
 
         }
         if (!exist) {
-            var obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
+            obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
             onlineClients.push(obj);
         }
 
-        for (var i = 0; i < onlineClients.length; i++) {
+        for ( i = 0; i < onlineClients.length; i++) {
             //console.log("Online now", onlineClients[i]);
 
         }
-        for (var i = 0; i < blockedRoutes.length; i++) {
+        for ( i = 0; i < blockedRoutes.length; i++) {
             //console.log("Blocked now", blockedRoutes[i]);
 
         }
@@ -1735,7 +1744,7 @@ function strToTstamp(strDate, lockaldata) {
 
         year = ('' + today.getFullYear()).substring(2);
         //console.log("Constructor", day, month, year);
-        var adding = day+'.'+month+'.'+year;
+        adding = day+'.'+month+'.'+year;
         if (strDate.length<10) {
             strDate = adding + " " + strDate;
            // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
@@ -2155,16 +2164,17 @@ function startPeriodicCalculating() {
 
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length + 2; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
             console.log ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests );
+            cashedDataArr[companys[k]].allPushes=[];
             for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
-                        console.log("receivePUSHES!!!!!");
+                        console.log("2168 receivePUSHES!!!!! for iten", iten);
                         if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //console.log("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
-                        cashedDataArr[company].allPushes=obj;}
+                        cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);}
                         cashedDataArr[company].needRequests--;
                         console.log("GetPushes finished for company", company, cashedDataArr[company].needRequests);
                         if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
@@ -2437,12 +2447,12 @@ function startPeriodicCalculating() {
 
                         console.log("начинаем проверку качества трека", companyAsk);
                         for (var k=0; k<cached.routes.length; k++){
-                            if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0) {
+                            if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
                                 console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
                                 continue;
                             }
 
-                            for(var l=1; l<cached.routes[k].real_track.length; l++){
+                            for( l=1; l<cached.routes[k].real_track.length; l++){
                                 if (cached.routes[k].real_track[l].t1 != cached.routes[k].real_track[l-1].t2 )
                                     if (cached.routes[k].real_track[l-1].id+'' != cached.routes[k].real_track[l].id+''
 
@@ -2873,10 +2883,11 @@ function checkPushesTimeGMTZone(pushes, company){
 
 
         var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*4 : 0;
+        pushes[i].gps_time_ts=temp;
         if( temp == 0) {
             console.log("Невалидный ПУШ", company);
         }
-        pushes[i].gps_time_ts=temp;
+
         //console.log("New Time", temp);
         var date=new Date();
         date.setTime(pushes[i].gps_time_ts*1000);
@@ -2890,11 +2901,11 @@ function checkPushesTimeGMTZone(pushes, company){
 function timestmpToStr(d) {
     //console.log("d", d, "type", typeof (d), "proba", d.getHours());
 
-    var dformat =
-        [d.getHours().padLeft(),
+
+    return  [d.getHours().padLeft(),
             d.getMinutes().padLeft(),
             d.getSeconds().padLeft()].join(':');
-    return dformat;
+
 }
 
 // добавить ноль слева, если число меньше десяти
@@ -3183,7 +3194,7 @@ function lookForNewIten(company) {
 
 
                     lastFilterId++;
-                    lastRowId++
+                    lastRowId++;
 
 
                     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(newRoutes);
@@ -3724,11 +3735,11 @@ function connectPointsAndPushes(company) {
 
     for (i = 0; i<mobilePushes.length;i++){
 
-
-        if (mobilePushes[i].gps_time == 0 ||
-            (mobilePushes[i].lat == 0 && mobilePushes[i].lon == 0) ||
-            mobilePushes.gps_time > parseInt(Date.now()/1000)
-        ) continue;
+//todo временно закомментируем, чтобы проверить наличие пушей
+//        if (mobilePushes[i].gps_time == 0 ||
+//            (mobilePushes[i].lat == 0 && mobilePushes[i].lon == 0) ||
+//            mobilePushes.gps_time > parseInt(Date.now()/1000)
+//        ) continue;
 
 
 
@@ -3740,6 +3751,8 @@ function connectPointsAndPushes(company) {
 
 
                 var tmpPoint = cashedDataArr[company].routes[j].points[k];
+
+
                 var LAT = parseFloat(tmpPoint.LAT);
                 var LON = parseFloat(tmpPoint.LON);
                 var lat = mobilePushes[i].lat;

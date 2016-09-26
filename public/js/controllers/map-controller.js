@@ -101,7 +101,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-            if (!route ) return;
+            if (!route || route.real_track == "invalid parameter 'gid'. ") return;
             console.log("I gona draw real route", route);
             var start = strToTstamp(route.START_TIME);
             var end = strToTstamp(route.END_TIME);
@@ -129,9 +129,23 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             gpsPushMarkers=[];
 
             if( track!=undefined) {
-                for (var i = 0; i < track.length; i++) {
+                //todo тестово отладочный блок
+                for ( i = 1; i < track.length; i++) {
+                    if (track[i].t1 != track[i-1].t2){
+
+                        console.log ("Проверка трека показала разрыв", track[i-1] , track[i] );
+                       if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
+                    }
+                }
+
+
+                for (i = 0; i < track.length; i++) {
                     // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
-                    if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) continue;
+                    if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) {
+                        console.log("Это какой то бракованный СТЭЙТ. Я не буду его рисовать", track[i]);
+                        if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
+                        continue;
+                    }
                     //console.log(" track[i].time",  track[i].coords);
 
 
@@ -1389,7 +1403,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         oms.addListener('unspiderfy', function(event) {
             scope.tempCurrentWayPoints=[];
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
-            scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
+            if (scope.dataActivePoint.stopState != undefined) scope.drawConnectsActivePoint(scope.dataActivePoint.stopState, scope.dataActivePoint.number, scope.dataActivePoint.TASK_NUMBER);
             if (map.getZoom() > 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
                 drowConnectWithStopsAndPoints();
@@ -1500,7 +1514,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         //Функция находящая ближайший марке, находящийся в oms при приближении к нему маркера остановки
         function findAndClickMarker(obj){
-            console.log("obj LAT LON", obj);
+            //console.log("obj LAT LON", obj);
             var i=0;
             while(i<markersArr.length){
                 if (typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined' && markersArr[i].source.NUMBER==obj.NUMBER)// выбрасываем маркера остановок и машины, находи марке соответсвующий объекту
@@ -2100,7 +2114,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             map.setZoom(18);
             var temp = map.getZoom();
             if (!route || !route.problem_point || !route.problem_point.waypoint ) return;
-            console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), temp);
+            //console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), temp);
             setMapCenter(parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), 18);
 
 
