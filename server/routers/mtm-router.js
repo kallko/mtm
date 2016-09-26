@@ -2522,12 +2522,16 @@ function dataForPredicate(company, callback){
         var route=cashedDataArr[company].routes[i];
 
         //console.log("Вот такой вот роут real trac", route.real_track);
-        if(route.real_track !=undefined && route.real_track.length>0) {
+        if(route.real_track !=undefined && route.real_track.length>0 && route.real_track != "invalid parameter 'gid'. ") {
             var indx = route.uniqueID;
             var carPos = [{
                 LAT: route.real_track[route.real_track.length - 1].lat,
                 LON: route.real_track[route.real_track.length - 1].lon
             }];
+
+            if (carPos[0].LAT == undefined) {
+                console.log ("НАЙДЕНА ОШИБОЧКА!!!!!!&*&*&*^&^%&*%&", route.real_track);
+            }
             var obj = {id: indx, points: carPos.concat(route.points)};
             result.push(obj);
             //if (route.uniqueID == 231157) {
@@ -2551,13 +2555,19 @@ function dataForPredicate(company, callback){
     }
     while(j<collection.length){
         var pointsStr = '';
-        for (var  i= 0; i < collection[j].points.length; i++) {
-            //console.log("i=", i);
+        //console.log(collection[j].points);
+        if (collection[j].points == undefined) {
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Точек нет!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        } else {
+            console.log(collection[j].points.length);
+        }
+        for (i= 0; i < collection[j].points.length; i++) {
+            //console.log("i=", i, collection[j].points[i].LAT, " ", collection[j].points[i].LON);
             if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
                 pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
             }
         }
-        // console.log(pointsStr);
+         //console.log( pointsStr, "PointSTR");
 
         //запрос матрицы по одному маршруту с обработкой в колбэке.
        /* console.log("Пытаемся получить предсказание МТМ 2241");*/
