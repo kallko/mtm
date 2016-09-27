@@ -84,7 +84,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 };
 
 // получение части треков по всему склееному решению и заданному времени
-TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, company) {
+TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, company, dayStart) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
             this.stop_d, this.move_s, this.move_d),
         counter = 0,
@@ -108,9 +108,15 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                         if (data.sensors[jj].real_track != undefined && data.sensors[jj].real_track[data.sensors[jj].real_track.length-2] != undefined) {
                             newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t1 + url.substring(indxEnd);
                         } else {
-                            newUrl=url;
+
+                            if (data.sensors[jj].real_track != undefined && data.sensors[jj].real_track.length == 1){
+                                newUrl=url.substring(0,indxBegin) + '&from=' + dayStart + url.substring(indxEnd);
+                            } else {
+                                newUrl=url;
+                            }
+
                         }
-                        //console.log("url=", newUrl);
+                        console.log("url=", newUrl);
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true

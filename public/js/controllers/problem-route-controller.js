@@ -62,21 +62,31 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
  //           }
 
-            var need=3;
+            console.log("На момент запроса настройки", rootScope.data, rootScope.settings);
+            var need=0;
             var exist=0;
             if (rootScope.data != undefined && rootScope.data.routes != undefined){
                 exist = rootScope.data.routes.length;
             }
             if(rootScope.settings != undefined) {
-                need = parseInt(rootScope.settings.problems_to_operator) - exist;
+                var settings;
+                if (rootScope.data != undefined && rootScope.data.settings != undefined) {
+                    settings = rootScope.data.settings;
+                } else {
+                    settings=rootScope.settings;
+                }
+                for(var i=0; i<settings.userRoles.length; i++){
+                    if (settings.userRoles[i] == 'operator') need = parseInt(settings.problems_to_operator) - exist;
+                }
+
 
             }
 
             //if(need<0) need='';
-            //console.log("Данные", need, rootScope.settings.problems_to_operator, exist);
+            console.log("Данные перед запросом", need, rootScope.settings.problems_to_operator, exist);
             console.log(" Go to ASK ", !rootScope.data,  need,  rootScope.asking);
             if(!rootScope.asking) return;
-            if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist ==0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
+            if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist == 0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 console.log("Give me", need, "the problem please! ");
 
 

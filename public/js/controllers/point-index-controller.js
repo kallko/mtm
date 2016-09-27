@@ -206,34 +206,42 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 } else {
 
                     //Два принципиально разных случая Оператор выбирает один из проблемных роутов или один из общих (общий может быть заблокирован)
-                    for (var i=0; i<rootScope.data.routes.length; i++){
-                        if (scope.filters.route == rootScope.data.routes[i].filterId) {
-                            console.log("Вы выбрали маршрут из проблемных");
+                    if (rootScope.data.routes != undefined && rootScope.data.routes.length>0) {
 
-                            scope.drawRoute(scope.filters.route, false, false);
-                            rootScope.carCentre=true;
-                            return;
-                            //todo сделать вывод статистики маршрута
+                        for ( i = 0; i < rootScope.data.routes.length; i++) {
+                            if (scope.filters.route == rootScope.data.routes[i].filterId) {
+                                console.log("Вы выбрали маршрут из проблемных");
+
+                                scope.drawRoute(scope.filters.route, false, false);
+                                rootScope.carCentre = true;
+                                return;
+                                //todo сделать вывод статистики маршрута
+                            }
                         }
                     }
-
 
                     console.log("Вы выбрали маршрут из общедоступных", rootScope.settings);
 
                     var extra = 1; //Стандартное количество привышения количества роутов
+                    var settings;
+                    if (rootScope.data != undefined && rootScope.data.settings != undefined) {
+                        settings = rootScope.data.settings;
+                    } else {
+                        settings = rootScope.settings;
+                    }
 
-                    for (i=0; i<rootScope.data.settings.userRoles.length; i++){
-                        if (rootScope.data.settings.userRoles[i] == 'supervisor' ||  rootScope.data.settings.userRoles[i] == 'head'){
+                    for (i=0; i<settings.userRoles.length; i++){
+                        if (settings.userRoles[i] == 'supervisor' ||  settings.userRoles[i] == 'head'){
                             extra = 100;
                             break;
                         }
                     }
-                    console.log("EXTRA", extra, rootScope.data.settings.role);
+                    console.log("EXTRA", extra);
 
 
 
 
-                        if(rootScope.data.routes.length >= rootScope.settings.problems_to_operator + extra){
+                        if(rootScope.data.routes.length >= settings.problems_to_operator + extra){
                         scope.$emit('clearMap');
                         alert("Вы уже заблокировали предельное количество маршрутов");
                         return;
@@ -4502,12 +4510,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
-            if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined)) {
+            if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined )) {
 
                 for (var k = 0; k < cache.routes.length; k++){
                    for (var l=k+1; l< cache.routes.length; l++) {
                        console.log ("Ищем задвоенность", cache.routes[k].uniqueID, cache.routes[l].uniqueID);
-                       if (k != l && cache.routes[k].uniqueID == cache.routes[l].uniqueID) {
+                       if (k != l && cache.routes[k].uniqueID == cache.routes[l].uniqueID || cache.routes[k] == undefined) {
                            console.log ("Решена проблема задвоенности роутов");
                            cache.routes.splice(k,1);
                            k--;
@@ -4519,6 +4527,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                 console.log("Re Display", cache, "First time rotscope.data", rootScope.data );
+                if (cache.routes[0] == undefined) cache.routes = [];
                 if( scope.rowCollection == undefined) scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
                 if (scope.displayCollection == undefined) scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
                 console.log("PIC receive problem", cache);
@@ -4558,11 +4567,15 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             } else {
                 console.log ("У нас уже есть проблеммы, но мы еще получили", cache);
                 rootScope.nowTime = cache.server_time;
-                var last = cache.routes.length-1;
-                rootScope.data.routes.push(cache.routes[last]);
-                scope.rowCollection=scope.rowCollection.concat(cache.routes[last].points);
-                scope.displayCollection = [].concat(scope.rowCollection);
-                rootScope.rowCollection = scope.rowCollection;
+                if (cache.routes[0]== undefined) cache.routes=[];
+                if(cache.routes != undefined && cache.routes.length >0) {
+                    var last = cache.routes.length-1;
+                    rootScope.data.routes.push(cache.routes[last]);
+                    scope.rowCollection=scope.rowCollection.concat(cache.routes[last].points);
+                    scope.displayCollection = [].concat(scope.rowCollection);
+                    rootScope.rowCollection = scope.rowCollection;
+                }
+
 
 
             }

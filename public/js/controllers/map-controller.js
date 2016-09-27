@@ -117,7 +117,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 color = '',
                 stopIndx,
                 stopTime,
-                timeThreshold = scope.data.settings.timeThreshold * 60,
+                timeThreshold = rootScope.settings.timeThreshold * 60,
                 drawStops = $('#draw-stops').is(':checked'),    // отрисовать стопы
             //drawStops = true;
 
@@ -682,18 +682,20 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         var LON=mobilePush._latlng.lng;
                         var lat=servicePointsLat;
                         var lon=servicePointsLng;
-                        var line_points = [
+                        if(LAT != undefined && LON != undefined && lat != undefined && lon != undefined) {
+                            var line_points = [
                             [LAT, LON],
                             [lat, lon]];
 
-                        var qwe = new L.polyline(line_points, {
-                            color: '#46b8da',
-                            weight: 4,
-                            opacity: 0.5,
-                            smoothFactor: 1
-                        });
-                        map.addLayer(qwe);
-                        break;
+                            var qwe = new L.polyline(line_points, {
+                                color: '#46b8da',
+                                weight: 4,
+                                opacity: 0.5,
+                                smoothFactor: 1
+                            });
+                            map.addLayer(qwe);
+                            break;}
+
                     }
                 }
 

@@ -536,6 +536,7 @@ router.route('/askforroute')
                 //console.log("Ищем в проблемных");
                 if (uniqueID == cashedDataArr[currentCompany].line_routes[i].uniqueID) {
                     result = cashedDataArr[currentCompany].line_routes[i];
+                    cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes || [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].line_routes.splice(i, 1);
                     //console.log ("Маршрут найден в проблемных");
@@ -550,6 +551,7 @@ router.route('/askforroute')
                 if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID) {
                     result = cashedDataArr[currentCompany].routes[i];
                     if (cashedDataArr[currentCompany].blocked_routes == undefined) cashedDataArr[currentCompany].blocked_routes = [];
+                    cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes || [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].routes.splice(i, 1);
                     //console.log ("Маршрут найден в беспроблемных");
@@ -1500,6 +1502,7 @@ router.route('/askforproblems/:need')
             if (result.routes == undefined || result.routes.length == 0) {
                 result.routes = [];
                 result.allRoutes = cashedDataArr[currentCompany].allRoutes;
+                result.server_time = parseInt(Date.now() / 1000);
             }
             console.log("Need=", need);
             if (need != 1){
@@ -2195,6 +2198,10 @@ function startPeriodicCalculating() {
 
             var end = parseInt(Date.now()/1000);
             var start = cashedDataArr[companys[k]].last_track_update;
+            var dayStart = new Date();
+            dayStart.setHours(0,0,0,0);
+            dayStart=dayStart/1000;
+            console.log("Midnight TimeStamp = ", start)
             var companyAsk = companys[k];
                 console.log("Check data", cashedDataArr[companyAsk].routes.length);
                 tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
@@ -2484,7 +2491,7 @@ function startPeriodicCalculating() {
                     if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
 
 
-                }, companyAsk);
+                }, companyAsk, dayStart);
 
 
 
@@ -2639,7 +2646,7 @@ function dataForPredicate(company, callback){
 
 function uncalcPredication(route, company) {
 
-    console.log("This is uncalc route");
+    //console.log("This is uncalc route");
     var now = parseInt(Date.now()/1000);
 
 
