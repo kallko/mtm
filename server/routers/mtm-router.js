@@ -2134,6 +2134,18 @@ function startPeriodicCalculating() {
         }
     }
 
+    //Удаляем из списка прошлые дни
+
+    for( i=0; i<companysToCalc.length; i++){
+        console.log("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].currentDay);
+        if (cashedDataArr[companysToCalc[i]].currentDay == false){
+            console.log("Это прошлый день");
+            companysToCalc.splice(i,1);
+            i--;
+        }
+    }
+
+
     // Не считаем те компании, у которых размер роутов равен 0
     for(var i=0; i<companysToCalc.length; i++){
         if ((cashedDataArr[companysToCalc[i]].routes == undefined || cashedDataArr[companysToCalc[i]].routes.length == 0) && (cashedDataArr[companysToCalc[i]].line_routes == undefined || cashedDataArr[companysToCalc[i]].line_routes.length == 0)){
@@ -2201,7 +2213,7 @@ function startPeriodicCalculating() {
             var dayStart = new Date();
             dayStart.setHours(0,0,0,0);
             dayStart=dayStart/1000;
-            console.log("Midnight TimeStamp = ", start)
+            console.log("Midnight TimeStamp = ", dayStart);
             var companyAsk = companys[k];
                 console.log("Check data", cashedDataArr[companyAsk].routes.length);
                 tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
@@ -4259,7 +4271,7 @@ function calculateStatistic (company){
 }
 
 function oldDayStatuses(company) {
-    console.log("Заменяем статусы компании", company )
+    console.log("Заменяем статусы компании", company );
     for (var i=0; i<cashedDataArr[company].routes.length;i++){
         for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
             if (cashedDataArr[company].routes[i].points[j].status >2 && cashedDataArr[company].routes[i].points[j].status !=8 ) {
@@ -4274,6 +4286,7 @@ function oldDayCalculate (company, data) {
     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
     data.current_server_time = parseInt(new Date() / 1000);
     data.currentDay = false;
+    cashedDataArr[company].currentDay = false;
     console.log("Прошлый день готов к рассчету", company);
     createFilterIdForOldDay(company);
 
@@ -5016,7 +5029,7 @@ function checkServiceTime(company) {
 function startCalculateCompany(company) {
 
     console.log("Все данные получены, пересчитываем компанию", company);
-
+    if (cashedDataArr[company].currentDay == false) return;
     checkCorrectCalculating(company);
     cashedDataArr[company].recalc_finishing = false;
     selectRoutes(company);

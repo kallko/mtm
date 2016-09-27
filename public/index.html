@@ -237,7 +237,7 @@
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
                     </th>
-                    <th ng-show="data.settings.user == 'ids.kalko'" class="degree" title="Достоверность"></th>
+                    <th ng-show="data.settings.user == 'IDS.kalko'" class="degree" title="Достоверность"></th>
                     <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
@@ -283,7 +283,7 @@
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
                     </th>
-                    <th ng-show="data.settings.user == 'ids.kalko'" class="degree" title="Достоверность">%</th>
+                    <th ng-show="data.settings.user == 'IDS.kalko'" class="degree" title="Достоверность">%</th>
                     <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
@@ -343,7 +343,7 @@
                                 {{getTextStatus(row)}}
                             </span>
                     </td>
-                    <td ng-show="data.settings.user == 'ids.kalko'" class="degree"  >
+                    <td ng-show="data.settings.user == 'IDS.kalko'" class="degree"  >
                         <span>
                           {{row.limit}}
                         </span>
@@ -921,7 +921,7 @@
         </div> <br> <br>
 
         <div>
-            <button ng-show="data != undefined && ((data.settings.user == 'ids.kalko') || (data.settings.user == 'ids.dsp') )" ng-click="statuses()"> STATUS</button>
+            <button ng-show="data != undefined && ((data.settings.user == 'IDS.kalko') || (data.settings.user == 'IDS.dsp') )" ng-click="statuses()"> STATUS</button>
         </div>
 
         <div class="block-title">

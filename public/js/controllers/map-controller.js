@@ -134,7 +134,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     if (track[i].t1 != track[i-1].t2){
 
                         console.log ("Проверка трека показала разрыв", track[i-1] , track[i] );
-                       if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
+                       if (rootScope.data.settings.user == "IDS.kalko" || rootScope.data.settings.user == "IDS.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
                     }
                 }
 
@@ -143,7 +143,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
                     if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) {
                         console.log("Это какой то бракованный СТЭЙТ. Я не буду его рисовать", track[i]);
-                        if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
+                        if (rootScope.data.settings.user == "IDS.kalko" || rootScope.data.settings.user == "IDS.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
                         continue;
                     }
                     //console.log(" track[i].time",  track[i].coords);
