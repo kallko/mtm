@@ -491,7 +491,7 @@ router.route('/dailydata')
                         startServer = true;
                         var timerId = setInterval(function() {
                             startPeriodicCalculating(currentCompany);
-                        }, 120 * 1000);}
+                        }, 80 * 1000);}
                     // через 5 сек остановить повторы
                     //setTimeout(function() {
                     //    clearInterval(timerId);
@@ -1271,7 +1271,7 @@ router.route('/savetonode/')
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         console.log("Приступаем к сохранению роута", i, id, currentCompany);
-        while(i<cashedDataArr[currentCompany].blocked_routes.length){
+        while(cashedDataArr[currentCompany].blocked_routes != undefined && i<cashedDataArr[currentCompany].blocked_routes.length){
                 if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
                     cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                     console.log("Overwright Route");
@@ -1632,7 +1632,7 @@ router.route('/confirmonline')
             onlineClients.push(obj);
             var result={};
             result.server_time = parseInt(Date.now() / 1000);
-            result.statistics = cashedDataArr[currentCompany].statistic;
+            if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].statistic != undefined) result.statistics = cashedDataArr[currentCompany].statistic;
             result.status = 'ok';
 
             res.status(200).json(result);
@@ -2180,7 +2180,7 @@ function startPeriodicCalculating() {
 
     function callbackDispetcher(companys) {
         for (var k=0; k<companys.length; k++) {
-
+            middleTime = parseInt(Date.now()/1000);
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length + 2; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
             console.log ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests );
             cashedDataArr[companys[k]].allPushes=[];
@@ -2224,6 +2224,10 @@ function startPeriodicCalculating() {
                 function (data, companyAsk) {
                    // if (!first) return;
 
+                    // todo тестово отладочный блок
+                    //checkeConcatTrack(companyAsk, 437123, data);
+                    //checkeConcatTrack(companyAsk, 437323, data);
+
                     //console.log('getRealTrackParts DONE', data);
                     //first = false;
 
@@ -2236,14 +2240,18 @@ function startPeriodicCalculating() {
                         //return;
                     }
 
-                    for( var i=0; i<data.length; i++){
+                    for(i=0; i<data.length; i++){
+
+                    if (typeof (data[i].data) == 'string') data[i].data =[];
                             //console.log("Stage 1", i, data[i]);
-                        if (data[i] == undefined || data[i].data == undefined) continue;
+                        if (data[i] == undefined || data[i].data == undefined || data[i].data.length == 0) continue;
+
+
 
                         for (j=0; j<data[i].data.length; j++){
                             //console.log("Stage 2");
                            // console.log("Time == ", data[i].data[j].time);
-                          if (data[i].data[j].time == 0 || data[i].data[j].time == '0' || data[i].data[j] == "error") {
+                          if (data[i].data[j].time == 0 || data[i].data[j].time == '0' || data[i].data[j] == "error" ) {
                               //console.log("delete 0 time state");
                               data[i].data.splice(j,1);
                               j--;
@@ -2251,6 +2259,8 @@ function startPeriodicCalculating() {
                         }
 
                     }
+
+
 
                     var cached = cashedDataArr[companyAsk];
                     cashedDataArr[companyAsk].last_track_update = parseInt(Date.now()/1000);
@@ -2260,6 +2270,19 @@ function startPeriodicCalculating() {
                             for (var j = 0; j < data.length; j++) {
                                 if (cached.routes[i].transport.gid == data[j].gid && data[j].data != cached.routes[i].real_track) {
                                     //TODO конкатенация свежих данных.
+
+                                    //Первое слияние за день прописываем отдельно
+
+                                    if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length < 2 || cached.routes[i].real_track == "invalid parameter 'gid'. ")) {
+
+                                        if (data[j].data.length<2)  continue;
+
+                                        console.log("№;№;№;№;;№;№;№;№;Записываем Первые данные№;№;№;№;№;№;№;№");
+                                        cached.routes[i].real_track = data[j].data;
+
+                                    continue;
+                                    }
+
 
                                    // var size = data[j].data.length;
                                    //console.log("____________________________________")
@@ -2468,7 +2491,7 @@ function startPeriodicCalculating() {
 
                         }
 
-                        console.log("начинаем проверку качества трека", companyAsk);
+                        //console.log("начинаем проверку качества трека", companyAsk);
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
                                 console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
@@ -2498,6 +2521,9 @@ function startPeriodicCalculating() {
                             }
 
                         }
+                        //
+                        //checkeConcatTrack(companyAsk, 437123);
+                        //checkeConcatTrack(companyAsk, 437323);
 
                     }
 
@@ -5044,8 +5070,50 @@ function checkServiceTime(company) {
 }
 
 
-function startCalculateCompany(company) {
+function checkeConcatTrack(company, id, data){
+    if (company == undefined || id == undefined ){
+        console.log("Ошибка в checkeConcatTrack. Данные неопределены");
+        return;
+    }
+    //console.log("Для проверки переданы данные", company, id, cashedDataArr[company].routes.length);
+    var route;
+     for(var i=0; i< cashedDataArr[company].routes.length; i++){
 
+         if (cashedDataArr[company].routes[i].uniqueID == id) {
+             route = cashedDataArr[company].routes[i];
+             break;
+         }
+
+     }
+
+    if (route == undefined) {
+        //console.log("Маршрут для проверки не найден");
+        return;
+    }
+
+    console.log("В маршруте сейчас ", route.real_track.length, " стэйтов");
+    console.log ("Последний стейт", route.real_track[route.real_track.length-1]);
+
+    if (data == undefined) return;
+    var newTrack;
+    //console.log(data, "data for concat");
+    //console.log("Количество полученных наборов", data.length  );
+    for (i=0; i<data.length; i++){
+
+       if (data[i].gid == route.transport.gid){
+           newTrack=data[i].data;
+           console.log("Новые стейты найдены. Их имеется", newTrack.length);
+           break;
+       }
+   }
+
+    for (i=0; i<newTrack.length; i++){
+        console.log("Получен стейт", newTrack[i]);
+    }
+}
+
+function startCalculateCompany(company) {
+    startTime = parseInt(Date.now()/1000);
     console.log("Все данные получены, пересчитываем компанию", company);
     if (cashedDataArr[company].currentDay == false) return;
     checkCorrectCalculating(company);
@@ -5064,6 +5132,7 @@ function startCalculateCompany(company) {
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
     printData(company); //todo статистическая функция, можно убивать
+    if (middleTime) console.log("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
 }
 
 

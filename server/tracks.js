@@ -105,18 +105,21 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                         var indxBegin=url.indexOf('&from=');
                         var indxEnd=url.indexOf('&to=');
                         var newUrl='';
-                        if (data.sensors[jj].real_track != undefined && data.sensors[jj].real_track[data.sensors[jj].real_track.length-2] != undefined) {
-                            newUrl=url.substring(0,indxBegin) + '&from=' + data.sensors[jj].real_track[data.sensors[jj].real_track.length-1].t1 + url.substring(indxEnd);
+                        //if (data.routes[i].real_track != undefined && typeof(data.routes[i].real_track) != 'string') console.log ("Стейтов перед запросом", data.routes[i].real_track.length);
+                        if (data.routes[i].real_track != undefined && data.routes[i].real_track[data.routes[i].real_track.length-2] != undefined) {
+                            newUrl=url.substring(0,indxBegin) + '&from=' + data.routes[i].real_track[data.routes[i].real_track.length-1].t1 + url.substring(indxEnd);
                         } else {
 
-                            if (data.sensors[jj].real_track != undefined && data.sensors[jj].real_track.length == 1){
+                            if (data.routes[i].real_track != undefined && data.routes[i].real_track.length <= 1){
                                 newUrl=url.substring(0,indxBegin) + '&from=' + dayStart + url.substring(indxEnd);
                             } else {
                                 newUrl=url;
                             }
 
                         }
-                        console.log("url=", newUrl);
+                        //if (data.sensors[jj].GID == 761 || data.sensors[jj].GID =="761"){
+                        //    console.log("Newurl=", newUrl);
+                        //    console.log("   url=", url)}
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true

@@ -4568,7 +4568,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log("rootScope.data", rootScope.data);
                 rootScope.nowTime = cache.server_time;
             } else {
-                console.log ("У нас уже есть проблеммы, но мы еще получили", cache);
+                if (rootScope.data != undefined && rootScope.data.routes.length > 0 && cache.routes != undefined && cache.routes.length>0) console.log ("У нас уже есть проблеммы, но мы еще получили", cache);
                 rootScope.nowTime = cache.server_time;
                 if (cache.routes[0]== undefined) cache.routes=[];
                 if(cache.routes != undefined && cache.routes.length >0) {
@@ -4740,6 +4740,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                     if (data.route != undefined) {
+                        checkRouteQuality(data.route);
                         rootScope.data.routes.push(data.route);
                         scope.filters.route = data.route.filterId;
                         console.log("Раз два три четыре пять, начинаем рисовать", scope.filters.route );
@@ -4833,6 +4834,31 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         }
+
+
+        function checkRouteQuality(route){
+            if (route == undefined) {
+                console.log("Ошибка в checkRouteQuality, данные не определены");
+                return;
+            }
+             if (route.real_track == undefined || route.real_track.length == 0){
+                 console.log("Трек неопределен или равен 0");
+             } else {
+                 console.log("Трек состоит из", route.real_track.length, "Стейтов");
+                 for (var i=0; i<route.real_track.length; i++ ){
+                     if (route.real_track[i].id == 0) console.log("Есть стейт с ID = 0", route.real_track[i]);
+                     if (route.real_track[i].state == "MOVE") {
+                         if (route.real_track[i].coords == undefined || route.real_track[i].coords.length == 0) {
+                             console.log("У стейта мув нет координат");
+                         } else {
+                             console.log("У стейта мув есть координаты");
+                         }
+                     }
+                 }
+             }
+
+        }
+
 
         rootScope.$on('clearDisplay', function(event) {
             console.log ("Расчищаем коллекцию");
