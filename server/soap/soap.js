@@ -278,6 +278,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
             console.log(dateDay+'.'+dateMonth+'.'+dateYear);
             setTimeout(function(){
+                console.log("Запрос getOldDay");
 
                     client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
                         try{
@@ -286,6 +287,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                 try{
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
+                                    console.log(data.closedRoutesFrom1C, "Soap 290")
                                 }catch(e){
                                     console.log(e, "SOAP 285");
                                 }
@@ -298,48 +300,49 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             }, 5000);
         }
 
-        client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
-            if (!err) {
-                console.log('DONE getDailyPlan');
-                console.log(result.return, "SOAP 299");
 
-                // парсинг ответа соапа из xml в json
-                parseXML(result.return, function (err, res) {
-                    if (res.MESSAGE.PLANS == null) {
-                        console.log('NO PLANS!');
-                        callback({status: 'no plan'});
-                        return;
-                    }
+            console.log("Запрос dailyPlanXML");
+            client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
+                if (!err) {
+                    console.log('DONE getDailyPlan');
+                    console.log(result.return, "SOAP 299");
 
-                    var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
+                    // парсинг ответа соапа из xml в json
+                    parseXML(result.return, function (err, res) {
+                        if (res.MESSAGE.PLANS == null) {
+                            console.log('NO PLANS!');
+                            callback({status: 'no plan'});
+                            return;
+                        }
 
-
-
-                    data.iLength = itineraries.length;
-
-                    //console.log("Решения на сейчас", itineraries[0].$);
+                        var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
 
 
-                    //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
-                    // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
-                    // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
-                    if (!config.loadOnlyItineraryNew) data.iLength *= 2;
+                        data.iLength = itineraries.length;
 
-                    // получение развернутого решения по списку полученных ранее id решений
-                    for (var i = 0; i < itineraries.length; i++) {
-                        (function (ii) {
-                            setTimeout(function () {
-                                me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
-                            }, ii * 5000);
-                        })(i);
-                    }
+                        //console.log("Решения на сейчас", itineraries[0].$);
 
-                });
-            } else {
-                console.log('getDailyPlan ERROR');
-                console.log(err.body, "SOAP 335");
-            }
-        });
+
+                        //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
+                        // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
+                        // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
+                        if (!config.loadOnlyItineraryNew) data.iLength *= 2;
+
+                        // получение развернутого решения по списку полученных ранее id решений
+                        for (var i = 0; i < itineraries.length; i++) {
+                            (function (ii) {
+                                setTimeout(function () {
+                                    me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
+                                }, ii * 5000);
+                            })(i);
+                        }
+
+                    });
+                } else {
+                    console.log('getDailyPlan ERROR');
+                    console.log(err.body, "SOAP 335");
+                }
+            });
 
 
 
@@ -392,6 +395,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             data[nIndx].sended = false;
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
+            console.log("Запросы СОАП 398");
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
             me.getAdditionalData(client, data, itIsToday, nIndx, callback, date);
 
@@ -544,7 +548,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
-                //console.log(data[nIndx].reasons, "data SOAP 429");
+                console.log(data.closedRoutesFrom1C, "data SOAP 429");
                 checkBeforeSend(data, callback);
             });
 

@@ -83,7 +83,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             }
 
             //if(need<0) need='';
-            console.log("Данные перед запросом", need, rootScope.settings.problems_to_operator, exist);
+            //console.log("Данные перед запросом", need, rootScope.settings.problems_to_operator, exist);
             console.log(" Go to ASK ", !rootScope.data,  need,  rootScope.asking);
             if(!rootScope.asking) return;
             if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist == 0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {

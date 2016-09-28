@@ -385,7 +385,7 @@ router.route('/dailydata')
                             cashedDataArr[currentCompany].repeat = cashedDataArr[currentCompany].idArr.length;
 
                             cashedDataArr[currentCompany].allPushes = [];
-                            var soapManager = new soap(req.session.login);
+                            soapManager = new soap(req.session.login);
                             for (var k=0; k<cashedDataArr[currentCompany].idArr.length; k++) {
                             soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
                                 console.log("391 receivePUSHES!!!!! for iten", iten);
@@ -1609,6 +1609,10 @@ router.route('/askforproblems/:need')
             }
 
         result.allRoutes = cashedDataArr[currentCompany].allRoutes;
+        //Перед отправкой проверка на задвоенность маршрутов
+
+
+
         console.log("Result length", result.routes.length);
         res.status(200).json(result);
 
@@ -2695,12 +2699,14 @@ function uncalcPredication(route, company) {
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
+                console.log("Присваиваем статус 5");
                 //points[i].variantus = 2770;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                 //console.log("TIME_OUT for point", points[i]);
             }
             if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
                 points[i].status = 4;
+                console.log("Присваиваем статус 4");
                 //points[i].variantus = 2836;
                 points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
 
@@ -2775,6 +2781,7 @@ function calcPredication(route, company) {
                     //todo решить проблему со складом
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
+                        console.log("Присваиваем статус 4");
                         //route.points[j].variantus = 2910;
                         route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     }
@@ -2784,6 +2791,7 @@ function calcPredication(route, company) {
                 if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
 
                     route.points[i].status = 4;
+                    console.log("Присваиваем статус 4");
                     //route.points[i].variantus =2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
@@ -2828,6 +2836,7 @@ function calcPredication(route, company) {
                         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
                         //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                         route.points[j].status = 4;
+                        console.log("Присваиваем статус 4");
                         //route.points[j].variantus = 2960;
                         //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                         route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
@@ -2874,6 +2883,7 @@ function calcPredication(route, company) {
                     if (route.points[j].overdue_time > 0) {
                         if (minus < now) {
                             route.points[j].status = 4;
+                            console.log("Присваиваем статус 4");
                             //route.points[j].variantus = 3005;
                             //console.log("_route.points[j].status = STATUS.TIME_OUT;");
                         } else {
@@ -4086,7 +4096,7 @@ function connectStopsAndPoints(company) {
 
 
 function findStatusesAndWindows(company) {
-    console.log("Start findStatusesAndWindows");
+    console.log("Start findStatusesAndWindows", company);
     var tmpPoint;
 
     for(var i=0; i<cashedDataArr[company].routes.length; i++ ) {
@@ -4139,9 +4149,12 @@ function findStatusesAndWindows(company) {
 
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
+                    console.log("Присваиваем статус 1");
                 } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
+                    console.log("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 } else {
+                    console.log("Присваиваем статус 0");
                     tmpPoint.status = 0;
                 }
             } else{
@@ -4168,22 +4181,26 @@ function findStatusesAndWindows(company) {
 
                 if (tmpPoint.real_arrival_time > end)
                 {
+                    console.log("Присваиваем статус 1");
                     tmpPoint.status = 1;
 
                 }
 
                 if (tmpPoint.real_arrival_time < start)
                 {
+                    console.log("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 }
 
                 if (tmpPoint.status == undefined) {
                     if (tmpPoint.working_window[0] == undefined) {
+                        console.log("Присваиваем статус 0");
                         tmpPoint.status = 0;
                     } else {
                         for (var k=0; k<tmpPoint.working_window.length; k++){
                             if (tmpPoint.real_arrival_time > tmpPoint.working_window[k].start && tmpPoint.real_arrival_time < tmpPoint.working_window[k].finish ){
                                 tmpPoint.status = 0;
+                                console.log("Присваиваем статус 0");
                                 break;
                             }
                         }
@@ -4194,6 +4211,7 @@ function findStatusesAndWindows(company) {
 
                     if(tmpPoint.status == undefined) {
                         //точка где то между окнами
+                        console.log("Присваиваем статус 1");
                         tmpPoint.status = 1; //todo Условно присвоили статус доставлен поздно, если не попали ни в одно окно
                     }
 
@@ -4287,7 +4305,7 @@ function oldDayCalculate (company, data) {
     data.current_server_time = parseInt(new Date() / 1000);
     data.currentDay = false;
     cashedDataArr[company].currentDay = false;
-    console.log("Прошлый день готов к рассчету", company);
+    console.log("Прошлый день готов к рассчету", company, data);
     createFilterIdForOldDay(company);
 
     connectPointsAndPushes(company);

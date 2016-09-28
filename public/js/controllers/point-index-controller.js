@@ -591,6 +591,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log("Loaded DATA", data.date, JSON.parse(JSON.stringify(data)));
                     rootScope.data=data;
                     upgradeOldDateData ();
+                    //Проверка с какими статусами пришли точки
+                    //for(i=0; i< rootScope.data.routes.length)
+
                     scope.rowCollection=[];
 
                     var i=0;
