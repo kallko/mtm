@@ -198,13 +198,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //todo пройтись по эмиту ниже и все убрать
                     //rootScope.$emit('logoutsave');
 
-                    for (var j = 0; rootScope.data.routes.length > j; j++) {
+                    for ( j = 0; rootScope.data.routes.length > j; j++) {
                         rootScope.data.routes[j].selected = false;
                     }
                     //todo пройтись по эмиту ниже и все убрать
                     //rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
                 } else {
-
+                    rootScope.clickOff = true;
                     //Два принципиально разных случая Оператор выбирает один из проблемных роутов или один из общих (общий может быть заблокирован)
                     if (rootScope.data.routes != undefined && rootScope.data.routes.length>0) {
 
@@ -4599,6 +4599,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.clickOff = true;
             scope.$emit('clearMap');
             console.log("Event", id);
+            if (id == -1) alert ("Маршрут для сохранения не выбран");
             console.log("RootScopeData",rootScope.data);
             var result;
             for (var i = 0; i<rootScope.data.routes.length; i++){
@@ -4782,7 +4783,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
            console.log ("Ищем новый статус");
 
-            if (rootScope.data.settings.workingWindowType == 0) {
+            if (rootScope.settings.workingWindowType == 0 || rootScope.data.settings.workingWindowType == 0) {
                 var start,end;
                 if (point.working_window[0] != undefined) {
                     start = point.working_window[0].start;

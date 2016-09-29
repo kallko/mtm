@@ -12,13 +12,23 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         function confirmOnline() {
             console.log("confirmOnline in process");
-            http.get('./confirmonline/')
+            var sync=[];
+            if (rootScope.data && rootScope.data.routes && rootScope.data.currentDay == true) {
+                for (var i=0; i<rootScope.data.routes.length; i++){
+                sync.push(rootScope.data.routes[i].uniqueID);
+            }}
+
+            http.post('./confirmonline/', sync)
                 .success(function (data) {
                     if (data.status != "ok") alert("Отсутсвует связь с сервером ");
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
                     rootScope.data.server_time = data.server_time;
                     rootScope.data.statistic = data.statistics;
                     rootScope.nowTime = rootScope.data.server_time;
+
+                    if (data.err != undefined && data.err.length >0) {
+                        alert("Произошел сбой связи. Перезайдите в АРМ, пожалуйста");
+                    }
                     //rootScope.$emit('holestatistic', rootScope.data.statistic);
                     //console.log(rootScope.data.server_time, "Статистика такая стала", rootScope.data.statistic);
                 }).error(function () {

@@ -1305,7 +1305,7 @@ router.route('/savetonode/')
                 cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
                 console.log("Overwright OLD Route");
 
-                var uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
+                uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
                 unblockRoute(key, uniqueId);
 
                 res.status(200).json(id);
@@ -1474,6 +1474,7 @@ router.route('/askforproblems/:need')
                     result.companyName = currentCompany;
                     result.statistic = cashedDataArr[currentCompany].statistic;
                     result.settings.user = "" + req.session.login;
+                    result.currentDay = true;
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
@@ -1504,6 +1505,7 @@ router.route('/askforproblems/:need')
                 result.routes = [];
                 result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                 result.server_time = parseInt(Date.now() / 1000);
+                result.currentDay = true;
             }
             console.log("Need=", need);
             if (need != 1){
@@ -1610,6 +1612,7 @@ router.route('/askforproblems/:need')
             }
 
         result.allRoutes = cashedDataArr[currentCompany].allRoutes;
+        result.currentDay = true;
         //Перед отправкой проверка на задвоенность маршрутов
 
 
@@ -1623,11 +1626,13 @@ router.route('/askforproblems/:need')
 //Каждую минуту клиент подтверждает на сервер, что он online
 // Если такого подтверждения нет более 3 минут, считаем, что юзер закрыл клиент
 router.route('/confirmonline')
-    .get(function (req, res) {
+    .post(function (req, res) {
         if(req.session.login == undefined) return;
-        console.log("online confirmed", req.session.login);
+        console.log("online confirmed", req.session.login, req.body);
+        var blockedArr = req.body;
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
+        var err = checkSync(currentCompany, req.session.login, blockedArr);
         if (onlineClients.length == 0) {
             var obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
             onlineClients.push(obj);
@@ -1664,10 +1669,11 @@ router.route('/confirmonline')
 
         }
 
-        var result={};
+        result={};
         result.server_time = parseInt(Date.now() / 1000);
         result.statistics = cashedDataArr[currentCompany].statistic;
         result.status = 'ok';
+        result.err = err;
 
         res.status(200).json(result);
 
@@ -5114,6 +5120,72 @@ function checkeConcatTrack(company, id, data){
         console.log("Получен стейт", newTrack[i]);
     }
 }
+
+
+function checkSync(company, login, blockedArr) {
+    var result=[];
+    if (!company || !login || !blockedArr || blockedArr.length == 0) {
+        console.log("Неопределенные данные checkSync");
+        return result;
+    }
+
+    for(var i=0; i<blockedArr.length; i++){
+        for (var j=0; j<blockedRoutes.length; j++){
+            if (blockedRoutes[j].id == blockedArr[i] && blockedRoutes[j].login == login){
+                blockedArr.splice(i,1);
+                i--;
+            }
+        }
+    }
+    result = blockedArr;
+    console.log("Результат проверки", result);
+    if (result.length == 0) return result;
+    // Если так случилось, что существует роут на клиенте, который незаблокирован за пользователем на сервере
+    // Блокируем этот маршрут
+    for(i=0; i<result.length; i++){
+        var blocked =false;
+        for (j=0; j<blockedRoutes.length; j++){
+            if (blockedRoutes[j].id == result[i]) {
+                console.log("Этот маршрут заблокирован другим пользователем");
+                blocked =true;
+            }
+        }
+        if (!blocked) {
+            if (cashedDataArr[company].line_routes != undefined) {
+                for (var l=0; l<cashedDataArr[company].line_routes.length; l++){
+                    if(result[i] == cashedDataArr[company].line_routes[l].uniqueID ) {
+                        if (cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes =[];
+                        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].line_routes[l])
+                        cashedDataArr[company].line_routes.splice(l,1);
+                        blockedRoutes.push({id: result[i], company:company, login:login, time:parseInt(Date.now()/1000)})
+                        changePriority(result[i], company, login);
+                        break;
+                    }
+                }
+            }
+
+            if (cashedDataArr[company].routes != undefined) {
+                for ( l=0; l<cashedDataArr[company].routes.length; l++){
+                    if(result[i] == cashedDataArr[company].routes[l].uniqueID ) {
+                        if (cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes =[];
+                        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].routes[l])
+                        cashedDataArr[company].routes.splice(l,1);
+                        blockedRoutes.push({id: result[i], company:company, login:login, time:parseInt(Date.now()/1000)})
+                        changePriority(result[i], company, login);
+                        break;
+                    }
+                }
+            }
+
+            result.splice(i,1);
+        }
+    }
+
+    return result;
+
+}
+
+
 
 function startCalculateCompany(company) {
     startTime = parseInt(Date.now()/1000);
