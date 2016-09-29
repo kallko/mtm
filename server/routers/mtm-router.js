@@ -3399,8 +3399,8 @@ function lookForNewIten(company) {
 
                                     allRoutes: false,
 
-                                    nameDriver: ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени') + ' - ' + cashedDataArr[currentCompany].routes[i].transport.NAME,
-                                    nameCar: cashedDataArr[currentCompany].routes[i].transport.NAME + ' - ' + ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени'),
+                                    nameDriver: ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени') +  " " + cashedDataArr[currentCompany].routes[i].SHIFT_NAME + ' - ' + cashedDataArr[currentCompany].routes[i].transport.NAME,
+                                    nameCar: cashedDataArr[currentCompany].routes[i].transport.NAME + " " + cashedDataArr[currentCompany].routes[i].SHIFT_NAME + ' - ' + ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени'),
 
                                     value: cashedDataArr[currentCompany].routes[i].filterId,
                                     uniqueID: cashedDataArr[currentCompany].routes[i].uniqueID,
