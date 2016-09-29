@@ -391,12 +391,13 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
             var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
 
+
             nIndx--;
             data[nIndx].sended = false;
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
             console.log("Запросы СОАП 398");
-            me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback);
+            me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback, res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.SHIFT_NAME);
             me.getAdditionalData(client, data, itIsToday, nIndx, callback, date);
 
         });
@@ -407,7 +408,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
 }
 
 // подготовка решений для дальнейшего работы с ним
-SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nIndx, callback) {
+SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nIndx, callback, shift) {
 
 
 
@@ -417,6 +418,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
     for (var i = 0; i < routes.length; i++) {
         tmpRoute = {};
         tmpRoute = routes[i].$;
+        tmpRoute.SHIFT_NAME=shift;
         // создания массива точек доставки
         tmpRoute.points = [];
 
@@ -459,8 +461,10 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
                     reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
-
+                   // shift_name = res.MESSAGE.SHIFT_NAME;
                 //console.log("полученные сенсоры",sensors, "SOAP345");
+
+
 
 
                 if (waypoints == undefined) return;

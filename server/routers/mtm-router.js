@@ -267,8 +267,9 @@ router.route('/dailydata')
                 //todo Два костыля, пока настройки не прописаны в 1с
                 if(cashedDataArr[currentCompany].settings.limit == undefined ) cashedDataArr[currentCompany].settings.limit = 74;
                 if(cashedDataArr[currentCompany].settings.problems_to_operator == undefined) cashedDataArr[currentCompany].settings.problems_to_operator = 3;
-
-                res.status(200).json(cashedDataArr[currentCompany].settings);
+                var result = cashedDataArr[currentCompany].settings;
+                result.user = req.session.login;
+                res.status(200).json(result);
             });
 
 
@@ -1401,7 +1402,7 @@ router.route('/getServerStatus')
         var result={};
         result.company = currentCompany;
         result.routes = cashedDataArr[currentCompany].routes.length;
-        result.blocked_routes = cashedDataArr[currentCompany].blocked_routes.length;
+        result.blocked_routes = cashedDataArr[currentCompany].blocked_routes ? cashedDataArr[currentCompany].blocked_routes.length : 0;
         result.line_routes = cashedDataArr[currentCompany].line_routes.length;
         result.oldRoutes = 0;
         if (cashedDataArr[currentCompany].oldRoutes != undefined) result.oldRoutes = cashedDataArr[currentCompany].oldRoutes.length;
@@ -1921,8 +1922,9 @@ function linkDataParts (currentCompany, login)
 
                     allRoutes: false,
 
-                    nameDriver: ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени') + ' - ' + cashedDataArr[currentCompany].routes[i].transport.NAME,
-                    nameCar: cashedDataArr[currentCompany].routes[i].transport.NAME + ' - ' + ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени'),
+                    nameDriver: ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени') +  " " + cashedDataArr[currentCompany].routes[i].SHIFT_NAME + ' - ' + cashedDataArr[currentCompany].routes[i].transport.NAME,
+                    nameCar: cashedDataArr[currentCompany].routes[i].transport.NAME + " " + cashedDataArr[currentCompany].routes[i].SHIFT_NAME + ' - ' + ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени'),
+
 
                     value: cashedDataArr[currentCompany].routes[i].filterId,
                     uniqueID: cashedDataArr[currentCompany].routes[i].uniqueID,
@@ -2499,6 +2501,7 @@ function startPeriodicCalculating() {
                             }
 
                             for( l=1; l<cached.routes[k].real_track.length; l++){
+                                //if (cached.routes[k].real_track[l].state == "MOVE" && cached.routes[k].real_track[l].coords != undefined && cached.routes[k].real_track[l].coords.length > 0) console.log  ("НА НООДЕ НАЙДЕНЫ КООРДИНАТЫ!!!!!")
                                 if (cached.routes[k].real_track[l].t1 != cached.routes[k].real_track[l-1].t2 )
                                     if (cached.routes[k].real_track[l-1].id+'' != cached.routes[k].real_track[l].id+''
 

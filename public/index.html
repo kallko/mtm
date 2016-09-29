@@ -233,11 +233,11 @@
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
                     <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
-                    <th class="bulled-th"></th>
+                    <th ng-show="settings.user == 'ids.kalko'" class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
                     </th>
-                    <th ng-show="data.settings.user == 'IDS.kalko'" class="degree" title="Достоверность"></th>
+                    <th ng-show="settings.user == 'ids.kalko'" class="degree" title="Достоверность"></th>
                     <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
@@ -279,11 +279,11 @@
                 <tr class="titles-tr">
                     <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
                     <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
-                    <th class="bulled-th"></th>
+                    <th ng-show="settings.user == 'ids.kalko'" class="bulled-th"></th>
                     <th class="status-col"  title="Статус доставки">
                         <button ng-click="order('status')"  >Статус</button>
                     </th>
-                    <th ng-show="data.settings.user == 'IDS.kalko'" class="degree" title="Достоверность">%</th>
+                    <th ng-show="settings.user == 'ids.kalko'" class="degree" title="Достоверность">%</th>
                     <th class="car-type-col" title="Назавание машины">Машина</th>
                     <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
                     <th class="client-name-col" title="Название точки доставки">Название</th>
@@ -337,13 +337,13 @@
                     <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
                     <td class="number-col">{{row.NUMBER}}</td>
                     <td class="number-col">{{row.fact_number}}</td>
-                    <td ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
+                    <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
                     <td class="status-col" ng-class="row.class" >
                              <span>
                                 {{getTextStatus(row)}}
                             </span>
                     </td>
-                    <td ng-show="data.settings.user == 'IDS.kalko'" class="degree"  >
+                    <td ng-show="settings.user == 'ids.kalko'" class="degree"  >
                         <span>
                           {{row.limit}}
                         </span>
@@ -921,7 +921,7 @@
         </div> <br> <br>
 
         <div>
-            <button ng-show="data != undefined && ((data.settings.user == 'IDS.kalko') || (data.settings.user == 'IDS.dsp') )" ng-click="statuses()"> STATUS</button>
+            <button ng-show="data != undefined && ((settings.user == 'ids.kalko') || (settings.user == 'ids.dsp') )" ng-click="statuses()"> STATUS</button>
         </div>
 
         <div class="block-title">
@@ -992,7 +992,7 @@
 
     <div ng-repeat="route in data.routes" ng-click="showProblem(route)">
         <div>
-            <button style="background: red">{{settings.routeListOrderBy == 'nameCar' ? route.transport.NAME : route.driver.NAME}} {{route.max_problem == 0 ? "нет проблем" : route.kind_of_problem }} {{route.max_problem}}</button>
+            <button style="background: red">{{settings.routeListOrderBy == 'nameCar' ? route.transport.NAME + " " + route.SHIFT_NAME  : route.driver.NAME + " " + route.SHIFT_NAME}} {{route.max_problem == 0 ? "нет проблем" : route.kind_of_problem }} {{route.max_problem}}</button>
         </div>
         <div style="background: transparent"><br></div>
     </div>

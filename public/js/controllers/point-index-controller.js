@@ -221,6 +221,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
 
                     console.log("Вы выбрали маршрут из общедоступных", rootScope.settings);
+                    //todo замеры времени сделать глобально
+                    rootScope.checkTime = parseInt(Date.now()/1000);
 
                     var extra = 1; //Стандартное количество привышения количества роутов
                     var settings;
@@ -256,6 +258,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (asking) return;
 
+                    console.log("Отправляем маршрут на отрисовку");
                     scope.drawRoute(scope.filters.route, false, true);
                     rootScope.carCentre=true;
 
@@ -2585,6 +2588,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route.real_track[route.real_track.length-1].coords.length ==0)
             ) {
                 console.log("Запрашиваю стейты для роута");
+                var tempTime = parseInt(Date.now()/1000);
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
 
@@ -2648,6 +2652,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         //console.log('after', route.real_track.length);
                         scope.$emit('clearMap');
+                        console.log("Переходим непосредственно к рисованию после", parseInt(Date.now()/1000) - tempTime);
                         draw(route);
                     }).error(function(err){
                         console.log(err);
@@ -4339,7 +4344,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.$emit('holestatistic', rootScope.data.statistic);
             scope.filters.routes.length =1;
             for (i=0; i<rootScope.data.allRoutes.length; i++){
-                scope.filters.routes.push(rootScope.data.allRoutes[i])
+                scope.filters.routes.push(rootScope.data.allRoutes[i]);
                 //console.log("Значение всех маршрутов +1 =", scope.filters.routes.length);
             }
             console.log("Имеем данные", rootScope.data);
@@ -4730,6 +4735,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             .success(function(data){
                 console.log("Result", data);
 
+                    console.log("Загрузка маршрута заняла", parseInt(Date.now()/1000) - rootScope.checkTime);
                     if (data.blocked != undefined) {
                         alert("Этот маршрут уже заблокирван оператором "+ data.blocked);
 
