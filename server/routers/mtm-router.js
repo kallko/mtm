@@ -5186,6 +5186,13 @@ function checkSync(company, login, blockedArr) {
 }
 
 
+function loadCoords(company) {
+    if (!company) return;
+
+
+
+}
+
 
 function startCalculateCompany(company) {
     startTime = parseInt(Date.now()/1000);
@@ -5203,6 +5210,7 @@ function startCalculateCompany(company) {
     calculateStatistic (company);
     createProblems(company);
     //checkRealTrackData(company); //todo убрать, после того как починят треккер
+    loadCoords(company);
     lookForNewIten(company);
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;

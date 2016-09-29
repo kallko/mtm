@@ -1604,28 +1604,103 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             waypoint.rawConfirmed = 1;
             console.log("changeFieldsAlredyConnectedPoints");
 
-            waypoint.windowType = 0;
-            if (waypoint.promised_window_changed.start < waypoint.real_arrival_time) {
-                console.log("window type2");
-                waypoint.windowType = 2;
+            waypoint.windowType = 'Вне окон';
+            if (waypoint.promised_window_changed.start < waypoint.real_arrival_time
+                && waypoint.promised_window_changed.finish > waypoint.real_arrival_time) {
+                waypoint.windowType = 'В обещанном';
+                //console.log('В заказанном')
             } else {
                 for (var l = 0; waypoint.windows != undefined && l < waypoint.windows.length; l++) {
-                    if (waypoint.windows[l].start < waypoint.real_arrival_time) {
-                        waypoint.windowType = 1;
-                        console.log("window type1");
-
+                    if (waypoint.windows[l].start < waypoint.real_arrival_time
+                        && waypoint.windows[l].finish > waypoint.real_arrival_time) {
+                        waypoint.windowType = 'В заказанном';
+                        //console.log('В обещанном');
+                        break;
                     }
                 }
             }
 
-            if (waypoint.rawConfirmed !== -1) {
-                if (waypoint.real_arrival_time > waypoint.working_window.finish) {
-                    waypoint.status = STATUS.FINISHED_LATE;
-                } else if (waypoint.real_arrival_time < waypoint.working_window.start) {
-                    waypoint.status = STATUS.FINISHED_TOO_EARLY;
-                } else {
-                    waypoint.status = STATUS.FINISHED;
+            console.log("Окно", rootScope.settings.workingWindowType);
+            if (rootScope.settings.workingWindowType == 1) {
+                //tmpPoint.findStatus = true;
+                if (waypoint.waypoint.TYPE == "WAREHOUSE"){
+                    //todo Дописать определение статуса для склада
+                    return;
                 }
+
+
+
+
+                if (waypoint.real_arrival_time > waypoint.working_window[waypoint.working_window.length-1].finish) {
+                    waypoint.status = 1;
+                    console.log("Присваиваем статус 1");
+                } else if (waypoint.real_arrival_time < waypoint.working_window[0].start) {
+                    console.log("Присваиваем статус 2");
+                    waypoint.status = 2;
+                } else {
+                    console.log("Присваиваем статус 0");
+                    waypoint.status = 0;
+                }
+            } else{
+
+                console.log("Начинаем определение статуса");
+                if (waypoint.waypoint.TYPE == "WAREHOUSE"){
+                    //todo Дописать определение статуса для склада
+                    return;
+                }
+
+
+                var start, end;
+                waypoint.status = undefined;
+
+                if (waypoint.working_window[0] == undefined){
+                    end = waypoint.working_window.finish;
+                    start = waypoint.working_window.start;
+                } else {
+                    end = waypoint.working_window[waypoint.working_window.length-1].finish;
+                    start = waypoint.working_window[0].start;
+                }
+
+
+                console.log ("Ориентиры", waypoint.real_arrival_time, start, end);
+                if (waypoint.real_arrival_time > end)
+                {
+                    console.log("Присваиваем статус 1");
+                    waypoint.status = 1;
+
+                }
+
+                if (waypoint.real_arrival_time < start)
+                {
+                    console.log("Присваиваем статус 2");
+                    waypoint.status = 2;
+                }
+
+                if (waypoint.status == undefined) {
+                    if (waypoint.working_window[0] == undefined) {
+                        console.log("Присваиваем статус 0");
+                        waypoint.status = 0;
+                    } else {
+                        for (var k=0; k<waypoint.working_window.length; k++){
+                            if (waypoint.real_arrival_time > waypoint.working_window[k].start && waypoint.real_arrival_time < waypoint.working_window[k].finish ){
+                                waypoint.status = 0;
+                                console.log("Присваиваем статус 0");
+                                break;
+                            }
+                        }
+
+
+                    }
+
+
+                    if(waypoint.status == undefined) {
+                        //точка где то между окнами
+                        console.log("Присваиваем статус 1");
+                        waypoint.status = 1; //todo Условно присвоили статус доставлен поздно, если не попали ни в одно окно
+                    }
+
+                }
+
             }
 
             var newStatus=Statuses.getTextStatuses()[waypoint.status+1].name;

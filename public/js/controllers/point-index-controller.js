@@ -2086,8 +2086,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
+             rawPoint.real_arrival_time = rootScope.settings.server_time;
+             if (rawPoint.mobile_arrival_time ) rawPoint.real_arrival_time =  rawPoint.mobile_arrival_time;
+             if (rawPoint.stop_arrival_time ) rawPoint.real_arrival_time =  rawPoint.stop_arrival_time;
 
-             rawPoint.changeConfirmation=true;
+            rawPoint.changeConfirmation=true;
 
 
             changeStatus(data.row, rawPoint, data.option);
