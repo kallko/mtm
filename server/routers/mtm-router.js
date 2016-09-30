@@ -492,7 +492,7 @@ router.route('/dailydata')
                         startServer = true;
                         var timerId = setInterval(function() {
                             startPeriodicCalculating(currentCompany);
-                        }, 80 * 1000);}
+                        }, 120 * 1000);}
                     // через 5 сек остановить повторы
                     //setTimeout(function() {
                     //    clearInterval(timerId);
@@ -564,6 +564,9 @@ router.route('/askforroute')
             changePriority(result.uniqueID, currentCompany, key);
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
         }
+        //console.log ("Начинаем запись файла");
+        //log.toFLog('logging.txt', JSON.stringify(result));
+        //console.log("Заканчиваем запись файла");
         res.status(200).json({route: result});
 
 
@@ -1946,7 +1949,9 @@ function linkDataParts (currentCompany, login)
 
             try {
                 tPoint.route_indx = cashedDataArr[currentCompany].routes[i].filterId;
-                tPoint.transport = cashedDataArr[currentCompany].routes[i].transport;
+                var trans = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].routes[i].transport))
+                delete trans.real_track;
+                tPoint.transport = trans;
 
                 if (cashedDataArr[currentCompany].routes[i].DISTANCE == 0) {
                     //console.log("The route is UNCALCULATE");
@@ -3422,7 +3427,9 @@ function lookForNewIten(company) {
 
                             try {
                                 tPoint.route_indx = cashedDataArr[currentCompany].routes[i].filterId;
-                                tPoint.transport = cashedDataArr[currentCompany].routes[i].transport;
+                                var trans = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].routes[i].transport))
+                                delete trans.real_track;
+                                tPoint.transport = trans;
 
                                 if (cashedDataArr[currentCompany].routes[i].DISTANCE == 0) {
                                     //console.log("The route is UNCALCULATE");
@@ -5189,7 +5196,24 @@ function checkSync(company, login, blockedArr) {
 function loadCoords(company) {
     if (!company) return;
 
+    var states = [],
+        gid,
+        route = {};
+    if (cashedDataArr[company].line_routes != undefined) {
 
+        for (var i = 0; i < cashedDataArr[company].line_routes.length; i++) {
+            route = cashedDataArr[company].line_routes[i];
+            states = route.real_track;
+            gid = route.transport.gid;
+            //console.log("Отправляем запрос по гиду", gid);
+            if (gid !=undefined && states != undefined && states.length>0) tracksManager.getTrackByStatesForNode(states, gid, route, function (data, route) {
+                //console.log(data, "MTM 5198");
+                route.real_track=data;
+                console.log("Закончена подгрузка координат", route.transport.gid);
+            })
+        }
+
+    }
 
 }
 

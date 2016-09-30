@@ -2583,14 +2583,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //console.log(    route.real_track[route.real_track.length-1].coords != null);
             //console.log(    route.real_track[route.real_track.length-1].coords.length !=0);
 
-            if (route.real_track != undefined &&
-                route.real_track != null &&
-                route.real_track.length !=0 &&
-                (route.real_track[route.real_track.length-1].coords == undefined ||
-                route.real_track[route.real_track.length-1].coords == null ||
-                route.real_track[route.real_track.length-1].coords.length ==0)
-            ) {
-                console.log("Запрашиваю стейты для роута");
+
+
                 var tempTime = parseInt(Date.now()/1000);
                 //console.log('I need download Updated tracks' );
                 //console.log('before', route.real_track.length);
@@ -2598,86 +2592,21 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 //console.log("route.real_track", route.real_track);
 
+                var start = Date.now()/1000;
+                rootScope.editing.start = start;
+                rootScope.editing.uniqueID = route.uniqueID;
+                if(route.real_track != undefined && route.real_track[0]){
+                    route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);}
+
+                scope.$emit('clearMap');
+                console.log("Переходим непосредственно к рисованию после", parseInt(Date.now()/1000) - tempTime);
 
 
 
-                    http.post('./gettracksbystates', {
-                    states: route.real_track,
-                    gid: route.transport.gid,
-                    id: route.uniqueID,
-                    demoTime: scope.demoMode ? rootScope.data.server_time : -1
-                }).success(function (data) {
-                        //var rRtrack = JSON.parse(JSON.stringify(route.real_track));
-                        //console.log("Existing before Additional load for Route", rRtrack);
-                        //var newData = JSON.parse(JSON.stringify(data));
-                        //console.log("Additional load for Route", newData);
-
-
-                        //Маршрут заблокирован и редактируется другим пользователем
-                        if (data.result == 'blocked'){
-                            alert("Маршрут заблокирован оператором " + data.user);
-                            scope.filters.route = -1;
-                            rootScope.clickOff=false;
-                            return;
-                        }
-
-
-
-                        //alert("Маршрут свободен для редактирования");
-                        //rootScope.editing.route = route.uniqueID;
-                        var start = Date.now()/1000;
-                        rootScope.editing.start = start;
-                        rootScope.editing.uniqueID = route.uniqueID;
-
-
-                        //console.log("Editing", rootScope.editing);
-
-                        route.real_track = data;
-
-
-                        if(typeof (route.real_track) == Array) {
-                            for (var k = 0; k < route.real_track.length; k++) {
-                                if (route.real_track[k].coords == undefined ||
-                                    route.real_track[k].coords.length == 0) {
-                                    route.real_track.splice(k, 1);
-                                    k--;
-                                }
-                            }
-                        }
-
-                        if (scope.demoMode) {
-                            route.real_track[0].lastTrackUpdate = 2000000000;
-                            //route.car_position = route.real_track[route.real_track.length - 2];
-                        } else {
-                            if(route.real_track != undefined && route.real_track[0]){
-                            route.real_track[0].lastTrackUpdate = parseInt(Date.now() / 1000);}
-                        }
-
-                        //console.log('after', route.real_track.length);
-                        scope.$emit('clearMap');
-                        console.log("Переходим непосредственно к рисованию после", parseInt(Date.now()/1000) - tempTime);
-                        draw(route);
-                    }).error(function(err){
-                        console.log(err);
-                        //alert("Маршрут свободен для редактирования");
-                        rootScope.errorNotification(' к агрегатору /gettracksbystates. У этой машины нет трека');
-                        if (route.real_track == undefined) {
-                            scope.filters.route = route.filterId;
-                            draw(route);
-                            return;
-                        }
-                        rootScope.clickOff=false;
-                        return;
-                    });
-
-                //console.log("Troubles here");
-            } else {
-                // console.log('$$$$$load tracks from cache', scope.draw_modes);
-                rootScope.clickOff = false;
                 scope.draw_mode=0;
-                //scope.draw_modes[0]=scope.draw_modes[0].value;
+
                 draw(route);
-            }
+
         };
 
         //вкл/выкл фильтр только проблемных точек
@@ -4689,7 +4618,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         rootScope.$on('choseproblem', function(event, id){
-           console.log("Принял" + id);
+           console.log("Принял " + id);
             scope.filters.route=id;
             var route;
             for(var i=0; i<rootScope.data.routes.length; i++){
@@ -4700,7 +4629,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-            factTimeForRoute(route, true);
+            //factTimeForRoute(route, true);
 
         });
 
@@ -4750,6 +4679,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                     if (data.route != undefined) {
+
                         checkRouteQuality(data.route);
                         rootScope.data.routes.push(data.route);
                         scope.filters.route = data.route.filterId;

@@ -83,6 +83,60 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
 };
 
+
+TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, callback) {
+    console.log("Готовимся к запросу в треккер", gid);
+    if(states == undefined || states[0] == undefined) {
+        console.log("Бракованный стейт", states);
+        return;
+    }
+
+    var counter = 0,
+        me = this,
+        started = 0,
+        finished = 0,
+        j=0;
+    for (j=0; j<states.length;j++){
+        if (states[j].coords == undefined || states[j].coords.length <2) finished++
+    }
+        j=0;
+    //console.log("По gid", gid, "Нужно запросить треков", finished+1);
+    for (var i = states.length-1; (i >=0 && j < finished+2); i--) {
+
+        if (i >= states.length-2 || (states[i].coords == undefined || states[i].coords.length <2) ) {
+            j++;
+        } else {
+            continue;
+        }
+        console.log("Параметры запрса" , i, j);
+        started++;
+        (function (ii) {
+            //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
+            me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data, error) {
+                if (error == undefined && data[0] != undefined && typeof (data) != 'string') {
+                    states[ii].coords = data;
+                } else {
+                   if (states[ii].coords != undefined) states[ii].coords = [];
+                }
+
+                if (states[ii] != undefined && (states[ii].states =="ARRIVAL" || states[ii].states == "START")&& states[ii].coords != undefined && states[ii].coords.length >2) {
+                    states[ii].coords.splice(1, states[ii].coords.length - 2);
+                }
+                //console.log('done loading part #', ii);
+                counter++;
+                if (counter == started) {
+                    callback(states, route);
+                }
+            });
+        })(i);
+    }
+
+    if (started == 0) {
+        callback(states, route);
+    }
+
+};
+
 // получение части треков по всему склееному решению и заданному времени
 TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, company, dayStart) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
@@ -423,8 +477,11 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log("tracks.js 366", body, "End 366");
+            //console.log("Track loaded");
             callback(body);
+        } else {
+            console.log(" Ошибка !!!!!", error);
+            callback(body,error);
         }
     });
 };

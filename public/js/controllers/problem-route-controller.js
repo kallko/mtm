@@ -22,6 +22,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                 .success(function (data) {
                     if (data.status != "ok") alert("Отсутсвует связь с сервером ");
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
+                    if (rootScope.data == undefined) rootScope.data = {};
                     rootScope.data.server_time = data.server_time;
                     rootScope.data.statistic = data.statistics;
                     rootScope.nowTime = rootScope.data.server_time;
@@ -54,7 +55,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         function setProblemUpdate() {
             console.log("I decide i do it!");
 
-            interval(checkProblem, 6 * 1000);
+            interval(checkProblem, 15 * 1000);
         }
 
 
