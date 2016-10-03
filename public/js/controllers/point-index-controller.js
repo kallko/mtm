@@ -3516,7 +3516,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             console.log("Получен маркер", marker);
-            rootScope.gpsConfirm = marker.point.CONFIRMBYGPS
+            rootScope.gpsConfirm = marker.point.CONFIRMBYGPS;
             console.log("Point", marker.point.ID, "confirmed=", rootScope.gpsConfirm);
 
         });

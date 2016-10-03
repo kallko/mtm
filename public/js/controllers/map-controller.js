@@ -150,15 +150,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                     //todo снять комментарий, когда правильно рассчитают время финиша
-                    //console.log("Времена", track[i].coords[0].t, start, timeThreshold);
-                    //if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
-                    //    //console.log("Its too early track");
-                    //    continue
-                    //}; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
-                    //if( track[i].coords[0].t > end+timeThreshold) {
-                    //    //console.log("Its too past track");
-                    //    break;
-                    //} //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+                   // console.log("Времена", track[i].coords[0].t, start, timeThreshold);
+                    if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
+                        //console.log("Its too early track");
+                        continue
+                    }; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
+                    if( track[i].coords[0].t > end+timeThreshold) {
+                        //console.log("Its too past track");
+                        break;
+                    } //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
 
                     color = '#5cb85c';
@@ -178,8 +178,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         //stops.push(track[i]);
 
 // todo раскомментировать когда будет правильно рассчитываться время финиша
-                        //if (track[i].coords.t1 < start - rootScope.data.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
-                        //if (track[i].coords.t1 > end + rootScope.data.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+                        if (track[i].coords.t1 < start - rootScope.data.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
+                        if (track[i].coords.t1 > end + rootScope.data.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
                         if (!drawStops) continue;
 
