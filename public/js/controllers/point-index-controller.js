@@ -3515,21 +3515,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         rootScope.$on('askGPSConfirmPoint', function(event, marker){
 
 
-            if(parentForm != undefined) {
-
-                try {
-                    //var temp = parentForm._call('getPointGpsConfirmation', [marker.point.ID]);
-                    //console.log("JSON file", temp);
-                    //rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).m_value)).result;
-                    rootScope.gpsConfirm = (JSON.parse((parentForm._call('getPointGpsConfirmation', [marker.point.ID])).Ti)).result;
-
-
-                } catch (e) {
-
-                    console.log("Point", marker.point, e)
-                }
-
-            }
+            console.log("Получен маркер", marker);
+            rootScope.gpsConfirm = marker.point.CONFIRMBYGPS
             console.log("Point", marker.point.ID, "confirmed=", rootScope.gpsConfirm);
 
         });

@@ -381,7 +381,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
                 tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
-                tmpTitle += 'ID задания: ' + pushes[i].number;
+                tmpTitle += '№ задания: ' + pushes[i].plan_number;
 
                 tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
                 var pushColor='orange';
@@ -663,7 +663,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             smoothFactor: 1
                         });
                         //console.log("Polyline Undefined???", servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng );
-                        if (servicePointsLat != undefined && servicePointsLng != undefined) {
+                        if (servicePointsLat != undefined && servicePointsLng != undefined && markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined) {
                             scope.singleConnect.addLayer(polyline);
                         }
                         //console.log(polyline);
@@ -1342,9 +1342,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                                 for (var k = 0; arrIndexStopPoints.length > k; k++) {
                                     if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
-                                        if (markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined){
+                                        if (markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined && servicePointsLat != undefined && servicePointsLng != undefined ){
 
-                                        var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
+                                            console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
+
+                                        var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng)]], {
                                             color: 'black',
                                             weight: 2,
                                             opacity: 0.5,
@@ -1919,6 +1921,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             newMarker.source.waypoint.LAT=lat;
             newMarker.source.waypoint.LON=lng;
 
+            console.log(lat, lng );
             //Сформировать soap data и soap запрос
             rootScope.$emit('pushWaypointTo1С', newMarker.source.waypoint, confirm);
 

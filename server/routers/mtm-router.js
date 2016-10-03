@@ -3838,7 +3838,7 @@ function connectPointsAndPushes(company) {
                 // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
                 if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
 
-
+                    mobilePushes[i].plan_number = tmpPoint.NUMBER;
 
                     //TODO написать функцию обработки пуша-отмены
                     if (mobilePushes[i].canceled) {
