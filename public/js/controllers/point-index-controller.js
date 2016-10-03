@@ -191,87 +191,128 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         // };
         scope.$watch('filters.route', function(){
             if(rootScope.data != undefined) {
-                if (scope.filters.route == -1) {
-                    console.log("All Routes selected");
-                    scope.$emit('clearMap');
-                    rootScope.$emit('holestatistic', rootScope.data.statistic);//todo можно отсылать статистику по всем загруженным роутам, но нет смысла, потому что нет информативности
-                    //todo пройтись по эмиту ниже и все убрать
-                    //rootScope.$emit('logoutsave');
+                if (!rootScope.data.currentDay ){
+                    if (scope.filters.route == -1) {
+                        console.log("All Routes selected");
+                        scope.$emit('clearMap');
+                        rootScope.$emit('holestatistic', rootScope.data.statistic);
 
-                    for ( j = 0; rootScope.data.routes.length > j; j++) {
-                        rootScope.data.routes[j].selected = false;
-                    }
-                    //todo пройтись по эмиту ниже и все убрать
-                    //rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
-                } else {
-                    rootScope.clickOff = true;
-                    //Два принципиально разных случая Оператор выбирает один из проблемных роутов или один из общих (общий может быть заблокирован)
-                    if (rootScope.data.routes != undefined && rootScope.data.routes.length>0) {
+                        for ( j = 0; rootScope.data.routes.length > j; j++) {
+                            rootScope.data.routes[j].selected = false;
+                        }
 
+                    } else {
                         for ( i = 0; i < rootScope.data.routes.length; i++) {
                             if (scope.filters.route == rootScope.data.routes[i].filterId) {
-                                console.log("Вы выбрали маршрут из проблемных");
 
-                                scope.drawRoute(scope.filters.route, false, false);
-                                rootScope.carCentre = true;
+                                console.log("Вы выбрали уже загруженный прошлый маршрут");
+                                var states =  rootScope.data.routes[i].real_track;
+                                var gid = rootScope.data.routes[i].transport.gid;
+                                console.log("Перед отправкой запроса", states != undefined , gid != undefined , states[0] != undefined);
+                                if (states != undefined && gid != undefined && states[0] != undefined) {
+                                    http.post('./gettracksbystates', {states: states, gid: gid, demoTime:false})
+                                        .success( function  () {
+                                            console.log("Трек загружен")
+                                            scope.drawRoute(scope.filters.route, false, false);
+                                            rootScope.carCentre = true;
+                                        }
+
+                                    );
+                                }
+
+
                                 return;
                                 //todo сделать вывод статистики маршрута
                             }
                         }
+
                     }
 
-                    console.log("Вы выбрали маршрут из общедоступных", rootScope.settings);
-                    //todo замеры времени сделать глобально
-                    rootScope.checkTime = parseInt(Date.now()/1000);
-
-                    var extra = 1; //Стандартное количество привышения количества роутов
-                    var settings;
-                    if (rootScope.data != undefined && rootScope.data.settings != undefined) {
-                        settings = rootScope.data.settings;
-                    } else {
-                        settings = rootScope.settings;
-                    }
-
-                    for (i=0; i<settings.userRoles.length; i++){
-                        if (settings.userRoles[i] == 'supervisor' ||  settings.userRoles[i] == 'head'){
-                            extra = 100;
-                            break;
-                        }
-                    }
-                    console.log("EXTRA", extra);
 
 
-
-
-                        if(rootScope.data.routes.length >= settings.problems_to_operator + extra){
+                } else {
+                    if (scope.filters.route == -1) {
+                        console.log("All Routes selected");
                         scope.$emit('clearMap');
-                        alert("Вы уже заблокировали предельное количество маршрутов");
-                        return;
-                    }
-                    var asking=true;
-                    for (var j=0; j<rootScope.data.allRoutes.length; j++){
-                        if (rootScope.data.allRoutes[j].value == scope.filters.route) {
-                            giveMeOneRoutePls(rootScope.data.allRoutes[j].uniqueID);
+                        rootScope.$emit('holestatistic', rootScope.data.statistic);//todo можно отсылать статистику по всем загруженным роутам, но нет смысла, потому что нет информативности
+                        //todo пройтись по эмиту ниже и все убрать
+                        //rootScope.$emit('logoutsave');
+
+                        for ( j = 0; rootScope.data.routes.length > j; j++) {
+                            rootScope.data.routes[j].selected = false;
                         }
-                    }
+                        //todo пройтись по эмиту ниже и все убрать
+                        //rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
+                    } else {
+                        rootScope.clickOff = true;
+                        //Два принципиально разных случая Оператор выбирает один из проблемных роутов или один из общих (общий может быть заблокирован)
+                        if (rootScope.data.routes != undefined && rootScope.data.routes.length>0) {
 
+                            for ( i = 0; i < rootScope.data.routes.length; i++) {
+                                if (scope.filters.route == rootScope.data.routes[i].filterId) {
+                                    console.log("Вы выбрали маршрут из проблемных");
 
-                    if (asking) return;
-
-                    console.log("Отправляем маршрут на отрисовку");
-                    scope.drawRoute(scope.filters.route, false, true);
-                    rootScope.carCentre=true;
-
-                    for (var i = 0; rootScope.data.routes.length > i; i++) {
-                        if (rootScope.data.routes[i].filterId == scope.filters.route) {
-                            if (!rootScope.data.routes[i].selected) {
-                                for (var j = 0; rootScope.data.routes.length > j; j++) {
-                                    rootScope.data.routes[j].selected = false;
+                                    scope.drawRoute(scope.filters.route, false, false);
+                                    rootScope.carCentre = true;
+                                    return;
+                                    //todo сделать вывод статистики маршрута
                                 }
-                                rootScope.data.routes[i].selected = true;
                             }
-                            rootScope.$emit('displayCollectionToStatistic', rootScope.data.routes[i].points);
-                            break;
+                        }
+
+                        console.log("Вы выбрали маршрут из общедоступных", rootScope.settings);
+                        //todo замеры времени сделать глобально
+                        rootScope.checkTime = parseInt(Date.now()/1000);
+
+                        var extra = 1; //Стандартное количество привышения количества роутов
+                        var settings;
+                        if (rootScope.data != undefined && rootScope.data.settings != undefined) {
+                            settings = rootScope.data.settings;
+                        } else {
+                            settings = rootScope.settings;
+                        }
+
+                        for (i=0; i<settings.userRoles.length; i++){
+                            if (settings.userRoles[i] == 'supervisor' ||  settings.userRoles[i] == 'head'){
+                                extra = 100;
+                                break;
+                            }
+                        }
+                        console.log("EXTRA", extra);
+
+
+
+
+                            if(rootScope.data.routes.length >= settings.problems_to_operator + extra){
+                            scope.$emit('clearMap');
+                            alert("Вы уже заблокировали предельное количество маршрутов");
+                            return;
+                        }
+                        var asking=true;
+                        for (var j=0; j<rootScope.data.allRoutes.length; j++){
+                            if (rootScope.data.allRoutes[j].value == scope.filters.route) {
+                                giveMeOneRoutePls(rootScope.data.allRoutes[j].uniqueID);
+                            }
+                        }
+
+
+                        if (asking) return;
+
+                        console.log("Отправляем маршрут на отрисовку");
+                        scope.drawRoute(scope.filters.route, false, true);
+                        rootScope.carCentre=true;
+
+                        for (var i = 0; rootScope.data.routes.length > i; i++) {
+                            if (rootScope.data.routes[i].filterId == scope.filters.route) {
+                                if (!rootScope.data.routes[i].selected) {
+                                    for (var j = 0; rootScope.data.routes.length > j; j++) {
+                                        rootScope.data.routes[j].selected = false;
+                                    }
+                                    rootScope.data.routes[i].selected = true;
+                                }
+                                rootScope.$emit('displayCollectionToStatistic', rootScope.data.routes[i].points);
+                                break;
+                            }
                         }
                     }
                 }
@@ -1454,7 +1495,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     //    tmpPoint.limit=60;
                                     //} else {tmpPoint.limit=60; } }
 
-                                    tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
+                                    //tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                                     tmpPoint.stopState = tmpArrival;
                                     //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
 
@@ -1768,27 +1809,27 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function findStatusAndWindowForPoint(tmpPoint) {
 
 
-            tmpPoint.windowType = WINDOW_TYPE.OUT_WINDOWS;
+            tmpPoint.windowType = "Вне окон";
             if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
                 && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
-                tmpPoint.windowType = WINDOW_TYPE.IN_PROMISED;
+                tmpPoint.windowType = "В обещанном";
             } else {
                 for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
                     if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time
                         && tmpPoint.windows[l].finish > tmpPoint.real_arrival_time) {
-                        tmpPoint.windowType = WINDOW_TYPE.IN_ORDERED;
+                        tmpPoint.windowType = "В заказанном";
                         break;
                     }
                 }
             }
 
             if (tmpPoint.rawConfirmed !== -1) {
-                if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
-                    tmpPoint.status = STATUS.FINISHED_LATE;
-                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
-                    tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window-1].finish) {
+                    tmpPoint.status = 1;
+                } else if (tmpPoint.real_arrival_time < tmpPoint[0].working_window.start) {
+                    tmpPoint.status = 2;
                 } else {
-                    tmpPoint.status = STATUS.FINISHED;
+                    tmpPoint.status = 0;
                 }
             } else {
 
@@ -4671,7 +4712,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log("Загрузка маршрута заняла", parseInt(Date.now()/1000) - rootScope.checkTime);
                     if (data.blocked != undefined) {
                         alert("Этот маршрут уже заблокирван оператором "+ data.blocked);
-
+                        rootScope.clickOff = false;
                         return;
                     }
 

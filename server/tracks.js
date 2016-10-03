@@ -85,7 +85,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
 
 TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, callback) {
-    console.log("Готовимся к запросу в треккер", gid);
+    //console.log("Готовимся к запросу в треккер", gid);
     if(states == undefined || states[0] == undefined) {
         console.log("Бракованный стейт", states);
         return;
@@ -101,14 +101,14 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
     }
         j=0;
     //console.log("По gid", gid, "Нужно запросить треков", finished+1);
-    for (var i = states.length-1; (i >=0 && j < finished+2); i--) {
+    for (var i = states.length-1; (i >=0 && j < finished+4); i--) {
 
-        if (i >= states.length-2 || (states[i].coords == undefined || states[i].coords.length <2) ) {
+        if (i >= states.length-4 || (states[i].coords == undefined || states[i].coords.length <2) ) {
             j++;
         } else {
             continue;
         }
-        console.log("Параметры запрса" , i, j);
+        //console.log("Параметры запрса" , i, j);
         started++;
         (function (ii) {
             //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
@@ -116,10 +116,12 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
                 if (error == undefined && data[0] != undefined && typeof (data) != 'string') {
                     states[ii].coords = data;
                 } else {
-                   if (states[ii].coords != undefined) states[ii].coords = [];
+                   if (states[ii] != undefined && states[ii].coords != undefined) states[ii].coords = [];
                 }
 
-                if (states[ii] != undefined && (states[ii].states =="ARRIVAL" || states[ii].states == "START")&& states[ii].coords != undefined && states[ii].coords.length >2) {
+                //console.log (states[ii] != undefined , states[ii]);
+                if (states[ii] != undefined && (states[ii].state =="ARRIVAL" || states[ii].state == "START") && states[ii].coords != undefined && states[ii].coords.length >2) {
+                    //console.log("Убиваем лишние координаты");
                     states[ii].coords.splice(1, states[ii].coords.length - 2);
                 }
                 //console.log('done loading part #', ii);

@@ -217,7 +217,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
                     "Беспроблемных роутов " + data.result.routes + "\n" +
                     "Роутов в очереди " + data.result.line_routes + "\n" +
                     "Заблокированных роутов " + data.result.blocked_routes + "\n" +
-                    "Старых роутов " + data.result.old_routes);
+                    "Старых роутов " + data.result.oldRoutes);
             });
 
 

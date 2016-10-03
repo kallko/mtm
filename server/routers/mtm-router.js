@@ -540,7 +540,7 @@ router.route('/askforroute')
                     cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes || [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].line_routes.splice(i, 1);
-                    //console.log ("Маршрут найден в проблемных");
+                    console.log ("Маршрут найден в проблемных");
                     break;
                  }
              }
@@ -555,7 +555,7 @@ router.route('/askforroute')
                     cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes || [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].routes.splice(i, 1);
-                    //console.log ("Маршрут найден в беспроблемных");
+                    console.log ("Маршрут найден в беспроблемных");
                     break
                 }
             }
@@ -564,9 +564,9 @@ router.route('/askforroute')
             changePriority(result.uniqueID, currentCompany, key);
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
         }
-        //console.log ("Начинаем запись файла");
-        //log.toFLog('logging.txt', JSON.stringify(result));
-        //console.log("Заканчиваем запись файла");
+        console.log ("Начинаем запись файла");
+        log.toFLog('logging.txt', JSON.stringify(result));
+        console.log("Заканчиваем запись файла");
         res.status(200).json({route: result});
 
 
@@ -728,93 +728,93 @@ router.route('/trackparts/:start/:end')
     });
 
 // получение треков по переданным стейтам
-router.route('/gettracksbystates/')
+router.route('/gettracksbystates')
     .post(function (req, res) {
         // проверяем все ли пользователи еще онлайн и если, кто-то "отпал", разблокируем его маршрут
-        var timeNow = parseInt(Date.now() / 1000);
-        for (var i = 0; i < onlineClients.length; i++) {
-            if (onlineClients[i].time + 60 * 3 < timeNow) {
-                unblockLogin(req.session.login);
-                onlineClients.splice(i, 1);
-                i--;
-            }
-
-        }
-
-        // проверяем не заблокирован ли этот маршрут другим пользователемъ
-        // Задача 1 найти этот роут в заблокированных
-        var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
-        var i=0;
-        var blocked=false;
-        var dataB;
-        //blockedRoutes.push({id:"168113", company:currentCompany, login:key});
-        if (blockedRoutes.length==0){
-            console.log("!!!! Create first element!!!!!!");
-            blockedRoutes.push({id: '286111', company: '292942', login: 'IDS1.dsp', time: parseInt(Date.now() / 1000)});
-        }
-
-        //while( i<blockedRoutes.length){
-        //    if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany && ""+blockedRoutes[i].login != ""+req.session.login){
-        //        console.log("Try accept blocked route");
-        //        blocked=true;
-        //        dataB = {
-        //            result: 'blocked',
-        //            user: blockedRoutes[i].login
-        //        };
-        //        break;
+        //var timeNow = parseInt(Date.now() / 1000);
+        //for (var i = 0; i < onlineClients.length; i++) {
+        //    if (onlineClients[i].time + 60 * 3 < timeNow) {
+        //        unblockLogin(req.session.login);
+        //        onlineClients.splice(i, 1);
+        //        i--;
         //    }
-        //
-        //    i++;
-        //}
-
-        //if(blocked) {
-        //    res.status(200).json(dataB);
-        //    return;
-        //} else {
-        //    // заменяем блокировку, если таковая была или создаем новую, если это первое обращение этого логина
-        //    i=0;
-        //    var created=false;
-        //    while(i<blockedRoutes.length){
-        //        console.log ("Blocked logins",blockedRoutes[i].login , req.session.login);
-        //        if(""+blockedRoutes[i].login == ""+req.session.login) {
-        //            console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
-        //            blockedRoutes[i].id=req.body.id;
-        //            created = true;
-        //            changePriority(req.body.id, currentCompany, req.session.login);
-        //
-        //            //var j = 0;
-        //            //while (j<blockedRoutes.length){
-        //            //    console.log("First", blockedRoutes[j]);
-        //            //    j++;
-        //            //}
-        //
-        //            break;
-        //        }
-        //
-        //
-        //        i++;
-        //    }
-        //
-        //    if(!created){
-        //        var ts = parseInt(Date.now() / 1000);
-        //        console.log("Не было такого логина! создаем");
-        //        blockedRoutes.push({id: "" + req.body.id, company: currentCompany, login: key, time: ts});
-        //        changePriority(req.body.id, currentCompany, req.session.login);
-        //    }
-        //
-        //    i=0;
-        //    while (i<blockedRoutes.length){
-        //        console.log("Second ", blockedRoutes[i]);
-        //        i++;
-        //    }
-        //
         //
         //}
+        //
+        //// проверяем не заблокирован ли этот маршрут другим пользователемъ
+        //// Задача 1 найти этот роут в заблокированных
+        //var key = ""+req.session.login;
+        //var currentCompany = companyLogins[key];
+        //var i=0;
+        //var blocked=false;
+        //var dataB;
+        ////blockedRoutes.push({id:"168113", company:currentCompany, login:key});
+        //if (blockedRoutes.length==0){
+        //    console.log("!!!! Create first element!!!!!!");
+        //    blockedRoutes.push({id: '286111', company: '292942', login: 'IDS1.dsp', time: parseInt(Date.now() / 1000)});
+        //}
+        //
+        ////while( i<blockedRoutes.length){
+        ////    if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany && ""+blockedRoutes[i].login != ""+req.session.login){
+        ////        console.log("Try accept blocked route");
+        ////        blocked=true;
+        ////        dataB = {
+        ////            result: 'blocked',
+        ////            user: blockedRoutes[i].login
+        ////        };
+        ////        break;
+        ////    }
+        ////
+        ////    i++;
+        ////}
+        //
+        ////if(blocked) {
+        ////    res.status(200).json(dataB);
+        ////    return;
+        ////} else {
+        ////    // заменяем блокировку, если таковая была или создаем новую, если это первое обращение этого логина
+        ////    i=0;
+        ////    var created=false;
+        ////    while(i<blockedRoutes.length){
+        ////        console.log ("Blocked logins",blockedRoutes[i].login , req.session.login);
+        ////        if(""+blockedRoutes[i].login == ""+req.session.login) {
+        ////            console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
+        ////            blockedRoutes[i].id=req.body.id;
+        ////            created = true;
+        ////            changePriority(req.body.id, currentCompany, req.session.login);
+        ////
+        ////            //var j = 0;
+        ////            //while (j<blockedRoutes.length){
+        ////            //    console.log("First", blockedRoutes[j]);
+        ////            //    j++;
+        ////            //}
+        ////
+        ////            break;
+        ////        }
+        ////
+        ////
+        ////        i++;
+        ////    }
+        ////
+        ////    if(!created){
+        ////        var ts = parseInt(Date.now() / 1000);
+        ////        console.log("Не было такого логина! создаем");
+        ////        blockedRoutes.push({id: "" + req.body.id, company: currentCompany, login: key, time: ts});
+        ////        changePriority(req.body.id, currentCompany, req.session.login);
+        ////    }
+        ////
+        ////    i=0;
+        ////    while (i<blockedRoutes.length){
+        ////        console.log("Second ", blockedRoutes[i]);
+        ////        i++;
+        ////    }
+        ////
+        ////
+        ////}
 
-
+        console.log("Запрашиваем стейты для прошлого маршрута");
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-
+            console.log("Трек для прошлого маршрута получен");
             res.status(200).json(data);
         });
 
@@ -2104,6 +2104,7 @@ function linkDataParts (currentCompany, login)
     for (i=0; i<cashedDataArr[currentCompany].routes.length; i++){
 
         var route = cashedDataArr[currentCompany].routes[i];
+        delete route.transport.real_track;
         if (route.real_track == undefined || route.real_track.length == 0) continue;
         var last = route.real_track.length-1;
         //console.log("last = ", last);
@@ -2739,14 +2740,14 @@ function uncalcPredication(route, company) {
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
-                console.log("Присваиваем статус 5");
+                //console.log("Присваиваем статус 5");
                 //points[i].variantus = 2770;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                 //console.log("TIME_OUT for point", points[i]);
             }
             if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
                 points[i].status = 4;
-                console.log("Присваиваем статус 4");
+                //console.log("Присваиваем статус 4");
                 //points[i].variantus = 2836;
                 points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
 
@@ -2821,7 +2822,7 @@ function calcPredication(route, company) {
                     //todo решить проблему со складом
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
-                        console.log("Присваиваем статус 4");
+                        //console.log("Присваиваем статус 4");
                         //route.points[j].variantus = 2910;
                         route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     }
@@ -2831,7 +2832,7 @@ function calcPredication(route, company) {
                 if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
 
                     route.points[i].status = 4;
-                    console.log("Присваиваем статус 4");
+                    //console.log("Присваиваем статус 4");
                     //route.points[i].variantus =2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
@@ -2876,7 +2877,7 @@ function calcPredication(route, company) {
                         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
                         //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                         route.points[j].status = 4;
-                        console.log("Присваиваем статус 4");
+                        //console.log("Присваиваем статус 4");
                         //route.points[j].variantus = 2960;
                         //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                         route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
@@ -2923,7 +2924,7 @@ function calcPredication(route, company) {
                     if (route.points[j].overdue_time > 0) {
                         if (minus < now) {
                             route.points[j].status = 4;
-                            console.log("Присваиваем статус 4");
+                            //console.log("Присваиваем статус 4");
                             //route.points[j].variantus = 3005;
                             //console.log("_route.points[j].status = STATUS.TIME_OUT;");
                         } else {
@@ -3427,7 +3428,7 @@ function lookForNewIten(company) {
 
                             try {
                                 tPoint.route_indx = cashedDataArr[currentCompany].routes[i].filterId;
-                                var trans = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].routes[i].transport))
+                                var trans = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].routes[i].transport));
                                 delete trans.real_track;
                                 tPoint.transport = trans;
 
@@ -3616,7 +3617,8 @@ function lookForNewIten(company) {
                 //TODO решить вопрос с обновлением настроек.
                 var settings = cashedDataArr[company].settings;
                 if(cashedDataArr[company].oldRoutes != undefined) {
-                    oldRoutes = JSON.parse(JSON.stringify(cashedDataArr[company].line_routes.concat(cashedDataArr[company].oldRoutes)));
+                    cashedDataArr[company].line_routes = cashedDataArr[company].line_routes.concat(cashedDataArr[company].oldRoutes);
+                    oldRoutes = JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
                 } else {
                     oldRoutes =JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
                 }
@@ -4069,7 +4071,7 @@ function connectStopsAndPoints(company) {
                             //    tmpPoint.limit=60;
                             //} else {tmpPoint.limit=60; } }
 
-                            tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
+                            //tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
                             tmpPoint.stopState = tmpArrival;
                             //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
 
@@ -4191,12 +4193,12 @@ function findStatusesAndWindows(company) {
 
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
-                    console.log("Присваиваем статус 1");
+                    //console.log("Присваиваем статус 1");
                 } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
-                    console.log("Присваиваем статус 2");
+                    //console.log("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 } else {
-                    console.log("Присваиваем статус 0");
+                    //console.log("Присваиваем статус 0");
                     tmpPoint.status = 0;
                 }
             } else{
@@ -4223,26 +4225,26 @@ function findStatusesAndWindows(company) {
 
                 if (tmpPoint.real_arrival_time > end)
                 {
-                    console.log("Присваиваем статус 1");
+                    //console.log("Присваиваем статус 1");
                     tmpPoint.status = 1;
 
                 }
 
                 if (tmpPoint.real_arrival_time < start)
                 {
-                    console.log("Присваиваем статус 2");
+                    //console.log("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 }
 
                 if (tmpPoint.status == undefined) {
                     if (tmpPoint.working_window[0] == undefined) {
-                        console.log("Присваиваем статус 0");
+                        //console.log("Присваиваем статус 0");
                         tmpPoint.status = 0;
                     } else {
                         for (var k=0; k<tmpPoint.working_window.length; k++){
                             if (tmpPoint.real_arrival_time > tmpPoint.working_window[k].start && tmpPoint.real_arrival_time < tmpPoint.working_window[k].finish ){
                                 tmpPoint.status = 0;
-                                console.log("Присваиваем статус 0");
+                                //console.log("Присваиваем статус 0");
                                 break;
                             }
                         }
@@ -4253,7 +4255,7 @@ function findStatusesAndWindows(company) {
 
                     if(tmpPoint.status == undefined) {
                         //точка где то между окнами
-                        console.log("Присваиваем статус 1");
+                        //console.log("Присваиваем статус 1");
                         tmpPoint.status = 1; //todo Условно присвоили статус доставлен поздно, если не попали ни в одно окно
                     }
 
@@ -5209,7 +5211,7 @@ function loadCoords(company) {
             if (gid !=undefined && states != undefined && states.length>0) tracksManager.getTrackByStatesForNode(states, gid, route, function (data, route) {
                 //console.log(data, "MTM 5198");
                 route.real_track=data;
-                console.log("Закончена подгрузка координат", route.transport.gid);
+                //console.log("Закончена подгрузка координат", route.transport.gid);
             })
         }
 

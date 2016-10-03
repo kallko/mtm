@@ -1170,7 +1170,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 wayPoint.rawConfirmed =1;
                 makeWayPointMarkerGreen(indx);
                 changeFieldsAlredyConnectedPoints(wayPoint, stop);
-                if(duplicate){return};
+                if(duplicate){return}
             }
 
 
@@ -1178,7 +1178,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             if(typeof (wayPoint.stopState)!='undefined'){
 
                 //Находим маркер oldStop;
-                var i=0;
+                i=0;
                 while(i<markersArr.length){
 
                     if((typeof (markersArr[i].source)!='undefined') &&(typeof (markersArr[i].source.t1!='undefined'))&& (markersArr[i].source.t1==oldStopTime)){
@@ -1192,7 +1192,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 //Удаляем из старого маркера  его сервиспоинтс indx, если он есть
                 if(oldStopMarker!=undefined) {
-                    var i=0;
+                    i=0;
                     while (typeof (oldStopMarker.source.servicePoints)!='undefined' && i<oldStopMarker.source.servicePoints.length){
 
                         if (oldStopMarker.source.servicePoints[i]==indx){
@@ -1567,30 +1567,43 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             tmpPoint.windowType = 0;
-            if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time) {
-                console.log("window type2");
-                tmpPoint.windowType = 2;
+            if (tmpPoint.working_window[0].start > tmpPoint.real_arrival_time || tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length -1].finish) {
+
+                tmpPoint.windowType = "Вне окон";
             } else {
-                for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
-                    if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time) {
-                        tmpPoint.windowType = 1;
-                        console.log("window type1");
-                        break;
-                    }
-                }
-            }
-
-
-            if (tmpPoint.rawConfirmed !== -1) {
-                if (tmpPoint.real_arrival_time > tmpPoint.working_window.finish) {
-                    tmpPoint.status = STATUS.FINISHED_LATE;
-                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window.start) {
-                    tmpPoint.status = STATUS.FINISHED_TOO_EARLY;
+                if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time && tmpPoint.real_arrival_time < tmpPoint.promised_window_changed.finish) {
+                    tmpPoint.windowType = "В обещанном";
                 } else {
-                    tmpPoint.status = STATUS.FINISHED;
-                }
+                    for (var l = 0; tmpPoint.working_window != undefined &&  tmpPoint.windowType == 0 && l < tmpPoint.working_window.length; l++) {
+                        if (tmpPoint.working_window[l].start < tmpPoint.real_arrival_time && tmpPoint.working_window[l].finish > tmpPoint.real_arrival_time) {
+                            tmpPoint.windowType = "В заказанном";
+
+                            break;
+                    }
+                }}
+
             }
 
+            if (tmpPoint.windowType == 0) tmpPoint.windowType = "Вне окон";
+
+
+
+            tmpPoint.status = undefined;
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
+                    tmpPoint.status = 1;
+                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
+                    tmpPoint.status = 2;
+                } else {
+                    for (var i=0; (tmpPoint.working_window != undefined && i<tmpPoint.working_window.length); i++ ){
+                        if (tmpPoint.working_window[i].start < tmpPoint.real_arrival_time && tmpPoint.working_window[i].finish > tmpPoint.real_arrival_time) {
+                            tmpPoint.status = 0;
+                            break;
+                        }
+
+                }
+
+                    if (tmpPoint.status == undefined) tmpPoint.status = 1;
+                }
 
 
 
@@ -1633,18 +1646,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 if (waypoint.real_arrival_time > waypoint.working_window[waypoint.working_window.length-1].finish) {
                     waypoint.status = 1;
-                    console.log("Присваиваем статус 1");
+                    //console.log("Присваиваем статус 1, 1636");
                 } else if (waypoint.real_arrival_time < waypoint.working_window[0].start) {
-                    console.log("Присваиваем статус 2");
+                    //console.log("Присваиваем статус 2, 1638");
                     waypoint.status = 2;
                 } else {
-                    console.log("Присваиваем статус 0");
+                    //console.log("Присваиваем статус 0, 1641");
                     waypoint.status = 0;
                 }
             } else{
 
                 console.log("Начинаем определение статуса");
-                if (waypoint.waypoint.TYPE == "WAREHOUSE"){
+                if (waypoint.waypoint == undefined || waypoint.waypoint.TYPE == "WAREHOUSE"){
                     //todo Дописать определение статуса для склада
                     return;
                 }
@@ -1665,26 +1678,26 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 console.log ("Ориентиры", waypoint.real_arrival_time, start, end);
                 if (waypoint.real_arrival_time > end)
                 {
-                    console.log("Присваиваем статус 1");
+                    //console.log("Присваиваем статус 1");
                     waypoint.status = 1;
 
                 }
 
                 if (waypoint.real_arrival_time < start)
                 {
-                    console.log("Присваиваем статус 2");
+                    //console.log("Присваиваем статус 2");
                     waypoint.status = 2;
                 }
 
                 if (waypoint.status == undefined) {
                     if (waypoint.working_window[0] == undefined) {
-                        console.log("Присваиваем статус 0");
+                        //console.log("Присваиваем статус 0");
                         waypoint.status = 0;
                     } else {
                         for (var k=0; k<waypoint.working_window.length; k++){
                             if (waypoint.real_arrival_time > waypoint.working_window[k].start && waypoint.real_arrival_time < waypoint.working_window[k].finish ){
                                 waypoint.status = 0;
-                                console.log("Присваиваем статус 0");
+                                //console.log("Присваиваем статус 0");
                                 break;
                             }
                         }
@@ -1695,7 +1708,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                     if(waypoint.status == undefined) {
                         //точка где то между окнами
-                        console.log("Присваиваем статус 1");
+                        //console.log("Присваиваем статус 1");
                         waypoint.status = 1; //todo Условно присвоили статус доставлен поздно, если не попали ни в одно окно
                     }
 
