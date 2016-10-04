@@ -461,7 +461,7 @@ router.route('/dailydata')
                                 //delete cashedDataArr[company].allPushes;
                                 cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
                             }
-
+                            console.log("Присоеденили", obj.length, "Получили", cashedDataArr[company].allPushes.length);
                             console.log("GetPushes finished for company", company, t, tt );
                             if (t==tt) startCalculateCompany(company);
                         });
@@ -2129,6 +2129,7 @@ function startPeriodicCalculating() {
                         //delete cashedDataArr[company].allPushes;
                         cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);}
                         cashedDataArr[company].needRequests--;
+                        console.log ("Получили", obj.length, "присоеденеили", cashedDataArr[company].allPushes.length);
                         console.log("GetPushes finished for company", company, cashedDataArr[company].needRequests);
                         if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
                     });

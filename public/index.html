@@ -340,7 +340,7 @@
                     <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
                     <td class="status-col" ng-class="row.class" >
                              <span>
-                                {{getTextStatus(row)}}
+                                {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status ==1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }}
                             </span>
                     </td>
                     <td ng-show="settings.user == 'ids.kalko'" class="degree"  >
