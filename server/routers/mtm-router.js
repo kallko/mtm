@@ -730,89 +730,9 @@ router.route('/trackparts/:start/:end')
 // получение треков по переданным стейтам
 router.route('/gettracksbystates')
     .post(function (req, res) {
-        // проверяем все ли пользователи еще онлайн и если, кто-то "отпал", разблокируем его маршрут
-        //var timeNow = parseInt(Date.now() / 1000);
-        //for (var i = 0; i < onlineClients.length; i++) {
-        //    if (onlineClients[i].time + 60 * 3 < timeNow) {
-        //        unblockLogin(req.session.login);
-        //        onlineClients.splice(i, 1);
-        //        i--;
-        //    }
-        //
-        //}
-        //
-        //// проверяем не заблокирован ли этот маршрут другим пользователемъ
-        //// Задача 1 найти этот роут в заблокированных
-        //var key = ""+req.session.login;
-        //var currentCompany = companyLogins[key];
-        //var i=0;
-        //var blocked=false;
-        //var dataB;
-        ////blockedRoutes.push({id:"168113", company:currentCompany, login:key});
-        //if (blockedRoutes.length==0){
-        //    console.log("!!!! Create first element!!!!!!");
-        //    blockedRoutes.push({id: '286111', company: '292942', login: 'IDS1.dsp', time: parseInt(Date.now() / 1000)});
-        //}
-        //
-        ////while( i<blockedRoutes.length){
-        ////    if(blockedRoutes[i].id == req.body.id && blockedRoutes[i].company==currentCompany && ""+blockedRoutes[i].login != ""+req.session.login){
-        ////        console.log("Try accept blocked route");
-        ////        blocked=true;
-        ////        dataB = {
-        ////            result: 'blocked',
-        ////            user: blockedRoutes[i].login
-        ////        };
-        ////        break;
-        ////    }
-        ////
-        ////    i++;
-        ////}
-        //
-        ////if(blocked) {
-        ////    res.status(200).json(dataB);
-        ////    return;
-        ////} else {
-        ////    // заменяем блокировку, если таковая была или создаем новую, если это первое обращение этого логина
-        ////    i=0;
-        ////    var created=false;
-        ////    while(i<blockedRoutes.length){
-        ////        console.log ("Blocked logins",blockedRoutes[i].login , req.session.login);
-        ////        if(""+blockedRoutes[i].login == ""+req.session.login) {
-        ////            console.log('Change blocked routes', blockedRoutes[i].id, req.body.id);
-        ////            blockedRoutes[i].id=req.body.id;
-        ////            created = true;
-        ////            changePriority(req.body.id, currentCompany, req.session.login);
-        ////
-        ////            //var j = 0;
-        ////            //while (j<blockedRoutes.length){
-        ////            //    console.log("First", blockedRoutes[j]);
-        ////            //    j++;
-        ////            //}
-        ////
-        ////            break;
-        ////        }
-        ////
-        ////
-        ////        i++;
-        ////    }
-        ////
-        ////    if(!created){
-        ////        var ts = parseInt(Date.now() / 1000);
-        ////        console.log("Не было такого логина! создаем");
-        ////        blockedRoutes.push({id: "" + req.body.id, company: currentCompany, login: key, time: ts});
-        ////        changePriority(req.body.id, currentCompany, req.session.login);
-        ////    }
-        ////
-        ////    i=0;
-        ////    while (i<blockedRoutes.length){
-        ////        console.log("Second ", blockedRoutes[i]);
-        ////        i++;
-        ////    }
-        ////
-        ////
-        ////}
 
-        console.log("Запрашиваем стейты для прошлого маршрута");
+
+        //console.log("Запрашиваем стейты для прошлого маршрута", req.body.states, req.body.gid, req.body.demoTime);
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
             console.log("Трек для прошлого маршрута получен");
             res.status(200).json(data);
@@ -4162,6 +4082,7 @@ function findStatusesAndWindows(company) {
             }
             //считаем окна только для доставленного
             //if (tmpPoint.status > 3 && tmpPoint.status != 6) continue;
+            //console.log("Точка  вероятно доставлена");
 
             tmpPoint.windowType = 'Вне окон';
             if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
@@ -4294,6 +4215,7 @@ function findStatusesAndWindows(company) {
                 tmpPoint.problem_index = 1;
                 //console.log("tmpPoint.problem_index", tmpPoint.problem_index);
             }
+            //console.log("И присваиваем ей статус", tmpPoint.status);
         }
 
     }
@@ -4349,18 +4271,20 @@ function oldDayCalculate (company, data) {
     data.current_server_time = parseInt(new Date() / 1000);
     data.currentDay = false;
     cashedDataArr[company].currentDay = false;
-    console.log("Прошлый день готов к рассчету", company, data);
+    console.log("Прошлый день готов к рассчету", company);
     createFilterIdForOldDay(company);
 
     connectPointsAndPushes(company);
     connectStopsAndPoints(company);
     findStatusesAndWindows(company);
+    concat1CAndMonitoring (company);
     calculateStatistic (company);
     //checkRealTrackData(company); //todo убрать, после того как починят треккер
     //oldDayStatuses(company);
 
 
     console.log("Расчет прошлого дня окончен", company);
+    console.log("Доставленных точек", cashedDataArr[company].statistic[0]+cashedDataArr[company].statistic[1]+cashedDataArr[company].statistic[2] )
     cashedDataArr[company].ready = true;
     console.log("Готово к отдаче", cashedDataArr[company].ready);
 }
@@ -5194,6 +5118,11 @@ function checkSync(company, login, blockedArr) {
 
 }
 
+
+function concat1CAndMonitoring (company) {
+    if (!company) return;
+    console.log("Закрытые в 1С маршруты загружены", cashedDataArr[company].closedRoutesFrom1C == undefined);
+}
 
 function loadCoords(company) {
     if (!company) return;

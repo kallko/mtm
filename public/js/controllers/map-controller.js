@@ -330,7 +330,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         addMarker(tmpVar);
 
                     } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
-                        color = '#5bc0de';
+                        color = '#de5bc0';
+                        polyline = new L.Polyline(track[i].coords, {
+                            color: color,
+                            weight: 3,
+                            opacity: 0.8,
+                            smoothFactor: 1
+                        });
+
+                        polyline.addTo(map);
                     } else if (track[i].state == 'START') {
                         color = 'yellow';
                     }
@@ -1344,7 +1352,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                     if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
                                         if (markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined && servicePointsLat != undefined && servicePointsLng != undefined ){
 
-                                            console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
+                                            //console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
 
                                         var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng)]], {
                                             color: 'black',

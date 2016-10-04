@@ -60,12 +60,12 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
         updateTime = states[0].lastTrackUpdate == undefined ? 0 : states[0].lastTrackUpdate;
 
     for (var i = 0; i < states.length; i++) {
-        if ((demoTime != -1 && states[i].t2 > demoTime) ||
-            (demoTime == -1 && states[i].t1 < updateTime + 1800)) continue;
+        //if ((demoTime != -1 && states[i].t2 > demoTime) ||
+        //    (demoTime == -1 && states[i].t1 < updateTime + 1800)) continue;
 
         started++;
         (function (ii) {
-            //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
+            console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
                 //console.log('done loading part #', ii);
