@@ -178,8 +178,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         //stops.push(track[i]);
 
 // todo раскомментировать когда будет правильно рассчитываться время финиша
-                        if (track[i].coords.t1 < start - rootScope.data.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
-                        if (track[i].coords.t1 > end + rootScope.data.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+                        if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
+                        if (track[i].coords.t1 > end + rootScope.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
                         if (!drawStops) continue;
 
