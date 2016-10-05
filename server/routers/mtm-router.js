@@ -2869,18 +2869,24 @@ function calcPredication(route, company) {
     }
 
 //Приведение времени PUSH к локально текущему Киев прибавляем 3 часа
-function checkPushesTimeGMTZone(pushes, company){
+function checkPushesTimeGMTZone(pushes, company, companyName){
     //console.log(colors.green('Start reorange pushes'));
     //console.log('Тестовое сообщение зеленого цвета'.green);
-    if (pushes == undefined) return;
+    if (pushes == undefined || company == undefined) return;
     var i=0;
+    var delta;
+
+    //Костыль приводящий пуши разных компаний к единому знаменателю
+    if (company == "292942") delta = 4;
+    if (company == "271389") delta = 3;
+
     while (i<pushes.length) {
 
 
-        var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*4 : 0;
+        var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*delta : 0;
         pushes[i].gps_time_ts=temp;
         if( temp == 0) {
-            console.log("Невалидный ПУШ", company);
+            console.log("Невалидный ПУШ", companyName);
         }
 
         //console.log("New Time", temp);
@@ -3722,7 +3728,7 @@ function connectPointsAndPushes(company) {
     console.log("Start connectPointsAndPushes", company);
     var mobilePushes = cashedDataArr[company].allPushes;
 
-    checkPushesTimeGMTZone(mobilePushes, cashedDataArr[company].CLIENT_NAME);
+    checkPushesTimeGMTZone(mobilePushes, company, cashedDataArr[company].CLIENT_NAME);
 
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
         cashedDataArr[company].routes[i].pushes=[];
@@ -4112,7 +4118,14 @@ function findStatusesAndWindows(company) {
 
 
 
+                //console.log(tmpPoint, "MTM 4121");
+                //Костыль, если working window неправильно сформирован
+                if (!tmpPoint.working_window.isArray) {
+                    var transit = tmpPoint.working_window;
+                    tmpPoint.working_window =[];
+                    tmpPoint.working_window.push(transit)
 
+                }
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
                     //console.log("Присваиваем статус 1");

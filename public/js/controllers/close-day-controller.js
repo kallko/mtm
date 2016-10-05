@@ -204,6 +204,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             scope.$emit('clearMap');
 
             alert("Вы уже заблокировали предельное количество маршрутов");
+            rootScope.clickOff = false;
         }
         else scope.$emit('loadoneroute', id);
     };
