@@ -1827,7 +1827,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             var reRoute;
-            for (var i = 0; i< rootScope.data.routes.length; i++){
+            for ( i = 0; i< rootScope.data.routes.length; i++){
                 if (rootScope.data.routes[i].uniqueID == uniqueID){
                     reRoute = rootScope.data.routes[i];
                 }
@@ -2227,6 +2227,40 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //    // clearMap();
         //    // drawRealRoute(route);
         //})
+
+
+        //функция помещающая все маркеры на видимую часть карты
+        rootScope.$on('showAllMarkers', function(event){
+            //console.log("Центрируем по всем маркерам");
+            if (markersArr == undefined || markersArr.length == 0) return;
+
+            var globalMarkers = gpsPushMarkers.concat(markersArr);
+            //console.log(event);
+            //console.log(markersArr);
+            //console.log(gpsPushMarkers);
+            if (gpsPushMarkers == undefined || gpsPushMarkers.length == 0) gpsPushMarkers=[];
+            console.log(globalMarkers);
+            if (globalMarkers != undefined && globalMarkers.length>0) {
+                var group = new L.featureGroup(globalMarkers);
+                map.fitBounds(group.getBounds());
+            }
+
+            var newZoom = map.getZoom();
+            console.log(map.getCenter());
+            var centre = map.getCenter();
+            var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
+                offset = map.getSize(),
+                tmp = map.project(new L.LatLng(centre.lat, centre.lng), zoom).subtract(
+                    [
+                        position.width / 2 - offset.x / 2 + position.offset.left,
+                        position.height / 2 - offset.y / 2 + position.offset.top
+                    ]),
+                target = map.unproject(tmp, zoom);
+
+            console.log(zoom, offset, tmp, target);
+            setMapCenter(target.lat, target.lng, newZoom);
+
+        })
 
     }]);
 

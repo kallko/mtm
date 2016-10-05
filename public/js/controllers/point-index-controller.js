@@ -190,9 +190,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //     }
         // };
         scope.$watch('filters.route', function(){
-            if (rootScope.data) {console.log("Watcher is on!", rootScope.data.statistic)} else {
-                console.log("RootSCOPE UNDEFINED");
-            }
+
             if(rootScope.data != undefined) {
                 if (!rootScope.data.currentDay ){
                     if (scope.filters.route == -1) {
@@ -259,7 +257,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     console.log("Вы выбрали маршрут из проблемных");
 
                                     scope.drawRoute(scope.filters.route, false, false);
-                                    rootScope.carCentre = true;
+                                    rootScope.carCentre = false;
+                                    console.log("Отправляем карту на центровку");
+                                    rootScope.$emit('showAllMarkers');
                                     return;
                                     //todo сделать вывод статистики маршрута
                                 }
@@ -292,10 +292,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             if(rootScope.data.routes.length >= settings.problems_to_operator + extra){
                             scope.$emit('clearMap');
                             alert("Вы уже заблокировали предельное количество маршрутов");
+                                rootScope.clickOff = false;
+                                scope.filters.route = -1;
                             return;
                         }
                         var asking=true;
-                        for (var j=0; j<rootScope.data.allRoutes.length; j++){
+                        for ( j=0; j<rootScope.data.allRoutes.length; j++){
                             if (rootScope.data.allRoutes[j].value == scope.filters.route) {
                                 giveMeOneRoutePls(rootScope.data.allRoutes[j].uniqueID);
                             }
@@ -323,6 +325,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                 }
             }
+
+
+            console.log("Отправляем карту на центровку");
+            rootScope.$emit('showAllMarkers');
+
         });
 
 
@@ -4728,7 +4735,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         scope.filters.route = data.route.filterId;
                         console.log("Раз два три четыре пять, начинаем рисовать", scope.filters.route );
                         scope.drawRoute(scope.filters.route, true, false);
-                        rootScope.carCentre=true;
+                        console.log("Отправляем карту на центровку");
+                        rootScope.$emit('showAllMarkers');
 
                         for (var i = 0; rootScope.data.routes.length > i; i++) {
                             if (rootScope.data.routes[i].filterId == scope.filters.route) {
