@@ -1004,7 +1004,7 @@ router.route('/closeday')
         console.log("приняли данные на роутере");
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
-        //console.log(req.body.closeDayData);
+        log.toFLog("/logging.txt", req.body.closeDayData);
         console.log ("start working");
         var soapManager = new soap(req.session.login);
             soapManager.closeDay(req.body.closeDayData, function (data) {
@@ -1429,6 +1429,7 @@ router.route('/askforproblems/:need')
                 result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.currentDay = true;
+                result.reasons = cashedDataArr[currentCompany].reasons;
             }
             console.log("Need=", need);
             if (need != 1){
@@ -1456,6 +1457,7 @@ router.route('/askforproblems/:need')
                         result.drivers = cashedDataArr[currentCompany].drivers;
                         result.transports = cashedDataArr[currentCompany].transports;
                         result.settings.user = "" + req.session.login;
+                        result.reasons = cashedDataArr[currentCompany].reasons;
                         //надо отдать маршрут из старых на закрытие
                         //var existOld = choseRouteForClose(currentCompany);
                         //if (existOld === false) {
@@ -1539,7 +1541,7 @@ router.route('/askforproblems/:need')
         //Перед отправкой проверка на задвоенность маршрутов
 
 
-
+        result.reasons = cashedDataArr[currentCompany].reasons;
         console.log("Result length", result.routes.length);
         res.status(200).json(result);
 

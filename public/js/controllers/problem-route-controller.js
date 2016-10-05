@@ -117,8 +117,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         if(data.allRoutes != undefined) {
                             //console.log("Отправляем данные на клиент", data, data.routes[0].points.length, data.routes[1].points.length, data.routes[2].points.length);
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
-                            rootScope.$emit('receiveproblem', rootScope.tempDecision);
                             rootScope.reasons=data.reasons;
+                            console.log("причины отказа", data.reasons);
+                            rootScope.$emit('receiveproblem', rootScope.tempDecision);
+
                             if (rootScope.tempDecision.statistic != undefined) rootScope.$emit('holestatistic', rootScope.tempDecision.statistic);
                         } else
 

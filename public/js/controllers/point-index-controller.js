@@ -3062,10 +3062,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         ordered: false
                     };
 
-                    if (point.windowType === WINDOW_TYPE.IN_PROMISED) {
+                    if (point.windowType == "В заказанном") {
                         point.status.promised = true;
                         point.status.ordered = true;
-                    } else if (point.windowType === WINDOW_TYPE.IN_ORDERED) {
+                    } else if (point.windowType == "В обещанном") {
                         point.status.ordered = true;
                     }
 
