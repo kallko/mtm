@@ -167,7 +167,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
             }));
             rootScope.$emit('displayCollectionToStatistic', route.points);
-
+            rootScope.showPoint = true;
         };
 
 

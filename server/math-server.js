@@ -12,16 +12,16 @@ function MathServer() {
 
 // запрос на пересчет маршрута
 MathServer.prototype.recalculate = function (route, callback) {
-    me = this;
-    console.log(this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route));
+    var me = this;
+    log.info(this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route));
     log.toFLog('query.js', this.mathServerUrl + 'task?action=add&globalID=uniqGuid&task=' + JSON.stringify(route));
     request({
         url: this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route),
         json: true
     }, function (error, response, body) {
-        console.log('recalculate callback!');
+        log.info('recalculate callback!');
         if (error) {
-            console.log(error);
+            log.info(error);
         } else {
             log.toFLog('math_res.js', body);
             var queryID = body.query;
@@ -32,16 +32,16 @@ MathServer.prototype.recalculate = function (route, callback) {
                     json: true
                 }, function (error, response, body) {
                     if (error || body.error) {
-                        console.log(error);
-                        if (body)   console.log(body.error);
+                        log.info(error);
+                        if (body)   log.info(body.error);
                         clearInterval(intervalID);
                         callback({status: 'error'});
                     } else {
                         if (body.state.status == 3 || body.state.status == 4 || body.state.status == 5) {
                             if (body.state.status == 4) {
                                 log.toFLog('math_res2.js', body);
-                                console.log('Math ready!');
-                                console.log(body);
+                                log.info('Math ready!');
+                                log.info(body);
                                 clearInterval(intervalID);
                                 body.timestamp = parseInt(Date.now() / 1000);
                                 callback(body);

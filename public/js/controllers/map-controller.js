@@ -2213,14 +2213,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         function showProblemPoint(route) {
             map.setZoom(18);
-            var temp = map.getZoom();
+
             if (!route || !route.problem_point || !route.problem_point.waypoint ) return;
-            //console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), temp);
+            console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON));
             setMapCenter(parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), 18);
 
 
         }
 
+
+        rootScope.$on('showproblem', function(event, route){
+            showProblemPoint(route);
+        });
         //rootScope.$on('receiveproblem', function (event, cache) {
         //    console.log("map-controller draw route from Cashe", cache);
         //    // console.log("FOR ALeXANDER", JSON.stringify(cache.routes[0].plan_geometry));
@@ -2233,20 +2237,33 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         rootScope.$on('showAllMarkers', function(event){
             //console.log("Центрируем по всем маркерам");
             if (markersArr == undefined || markersArr.length == 0) return;
-
-            var globalMarkers = gpsPushMarkers.concat(markersArr);
-            //console.log(event);
-            //console.log(markersArr);
-            //console.log(gpsPushMarkers);
+            var globalMarkers = [];
+            globalMarkers = globalMarkers.concat(markersArr);
+            //console.log(globalMarkers.length);
+            for (var i=0; i< globalMarkers.length; i++){
+                if (globalMarkers[i].source && globalMarkers[i].source.waypoint && globalMarkers[i].source.waypoint.TYPE) console.log ("globalMarkers[i].source.waypoint.TYPE", globalMarkers[i].source.waypoint.TYPE)
+                if (globalMarkers[i].source != undefined && (globalMarkers[i].source.waypoint == undefined || globalMarkers[i].source.waypoint.TYPE == "WAREHOUSE" || globalMarkers[i].source.waypoint.TYPE == "PARKING")){
+                    globalMarkers.splice(i,1);
+                    i--;
+                }
+            }
             if (gpsPushMarkers == undefined || gpsPushMarkers.length == 0) gpsPushMarkers=[];
-            console.log(globalMarkers);
-            if (globalMarkers != undefined && globalMarkers.length>0) {
+            globalMarkers = globalMarkers.concat(gpsPushMarkers);
+            displayMarkers (globalMarkers);
+
+        });
+
+
+        function displayMarkers (globalMarkers) {
+            //console.log("Zoom1", map.getZoom());
+            //console.log(globalMarkers);
+            if (globalMarkers != undefined && globalMarkers.length > 0) {
                 var group = new L.featureGroup(globalMarkers);
                 map.fitBounds(group.getBounds());
             }
-
+            //console.log("Zoom2", map.getZoom());
             var newZoom = map.getZoom();
-            console.log(map.getCenter());
+            //console.log(map.getCenter());
             var centre = map.getCenter();
             var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
                 offset = map.getSize(),
@@ -2259,8 +2276,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             console.log(zoom, offset, tmp, target);
             setMapCenter(target.lat, target.lng, newZoom);
-
-        })
+            console.log("Zoom3", map.getZoom());
+        }
 
     }]);
 

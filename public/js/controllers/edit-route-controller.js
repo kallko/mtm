@@ -270,6 +270,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 .error(function(data){
                     console.log("This is ERROR!");
                 });
+
         }
 
         // применить времена проезда ко всем параметрам задач

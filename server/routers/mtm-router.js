@@ -1,3 +1,5 @@
+
+
 var express = require('express'),
     router = express.Router(),
     config = require('../config'),
@@ -67,7 +69,7 @@ cashedDataArr = {},  // глобальный кеш
 //        }
 //    }
 //
-//    console.log('END CRON');
+//    log.info('END CRON');
 //
 //    needNewReqto1C = {};
 //    closeRoutesUniqueID = {};
@@ -87,13 +89,21 @@ cashedDataArr = {},  // глобальный кеш
 
 router.route('/')
     .get(function (req, res) {
+        try {
         res.status(200);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 router.route('/currentsrvertime')
     .post(function(req, res){
+        try {
         res.status(200).json(Date.now());
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -106,22 +116,30 @@ router.route('/currentsrvertime')
 
 router.route('/keysoldroutescache')
     .get(function(req, res){
+        try {
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         if(currentCompany in oldRoutesCache){
-            console.log(Object.keys(oldRoutesCache[currentCompany]));
+            log.info(Object.keys(oldRoutesCache[currentCompany]));
             res.status(200).json( Object.keys(oldRoutesCache[currentCompany]) );
         }else{
             res.status(200).json(null);
         }
 
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
 
     });
 router.route('/getoldroute')
     .post(function(req, res){
+        try {
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         res.status(200).json(oldRoutesCache[currentCompany][req.body.date]);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -129,7 +147,8 @@ router.route('/getoldroute')
 
 router.route('/nodeserch')
     .post(function(req, res){
-        console.log("Получил запрос на поиск", req.body.data);
+        try {
+        log.info("Получил запрос на поиск", req.body.data);
         log.toFLog('logging.txt', 'TEST 29.08');
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
@@ -139,27 +158,30 @@ router.route('/nodeserch')
 
         //todo Тестовый блок асинхронности
     //    async.parallel([
-    //         function(callback){console.log("First");
+    //         function(callback){log.info("First");
     //
     //            var soapManager = new soap(req.session.login);
     //            soapManager.getNewConfig(req.session.login, function (company, data) {
     //                var settings = JSON.parse(data.return);
-    //                console.log("Recieve first settings", settings);
+    //                log.info("Recieve first settings", settings);
     //                callback (null, settings)
     //
     //            })
     //        },
-    //         function(callback){console.log("Second");
+    //         function(callback){log.info("Second");
     //
     //            var soapManager = new soap(req.session.login);
     //            soapManager.getNewConfig(req.session.login, function (company, data) {
     //                var settings = JSON.parse(data.return);
-    //                console.log("Recieve second settings", settings);
+    //                log.info("Recieve second settings", settings);
     //                callback(null, settings)
     //            })}
     //],
-    //        function(err, results) {console.log("Third", results)});
+    //        function(err, results) {log.info("Third", results)});
         res.status(200).json(result);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -167,23 +189,29 @@ router.route('/nodeserch')
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
 router.route('/login')
     .get(function (req, res) {
+        try {
         req.session.login = req.query.curuser;
 
 
         res.sendFile('index.html', {root: './public/'});
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // загрузка данных из соапа за текущий день
+
 router.route('/dailydata')
     .get(function (req, res) {
-        console.log("Start Loading DailyData");
+        try {
+        log.info("Start Loading DailyData");
         startTime = parseInt(Date.now()/1000);
         req.session.lastLockCheck = 0;
         // проверка на включеннный демо режим
         if (req.session.login == demoLogin) {
             var soapManager = new soap(req.session.login);
             soapManager.loadDemoData(function (data) {
-                console.log('Demo data loaded!');
+                log.info('Demo data loaded!');
                 data.demoMode = true;
                 data.user = req.session.login;
                 res.status(200).json(data);
@@ -192,10 +220,12 @@ router.route('/dailydata')
         }
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
-        console.log("Prepere for Conflict!!!!!!!!", req.session.login);
-        //console.log(colors.green('HELLO'));
+        log.info("Prepere for Conflict!!!!!!!!",  req.session.login);
+
+
+        //log.info(colors.green('HELLO'));
         if (req.session.login == null || req.session.login == undefined) {
-            console.log("Login", req.session.login);
+            log.info("Login", req.session.login);
             res.status(401).json({status: 'Unauthorized'});
             return;
             //req.session.login = config.soap.defaultClientLogin;
@@ -208,20 +238,20 @@ router.route('/dailydata')
         var currentCompany = companyLogins[key];
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
-        //console.log("!!!!!!!req.session.login!!!!!", req.session.login);
+        //log.info("!!!!!!!req.session.login!!!!!", req.session.login);
         //
         //if(req.session.login!=undefined && updateCacshe[req.session.login].length==0){
-        //    console.log("First call for data!, or login undefined");
+        //    log.info("First call for data!, or login undefined");
         //
         //} else {
-        //    console.log("Repeat call for data!");
+        //    log.info("Repeat call for data!");
         //}
 
         // при включенном флаге кешинга по сессии, ищет наличие относительно свежего кеша и отправляет в случае успеха
 
 
 
-        console.log(" Should I choose Cashe?", req.session.login,  config.cashing.session
+        log.info(" Should I choose Cashe?", req.session.login,  config.cashing.session
             , req.query.force == null
             , req.query.showDate == null
             , req.session.login != null
@@ -238,18 +268,18 @@ router.route('/dailydata')
             && cashedDataArr[currentCompany] != null
             && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
-            console.log('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
+            log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
 
             var settings={};
 
             // Получение настроек для конкретной компании
             soapManager = new soap(req.session.login);
-            console.log("Запрашиваю настройки для ", req.session.login);
+            log.info("Запрашиваю настройки для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
-                //console.log("receiveConfig", data);
+                log.info("receiveConfig", data);
 
                 if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
-                console.log("Settings Recieved",  settings, "mtm 218");
+                log.info("Settings Recieved",  settings, "mtm 218");
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
                 cashedDataArr[currentCompany].user = req.session.login;
 
@@ -262,7 +292,7 @@ router.route('/dailydata')
                 }
 
                 cashedDataArr[currentCompany].settings = settings;
-                console.log("проверка на отправку, получены ли настройки.", cashedDataArr[currentCompany].settings);
+                log.info("проверка на отправку, получены ли настройки.", cashedDataArr[currentCompany].settings);
 
                 //todo Два костыля, пока настройки не прописаны в 1с
                 if(cashedDataArr[currentCompany].settings.limit == undefined ) cashedDataArr[currentCompany].settings.limit = 74;
@@ -283,12 +313,12 @@ router.route('/dailydata')
             settings={};
 
             // Получение настроек для конкретной компании
-            console.log("Запрашиваю настройки 285 для ", req.session.login);
+            log.info("Запрашиваю настройки 285 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
-                //console.log("receiveConfig", data);
+                //log.info("receiveConfig", data);
                 settings = JSON.parse(data.return);
                 //cashedDataArr[company].settings = settings;
-                //console.log("Obj",  obj.predictMinutes, "mtm 1192")
+                //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
 
             //Получение дневного плана для конкретной компании
@@ -296,18 +326,18 @@ router.route('/dailydata')
 
 
             function dataReadyCallback(data) {
-                console.log("Загрузка данных из 1C заняла", parseInt(Date.now()/1000)-middleTime);
+                log.info("Загрузка данных из 1C заняла", parseInt(Date.now()/1000)-middleTime);
                 endTime = parseInt(Date.now()/1000);
                 if (data.routes != undefined) {
-                    console.log('=== dataReadyCallback === send data to client ===', data.routes.length);}
+                    log.info('=== dataReadyCallback === send data to client ===', data.routes.length);}
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                console.log('send data to client');
+                log.info('send data to client');
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
                     res.status(200).json(data);
                 }else if( data.routes.length == 0){
                     res.status(200).json({status: 'no plan'});
                 }else{
-                    //console.log("ReChange SessionLogin", data.CLIENT_ID);
+                    //log.info("ReChange SessionLogin", data.CLIENT_ID);
 
                     var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
                     var key=""+req.session.login;
@@ -319,36 +349,36 @@ router.route('/dailydata')
 
 
                     //TODO Костыль проверка грузили ли мы сегодня уже эти планы для другого юзера и если да, то не перезаписывать данные.
-                    //console.log(data, "Data mtm 248");
+                    //log.info(data, "Data mtm 248");
 
                     //for (key in data){
-                    //    console.log("Key", key);
+                    //    log.info("Key", key);
                     //};
 
 
 
                     if (cashedDataArr[currentCompany] != null){
-                        console.log("Date", data.date, cashedDataArr[currentCompany].date, parseInt(Date.parse(data.date)/1000));
+                        log.info("Date", data.date, cashedDataArr[currentCompany].date, parseInt(Date.parse(data.date)/1000));
                         var exist = "" +cashedDataArr[currentCompany].date.substring(0,10);
                         if ((""+data.date).startsWith(exist)){
-                        console.log("Данные по этой компани на сегодня уже получены");
+                        log.info("Данные по этой компани на сегодня уже получены");
                             //todo мина замедленного действия. Переписать, чтобы настройки записывались сразу при получении/ или явно передавались не оставаясь в области  глобальной видимости.
                             cashedDataArr[currentCompany].settings = settings;
                         res.status(200).json(cashedDataArr[currentCompany].settings);
                         return;
                         } else {
 
-                            console.log("Грузим день из прошлого");
+                            log.info("Грузим день из прошлого");
                             //Если кто-то запросил данные по прошлому дню
                             var compmpanyName=""+currentCompany;
                             currentCompany+=""+data.date.substring(0,10);
 
                             if(cashedDataArr[currentCompany] != undefined) {
 
-                                console.log("Прошлый день уже создан", cashedDataArr[currentCompany] != undefined , "и посчитан", cashedDataArr[currentCompany].ready);
+                                log.info("Прошлый день уже создан", cashedDataArr[currentCompany] != undefined , "и посчитан", cashedDataArr[currentCompany].ready);
                                 oldDayCalculate(currentCompany, data);
                             } else {
-                                console.log("Прошлый день еще не создан, начинаем создание");
+                                log.info("Прошлый день еще не создан, начинаем создание");
                             }
 
                             if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].ready) {
@@ -382,19 +412,19 @@ router.route('/dailydata')
                             linkDataParts(currentCompany, req.session.login);
                             //Мгновенный запуск на пересчет, после загрузки
 
-                            console.log("Собираемся получать пуши", currentCompany, cashedDataArr[currentCompany].idArr );
+                            log.info("Собираемся получать пуши", currentCompany, cashedDataArr[currentCompany].idArr );
                             cashedDataArr[currentCompany].repeat = cashedDataArr[currentCompany].idArr.length;
 
                             cashedDataArr[currentCompany].allPushes = [];
                             soapManager = new soap(req.session.login);
                             for (var k=0; k<cashedDataArr[currentCompany].idArr.length; k++) {
                             soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
-                                console.log("391 receivePUSHES!!!!! for iten", iten);
+                                log.info("391 receivePUSHES!!!!! for iten", iten);
                                 var obj = JSON.parse(data.return);
-                                console.log("Obj", obj[0], "mtm 336");
+                                log.info("Obj", obj[0], "mtm 336");
                                 //delete cashedDataArr[company].allPushes;
                                 cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);
-                                console.log("GetPushes finished for company", company, "получено пушей", cashedDataArr[currentCompany].idArr.length-cashedDataArr[currentCompany].repeat+1, "из", cashedDataArr[currentCompany].idArr.length );
+                                log.info("GetPushes finished for company", company, "получено пушей", cashedDataArr[currentCompany].idArr.length-cashedDataArr[currentCompany].repeat+1, "из", cashedDataArr[currentCompany].idArr.length );
                                 cashedDataArr[currentCompany].repeat--;
                                 if (cashedDataArr[currentCompany].repeat == 0) oldDayCalculate (company, data);
 
@@ -444,25 +474,25 @@ router.route('/dailydata')
                     //Мгновенный запуск на пересчет, после загрузки
 
 
-                    console.log("Запуск первого расчета, после первого запрса.", cashedDataArr[currentCompany].idArr);
+                    log.info("Запуск первого расчета, после первого запрса.", cashedDataArr[currentCompany].idArr);
 
                     var tt=0;
                     cashedDataArr[currentCompany].allPushes =[];
                     for (var t=0; t< cashedDataArr[currentCompany].idArr.length; t++) {
                         var soapManager = new soap(cashedDataArr[currentCompany].firstLogin);
                         var iten = cashedDataArr[currentCompany].idArr[t];
-                        console.log("Request for Itin", iten);
+                        log.info("Request for Itin", iten);
                         soapManager.getPushes(iten, parseInt(Date.now() / 1000), currentCompany, function (company, data) {
-                            console.log(" 452 receivePUSHES!!!!! for iten", iten);
+                            log.info(" 452 receivePUSHES!!!!! for iten", iten);
                             tt++;
                             if (data != undefined && data.error == undefined) {
                                 var obj = JSON.parse(data.return);
-                                //console.log("Obj", obj[0], "mtm 1497");
+                                //log.info("Obj", obj[0], "mtm 1497");
                                 //delete cashedDataArr[company].allPushes;
                                 cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
                             }
-                            console.log("Присоеденили", obj.length, "Получили", cashedDataArr[company].allPushes.length);
-                            console.log("GetPushes finished for company", company, t, tt );
+                            log.info("Присоеденили", obj.length, "Получили", cashedDataArr[company].allPushes.length);
+                            log.info("GetPushes finished for company", company, t, tt );
                             if (t==tt) startCalculateCompany(company);
                         });
 
@@ -488,7 +518,7 @@ router.route('/dailydata')
                     //TODO Склейка решения закончена, включаем периодическое (раз в 2 минуты ) обновление и пересчет данных
                     //interval(startPeriodicCalculating(currentCompany), 20 * 1000);
                     if(startServer == false) {
-                        console.log("Start SERVER");
+                        log.info("Start SERVER");
                         startServer = true;
                         var timerId = setInterval(function() {
                             startPeriodicCalculating(currentCompany);
@@ -507,21 +537,24 @@ router.route('/dailydata')
 
 
         }
-
+    } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 //Попытка запроса оператором одного роута
 router.route('/askforroute')
     .post(function(req, res) {
+        try {
         var key = "" + req.session.login;
         var currentCompany = companyLogins[key];
         var uniqueID = req.body.id;
-        console.log("Пришел одиночный запрос на роут", uniqueID);
+        log.info("Пришел одиночный запрос на роут", uniqueID);
 
         // проверяем не был ли этот маршрут заблокирован
         for (var i = 0; i < blockedRoutes.length; i++) {
-            console.log(blockedRoutes[i]);
+            log.info(blockedRoutes[i]);
             if (blockedRoutes[i].id == uniqueID && currentCompany == blockedRoutes[i].company) {
                 res.status(200).json({blocked: blockedRoutes[i].login});
                 return;
@@ -529,18 +562,18 @@ router.route('/askforroute')
         }
 
         //Искать маршрут нужно в 2-х местах line_routes & routes
-        //console.log("Начинаем поиск", currentCompany, cashedDataArr[currentCompany].line_routes.length);
+        //log.info("Начинаем поиск", currentCompany, cashedDataArr[currentCompany].line_routes.length);
         var result = {error: "Dont Found"};
         if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length >0 ) {
 
             for (var i = 0; i < cashedDataArr[currentCompany].line_routes.length; i++) {
-                //console.log("Ищем в проблемных");
+                //log.info("Ищем в проблемных");
                 if (uniqueID == cashedDataArr[currentCompany].line_routes[i].uniqueID) {
                     result = cashedDataArr[currentCompany].line_routes[i];
                     cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes || [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].line_routes.splice(i, 1);
-                    console.log ("Маршрут найден в проблемных");
+                    log.info ("Маршрут найден в проблемных");
                     break;
                  }
              }
@@ -548,14 +581,14 @@ router.route('/askforroute')
 
         if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].routes != undefined && cashedDataArr[currentCompany].routes.length >0 ) {
             for (var i = 0; i < cashedDataArr[currentCompany].routes.length; i++) {
-                //console.log("Ищем в беспроблемных");
+                //log.info("Ищем в беспроблемных");
                 if (uniqueID == cashedDataArr[currentCompany].routes[i].uniqueID) {
                     result = cashedDataArr[currentCompany].routes[i];
                     if (cashedDataArr[currentCompany].blocked_routes == undefined) cashedDataArr[currentCompany].blocked_routes = [];
                     cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes || [];
                     cashedDataArr[currentCompany].blocked_routes.push(result);
                     cashedDataArr[currentCompany].routes.splice(i, 1);
-                    console.log ("Маршрут найден в беспроблемных");
+                    log.info ("Маршрут найден в беспроблемных");
                     break
                 }
             }
@@ -564,18 +597,21 @@ router.route('/askforroute')
             changePriority(result.uniqueID, currentCompany, key);
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
         }
-        console.log ("Начинаем запись файла");
+        log.info ("Начинаем запись файла");
         log.toFLog('logging.txt', JSON.stringify(result));
-        console.log("Заканчиваем запись файла");
+        log.info("Заканчиваем запись файла");
         res.status(200).json({route: result});
 
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
 
     });
 
 // проверка блокировок точек и маршрутов
 router.route('/checklocks/:itineraryid')
     .get(function (req, res) {
+        try{
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         var result = locker.checkLocks(req.params.itineraryid, req.session.lastLockCheck);
         if (result) {
@@ -584,11 +620,15 @@ router.route('/checklocks/:itineraryid')
         } else {
             res.status(200).json({status: 'no_changes'});
         }
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // открытие окна точки с проверкой на блокировки
 router.route('/opentask/:itineraryid/:taskid')
     .get(function (req, res) {
+        try{
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         locker.checkTaskLock(req.params.itineraryid, req.params.taskid, req.session.login,
             function () {
@@ -602,16 +642,23 @@ router.route('/opentask/:itineraryid/:taskid')
                     me: req.session.login === user
                 });
             });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // разблокирование конкретной задачи
 router.route('/unlocktask/:itineraryid/:taskid')
     .get(function (req, res) {
+        try {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         if (locker.unlockTask(req.params.itineraryid, req.params.taskid, req.session.login)) {
             res.status(200).json({status: 'unlocked'});
         } else {
             res.status(200).json({status: 'not_yours'});
+        }
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -619,6 +666,7 @@ router.route('/unlocktask/:itineraryid/:taskid')
 // блокировка всего марщрута
 router.route('/lockroute/:itineraryid/:routeid/:tasks')
     .get(function (req, res) {
+        try {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         var tasksArr = req.params.tasks.split(';');
         locker.checkRouteLocks(req.params.itineraryid, tasksArr, req.session.login,
@@ -630,20 +678,28 @@ router.route('/lockroute/:itineraryid/:routeid/:tasks')
             function (user) {
                 res.status(200).json({status: 'locked', byUser: user});
             });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // разблокировка всего маршрута
 router.route('/unlockroute/:itineraryid/:routeid/:tasks')
     .get(function (req, res) {
+        try {
         req.params.itineraryid = req.params.itineraryid.replace('SL', '/');
         var tasksArr = req.params.tasks.split(';');
         var result = locker.unlockRoute(req.params.itineraryid, tasksArr, req.session.login);
         res.status(200).json(result);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // получение куска трека по гиду машины и по временному промежутку
 router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:move_d')
     .get(function (req, res) {
+        try {
         tracksManager.getTrack(
             req.params.gid,
             req.params.from,
@@ -656,12 +712,16 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
             req.params.move_d, function (data) {
                 res.status(200).json(data);
             });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // догрузка треков в данные по сессии по всем машинам сразу
 router.route('/trackparts/:start/:end')
     .get(function (req, res) {
-        console.log('догрузка треков в данные по сессии по всем машинам сразу , trackparts, ', req.session.login);
+        try {
+        log.info('догрузка треков в данные по сессии по всем машинам сразу , trackparts, ', req.session.login);
         if (req.session.login == undefined || req.session.login == null) {
             res.status(401).json({status: 'Unauthorized'});
             return;
@@ -679,7 +739,7 @@ router.route('/trackparts/:start/:end')
                 var key = ""+req.session.login;
                 var currentCompany = companyLogins[key];
                 var cached = cashedDataArr[currentCompany];
-                console.log('getRealTrackParts DONE', currentCompany);
+                log.info('getRealTrackParts DONE', currentCompany);
 
                 if(cached) {
                     for (var i = 0; i < cached.sensors.length; i++) {
@@ -688,9 +748,9 @@ router.route('/trackparts/:start/:end')
                                 if (data[j].data.length > 0 && cached.sensors[i].real_track != undefined) {
                                     // var stopsBefore = cached.sensors[i].real_track.length;
 
-                                   // console.log("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
+                                   // log.info("Car with gid=",cached.sensors[i].GID, "Had stops",  stopsBefore);
                                     //if (cached.sensors[i].GID == 9296) {
-                                    //   // console.log(cached.sensors[i].real_track, " BEFORE MTM 338")
+                                    //   // log.info(cached.sensors[i].real_track, " BEFORE MTM 338")
                                     //}
 
 
@@ -702,13 +762,13 @@ router.route('/trackparts/:start/:end')
                                     cached.sensors[i].real_track = cached.sensors[i].real_track || [];
                                     cached.sensors[i].real_track = cached.sensors[i].real_track.concat(data[j].data);
                                     // var stopsAfter = cached.sensors[i].real_track.length;
-                                   // console.log("Car with gid=", cached.sensors[i].GID, "Now have stops",  stopsAfter);
+                                   // log.info("Car with gid=", cached.sensors[i].GID, "Now have stops",  stopsAfter);
                                     //if (cached.sensors[i].GID == 9296) {
-                                    //    console.log(cached.sensors[i].real_track, " AFTER MTM 338")
+                                    //    log.info(cached.sensors[i].real_track, " AFTER MTM 338")
                                     //}
 
                                     // if (stopsAfter - stopsBefore == 1) {
-                                    //       //console.log("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
+                                    //       //log.info("gid", cached.sensors[i].GID, "stops", cached.sensors[i].real_track);
                                     // }
 
                                 }
@@ -717,68 +777,85 @@ router.route('/trackparts/:start/:end')
                         }
                     }
                 }
-                //console.log('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
+                //log.info('Last cached data before', new Date(cashedDataArr[req.session.login].server_time * 1000));
                 //cached.server_time = parseInt(Date.now() / 1000);
-                //console.log('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
+                //log.info('Last cached data after', new Date(cashedDataArr[req.session.login].server_time * 1000));
 
                 //log.toFLog('final_data.js', cached);
 
                 res.status(200).json(data);
             });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // получение треков по переданным стейтам
 router.route('/gettracksbystates')
     .post(function (req, res) {
 
-
-        //console.log("Запрашиваем стейты для прошлого маршрута", req.body.states, req.body.gid, req.body.demoTime);
+        try{
+        //log.info("Запрашиваем стейты для прошлого маршрута", req.body.states, req.body.gid, req.body.demoTime);
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-            console.log("Трек для прошлого маршрута получен");
+            log.info("Трек для прошлого маршрута получен");
             res.status(200).json(data);
         });
 
 
-
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
 
     });
 
 // получение планового трека с роутера между двумя точками
 router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
-        console.log('=== router.route findpath ===');
+        try {
+        log.info('=== router.route findpath ===');
         tracksManager.findPath(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
             function (data) {
                 res.status(200).json(data);
             });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // получение планового времени проезда с роутера между двумя точками
 router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
     .get(function (req, res) {
+        try {
         tracksManager.findTime(req.params.lat1, req.params.lon1, req.params.lat2, req.params.lon2,
             function (data) {
                 res.status(200).json(data);
             });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // пересчет маршрута на математике
 router.route('/recalculate')
     .post(function (req, res) {
-        console.log("Send route to recalc");
+        try {
+        log.info("Send route to recalc");
         math_server.recalculate(req.body.input, function (data) {
-            console.log('MATH DATE >>', new Date());
+            log.info('MATH DATE >>', new Date());
             res.status(200).json(data);
         });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // сохранение в 1С маршрута
 router.route('/saveroute/')
     .post(function (req, res) {
-        //console.log('saveroute, len', req.body.routes.length);
+        try {
+        //log.info('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
-        console.log("Отправляем в SOAP роутов", req.body.routes.length);
+        log.info("Отправляем в SOAP роутов", req.body.routes.length);
         soapManager.saveRoutesTo1C(req.body.routes, function (data) {
             if (!data.error) {
                 res.status(200).json({result: data.result});
@@ -786,6 +863,9 @@ router.route('/saveroute/')
                 res.status(200).json({error: data.error});
             }
         });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -811,8 +891,9 @@ router.route('/saveroute/')
 
 router.route('/savewaypoint/')
     .post(function (req, res) {
-        console.log("^^^^^^^^^ router ^^^^^^^^^");
-        console.log('savewaypoint, req.bod', req.body);
+        try {
+        log.info("^^^^^^^^^ router ^^^^^^^^^");
+        log.info('savewaypoint, req.bod', req.body);
         var soapManager = new soap(req.session.login);
         soapManager.updateWaypointCoordTo1C(req.body, function (data) {
             if (!data.error) {
@@ -821,6 +902,9 @@ router.route('/savewaypoint/')
                 res.status(200).json({error: data.error});
             }
         });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -831,7 +915,7 @@ router.route('/savewaypoint/')
 
 //router.route('/saveupdate/')
 //    .post(function (req, res) {
-//        console.log('saveupdate');
+//        log.info('saveupdate');
 //        var key = ""+req.session.login;
 //        var currentCompany = companyLogins[key];
 //        res.status(200).json({status: 'ok'});
@@ -853,20 +937,20 @@ router.route('/savewaypoint/')
 //                    if(obj.data[i] && obj.data[i].id!=undefined) newID=""+obj.data[i].lat+obj.data[i].lon+obj.data[i].t1;
 //                    if(obj.data[i] && obj.data[i].TASK_NUMBER) newID=""+obj.data[i].TASK_NUMBER+obj.data[i].TASK_DATE;
 //                    var j=0;
-//                    //console.log("updateCacshe[req.session.login]", updateCacshe[req.session.login])
+//                    //log.info("updateCacshe[req.session.login]", updateCacshe[req.session.login])
 //                    while(j<updateCacshe[currentCompany][req.body.date].data.length){
 //                        var oldID;
 //                        if(updateCacshe[currentCompany][req.body.date].data[j] && updateCacshe[currentCompany][req.body.date].data[j].id!=undefined) oldID=""+updateCacshe[currentCompany][req.body.date].data[j].lat+updateCacshe[currentCompany][req.body.date].data[j].lon+updateCacshe[currentCompany][req.body.date].data[j].t1;
 //                        if(updateCacshe[currentCompany][req.body.date].data[j] && updateCacshe[currentCompany][req.body.date].data[j].TASK_NUMBER) oldID=""+updateCacshe[currentCompany][req.body.date].data[j].TASK_NUMBER+updateCacshe[currentCompany][req.body.date].data[j].TASK_DATE;
 //                        if(newID==oldID){
-//                            //console.log("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
+//                            //log.info("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
 //                            updateCacshe[currentCompany][req.body.date].data[j]=obj.data[i];
 //                            exist=true;
 //                        }
 //                        j++;
 //                    }
 //                    if(!exist) {
-//                       // console.log("Adding new point/stop")
+//                       // log.info("Adding new point/stop")
 //                        updateCacshe[currentCompany][req.body.date].data.push(obj.data[i])
 //                    }
 //                    delete newID;
@@ -895,7 +979,7 @@ router.route('/savewaypoint/')
 //        // updateCacshe[req.session.login][req.body.date] = {};
 //        // updateCacshe[req.session.login][req.body.date] = JSON.parse(JSON.stringify(req.body));
 //        //
-//        // console.log(updateCacshe);
+//        // log.info(updateCacshe);
 //        //
 //        //     res.status(200).json({status: 'ok'});
 //        //     return;
@@ -913,20 +997,20 @@ router.route('/savewaypoint/')
 //    //         if(obj.data[i] && obj.data[i].id!=undefined) newID=""+obj.data[i].lat+obj.data[i].lon+obj.data[i].t1;
 //    //         if(obj.data[i] && obj.data[i].TASK_NUMBER) newID=""+obj.data[i].TASK_NUMBER+obj.data[i].TASK_DATE;
 //    //         var j=0;
-//    //         //console.log("updateCacshe[req.session.login]", updateCacshe[req.session.login])
+//    //         //log.info("updateCacshe[req.session.login]", updateCacshe[req.session.login])
 //    //         while(j<updateCacshe[req.session.login].data.length){
 //    //             var oldID;
 //    //             if(updateCacshe[req.session.login].data[j] && updateCacshe[req.session.login].data[j].id!=undefined) oldID=""+updateCacshe[req.session.login].data[j].lat+updateCacshe[req.session.login].data[j].lon+updateCacshe[req.session.login].data[j].t1;
 //    //             if(updateCacshe[req.session.login].data[j] && updateCacshe[req.session.login].data[j].TASK_NUMBER) oldID=""+updateCacshe[req.session.login].data[j].TASK_NUMBER+updateCacshe[req.session.login].data[j].TASK_DATE;
 //    //             if(newID==oldID){
-//    //                 //console.log("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
+//    //                 //log.info("i=", i, "ID=", newID, 'j=', j, "oldID=", oldID);
 //    //                 updateCacshe[req.session.login].data[j]=obj.data[i];
 //    //                 exist=true;
 //    //             }
 //    //             j++;
 //    //         }
 //    //         if(!exist) {
-//    //            // console.log("Adding new point/stop")
+//    //            // log.info("Adding new point/stop")
 //    //             updateCacshe[req.session.login].data.push(obj.data[i])
 //    //         }
 //    //         delete newID;
@@ -941,47 +1025,59 @@ router.route('/savewaypoint/')
 // получение с роутера планового трека и времен проезда по всем маршрутам по логину в сессии
 router.route('/routerdata')
     .get(function (req, res) {
+        try {
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         var routeIndx = req.query.routeIndx,
             cData = cashedDataArr[currentCompany],
             sended = false,
             checkFunc = function (data, callback) {
-                console.log('checkFunc', cData.routes[routeIndx].plan_geometry_loaded, cData.routes[routeIndx].time_matrix_loaded, !sended);
+                log.info('checkFunc', cData.routes[routeIndx].plan_geometry_loaded, cData.routes[routeIndx].time_matrix_loaded, !sended);
                 if (cData.routes[routeIndx].plan_geometry_loaded && cData.routes[routeIndx].time_matrix_loaded && !sended) {
                     callback(data);
                 }
             },
             callback = function (data) {
                 sended = true;
-                console.log('routerdata callback');
+                log.info('routerdata callback');
                 res.status(200).json({
                     geometry: data.routes[routeIndx].plan_geometry,
                     time_matrix: data.routes[routeIndx].time_matrix
                 });
             };
 
-        console.log('routerdata', routeIndx);
+        log.info('routerdata', routeIndx);
         tracksManager.getRouterData(cData, routeIndx, -1, checkFunc, callback, true);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // получение матрицы расстояний с роутера
 router.route('/getroutermatrix/:points')
     .get(function (req, res) {
-        //console.log('getmatrix', req.params.points);
-        console.log('getmatrix for route to recalc');
+        try {
+        //log.info('getmatrix', req.params.points);
+        log.info('getmatrix for route to recalc');
         tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
             res.status(200).json(data);
         });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // открытие окна задачи в 1С IDS
 router.route('/openidspointwindow/:pointId')
     .get(function (req, res) {
-        console.log('openidspointwindow mtm router');
+        try {
+        log.info('openidspointwindow mtm router');
         var soapManager = new soap(req.session.login);
         soapManager.openPointWindow(req.session.login, req.params.pointId);
         res.status(200).json({status: 'ok'});
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // получение списка отмен
@@ -995,24 +1091,25 @@ router.route('/openidspointwindow/:pointId')
 
 router.route('/closeday')
     .post(function (req, res) {
+        try{
         if (req.session.login == null || req.session.login ==undefined) {
             res.status(401).json({status: 'Unauthorized'});
             return;
             //req.session.login = config.soap.defaultClientLogin;
         }
 
-        console.log("приняли данные на роутере");
+        log.info("приняли данные на роутере");
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         log.toFLog("/logging.txt", req.body.closeDayData);
-        console.log ("start working");
+        log.info ("start working");
         var soapManager = new soap(req.session.login);
             soapManager.closeDay(req.body.closeDayData, function (data) {
                 if (!data.error) {
                     res.status(200).json({result: data.result, closeCount:req.body.routesID.length, CloseDate:req.body.closeDayDate });
                     //if(req.body.update) { // перезаписать сегодняшний день
                     //        closeRoutesUniqueID[currentCompany] = [];
-                    //    console.log(req.body);
+                    //    log.info(req.body);
                     //    closeRoutesUniqueID[currentCompany] = JSON.parse(JSON.stringify(req.body.routesID));
                     //}else {
                     //    if (currentCompany in oldRoutesCache && req.body.closeDayDate in oldRoutesCache[currentCompany]){
@@ -1021,7 +1118,7 @@ router.route('/closeday')
                     //                if (req.body.routesID[i] == oldRoutesCache[currentCompany][req.body.closeDayDate].routes[j]['uniqueID']) {
                     //                    oldRoutesCache[currentCompany][req.body.closeDayDate].routes.splice(j, 1);
                     //                    j--;
-                    //                    console.log('CLOSEROUTE');
+                    //                    log.info('CLOSEROUTE');
                     //                    break;
                     //                }
                     //            }
@@ -1035,7 +1132,9 @@ router.route('/closeday')
                     res.status(200).json({error: data.error});
                 }
             });
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -1047,27 +1146,38 @@ router.route('/closeday')
 // логировать что-нибудь в БД
 router.route('/log')
     .post(function (req, res) {
+        try {
         db.logMessage(1, req.body.message, function (err, result) {
             res.status(200).json({error: err, result: result});
         });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 router.route('/test')
     .get(function (req, res) {
-        console.log(req.session.login);
+        try{
+        log.info(req.session.login);
         res.status(200).json({sessionLogin: req.session.login});
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 // догрузка стопов по маршруту на текущиймомент
 router.route('/currentStops/:gid/:from/:to')
     .get(function (req, res) {
-        console.log("Start load stops", req.session.login);
+        try {
+        log.info("Start load stops", req.session.login);
         tracksManager.getStops(req.params.gid,  req.params.from, req.params.to, function(rData){
-           // console.log("rData", rData, "END rDAta, mtm 475");
+           // log.info("rData", rData, "END rDAta, mtm 475");
             res.status(200).json(rData);
         });
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -1078,17 +1188,21 @@ router.route('/currentStops/:gid/:from/:to')
 // получение срочной заявки
 router.route('/UrgentOrder/')
     .post(function (req, res) {
+        try {
 
-            console.log("!!!!Recieve URGENT ORDER!!!! ", req.body);
+            log.info("!!!!Recieve URGENT ORDER!!!! ", req.body);
             res.status(200).json('ок');
 
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 // получение всех таймматриц для всех роутов одним запросом.
 router.route('/predicate/')
     .post(function (req, res) {
+        try{
 
         var collection=req.body.collection;
         var j=0;
@@ -1101,11 +1215,11 @@ router.route('/predicate/')
                     pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
                 }
             }
-           // console.log(pointsStr);
+           // log.info(pointsStr);
 
             //запрос матрицы по одному маршруту с обработкой в колбэке.
             tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
-                //console.log(pointsStr);
+                //log.info(pointsStr);
                 var timeMatrix=[];
                 var i=1;
                 // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
@@ -1121,12 +1235,12 @@ router.route('/predicate/')
                 var parts = temp.split(',');
                 var LAT=parts[0];
                 var LON=parts[1];
-                //console.log(LAT, " ", LON);
+                //log.info(LAT, " ", LON);
                 var k=0;
                 while (k<collection.length){
                         if(LAT==collection[k].points[0].LAT && LON==collection[k].points[0].LON){
                         indx=collection[k].id;
-                            //console.log("find id", indx);
+                            //log.info("find id", indx);
                         break;
                     }
                     k++
@@ -1135,7 +1249,7 @@ router.route('/predicate/')
                 // Проверка не является ли этот колбек последним.
                 if(generalResult.length==collection.length)
                 {
-                    //console.log("The cickle is finished RESULT LENGTH=", generalResult.length );
+                    //log.info("The cickle is finished RESULT LENGTH=", generalResult.length );
                     res.status(200).json(generalResult);
                     return;
                 }
@@ -1145,14 +1259,17 @@ router.route('/predicate/')
 
             j++;
         }
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 // получение треков по переданным стейтам
 router.route('/changedriver/')
     .post(function (req, res) {
-        //console.log('gettracksbystates ', req.body.routes[0], "MTM 750");
-        //console.log("cashedDataArr[req.session.login]", cashedDataArr[req.session.login].routes, "MTM 751");
+        try {
+        //log.info('gettracksbystates ', req.body.routes[0], "MTM 750");
+        //log.info("cashedDataArr[req.session.login]", cashedDataArr[req.session.login].routes, "MTM 751");
         // Перезапись в кеше маршрута отредактированного в мониторинге
         var i=0;
         req.body.routes[0].filterId=null;
@@ -1162,7 +1279,7 @@ router.route('/changedriver/')
             if(cashedDataArr[currentCompany].routes[i].uniqueID == req.body.routes[0].uniqueID){
                 cashedDataArr[currentCompany].routes[i] = req.body.routes[0];
                 cashedDataArr[currentCompany].routes[i].filterId=null;
-                //console.log("Overwright Route");
+                //log.info("Overwright Route");
                 break;
             }
 
@@ -1171,7 +1288,7 @@ router.route('/changedriver/')
         }
 
         //tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-        //    console.log('get tracks by states DONE!');
+        //    log.info('get tracks by states DONE!');
         //    res.status(200).json(data);
         //});
 
@@ -1182,23 +1299,26 @@ router.route('/changedriver/')
         }
 
         res.status(200).json("ok");
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 
 router.route('/savetonode/')
     .post(function (req, res) {
-        console.log("Приступаем к сохранению роута");
+        try {
+        log.info("Приступаем к сохранению роута");
         var i=0;
         var id = parseInt(req.body.route.uniqueID);
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
-        console.log("Приступаем к сохранению роута", i, id, currentCompany);
+        log.info("Приступаем к сохранению роута", i, id, currentCompany);
         while(cashedDataArr[currentCompany].blocked_routes != undefined && i<cashedDataArr[currentCompany].blocked_routes.length){
                 if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
                     cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
-                    console.log("Overwright Route");
+                    log.info("Overwright Route");
                     cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
                     var uniqueId = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
                     unblockRoute(key, uniqueId);
@@ -1213,7 +1333,7 @@ router.route('/savetonode/')
         function unblockRoute(login, uniqueId) {
                      for (var i=0; i<blockedRoutes.length; i++) {
                 if (blockedRoutes[i].id == uniqueId && blockedRoutes[i].login == login) {
-                    console.log("снимаем блокировку с роута", uniqueId);
+                    log.info("снимаем блокировку с роута", uniqueId);
                     blockedRoutes.splice(i, 1);
                 }
 
@@ -1226,7 +1346,7 @@ router.route('/savetonode/')
         while(i<cashedDataArr[currentCompany].oldRoutes.length){
             if(cashedDataArr[currentCompany].oldRoutes[i].uniqueID == id){
                 cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
-                console.log("Overwright OLD Route");
+                log.info("Overwright OLD Route");
 
                 uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
                 unblockRoute(key, uniqueId);
@@ -1240,17 +1360,19 @@ router.route('/savetonode/')
         }
 
         res.status(200).json("error");
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 //router.route('/checknewiten')
 //    .get(function (req, res) {
-//        console.log("check New Iten in Progress");
+//        log.info("check New Iten in Progress");
 //
 //        // присвоение лоина для прогрузки интерфейса при запуске вне окна  (для отладки)
 //        if (req.session.login == null || req.session.login == undefined) {
-//            console.log("Login", req.session.login);
+//            log.info("Login", req.session.login);
 //            res.status(401).json({status: 'Unauthorized'});
 //            return;
 //            //req.session.login = config.soap.defaultClientLogin;
@@ -1266,9 +1388,9 @@ router.route('/savetonode/')
 //
 //
 //        function dataReadyCallback (quant){
-//            console.log("QUANT", quant, "req.session", cache.CLIENT_NAME, "____ ", cache.CLIENT_ID);
+//            log.info("QUANT", quant, "req.session", cache.CLIENT_NAME, "____ ", cache.CLIENT_ID);
 //            //for (var key in cache){
-//            //    console.log ("key", key);
+//            //    log.info ("key", key);
 //            //}
 //
 //
@@ -1279,17 +1401,18 @@ router.route('/savetonode/')
 
 router.route('/logout')
     .post(function (req, res) {
+        try {
         if (req.session.login == undefined) return;
-        console.log("!!!!!!!!!!LOGOUT!!!!!!!", req.session.login);
+        log.info("!!!!!!!!!!LOGOUT!!!!!!!", req.session.login);
         var i=0;
         while(i<blockedRoutes.length){
             if( ""+blockedRoutes[i].login == ""+req.session.login){
-                console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", req.session.login, "logouting");
+                log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", req.session.login, "logouting");
                 var uniqueId = blockedRoutes[i].id;
                 var company = blockedRoutes[i].company;
                 for(var j=0; j<cashedDataArr[company].blocked_routes.length; j++){
                     if(cashedDataArr[company].blocked_routes[j].uniqueID == uniqueId){
-                        console.log("Возврат роута из заблокированных в нормальные");
+                        log.info("Возврат роута из заблокированных в нормальные");
                         cashedDataArr[company].routes.push(cashedDataArr[company].blocked_routes[j]);
                         cashedDataArr[company].blocked_routes.splice(j,1);
                         break;
@@ -1306,19 +1429,22 @@ router.route('/logout')
 
         i=0;
         while(i<blockedRoutes.length){
-            console.log("Third blocking", blockedRoutes[i]);
+            log.info("Third blocking", blockedRoutes[i]);
             i++;
         }
-        console.log("Logout complete");
+        log.info("Logout complete");
         res.status(200).json("ok");
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 //тестовая функция показывает по логину kalko некоторые параметры сервера
 
 router.route('/getServerStatus')
     .get(function(req, res) {
-        //console.log("Router");
+        try {
+        //log.info("Router");
         var key = "" + req.session.login;
         var login=key;
         var currentCompany = companyLogins[key];
@@ -1329,23 +1455,26 @@ router.route('/getServerStatus')
         result.line_routes = cashedDataArr[currentCompany].line_routes.length;
         result.oldRoutes = 0;
         if (cashedDataArr[currentCompany].oldRoutes != undefined) result.oldRoutes = cashedDataArr[currentCompany].oldRoutes.length;
-        //console.log("Result ", result);
+        //log.info("Result ", result);
         res.status(200).json({result :result});
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
 //need - количество необходимых оператору проблем. Указывается в настройках
 router.route('/askforproblems/:need')
     .get(function (req, res) {
-        //console.log("пришел запроc", req.params.need);
+        try{
+        //log.info("пришел запроc", req.params.need);
         if (req.params.need == NaN) return;
         var result = {};
         var key = "" + req.session.login;
         var login=key;
         var currentCompany = companyLogins[key];
         var need = parseInt((req.params.need).substring(1));
-        console.log("ASk For ", need, "Problem", req.session.login);
+        log.info("ASk For ", need, "Problem", req.session.login);
         if(need <0){
             res.status(400).json("Need degree zerro");
             return;
@@ -1360,19 +1489,19 @@ router.route('/askforproblems/:need')
 
 
 
-       // console.log("Проблемных роутов", cashedDataArr[currentCompany].line_routes.length);
+       // log.info("Проблемных роутов", cashedDataArr[currentCompany].line_routes.length);
         //TODO переписать условие когда начнет правильно формировать очередь проблемных роутов
         if (cashedDataArr[currentCompany].line_routes != undefined) {
-            console.log("Ищем проблемму для для оператора");
+            log.info("Ищем проблемму для для оператора");
             result = {};
             result.routes = [];
             //Сначала просмотрим в заблокированных роутах. Возможно этот роут уже был выбран оператором и он случайно нажал эскейп, не сохранившись
             if (cashedDataArr[currentCompany].blocked_routes != undefined) {
-                console.log("Ищем не блокировал ли этот оператор маршруты?");
+                log.info("Ищем не блокировал ли этот оператор маршруты?");
                 //todo тестовый блок
-                console.log("Заблокированные сейчас маршруты");
+                log.info("Заблокированные сейчас маршруты");
                 for(var i=0; i<blockedRoutes.length;i++){
-                    console.log("Check blocked", blockedRoutes[i] );
+                    log.info("Check blocked", blockedRoutes[i] );
                 }
 
                 var toOperator = [];
@@ -1382,7 +1511,7 @@ router.route('/askforproblems/:need')
                     }
                 }
 
-                console.log ("Оператором уже заблокировано", toOperator);
+                log.info ("Оператором уже заблокировано", toOperator);
                 if (toOperator.length > 0) {
 
 
@@ -1401,9 +1530,9 @@ router.route('/askforproblems/:need')
 
                     for (i = 0; i < toOperator.length; i++) {
                         for (var j = 0; j < cashedDataArr[currentCompany].blocked_routes.length; j++) {
-                            console.log("" + toOperator[i], "" + cashedDataArr[currentCompany].blocked_routes[j].uniqueID);
+                            log.info("" + toOperator[i], "" + cashedDataArr[currentCompany].blocked_routes[j].uniqueID);
                             if ("" + toOperator[i] == "" + cashedDataArr[currentCompany].blocked_routes[j].uniqueID) {
-                                console.log("Добавляем маршрут");
+                                log.info("Добавляем маршрут");
                                 result.routes.push(cashedDataArr[currentCompany].blocked_routes[j]);
 
                             }
@@ -1412,9 +1541,9 @@ router.route('/askforproblems/:need')
 
                     }
 
-                    // console.log("Result", result.routes[0].uniqueID);
+                    // log.info("Result", result.routes[0].uniqueID);
                     if (result.routes.length == need) {
-                        console.log("Все запрашиваемые маршруты уже были заблокированы этим пользователем");
+                        log.info("Все запрашиваемые маршруты уже были заблокированы этим пользователем");
                         res.status(200).json(result);
                         return;
                     }
@@ -1431,17 +1560,17 @@ router.route('/askforproblems/:need')
                 result.currentDay = true;
                 result.reasons = cashedDataArr[currentCompany].reasons;
             }
-            console.log("Need=", need);
+            log.info("Need=", need);
             if (need != 1){
 
 
                 while (result.routes.length < need) {
                     //Если у оператора нет заблокированного маршрута ищем, что ему дать из проблем
-                    console.log("Выбираем новую проблемму");
+                    log.info("Выбираем новую проблемму");
                     i = choseRouteForOperator(currentCompany, login);
 
                     if ( i< 0 &&  result.routes.length>0){
-                        console.log("Нашли проблемм сколько могли");
+                        log.info("Нашли проблемм сколько могли");
                         res.status(200).json(result);
                         return;
                     }
@@ -1495,8 +1624,8 @@ router.route('/askforproblems/:need')
                 }
 
             } else {
-                console.log("нужна всего одна новая проблемма");
-                console.log("Выбираем новую проблемму");
+                log.info("нужна всего одна новая проблемма");
+                log.info("Выбираем новую проблемму");
                 i = choseRouteForOperator(currentCompany, login);
 
                 if (i < 0) {
@@ -1542,9 +1671,11 @@ router.route('/askforproblems/:need')
 
 
         result.reasons = cashedDataArr[currentCompany].reasons;
-        console.log("Result length", result.routes.length);
+        log.info("Result length", result.routes.length);
         res.status(200).json(result);
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -1552,8 +1683,9 @@ router.route('/askforproblems/:need')
 // Если такого подтверждения нет более 3 минут, считаем, что юзер закрыл клиент
 router.route('/confirmonline')
     .post(function (req, res) {
+        try {
         if(req.session.login == undefined) return;
-        console.log("online confirmed", req.session.login, req.body);
+        log.info("online confirmed", req.session.login, req.body);
         var blockedArr = req.body;
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
@@ -1586,11 +1718,11 @@ router.route('/confirmonline')
         }
 
         for ( i = 0; i < onlineClients.length; i++) {
-            //console.log("Online now", onlineClients[i]);
+            //log.info("Online now", onlineClients[i]);
 
         }
         for ( i = 0; i < blockedRoutes.length; i++) {
-            //console.log("Blocked now", blockedRoutes[i]);
+            //log.info("Blocked now", blockedRoutes[i]);
 
         }
 
@@ -1601,7 +1733,9 @@ router.route('/confirmonline')
         result.err = err;
 
         res.status(200).json(result);
-
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 
@@ -1619,6 +1753,7 @@ var temp1,   //Тестовые переменные для отладки
     temp3;
 
 function getTstampAvailabilityWindow(strWindows, currentTime) {
+    try {
     if (!strWindows) {
         return;
     }
@@ -1646,21 +1781,28 @@ function getTstampAvailabilityWindow(strWindows, currentTime) {
     }
 
     return resWindows;
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 
 // Функция вытягивающая ФИО водителя из его карточки.
 function cutFIO(fioStr) {
+    try {
     fioStr = fioStr.replace(/_/g, " ");
     var parts = fioStr.split(' ');
     return ( (parts[0]) ? parts[0] + ' ' : "" ) + ( (parts[1]) ? parts[1] : "" );
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 // Перевод строковой даты в таймстамп
 function strToTstamp(strDate, lockaldata) {
-    //console.log(strDate, "strDate");
+    try {
+    //log.info(strDate, "strDate");
     if (lockaldata != undefined) {
         var today = new Date();
         var day, adding, month, year;
@@ -1682,11 +1824,11 @@ function strToTstamp(strDate, lockaldata) {
         }
 
         year = ('' + today.getFullYear()).substring(2);
-        //console.log("Constructor", day, month, year);
+        //log.info("Constructor", day, month, year);
         adding = day+'.'+month+'.'+year;
         if (strDate.length<10) {
             strDate = adding + " " + strDate;
-           // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
+           // log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
         }
 
     }
@@ -1695,25 +1837,28 @@ function strToTstamp(strDate, lockaldata) {
     var _time;
     var toPrint=JSON.stringify(strDate);
     //for (var i=0; i<parts.length;i++){
-    //    console.log("PARTS", parts[i]);
+    //    log.info("PARTS", parts[i]);
     //}
-    //console.log("_________________");
+    //log.info("_________________");
     try {
         _time = parts[1].split(':');} catch (exeption) {
 
 
-        console.log(toPrint, strDate, "Error", exeption, lockaldata);
+        log.info(toPrint, strDate, "Error", exeption, lockaldata);
     }
 
 
 
-    //console.log(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
+    //log.info(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
 
     return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
-function linkDataParts (currentCompany, login)
-{
+function linkDataParts (currentCompany, login) {
+    try {
 //Добавление нового пользователь online, если его раньше не было
     var exist = false;
     for (var i=0; i<onlineClients.length;i++){
@@ -1742,9 +1887,9 @@ function linkDataParts (currentCompany, login)
 
     //var soapManager = new soap(login);
     //soapManager.getNewConfig(login, function (data) {
-    //    console.log("receiveConfig", data);
+    //    log.info("receiveConfig", data);
     //    var obj = JSON.parse(data.return);
-    //    console.log("Obj",  obj.predictMinutes, "mtm 1192")
+    //    log.info("Obj",  obj.predictMinutes, "mtm 1192")
     //});
 
 
@@ -1792,7 +1937,7 @@ function linkDataParts (currentCompany, login)
                     cashedDataArr[currentCompany].routes[i].real_track != aggregatorError) {
                     var len = cashedDataArr[currentCompany].routes[i].real_track.length - 1;
                     cashedDataArr[currentCompany].routes[i].car_position = cashedDataArr[currentCompany].routes[i].real_track[len]; // определение текущего положения машины
-                    //console.log('data.routes[i]', data.routes[i]);
+                    //log.info('data.routes[i]', data.routes[i]);
                     if (typeof (cashedDataArr[currentCompany].routes[i].real_track) == Array) {
                         cashedDataArr[currentCompany].routes[i].real_track.splice(len, 1);
                     } // удаление стейта с текущим положением машины
@@ -1810,7 +1955,7 @@ function linkDataParts (currentCompany, login)
             }
         }
         //if(j == data.drivers.length){
-        //    console.log(data.routes[i].DRIVER);
+        //    log.info(data.routes[i].DRIVER);
         //}
         //
         //
@@ -1864,7 +2009,7 @@ function linkDataParts (currentCompany, login)
                     car: cashedDataArr[currentCompany].routes[i].transport.NAME,
                     driver: ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени' + i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                 });
-                //  console.log(scope.filters.routes, ' filters.routes');
+                //  log.info(scope.filters.routes, ' filters.routes');
                 routeId++;
             }
 
@@ -1876,7 +2021,7 @@ function linkDataParts (currentCompany, login)
                 tPoint.transport = trans;
 
                 if (cashedDataArr[currentCompany].routes[i].DISTANCE == 0) {
-                    //console.log("The route is UNCALCULATE");
+                    //log.info("The route is UNCALCULATE");
 
 
                     //Для непосчитанных маршрутов время прибытия считается границей окна доступности
@@ -1904,7 +2049,7 @@ function linkDataParts (currentCompany, login)
 
                 }
                 else {
-                    //console.log("!!!!!The route is Very Good CALCULATE!!!!");
+                    //log.info("!!!!!The route is Very Good CALCULATE!!!!");
                     tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
 
 
@@ -1925,9 +2070,9 @@ function linkDataParts (currentCompany, login)
 
 
             } catch (e) {
-                console.log( tPoint, "Error mtm 1874");
-                console.log(tPoint.driver.NAME, e);
-               // console.log("route", cashedDataArr[currentCompany].routes[i].points[0] );
+                log.info( tPoint, "Error mtm 1874");
+                log.info(tPoint.driver.NAME, e);
+               // log.info("route", cashedDataArr[currentCompany].routes[i].points[0] );
             }
             //
             //
@@ -1943,7 +2088,7 @@ function linkDataParts (currentCompany, login)
             tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, cashedDataArr[currentCompany].server_time);
             // создание обещанных окон
             if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
-                //console.log("Create PROMISED WINDOW step1");
+                //log.info("Create PROMISED WINDOW step1");
 
                 for (var k = 0; k < tPoint.windows.length; k++) {
                     if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
@@ -1967,7 +2112,7 @@ function linkDataParts (currentCompany, login)
             //
             // если обещанное окно не было созданно выше, создаем его вокруг времени прибытия и округляем
             if (tPoint.promised_window == undefined) {
-                //console.log("Create PROMISED WINDOW step2");
+                //log.info("Create PROMISED WINDOW step2");
                 tPoint.promised_window = {
                     start: tPoint.arrival_time_ts - promisedWindow / 2,
                     finish: tPoint.arrival_time_ts + promisedWindow / 2
@@ -1988,7 +2133,7 @@ function linkDataParts (currentCompany, login)
             //
             //    // копируем обещанное окно без ссылок
             if (tPoint.promised_window_changed == undefined) {
-                //console.log("Create PROMISED WINDOW step3");
+                //log.info("Create PROMISED WINDOW step3");
                 tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
             }
 
@@ -1998,26 +2143,21 @@ function linkDataParts (currentCompany, login)
 
             var workingWindowType = cashedDataArr[currentCompany].settings.workingWindowType;
 
-            //console.log("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
+            //log.info("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
 
             if (workingWindowType == 0) {
                 tPoint.working_window = tPoint.orderWindows;
-                //for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
-                //    //console.log("Create PROMISED WINDOW step4");
-                //    if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
-                //        tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
-                //        tPoint.working_window = tPoint.windows[k];
-                //    }
-                //}
+
 
                 if (tPoint.working_window == undefined) tPoint.working_window = tPoint.orderWindows;
             } else if (workingWindowType == 1) {
-                tPoint.working_window = tPoint.promised_window_changed;
+                tPoint.working_window =[];
+                tPoint.working_window.push(tPoint.promised_window_changed);
             }
 
         }
 
-        //console.log(cashedDataArr[currentCompany].currentProblems, "Problems 485");
+        //log.info(cashedDataArr[currentCompany].currentProblems, "Problems 485");
 
     }
 
@@ -2029,22 +2169,25 @@ function linkDataParts (currentCompany, login)
         delete route.transport.real_track;
         if (route.real_track == undefined || route.real_track.length == 0) continue;
         var last = route.real_track.length-1;
-        //console.log("last = ", last);
+        //log.info("last = ", last);
         if (route.real_track[last].state == 'CURRENT_POSITION') {
             route.real_track.length=last;
-            //console.log("DELETE CURRENT POSITION");
+            //log.info("DELETE CURRENT POSITION");
         }
     }
     //cashedDataArr[currentCompany].routes.length = size;
-    console.log("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
+    log.info("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
     checkCorrectCalculating(currentCompany);
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 // Каждые две минуты стартует расчет, которые проходит по всем решениям, которые сейчас присутствуют в кэше
 function startPeriodicCalculating() {
-    console.log("Начинаем периодический рассчет");
+    try {
+    log.info("Начинаем периодический рассчет");
 
     var superEndTime = parseInt(Date.now()/1000); //TODO условный замер времени на 1 компании можно убивать, но вместе с парой, которая отмеряет финиш
     // Создаем список компаний, по которым нужно провести пересчет
@@ -2057,7 +2200,7 @@ function startPeriodicCalculating() {
     // Удаляем из списка компаний те, пользователи которых, не находятся online
     //for(var i=0; i<companysToCalc.length; i++){
     //    if (!checkOnline(companysToCalc[i])){
-    //        console.log("Нет пользователей онлайн");
+    //        log.info("Нет пользователей онлайн");
     //        companysToCalc.splice(i,1);
     //        i--;
     //    }
@@ -2066,9 +2209,9 @@ function startPeriodicCalculating() {
     // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
 
     for(var i=0; i<companysToCalc.length; i++){
-        console.log("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
+        log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
         if ( !cashedDataArr[companysToCalc[i]].recalc_finishing){
-            console.log("Первичный расчет еще не закончен");
+            log.info("Первичный расчет еще не закончен");
             companysToCalc.splice(i,1);
             i--;
         }
@@ -2077,9 +2220,9 @@ function startPeriodicCalculating() {
     //Удаляем из списка прошлые дни
 
     for( i=0; i<companysToCalc.length; i++){
-        console.log("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].currentDay);
+        log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].currentDay);
         if (cashedDataArr[companysToCalc[i]].currentDay == false){
-            console.log("Это прошлый день");
+            log.info("Это прошлый день");
             companysToCalc.splice(i,1);
             i--;
         }
@@ -2089,7 +2232,7 @@ function startPeriodicCalculating() {
     // Не считаем те компании, у которых размер роутов равен 0
     for(var i=0; i<companysToCalc.length; i++){
         if ((cashedDataArr[companysToCalc[i]].routes == undefined || cashedDataArr[companysToCalc[i]].routes.length == 0) && (cashedDataArr[companysToCalc[i]].line_routes == undefined || cashedDataArr[companysToCalc[i]].line_routes.length == 0)){
-            console.log("У этой компании нет роутов на пересчет");
+            log.info("У этой компании нет роутов на пересчет");
             companysToCalc.splice(i,1);
             i--;
         } else {
@@ -2103,12 +2246,12 @@ function startPeriodicCalculating() {
 
 
     for(i=0; i<companysToCalc.length; i++){
-            console.log("Компания на пересчет", companysToCalc[i]);
+            log.info("Компания на пересчет", companysToCalc[i]);
             checkOnline(companysToCalc[i]);
 
     }
 
-    console.log("Вызов callbackDispetcher из startPeriodicCalculating");
+    log.info("Вызов callbackDispetcher из startPeriodicCalculating");
 
     callbackDispetcher(companysToCalc);
 
@@ -2118,21 +2261,21 @@ function startPeriodicCalculating() {
         for (var k=0; k<companys.length; k++) {
             middleTime = parseInt(Date.now()/1000);
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length + 2; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
-            console.log ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests );
+            log.info ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests );
             cashedDataArr[companys[k]].allPushes=[];
             for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
-                        console.log("2168 receivePUSHES!!!!! for iten", iten);
+                        log.info("2168 receivePUSHES!!!!! for iten", iten);
                         if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
-                        //console.log("Obj", obj[0], "mtm 1497");
+                        //log.info("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
                         cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);}
                         cashedDataArr[company].needRequests--;
-                        console.log ("Получили", obj.length, "присоеденеили", cashedDataArr[company].allPushes.length);
-                        console.log("GetPushes finished for company", company, cashedDataArr[company].needRequests);
+                        log.info ("Получили", obj.length, "присоеденеили", cashedDataArr[company].allPushes.length);
+                        log.info("GetPushes finished for company", company, cashedDataArr[company].needRequests);
                         if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
                     });
             //
@@ -2141,7 +2284,7 @@ function startPeriodicCalculating() {
             //TODO Заменить на запрс свежих стейтов и треков
 
 
-            console.log('Start loading TrackParts',companys[k]);
+            log.info('Start loading TrackParts',companys[k]);
             //if (req.session.login == undefined || req.session.login == null) {
             //    res.status(401).json({status: 'Unauthorized'});
             //    return;
@@ -2154,9 +2297,9 @@ function startPeriodicCalculating() {
             var dayStart = new Date();
             dayStart.setHours(0,0,0,0);
             dayStart=dayStart/1000;
-            console.log("Midnight TimeStamp = ", dayStart);
+            log.info("Midnight TimeStamp = ", dayStart);
             var companyAsk = companys[k];
-                console.log("Check data", cashedDataArr[companyAsk].routes.length);
+                log.info("Check data", cashedDataArr[companyAsk].routes.length);
                 tracksManager.getRealTrackParts(cashedDataArr[companyAsk], start, end,
                 function (data, companyAsk) {
                    // if (!first) return;
@@ -2165,13 +2308,13 @@ function startPeriodicCalculating() {
                     //checkeConcatTrack(companyAsk, 437123, data);
                     //checkeConcatTrack(companyAsk, 437323, data);
 
-                    //console.log('getRealTrackParts DONE', data);
+                    //log.info('getRealTrackParts DONE', data);
                     //first = false;
 
                     if (data =='error') {
                         //cashedDataArr[companyAsk].needRequests = cashedDataArr[companyAsk].needRequests+ 2+(cashedDataArr[companyAsk].idArr.length-1)*2;// todo костыль на  решения без датчиков.
                         //cashedDataArr[companyAsk].needRequests --;
-                        console.log("Get Real TRACK finished for company Recieve ERROR", companyAsk, cashedDataArr[companyAsk].needRequests);
+                        log.info("Get Real TRACK finished for company Recieve ERROR", companyAsk, cashedDataArr[companyAsk].needRequests);
                         //dataForPredicate(companyAsk, startCalculateCompany);
                         if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
                         //return;
@@ -2180,16 +2323,16 @@ function startPeriodicCalculating() {
                     for(i=0; i<data.length; i++){
 
                     if (typeof (data[i].data) == 'string') data[i].data =[];
-                            //console.log("Stage 1", i, data[i]);
+                            //log.info("Stage 1", i, data[i]);
                         if (data[i] == undefined || data[i].data == undefined || data[i].data.length == 0) continue;
 
 
 
                         for (j=0; j<data[i].data.length; j++){
-                            //console.log("Stage 2");
-                           // console.log("Time == ", data[i].data[j].time);
+                            //log.info("Stage 2");
+                           // log.info("Time == ", data[i].data[j].time);
                           if (data[i].data[j].time == 0 || data[i].data[j].time == '0' || data[i].data[j] == "error" ) {
-                              //console.log("delete 0 time state");
+                              //log.info("delete 0 time state");
                               data[i].data.splice(j,1);
                               j--;
                           }
@@ -2214,7 +2357,7 @@ function startPeriodicCalculating() {
 
                                         if (data[j].data.length<2)  continue;
 
-                                        console.log("№;№;№;№;;№;№;№;№;Записываем Первые данные№;№;№;№;№;№;№;№");
+                                        log.info("№;№;№;№;;№;№;№;№;Записываем Первые данные№;№;№;№;№;№;№;№");
                                         cached.routes[i].real_track = data[j].data;
 
                                     continue;
@@ -2222,21 +2365,21 @@ function startPeriodicCalculating() {
 
 
                                    // var size = data[j].data.length;
-                                   //console.log("____________________________________")
+                                   //log.info("____________________________________")
                                    // for (var f=data[j].data.length; f>=0; f--){
-                                   //    console.log("New Track", data[j].data[f-1]);
-                                   //     console.log("Old track", cached.sensors[i].real_track[cached.sensors[i].real_track.length-1-(size-f)] );
+                                   //    log.info("New Track", data[j].data[f-1]);
+                                   //     log.info("Old track", cached.sensors[i].real_track[cached.sensors[i].real_track.length-1-(size-f)] );
                                    // }
 
 
                                     if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length == 0) && (data[j].data[0] != undefined)){
                                         cached.routes[i].real_track = data[j].data;
-                                        //console.log("(cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) && (data[j].data[0] != undefined)");
+                                        //log.info("(cached.sensors[i].real_track == undefined || cached.sensors[i].real_track.length == 0) && (data[j].data[0] != undefined)");
                                         continue;
                                     }
 
                                     if(data[j].data[0] == undefined || data[j].data == 'error') {
-                                    //console.log("data[j].data[0] == undefined");
+                                    //log.info("data[j].data[0] == undefined");
                                         continue;
                                     }
 
@@ -2254,7 +2397,7 @@ function startPeriodicCalculating() {
 
                                     if (data[j].data[0].id == '0') {
 
-                                        //console.log("ID первого полученного стейта 0, всего получено стейтов", data[j].data.length);
+                                        //log.info("ID первого полученного стейта 0, всего получено стейтов", data[j].data.length);
                                         data[j].data.splice(0,1);
                                         if(data[j].data.length == 0 ) continue;
                                     }
@@ -2262,7 +2405,7 @@ function startPeriodicCalculating() {
 
                                     if (data[j].data[data[j].data.length-1].id == '0') {
 
-                                        //console.log("ID последнего стейта 0, всего получено стейтов", data[j].data.length);
+                                        //log.info("ID последнего стейта 0, всего получено стейтов", data[j].data.length);
                                         data[j].data.splice(data[j].data.length-1,1);
                                         if(data[j].data.length == 0 ) continue;
                                     }
@@ -2270,12 +2413,12 @@ function startPeriodicCalculating() {
                                     //var idx = cached.routes[i].real_track.length-1;
                                     //var flag = 0;
                                     //while (cached.routes[i].real_track[idx] != undefined && flag<2){
-                                    //    console.log("Последние треки", cached.routes[i].real_track[idx]);
+                                    //    log.info("Последние треки", cached.routes[i].real_track[idx]);
                                     //    idx--;
                                     //    flag++;
                                     //}
                                     //
-                                    //console.log("Полученные данные", data[j].data);
+                                    //log.info("Полученные данные", data[j].data);
 
                                     if ( data[j].data[0].id+'' == cached.routes[i].real_track[cached.routes[i].real_track.length-1].id+"" ){
                                                 cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
@@ -2286,21 +2429,21 @@ function startPeriodicCalculating() {
                                                 cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
                                         data[j].data.splice(0,1);
                                         if (data[j].data.length >0) {
-                                            //console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
+                                            //log.info("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
                                             for (var g=0; g<data[j].data.length; g++){
                                                 cached.routes[i].real_track.push(data[j].data[g]);
                                             }
                                             //cached.routes[i].real_track.concat(data[j].data);
-                                            //console.log("Стейтов стало", cached.routes[i].real_track.length);
+                                            //log.info("Стейтов стало", cached.routes[i].real_track.length);
                                         }
 
                                     } else {
-                                        //console.log("Какой-то невероятный случай!", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0], data[j].data.length);
+                                        //log.info("Какой-то невероятный случай!", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0], data[j].data.length);
 
                                         //Убираем стейты, которые мы уже получали раньше и которые у нас записаны
                                         var t=0;
                                         while(data[j].data[0] != undefined && ""+cached.routes[i].real_track[cached.routes[i].real_track.length-1].id != ""+data[j].data[t].id){
-                                            //console.log("Сравниваем", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[t]);
+                                            //log.info("Сравниваем", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[t]);
                                             if (""+cached.routes[i].real_track[cached.routes[i].real_track.length-1].id != ""+data[j].data[t].id)
                                             {
                                                 data[j].data.splice(t,1);
@@ -2309,7 +2452,7 @@ function startPeriodicCalculating() {
                                             t++;
                                         }
 
-                                        //console.log("Отбросы закончены", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0]);
+                                        //log.info("Отбросы закончены", cached.routes[i].real_track[cached.routes[i].real_track.length-1], data[j].data[0]);
 
 
                                         if(data[j].data.length == 0 || data[j].data == undefined) continue;
@@ -2325,12 +2468,12 @@ function startPeriodicCalculating() {
                                             data[j].data.splice(0,1);
 
                                         if (data[j].data.length >0) {
-                                            //console.log("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
+                                            //log.info("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
                                             for ( g=0; g<data[j].data.length; g++){
                                                 cached.routes[i].real_track.push(data[j].data[g]);
                                             }
                                             //cached.routes[i].real_track.concat(data[j].data);
-                                            //console.log("Стейтов стало", cached.routes[i].real_track.length);
+                                            //log.info("Стейтов стало", cached.routes[i].real_track.length);
                                         }
 
                                     }
@@ -2349,29 +2492,29 @@ function startPeriodicCalculating() {
                                     //    }
                                     //}
                                     //
-                                    //if (cached.real_track.length>1) console.log("Найдена точка входа, для объединения треков, где всего стейтов", cached.real_track.length, "стейт в треке", n,  cached.real_track[n], "всего получено", data[j].data.length );
+                                    //if (cached.real_track.length>1) log.info("Найдена точка входа, для объединения треков, где всего стейтов", cached.real_track.length, "стейт в треке", n,  cached.real_track[n], "всего получено", data[j].data.length );
 
 
 
                                     // todo визу старый вариант сверху новый
 
 
-                                   // //console.log("Перезапись существующего стейта", cached.routes[i].transport.gid );
+                                   // //log.info("Перезапись существующего стейта", cached.routes[i].transport.gid );
                                    // if (cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 != data[j].data[0].t1) {
-                                   //     console.log("Подозреваем ошибку здесь");
+                                   //     log.info("Подозреваем ошибку здесь");
                                    //
                                    //     if(data[j].data[0] == cached.routes[i].real_track[cached.routes[i].real_track.length-2] ) {
-                                   //         console.log("Теория верна, Стэйты совпадают");
+                                   //         log.info("Теория верна, Стэйты совпадают");
                                    //
                                    //     } else {
-                                   //         console.log("Непонятно", data[j].data.length, data[j].data[0], cached.routes[i].real_track[cached.routes[i].real_track.length-1], cached.routes[i].real_track[cached.routes[i].real_track.length-2])
+                                   //         log.info("Непонятно", data[j].data.length, data[j].data[0], cached.routes[i].real_track[cached.routes[i].real_track.length-1], cached.routes[i].real_track[cached.routes[i].real_track.length-2])
                                    //     }
                                    //
-                                   //     //console.log("Первый трек на запись", data[j].data[0]);
-                                   //     //console.log("Крайний стейт трека", cached.routes[i].real_track[cached.routes[i].real_track.length-1]);
+                                   //     //log.info("Первый трек на запись", data[j].data[0]);
+                                   //     //log.info("Крайний стейт трека", cached.routes[i].real_track[cached.routes[i].real_track.length-1]);
                                    //     //
                                    //     //if (cached.routes[i].real_track[cached.routes[i].real_track.length-2] != undefined) {
-                                   //     //    console.log("Предпоследний трек", cached.routes[i].real_track[cached.routes[i].real_track.length-2])
+                                   //     //    log.info("Предпоследний трек", cached.routes[i].real_track[cached.routes[i].real_track.length-2])
                                    //     //}
                                    // }
                                    // cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
@@ -2384,21 +2527,21 @@ function startPeriodicCalculating() {
                                    //     cached.routes[i].real_track[cached.routes[i].real_track.length-1].state = data[j].data[0].state;
                                    // }
                                    //
-                                   // //console.log("Ищем ошибку здесь", data[j].data);
+                                   // //log.info("Ищем ошибку здесь", data[j].data);
                                    //try {
                                    // data[j].data.splice(0,1);
                                    //} catch (e) {
-                                   //    console.log("ОШИБКА", e, data[j].data );
+                                   //    log.info("ОШИБКА", e, data[j].data );
                                    //}
 
                                     //if(data[j].data.length>0){
-                                    //    //console.log("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
-                                    //    //console.log("DATA", data[j].data);
+                                    //    //log.info("Дописываем новые стейты", cached.routes[i].transport.gid, data[j].gid, "Было", cached.routes[i].real_track.length, "Хотим добавить", data[j].data.length );
+                                    //    //log.info("DATA", data[j].data);
                                     //    //for (var k=1; k<data[j].data.length; k++){
-                                    //    //    console.log("Вариант стейта", data[j].data[k] );
+                                    //    //    log.info("Вариант стейта", data[j].data[k] );
                                     //    //}
                                     //    cached.routes[i].real_track = cached.routes[i].real_track.concat(data[j].data);
-                                    //    //console.log("Стало", cached.routes[i].real_track.length);
+                                    //    //log.info("Стало", cached.routes[i].real_track.length);
                                     //}
 
 
@@ -2424,25 +2567,25 @@ function startPeriodicCalculating() {
 
                             var res=0;
                             if (cached.routes[i].real_track != undefined) res = cached.routes[i].real_track.length;
-                            //console.log("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
+                            //log.info("проверка и запись сенсора", cached.routes[i].transport.gid, "Закончена. Количество стейтов", res );
 
                         }
 
-                        //console.log("начинаем проверку качества трека", companyAsk);
+                        //log.info("начинаем проверку качества трека", companyAsk);
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
-                                console.log("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
                                 continue;
                             }
 
                             for( l=1; l<cached.routes[k].real_track.length; l++){
-                                //if (cached.routes[k].real_track[l].state == "MOVE" && cached.routes[k].real_track[l].coords != undefined && cached.routes[k].real_track[l].coords.length > 0) console.log  ("НА НООДЕ НАЙДЕНЫ КООРДИНАТЫ!!!!!")
+                                //if (cached.routes[k].real_track[l].state == "MOVE" && cached.routes[k].real_track[l].coords != undefined && cached.routes[k].real_track[l].coords.length > 0) log.info  ("НА НООДЕ НАЙДЕНЫ КООРДИНАТЫ!!!!!")
                                 if (cached.routes[k].real_track[l].t1 != cached.routes[k].real_track[l-1].t2 )
                                     if (cached.routes[k].real_track[l-1].id+'' != cached.routes[k].real_track[l].id+''
 
 
                                     ) {
-                                        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Трек разорван !!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l-1], cached.routes[k].real_track[l] );
+                                        log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Трек разорван !!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l-1], cached.routes[k].real_track[l] );
                                     } else {
                                         cached.routes[k].real_track.splice(l-1, 1);
                                         l--;
@@ -2454,7 +2597,7 @@ function startPeriodicCalculating() {
 
                             for(var l=1; l<cached.routes[k].real_track.length; l++){
                                 if ( cached.routes[k].real_track[l].t1 > cached.routes[k].real_track[l].t2 )
-                                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Обратный стейт!!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l]);
+                                    log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Обратный стейт!!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l]);
 
                             }
 
@@ -2466,7 +2609,7 @@ function startPeriodicCalculating() {
                     }
 
                     cashedDataArr[companyAsk].needRequests --;
-                    console.log("2375 Get and Check Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
+                    log.info("2375 Get and Check Real TRACK finished for company", companyAsk, cashedDataArr[companyAsk].needRequests);
                     dataForPredicate(companyAsk, startCalculateCompany);
                     if(cashedDataArr[companyAsk].needRequests == 0) startCalculateCompany(companyAsk);
 
@@ -2475,50 +2618,28 @@ function startPeriodicCalculating() {
 
 
 
-                console.log("Конец запросов по компании", companyAsk);
-
-
-            //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                log.info("Конец запросов по компании", companyAsk);
 
 
 
             }
         }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function dataForPredicate(company, callback){
-    console.log("START PREDICATE FUNCTION", company);
+    try {
+    log.info("START PREDICATE FUNCTION", company);
     var result=[];
     var i=0;
     while(i<cashedDataArr[company].routes.length) {
 
         var route=cashedDataArr[company].routes[i];
 
-        //console.log("Вот такой вот роут real trac", route.real_track);
+        //log.info("Вот такой вот роут real trac", route.real_track);
         if(route.real_track !=undefined && route.real_track.length>0 && route.real_track != "invalid parameter 'gid'. ") {
             var indx = route.uniqueID;
             var carPos = [{
@@ -2527,51 +2648,51 @@ function dataForPredicate(company, callback){
             }];
 
             if (carPos[0].LAT == undefined) {
-                console.log ("НАЙДЕНА ОШИБОЧКА!!!!!!&*&*&*^&^%&*%&", route.real_track);
+                log.info ("НАЙДЕНА ОШИБОЧКА!!!!!!&*&*&*^&^%&*%&", route.real_track);
             }
             var obj = {id: indx, points: carPos.concat(route.points)};
             result.push(obj);
             //if (route.uniqueID == 231157) {
-            //    console.log("Route", route, "result", obj);
+            //    log.info("Route", route, "result", obj);
             //}
         }
         i++;
     }
 
-     //console.log("Result for predication=", result);
+     //log.info("Result for predication=", result);
 
     var j=0;
     var generalResult=[];                                                   // преременная собирающая в себе все ответы
         var collection = result;
-    console.log("CONT PREDICATE FUNCTION", !(collection.length==0));
+    log.info("CONT PREDICATE FUNCTION", !(collection.length==0));
     if (collection.length==0) {
         cashedDataArr[company].needRequests --;
-        console.log("The first cickle is finished RESULT LENGTH =", company, generalResult.length, cashedDataArr[company].needRequests );
+        log.info("The first cickle is finished RESULT LENGTH =", company, generalResult.length, cashedDataArr[company].needRequests );
         if(cashedDataArr[company].needRequests == 0) callback(company);
         return;
     }
     while(j<collection.length){
         var pointsStr = '';
-        //console.log(collection[j].points);
+        //log.info(collection[j].points);
         //if (collection[j].points == undefined) {
-        //    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Точек нет!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //    log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Точек нет!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         //} else {
-        //    console.log(collection[j].points.length);
+        //    log.info(collection[j].points.length);
         //}
         for (i= 0; i < collection[j].points.length; i++) {
-            //console.log("i=", i, collection[j].points[i].LAT, " ", collection[j].points[i].LON);
+            //log.info("i=", i, collection[j].points[i].LAT, " ", collection[j].points[i].LON);
             if (collection[j].points[i].LAT != null && collection[j].points[i].LON != null) {
                 pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
             }
         }
-         //console.log( pointsStr, "PointSTR");
+         //log.info( pointsStr, "PointSTR");
 
         //запрос матрицы по одному маршруту с обработкой в колбэке.
-       /* console.log("Пытаемся получить предсказание МТМ 2241");*/
-        //console.log("CONT2 PREDICATE FUNCTION");
+       /* log.info("Пытаемся получить предсказание МТМ 2241");*/
+        //log.info("CONT2 PREDICATE FUNCTION");
         tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
-            //console.log(pointsStr);
-         //console.log("SUCCESS PREDICATE FUNCTION");
+            //log.info(pointsStr);
+         //log.info("SUCCESS PREDICATE FUNCTION");
             var timeMatrix=[];
             var i=1;
             // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
@@ -2587,12 +2708,12 @@ function dataForPredicate(company, callback){
             var parts = temp.split(',');
             var LAT=parts[0];
             var LON=parts[1];
-            //console.log(LAT, " ", LON);
+            //log.info(LAT, " ", LON);
             var k=0;
             while (k<collection.length){
                 if(LAT==collection[k].points[0].LAT && LON==collection[k].points[0].LON){
                     indx=collection[k].id;
-                    //console.log("find id", indx);
+                    //log.info("find id", indx);
                     break;
                 }
                 k++
@@ -2604,7 +2725,7 @@ function dataForPredicate(company, callback){
 
                 cashedDataArr[company].dataForPredicate=generalResult;
                 cashedDataArr[company].needRequests --;
-                console.log("The Second cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests, company );
+                log.info("The Second cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests, company );
                 if(cashedDataArr[company].needRequests == 0) callback(company);
                 return;
             }
@@ -2618,15 +2739,17 @@ function dataForPredicate(company, callback){
 
     //TODO переделать этот костыль. Сюда не должно заходить.
     //Если зашло сюда, значит не было данных для придиката.
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 
 function uncalcPredication(route, company) {
-
-    //console.log("This is uncalc route");
+try{
+    //log.info("This is uncalc route");
     var now = parseInt(Date.now()/1000);
 
 
@@ -2636,9 +2759,9 @@ function uncalcPredication(route, company) {
     var k = 0;
     if (cashedDataArr[company].dataForPredicate != undefined) {
         while (k < cashedDataArr[company].dataForPredicate.length) {
-            //console.log("Start serch", route.uniqueID, data[k].id );
+            //log.info("Start serch", route.uniqueID, data[k].id );
             if (route.uniqueID == cashedDataArr[company].dataForPredicate[k].id) {
-                //  console.log("find Time_Table");
+                //  log.info("find Time_Table");
                 time_table = cashedDataArr[company].dataForPredicate[k].time;
                 break;
             }
@@ -2648,9 +2771,9 @@ function uncalcPredication(route, company) {
     }
 
     var i = 0;
-    //console.log("timeTabls",time_table)
+    //log.info("timeTabls",time_table)
     for ( i = 0; i < points.length; i++) {
-        // console.log("START PREDICATE CALCULATING", points[i]);
+        // log.info("START PREDICATE CALCULATING", points[i]);
         if (points[i].real_arrival_time != undefined  || points[i].haveStop) {
 
             continue;
@@ -2663,32 +2786,34 @@ function uncalcPredication(route, company) {
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
-                //console.log("Присваиваем статус 5");
+                //log.info("Присваиваем статус 5");
                 //points[i].variantus = 2770;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
-                //console.log("TIME_OUT for point", points[i]);
+                //log.info("TIME_OUT for point", points[i]);
             }
             if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
                 points[i].status = 4;
-                //console.log("Присваиваем статус 4");
+                //log.info("Присваиваем статус 4");
                 //points[i].variantus = 2836;
                 points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
 
-                //console.log("DELAY for point", points[i]);
+                //log.info("DELAY for point", points[i]);
             }
 
         }
 
     }
 
-
+} catch (e) {
+    log.error( "Ошибка "+ e + e.stack);
+}
 }
 
 
 function calcPredication(route, company) {
 
-
-    console.log("This is calculated route");
+try {
+    log.info("This is calculated route");
 
     var point,
         tmpPred,
@@ -2741,21 +2866,21 @@ function calcPredication(route, company) {
             for (var i= 0; i<route.points.length; i++ ){
                 if (route.points[i].working_window[0] == undefined) {
 
-                    console.log ('Скорее всего это склад'.green);
+                    log.info ('Скорее всего это склад'.green);
                     //todo решить проблему со складом
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
-                        //console.log("Присваиваем статус 4");
+                        //log.info("Присваиваем статус 4");
                         //route.points[j].variantus = 2910;
                         route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     }
                         continue;
                 }
-                //console.log("2843 MTM", route.points[i].working_window);
+                //log.info("2843 MTM", route.points[i].working_window);
                 if (now > route.points[i].working_window[route.points[i].working_window.length-1].finish){
 
                     route.points[i].status = 4;
-                    //console.log("Присваиваем статус 4");
+                    //log.info("Присваиваем статус 4");
                     //route.points[i].variantus =2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
@@ -2784,25 +2909,25 @@ function calcPredication(route, company) {
 
         for (var j = 0; j < route.points.length; j++) {
             //if(route.driver.NAME =="Зінчук Віталій") {
-            //    console.log("Считаем точку Зинчука", lastPoint, route.points[j]);
+            //    log.info("Считаем точку Зинчука", lastPoint, route.points[j]);
             //}
             if (j <= lastPoint || route.real_track == undefined) {
                 // все точки до последней выполненной проверяются по факту
-                //console.log("Try to change status for point", _route.points[j] );
+                //log.info("Try to change status for point", _route.points[j] );
 
 
                 route.points[j].arrival_prediction = 0;
                 route.points[j].overdue_time = 0;
                 if (route.points[j].status == 7) {
 
-                    //console.log(route.points[j], "MTM2865 route.points[j].working_window.finish");
+                    //log.info(route.points[j], "MTM2865 route.points[j].working_window.finish");
                     if (now > route.points[j].working_window.finish) {
                         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Проверить расчет working window
-                        //console.log("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
+                        //log.info("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                         route.points[j].status = 4;
-                        //console.log("Присваиваем статус 4");
+                        //log.info("Присваиваем статус 4");
                         //route.points[j].variantus = 2960;
-                        //console.log("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
+                        //log.info("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                         route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
                     }
                 } else if (route.points[j].status == 3) {
@@ -2810,7 +2935,7 @@ function calcPredication(route, company) {
                 }
             } else {
                 // точки ниже последней выполненной считаются ниже
-                //  console.log (j, "Point for Route", route);
+                //  log.info (j, "Point for Route", route);
                 tmpTime = route.time_matrix.time_table[0][j - 1][j];
                 // времена проезда от роутера приходят в десятых долях секунд
                 totalTravelTime += tmpTime == undefined ? 15 * 60 : parseInt(tmpTime / 10);
@@ -2824,7 +2949,7 @@ function calcPredication(route, company) {
 
                 route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
 
-                // console.log("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
+                // log.info("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
 
                 route.points[j].in_plan = true;
                 if (route.points[j].arrival_prediction == null || route.points[j].arrival_prediction == 0 || route.points[j].arrival_prediction == '0') {
@@ -2847,13 +2972,13 @@ function calcPredication(route, company) {
                     if (route.points[j].overdue_time > 0) {
                         if (minus < now) {
                             route.points[j].status = 4;
-                            //console.log("Присваиваем статус 4");
+                            //log.info("Присваиваем статус 4");
                             //route.points[j].variantus = 3005;
-                            //console.log("_route.points[j].status = STATUS.TIME_OUT;");
+                            //log.info("_route.points[j].status = STATUS.TIME_OUT;");
                         } else {
                             route.points[j].status = 5;
                             //route.points[j].variant = 2937;
-                            //console.log("_route.points[j].status = STATUS.DELAY;");
+                            //log.info("_route.points[j].status = STATUS.DELAY;");
                         }
                     }
 
@@ -2867,13 +2992,16 @@ function calcPredication(route, company) {
         }
 
     }
-
+} catch (e) {
+    log.error( "Ошибка "+ e + e.stack);
+}
     }
 
 //Приведение времени PUSH к локально текущему Киев прибавляем 3 часа
 function checkPushesTimeGMTZone(pushes, company, companyName){
-    //console.log(colors.green('Start reorange pushes'));
-    //console.log('Тестовое сообщение зеленого цвета'.green);
+    try {
+    //log.info(colors.green('Start reorange pushes'));
+    //log.info('Тестовое сообщение зеленого цвета'.green);
     if (pushes == undefined || company == undefined) return;
     var i=0;
     var delta;
@@ -2888,37 +3016,49 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
         var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*delta : 0;
         pushes[i].gps_time_ts=temp;
         if( temp == 0) {
-            console.log("Невалидный ПУШ", companyName);
+            log.info("Невалидный ПУШ", companyName);
         }
 
-        //console.log("New Time", temp);
+        //log.info("New Time", temp);
         var date=new Date();
         date.setTime(pushes[i].gps_time_ts*1000);
         pushes[i].time=timestmpToStr(date);
         i++
+    }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
 
 
 function timestmpToStr(d) {
-    //console.log("d", d, "type", typeof (d), "proba", d.getHours());
+    try{
+    //log.info("d", d, "type", typeof (d), "proba", d.getHours());
 
 
     return  [d.getHours().padLeft(),
             d.getMinutes().padLeft(),
             d.getSeconds().padLeft()].join(':');
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 // добавить ноль слева, если число меньше десяти
 Number.prototype.padLeft = function (base, chr) {
+    try {
     var len = (String(base || 10).length - String(this).length) + 1;
     return len > 0 ? new Array(len).join(chr || '0') + this : this;
-}
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
+};
 
 // получить дистанцию между двумя LanLon в метрах
 function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+    try{
     var R = 6371; // Radius of the earth in km
     var dLat = deg2rad(lat2 - lat1);  // deg2rad below
     var dLon = deg2rad(lon2 - lon1);
@@ -2929,19 +3069,27 @@ function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
         ;
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
-    //console.log("lat1", lat1, "lon1", lon1, "lat2", lat2, "lon2", lon2, ' dist', d*1000);
+    //log.info("lat1", lat1, "lon1", lon1, "lat2", lat2, "lon2", lon2, ' dist', d*1000);
     return d * 1000;
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 // конверт градусов в радианы
 function deg2rad(deg) {
+    try {
     return deg * (Math.PI / 180)
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function checkUncalculateRoute(point, stop, company){
+    try {
 
-    //console.log("Start checkUncalculate");
+    //log.info("Start checkUncalculate");
 
     var result=false;
     var parts=point.AVAILABILITY_WINDOWS.split(";");
@@ -2952,7 +3100,7 @@ function checkUncalculateRoute(point, stop, company){
         var temp=parts[i].trim();
         var before=temp.substr(0,5);
         before=date+before+":00";
-        //console.log("before=", before);
+        //log.info("before=", before);
         var begin=strToTstamp(before, point);
 
         var after=temp.slice(-5);
@@ -2965,20 +3113,21 @@ function checkUncalculateRoute(point, stop, company){
         i++;
     }
 
-
-
-
     return result;
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 
 function findBestStop(point, stop){
 
+    try {
     //if (point.source &&
     //    point.source.row_id == 246)
     //{
-    //    console.log("Tested point", point, "and new stop is", stop, "and old point is ", point.stopState);
+    //    log.info("Tested point", point, "and new stop is", stop, "and old point is ", point.stopState);
     //}
 
     var findOldDist=getDistanceFromLatLonInM(point.LAT, point.LON, point.stopState.lat, point.stopState.lon);
@@ -3012,8 +3161,8 @@ function findBestStop(point, stop){
 
     if(oldWeight>newWeight){
 
-        //  console.log("New point is better");
-        //  console.log("I have to remove ", point.NUMBER-1, "from", point.stopState.servicePoints);
+        //  log.info("New point is better");
+        //  log.info("I have to remove ", point.NUMBER-1, "from", point.stopState.servicePoints);
         var i=0;
         while (i<point.stopState.servicePoints.length){
             if(point.stopState.servicePoints[i]==point.NUMBER-1) {
@@ -3023,7 +3172,7 @@ function findBestStop(point, stop){
             i++;
         }
 
-        //  console.log("result is", point.stopState.servicePoints);
+        //  log.info("result is", point.stopState.servicePoints);
 
         return true;
     } else{
@@ -3031,15 +3180,18 @@ function findBestStop(point, stop){
         return false;
 
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 
 function  checkOnline(company) {
+    try {
     for (var i=0; i<onlineClients.length; i++){
                 if(onlineClients[i].time + 60*3 < parseInt(Date.now()/1000)){
-                    console.log(onlineClients[i].login, "Давно не был онлайн, удаляем");
+                    log.info(onlineClients[i].login, "Давно не был онлайн, удаляем");
                     unblockLogin(onlineClients[i].login);
                     onlineClients.splice(i,1);
                     i--;
@@ -3048,7 +3200,7 @@ function  checkOnline(company) {
     }
     var result=false;
     for (var i=0; i<onlineClients.length; i++){
-        console.log("Стоит ли считать компанию ", company, "Если online:", onlineClients[i]);
+        log.info("Стоит ли считать компанию ", company, "Если online:", onlineClients[i]);
         if(onlineClients[i].company == company){
             result=true;
             return result;
@@ -3057,11 +3209,11 @@ function  checkOnline(company) {
     }
 
 
-    console.log("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
+    log.info("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
 
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
     if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
-        console.log("Страховка сработала", cashedDataArr[company].blocked_routes.length );
+        log.info("Страховка сработала", cashedDataArr[company].blocked_routes.length );
         cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].blocked_routes);
         cashedDataArr[company].blocked_routes.length = 0;
     }
@@ -3074,28 +3226,34 @@ function  checkOnline(company) {
     }
 
     return result;
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function checkRealTrackData (company) {
+    try {
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
         if (cashedDataArr[company].routes[i].real_track == undefined || cashedDataArr[company].routes[i].real_track.length == 0) continue;
         for (var j=0; j<cashedDataArr[company].routes[i].real_track.length-1; j++){
             if (cashedDataArr[company].routes[i].real_track[j].t2 != cashedDataArr[company].routes[i].real_track[j+1].t1) {
-                console.log ("Find Problem in ",cashedDataArr[company].routes[i].transport.gid, cashedDataArr[company].routes[i].real_track[j+1].t1);
-               // console.log ("Find Problem in ",cashedDataArr[company].routes[i].transport.gid, cashedDataArr[company].routes[i].real_track[j], cashedDataArr[company].routes[i].real_track[j+1] , j, " from", cashedDataArr[company].routes[i].real_track.length);
+                log.info ("Find Problem in ",cashedDataArr[company].routes[i].transport.gid, cashedDataArr[company].routes[i].real_track[j+1].t1);
+               // log.info ("Find Problem in ",cashedDataArr[company].routes[i].transport.gid, cashedDataArr[company].routes[i].real_track[j], cashedDataArr[company].routes[i].real_track[j+1] , j, " from", cashedDataArr[company].routes[i].real_track.length);
             }
         }
+    }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
 
 function lookForNewIten(company) {
 
-
+try {
         var date = cashedDataArr[company].routesOfDate;
-        console.log("Start looking for new ITEN", company);
+        log.info("Start looking for new ITEN", company);
         var soapManager = new soap(cashedDataArr[company].firstLogin);
         var existIten;
         if(cashedDataArr[company].idArr != undefined) {
@@ -3105,18 +3263,18 @@ function lookForNewIten(company) {
         }
 
         soapManager.lookAdditionalDailyPlan(date, existIten, company, function (data) {
-           console.log("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
+           log.info("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
             // Если присутствуют новые решения в текущем дне
             if(data.addIten != undefined){
-                console.log("Начинаем догружать и объединять новые данные со старым решением " );
+                log.info("Начинаем догружать и объединять новые данные со старым решением " );
                 // Определение ID и версий новых решений
                 var newIten =[];
                 for( var i=0; i<data.addIten.itens.length; i++){
-                    console.log(data.addIten.itens[i].$);
+                    log.info(data.addIten.itens[i].$);
                     var alreadyExistIten=false;
                     for (var j=0; j<cashedDataArr[company].idArr; j++) {
                          if( ""+cashedDataArr[company].idArr[j] == ""+data.addIten.itens[i].$.ID ) {
-                             console.log ("Найдено существующее решение", cashedDataArr[company].idArr[j] );
+                             log.info ("Найдено существующее решение", cashedDataArr[company].idArr[j] );
                              alreadyExistIten=true;
                              break
                          }
@@ -3128,7 +3286,7 @@ function lookForNewIten(company) {
                 }
 
 
-                console.log("Выявлены следующие новые решения", newIten);
+                log.info("Выявлены следующие новые решения", newIten);
 
 
 
@@ -3138,9 +3296,9 @@ function lookForNewIten(company) {
                 }
 
                 function addIten (data) {
-                    //console.log("Ready to concat", data.routes, "MTM 2750");
+                    //log.info("Ready to concat", data.routes, "MTM 2750");
                     //Добавление новых данных в Кэш
-                    console.log("До объединения", cashedDataArr[company].routes.length,  cashedDataArr[company].waypoints.length, "получили", data.routes.length, data.waypoints.length);
+                    log.info("До объединения", cashedDataArr[company].routes.length,  cashedDataArr[company].waypoints.length, "получили", data.routes.length, data.waypoints.length);
                     var newRoutes = JSON.parse(JSON.stringify(data.routes));
                     var newWaypoints = JSON.parse(JSON.stringify(data.waypoints));
 
@@ -3152,12 +3310,12 @@ function lookForNewIten(company) {
                         for ( i=0; i<cashedDataArr[company].routes.length; i++){
                             if(cashedDataArr[company].routes[i].filterId > lastFilterId) {
                                 lastFilterId = cashedDataArr[company].routes[i].filterId;
-                                console.log("Новый максимальный аfilterId =", lastFilterId);
+                                log.info("Новый максимальный аfilterId =", lastFilterId);
                             }
                             for (j=0; j<cashedDataArr[company].routes[i].points.length; j++){
                                 if(cashedDataArr[company].routes[i].points[j].row_id >lastRowId  ){
                                     lastRowId = cashedDataArr[company].routes[i].points[j].row_id;
-                                    console.log("Новый максимальный rowID =", lastRowId);
+                                    log.info("Новый максимальный rowID =", lastRowId);
                                 }
                             }
 
@@ -3169,12 +3327,12 @@ function lookForNewIten(company) {
                         for (var i=0; i<cashedDataArr[company].line_routes.length; i++){
                             if(cashedDataArr[company].line_routes[i].filterId > lastFilterId) {
                                 lastFilterId = cashedDataArr[company].line_routes[i].filterId;
-                                console.log("Новый максимальный аfilterId =", lastFilterId);
+                                log.info("Новый максимальный аfilterId =", lastFilterId);
                             }
                             for (j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
                                 if(cashedDataArr[company].line_routes[i].points[j].row_id >lastRowId  ){
                                     lastRowId = cashedDataArr[company].line_routes[i].points[j].row_id;
-                                    console.log("Новый максимальный rowID =", lastRowId);
+                                    log.info("Новый максимальный rowID =", lastRowId);
                                 }
                             }
                         }
@@ -3184,12 +3342,12 @@ function lookForNewIten(company) {
                         for (var i=0; i<cashedDataArr[company].blocked_routes.length; i++){
                             if(cashedDataArr[company].blocked_routes[i].filterId > lastFilterId) {
                                 lastFilterId = cashedDataArr[company].blocked_routes[i].filterId;
-                                console.log("Новый максимальный аfilterId =", lastFilterId);
+                                log.info("Новый максимальный аfilterId =", lastFilterId);
                             }
                             for (j=0; j<cashedDataArr[company].blocked_routes[i].points.length; j++){
                                 if(cashedDataArr[company].blocked_routes[i].points[j].row_id >lastRowId  ){
                                     lastRowId = cashedDataArr[company].blocked_routes[i].points[j].row_id;
-                                    console.log("Новый максимальный rowID =", lastRowId);
+                                    log.info("Новый максимальный rowID =", lastRowId);
                                 }
                             }
                         }
@@ -3203,7 +3361,7 @@ function lookForNewIten(company) {
                     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(newRoutes);
 
                     cashedDataArr[company].waypoints = cashedDataArr[company].waypoints.concat(newWaypoints);
-                    console.log("После объединения", cashedDataArr[company].routes.length, cashedDataArr[company].waypoints.length);
+                    log.info("После объединения", cashedDataArr[company].routes.length, cashedDataArr[company].waypoints.length);
 
                     var tmpPoints,
                         rowId = lastRowId,
@@ -3221,9 +3379,9 @@ function lookForNewIten(company) {
 
                     //var soapManager = new soap(login);
                     //soapManager.getNewConfig(login, function (data) {
-                    //    console.log("receiveConfig", data);
+                    //    log.info("receiveConfig", data);
                     //    var obj = JSON.parse(data.return);
-                    //    console.log("Obj",  obj.predictMinutes, "mtm 1192")
+                    //    log.info("Obj",  obj.predictMinutes, "mtm 1192")
                     //});
 
 
@@ -3262,7 +3420,7 @@ function lookForNewIten(company) {
                         //
                         //// назначение машин и реальных треков на маршруты
                         for (j = 0; j < cashedDataArr[currentCompany].transports.length; j++) {
-                            //console.log("Сравнение", cashedDataArr[currentCompany].routes[i].TRANSPORT , cashedDataArr[currentCompany].transports[j].ID)
+                            //log.info("Сравнение", cashedDataArr[currentCompany].routes[i].TRANSPORT , cashedDataArr[currentCompany].transports[j].ID)
                             if (cashedDataArr[currentCompany].routes[i].TRANSPORT == cashedDataArr[currentCompany].transports[j].ID) {
                                 cashedDataArr[currentCompany].routes[i].transport = cashedDataArr[currentCompany].transports[j];
                                 cashedDataArr[currentCompany].routes[i].real_track = cashedDataArr[currentCompany].transports[j].real_track;
@@ -3272,7 +3430,7 @@ function lookForNewIten(company) {
                                     cashedDataArr[currentCompany].routes[i].real_track != aggregatorError) {
                                     var len = cashedDataArr[currentCompany].routes[i].real_track.length - 1;
                                     cashedDataArr[currentCompany].routes[i].car_position = cashedDataArr[currentCompany].routes[i].real_track[len]; // определение текущего положения машины
-                                    //console.log('data.routes[i]', data.routes[i]);
+                                    //log.info('data.routes[i]', data.routes[i]);
                                     if (typeof (cashedDataArr[currentCompany].routes[i].real_track) == Array) {
                                         cashedDataArr[currentCompany].routes[i].real_track.splice(len, 1);
                                     } // удаление стейта с текущим положением машины
@@ -3290,7 +3448,7 @@ function lookForNewIten(company) {
                             }
                         }
                         //if(j == data.drivers.length){
-                        //    console.log(data.routes[i].DRIVER);
+                        //    log.info(data.routes[i].DRIVER);
                         //}
                         //
                         //
@@ -3323,7 +3481,7 @@ function lookForNewIten(company) {
                             if (cashedDataArr[currentCompany].routes[i].filterId == null || cashedDataArr[currentCompany].routes[i].filterId == undefined ) {
                                 cashedDataArr[currentCompany].routes[i].filterId = lastFilterId;
                                 cashedDataArr[currentCompany].routes[i].uniqueID = ""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID;
-                                console.log("Prisvoen UNIQUE ID", ""+""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID);
+                                log.info("Prisvoen UNIQUE ID", ""+""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID);
                                 for( var k =0; k < cashedDataArr[currentCompany].routes[i].points.length; k++){
                                     cashedDataArr[currentCompany].routes[i].points[k].uniqueID = cashedDataArr[currentCompany].routes[i].uniqueID;
                                     cashedDataArr[currentCompany].routes[i].points[k].route_id = cashedDataArr[currentCompany].routes[i].filterId;
@@ -3350,7 +3508,7 @@ function lookForNewIten(company) {
                                     car: cashedDataArr[currentCompany].routes[i].transport.NAME,
                                     driver: ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени' + i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                                 });
-                                //  console.log(scope.filters.routes, ' filters.routes');
+                                //  log.info(scope.filters.routes, ' filters.routes');
                                 lastFilterId++;
                             }
 
@@ -3362,7 +3520,7 @@ function lookForNewIten(company) {
                                 tPoint.transport = trans;
 
                                 if (cashedDataArr[currentCompany].routes[i].DISTANCE == 0) {
-                                    //console.log("The route is UNCALCULATE");
+                                    //log.info("The route is UNCALCULATE");
 
 
                                     //Для непосчитанных маршрутов время прибытия считается границей окна доступности
@@ -3390,7 +3548,7 @@ function lookForNewIten(company) {
 
                                 }
                                 else {
-                                    //console.log("!!!!!The route is Very Good CALCULATE!!!!");
+                                    //log.info("!!!!!The route is Very Good CALCULATE!!!!");
                                     tPoint.arrival_time_hhmm = tPoint.ARRIVAL_TIME.substr(11, 8);
 
 
@@ -3411,9 +3569,9 @@ function lookForNewIten(company) {
 
 
                             } catch (e) {
-                                console.log("Error", tPoint);
-                                console.log(tPoint.driver.NAME, e);
-                                // console.log("route", cashedDataArr[currentCompany].routes[i].points[0] );
+                                log.info("Error", tPoint);
+                                log.info(tPoint.driver.NAME, e);
+                                // log.info("route", cashedDataArr[currentCompany].routes[i].points[0] );
                             }
                             //
                             //
@@ -3429,7 +3587,7 @@ function lookForNewIten(company) {
                             tPoint.windows = getTstampAvailabilityWindow(tPoint.AVAILABILITY_WINDOWS, cashedDataArr[currentCompany].server_time);
                             // создание обещанных окон
                             if (tPoint.promised_window == undefined && tPoint.windows != undefined) {
-                                //console.log("Create PROMISED WINDOW step1");
+                                //log.info("Create PROMISED WINDOW step1");
 
                                 for (var k = 0; k < tPoint.windows.length; k++) {
                                     if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
@@ -3453,7 +3611,7 @@ function lookForNewIten(company) {
                             //
                             // если обещанное окно не было созданно выше, создаем его вокруг времени прибытия и округляем
                             if (tPoint.promised_window == undefined) {
-                                //console.log("Create PROMISED WINDOW step2");
+                                //log.info("Create PROMISED WINDOW step2");
                                 tPoint.promised_window = {
                                     start: tPoint.arrival_time_ts - promisedWindow / 2,
                                     finish: tPoint.arrival_time_ts + promisedWindow / 2
@@ -3474,7 +3632,7 @@ function lookForNewIten(company) {
                             //
                             //    // копируем обещанное окно без ссылок
                             if (tPoint.promised_window_changed == undefined) {
-                                //console.log("Create PROMISED WINDOW step3");
+                                //log.info("Create PROMISED WINDOW step3");
                                 tPoint.promised_window_changed = JSON.parse(JSON.stringify(tPoint.promised_window));
                             }
 
@@ -3486,12 +3644,12 @@ function lookForNewIten(company) {
 
 
 
-                            //console.log("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
+                            //log.info("Ищем ошибку в роуте", cashedDataArr[currentCompany].routes[i].driver.NAME);
 
                             if (workingWindowType == 0) {
                                 tPoint.working_window = tPoint.orderWindows;
                                 //for (var k = 0; tPoint.windows != undefined && k < tPoint.windows.length; k++) {
-                                //    //console.log("Create PROMISED WINDOW step4");
+                                //    //log.info("Create PROMISED WINDOW step4");
                                 //    if (tPoint.windows[k].finish + 120 > tPoint.arrival_time_ts &&
                                 //        tPoint.windows[k].start - 120 < tPoint.arrival_time_ts) {
                                 //        tPoint.working_window = tPoint.windows[k];
@@ -3505,7 +3663,7 @@ function lookForNewIten(company) {
 
                         }
 
-                        //console.log(cashedDataArr[currentCompany].currentProblems, "Problems 485");
+                        //log.info(cashedDataArr[currentCompany].currentProblems, "Problems 485");
 
                     }
 
@@ -3515,15 +3673,15 @@ function lookForNewIten(company) {
                         var route = cashedDataArr[currentCompany].routes[i];
                         if (route.real_track == undefined || route.real_track.length == 0) continue;
                         var last = route.real_track.length-1;
-                        //console.log("last = ", last);
+                        //log.info("last = ", last);
                         if (route.real_track[last].state == 'CURRENT_POSITION') {
                             route.real_track.length=last;
-                            //console.log("DELETE CURRENT POSITION");
+                            //log.info("DELETE CURRENT POSITION");
                         }
                     }
 
                     cashedDataArr[currentCompany].idArr.push(cashedDataArr[currentCompany].routes[cashedDataArr[currentCompany].routes.length-1].itineraryID);
-                    console.log("FINISHING SECOND LINKING");
+                    log.info("FINISHING SECOND LINKING");
                     checkCorrectCalculating(currentCompany);
 
 
@@ -3540,7 +3698,7 @@ function lookForNewIten(company) {
             // Если уже есть планы на новый день и он наступил
             if(data.newDayIten != undefined){
                 //TODO дописать и проверить работоспособность строчки ниже и всего кода.
-                console.log("Start Load NEW DAY");
+                log.info("Start Load NEW DAY");
 
                 var login = cashedDataArr[company].firstLogin;
                 //TODO решить вопрос с обновлением настроек.
@@ -3561,7 +3719,7 @@ function lookForNewIten(company) {
                 cashedDataArr[company]={};
 
 
-                console.log("Старых маршрутов ", oldRoutes.length);
+                log.info("Старых маршрутов ", oldRoutes.length);
                 //
 
                 //Получение дневного плана для конкретной компании
@@ -3570,14 +3728,14 @@ function lookForNewIten(company) {
 
 
                 function dataReadyCallback(data) {
-                    console.log("Загрузка данных НОВОГО ДНЯ из 1C заняла", parseInt(Date.now()/1000)-middleTime);
+                    log.info("Загрузка данных НОВОГО ДНЯ из 1C заняла", parseInt(Date.now()/1000)-middleTime);
                     endTime = parseInt(Date.now()/1000);
                     if (data.routes != undefined) {
-                        console.log('=== dataReadyCallback === send data to client ===', data.routes.length);}
+                        log.info('=== dataReadyCallback === send data to client ===', data.routes.length);}
                     // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                    console.log('send data to client');
+                    log.info('send data to client');
 
-                        //console.log("ReChange SessionLogin", data.CLIENT_ID);
+                        //log.info("ReChange SessionLogin", data.CLIENT_ID);
 
                         var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
                         var key=""+login;
@@ -3591,7 +3749,7 @@ function lookForNewIten(company) {
                             for (var i = 0; i < data.routes.length; i++) {
                                 if (!data.routes[i]['uniqueID']) {
                                     data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
-                                    console.log("Prisvoeno znahenie", data.routes[i]['uniqueID']);
+                                    log.info("Prisvoeno znahenie", data.routes[i]['uniqueID']);
                                     for (var j = 0; j < data.routes[i].points.length; j++) {
                                         data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                     }
@@ -3633,16 +3791,16 @@ function lookForNewIten(company) {
                         //TODO Склейка решения закончена, включаем периодическое (раз в 2 минуты ) обновление и пересчет данных
                         //interval(startPeriodicCalculating(currentCompany), 20 * 1000);
                         if(startServer == false) {
-                            console.log("Start SERVER");
+                            log.info("Start SERVER");
                             startServer = true;
                             var timerId = setInterval(function() {
                                 startPeriodicCalculating(currentCompany);
                             }, 120 * 1000);}
 
                     cashedDataArr[company].oldRoutes=[];
-                    console.log("Старые маршрутыб было", cashedDataArr[company].oldRoutes.length, "пришло", oldRoutes.length );
+                    log.info("Старые маршрутыб было", cashedDataArr[company].oldRoutes.length, "пришло", oldRoutes.length );
                     cashedDataArr[company].oldRoutes= [].concat(oldRoutes);
-                    console.log("Старые маршрутыб СТАЛО", cashedDataArr[company].oldRoutes.length);
+                    log.info("Старые маршрутыб СТАЛО", cashedDataArr[company].oldRoutes.length);
 
 
                 }
@@ -3651,11 +3809,13 @@ function lookForNewIten(company) {
             }
 
         });
-
+} catch (e) {
+    log.error( "Ошибка "+ e + e.stack);
+}
 }
 
 function changePriority(id, company, login) {
-
+try {
     //Редактировался ли этот маршрут ранее.
     var exist = false;
     for (var i = 0; i < priority.length; i++) {
@@ -3678,15 +3838,18 @@ function changePriority(id, company, login) {
     }
 
     for (i = 0; i < priority.length; i++) {
-        console.log("PRIORITY", priority[i]);
+        log.info("PRIORITY", priority[i]);
     }
-
+} catch (e) {
+    log.error( "Ошибка "+ e + e.stack);
+}
 }
 
 
 // Функция подбирает роут для оператора
 function choseRouteForOperator(company, login){
-    console.log("Start choseRouteForOperator ");
+    try{
+    log.info("Start choseRouteForOperator ");
     var result = 0;
     for (;result< cashedDataArr[company].line_routes.length; result++){
         var route = cashedDataArr[company].line_routes[result];
@@ -3695,7 +3858,7 @@ function choseRouteForOperator(company, login){
         for(var j=0; j<blockedRoutes.length; j++){
 
             if (blockedRoutes[j].id == route.uniqueID &&  blockedRoutes[j].company  == company){
-                console.log("проблемный роут уже заблокирован");
+                log.info("проблемный роут уже заблокирован");
                 blocked = true;
                 break;
             }
@@ -3708,26 +3871,29 @@ function choseRouteForOperator(company, login){
     }
 
     if(result< cashedDataArr[company].line_routes.length ){
-        console.log("Отдаем оператору маршрут ", result, cashedDataArr[company].line_routes[result].uniqueID );
+        log.info("Отдаем оператору маршрут ", result, cashedDataArr[company].line_routes[result].uniqueID );
         blockedRoutes.push({id: "" + cashedDataArr[company].line_routes[result].uniqueID, company: company, login: login, time: parseInt(Date.now()/1000)});
 
         if(cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes = [];
 
         cashedDataArr[company].blocked_routes.push(cashedDataArr[company].line_routes[result]);
 
-        console.log("Size of blocked Routes is", cashedDataArr[company].blocked_routes.length);
+        log.info("Size of blocked Routes is", cashedDataArr[company].blocked_routes.length);
         return result;
     } else {
-        console.log("Больше проблем не вижу");
+        log.info("Больше проблем не вижу");
         return -1;
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 function connectPointsAndPushes(company) {
-    console.log("Start connectPointsAndPushes", company);
+    try{
+    log.info("Start connectPointsAndPushes", company);
     var mobilePushes = cashedDataArr[company].allPushes;
 
     checkPushesTimeGMTZone(mobilePushes, company, cashedDataArr[company].CLIENT_NAME);
@@ -3771,7 +3937,7 @@ function connectPointsAndPushes(company) {
 
                     //TODO написать функцию обработки пуша-отмены
                     if (mobilePushes[i].canceled) {
-                        //console.log("НАЙДЕН ПУШ, который отменяет точку!!!!!!!!!!!!!", tmpPoint.driver.NAME, tmpPoint.NUMBER);
+                        //log.info("НАЙДЕН ПУШ, который отменяет точку!!!!!!!!!!!!!", tmpPoint.driver.NAME, tmpPoint.NUMBER);
                         cancelTaskPush(mobilePushes[i], tmpPoint, company);
                         continue mark1;
                     }
@@ -3780,7 +3946,7 @@ function connectPointsAndPushes(company) {
                     //Проверка, не был ли ранее отменен этот пуш как некоректный
                     if (tmpPoint.incorrect_push != undefined && tmpPoint.incorrect_push.number == mobilePushes[i].number) break;
 
-                    //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
+                    //log.info("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
 
                     tmpPoint.mobile_push = mobilePushes[i];
                     tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
@@ -3813,20 +3979,23 @@ function connectPointsAndPushes(company) {
                             mobilePushes[i].long_away = true;
                             cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
                         }
-                        //console.log('>>> OUT of mobile radius');
+                        //log.info('>>> OUT of mobile radius');
                     }
                 }
             }
         }
 
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 function connectStopsAndPoints(company) {
-    console.log("Start connectStopsAndPushes");
+    try{
+    log.info("Start connectStopsAndPushes");
 
     // создание множественных окон доступности если их нет
     for(var i = 0; i<cashedDataArr[company].routes.length; i++){
@@ -3845,19 +4014,19 @@ function connectStopsAndPoints(company) {
 
     for (i = 0; i < cashedDataArr[company].routes.length; i++) {
         var route = cashedDataArr[company].routes[i];
-        //console.log ("route.driver.name", route.driver.NAME);
+        //log.info ("route.driver.name", route.driver.NAME);
         route.lastPointIndx = 0;
         if (route.real_track != undefined) {
             for (var j = 0; j < route.real_track.length; j++) {
                 // если статус не из будущего (в случае демо-режима) и стейт является стопом, b dhtvz проверяем его
                 if (route.real_track[j].t1 < parseInt(Date.now()/1000) && route.real_track[j].state == "ARRIVAL") {
-                    //console.log("считаем стоп", _data.server_time, route.real_track[j].t1, _data.server_time-route.real_track[j].t1)
+                    //log.info("считаем стоп", _data.server_time, route.real_track[j].t1, _data.server_time-route.real_track[j].t1)
 
 
 
                     var tmpArrival = route.real_track[j];
 
-                    //console.log("tmpArrival",tmpArrival);
+                    //log.info("tmpArrival",tmpArrival);
                     // перебираем все точки к которым
                     for (var k = 0; k < route.points.length; k++) {
 
@@ -3870,7 +4039,7 @@ function connectStopsAndPoints(company) {
                         //cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
 
                         if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit){
-                            //console.log("Подтверждена вручную Уходим");
+                            //log.info("Подтверждена вручную Уходим");
                             continue;
                         }
 
@@ -3909,7 +4078,7 @@ function connectStopsAndPoints(company) {
                         var warehoseK = 1;
                         if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint != undefined && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
                             warehoseK = 2;
-                            //console.log("Рассчитываем склад", (tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold &&
+                            //log.info("Рассчитываем склад", (tmpPoint.arrival_time_ts < tmpArrival.t2 + cashedDataArr[company].settings.timeThreshold &&
                             //tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                             //tmpPoint.timeToStop > tmpTime)));
 
@@ -3937,12 +4106,12 @@ function connectStopsAndPoints(company) {
                         }
 
 
-                        //if (tmpPoint.TASK_NUMBER == "4400455330" && tmpArrival.id+"" == "" + 2990767  ) console.log ("Второй этап проверки",cashedDataArr[company].settings.workingWindowTypes,  orderSuit, generalSuit, tmpDistance < cashedDataArr[company].settings.stopRadius, tmpPoint.distanceToStop > tmpDistance, tmpPoint.timeToStop > tmpTime);
+                        //if (tmpPoint.TASK_NUMBER == "4400455330" && tmpArrival.id+"" == "" + 2990767  ) log.info ("Второй этап проверки",cashedDataArr[company].settings.workingWindowTypes,  orderSuit, generalSuit, tmpDistance < cashedDataArr[company].settings.stopRadius, tmpPoint.distanceToStop > tmpDistance, tmpPoint.timeToStop > tmpTime);
                         if ((suit || generalSuit)  && tmpDistance < cashedDataArr[company].settings.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
                         tmpPoint.timeToStop > tmpTime)) {
 
 
-                            //console.log("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
+                            //log.info("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
                            // var haveUnfinished = false;
 
 
@@ -3985,7 +4154,7 @@ function connectStopsAndPoints(company) {
                             }
 
                             if (incorrect_stop){
-                                console.log ("Ура, найден некорректный стоп!!!!!!");
+                                log.info ("Ура, найден некорректный стоп!!!!!!");
                                 continue;
                             }
 
@@ -4009,7 +4178,7 @@ function connectStopsAndPoints(company) {
                             tmpPoint.real_arrival_time = tmpArrival.t1;
                             tmpPoint.autofill_service_time = tmpArrival.time;
                             //route.points[k]
-                            //console.log("route-point-k", route.points[k], "route" , route)
+                            //log.info("route-point-k", route.points[k], "route" , route)
 
                             //if (angular.isUndefined(tmpArrival.servicePoints)==true){
                             //    tmpArrival.servicePoints=[];
@@ -4032,7 +4201,7 @@ function connectStopsAndPoints(company) {
 
                             // tmpPoint.rawConfirmed=0;
 
-                            //console.log("Find stop for Waypoint and change STATUS")
+                            //log.info("Find stop for Waypoint and change STATUS")
 
 
 
@@ -4045,13 +4214,13 @@ function connectStopsAndPoints(company) {
             }
 
 
-            // console.log("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
+            // log.info("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
             var lastPoint = route.points[route.lastPointIndx];
-            // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
+            // log.info("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
 
             // проверка последней определенной точки на статус выполняется
             if (lastPoint != null && route.car_position !=  undefined) {
-                // console.log("Route", route);
+                // log.info("Route", route);
                 if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > parseInt(Date.now()/1000)
                     && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
                         lastPoint.LAT, lastPoint.LON) < cashedDataArr[company].stopRadius) {
@@ -4060,25 +4229,28 @@ function connectStopsAndPoints(company) {
             }
         }
 
-        // console.log("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
+        // log.info("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
 
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 function findStatusesAndWindows(company) {
-    console.log("Start findStatusesAndWindows", company);
+    try{
+    log.info("Start findStatusesAndWindows", company);
     var tmpPoint;
 
     for(var i=0; i<cashedDataArr[company].routes.length; i++ ) {
 
         cashedDataArr[company].routes[i].ready_to_close=true;
 
-        //console.log("1");
+        //log.info("1");
         for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++) {
-            //console.log("2");
+            //log.info("2");
 
             tmpPoint = cashedDataArr[company].routes[i].points[j];
 
@@ -4091,26 +4263,26 @@ function findStatusesAndWindows(company) {
             }
             //считаем окна только для доставленного
             //if (tmpPoint.status > 3 && tmpPoint.status != 6) continue;
-            //console.log("Точка  вероятно доставлена");
+            //log.info("Точка  вероятно доставлена");
 
             tmpPoint.windowType = 'Вне окон';
             if (tmpPoint.promised_window_changed.start < tmpPoint.real_arrival_time
                 && tmpPoint.promised_window_changed.finish > tmpPoint.real_arrival_time) {
                 tmpPoint.windowType = 'В обещанном';
-                //console.log('В заказанном')
+                //log.info('В заказанном')
             } else {
                 for (var l = 0; tmpPoint.windows != undefined && l < tmpPoint.windows.length; l++) {
                     if (tmpPoint.windows[l].start < tmpPoint.real_arrival_time
                         && tmpPoint.windows[l].finish > tmpPoint.real_arrival_time) {
                         tmpPoint.windowType = 'В заказанном';
-                        //console.log('В обещанном');
+                        //log.info('В обещанном');
                         break;
                     }
                 }
             }
 
 
-            //console.log("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
+            //log.info("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
             if (cashedDataArr[company].settings.workingWindowType == 1) {
                 //tmpPoint.findStatus = true;
                 if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
@@ -4120,7 +4292,7 @@ function findStatusesAndWindows(company) {
 
 
 
-                //console.log(tmpPoint, "MTM 4121");
+                //log.info(tmpPoint, "MTM 4121");
                 //Костыль, если working window неправильно сформирован
                 if (!tmpPoint.working_window.isArray) {
                     var transit = tmpPoint.working_window;
@@ -4130,12 +4302,12 @@ function findStatusesAndWindows(company) {
                 }
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
-                    //console.log("Присваиваем статус 1");
+                    //log.info("Присваиваем статус 1");
                 } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
-                    //console.log("Присваиваем статус 2");
+                    //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 } else {
-                    //console.log("Присваиваем статус 0");
+                    //log.info("Присваиваем статус 0");
                     tmpPoint.status = 0;
                 }
             } else{
@@ -4162,26 +4334,26 @@ function findStatusesAndWindows(company) {
 
                 if (tmpPoint.real_arrival_time > end)
                 {
-                    //console.log("Присваиваем статус 1");
+                    //log.info("Присваиваем статус 1");
                     tmpPoint.status = 1;
 
                 }
 
                 if (tmpPoint.real_arrival_time < start)
                 {
-                    //console.log("Присваиваем статус 2");
+                    //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 }
 
                 if (tmpPoint.status == undefined) {
                     if (tmpPoint.working_window[0] == undefined) {
-                        //console.log("Присваиваем статус 0");
+                        //log.info("Присваиваем статус 0");
                         tmpPoint.status = 0;
                     } else {
                         for (var k=0; k<tmpPoint.working_window.length; k++){
                             if (tmpPoint.real_arrival_time > tmpPoint.working_window[k].start && tmpPoint.real_arrival_time < tmpPoint.working_window[k].finish ){
                                 tmpPoint.status = 0;
-                                //console.log("Присваиваем статус 0");
+                                //log.info("Присваиваем статус 0");
                                 break;
                             }
                         }
@@ -4192,7 +4364,7 @@ function findStatusesAndWindows(company) {
 
                     if(tmpPoint.status == undefined) {
                         //точка где то между окнами
-                        //console.log("Присваиваем статус 1");
+                        //log.info("Присваиваем статус 1");
                         tmpPoint.status = 1; //todo Условно присвоили статус доставлен поздно, если не попали ни в одно окно
                     }
 
@@ -4229,20 +4401,23 @@ function findStatusesAndWindows(company) {
                 tmpPoint.status = 6;
                 cashedDataArr[company].routes[i].ready_to_close=false;
                 tmpPoint.problem_index = 1;
-                //console.log("tmpPoint.problem_index", tmpPoint.problem_index);
+                //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
-            //console.log("И присваиваем ей статус", tmpPoint.status);
+            //log.info("И присваиваем ей статус", tmpPoint.status);
         }
 
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 
 function calculateStatistic (company){
-    console.log("Start calculate Statistic");
+    try {
+    log.info("Start calculate Statistic");
     var indx;
     cashedDataArr[company].statistic=[];
     for (var i=0; i<9; i++) {
@@ -4267,27 +4442,34 @@ function calculateStatistic (company){
         }
     }
 
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function oldDayStatuses(company) {
-    console.log("Заменяем статусы компании", company );
+    try {
+    log.info("Заменяем статусы компании", company );
     for (var i=0; i<cashedDataArr[company].routes.length;i++){
         for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
             if (cashedDataArr[company].routes[i].points[j].status >2 && cashedDataArr[company].routes[i].points[j].status !=8 ) {
-                //console.log("Change Old Day Status");
+                //log.info("Change Old Day Status");
                 cashedDataArr[company].routes[i].points[j].status == 4;
             }
         }
     }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function oldDayCalculate (company, data) {
+    try {
     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
     data.current_server_time = parseInt(new Date() / 1000);
     data.currentDay = false;
     cashedDataArr[company].currentDay = false;
-    console.log("Прошлый день готов к рассчету", company);
+    log.info("Прошлый день готов к рассчету", company);
     createFilterIdForOldDay(company);
 
     connectPointsAndPushes(company);
@@ -4299,38 +4481,49 @@ function oldDayCalculate (company, data) {
     //oldDayStatuses(company);
 
 
-    console.log("Расчет прошлого дня окончен", company);
-    console.log("Доставленных точек", cashedDataArr[company].statistic[0]+cashedDataArr[company].statistic[1]+cashedDataArr[company].statistic[2] )
+    log.info("Расчет прошлого дня окончен", company);
+    log.info("Доставленных точек", cashedDataArr[company].statistic[0]+cashedDataArr[company].statistic[1]+cashedDataArr[company].statistic[2] )
     cashedDataArr[company].ready = true;
-    console.log("Готово к отдаче", cashedDataArr[company].ready);
+    log.info("Готово к отдаче", cashedDataArr[company].ready);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function checkUniqueID (company){
-    console.log("Start check uniqueID");
+    try{
+    log.info("Start check uniqueID");
     for ( var i=0; i<cashedDataArr[company].routes.length; i++){
-        //console.log("i", i);
+        //log.info("i", i);
         for (var j = i+1; j < cashedDataArr[company].routes.length; j++){
-            //console.log("j", j, cashedDataArr[company].routes[i].uniqueID , cashedDataArr[company].routes[j].uniqueID);
+            //log.info("j", j, cashedDataArr[company].routes[i].uniqueID , cashedDataArr[company].routes[j].uniqueID);
             if (cashedDataArr[company].routes[i].uniqueID == cashedDataArr[company].routes[j].uniqueID){
 
-                console.log(cashedDataArr[company].routes[i].uniqueID , cashedDataArr[company].routes[j].uniqueID);
-                console.log("АТТЕНТИОН!!!!! Find equals uniqiueID", cashedDataArr[company].routes[i].driver.NAME, cashedDataArr[company].routes[j].driver.NAME)
+                log.info(cashedDataArr[company].routes[i].uniqueID , cashedDataArr[company].routes[j].uniqueID);
+                log.info("АТТЕНТИОН!!!!! Find equals uniqiueID", cashedDataArr[company].routes[i].driver.NAME, cashedDataArr[company].routes[j].driver.NAME)
             }
         }
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function selectRoutes(company) {
+    try{
     if (cashedDataArr[company].line_routes == undefined || cashedDataArr[company].line_routes == null) return;
     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].line_routes);
     cashedDataArr[company].line_routes.length=0;
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 
 function serchInCache(input, company) {
+    try {
 
     if(input == undefined || company == undefined || input == null || input =='') return '';
     var hits = [];
@@ -4340,13 +4533,13 @@ function serchInCache(input, company) {
     routesForSerch=routesForSerch.concat(cashedDataArr[company].routes);
     routesForSerch=routesForSerch.concat(cashedDataArr[company].line_routes);
     routesForSerch=routesForSerch.concat(cashedDataArr[company].blocked_routes);
-    //console.log("Начинаем поиск", routesForSerch.length);
+    //log.info("Начинаем поиск", routesForSerch.length);
 
 
     for (var i=0; i< routesForSerch.length; i++){
-        //console.log("проверяем Водителя", routesForSerch[i].driver.NAME, " ", input)
+        //log.info("проверяем Водителя", routesForSerch[i].driver.NAME, " ", input)
         if(routesForSerch[i].driver.NAME.indexOf(input)>=0){
-            //console.log("Найден водитель", routesForSerch[i].driver.NAME);
+            //log.info("Найден водитель", routesForSerch[i].driver.NAME);
             hits.push({driverName:routesForSerch[i].driver.NAME, uniqueID: routesForSerch[i].uniqueID, transportName: routesForSerch[i].transport.NAME });
             continue;
         }
@@ -4380,17 +4573,21 @@ function serchInCache(input, company) {
         }
     }
     return hits;
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function printData(company) {
+    try {
 
     for (var i = 0; i <onlineClients.length; i++ ){
-        console.log(" Онлайн", onlineClients[i]);
+        log.info(" Онлайн", onlineClients[i]);
     }
 
     for (i= 0; i<blockedRoutes.length; i ++){
-        console.log(" Блокед", blockedRoutes[i]);
+        log.info(" Блокед", blockedRoutes[i]);
     }
 
     var routesCount = 0;
@@ -4481,7 +4678,7 @@ function printData(company) {
     //}
 
 
-    console.log ("Итоговая информация" + "\n" +
+    log.info ("Итоговая информация" + "\n" +
         "Достойных роутов " + routesCount + "\n" +
         "Точек доставки " + pointsCount + "\n" +
         "Точек в заказанном окне " + orderCount + "\n" +
@@ -4489,28 +4686,36 @@ function printData(company) {
         "Доставленных мимо " + outCount + "\n" +
         "В том числе с разницей более 15 минут " + biger15 + "\n"+
         "Точек с неопределенным статусом " + undefinedCount);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function unblockInData(data){
-    //console.log("Переносим заблокированный роуты в нормальные");
+    try {
+    //log.info("Переносим заблокированный роуты в нормальные");
     if (cashedDataArr[data.company].blocked_routes == undefined) return;
-    //console.log("Есть заблокированные");
+    //log.info("Есть заблокированные");
     for (var i=0; i<cashedDataArr[data.company].blocked_routes.length; i++){
-        //console.log("Сравнение ", cashedDataArr[data.company].blocked_routes[i].uniqueID , data.id)
+        //log.info("Сравнение ", cashedDataArr[data.company].blocked_routes[i].uniqueID , data.id)
         if (cashedDataArr[data.company].blocked_routes[i].uniqueID == data.id){
-            console.log("Переносим", data.id);
+            log.info("Переносим", data.id);
             cashedDataArr[data.company].routes.push(cashedDataArr[data.company].blocked_routes[i]);
             cashedDataArr[data.company].blocked_routes.splice(i,1);
-            console.log("Роутов", cashedDataArr[data.company].routes.length, "А блокированных роутов", cashedDataArr[data.company].blocked_routes.length);
+            log.info("Роутов", cashedDataArr[data.company].routes.length, "А блокированных роутов", cashedDataArr[data.company].blocked_routes.length);
             break;
         }
+    }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
 
 function unblockLogin(login) {
-    //console.log("Start unbloking");
+    try {
+    //log.info("Start unbloking");
     for (var i = 0; i < blockedRoutes.length; i++) {
         if ("" + blockedRoutes[i].login == "" + login) {
             unblockInData(blockedRoutes[i]);
@@ -4528,18 +4733,21 @@ function unblockLogin(login) {
     //    }
     //
     //}
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 function cancelTaskPush(push, point, company){
+    try{
     if(push == undefined || point == undefined) {
-        console.log(point, push, "!!!!!ОШИБКА входных данных в функции cancelTaskPush 1-point, 2-push");
+        log.info(point, push, "!!!!!ОШИБКА входных данных в функции cancelTaskPush 1-point, 2-push");
         return;
     }
 
-    //console.log("Отменяющий пуш выглядит так", push);
+    //log.info("Отменяющий пуш выглядит так", push);
     point.status = 8;
     point.checkedStatus = 8;
     point.class = "canceled-status";
@@ -4553,7 +4761,7 @@ function cancelTaskPush(push, point, company){
 
     if(push.cancel_reason != undefined && push.cancel_reason.length >0) {
         for (var i=0; i<cashedDataArr[company].reasons.length; i++ ){
-            //console.log("Ищем причину отмены задания", push.cancel_reason, cashedDataArr[company].reasons[i].DESCRIPTION);
+            //log.info("Ищем причину отмены задания", push.cancel_reason, cashedDataArr[company].reasons[i].DESCRIPTION);
             if(push.cancel_reason == cashedDataArr[company].reasons[i].DESCRIPTION) {
                 point.reason = i;
                 break;
@@ -4562,27 +4770,30 @@ function cancelTaskPush(push, point, company){
 
     }
 
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 
 }
 
 
 function checkCorrectCalculating(company){
-    console.log("Проверяем корректность расчета маршрутов");
+    try{
+    log.info("Проверяем корректность расчета маршрутов");
     if (company == undefined || cashedDataArr[company] == undefined) {
-        console.log("Ошибка в функции checkCorrectCalculating ");
+        log.info("Ошибка в функции checkCorrectCalculating ");
         return;
     }
 
     if (cashedDataArr[company].routes != undefined) {
         for (var i=0; i<cashedDataArr[company].routes.length; i++){
             if (cashedDataArr[company].routes[i].DISTANCE == 0 || cashedDataArr[company].routes[i].check_calc == true || cashedDataArr[company].routes[i].points == undefined) continue;
-            //console.log("проверка Роута");
+            //log.info("проверка Роута");
             for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
-                //console.log("проверка точки в Роуте");
+                //log.info("проверка точки в Роуте");
                 if (cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME == undefined || cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME == '' || cashedDataArr[company].routes[i].points[j].ARRIVAL_TIME.length == 0 ){
-                    //console.log("Найден непросчитанный роут!!!!!");
+                    //log.info("Найден непросчитанный роут!!!!!");
                     createArrivalTime(cashedDataArr[company].routes[i].points[j], cashedDataArr[company].routes[i], cashedDataArr[company].settings.controlledWindow, company);
                     cashedDataArr[company].routes[i].DISTANCE = 0;
                     cashedDataArr[company].routes[i].check_calc = true;
@@ -4595,13 +4806,13 @@ function checkCorrectCalculating(company){
 
     if (cashedDataArr[company].line_routes != undefined) {
         for (var i=0; i<cashedDataArr[company].line_routes.length; i++){
-            //console.log("проверка  лайн Роута");
+            //log.info("проверка  лайн Роута");
             if (cashedDataArr[company].line_routes[i].DISTANCE == 0 || cashedDataArr[company].line_routes[i].check_calc == true || cashedDataArr[company].line_routes[i].points == undefined) continue;
 
             for (var j=0; j<cashedDataArr[company].line_routes[i].points.length; j++){
-                //console.log("проверка точки в  Лайн Роуте");
+                //log.info("проверка точки в  Лайн Роуте");
                 if (cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME == undefined || cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME == '' || cashedDataArr[company].line_routes[i].points[j].ARRIVAL_TIME.length == 0 ){
-                    //console.log("Найден непросчитанный роут!!!!!");
+                    //log.info("Найден непросчитанный роут!!!!!");
                     createArrivalTime(cashedDataArr[company].line_routes[i].points[j], cashedDataArr[company].line_routes[i], cashedDataArr[company].settings.controlledWindow, company);
                     cashedDataArr[company].line_routes[i].DISTANCE = 0;
                     cashedDataArr[company].line_routes[i].check_calc = true;
@@ -4613,22 +4824,26 @@ function checkCorrectCalculating(company){
     }
 
 
-    console.log("Первичная проверка корректности расчетов окончена");
+    log.info("Первичная проверка корректности расчетов окончена");
 
     if (cashedDataArr[company].routes != undefined) {
         for (i = 0; i < cashedDataArr[company].routes.length; i++) {
             for (j = 0; j<cashedDataArr[company].routes[i].points.length; j++){
                 if(cashedDataArr[company].routes[i].points[j].waypoint == undefined) {
-                    console.log(cashedDataArr[company].routes[i].points[j], "Внимание, найдена точка маршрута без описания!!!");
+                    log.info(cashedDataArr[company].routes[i].points[j], "Внимание, найдена точка маршрута без описания!!!");
                 }
             }
         }
+    }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
 
 function createArrivalTime (tPoint, route, controlledWindow, company) {
-    //console.log("#############################################################The route is UNCALCULATE########################################################");
+    try{
+    //log.info("#############################################################The route is UNCALCULATE########################################################");
 
 
     //Для непосчитанных маршрутов время прибытия считается границей окна доступности
@@ -4669,22 +4884,25 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
 
     if (cashedDataArr[company].settings.workingWindowType == 0){
 
-        console.log (tPoint, "MTM 4538");
-        console.log("Время заказанное",  tPoint.orderWindows[tPoint.orderWindows.length -1]);
+        log.info (tPoint, "MTM 4538");
+        log.info("Время заказанное",  tPoint.orderWindows[tPoint.orderWindows.length -1]);
         tPoint.working_window = tPoint.orderWindows[tPoint.orderWindows.length -1];
     }  else {
 
-        console.log("Время обещанное");
+        log.info("Время обещанное");
         tPoint.working_window = tPoint.orderWindows;
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function createFilterIdForOldDay(company) {
-    console.log("Start createFilterIdForOldDay");
+    try {
+    log.info("Start createFilterIdForOldDay");
     if(company == undefined) {
-        console.log("ОШИБКА ВХОДНЫХ ДАННЫХ createFilterIdForOldDay");
+        log.info("ОШИБКА ВХОДНЫХ ДАННЫХ createFilterIdForOldDay");
         return;
     }
 
@@ -4692,21 +4910,25 @@ function createFilterIdForOldDay(company) {
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
         for (var j =0; j<cashedDataArr[company].allRoutes.length; j++ ){
             if (cashedDataArr[company].routes[i].uniqueID == cashedDataArr[company].allRoutes[j].uniqueID) {
-                //console.log("Найдено совпадение");
+                //log.info("Найдено совпадение");
                 cashedDataArr[company].routes[i].filterId = cashedDataArr[company].allRoutes[j].value;
                 break;
             }
         }
 
     }
-    console.log("FINISH createFilterIdForOldDay");
+    log.info("FINISH createFilterIdForOldDay");
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function createSeveralAviabilityWindows (point){
+    try {
 
     point.orderWindows=[];
-    //console.log("Start checkUncalculate");
+    //log.info("Start checkUncalculate");
 
     if (point.AVAILABILITY_WINDOWS == undefined || point.AVAILABILITY_WINDOWS.length == 0) return;
 
@@ -4716,31 +4938,34 @@ function createSeveralAviabilityWindows (point){
     while(i<size){
         var date=point.ARRIVAL_TIME.substr(0,11);
         var temp=parts[i].trim();
-        //console.log("Arrival Time", point.ARRIVAL_TIME );
-        //console.log("Date", date, temp);
+        //log.info("Arrival Time", point.ARRIVAL_TIME );
+        //log.info("Date", date, temp);
         var before=temp.substr(0,5);
         before=date+before+":00";
-        //console.log("before=", before);
+        //log.info("before=", before);
         var begin=strToTstamp(before, point);
 
         var after=temp.slice(-5);
         after=date+after+":00";
-        //console.log("after=", after);
+        //log.info("after=", after);
         var end=strToTstamp(after, point);
         point.orderWindows.push({start: begin, finish: end });
 
 
         i++;
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 function checkOrderSuit (point, stop, company) {
-    //console.log("Start checkOrderSuit");
+    try {
+    //log.info("Start checkOrderSuit");
     if (point == undefined || stop == undefined) {
-        console.log(point, stop, "Ошибка данных в checkOrderSuit");
+        log.info(point, stop, "Ошибка данных в checkOrderSuit");
         return false;
     }
 
@@ -4760,12 +4985,12 @@ function checkOrderSuit (point, stop, company) {
 
     } else {
 
-        //console.log("_________________________________________________________________________________________")
+        //log.info("_________________________________________________________________________________________")
         for (var i=0; i<point.orderWindows.length; i++){
 
-            //if (point.TASK_NUMBER == "4400455330" && stop.id+"" == "" + 2990767  ) console.log("Проверяем точку", stop.t1, point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60, (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60), " и больше ", stop.t2, point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60, (stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60))
+            //if (point.TASK_NUMBER == "4400455330" && stop.id+"" == "" + 2990767  ) log.info("Проверяем точку", stop.t1, point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60, (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60), " и больше ", stop.t2, point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60, (stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60))
             if (stop.t1 < point.orderWindows[i].finish + cashedDataArr[company].settings.timeThreshold*60 && stop.t2 > point.orderWindows[i].start - cashedDataArr[company].settings.timeThreshold*60 ) {
-                //console.log("Проверка удачная");
+                //log.info("Проверка удачная");
                // point.variant = 3;
                 return true;
             }
@@ -4774,13 +4999,16 @@ function checkOrderSuit (point, stop, company) {
         return false;
 
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 };
 
 
 function predicateTime(company) {
-    console.log("Start predicateTime");
+    try {
+    log.info("Start predicateTime");
     for (var i=0; i< cashedDataArr[company].routes.length; i++){
         var route = cashedDataArr[company].routes[i];
         if (route.DISTANCE == 0) {
@@ -4789,14 +5017,17 @@ function predicateTime(company) {
             calcPredication(route, company);
         }
 
-
+    }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
 
 
 function calculateProblemIndex(company) {
-    console.log("Start calculate ProblemIndx");
+    try {
+    log.info("Start calculate ProblemIndx");
 
     var point,
         timeThreshold = 3600 * 6,
@@ -4814,7 +5045,7 @@ function calculateProblemIndex(company) {
             point.problem_index = 0;
 
             if(point.status < 4 || point.status == 8) continue;
-            //console.log("Найдена проблемная точка");
+            //log.info("Найдена проблемная точка");
 
             if (point.status == 6) {
                 point.problem_index = 1;
@@ -4826,7 +5057,7 @@ function calculateProblemIndex(company) {
                     route.max_problem = point.problem_index;
                     route.problem_point=point;
                     route.kind_of_problem='внимание';
-                    // console.log("Проблемность равна  1");
+                    // log.info("Проблемность равна  1");
                     continue;
                 }
 
@@ -4835,7 +5066,7 @@ function calculateProblemIndex(company) {
 
 
 
-            // console.log("point.problem_index", point.problem_index);
+            // log.info("point.problem_index", point.problem_index);
             if (point.overdue_time > 0) {
                 if (point.status == 4) {
                     var koef;
@@ -4869,7 +5100,7 @@ function calculateProblemIndex(company) {
                 point.problem_index = parseInt(point.problem_index * timeCoef);
                 point.problem_index = parseInt(point.problem_index / 100);
 
-                // console.log("Проблемность равна  ",  point.problem_index);
+                // log.info("Проблемность равна  ",  point.problem_index);
                 // Проверка на максимальную проблемность
                 if(point.problem_index > route.max_problem) {
                     route.max_problem = point.problem_index;
@@ -4900,7 +5131,7 @@ function calculateProblemIndex(company) {
             var point = route.points[j];
             var outOfWindows = true;
             if (point.orderWindows == undefined) {
-                console.log("У точки нет заказанного окна, скорее всего склад");
+                log.info("У точки нет заказанного окна, скорее всего склад");
                 continue;
             }
 
@@ -4914,7 +5145,7 @@ function calculateProblemIndex(company) {
             }
 
             if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
-                console.log("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
+                log.info("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
                 point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
                 point.out_of_ordered = true;
                 route.max_problem = point.problem_index;
@@ -4929,13 +5160,13 @@ function calculateProblemIndex(company) {
     //определение готовых к закрытию маршрутов
 
     for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-        // console.log("Start looking for ready to close");
+        // log.info("Start looking for ready to close");
         if (cashedDataArr[company].routes[i].closed == true) continue;
 
         if (cashedDataArr[company].routes[i].ready_to_close) {
 
             var route = cashedDataArr[company].routes[i];
-            console.log("Find route ready to close");
+            log.info("Find route ready to close");
             route.max_problem = 0.5;
             route.kind_of_problem='не закрыт';
             route.find_problem_ts = parseInt(Date.now()/1000);
@@ -4950,12 +5181,15 @@ function calculateProblemIndex(company) {
             cashedDataArr[company].routes[i].find_problem_ts = 0;
         }
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 
 }
 
 
 function createProblems(company) {
+    try {
     //todo поиск и сортировка ведется по полю max_problem. А описание проблемы в поле kind_of_problem
     //todo дописать определение проблемности в случае, если проблемма - не точка
     // Задача этой функции сформировать и расставить по порядку проблеммы
@@ -4978,20 +5212,23 @@ function createProblems(company) {
     }
 
 
-    console.log("!!!!!!!!Посчитана компания", company);
-    //console.log("Конец рассчета, который занял", parseInt(Date.now()/1000)-superEndTime);
-    console.log("Общая статистика. Беспроблемных роутов", cashedDataArr[company].routes.length);
-    console.log("Роутов с проблеммами в очереди",cashedDataArr[company].line_routes.length);
-    console.log("Роутов розданных операторам", cashedDataArr[company].blocked_routes ? cashedDataArr[company].blocked_routes.length : 0);
-    console.log("Прошлых незакрытых роутов", cashedDataArr[company].oldRoutes ? cashedDataArr[company].oldRoutes.length:0);
+    log.info("!!!!!!!!Посчитана компания", company);
+    //log.info("Конец рассчета, который занял", parseInt(Date.now()/1000)-superEndTime);
+    log.info("Общая статистика. Беспроблемных роутов", cashedDataArr[company].routes.length);
+    log.info("Роутов с проблеммами в очереди",cashedDataArr[company].line_routes.length);
+    log.info("Роутов розданных операторам", cashedDataArr[company].blocked_routes ? cashedDataArr[company].blocked_routes.length : 0);
+    log.info("Прошлых незакрытых роутов", cashedDataArr[company].oldRoutes ? cashedDataArr[company].oldRoutes.length:0);
 
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function checkServiceTime(company) {
+    try {
     if (company == undefined) {
-        console.log("Ошибка в checkServiceTime");
+        log.info("Ошибка в checkServiceTime");
         return;
     }
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
@@ -5025,15 +5262,19 @@ function checkServiceTime(company) {
 
         }
     }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function checkeConcatTrack(company, id, data){
+    try {
     if (company == undefined || id == undefined ){
-        console.log("Ошибка в checkeConcatTrack. Данные неопределены");
+        log.info("Ошибка в checkeConcatTrack. Данные неопределены");
         return;
     }
-    //console.log("Для проверки переданы данные", company, id, cashedDataArr[company].routes.length);
+    //log.info("Для проверки переданы данные", company, id, cashedDataArr[company].routes.length);
     var route;
      for(var i=0; i< cashedDataArr[company].routes.length; i++){
 
@@ -5045,36 +5286,40 @@ function checkeConcatTrack(company, id, data){
      }
 
     if (route == undefined) {
-        //console.log("Маршрут для проверки не найден");
+        //log.info("Маршрут для проверки не найден");
         return;
     }
 
-    console.log("В маршруте сейчас ", route.real_track.length, " стэйтов");
-    console.log ("Последний стейт", route.real_track[route.real_track.length-1]);
+    log.info("В маршруте сейчас ", route.real_track.length, " стэйтов");
+    log.info ("Последний стейт", route.real_track[route.real_track.length-1]);
 
     if (data == undefined) return;
     var newTrack;
-    //console.log(data, "data for concat");
-    //console.log("Количество полученных наборов", data.length  );
+    //log.info(data, "data for concat");
+    //log.info("Количество полученных наборов", data.length  );
     for (i=0; i<data.length; i++){
 
        if (data[i].gid == route.transport.gid){
            newTrack=data[i].data;
-           console.log("Новые стейты найдены. Их имеется", newTrack.length);
+           log.info("Новые стейты найдены. Их имеется", newTrack.length);
            break;
        }
    }
 
     for (i=0; i<newTrack.length; i++){
-        console.log("Получен стейт", newTrack[i]);
+        log.info("Получен стейт", newTrack[i]);
+    }
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
 
 function checkSync(company, login, blockedArr) {
+    try {
     var result=[];
     if (!company || !login || !blockedArr || blockedArr.length == 0) {
-        console.log("Неопределенные данные checkSync");
+        log.info("Неопределенные данные checkSync");
         return result;
     }
 
@@ -5087,7 +5332,7 @@ function checkSync(company, login, blockedArr) {
         }
     }
     result = blockedArr;
-    console.log("Результат проверки", result);
+    log.info("Результат проверки", result);
     if (result.length == 0) return result;
     // Если так случилось, что существует роут на клиенте, который незаблокирован за пользователем на сервере
     // Блокируем этот маршрут
@@ -5095,7 +5340,7 @@ function checkSync(company, login, blockedArr) {
         var blocked =false;
         for (j=0; j<blockedRoutes.length; j++){
             if (blockedRoutes[j].id == result[i]) {
-                console.log("Этот маршрут заблокирован другим пользователем");
+                log.info("Этот маршрут заблокирован другим пользователем");
                 blocked =true;
             }
         }
@@ -5131,16 +5376,23 @@ function checkSync(company, login, blockedArr) {
     }
 
     return result;
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function concat1CAndMonitoring (company) {
+    try {
     if (!company) return;
-    console.log("Закрытые в 1С маршруты загружены", cashedDataArr[company].closedRoutesFrom1C == undefined);
+    log.info("Закрытые в 1С маршруты загружены", cashedDataArr[company].closedRoutesFrom1C == undefined);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function loadCoords(company) {
+    try {
     if (!company) return;
 
     var states = [],
@@ -5152,22 +5404,25 @@ function loadCoords(company) {
             route = cashedDataArr[company].line_routes[i];
             states = route.real_track;
             gid = route.transport.gid;
-            //console.log("Отправляем запрос по гиду", gid);
+            //log.info("Отправляем запрос по гиду", gid);
             if (gid !=undefined && states != undefined && states.length>0) tracksManager.getTrackByStatesForNode(states, gid, route, function (data, route) {
-                //console.log(data, "MTM 5198");
+                //log.info(data, "MTM 5198");
                 route.real_track=data;
-                //console.log("Закончена подгрузка координат", route.transport.gid);
+                //log.info("Закончена подгрузка координат", route.transport.gid);
             })
         }
 
     }
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function startCalculateCompany(company) {
+    try {
     startTime = parseInt(Date.now()/1000);
-    console.log("Все данные получены, пересчитываем компанию", company);
+    log.info("Все данные получены, пересчитываем компанию", company);
     if (cashedDataArr[company].currentDay == false) return;
     checkCorrectCalculating(company);
     cashedDataArr[company].recalc_finishing = false;
@@ -5186,7 +5441,10 @@ function startCalculateCompany(company) {
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
     printData(company); //todo статистическая функция, можно убивать
-    if (middleTime) console.log("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
+    if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 

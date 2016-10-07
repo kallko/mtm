@@ -27,4 +27,4 @@ app.use('/', mtmRouter);
 app.use('/acp', acpRouter);
 
 app.listen(process.env.PORT || port);
-console.log('Listening on port ' + (process.env.PORT || port) + '...\n');
+console.info('Listening on port ' + (process.env.PORT || port) + '...\n');

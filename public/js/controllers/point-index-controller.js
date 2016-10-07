@@ -259,7 +259,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     scope.drawRoute(scope.filters.route, false, false);
                                     rootScope.carCentre = false;
                                     console.log("Отправляем карту на центровку");
-                                    rootScope.$emit('showAllMarkers');
+                                    if (!rootScope.showPoint) {
+                                        rootScope.$emit('showAllMarkers');
+                                    } else {
+                                        rootScope.$emit('showproblem', rootScope.data.routes[i]);
+                                        rootScope.showPoint = false;
+                                    }
                                     return;
                                     //todo сделать вывод статистики маршрута
                                 }
@@ -328,7 +333,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             console.log("Отправляем карту на центровку");
-            rootScope.$emit('showAllMarkers');
+            if (!rootScope.showPoint) {
+                rootScope.$emit('showAllMarkers');
+            } else {
+                rootScope.$emit('showproblem', rootScope.data.routes[i]);
+                rootScope.showPoint = false;
+            }
 
         });
 
@@ -4736,7 +4746,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         console.log("Раз два три четыре пять, начинаем рисовать", scope.filters.route );
                         scope.drawRoute(scope.filters.route, true, false);
                         console.log("Отправляем карту на центровку");
-                        rootScope.$emit('showAllMarkers');
+                        if (!rootScope.showPoint) {
+                            rootScope.$emit('showAllMarkers');
+                        } else {
+                            rootScope.$emit('showproblem', rootScope.data.routes[i]);
+                            rootScope.showPoint = false;
+                        }
 
                         for (var i = 0; rootScope.data.routes.length > i; i++) {
                             if (rootScope.data.routes[i].filterId == scope.filters.route) {

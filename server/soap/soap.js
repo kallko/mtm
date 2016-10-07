@@ -41,10 +41,10 @@ SoapManager.prototype.getFullUrl = function () {
 // получить все необходимые для интерфейса данные на конкретную дату
 SoapManager.prototype.getAllDailyData = function (callback, date) {
     if (!loadFromCache) {
-        console.log("Wait for Data from SOAP");
+        log.info("Wait for Data from SOAP");
         this.getDailyPlan(callback, date);
     } else {
-        console.log("Wait for Data from Cahse");
+        log.info("Wait for Data from Cahse");
         this.loadFromCachedJson(callback);
     }
 };
@@ -53,15 +53,15 @@ SoapManager.prototype.getAllDailyData = function (callback, date) {
 SoapManager.prototype.loadFromCachedJson = function (callback) {
     fs.readFile('./logs/final_data.js', 'utf8', function (err, data) {
         if (err) {
-            return console.log(err);
+            return log.info(err);
         }
 
-        console.log('The data loaded from the cache.');
+        log.info('The data loaded from the cache.');
 
         var jsonData = JSON.parse(data);
-        //console.log('jsonData', jsonData);
+        //log.info('jsonData', jsonData);
         //jsonData.server_time = parseInt(Date.now() / 1000); // - 3600 * 3; // Date.now();
-        //console.log(jsonData.server_time);
+        //log.info(jsonData.server_time);
         //
         //jsonData.tasks_loaded = true;
         //jsonData.sended = false;
@@ -78,7 +78,7 @@ SoapManager.prototype.loadFromCachedJson = function (callback) {
 SoapManager.prototype.loadDemoData = function (callback) {
     fs.readFile('./data/demoDay.js', 'utf8', function (err, data) {
         if (err) {
-            return console.log(err);
+            return log.info(err);
         }
 
         callback(JSON.parse(data));
@@ -88,11 +88,11 @@ SoapManager.prototype.loadDemoData = function (callback) {
 // проверить наличие всех необходимых данных перед отправкой json на клиент
 function checkBeforeSend(_data, callback) {
 
-    //console.log("START CHECK BEFORE SEND");
+    //log.info("START CHECK BEFORE SEND");
 
-    //console.log( " Check before send started", _data.iLength);
+    //log.info( " Check before send started", _data.iLength);
     if(_data.iLength != 0){
-        //console.log("Рано еще, подпустим поближе!");
+        //log.info("Рано еще, подпустим поближе!");
         return;
     }
 
@@ -149,11 +149,11 @@ function checkBeforeSend(_data, callback) {
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
     if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
-        console.log(data.closedRoutesFrom1C, "SOAP 148");
+        log.info(data.closedRoutesFrom1C, "SOAP 148");
         try{
             allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
         }catch(e){
-            console.log(e, "SOAP 152");
+            log.info(e, "SOAP 152");
         }
     }
 
@@ -167,7 +167,7 @@ function checkBeforeSend(_data, callback) {
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
 
 
-    console.log("А теперь пора!".green);
+    log.info("А теперь пора!".green);
 
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
@@ -203,7 +203,7 @@ function checkBeforeSend(_data, callback) {
         }
     }
 
-    //console.log('DONE!', allData.reasons, "SOAP175");
+    //log.info('DONE!', allData.reasons, "SOAP175");
     log.toFLog('final_data.js', allData);
 
 
@@ -212,7 +212,7 @@ function checkBeforeSend(_data, callback) {
 
 // получить план на день
 SoapManager.prototype.getDailyPlan = function (callback, date) {
-    console.log("Request Date =", date);
+    log.info("Request Date =", date);
     var me = this,
         itIsToday = typeof date === 'undefined';
 
@@ -220,12 +220,12 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     if (date) {
         date = parseInt(date);
         var loadOldDay = true;
-        console.log(" СОАП готов к загрузке прошлого дня");
+        log.info(" СОАП готов к загрузке прошлого дня");
     }
 
      date = date ? date : Date.now();
 
-    console.log('Date >>>', new Date(date));
+    log.info('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {
     //     if (err) throw err;
@@ -241,7 +241,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     //                 if(err) throw err;
     //                 parseXML(result.return, function (err, res) {
     //                     if(err) throw err;
-    //                     console.log(JSON.porse(res.MESSAGE.JSONDATA[0]));
+    //                     log.info(JSON.porse(res.MESSAGE.JSONDATA[0]));
     //                 });
     //             });
     //         }, 10000);
@@ -257,16 +257,16 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
         // авторизация с правами соап-администратора
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        console.log(me.login);
-        console.log(_xml.dailyPlanXML(date));
+        log.info(me.login);
+        log.info(_xml.dailyPlanXML(date));
 
         // запрос в соап от имени авторизированного пользователя, но с правами администратора
         // получения списка id решений на конкретную дату
 
         // if(loadOldDay){
-        //     console.log(_xml.getOldDay("04.06.2016"));
+        //     log.info(_xml.getOldDay("04.06.2016"));
         //     client.runAsUser({'input_data': _xml.getOldDay("04.06.2016"), 'user': me.login}, function (err, result) {
-        //         console.log(result);
+        //         log.info(result);
         //     });
         // }
         var data = [];
@@ -276,9 +276,9 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             dateMonth = dateObj.getMonth() + 1,
             dateMonth = dateMonth < 10 ? '0'+dateMonth : dateMonth,
             dateDay = dateObj.getDate() < 10 ? '0' + dateObj.getDate() : dateObj.getDate();
-            console.log(dateDay+'.'+dateMonth+'.'+dateYear);
+            log.info(dateDay+'.'+dateMonth+'.'+dateYear);
             setTimeout(function(){
-                console.log("Запрос getOldDay");
+                log.info("Запрос getOldDay");
 
                     client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
                         try{
@@ -287,13 +287,14 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                 try{
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
-                                    console.log(data.closedRoutesFrom1C, "Soap 290")
+                                    log.info(data.closedRoutesFrom1C, "Soap 290")
+                                    log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
                                 }catch(e){
-                                    console.log(e, "SOAP 285");
+                                    log.info(e, "SOAP 285");
                                 }
                             });
                         }catch(e){
-                            console.log(e, "SOAP 289");
+                            log.info(e, "SOAP 289");
                         }
                     });
 
@@ -301,16 +302,16 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         }
 
 
-            console.log("Запрос dailyPlanXML");
+            log.info("Запрос dailyPlanXML");
             client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
                 if (!err) {
-                    console.log('DONE getDailyPlan');
-                    console.log(result.return, "SOAP 299");
+                    log.info('DONE getDailyPlan');
+                    log.info(result.return, "SOAP 299");
 
                     // парсинг ответа соапа из xml в json
                     parseXML(result.return, function (err, res) {
                         if (res.MESSAGE.PLANS == null) {
-                            console.log('NO PLANS!');
+                            log.info('NO PLANS!');
                             callback({status: 'no plan'});
                             return;
                         }
@@ -320,10 +321,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                         data.iLength = itineraries.length;
 
-                        //console.log("Решения на сейчас", itineraries[0].$);
+                        //log.info("Решения на сейчас", itineraries[0].$);
 
 
-                        //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
+                        //log.info("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
                         // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
                         // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
                         if (!config.loadOnlyItineraryNew) data.iLength *= 2;
@@ -339,8 +340,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                     });
                 } else {
-                    console.log('getDailyPlan ERROR');
-                    console.log(err.body, "SOAP 335");
+                    log.info('getDailyPlan ERROR');
+                    log.info(err.body, "SOAP 335");
                 }
             });
 
@@ -361,7 +362,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
         })}, 15);
     }
 
-    //console.log("Очень очень Очень  Важные данные", id, version, me.login, data, date );
+    //log.info("Очень очень Очень  Важные данные", id, version, me.login, data, date );
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
         itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
     });
@@ -370,7 +371,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, d
 // колбек срабатывающий при получении развернутого решения
 function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
     if (!err) {
-        //console.log(result.return, "soap.js:266")
+        //log.info(result.return, "soap.js:266")
         parseXML(result.return, function (err, res) {
             data.iLength--;
 
@@ -381,14 +382,14 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
                 // оставшихся необходмыз запросов и если всё уже запрошенно, а решений всё нет и не было,
                 // значит планов нет вообще
                 if (data.iLength == 0 && !data.havePlan) {
-                    console.log('NO PLANS!!!!!!!!!');
+                    log.info('NO PLANS!!!!!!!!!');
                     callback({status: 'no plan'});
                 }
                 return;
             }
 
             data.havePlan = true;
-            console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
+            log.info('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
             var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
 
 
@@ -396,14 +397,14 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             data[nIndx].sended = false;
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
-            console.log("Запросы СОАП 398");
+            log.info("Запросы СОАП 398");
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback, res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.SHIFT_NAME);
             me.getAdditionalData(client, data, itIsToday, nIndx, callback, date);
 
         });
     } else {
-        console.log('getItinerary ERROR');
-        console.log(err.body, "SOAP 396");
+        log.info('getItinerary ERROR');
+        log.info(err.body, "SOAP 396");
     }
 }
 
@@ -434,7 +435,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
 
             //TODO ловля ошибочных заданий, если настроится 1сб можно убивать
             if((routes[i].SECTION[j].$).START_TIME == '') {
-                console.log("BIG MISTAKE!!!!!!!", (routes[i].SECTION[j].$));
+                log.info("BIG MISTAKE!!!!!!!", (routes[i].SECTION[j].$));
 
             }
 
@@ -452,7 +453,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     log.l(_xml.additionalDataXML(data[nIndx].ID));
-    //console.log("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
+    //log.info("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
             parseXML(result.return, function (err, res) {
@@ -462,19 +463,19 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
                     reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
                    // shift_name = res.MESSAGE.SHIFT_NAME;
-                //console.log("полученные сенсоры",sensors, "SOAP345");
+                //log.info("полученные сенсоры",sensors, "SOAP345");
 
 
 
 
                 if (waypoints == undefined) return;
-                console.log('drivers', drivers.length);
+                log.info('drivers', drivers.length);
                 log.l('waypoints.length = ' + waypoints.length);
-                //console.log(waypoints, "soap.js:344");
+                //log.info(waypoints, "soap.js:344");
 
                 data[nIndx].transports = [];
                 if (transports === undefined) {
-                    console.log('transports === undefined');
+                    log.info('transports === undefined');
                 } else {
                     for (var i = 0; i < transports.length; i++) {
                         data[nIndx].transports.push(transports[i].$);
@@ -483,7 +484,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
                 data[nIndx].drivers = [];
                 if (drivers === undefined) {
-                    console.log('drivers === undefined');
+                    log.info('drivers === undefined');
                 } else {
                     for (i = 0; i < drivers.length; i++) {
                         data[nIndx].drivers.push(drivers[i].$);
@@ -497,7 +498,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
                 data[nIndx].reasons = [];
                 if (reasons== undefined){
-                    console.log("No reasons");
+                    log.info("No reasons");
                     callback({status: 'no reasons'});
                 } else {
                     for(i = 0; i<reasons.length; i++){
@@ -533,7 +534,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
                 data[nIndx].sensors = [];
                 if (sensors == undefined) {
-                    console.log('NO SENSORS!');
+                    log.info('NO SENSORS!');
                     callback({status: 'no sensors'});
                 }
 
@@ -552,12 +553,12 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
-                console.log(data.closedRoutesFrom1C, "data SOAP 429");
+                log.info(data.closedRoutesFrom1C, "data SOAP 429");
                 checkBeforeSend(data, callback);
             });
 
         } else {
-            console.log("ERROR SOAP 543", err);
+            log.info("ERROR SOAP 543", err);
             log.l(err.body);
         }
     });
@@ -565,7 +566,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
 // получение списка причин отмен
 //SoapManager.prototype.getReasonList = function (callback) {
-//    console.log('getReasonList');
+//    log.info('getReasonList');
 //    var config = {
 //        login: 'ids.dsp',
 //        pass: 'dspids'
@@ -576,12 +577,12 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 //        if (err) throw err;
 //
 //        client.setSecurity(new soap.BasicAuthSecurity(config.login, config.pass));
-//        console.log(client.describe());
+//        log.info(client.describe());
 //        client.get_reason_list(function (err, result) {
 //            if (!err) {
 //                callback(result.return.reason);
 //            } else {
-//                console.log('err', err.body);
+//                log.info('err', err.body);
 //                callback({error: 'SOAP error'});
 //            }
 //        });
@@ -595,10 +596,10 @@ SoapManager.prototype.getAllSensors = function (callback) {
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        console.log('getAllSensors', me.login);
+        log.info('getAllSensors', me.login);
         client.runAsUser({'input_data': _xml.allSensorsXML(), 'user': me.login}, function (err, result) {
             if (!err) {
-                console.log('getAllSensors OK');
+                log.info('getAllSensors OK');
                 parseXML(result.return, function (err, res) {
                     res = res.MESSAGE.SENSORS[0].SENSOR;
                     var sensors = [];
@@ -609,8 +610,8 @@ SoapManager.prototype.getAllSensors = function (callback) {
                     callback(sensors);
                 });
             } else {
-                console.log('getAllSensors ERROR');
-                console.log(err.body, "SOAP 595");
+                log.info('getAllSensors ERROR');
+                log.info(err.body, "SOAP 595");
             }
         });
     });
@@ -624,7 +625,7 @@ SoapManager.prototype.getPlanByDate = function (timestamp, callback) {
         if (err) throw err;
 
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        console.log('getPlansByTime', me.login);
+        log.info('getPlansByTime', me.login);
 
         // timestamp *= 1000;
         me.getDailyPlan(callback, timestamp);
@@ -633,7 +634,7 @@ SoapManager.prototype.getPlanByDate = function (timestamp, callback) {
 
 // сохранение маршрута в 1С
 SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
-    console.log('saveRoutesTo1C');
+    log.info('saveRoutesTo1C');
     var counter = 0,
         me = this,
         // получение новой геометрии маршрута
@@ -644,7 +645,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
                     routes[ii].counter++;
                     if (routes[ii].counter == routes[ii].points.length) {
                         counter++;
-                        console.log('route ready', ii);
+                        log.info('route ready', ii);
                         if (routes.length == counter) {
                             callback();
                         }
@@ -661,13 +662,13 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
 
                 client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
                     if (!err) {
-                        console.log('saveRoutesTo1C OK');
+                        log.info('saveRoutesTo1C OK');
                         log.toFLog('afterSave.js', result);
                         callback({result: result});
                     } else {
-                        console.log('saveRoutesTo1C ERROR');
+                        log.info('saveRoutesTo1C ERROR');
                         log.toFLog('afterSaveError.js', err);
-                        console.log(err.body, "SOAP 652");
+                        log.info(err.body, "SOAP 652");
                         callback({error: err});
                     }
                 });
@@ -703,18 +704,18 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     //pointId = '2dddb7d0-c943-11e2-a05b-52540027e502';
     //user = 'IDS.a.kravchenko';
 
-    console.log('user', user, 'pointId', pointId);
-    console.log('userIds[user]', userIds[user]);
+    log.info('user', user, 'pointId', pointId);
+    log.info('userIds[user]', userIds[user]);
 
     if (!userIds[user]) {
-        console.log('openPointWindow >> can not find user');
+        log.info('openPointWindow >> can not find user');
         return;
     }
 
     soap.createClient('http://SNG_Trans:J7sD3h9d0@api.alaska.com.ua:32080/1c/ws/SNGTrans.1cws?wsdl', function (err, client) {
         if (err) {
-            console.log('user', user, 'pointId', pointId);
-            console.log('err.body >> ', err.body, "SOAP 698");
+            log.info('user', user, 'pointId', pointId);
+            log.info('err.body >> ', err.body, "SOAP 698");
             return;
         }
         client.setSecurity(new soap.BasicAuthSecurity('SNG_Trans', 'J7sD3h9d0'));
@@ -733,8 +734,8 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
             ElementId: pointId
         },
             function (err, result) {
-            if (err) console.log(err.body, "SOAP 717");
-            if (result) console.log(result, "SOAP 718");
+            if (err) log.info(err.body, "SOAP 717");
+            if (result) log.info(result, "SOAP 718");
         });
     });
 };
@@ -743,7 +744,7 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
 SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     log.toFLog('origWaypointBeforeSave.json', waypoint);
 
-    //console.log("!!!!!!!!!!! update Wayoint", waypoint.waypoint, "confirm", waypoint.confirm);
+    //log.info("!!!!!!!!!!! update Wayoint", waypoint.waypoint, "confirm", waypoint.confirm);
         me = this;
 
     var resXml;
@@ -755,7 +756,7 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
     // сохранение в 1С от имени авторизированного пользователя
     saveTo1C = function (resXml) {
 
-        //console.log("Saveto1C me", me)
+        //log.info("Saveto1C me", me)
             soap.createClient(me.getFullUrl(), function (err, client) {
                 if (err) throw err;
 
@@ -767,14 +768,14 @@ SoapManager.prototype.updateWaypointCoordTo1C = function (waypoint, callback) {
 
                 client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
                     if (!err) {
-                        console.log('updateWaypointCoordTo1C OK');
+                        log.info('updateWaypointCoordTo1C OK');
                         log.toFLog('afterSave.js', result);
                         callback({result: result});
                     } else {
-                        console.log("Res.XML = ", resXml);
-                        console.log('updateWaypointCoordTo1C ERROR');
+                        log.info("Res.XML = ", resXml);
+                        log.info('updateWaypointCoordTo1C ERROR');
                         log.toFLog('afterSaveError.js', err);
-                        console.log(err.body, "SOAP 758");
+                        log.info(err.body, "SOAP 758");
                         callback({error: err});
                     }
                 });
@@ -793,24 +794,24 @@ SoapManager.prototype.closeDay = function (closeDayData, callback) {
     var url  = 'https://' + this.admin_login + ':' + this.password + this.url;
     // сохранение в 1С от имени авторизированного пользователя
     var saveTo1C = function (resXml) {
-        console.log("Saveto1C me", me);
+        log.info("Saveto1C me", me);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
-            console.log('CLIENT', client);
+            log.info('CLIENT', client);
             // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
             client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
             //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
 
             client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
                 if (!err) {
-                    console.log('Close Route to 1C ok');
+                    log.info('Close Route to 1C ok');
                     log.toFLog('afterSave.js', result);
                     callback({result: result});
                 } else {
-                    console.log("Res.XML = ", resXml);
-                    console.log('Close Route to 1C ERROR');
+                    log.info("Res.XML = ", resXml);
+                    log.info('Close Route to 1C ERROR');
                     log.toFLog('afterSaveError.js', err);
-                    console.log(err.body, "SOAP 794");
+                    log.info(err.body, "SOAP 794");
                     callback({error: err});
                 }
             });
@@ -826,10 +827,10 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
     var url  = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
     // сохранение в 1С от имени авторизированного пользователя
     var receiveConfig = function (company, callback) {
-        //console.log("Try to recieve config", me.login, configData);
+        //log.info("Try to recieve config", me.login, configData);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
-            //console.log('CLIENT', client);
+            //log.info('CLIENT', client);
             // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
             client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
             //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
@@ -837,15 +838,15 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
             client.getConfig({user: me.login}, function (err, result) {
                 if (!err) {
 
-                    console.log('GET CONFIG OK for', me.login);
+                    log.info('GET CONFIG OK for', me.login);
                     log.toFLog('config is', result);
-                    //console.log('config is', result);
+                    //log.info('config is', result);
                     callback(company, result);
                 } else {
-                    console.log('GET CONFIG  ERROR');
-                    console.log('result', err);
+                    log.info('GET CONFIG  ERROR');
+                    log.info('result', err);
                     log.toFLog('result', err);
-                    console.log(err.body, "SOAP 828");
+                    log.info(err.body, "SOAP 828");
                     callback({error: err});
                 }
             });
@@ -871,28 +872,28 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
     var url = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
     // сохранение в 1С от имени авторизированного пользователя
     var receivePushes = function (idArr, time, company, callback, tempCompany) {
-        //console.log("Try to recieve pushes", me.login);
+        //log.info("Try to recieve pushes", me.login);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
-            //console.log('CLIENT', client);
+            //log.info('CLIENT', client);
             // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
             client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
             //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
-            //console.log("STEP 1", idArr, getDateStrFor1C(time * 1000));
+            //log.info("STEP 1", idArr, getDateStrFor1C(time * 1000));
             client.getDriversActions({'itenId':idArr, 'datestr':getDateStrFor1C(time * 1000), 'user': me.login}, function (err, result) {
                 if (!err) {
-                    //console.log('GET PUSHES OK');
+                    //log.info('GET PUSHES OK');
                     //log.toFLog('PUSHES is', result);
-                    //console.log('!!!!!!!!PUSHES is', result);
+                    //log.info('!!!!!!!!PUSHES is', result);
                     if (tempCompany == undefined) tempCompany=company;
                     callback(tempCompany, result);
                 } else {
                     if (tempCompany == undefined) tempCompany=company;
-                    console.log('GET PUSHES  ERROR');
+                    log.info('GET PUSHES  ERROR');
                     log.toFLog('result', err);
-                    console.log('result', err, "SOAP 872");
+                    log.info('result', err, "SOAP 872");
 
-                    //console.log(err.body);
+                    //log.info(err.body);
                     callback(tempCompany, {error: err});
                 }
             });
@@ -912,7 +913,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var date =  new Date();
     var newDay = date.getDate();
     var inTime = (oldDay==newDay);
-    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
+    log.info("Old DAY = ", oldDay, "And new Day", newDay , inTime);
 
 
     var date =  Date.now();
@@ -921,15 +922,15 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
 
         // авторизация с правами соап-администратора
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        //console.log(me.login);
-        //console.log(_xml.dailyPlanXML(date));
+        //log.info(me.login);
+        //log.info(_xml.dailyPlanXML(date));
 
         // запрос в соап от имени авторизированного пользователя, но с правами администратора
         // получения списка id решений на конкретную дату
         client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
-                //console.log('Its ALL Iten for now:');
-                //console.log(result.return);
+                //log.info('Its ALL Iten for now:');
+                //log.info(result.return);
 
                 // парсинг ответа соапа из xml в json
                 parseXML(result.return, function (err, res) {
@@ -938,14 +939,14 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
 
                     // пропало утвержденное решение
                     if (res.MESSAGE.PLANS == null && inTime && existIten>0) {
-                        //console.log('Проблемма = пропало единственное утвержденное решение');
+                        //log.info('Проблемма = пропало единственное утвержденное решение');
                         callback({status: ' loose single iten'});
                         return;
                     }
 
                     // Новых решений не появилось
                     if ((res.MESSAGE.PLANS == null && inTime && existIten == 0) || res.MESSAGE.PLANS == undefined ) {
-                        //console.log('Все еще нет утвержденных решений');
+                        //log.info('Все еще нет утвержденных решений');
                         callback({status: 'still no plan'});
                         return;
                     }
@@ -956,45 +957,45 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                     data.itens=itineraries;
                     data.iLength = itineraries.length;
                     data.company = company;
-                    //console.log("Quantity of Iten is", data.iLength);
+                    //log.info("Quantity of Iten is", data.iLength);
 
 
                     // Количество решений не изменилось
                     if (data.iLength == existIten && inTime) {
-                        //console.log("Количество решений за день не изменилось");
+                        //log.info("Количество решений за день не изменилось");
                         callback({status: 'no changes'});
                         return;
                     }
 
                     // Появились утвержденные планы на новый день.
                     if(!inTime && data.iLength>0){
-                        //console.log("Появились утвержденные планы на новый день");
+                        //log.info("Появились утвержденные планы на новый день");
                         callback({status: 'begin new day', newDayIten: data});
                         return;
                     }
 
                     //Пропало одно из утвержденных решений
                     if(inTime && data.iLength<existIten){
-                        //console.log("Проблемма. Пропало одно из утвержденных решений");
+                        //log.info("Проблемма. Пропало одно из утвержденных решений");
                         callback({status: 'loose one of Iten'});
                         return;
                     }
 
                     //Появились новые решения на текущий день
                     if(inTime && data.iLength>existIten){
-                        //console.log("Появилось дополнительное утвержденное решение");
+                        //log.info("Появилось дополнительное утвержденное решение");
                         callback({status: 'exist additional Iten', addIten:data});
                         return;
                     }
 
-                    console.log("Неопознанная проблемма. Текущий день = ", inTime, "Уже получено решений", existIten, "На 1с существует решений", data.iLength);
+                    log.info("Неопознанная проблемма. Текущий день = ", inTime, "Уже получено решений", existIten, "На 1с существует решений", data.iLength);
                     callback({status: 'undefined problem', iten:data});
 
 
                 });
             } else {
-                console.log('getDailyPlan ERROR');
-                console.log(err.body, "SOAP 976");
+                log.info('getDailyPlan ERROR');
+                log.info(err.body, "SOAP 976");
             }
         });
     });
@@ -1006,7 +1007,7 @@ SoapManager.prototype.getNewDayIten = function (id, version, company, callback) 
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        console.log("Важные данные", id, version, me.login);
+        log.info("Важные данные", id, version, me.login);
         client.runAsUser({
             'input_data': _xml.itineraryXML(id, version, true),
             'user': me.login
@@ -1018,7 +1019,7 @@ SoapManager.prototype.getNewDayIten = function (id, version, company, callback) 
 
 SoapManager.prototype.getAdditionalIten = function (id, version, company, callback) {
     var me=this;
-    console.log("Важные данные", id, version, me.login );
+    log.info("Важные данные", id, version, me.login );
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
@@ -1026,7 +1027,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
             parseXML(result.return, function (err, res) {
                 //if (res.MESSAGE.PLANS == null) {
-                //    console.log('NO PLANS!');
+                //    log.info('NO PLANS!');
                 //    callback({status: 'no plan'});
                 //    return;
                 //}
@@ -1036,10 +1037,10 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
                 data.iLength = 1;
                 var itIsToday = true;
-                //console.log("Решения на сейчас", itineraries[0].$);
+                //log.info("Решения на сейчас", itineraries[0].$);
                 var date = Date.now();
 
-                //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
+                //log.info("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
                 // если грузить нужно не только новые решения (т.е. запросов будет в два раза больше,
                 // один на новый формат, один на старый) счетчик оставшихся запросов умножаем на два
                 //if (!config.loadOnlyItineraryNew) data.iLength *= 2;
@@ -1048,7 +1049,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
                 for (var i = 0; i < itineraries.length; i++) {
                     (function (ii) {
                         setTimeout(function () {
-                            console.log("Подгружаем из 1с");
+                            log.info("Подгружаем из 1с");
                             me.getItinerary(client, id, version, itIsToday, data, date, callback);
                         }, ii * 5000);
                     })(i);
@@ -1063,7 +1064,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
 
 
-            //console.log("Промежуточный результат", result.return);
+            //log.info("Промежуточный результат", result.return);
             //var itineraries = result.return.MESSAGE.PLANS[0].ITINERARY;
             //data.iLength = itineraries.length;
             //itineraryCallback(err, result, me, company, true, data, date, callback);
