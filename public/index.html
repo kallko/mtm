@@ -167,7 +167,7 @@
                     {{nowTime*1000 | date : 'H:mm:ss'}}
                 </div>
                 <div class="col-sm-3">
-                    <input  id="search-input" class="heightElement" type="text" size="15" enter-event="setTextFilter()"/>
+                    <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text"/>
                     <button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="setTextFilter()">
                         <span class="glyphicon glyphicon-search" aria-hidden="false"></span>
                     </button>

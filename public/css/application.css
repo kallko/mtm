@@ -322,6 +322,7 @@ template {
 #search-input {
     margin: 0;
     width: calc(100% - 30px);
+    /*было calc(100% - 30px) в рассчте на кнопочку с лупой*/
     padding: 0;
 }
 

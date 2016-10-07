@@ -2874,6 +2874,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.setTextFilter = function () {
             scope.filters.text = $("#search-input").val();
             updateResizeGripHeight();
+            //console.log("TextFilter ", scope.filters.text);
         };
 
         // очистить текстовый фильтр
@@ -2883,8 +2884,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateResizeGripHeight();
         };
 
+        scope.$watch('filters.text', function(newValue, oldValue){
+            //console.log("Watcher", scope.filters.text, newValue, oldValue);
+            scope.filters.text = newValue;
+        });
+
         // текстовый фильтр
         function textFilter(row) {
+            //console.log("Данные для текст фильтра",  row);
             if (scope.filters.text === "") return true;
             if (row.waypoint == undefined) return false;
             var filterLowCase = scope.filters.text.toLowerCase();
@@ -2893,7 +2900,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 || row.driver.NAME.toLowerCase().indexOf(filterLowCase) >= 0
                 || row.waypoint.ADDRESS.toLowerCase().indexOf(filterLowCase) >= 0
                 || row.waypoint.COMMENT.toLowerCase().indexOf(filterLowCase) >= 0
-                || row.NUMBER.toLowerCase().indexOf(filterLowCase) >= 0
+                || row.transport.REGISTRATION_NUMBER.toLowerCase().indexOf(filterLowCase) >= 0
                 || row.transport.NAME.toLowerCase().indexOf(filterLowCase) >= 0
                 || row.driver.PHONE.toLowerCase().indexOf(filterLowCase) >= 0
                 || row.transport.REGISTRATION_NUMBER.toLowerCase().indexOf(filterLowCase) >= 0;
