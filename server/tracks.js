@@ -29,7 +29,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
     if (loadFromCache) {
         fs.readFile('./logs/' + gid + '_' + 'track.js', 'utf8', function (err, data) {
             if (err) {
-                return log.info(err);
+                return console.log(err);
             }
 
             callback(JSON.parse(data));
@@ -37,7 +37,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
     } else {
         var url = this.createParamsStr(from, to, undef_t, undef_d, stop_s, stop_d, move_s, move_d);
         url += '&gid=' + gid;
-        log.info(url);
+        console.log(url);
 
         request({
             url: url,
@@ -65,10 +65,10 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
         started++;
         (function (ii) {
-            log.info('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
+            console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
-                //log.info('done loading part #', ii);
+                //console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
                     callback(states);
@@ -85,9 +85,9 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
 
 TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, callback) {
-    //log.info("Готовимся к запросу в треккер", gid);
+    //console.log("Готовимся к запросу в треккер", gid);
     if(states == undefined || states[0] == undefined) {
-        log.info("Бракованный стейт", states);
+        console.log("Бракованный стейт", states);
         return;
     }
 
@@ -100,7 +100,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         if (states[j].coords == undefined || states[j].coords.length <2) finished++
     }
         j=0;
-    //log.info("По gid", gid, "Нужно запросить треков", finished+1);
+    //console.log("По gid", gid, "Нужно запросить треков", finished+1);
     for (var i = states.length-1; (i >=0 && j < finished+4); i--) {
 
         if (i >= states.length-4 || (states[i].coords == undefined || states[i].coords.length <2) ) {
@@ -108,10 +108,10 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         } else {
             continue;
         }
-        //log.info("Параметры запрса" , i, j);
+        //console.log("Параметры запрса" , i, j);
         started++;
         (function (ii) {
-            //log.info('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
+            //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data, error) {
                 if (error == undefined && data[0] != undefined && typeof (data) != 'string' && states[ii] != undefined) {
                     states[ii].coords = data;
@@ -119,12 +119,12 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
                    if (states[ii] != undefined && states[ii].coords != undefined) states[ii].coords = [];
                 }
 
-                //log.info (states[ii] != undefined , states[ii]);
+                //console.log (states[ii] != undefined , states[ii]);
                 if (states[ii] != undefined && (states[ii].state =="ARRIVAL" || states[ii].state == "START") && states[ii].coords != undefined && states[ii].coords.length >2) {
-                    //log.info("Убиваем лишние координаты");
+                    //console.log("Убиваем лишние координаты");
                     states[ii].coords.splice(1, states[ii].coords.length - 2);
                 }
-                //log.info('done loading part #', ii);
+                //console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
                     callback(states, route);
@@ -146,22 +146,22 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
         counter = 0,
         reqCounter = 0,
         result = [];
-    //log.info("Таки зашли в файл трекс", data.routes.length);
+    //console.log("Таки зашли в файл трекс", data.routes.length);
     if(data != undefined && data.routes != undefined) {
         for (var i = 0; i < data.routes.length; i++) {
 
-            //log.info("Ищем треки для ", data.routes[i].driver.NAME );
+            //console.log("Ищем треки для ", data.routes[i].driver.NAME );
             for (var j = 0; j < data.sensors.length; j++) {
                 // запрашивать треки только по сенсорам прикрепленным к машинам имеющихся маршрутов
                 if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                     counter++;
                     (function (jj) {
-                        //log.info("url=", url);
+                        //console.log("url=", url);
                         // замена стандартного времени на время нужное именно для этого роута
                         var indxBegin=url.indexOf('&from=');
                         var indxEnd=url.indexOf('&to=');
                         var newUrl='';
-                        //if (data.routes[i].real_track != undefined && typeof(data.routes[i].real_track) != 'string') log.info ("Стейтов перед запросом", data.routes[i].real_track.length);
+                        //if (data.routes[i].real_track != undefined && typeof(data.routes[i].real_track) != 'string') console.log ("Стейтов перед запросом", data.routes[i].real_track.length);
                         if (data.routes[i].real_track != undefined && data.routes[i].real_track[data.routes[i].real_track.length-2] != undefined) {
                             newUrl=url.substring(0,indxBegin) + '&from=' + data.routes[i].real_track[data.routes[i].real_track.length-1].t1 + url.substring(indxEnd);
                         } else {
@@ -174,13 +174,13 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
 
                         }
                         //if (data.sensors[jj].GID == 761 || data.sensors[jj].GID =="761"){
-                        //    log.info("Newurl=", newUrl);
-                        //    log.info("   url=", url)}
+                        //    console.log("Newurl=", newUrl);
+                        //    console.log("   url=", url)}
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true
                         }, function (error, response, body) {
-                            //log.info("Ответ по треку", response.statusCode);
+                            //console.log("Ответ по треку", response.statusCode);
                             if (!error && response.statusCode === 200) {
                                 result.push({
                                     'gid': data.sensors[jj].GID,
@@ -188,34 +188,34 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
-                                    log.info('Done, first loading stops!');
+                                    console.log('Done, first loading stops!');
                                     callback(result, company);
 
                                 }
                             } else {
-                                log.info('ERROR');
+                                console.log('ERROR');
                                 result.push({
                                     'gid': data.sensors[jj].GID,
                                     'data': "error"
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
-                                    log.info('Done, second loading stops!');
+                                    console.log('Done, second loading stops!');
                                     callback(result, company);
                                 }
                             }
                         });
                     })(j);
                 } else {
-                    //log.info("Если нет датчиков, то counter = 0, а сейчас counter = ", counter);
+                    //console.log("Если нет датчиков, то counter = 0, а сейчас counter = ", counter);
                 }
             }
-        }  //log.info ("Конец запросов. Результата нет");
+        }  //console.log ("Конец запросов. Результата нет");
         //callback("error");
     } else {
-        //log.info("Нечего спрашивать?");
+        //console.log("Нечего спрашивать?");
     }
-    //log.info("Отправлено запросов ", counter, " Получено ответов", reqCounter);
+    //console.log("Отправлено запросов ", counter, " Получено ответов", reqCounter);
     // Уникальный случай, когда ни у одной из машин не было датчика
     if(counter == 0) callback("error", company);
 };
@@ -272,7 +272,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
                 data.routes[index].time_matrix_loaded = true;
                 checkBeforeSend(_data, callback);
             } else {
-                log.info('table', points.length, body, url);
+                console.log('table', points.length, body, url);
             }
         });
     })(this.routerUrl + 'table?' + loc_str);
@@ -288,7 +288,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
             if (!error && response.statusCode === 200) {
                 // если роутер не смог проложить маршрут сразу, запрашиваем треки кусками по две точки
                 if (body.route_geometry == null) {
-                    log.info('body.route_geometry == null');
+                    console.log('body.route_geometry == null');
                     data.routes[index].plan_geometry = [];
                     data.routes[index].plan_geometry_loaded = false;
                     me.getGeometryByParts(_data, nIndx, index, 0, checkBeforeSend, callback, onlyOne);
@@ -298,7 +298,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
                     checkBeforeSend(_data, callback);
                 }
             } else {
-                log.info('viaroute', points.length, body, url);
+                console.log('viaroute', points.length, body, url);
             }
         });
     })(this.routerUrl + 'viaroute?instructions=false&compression=false' + loc_str);
@@ -329,7 +329,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
         if (!error && response.statusCode === 200) {
             data.routes[index].plan_geometry.push(body.route_geometry);
             startPos++;
-            //log.info('iteration #', startPos);
+            //console.log('iteration #', startPos);
             if (points.length > startPos + 1) {
                 me.getGeometryByParts(_data, nIndx, index, startPos, checkBeforeSend, callback, onlyOne);
             } else {
@@ -337,7 +337,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
                 checkBeforeSend(_data, callback);
             }
         } else {
-            log.info('getGeometryByParts ERROR', body, error, query);
+            console.log('getGeometryByParts ERROR', body, error, query);
         }
     });
 };
@@ -347,7 +347,7 @@ TracksManager.prototype.getGeometryByParts = function (_data, nIndx, index, star
 
 // получить реальные треки и стопы по всем машинам решения за весь день указанный в переданных данных в поле server_time
 TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeSend, callback, date, itIsToday) {
-    log.info('=== getRealTracks ===');
+    console.log('=== getRealTracks ===');
     var data = _data[nIndx];
     var now = new Date(data.server_time * 1000);
     if(itIsToday){
@@ -369,7 +369,7 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
             if (data.routes[i].TRANSPORT == data.sensors[j].TRANSPORT) {
                 if (data.routes[i].haveSensor) {
                     data.routes[i].moreThanOneSensor = true;
-                    log.info('moreThanOneSensor = true');
+                    console.log('moreThanOneSensor = true');
                     break;
                 }
 
@@ -377,13 +377,13 @@ TracksManager.prototype.getTracksAndStops = function (_data, nIndx, checkBeforeS
                 data.routes[i].haveSensor = true;
 
                 (function (jj) {
-                    log.info('request for stops ', jj, url + '&gid=' + data.sensors[jj].GID);
+                    console.log('request for stops ', jj, url + '&gid=' + data.sensors[jj].GID);
                     request({
                         url: url + '&gid=' + data.sensors[jj].GID,
                         json: true
                     }, function (error, response, body) {
                         if (!error && response.statusCode === 200) {
-                            log.info('stops for sensor loaded', jj);
+                            console.log('stops for sensor loaded', jj);
                             data.sensors[jj].stops_loaded = true;
                             data.sensors[jj].real_track = body;
                             checkBeforeSend(_data, callback);
@@ -414,7 +414,7 @@ TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
 // получить от роутера время проезда между двумя точками
 TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
 
-    log.info("Запрос на время/расстояние между точками", lat1, lon1, lat2, lon2);
+    console.log("Запрос на время/расстояние между точками", lat1, lon1, lat2, lon2);
     request({
         url: this.routerUrl + 'table?'
         + '&loc=' + lat1
@@ -453,14 +453,14 @@ TracksManager.prototype.getRouteBetweenPoints = function (points, callback) {
 TracksManager.prototype.getStops = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d);
-   // log.info("tracks 343", url);
+   // console.log("tracks 343", url);
 
     request({
         url: url + '&gid=' + gid,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //log.info("tracks 349 body", body, "END track.js 349");
+            //console.log("tracks 349 body", body, "END track.js 349");
             callback(body);
         }
     });
@@ -471,7 +471,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    //log.info(url, "Track 401");
+    //console.log(url, "Track 401");
 
 
     request({
@@ -479,10 +479,10 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //log.info("Track loaded");
+            //console.log("Track loaded");
             callback(body);
         } else {
-            log.info(" Ошибка !!!!!", error);
+            console.log(" Ошибка !!!!!", error);
             callback(body,error);
         }
     });
@@ -493,7 +493,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 //
 //    fs.readFile('./logs/' + config.soap.defaultClientLogin + '_BigSolution.json', 'utf8', function (err, data) {
 //        if (err) {
-//            return log.info(err);
+//            return console.log(err);
 //        }
 //
 //        data = JSON.parse(data);
@@ -510,7 +510,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 //            else {
 //                test[key].counter++;
 //                counter++;
-//                //log.info('REPEAT!', counter);
+//                //console.log('REPEAT!', counter);
 //                data.splice(i, 1);
 //                i--;
 //            }
@@ -519,12 +519,12 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 //        var query;
 //        var func = function (ii, _query) {
 //            setTimeout(function () {
-//                //log.info(_query);
+//                //console.log(_query);
 //                request({
 //                    url: _query,
 //                    json: true
 //                }, function (error, response, body) {
-//                    //log.info(body, ii);
+//                    //console.log(body, ii);
 //                });
 //
 //            }, (ii) * 4 );
@@ -560,24 +560,24 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
 //        func(i, query);
 //
 //
-//        log.info(data.length);
+//        console.log(data.length);
 //    });
 //
 //};
 
 // получить матрицу времен проездов и расстояний по готовой строке координат
 TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback) {
-    //log.info(this.routerUrl + 'table?' + pointsStr, "Пытаемся получить предсказание Tracks 488");
+    //console.log(this.routerUrl + 'table?' + pointsStr, "Пытаемся получить предсказание Tracks 488");
     request({
         url: this.routerUrl + 'table?' + pointsStr,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //log.info("Данные получены");
+            //console.log("Данные получены");
             callback(body, pointsStr);
         } else {
 
-            log.info(body, "ERROR TRACKS 495");
+            console.log(body, "ERROR TRACKS 495");
         }
     });
 };
@@ -602,8 +602,8 @@ TracksManager.prototype.getStateDataByPeriod = function () {
         strRes = '';
 
     while (tmpTime < endDate) {
-        log.info(tmpTime);
-        //log.info('day ', new Date(tmpTime * 1000));
+        console.log(tmpTime);
+        //console.log('day ', new Date(tmpTime * 1000));
         for (var j = 0; j < gids.length; j++) {
             requests.push([gids[j], tmpTime]);
         }
@@ -619,10 +619,10 @@ TracksManager.prototype.getStateDataByPeriod = function () {
             req = requests.pop(),
             gid = req[0], time = req[1];
 
-        log.info('GO >>', new Date(time * 1000), gid);
+        console.log('GO >>', new Date(time * 1000), gid);
         me.getStops(gid, time, time + step, function (data) {
 
-            log.info('READY >>', new Date(time * 1000), gid);
+            console.log('READY >>', new Date(time * 1000), gid);
             reqCounter++;
 
             result[gid] = result[gid] || {};
@@ -660,7 +660,7 @@ TracksManager.prototype.getStateDataByPeriod = function () {
             }
 
             if (reqCounter === gids.length * days) {
-                log.info('Done!');
+                console.log('Done!');
                 log.toFLog('jsonStates.json', result);
 
                 for (var k in result) {
@@ -682,7 +682,7 @@ TracksManager.prototype.getStateDataByPeriod = function () {
                     }
                 }
 
-                //log.info(strRes);
+                //console.log(strRes);
                 log.toFLog('jsonStates.csv', strRes, false);
             }
 

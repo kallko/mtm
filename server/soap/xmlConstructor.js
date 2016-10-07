@@ -132,7 +132,7 @@ XMLConstructor.prototype.allSensorsXML = function () {
 XMLConstructor.prototype.routesXML = function (routes, login) {
     if (routes.length == 0) return;
 
-    log.info(login);
+    console.log(login);
     var str = '',
         point,
         itineraries = {},
@@ -226,7 +226,7 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
 
 // xml для записи в 1С новых координат точки
 XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
-    //log.info("Constructor in process, and waypoint is", waypoint);
+    //console.log("Constructor in process, and waypoint is", waypoint);
     var str = '';
     str += this.xml.begin;
     str += '<WAYPOINTS> <WAYPOINT ACTION="AUTO" ';
@@ -236,7 +236,7 @@ XMLConstructor.prototype.waypointNewCoordXML = function (waypoint, login) {
     str += 'CONFIRMBYGPS="'+waypoint.confirm + '" ';
     str += ' /> </WAYPOINTS>'
     str += this.xml.end;
-    log.info("XML Constructor res=", str);
+    console.log("XML Constructor res=", str);
     return str;
 };
 

@@ -572,7 +572,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     .on('mouseover', function(event){
                         rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
                         var source = event.target.source;
-                        console.log(source);
+                        //console.log(source);
                         scope.drawConnectsActivePoint(source.stopState, source.NUMBER, source.TASK_NUMBER);
                     });
 
