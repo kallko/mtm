@@ -3131,9 +3131,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (point.stopState) {
                         point.durationFact = point.stopState.t2 - point.stopState.t1;
                         point.arrivalTimeFact = point.stopState.t1;
+                        point.id = point.stopState.id;
                     }else{
                         point.arrivalTimeFact = point.real_arrival_time || 0;
                         point.durationFact = 0;
+                        point.id = 0;
                     }
 
                     //console.log("Point", point);
@@ -3215,7 +3217,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     }
                 }else{
-
+                    console.log("CLOSEDAY ERR", res.data.error);
                     rootScope.$emit('showNotification', {text: 'Произошла ошибка при закрытии дня', duration:3000});
                 }
             }

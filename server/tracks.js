@@ -26,6 +26,7 @@ function TracksManager(aggregatorUrl, routerUrl, login, password) {
 TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
                                              stop_s, stop_d, move_s, move_d, callback) {
     // загрузка треков из кеша в случае наличия флага и самого кеша (использовалось для отладки)
+    //console.log (loadFromCache, "Пришел запрос", gid, from, to);
     if (loadFromCache) {
         fs.readFile('./logs/' + gid + '_' + 'track.js', 'utf8', function (err, data) {
             if (err) {
@@ -35,17 +36,18 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
             callback(JSON.parse(data));
         });
     } else {
+        //console.log( "Запрос на частичные треки пришел");
         var url = this.createParamsStr(from, to, undef_t, undef_d, stop_s, stop_d, move_s, move_d);
         url += '&gid=' + gid;
-        console.log(url);
+        //console.log( "NEW URL", url);
 
         request({
             url: url,
             json: true
         }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
-                log.toFLog(gid + '_' + 'track.js', body);
-                callback(body);
+                //log.toFLog(gid + '_' + 'track.js', body);
+                callback(body, gid);
             }
         });
     }
@@ -71,14 +73,14 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
                 //console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
-                    callback(states);
+                    callback(states, gid);
                 }
             });
         })(i);
     }
 
     if (started == 0) {
-        callback(states);
+        callback(states, gid);
     }
 
 };

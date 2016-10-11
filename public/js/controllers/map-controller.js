@@ -2241,7 +2241,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             globalMarkers = globalMarkers.concat(markersArr);
             //console.log(globalMarkers.length);
             for (var i=0; i< globalMarkers.length; i++){
-                if (globalMarkers[i].source && globalMarkers[i].source.waypoint && globalMarkers[i].source.waypoint.TYPE) console.log ("globalMarkers[i].source.waypoint.TYPE", globalMarkers[i].source.waypoint.TYPE)
+             //   if (globalMarkers[i].source && globalMarkers[i].source.waypoint && globalMarkers[i].source.waypoint.TYPE) console.log ("globalMarkers[i].source.waypoint.TYPE", globalMarkers[i].source.waypoint.TYPE)
                 if (globalMarkers[i].source != undefined && (globalMarkers[i].source.waypoint == undefined || globalMarkers[i].source.waypoint.TYPE == "WAREHOUSE" || globalMarkers[i].source.waypoint.TYPE == "PARKING")){
                     globalMarkers.splice(i,1);
                     i--;
@@ -2274,9 +2274,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     ]),
                 target = map.unproject(tmp, zoom);
 
-            console.log(zoom, offset, tmp, target);
+            //console.log(zoom, offset, tmp, target);
             setMapCenter(target.lat, target.lng, newZoom);
-            console.log("Zoom3", map.getZoom());
+            //console.log("Zoom3", map.getZoom());
         }
 
     }]);

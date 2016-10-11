@@ -142,18 +142,85 @@ router.route('/getoldroute')
         }
     });
 
+router.route('/updatetrack')
+    .post (function(req, res){
+    try {
+        console.log ("Получил запрос на поиск", req.body.data);
 
+        var key = ""+req.session.login;
+        var currentCompany = companyLogins[key];
+        var result = [];
+        var data = req.body.data;
+        var t=data.length;
+        var tt=0;
+        for (var i=0; i<data.length; i++){
+
+            tracksManager.getTrack(
+                data[i].gid,
+                data[i].lastState.t1,
+                parseInt(Date.now()/1000), "", "", "", "", "", "", function (newData, newGid) {
+                    newData.length=newData.length-1;
+
+                    tracksManager.getTrackByStates(newData, newGid, false, function(data, sNewGid){
+                        tt++;
+                       console.log ("NEWNEWNEW DATA", t, " ", tt);
+                        result.push({gid:sNewGid, state: data});
+                        if (t==tt) {
+                            console.log ("Своевременные данные получены, отправляем их на клиент");
+                            res.status(200).json(result);
+                        }
+                    });
+                    //console.log(newGid, "NEW DATA", newData);
+
+        })
+    }
+
+
+
+
+
+
+        //todo Тестовый блок асинхронности
+        //    async.parallel([
+        //         function(callback){log.info("First");
+        //
+        //            var soapManager = new soap(req.session.login);
+        //            soapManager.getNewConfig(req.session.login, function (company, data) {
+        //                var settings = JSON.parse(data.return);
+        //                log.info("Recieve first settings", settings);
+        //                callback (null, settings)
+        //
+        //            })
+        //        },
+        //         function(callback){log.info("Second");
+        //
+        //            var soapManager = new soap(req.session.login);
+        //            soapManager.getNewConfig(req.session.login, function (company, data) {
+        //                var settings = JSON.parse(data.return);
+        //                log.info("Recieve second settings", settings);
+        //                callback(null, settings)
+        //            })}
+        //],
+        //        function(err, results) {log.info("Third", results)});
+
+    } catch (e) {
+        console.info( "Ошибка "+ e + e.stack);
+    }
+});
 
 
 router.route('/nodeserch')
     .post(function(req, res){
         try {
         log.info("Получил запрос на поиск", req.body.data);
-        log.toFLog('logging.txt', 'TEST 29.08');
+
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         var input = req.body.data;
         var result = serchInCache(input, currentCompany);
+
+
+
 
 
         //todo Тестовый блок асинхронности

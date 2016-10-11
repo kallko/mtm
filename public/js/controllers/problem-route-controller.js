@@ -30,6 +30,32 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     if (data.err != undefined && data.err.length >0) {
                         alert("Произошел сбой связи. Перезайдите в АРМ, пожалуйста");
                     }
+
+                    //todo запрос на обнговление трека
+
+                    if (rootScope.data.routes != undefined && rootScope.data.routes.length>0){
+                        var obj =[];
+                        for (var i=0; i< rootScope.data.routes.length; i++){
+                            if (rootScope.data.routes[i].real_track != undefined
+                            && rootScope.data.routes[i].real_track.length>0
+                            && rootScope.data.routes[i].transport.gid != undefined) {
+                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: rootScope.data.routes[i].real_track[rootScope.data.routes[i].real_track.length-1]}
+                                obj.push(res);
+                            }
+                        }
+
+                        http.post ('./updatetrack', {data: obj})
+                            .success(function (data) {
+                                console.log("UpdateTrack", data);
+                                for (var j=0; j<data.length; j++){
+                                    console.log("Size of states ", data[j].state.length);
+                                }
+                            })
+                            .error (function (data){
+                            console.log("Ошибка", data);
+                        })
+                    }
+
                     //rootScope.$emit('holestatistic', rootScope.data.statistic);
                     //console.log(rootScope.data.server_time, "Статистика такая стала", rootScope.data.statistic);
                 }).error(function () {
@@ -118,7 +144,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             //console.log("Отправляем данные на клиент", data, data.routes[0].points.length, data.routes[1].points.length, data.routes[2].points.length);
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.reasons=data.reasons;
-                            console.log("причины отказа", data.reasons);
+                            //console.log("причины отказа", data.reasons);
                             rootScope.$emit('receiveproblem', rootScope.tempDecision);
 
                             if (rootScope.tempDecision.statistic != undefined) rootScope.$emit('holestatistic', rootScope.tempDecision.statistic);
