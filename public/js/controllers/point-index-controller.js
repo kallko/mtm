@@ -3043,7 +3043,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     transport: routeI.TRANSPORT,
                     itenereryID: routeI.itineraryID,
                     number: routeI.NUMBER,
-                    gid: routeI.transport.gid,
+                    gid: routeI.transport.gid || -1,
                     uniqueId: routeI.uniqueId,
                     startTimePlan: strToTstamp(routeI.START_TIME),
                     endTimePlan: strToTstamp(routeI.END_TIME),
