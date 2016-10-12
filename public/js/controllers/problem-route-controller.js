@@ -11,7 +11,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         interval(confirmOnline, 60 * 1000);
 
         function confirmOnline() {
-            console.log("confirmOnline in process");
+            console.log("confirmOnline in process", rootScope.settings, rootScope.data.server_time);
             var sync=[];
             if (rootScope.data && rootScope.data.routes && rootScope.data.currentDay == true) {
                 for (var i=0; i<rootScope.data.routes.length; i++){
@@ -33,7 +33,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                     //todo запрос на обнговление трека
 
-                    if (rootScope.data.routes != undefined && rootScope.data.routes.length>0){
+                    if (rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false){
                         var obj =[];
                         for (var i=0; i< rootScope.data.routes.length; i++){
                             if (rootScope.data.routes[i].real_track != undefined

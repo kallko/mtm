@@ -149,7 +149,7 @@ function checkBeforeSend(_data, callback) {
     var allData = JSON.parse(JSON.stringify(data[0])),
         gIndex = 0;
     if(data.closedRoutesFrom1C && !allData.closedRoutesFrom1C){
-        console.log(data.closedRoutesFrom1C, "SOAP 148");
+        //console.log(data.closedRoutesFrom1C, "SOAP 148");
         try{
             allData.closedRoutesFrom1C = JSON.parse(data.closedRoutesFrom1C);
         }catch(e){
@@ -167,7 +167,7 @@ function checkBeforeSend(_data, callback) {
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
 
 
-    console.log("А теперь пора!".green);
+    console.log("А теперь пора!");
 
     for (i = 1; i < data.length; i++) {
         allData.DISTANCE = parseInt(allData.DISTANCE) + parseInt(data[i].DISTANCE);
@@ -287,7 +287,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                 try{
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
-                                    console.log(data.closedRoutesFrom1C, "Soap 290")
+                                    //console.log(data.closedRoutesFrom1C, "Soap 290");
                                     log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
                                 }catch(e){
                                     console.log(e, "SOAP 285");
@@ -553,7 +553,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 tracksManager.getTracksAndStops(data, nIndx, checkBeforeSend, callback, date, itIsToday);
 
                 // проверка данных на готовность для отправки клиенту
-                console.log(data.closedRoutesFrom1C, "data SOAP 429");
+                //console.log(data.closedRoutesFrom1C, "data SOAP 429");
                 checkBeforeSend(data, callback);
             });
 
@@ -882,9 +882,9 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
             //console.log("STEP 1", idArr, getDateStrFor1C(time * 1000));
             client.getDriversActions({'itenId':idArr, 'datestr':getDateStrFor1C(time * 1000), 'user': me.login}, function (err, result) {
                 if (!err) {
-                    //console.log('GET PUSHES OK');
-                    //log.toFLog('PUSHES is', result);
-                    //console.log('!!!!!!!!PUSHES is', result);
+                    console.log('GET PUSHES OK');
+                    log.toFLog('PUSHES is', result);
+                    console.log('!!!!!!!!PUSHES is', result);
                     if (tempCompany == undefined) tempCompany=company;
                     callback(tempCompany, result);
                 } else {
