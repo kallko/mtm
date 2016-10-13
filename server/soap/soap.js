@@ -882,9 +882,9 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
             //console.log("STEP 1", idArr, getDateStrFor1C(time * 1000));
             client.getDriversActions({'itenId':idArr, 'datestr':getDateStrFor1C(time * 1000), 'user': me.login}, function (err, result) {
                 if (!err) {
-                    console.log('GET PUSHES OK');
+                    //console.log('GET PUSHES OK');
                     log.toFLog('PUSHES is', result);
-                    console.log('!!!!!!!!PUSHES is', result);
+                    console.log('!!!!!!!!PUSHES is', JSON.parse(result.return).length);
                     if (tempCompany == undefined) tempCompany=company;
                     callback(tempCompany, result);
                 } else {

@@ -223,6 +223,32 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
 
+    };
+
+
+    scope.saveData = function () {
+        console.log("begin");
+        http.get('./saveData')
+            .success(function (data){
+                console.log("Success", data);
+
+            });
+
+
+
+    };
+
+
+    scope.loadData = function () {
+        //console.log("begin");
+        http.get('./loadData')
+            .success(function (data){
+                console.log("Success", data);
+
+            });
+
+
+
     }
 
 }]);

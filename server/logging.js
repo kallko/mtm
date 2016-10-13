@@ -34,24 +34,38 @@ Log.prototype.l = function (obj) {
 Log.prototype.info = function () {
     //console.log("Пришел ли 2 параметр", obj1==null);
     var me = this;
-    var result='';
+    var result ="";
+    var preString;
     for (var i=0; i<arguments.length; i++){
-        //console.log(typeof (arguments[i]));
-        if (arguments[i] != null && typeof (arguments[i]) == 'object') {
-            arguments[i]=JSON.stringify(arguments[i]);
-            arguments[i]=arguments[i].substring(1, arguments[i].length-2);
-
-        } else {
-            if (typeof (arguments[i]) == 'string' || typeof (arguments[i]) == 'number') {
-
-            } else {
-                arguments[i] ='undefined';
-            }
-
+        if (arguments[i] == undefined) {
+            preString = "undefined";
+            result+= preString+" ";
+            continue;
         }
-        result+=arguments[i] + " ";
+        if (typeof (arguments[i]) == 'number') {
+            preString = ""+ arguments[i];
+            result+= preString+" ";
+            continue;
+        }
+        if (arguments[i] != null ) {
+            preString=JSON.stringify(arguments[i]);
+            if (preString == 'true' || preString == 'false') {
+                result+= preString+" ";
+                continue;}
+            //console.log("argument ", preString);
+            if (preString.length>1) {
+
+                preString = preString.substring(1, preString.length-1);
+
+            }
+        } else {
+            preString =''};
+        //console.log("result ", preString);
+        result+= preString+" ";
     }
-    console.log(result);
+
+
+
 
     var today = new Date().getDate();
     if (today != lastUpdate) {
@@ -90,11 +104,11 @@ Log.prototype.info = function () {
     //obj = obj7 != undefined ? obj+" " +obj7 :obj;
     //obj = obj8 != undefined ? obj+" " +obj8 :obj;
     //obj = obj9 != undefined ? obj+" " +obj9 :obj;
-    //
-    //console.log(obj);
-    var me = this;
-    var name ="log_" + new Date().getDate()+"_" + new Date().getMonth() + "_" + new Date().getFullYear();
 
+    //console.log(obj);
+
+    var name ="log_" + new Date().getDate()+"_" + new Date().getMonth() + "_" + new Date().getFullYear();
+    console.log(result);
     fs.appendFile(me.folder + '/' + name, '\n' + result, function(err){
         if (err) console.log("Какая-та хрень, не могу файл записать. Наверное, место на диске кончилось", err);
     })

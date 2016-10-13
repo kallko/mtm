@@ -107,6 +107,42 @@ router.route('/currentsrvertime')
     });
 
 
+router.route('/saveData')
+    .get(function(req, res){
+        log.info("Start data saving");
+        var data = JSON.stringify(cashedDataArr);
+
+        try {
+            fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
+                if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);});
+
+            res.status(200).json({mes: "complete"});
+        } catch (e) {
+            console.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+router.route('/loadData')
+    .get(function(req, res){
+        try {
+        log.info("Start data loading");
+            var oldJson;
+        fs.readFile('./logs' + '/' +'savedData.txt', 'utf8', function (err, data) {
+            oldJson = JSON.parse(data);
+            console.log("Error in load", err);
+            cashedDataArr = oldJson;
+            log.info( "Type of Data", typeof (oldJson));
+
+        });
+
+
+            res.status(200).json({msg: 'complete'});
+        } catch (e) {
+            console.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
 // запуск монитора диспетчера в демо-режиме
 //router.route('/demo')
 //    .get(function (req, res) {
@@ -145,7 +181,7 @@ router.route('/getoldroute')
 router.route('/updatetrack')
     .post (function(req, res){
     try {
-        console.log ("Получил запрос на поиск", req.body.data);
+        log.info ("Получил запрос на поиск", req.body.data);
 
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
@@ -163,14 +199,14 @@ router.route('/updatetrack')
 
                     tracksManager.getTrackByStates(newData, newGid, false, function(data, sNewGid){
                         tt++;
-                       console.log ("NEWNEWNEW DATA", t, " ", tt);
+                       log.info ("NEWNEWNEW DATA", t, " ", tt);
                         result.push({gid:sNewGid, state: data});
                         if (t==tt) {
-                            console.log ("Своевременные данные получены, отправляем их на клиент");
+                            log.info ("Своевременные данные получены, отправляем их на клиент");
                             res.status(200).json(result);
                         }
                     });
-                    //console.log(newGid, "NEW DATA", newData);
+                    //log.info(newGid, "NEW DATA", newData);
 
         })
     }
@@ -514,7 +550,7 @@ router.route('/dailydata')
 
 
                     if (data.routes !=undefined) {
-                        for (var i = 0; i < data.routes.length; i++) {
+                        for ( i = 0; i < data.routes.length; i++) {
                             if (!data.routes[i]['uniqueID']) {
                                 data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 for (var j = 0; j < data.routes[i].points.length; j++) {
@@ -552,17 +588,21 @@ router.route('/dailydata')
                         var iten = cashedDataArr[currentCompany].idArr[t];
                         log.info("Request for Itin", iten);
                         soapManager.getPushes(iten, parseInt(Date.now() / 1000), currentCompany, function (company, data) {
-                            log.info(" 452 receivePUSHES!!!!! for iten", iten);
+                            log.info(" 452 receivePUSHES!!!!! for iten", company);
                             tt++;
+                            //log.toFLog('pushes' + company +tt, data.return);
                             if (data != undefined && data.error == undefined) {
                                 var obj = JSON.parse(data.return);
                                 //log.info("Obj", obj[0], "mtm 1497");
                                 //delete cashedDataArr[company].allPushes;
                                 cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
                             }
-                            log.info("Присоеденили", obj.length, "Получили", cashedDataArr[company].allPushes.length);
+                            log.info("Присоединили", obj.length, "Получили", cashedDataArr[company].allPushes.length);
                             log.info("GetPushes finished for company", company, t, tt );
-                            if (t==tt) startCalculateCompany(company);
+                            if (t==tt) {
+                                //log.toFLog("Summary Pushes" , cashedDataArr[company].allPushes);
+                                startCalculateCompany(company);
+                            }
                         });
 
                     }
@@ -1871,7 +1911,7 @@ function cutFIO(fioStr) {
 // Перевод строковой даты в таймстамп
 function strToTstamp(strDate, lockaldata) {
     try {
-    //console.log(strDate, "#$%^#@^@#%^#$strDate #$&#$&#$&^#");
+    //log.info(strDate, "#$%^#@^@#%^#$strDate #$&#$&#$&^#");
     if (lockaldata != undefined) {
         var today = new Date();
         var day, adding, month, year;
@@ -2336,7 +2376,7 @@ function startPeriodicCalculating() {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
-                        log.info("2168 receivePUSHES!!!!! for iten", iten);
+                        log.info("2375 receivePUSHES!!!!! for iten", company);
                         if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //log.info("Obj", obj[0], "mtm 1497");
@@ -3773,7 +3813,7 @@ try {
                 //TODO решить вопрос с обновлением настроек.
                 var settings = cashedDataArr[company].settings;
                 if(cashedDataArr[company].oldRoutes != undefined) {
-                    cashedDataArr[company].line_routes = cashedDataArr[company].line_routes.concat(cashedDataArr[company].oldRoutes);
+                    //cashedDataArr[company].line_routes = cashedDataArr[company].line_routes.concat(cashedDataArr[company].oldRoutes);
                     oldRoutes = JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
                 } else {
                     oldRoutes =JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
@@ -5475,7 +5515,7 @@ function concat1CAndMonitoring (company) {
                             var to = strToTstamp(cashedDataArr[company].routesOfDate + " 23:59:59");
                             tracksManager.getTrack(cashedDataArr[company].routes[i].TRANSPORT.gid, from, to, "", "", "", "", "", "", function (data, gid){
                                 tt++;
-                                console.log ("inside t == tt", t, " ", tt);
+                                log.info ("inside t == tt", t, " ", tt);
                                 for (var l=0; l< cashedDataArr[company].routes.length; l++ ){
                                     if (cashedDataArr[company].routes[l].TRANSPORT.gid == gid) {
                                         cashedDataArr[company].routes[l].real_track = data;
@@ -5491,7 +5531,7 @@ function concat1CAndMonitoring (company) {
 
 
         }
-        console.log ("outside t == tt", t, " ", tt);
+        log.info ("outside t == tt", t, " ", tt);
         if (t==0 || t == tt) continueConcat(company);
     } catch (e) {
         console.error( "Ошибка "+ e + e.stack);
