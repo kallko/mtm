@@ -171,7 +171,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             opacity: 0.8,
                             smoothFactor: 1
                         });
-
+                     //   if (i + 1 == track.length) {
+                            polyline.redraw = i;
+                            markersArr.push(polyline);
+                      //  }
+                        polyline.on('click', function (event) {
+                            console.log(event.target);
+                        });
                         polyline.addTo(map);
                     } else if (track[i].state == 'ARRIVAL') { // отрисовать стоп
                         // если отрисовка стопов выключена, пропустить итерацию
@@ -352,7 +358,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                 'Время сигнала: ' + formatDate(new Date(track[i].t2 * 1000))
                             });
                         tmpVar.setIcon(getIcon(i, 7, color, 'black'));
+                        tmpVar.redraw = true;
+                        tmpVar.on('click', function (event){
+                            //console.log (tmpVar._latlng);
+                            console.log(event.target);
+                            checkUpdateTrack(event.target);
+                        });
                         addMarker(tmpVar);
+                        //map.addLayer(tmpVar);
+                        //oms.addMarker(tmpVar);
+
                         //console.log(map.getZoom(), "Zoom", track[i].coords[indx].lat, track[i].coords[indx].lon);
 
                         //Установить центр карты в текущее положение машины, если оно определено.
@@ -2277,6 +2292,21 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //console.log(zoom, offset, tmp, target);
             setMapCenter(target.lat, target.lng, newZoom);
             //console.log("Zoom3", map.getZoom());
+        }
+
+        function checkUpdateTrack(target) {
+            var m = map;
+            for (var j=0; j< markersArr.length; j++){
+                if (markersArr[j].redraw) m.removeLayer(markersArr[j]);
+            }
+
+            //
+            //for (var i in m._layers) {
+            //    //console.log("1", m._layers[i]);
+            //    if (m._layers[i] == target)  m.removeLayer(m._layers[i]);
+            //
+            //}
+
         }
 
     }]);

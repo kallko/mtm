@@ -211,14 +211,15 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
     scope.statuses = function () {
         //console.log("begin");
-        http.get('./getServerStatus')
+        http.get('./getServerStatus' )
             .success(function (data){
-                console.log("Success");
+                //console.log("Success 2", data.result.online);
                 alert("Status компании " + data.result.company +"\n" +
                     "Беспроблемных роутов " + data.result.routes + "\n" +
                     "Роутов в очереди " + data.result.line_routes + "\n" +
                     "Заблокированных роутов " + data.result.blocked_routes + "\n" +
-                    "Старых роутов " + data.result.oldRoutes);
+                    "Старых роутов " + data.result.oldRoutes+ "\n" +
+                    "Сейчас online " + data.result.online);
             });
 
 

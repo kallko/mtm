@@ -1563,6 +1563,12 @@ router.route('/getServerStatus')
         result.blocked_routes = cashedDataArr[currentCompany].blocked_routes ? cashedDataArr[currentCompany].blocked_routes.length : 0;
         result.line_routes = cashedDataArr[currentCompany].line_routes.length;
         result.oldRoutes = 0;
+            result.online= " ";
+            for (var i =0; i<onlineClients.length; i++) {
+                //console.log("ONLINE", onlineClients[i]);
+                result.online+= onlineClients[i].login + "  ";
+                //console.log("Result", result.online);
+            }
         if (cashedDataArr[currentCompany].oldRoutes != undefined) result.oldRoutes = cashedDataArr[currentCompany].oldRoutes.length;
         //log.info("Result ", result);
         res.status(200).json({result :result});
@@ -5342,11 +5348,20 @@ function checkServiceTime(company) {
         return;
     }
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
-        if (cashedDataArr[company].routes[i].DISTANCE == 0 || cashedDataArr[company].routes[i].DISTANCE == '0') continue;
+
+       // if (cashedDataArr[company].routes[i].DISTANCE == 0 || cashedDataArr[company].routes[i].DISTANCE == '0') continue;
         for(var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
+
+            //console.log("Расчет Правильности обслуживания", cashedDataArr[company].routes[i].points[j].waypoint == undefined,
+            //    cashedDataArr[company].routes[i].points[j].waypoint.TASK_TIME == "0" ,
+            //    !(cashedDataArr[company].routes[i].points[j].autofill_service_time > 0  || cashedDataArr[company].routes[i].points[j].real_service_time > 0))
+
+
+
             if( cashedDataArr[company].routes[i].points[j].waypoint == undefined ||
-                cashedDataArr[company].routes[i].points[j].waypoint.TASK_TIME == "0" ||
+                cashedDataArr[company].routes[i].points[j].TASK_TIME == "0" ||
                 !(cashedDataArr[company].routes[i].points[j].autofill_service_time > 0  || cashedDataArr[company].routes[i].points[j].real_service_time > 0)){
+                //console.log ("Delta UNDEFINED");
                 continue;
             }
             var time;
@@ -5356,15 +5371,16 @@ function checkServiceTime(company) {
                 time = cashedDataArr[company].routes[i].points[j].autofill_service_time
             }
 
-            var delta = (time/(parseInt(cashedDataArr[company].routes[i].points[j].waypoint.TASK_TIME))).toFixed(2);
+            var delta = (time/(parseInt(cashedDataArr[company].routes[i].points[j].TASK_TIME))).toFixed(2);
+            //console.log (time, cashedDataArr[company].routes[i].points[j].TASK_TIME, "DELTA,", delta);
 
             if (delta < 0.7) {
-                cashedDataArr[company].routes[i].points[j].service_quality = "Меньше на " + (1-delta)*100+ "%";
+                cashedDataArr[company].routes[i].points[j].service_quality = " - " + parseInt((1-delta)*100).toFixed(0)+ "%";
                 continue;
             }
 
             if (delta > 1.3) {
-                cashedDataArr[company].routes[i].points[j].service_quality = "Больше на " + (delta-1)*100+ "%";
+                cashedDataArr[company].routes[i].points[j].service_quality = "+ " + parseInt((delta-1)*100).toFixed(0) + "%";
                 continue;
             }
 
