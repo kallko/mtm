@@ -287,7 +287,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                 try{
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
-                                    //console.log(data.closedRoutesFrom1C, "Soap 290");
+                                    console.log(data.closedRoutesFrom1C, "Soap 290");
                                     log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
                                 }catch(e){
                                     console.log(e, "SOAP 285");

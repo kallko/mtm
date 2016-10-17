@@ -49,7 +49,11 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                                 console.log("UpdateTrack", data);
                                 for (var j=0; j<data.length; j++){
                                     console.log("Size of states ", data[j].state.length);
+                                    if (data[j].state[data[j].state.length-1].id == 0) {
+                                        data[j].state.length = data[j].state.length-2;
+                                    }
                                 }
+                                rootScope.$emit('updateTrack', data);
                             })
                             .error (function (data){
                             console.log("Ошибка", data);

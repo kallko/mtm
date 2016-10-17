@@ -382,7 +382,7 @@ router.route('/dailydata')
                 log.info("receiveConfig", data);
 
                 if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
-                log.info("Settings Recieved",  settings, "mtm 218");
+                log.info("Settings Recieved",  settings, "mtm 385");
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
                 cashedDataArr[currentCompany].user = req.session.login;
 
@@ -416,7 +416,7 @@ router.route('/dailydata')
             settings={};
 
             // Получение настроек для конкретной компании
-            log.info("Запрашиваю настройки 285 для ", req.session.login);
+            log.info("Запрашиваю настройки 419 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
                 //log.info("receiveConfig", data);
                 settings = JSON.parse(data.return);
@@ -472,16 +472,22 @@ router.route('/dailydata')
                         } else {
 
                             log.info("Грузим день из прошлого", currentCompany);
-                            //if (cashedDataArr[currentCompany].closedRoutesFrom1C) log.info("Первая проверка", cashedDataArr[currentCompany].closedRoutesFrom1C.length)
+                            if (cashedDataArr[currentCompany].closedRoutesFrom1C) log.info("Первая проверка", cashedDataArr[currentCompany].closedRoutesFrom1C.length);
                             //Если кто-то запросил данные по прошлому дню
                             var compmpanyName=""+currentCompany;
                             currentCompany+=""+data.date.substring(0,10);
-                            //if (cashedDataArr[currentCompany] && cashedDataArr[currentCompany].closedRoutesFrom1C) log.info("Вторая проверка", cashedDataArr[currentCompany].closedRoutesFrom1C.length);
+                            if (cashedDataArr[currentCompany] && cashedDataArr[currentCompany].closedRoutesFrom1C) log.info("Вторая проверка", cashedDataArr[currentCompany].closedRoutesFrom1C.length);
 
                             if(cashedDataArr[currentCompany] != undefined) {
 
                                 log.info("Прошлый день уже создан", cashedDataArr[currentCompany] != undefined , "и посчитан", cashedDataArr[currentCompany].ready);
-                                oldDayCalculate(currentCompany, data);
+                                if (!cashedDataArr[currentCompany].ready) {
+                                    oldDayCalculate(currentCompany, data);
+                                } else {
+                                    res.status(200).json(cashedDataArr[currentCompany]);
+                                    return;
+                                }
+
                             } else {
                                 log.info("Прошлый день еще не создан, начинаем создание");
                             }
@@ -631,7 +637,7 @@ router.route('/dailydata')
                         startServer = true;
                         var timerId = setInterval(function() {
                             startPeriodicCalculating(currentCompany);
-                        }, 66 * 1000);}
+                        }, 120 * 1000);}
                     // через 5 сек остановить повторы
                     //setTimeout(function() {
                     //    clearInterval(timerId);
@@ -4226,27 +4232,6 @@ function connectStopsAndPoints(company) {
                         tmpPoint.timeToStop > tmpTime)) {
 
 
-                            //log.info("Смещение по времени", cashedDataArr[company].settings.timeThreshold , tmpPoint.arrival_time_ts - tmpArrival.t2);
-                           // var haveUnfinished = false;
-
-
-
-                            //if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint != undefined && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
-                            //    for (var l = k - 1; l > 0; l--) {
-                            //        var status = route.points[l].status;
-                            //        if (status > 3 && status != 6)
-                            //        {
-                            //            haveUnfinished = true;
-                            //            continue;
-                            //        }
-                            //    }
-                            //
-                            //    if (haveUnfinished) {
-                            //        continue;
-                            //    }
-                            //}
-
-
 
                             //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
                             //
@@ -4291,7 +4276,7 @@ function connectStopsAndPoints(company) {
                             route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
                             tmpPoint.stop_arrival_time = tmpArrival.t1;
                             tmpPoint.real_arrival_time = tmpArrival.t1;
-                            tmpPoint.autofill_service_time = tmpArrival.time;
+                            tmpPoint.autofill_service_time = tmpPoint.stopState.time;
                             //route.points[k]
                             //log.info("route-point-k", route.points[k], "route" , route)
 
@@ -4950,6 +4935,23 @@ function checkCorrectCalculating(company){
             }
         }
     }
+
+
+        if (cashedDataArr[company].routes != undefined) {
+
+            for (i = 0; i < cashedDataArr[company].routes.length && cashedDataArr[company].routes[i].max_arrival_time == undefined ; i++) {
+                //console.log("!@#!@#$!$%@#$^@%^!@#%$!@#%!#$%!#$%^!#$%!#$%!@#%");
+                var route = cashedDataArr[company].routes[i];
+
+                for (j=0; j<route.points.length; j++){
+                    var point = route.points[j];
+                    if (route.max_arrival_time == undefined && point != undefined && point.arrival_time_ts != undefined) route.max_arrival_time = point.arrival_time_ts;
+                    if (point != undefined && point.arrival_time_ts != undefined && point.arrival_time_ts > route.max_arrival_time) route.max_arrival_time = point.arrival_time_ts;
+
+                }
+
+            }
+        }
     } catch (e) {
         console.error( "Ошибка "+ e + e.stack);
     }
@@ -4980,6 +4982,7 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
     tPoint.arrival_time_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
     tPoint.base_arrival_ts = strToTstamp(toDay + " " + tPoint.arrival_time_hhmm);
 
+        //todo костылек. Определение самого позднего времени доставки Используется в мэп контроллере, как граница прорисовки маршрута если эта граница посчитана в 1С неправильно
 
     createSeveralAviabilityWindows(tPoint);
 
@@ -5159,6 +5162,8 @@ function calculateProblemIndex(company) {
 
             point.problem_index = 0;
 
+
+
             if(point.status < 4 || point.status == 8) continue;
             //log.info("Найдена проблемная точка");
 
@@ -5239,10 +5244,10 @@ function calculateProblemIndex(company) {
     // todo хотя по идее при равильной работе диспетчера он увидит эту проблему прямо утром при запуске сервиса первом пересчете
     // todo трудность в том, что оператор может первый раз запустить программу в середине дня
 
-    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-        var route = cashedDataArr[company].routes[i];
+    for ( i=0; i<cashedDataArr[company].routes.length; i++) {
+         route = cashedDataArr[company].routes[i];
 
-        for (var j=0; j < route.points.length; j++){
+        for ( j=0; j < route.points.length; j++){
             var point = route.points[j];
             var outOfWindows = true;
             if (point.orderWindows == undefined) {
@@ -5510,7 +5515,11 @@ function checkSync(company, login, blockedArr) {
 
 function concat1CAndMonitoring (company) {
     try {
-    if (!company || cashedDataArr[company].closedRoutesFrom1C == undefined) return;
+    if (!company || cashedDataArr[company].closedRoutesFrom1C == undefined) {
+        log.info('В 1С нет сохраненных маршрутов');
+        continueConcat(company);
+        return;
+    }
 
 
 

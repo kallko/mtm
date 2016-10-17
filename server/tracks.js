@@ -115,7 +115,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         (function (ii) {
             //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data, error) {
-                if (error == undefined && data[0] != undefined && typeof (data) != 'string' && states[ii] != undefined) {
+                if (error == undefined && data!= undefined && data[0] != undefined && typeof (data) != 'string' && states[ii] != undefined) {
                     states[ii].coords = data;
                 } else {
                    if (states[ii] != undefined && states[ii].coords != undefined) states[ii].coords = [];

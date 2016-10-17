@@ -105,6 +105,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log("I gona draw real route", route);
             var start = strToTstamp(route.START_TIME);
             var end = strToTstamp(route.END_TIME);
+            if (end<route.max_arrival_time) end = route.max_arrival_time;
             // console.log("Start", start, "End", end);
 
 
@@ -171,10 +172,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             opacity: 0.8,
                             smoothFactor: 1
                         });
-                     //   if (i + 1 == track.length) {
-                            polyline.redraw = i;
+                        if (i + 1 == track.length) {
+                            polyline.redrawer = true;
                             markersArr.push(polyline);
-                      //  }
+                       }
                         polyline.on('click', function (event) {
                             console.log(event.target);
                         });
@@ -256,7 +257,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             opacity: 0.8,
                             smoothFactor: 1
                         });
+                        if (i == track.length-1 )stopPolyline.redrawer = true;
 
+
+                        stopPolyline.on('click', function(event) {
+                            console.log(event.target);
+                        });
                         stopPolyline.addTo(map);
 
 
@@ -354,15 +360,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         var indx = track[i].coords.length - 1;
                         tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
                             {
-                                'title': 'Текущее положение транспортного средства\n' +
+                                'title': 'Последнее известное положение транспортного средства\n' +
                                 'Время сигнала: ' + formatDate(new Date(track[i].t2 * 1000))
                             });
                         tmpVar.setIcon(getIcon(i, 7, color, 'black'));
-                        tmpVar.redraw = true;
+                        tmpVar.redrawer = true;
                         tmpVar.on('click', function (event){
                             //console.log (tmpVar._latlng);
                             console.log(event.target);
-                            checkUpdateTrack(event.target);
+                            redrawTrac(event.target);
                         });
                         addMarker(tmpVar);
                         //map.addLayer(tmpVar);
@@ -566,7 +572,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         scope.dragendPoint = event.target;// объект события при драге  маркера-point
                         rootScope.$emit('askGPSConfirmPoint', {point: event.target.source.waypoint});//point index controller
                         if(rootScope.gpsConfirm){
-                            var message="Эта точка ранее уже была подтверждена GPS данными. Вы уверены, что хотите изменить ее координаты?";
+                             message="Эта точка ранее уже была подтверждена GPS данными. Вы уверены, что хотите изменить ее координаты?";
                             if (!confirm(message)){
                                 var newMarker= scope.dragendPoint;
                                 newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
@@ -2294,18 +2300,27 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //console.log("Zoom3", map.getZoom());
         }
 
-        function checkUpdateTrack(target) {
+
+        rootScope.$on('redrawUpdate', function (event, states) {
+            redrawTrac (states)
+        });
+
+        function redrawTrac(states) {
+            //для начала стираются старые данные
             var m = map;
             for (var j=0; j< markersArr.length; j++){
-                if (markersArr[j].redraw) m.removeLayer(markersArr[j]);
+                if (markersArr[j].redrawer) m.removeLayer(markersArr[j]);
             }
 
             //
-            //for (var i in m._layers) {
-            //    //console.log("1", m._layers[i]);
-            //    if (m._layers[i] == target)  m.removeLayer(m._layers[i]);
-            //
-            //}
+            for (var i in m._layers) {
+                //console.log("1", m._layers[i]);
+                if (m._layers[i].redrawer == true)  m.removeLayer(m._layers[i]);
+
+            }
+
+            //теперь прорисовываются новые
+
 
         }
 

@@ -599,7 +599,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         function loadDailyData(force, showDate) {
 
             console.log("Стартует функция загрузки дня");
-            //showPopup('Загружаю данные...');
+            showPopup('Загружаю данные прошлого дня. Загрузка может занять несколько минут');
             var url = './dailydata';
             if (force)  url += '?force=true';
           //  if (showDate)   url += (force ? '&' : '?') + 'showDate=' + 1464132000000;
@@ -611,7 +611,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log("Исходные данные до обработки", JSON.parse(JSON.stringify(data)));
                     if ((data == 'wait' || data.routes == undefined) && data.status != 'no plan'  ){
                         console.log("Сервер еще подготавливает данные, надо подождать");
-                        loadDailyData(false, showDate);
+                        setTimeout(loadDailyData(false, showDate), 60000);
                         return;
                     }
 
@@ -636,6 +636,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rootScope.reasons=data.reasons;
                     rootScope.nowTime=data.current_server_time;
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
+                    showPopup("Прошлый день загружен");
                     console.log("Loaded DATA", data.date, JSON.parse(JSON.stringify(data)));
                     rootScope.data=data;
                     upgradeOldDateData ();
@@ -4242,18 +4243,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             rootScope.data.currentDay = false;
 
             //Есть ли закрытый маршрут с 1С соответсвующий загруженному
+            if (rootScope.data.closedRoutesFrom1C != undefined) {
+                for (i=0; i<rootScope.data.routes.length; i++){
+                    var route = rootScope.data.routes[i];
+                    for (j = 0; j<rootScope.data.closedRoutesFrom1C.routes.length; j++){
+                        if (rootScope.data.closedRoutesFrom1C.routes[j].transportID == route.transport.ID) {
+                            var route1C = rootScope.data.closedRoutesFrom1C.routes[j];
+                            upgradeDataFrom1C(route, route1C);
 
-            for (i=0; i<rootScope.data.routes.length; i++){
-                var route = rootScope.data.routes[i];
-                for (j = 0; j<rootScope.data.closedRoutesFrom1C.routes.length; j++){
-                    if (rootScope.data.closedRoutesFrom1C.routes[j].transportID == route.transport.ID) {
-                        var route1C = rootScope.data.closedRoutesFrom1C.routes[j];
-                        upgradeDataFrom1C(route, route1C);
-
+                        }
                     }
                 }
             }
-
             for (i=0; i<9; i++){
                 rootScope.data.statistic[i] = 0;
             }
@@ -5016,21 +5017,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     var gid = rootScope.data.routes[i].transport.gid;
                     if (gid == undefined) {
                         scope.$emit('showNotification', {text: 'У этого автомобиля нет трека', duration: 3000});
+                        console.log("FilterId прошлого маршрута", scope.filters.route );
                         scope.drawRoute(scope.filters.route, false, false);
                     }
                     //console.log("States 5093", states);
                     //console.log("Перед отправкой запроса", states != undefined , gid != undefined , states[0] != undefined);
                     if (states != undefined && gid != undefined && states[0] != undefined) {
+                        showPopup("Подгрузка трека автомобиля", 3000);
                         http.post('./gettracksbystates', {states: states, gid: gid, demoTime:false})
                             .success( function  (data) {
                                 console.log("Трек загружен", data);
                                 route.real_track = data;
                                 route.preload = true;
                                 scope.drawRoute(scope.filters.route, false, false);
-                                rootScope.carCentre = true;
+                                rootScope.carCentre = false;
                             }
 
                         );
+                    } else {
+                        scope.drawRoute(scope.filters.route, false, false);
                     }
 
 
@@ -5039,6 +5044,45 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
         }
+
+        rootScope.$on('updateTrack', function(event, data){
+            if (data == undefined) return;
+            for (var i=0; i<data.length; i++) {
+                for(var j=0; j<rootScope.data.routes.length; j++){
+                    if (rootScope.data.routes[j].transport.gid == data[i].gid) {
+                        console.log("Совпадение найдено", rootScope.data.routes[j].filterId , scope.filters.route);
+                        if (rootScope.data.routes[j].filterId != scope.filters.route) {
+                            console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+
+                        } else {
+                            console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+                            if(data[i].states != undefined && data[i].states.length >1 )rootScope.$emit('redrawUpdate', data[i].states);
+                        }
+
+                        if (data[i].states.length > 0) {
+                            if (data[i].states[0].id != rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1]) console.log("AAAAAAA Большой ошибка, начальника!!!");
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].coords = data[i].states[0].coords;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].dist = data[i].states[0].dist;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].lat = data[i].states[0].lat;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].lon = data[i].states[0].lon;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t1 = data[i].states[0].t1;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t2 = data[i].states[0].t2;
+
+
+
+                            for(var l = 1; l<data[i].states.length; l++) {
+                                rootScope.data.routes[j].real_track.push(data[i].states);
+                            }
+                        }
+
+                    }
+                }
+
+
+            }
+
+        });
+
 
         rootScope.$on('clearDisplay', function(event) {
             console.log ("Расчищаем коллекцию");
