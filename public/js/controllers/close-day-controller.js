@@ -213,7 +213,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         //console.log("begin");
         http.get('./getServerStatus' )
             .success(function (data){
-                //console.log("Success 2", data.result.online);
+                console.log("Success 2", data.result.online);
                 alert("Status компании " + data.result.company +"\n" +
                     "Беспроблемных роутов " + data.result.routes + "\n" +
                     "Роутов в очереди " + data.result.line_routes + "\n" +

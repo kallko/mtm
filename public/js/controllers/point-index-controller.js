@@ -5056,22 +5056,22 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         } else {
                             console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
-                            if(data[i].states != undefined && data[i].states.length >1 )rootScope.$emit('redrawUpdate', data[i].states);
+                            if(data[i].state != undefined && data[i].state.length >1 ) scope.$emit('redrawUpdate', data[i].state, scope.filters.route);
                         }
 
-                        if (data[i].states.length > 0) {
-                            if (data[i].states[0].id != rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1]) console.log("AAAAAAA Большой ошибка, начальника!!!");
-                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].coords = data[i].states[0].coords;
-                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].dist = data[i].states[0].dist;
-                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].lat = data[i].states[0].lat;
-                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].lon = data[i].states[0].lon;
-                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t1 = data[i].states[0].t1;
-                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t2 = data[i].states[0].t2;
+                        if (data[i].state != undefined && data[i].state.length > 0) {
+                            if (data[i].state[0].id != rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].id) console.log("AAAAAAA Большой ошибка, начальника!!!", data[i].state[0]);
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].coords = data[i].state[0].coords;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].dist = data[i].state[0].dist;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].lat = data[i].state[0].lat;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].lon = data[i].state[0].lon;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t1 = data[i].state[0].t1;
+                            rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t2 = data[i].state[0].t2;
 
 
 
-                            for(var l = 1; l<data[i].states.length; l++) {
-                                rootScope.data.routes[j].real_track.push(data[i].states);
+                            for(var l = 1; l<data[i].state.length; l++) {
+                                rootScope.data.routes[j].real_track.push(data[i].state);
                             }
                         }
 
