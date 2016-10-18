@@ -5046,6 +5046,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         rootScope.$on('updateTrack', function(event, data){
+           return;
             if (data == undefined) return;
             for (var i=0; i<data.length; i++) {
                 for(var j=0; j<rootScope.data.routes.length; j++){
