@@ -1182,497 +1182,497 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //    scope.fastCalc = false;
         //});
         // обновление статусов
-        function statusUpdate() {
-            //console.log('statusUpdate');
-            //if (!rootScope.currentDay){
-            //    updateDataforPast();
-            //    return;
-            //}
-
-
-
-            var route,
-                tmpPoint,
-                tmpArrival,
-                timeThreshold = scope.params.timeThreshold * 60,
-                LAT,
-                LON,
-                lat,
-                lon,
-                now = rootScope.data.server_time,
-                lastPoint,
-                tmpDistance,
-                tmpTime,
-                status,
-                haveUnfinished;
-
-            // удалением всех свойств задач созданных ранее при назначении статусов перед их переназначением
-            for (var i = 0; i < rootScope.data.routes.length; i++) {
-                for (var j = 0; j < rootScope.data.routes[i].points.length; j++) {
-                    tmpPoint = rootScope.data.routes[i].points[j];
-
-
-                    //Lля уменьшения количества рассчетов выбрасываем из расчетов следующие категории
-                    // Подтвержденные точки (из таблицы точек или ручным связыванием точки и стопа)
-                    // Точки у которых есть пуш и стоп
-                    // Стопы, которые были более 5 минут назад (Они скорее всего уж)
-                    //
-                    //
-                    //
-                    //
-
-
-                    if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
-                        //console.log("Подтверждена вручную Уходим");
-                        continue;
-                    }
-                    //
-                    //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
-                    //   // console.log("Подтверждена пушем и стопом Уходим");
-                    //    continue;
-                    //}
-                    //
-                    //if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
-                    //    //console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                    //    continue;
-                    //}
-                    //
-                    //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
-                    //    //console.log("Точка уже доставлена идем дальше");
-                    //    continue;
-                    //}
-
-                   // console.log("Пересчет");
-                    //tmpPoint.status = STATUS.SCHEDULED;
-
-                    delete tmpPoint.distanceToStop;
-                    delete tmpPoint.timeToStop;
-                    delete tmpPoint.haveStop;
-                    delete tmpPoint.stopState;
-                    delete tmpPoint.stop_arrival_time;
-                    delete tmpPoint.real_arrival_time;
-                    delete tmpPoint.windowType;
-                    //delete tmpPoint.mobile_push;
-                    delete tmpPoint.mobile_arrival_time;
-                    //delete tmpPoint.havePush;
-                    delete tmpPoint.real_arrival_time;
-                    delete tmpPoint.confirmed;
-                    //delete tmpPoint.servicePoints;
-                    //delete tmpPoint.overdue_time;
-                    //delete tmpPoint.limit;
-
-
-
-
-                }
-
-                rootScope.data.routes[i].lastPointIndx = 0;
-                delete rootScope.data.routes[i].pushes;
-
-
-            }
-
-
-
-            for (i = 0; i < rootScope.data.routes.length; i++) {
-                route = rootScope.data.routes[i];
-                //console.log ("route.driver.name", route.driver.NAME);
-                route.lastPointIndx = 0;
-                if (route.real_track != undefined) {
-                    for (j = 0; j < route.real_track.length; j++) {
-                        // если статус не из будущего (в случае демо-режима) и стейт является стопом, b dhtvz проверяем его
-                        if (route.real_track[j].t1 < rootScope.data.server_time && route.real_track[j].state == "ARRIVAL") {
-                            //console.log("считаем стоп", rootScope.data.server_time, route.real_track[j].t1, rootScope.data.server_time-route.real_track[j].t1)
-
-
-
-
-
-
-                            tmpArrival = route.real_track[j];
-
-                            //console.log("tmpArrival",tmpArrival);
-                            // перебираем все точки к которым
-                            for (var k = 0; k < route.points.length; k++) {
-
-
-
-
-                                tmpPoint = route.points[k];
-
-
-
-
-                                if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
-                                    //console.log("Подтверждена вручную Уходим");
-                                    continue;
-                                }
-
-                                //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
-                                //    //console.log("Подтверждена пушем и стопом Уходим");
-                                //    continue;
-                                //}
-                                //
-                                //if (scope.fastCalc && tmpPoint.haveStop && (rootScope.data.routes[i].pushes==undefined || rootScope.data.routes[i].pushes =='undefined' ||  rootScope.data.routes[i].pushes.length==0) ){
-                                //   // console.log("Подтверждена стопом. Валидных пушей нет уходим");
-                                //    continue;
-                                //}
-                                //
-                                //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
-                                //    //console.log("Точка уже доставлена идем дальше");
-                                //    continue;
-                                //}
-
-
-
-
-
-                                LAT = parseFloat(tmpPoint.LAT);
-                                LON = parseFloat(tmpPoint.LON);
-                                lat = parseFloat(tmpArrival.lat);
-                                lon = parseFloat(tmpArrival.lon);
-
-                                tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
-                                tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
-
-                                tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
-
-                                tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
-
-
-
-
-
-
-                                // Если маршрут не просчитан, отдельно проверяем попадает ли стоп в одно из возможных временных окон  и насколько он рядом
-                                // и если да, то тоже привязываем стоп к точке
-
-                                var suit=false;   //Показывает совместимость точки и стопа для непросчитанного маршрута
-                                if (route.DISTANCE == 0 && tmpDistance < scope.params.stopRadius ) {
-                                    suit=checkUncalculateRoute(tmpPoint, tmpArrival);
-                                }
-
-                                // если стоп от точки не раньше значения timeThreshold и в пределах
-                                // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
-                                // по времени чем предыдущий детект - привязываем этот стоп к точке
-
-
-
-                                if (suit || (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
-                                    tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
-                                    tmpPoint.timeToStop > tmpTime))) {
-
-                                    haveUnfinished = false;
-
-
-
-                                    if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint != undefined && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
-                                        for (var l = k - 1; l > 0; l--) {
-                                            status = route.points[l].status;
-                                            if (status !== STATUS.FINISHED
-                                                && status !== STATUS.FINISHED_LATE
-                                                && status !== STATUS.FINISHED_TOO_EARLY
-                                                && status !== STATUS.ATTENTION)
-                                            {
-                                                haveUnfinished = true;
-                                                continue;
-                                            }
-                                        }
-
-                                        if (haveUnfinished) {
-                                            continue;
-                                        }
-                                    }
-
-
-
-                                    //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
-                                    //
-                                    if(tmpPoint.haveStop == true &&!findBestStop(tmpPoint, tmpArrival)){
-                                        continue;
-                                    }
-
-
-
-
-                                    tmpPoint.distanceToStop = tmpDistance;
-                                    tmpPoint.timeToStop = tmpTime;
-                                    tmpPoint.haveStop = true;
-
-
-
-
-                                    //{ if (tmpArrival.t1 > tmpPoint.controlled_window.start) && (tmpArrival.t1<tmpPoint.controlled_window.finish){
-                                    //    tmpPoint.limit=60;
-                                    //} else {tmpPoint.limit=60; } }
-
-                                    //tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
-                                    tmpPoint.stopState = tmpArrival;
-                                    //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
-
-                                    route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
-                                    tmpPoint.stop_arrival_time = tmpArrival.t1;
-                                    tmpPoint.real_arrival_time = tmpArrival.t1;
-                                    tmpPoint.autofill_service_time = tmpArrival.time;
-                                    //route.points[k]
-                                    //console.log("route-point-k", route.points[k], "route" , route)
-
-                                    if (angular.isUndefined(tmpArrival.servicePoints)==true){
-                                        tmpArrival.servicePoints=[];
-                                    }
-
-
-
-                                    // проверка, существует ли уже этот пуш
-                                    var ip=0;
-                                    var sPointExist=false;
-                                    while(ip<tmpArrival.servicePoints.length){
-                                       if(tmpArrival.servicePoints[ip]==k){
-                                           sPointExist=true;
-                                           break;
-                                       }
-                                        ip++;
-                                    }
-                                    if(!sPointExist){
-                                    tmpArrival.servicePoints.push(k);}
-
-                                   // tmpPoint.rawConfirmed=0;
-
-                                    //console.log("Find stop for Waypoint and change STATUS")
-                                    findStatusAndWindowForPoint(tmpPoint);
-
-
-                                }
-
-
-                            }
-                        }
-
-                    }
-
-
-                   // console.log("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
-                    lastPoint = route.points[route.lastPointIndx];
-                   // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
-
-                    // проверка последней определенной точки на статус выполняется
-                    if (lastPoint != null && route.car_position !=  undefined) {
-                       // console.log("Route", route);
-                        if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
-                            && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
-                                lastPoint.LAT, lastPoint.LON) < scope.params.stopRadius) {
-                            lastPoint.status = STATUS.IN_PROGRESS;
-                        }
-                    }
-                }
-
-               // console.log("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
-
-            }
-
-            console.log("Step1 parentForm", parentForm);
-
-
-            //console.log("parentFORM=", parentForm);
-            console.trace();
-            if (parentForm == undefined && !scope.demoMode) {
-                checkConfirmedFromLocalStorage();
-                //_data.companyName = 'IDS';
-                scope.$emit('companyName', rootScope.data.companyName);
-                //scope.$emit('forCloseController', _data); // это реализовано около строки 308
-               // console.log("RETURN?????????");
-            }else {
-
-
-                //console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-                var mobilePushes = [],
-                    allPushes = [];
-
-                // генерируем мобильные нажатия, если мы в демо-режиме
-                if (scope.demoMode) {
-                    var rand,
-                        gpsTime,
-                        tmp,
-                        tmpLen,
-                        tmpCoord,
-                        tmpLat,
-                        tmpLon,
-                        tmpRoute;
-
-                    tmpTime = undefined;
-                    rootScope.data.companyName = 'Demo';
-                    for (var i = 0; i < rootScope.data.routes.length; i++) {
-
-                        tmpRoute = rootScope.data.routes[i];
-                        seed = i * 122;
-                        rand = random(0, 3600);
-                        for (var j = 0; j < tmpRoute.points.length; j++) {
-                            if (rootScope.data.server_time > (tmpRoute.points[j].arrival_time_ts + (rand - 1800))) {
-                                if (random(1, 8) != 1) {
-                                    tmp = (tmpRoute.points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
-                                    gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
-
-                                    if (tmpRoute.points[j].haveStop &&
-                                        tmpRoute.points[j].stopState != undefined &&
-                                        tmpRoute.points[j].stopState.coords &&
-                                        (tmpLen = tmpRoute.points[j].stopState.coords.length) > 0) {
-
-                                        tmpLen = tmpLen > 20 ? 20 : tmpLen;
-                                        tmpCoord = tmpRoute.points[j].stopState.coords[random(0, tmpLen)];
-                                        tmpLat = tmpCoord.lat;
-                                        tmpLon = tmpCoord.lon;
-                                    } else {
-                                        tmpLat = parseFloat(tmpRoute.points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
-                                        tmpLon = parseFloat(tmpRoute.points[j].LON) + (random(0, 4) / 10000 - 0.0002);
-                                    }
-
-                                    mobilePushes.push({
-                                        cancel_reason: "",
-                                        canceled: false,
-                                        gps_time: gpsTime,
-                                        lat: tmpLat,
-                                        lon: tmpLon,
-                                        number: tmpRoute.points[j].TASK_NUMBER,
-                                        time: gpsTime
-                                    });
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // получаем через 1С-ый parentForm имя клиента
-                    //console.log("Step3");
-                    rootScope.data.companyName = parentForm._call('getClientName');
-                }
-                //console.log( rootScope.data.companyName, ' cmpanyName');
-
-                scope.$emit('companyName', rootScope.data.companyName);
-
-                // по каждому доступному решению запрашиваем нажатия
-
-                //console.log("!!!!!!Find pushes. Where are you?!!!!!!");
-                //var newSettings1 = parentForm._call('getConfig()');
-                //var newSettings2 = parentForm._call('getConfig');
-                //console.log("All Settings", newSettings, newSettings1, newSettings2);
-
-                //for (var m = 0; m < rootScope.data.idArr.length; m++) {
-                //
-                //    if (scope.demoMode) {
-                //        m = 2000000000;
-                //    } else {
-                //        // console.log("$%$%$%$%$%$%$%$%Filters", scope.filters.route,  "Editing", rootScope.editing.uniqueID);
-                //
-                //        mobilePushes = parentForm._call('getDriversActions', [rootScope.data.idArr[m], getDateStrFor1C(rootScope.data.server_time * 1000)]);
-                //    }
-                //
-                //    //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
-                //
-                //
-                //    if (mobilePushes == undefined
-                //        || Object.keys(mobilePushes).length == 0) {
-                //        console.log('no mobile buttons push');
-                //        continue;
-                //    }
-                //
-                //    var buttonsStr = mobilePushes[Object.keys(mobilePushes)[0]];
-                //
-                //    if (buttonsStr == '[]') {
-                //        console.log('no mobile buttons push');
-                //        continue;
-                //    }
-                //
-                //    if (!scope.demoMode) {
-                //        buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
-                //        mobilePushes = JSON.parse(buttonsStr);
-                //    }
-                //    //console.log('mobilePushes array', {pushes: mobilePushes});
-                //
-                //    if (mobilePushes == undefined) continue;
-                //
-                //    checkPushesTimeGMTZone(mobilePushes);
-                //
-                //    for (var i = 0; i < mobilePushes.length; i++) {
-                //        if (mobilePushes[i].canceled) continue;
-                //
-                //        //console.log("mobilePushes[i]", mobilePushes[i]);
-                //        //var mobileString=JSON.stringify(mobilePushes[i]);
-                //        //console.log("mobileString", mobileString);
-                //
-                //        //if (mobilePushes[i].gps_time_ts == undefined) {
-                //        //    if (mobilePushes[i].gps_time) {
-                //        //        mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);//+60*60*4 Костыль для IDS у которых не настроены часовые пояса на телефонах водителей.
-                //        //    } else {
-                //        //        //mobilePushes[i].gps_time_ts = 0;
-                //        //    }
-                //        //}
-                //
-                //        if (mobilePushes[i].gps_time_ts > rootScope.data.server_time) continue;
-                //
-                //        for (var j = 0; j < rootScope.data.routes.length; j++) {
-                //            for (var k = 0; k < rootScope.data.routes[j].points.length; k++) {
-                //                tmpPoint = rootScope.data.routes[j].points[k];
-                //                LAT = parseFloat(tmpPoint.LAT);
-                //                LON = parseFloat(tmpPoint.LON);
-                //                lat = mobilePushes[i].lat;
-                //                lon = mobilePushes[i].lon;
-                //
-                //                // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
-                //                if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
-                //                    //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
-                //
-                //                    tmpPoint.mobile_push = mobilePushes[i];
-                //                    tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
-                //                    mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
-                //                    // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
-                //                    // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
-                //                    if (mobilePushes[i].distance <= scope.params.mobileRadius * 2) {
-                //                        tmpPoint.havePush = true;
-                //
-                //
-                //                        //TODO
-                //                        //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
-                //                        tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
-                //
-                //                        // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
-                //                        tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
-                //
-                //                        rootScope.data.routes[j].lastPointIndx = k > rootScope.data.routes[j].lastPointIndx ? k : rootScope.data.routes[j].lastPointIndx;
-                //                        rootScope.data.routes[j].pushes = rootScope.data.routes[j].pushes || [];
-                //                        if (mobilePushes[i].gps_time_ts < rootScope.data.server_time) {
-                //                            rootScope.data.routes[j].pushes.push(mobilePushes[i]);
-                //                        }
-                //                        findStatusAndWindowForPoint(tmpPoint);
-                //                        break;
-                //                    } else {
-                //                        rootScope.data.routes[j].pushes = rootScope.data.routes[j].pushes || [];
-                //                        if (mobilePushes[i].gps_time_ts < rootScope.data.server_time) {
-                //                            tmpPoint.havePush = true;
-                //                            mobilePushes[i].long_away = true;
-                //                            rootScope.data.routes[j].pushes.push(mobilePushes[i]);
-                //                        }
-                //                        console.log('>>> OUT of mobile radius');
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
-                //
-                //    allPushes = allPushes.concat(mobilePushes);
-                //}
-
-            }
-            if(scope.filters.route == -1) {
-                rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
-            }else{
-                for(var i = 0; rootScope.data.routes.length > i; i++){
-                    if(rootScope.data.routes[i].filterId == scope.filters.route){
-                        rootScope.$emit('displayCollectionToStatistic', rootScope.data.routes[i].points);
-                        break;
-                    }
-                }
-            }
-        }
+        //function statusUpdate() {
+        //    //console.log('statusUpdate');
+        //    //if (!rootScope.currentDay){
+        //    //    updateDataforPast();
+        //    //    return;
+        //    //}
+        //
+        //
+        //
+        //    var route,
+        //        tmpPoint,
+        //        tmpArrival,
+        //        timeThreshold = scope.params.timeThreshold * 60,
+        //        LAT,
+        //        LON,
+        //        lat,
+        //        lon,
+        //        now = rootScope.data.server_time,
+        //        lastPoint,
+        //        tmpDistance,
+        //        tmpTime,
+        //        status,
+        //        haveUnfinished;
+        //
+        //    // удалением всех свойств задач созданных ранее при назначении статусов перед их переназначением
+        //    for (var i = 0; i < rootScope.data.routes.length; i++) {
+        //        for (var j = 0; j < rootScope.data.routes[i].points.length; j++) {
+        //            tmpPoint = rootScope.data.routes[i].points[j];
+        //
+        //
+        //            //Lля уменьшения количества рассчетов выбрасываем из расчетов следующие категории
+        //            // Подтвержденные точки (из таблицы точек или ручным связыванием точки и стопа)
+        //            // Точки у которых есть пуш и стоп
+        //            // Стопы, которые были более 5 минут назад (Они скорее всего уж)
+        //            //
+        //            //
+        //            //
+        //            //
+        //
+        //
+        //            if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
+        //                //console.log("Подтверждена вручную Уходим");
+        //                continue;
+        //            }
+        //            //
+        //            //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
+        //            //   // console.log("Подтверждена пушем и стопом Уходим");
+        //            //    continue;
+        //            //}
+        //            //
+        //            //if (scope.fastCalc && tmpPoint.haveStop && (_data.routes[i].pushes==undefined || _data.routes[i].pushes =='undefined' ||  _data.routes[i].pushes.length==0) ){
+        //            //    //console.log("Подтверждена стопом. Валидных пушей нет уходим");
+        //            //    continue;
+        //            //}
+        //            //
+        //            //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
+        //            //    //console.log("Точка уже доставлена идем дальше");
+        //            //    continue;
+        //            //}
+        //
+        //           // console.log("Пересчет");
+        //            //tmpPoint.status = STATUS.SCHEDULED;
+        //
+        //            delete tmpPoint.distanceToStop;
+        //            delete tmpPoint.timeToStop;
+        //            delete tmpPoint.haveStop;
+        //            delete tmpPoint.stopState;
+        //            delete tmpPoint.stop_arrival_time;
+        //            delete tmpPoint.real_arrival_time;
+        //            delete tmpPoint.windowType;
+        //            //delete tmpPoint.mobile_push;
+        //            delete tmpPoint.mobile_arrival_time;
+        //            //delete tmpPoint.havePush;
+        //            delete tmpPoint.real_arrival_time;
+        //            delete tmpPoint.confirmed;
+        //            //delete tmpPoint.servicePoints;
+        //            //delete tmpPoint.overdue_time;
+        //            //delete tmpPoint.limit;
+        //
+        //
+        //
+        //
+        //        }
+        //
+        //        rootScope.data.routes[i].lastPointIndx = 0;
+        //        delete rootScope.data.routes[i].pushes;
+        //
+        //
+        //    }
+        //
+        //
+        //
+        //    for (i = 0; i < rootScope.data.routes.length; i++) {
+        //        route = rootScope.data.routes[i];
+        //        //console.log ("route.driver.name", route.driver.NAME);
+        //        route.lastPointIndx = 0;
+        //        if (route.real_track != undefined) {
+        //            for (j = 0; j < route.real_track.length; j++) {
+        //                // если статус не из будущего (в случае демо-режима) и стейт является стопом, b dhtvz проверяем его
+        //                if (route.real_track[j].t1 < rootScope.data.server_time && route.real_track[j].state == "ARRIVAL") {
+        //                    //console.log("считаем стоп", rootScope.data.server_time, route.real_track[j].t1, rootScope.data.server_time-route.real_track[j].t1)
+        //
+        //
+        //
+        //
+        //
+        //
+        //                    tmpArrival = route.real_track[j];
+        //
+        //                    //console.log("tmpArrival",tmpArrival);
+        //                    // перебираем все точки к которым
+        //                    for (var k = 0; k < route.points.length; k++) {
+        //
+        //
+        //
+        //
+        //                        tmpPoint = route.points[k];
+        //
+        //
+        //
+        //
+        //                        if(tmpPoint.rawConfirmed == 1 || tmpPoint.confirmed==true){
+        //                            //console.log("Подтверждена вручную Уходим");
+        //                            continue;
+        //                        }
+        //
+        //                        //if (scope.fastCalc && tmpPoint.haveStop && tmpPoint.havePush) {
+        //                        //    //console.log("Подтверждена пушем и стопом Уходим");
+        //                        //    continue;
+        //                        //}
+        //                        //
+        //                        //if (scope.fastCalc && tmpPoint.haveStop && (rootScope.data.routes[i].pushes==undefined || rootScope.data.routes[i].pushes =='undefined' ||  rootScope.data.routes[i].pushes.length==0) ){
+        //                        //   // console.log("Подтверждена стопом. Валидных пушей нет уходим");
+        //                        //    continue;
+        //                        //}
+        //                        //
+        //                        //if(scope.fastCalc && (tmpPoint.status<=2 || tmpPoint.status==8)){
+        //                        //    //console.log("Точка уже доставлена идем дальше");
+        //                        //    continue;
+        //                        //}
+        //
+        //
+        //
+        //
+        //
+        //                        LAT = parseFloat(tmpPoint.LAT);
+        //                        LON = parseFloat(tmpPoint.LON);
+        //                        lat = parseFloat(tmpArrival.lat);
+        //                        lon = parseFloat(tmpArrival.lon);
+        //
+        //                        tmpPoint.distanceToStop = tmpPoint.distanceToStop || 2000000000;
+        //                        tmpPoint.timeToStop = tmpPoint.timeToStop || 2000000000;
+        //
+        //                        tmpDistance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+        //
+        //                        tmpTime = Math.abs(tmpPoint.arrival_time_ts - tmpArrival.t1);
+        //
+        //
+        //
+        //
+        //
+        //
+        //                        // Если маршрут не просчитан, отдельно проверяем попадает ли стоп в одно из возможных временных окон  и насколько он рядом
+        //                        // и если да, то тоже привязываем стоп к точке
+        //
+        //                        var suit=false;   //Показывает совместимость точки и стопа для непросчитанного маршрута
+        //                        if (route.DISTANCE == 0 && tmpDistance < scope.params.stopRadius ) {
+        //                            suit=checkUncalculateRoute(tmpPoint, tmpArrival);
+        //                        }
+        //
+        //                        // если стоп от точки не раньше значения timeThreshold и в пределах
+        //                        // заданного в настройках радиуса, а так же новый детект ближе по расстояение и
+        //                        // по времени чем предыдущий детект - привязываем этот стоп к точке
+        //
+        //
+        //
+        //                        if (suit || (tmpPoint.arrival_time_ts < tmpArrival.t2 + timeThreshold &&
+        //                            tmpDistance < scope.params.stopRadius && (tmpPoint.distanceToStop > tmpDistance &&
+        //                            tmpPoint.timeToStop > tmpTime))) {
+        //
+        //                            haveUnfinished = false;
+        //
+        //
+        //
+        //                            if (tmpPoint.NUMBER !== '1' && tmpPoint.waypoint != undefined && tmpPoint.waypoint.TYPE === 'WAREHOUSE') {
+        //                                for (var l = k - 1; l > 0; l--) {
+        //                                    status = route.points[l].status;
+        //                                    if (status !== STATUS.FINISHED
+        //                                        && status !== STATUS.FINISHED_LATE
+        //                                        && status !== STATUS.FINISHED_TOO_EARLY
+        //                                        && status !== STATUS.ATTENTION)
+        //                                    {
+        //                                        haveUnfinished = true;
+        //                                        continue;
+        //                                    }
+        //                                }
+        //
+        //                                if (haveUnfinished) {
+        //                                    continue;
+        //                                }
+        //                            }
+        //
+        //
+        //
+        //                            //При привязке к точке нового стопа проверяет какой из стопов более вероятно обслужил эту точку
+        //                            //
+        //                            if(tmpPoint.haveStop == true &&!findBestStop(tmpPoint, tmpArrival)){
+        //                                continue;
+        //                            }
+        //
+        //
+        //
+        //
+        //                            tmpPoint.distanceToStop = tmpDistance;
+        //                            tmpPoint.timeToStop = tmpTime;
+        //                            tmpPoint.haveStop = true;
+        //
+        //
+        //
+        //
+        //                            //{ if (tmpArrival.t1 > tmpPoint.controlled_window.start) && (tmpArrival.t1<tmpPoint.controlled_window.finish){
+        //                            //    tmpPoint.limit=60;
+        //                            //} else {tmpPoint.limit=60; } }
+        //
+        //                            //tmpPoint.moveState = j > 0 ? route.real_track[j - 1] : undefined;
+        //                            tmpPoint.stopState = tmpArrival;
+        //                            //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
+        //
+        //                            route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+        //                            tmpPoint.stop_arrival_time = tmpArrival.t1;
+        //                            tmpPoint.real_arrival_time = tmpArrival.t1;
+        //                            tmpPoint.autofill_service_time = tmpArrival.time;
+        //                            //route.points[k]
+        //                            //console.log("route-point-k", route.points[k], "route" , route)
+        //
+        //                            if (angular.isUndefined(tmpArrival.servicePoints)==true){
+        //                                tmpArrival.servicePoints=[];
+        //                            }
+        //
+        //
+        //
+        //                            // проверка, существует ли уже этот пуш
+        //                            var ip=0;
+        //                            var sPointExist=false;
+        //                            while(ip<tmpArrival.servicePoints.length){
+        //                               if(tmpArrival.servicePoints[ip]==k){
+        //                                   sPointExist=true;
+        //                                   break;
+        //                               }
+        //                                ip++;
+        //                            }
+        //                            if(!sPointExist){
+        //                            tmpArrival.servicePoints.push(k);}
+        //
+        //                           // tmpPoint.rawConfirmed=0;
+        //
+        //                            //console.log("Find stop for Waypoint and change STATUS")
+        //                            findStatusAndWindowForPoint(tmpPoint);
+        //
+        //
+        //                        }
+        //
+        //
+        //                    }
+        //                }
+        //
+        //            }
+        //
+        //
+        //           // console.log("PRE Last point for route ", route.ID, " is ", route.points[route.lastPointIndx].NUMBER);
+        //            lastPoint = route.points[route.lastPointIndx];
+        //           // console.log("POST Last point for route ", route.ID, " is ", lastPoint.NUMBER);
+        //
+        //            // проверка последней определенной точки на статус выполняется
+        //            if (lastPoint != null && route.car_position !=  undefined) {
+        //               // console.log("Route", route);
+        //                if (lastPoint.arrival_time_ts + parseInt(lastPoint.TASK_TIME) > now
+        //                    && getDistanceFromLatLonInM(route.car_position.lat, route.car_position.lon,
+        //                        lastPoint.LAT, lastPoint.LON) < scope.params.stopRadius) {
+        //                    lastPoint.status = STATUS.IN_PROGRESS;
+        //                }
+        //            }
+        //        }
+        //
+        //       // console.log("Last point for route", route.ID, _data.routes[i].ID, " is ", route.lastPointIndx, lastPoint.NUMBER );
+        //
+        //    }
+        //
+        //    console.log("Step1 parentForm", parentForm);
+        //
+        //
+        //    //console.log("parentFORM=", parentForm);
+        //    console.trace();
+        //    if (parentForm == undefined && !scope.demoMode) {
+        //        checkConfirmedFromLocalStorage();
+        //        //_data.companyName = 'IDS';
+        //        scope.$emit('companyName', rootScope.data.companyName);
+        //        //scope.$emit('forCloseController', _data); // это реализовано около строки 308
+        //       // console.log("RETURN?????????");
+        //    }else {
+        //
+        //
+        //        //console.log("Step2____________________________!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //
+        //        var mobilePushes = [],
+        //            allPushes = [];
+        //
+        //        // генерируем мобильные нажатия, если мы в демо-режиме
+        //        if (scope.demoMode) {
+        //            var rand,
+        //                gpsTime,
+        //                tmp,
+        //                tmpLen,
+        //                tmpCoord,
+        //                tmpLat,
+        //                tmpLon,
+        //                tmpRoute;
+        //
+        //            tmpTime = undefined;
+        //            rootScope.data.companyName = 'Demo';
+        //            for (var i = 0; i < rootScope.data.routes.length; i++) {
+        //
+        //                tmpRoute = rootScope.data.routes[i];
+        //                seed = i * 122;
+        //                rand = random(0, 3600);
+        //                for (var j = 0; j < tmpRoute.points.length; j++) {
+        //                    if (rootScope.data.server_time > (tmpRoute.points[j].arrival_time_ts + (rand - 1800))) {
+        //                        if (random(1, 8) != 1) {
+        //                            tmp = (tmpRoute.points[j].arrival_time_ts + (random(1, 900) - 300)) * 1000;
+        //                            gpsTime = filter('date')(tmp, 'dd.MM.yyyy HH:mm:ss');
+        //
+        //                            if (tmpRoute.points[j].haveStop &&
+        //                                tmpRoute.points[j].stopState != undefined &&
+        //                                tmpRoute.points[j].stopState.coords &&
+        //                                (tmpLen = tmpRoute.points[j].stopState.coords.length) > 0) {
+        //
+        //                                tmpLen = tmpLen > 20 ? 20 : tmpLen;
+        //                                tmpCoord = tmpRoute.points[j].stopState.coords[random(0, tmpLen)];
+        //                                tmpLat = tmpCoord.lat;
+        //                                tmpLon = tmpCoord.lon;
+        //                            } else {
+        //                                tmpLat = parseFloat(tmpRoute.points[j].LAT) + (random(0, 4) / 10000 - 0.0002);
+        //                                tmpLon = parseFloat(tmpRoute.points[j].LON) + (random(0, 4) / 10000 - 0.0002);
+        //                            }
+        //
+        //                            mobilePushes.push({
+        //                                cancel_reason: "",
+        //                                canceled: false,
+        //                                gps_time: gpsTime,
+        //                                lat: tmpLat,
+        //                                lon: tmpLon,
+        //                                number: tmpRoute.points[j].TASK_NUMBER,
+        //                                time: gpsTime
+        //                            });
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        } else {
+        //            // получаем через 1С-ый parentForm имя клиента
+        //            //console.log("Step3");
+        //            rootScope.data.companyName = parentForm._call('getClientName');
+        //        }
+        //        //console.log( rootScope.data.companyName, ' cmpanyName');
+        //
+        //        scope.$emit('companyName', rootScope.data.companyName);
+        //
+        //        // по каждому доступному решению запрашиваем нажатия
+        //
+        //        //console.log("!!!!!!Find pushes. Where are you?!!!!!!");
+        //        //var newSettings1 = parentForm._call('getConfig()');
+        //        //var newSettings2 = parentForm._call('getConfig');
+        //        //console.log("All Settings", newSettings, newSettings1, newSettings2);
+        //
+        //        //for (var m = 0; m < rootScope.data.idArr.length; m++) {
+        //        //
+        //        //    if (scope.demoMode) {
+        //        //        m = 2000000000;
+        //        //    } else {
+        //        //        // console.log("$%$%$%$%$%$%$%$%Filters", scope.filters.route,  "Editing", rootScope.editing.uniqueID);
+        //        //
+        //        //        mobilePushes = parentForm._call('getDriversActions', [rootScope.data.idArr[m], getDateStrFor1C(rootScope.data.server_time * 1000)]);
+        //        //    }
+        //        //
+        //        //    //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA mobilePushes recieved", mobilePushes);
+        //        //
+        //        //
+        //        //    if (mobilePushes == undefined
+        //        //        || Object.keys(mobilePushes).length == 0) {
+        //        //        console.log('no mobile buttons push');
+        //        //        continue;
+        //        //    }
+        //        //
+        //        //    var buttonsStr = mobilePushes[Object.keys(mobilePushes)[0]];
+        //        //
+        //        //    if (buttonsStr == '[]') {
+        //        //        console.log('no mobile buttons push');
+        //        //        continue;
+        //        //    }
+        //        //
+        //        //    if (!scope.demoMode) {
+        //        //        buttonsStr = buttonsStr.substr(1, buttonsStr.length - 2);
+        //        //        mobilePushes = JSON.parse(buttonsStr);
+        //        //    }
+        //        //    //console.log('mobilePushes array', {pushes: mobilePushes});
+        //        //
+        //        //    if (mobilePushes == undefined) continue;
+        //        //
+        //        //    checkPushesTimeGMTZone(mobilePushes);
+        //        //
+        //        //    for (var i = 0; i < mobilePushes.length; i++) {
+        //        //        if (mobilePushes[i].canceled) continue;
+        //        //
+        //        //        //console.log("mobilePushes[i]", mobilePushes[i]);
+        //        //        //var mobileString=JSON.stringify(mobilePushes[i]);
+        //        //        //console.log("mobileString", mobileString);
+        //        //
+        //        //        //if (mobilePushes[i].gps_time_ts == undefined) {
+        //        //        //    if (mobilePushes[i].gps_time) {
+        //        //        //        mobilePushes[i].gps_time_ts = strToTstamp(mobilePushes[i].gps_time);//+60*60*4 Костыль для IDS у которых не настроены часовые пояса на телефонах водителей.
+        //        //        //    } else {
+        //        //        //        //mobilePushes[i].gps_time_ts = 0;
+        //        //        //    }
+        //        //        //}
+        //        //
+        //        //        if (mobilePushes[i].gps_time_ts > rootScope.data.server_time) continue;
+        //        //
+        //        //        for (var j = 0; j < rootScope.data.routes.length; j++) {
+        //        //            for (var k = 0; k < rootScope.data.routes[j].points.length; k++) {
+        //        //                tmpPoint = rootScope.data.routes[j].points[k];
+        //        //                LAT = parseFloat(tmpPoint.LAT);
+        //        //                LON = parseFloat(tmpPoint.LON);
+        //        //                lat = mobilePushes[i].lat;
+        //        //                lon = mobilePushes[i].lon;
+        //        //
+        //        //                // каждое нажатие проверяем с каждой точкой в каждом маршруте на совпадение номера задачи
+        //        //                if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
+        //        //                    //console.log("FIND PUSH ", mobilePushes[i], "for Waypoint", tmpPoint );
+        //        //
+        //        //                    tmpPoint.mobile_push = mobilePushes[i];
+        //        //                    tmpPoint.mobile_arrival_time = mobilePushes[i].gps_time_ts;
+        //        //                    mobilePushes[i].distance = getDistanceFromLatLonInM(lat, lon, LAT, LON);
+        //        //                    // если нажатие попадает в радиус заданный в настройках, нажатие считается валидным
+        //        //                    // Для большей захвата пушей, их радиус увеличен в 2 раза по сравнению с расстоянием до стопа
+        //        //                    if (mobilePushes[i].distance <= scope.params.mobileRadius * 2) {
+        //        //                        tmpPoint.havePush = true;
+        //        //
+        //        //
+        //        //                        //TODO
+        //        //                        //Пока нет валидного времени с GPS пушей, закомментируем следующую строку
+        //        //                        tmpPoint.real_arrival_time = tmpPoint.real_arrival_time || mobilePushes[i].gps_time_ts;
+        //        //
+        //        //                        // если точка уже подтверждена или у неё уже есть связанный стоп - она считается подтвержденной
+        //        //                        tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
+        //        //
+        //        //                        rootScope.data.routes[j].lastPointIndx = k > rootScope.data.routes[j].lastPointIndx ? k : rootScope.data.routes[j].lastPointIndx;
+        //        //                        rootScope.data.routes[j].pushes = rootScope.data.routes[j].pushes || [];
+        //        //                        if (mobilePushes[i].gps_time_ts < rootScope.data.server_time) {
+        //        //                            rootScope.data.routes[j].pushes.push(mobilePushes[i]);
+        //        //                        }
+        //        //                        findStatusAndWindowForPoint(tmpPoint);
+        //        //                        break;
+        //        //                    } else {
+        //        //                        rootScope.data.routes[j].pushes = rootScope.data.routes[j].pushes || [];
+        //        //                        if (mobilePushes[i].gps_time_ts < rootScope.data.server_time) {
+        //        //                            tmpPoint.havePush = true;
+        //        //                            mobilePushes[i].long_away = true;
+        //        //                            rootScope.data.routes[j].pushes.push(mobilePushes[i]);
+        //        //                        }
+        //        //                        console.log('>>> OUT of mobile radius');
+        //        //                    }
+        //        //                }
+        //        //            }
+        //        //        }
+        //        //    }
+        //        //
+        //        //    allPushes = allPushes.concat(mobilePushes);
+        //        //}
+        //
+        //    }
+        //    if(scope.filters.route == -1) {
+        //        rootScope.$emit('displayCollectionToStatistic', scope.displayCollection);
+        //    }else{
+        //        for(var i = 0; rootScope.data.routes.length > i; i++){
+        //            if(rootScope.data.routes[i].filterId == scope.filters.route){
+        //                rootScope.$emit('displayCollectionToStatistic', rootScope.data.routes[i].points);
+        //                break;
+        //            }
+        //        }
+        //    }
+        //}
 
         function random(min, max) {
             var x = Math.sin(seed++) * 10000;
@@ -4902,6 +4902,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             point.autofill_service_time = dataForPoint.stop.duration;
+            //point.autofill_change = '4905';
             point.limit = 90;
 
             point.windowType = "Вне окон";

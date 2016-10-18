@@ -526,8 +526,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 //Добавление титра реально обслужено. Если нет введенного в ручную параметра real_service_time то ставится автоматически время всего стопа
-                if(typeof (point.autofill_service_time)!='undefined'){
-                    title += 'Реально обслужено за: ' + mmhh((point.real_service_time) || (point.autofill_service_time)) + '\n';
+                if(typeof (point.stopState)!='undefined'){
+                    title += 'Реально обслужено за: ' + mmhh((point.real_service_time) || (point.stopState.time)) + '\n';
                 }
 
 
@@ -1121,6 +1121,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //console.log("Centre map");
         function setMapCenter(lat, lon, newZoom) {
 
+            lat=parseFloat(lat);
+            lon=parseFloat(lon);
+            console.log("Работает функция центровки по координате", lat, lon);
+
             var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
                 offset = map.getSize(),
                 tmp = map.project(new L.LatLng(lat, lon), newZoom||zoom).subtract(
@@ -1502,10 +1506,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var k= container._icon.title.indexOf("Реально обслужено");
             if (k<0){
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
+                //container.source.autofill_change = '1505';
                 container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n' ;
             } else {
                 container._icon.title=container._icon.title.substring(0,k);
                 container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n' ;
+                //container.source.autofill_change = '1510';
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
             }
         }
@@ -1539,9 +1545,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var k= container._icon.title.indexOf("Реально обслужено");
             if (k<0){
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
+                //container.source.autofill_change = '1544';
             } else {
                 container._icon.title=container._icon.title.substring(0,k);
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
+                //container.source.autofill_change = '1548';
             }
         }
 
@@ -1903,6 +1911,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             delete container.source.stopState;
             delete container.source.stop_arrival_time;
             delete container.source.autofill_service_time;
+            container.source.autofill_delete = '1910';
             delete container.source.real_service_time;
             delete container.source.haveStop;
             delete container.source.real_arrival_time;
@@ -2236,15 +2245,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         function showProblemPoint(route) {
             map.setZoom(18);
 
-            if (!route || !route.problem_point || !route.problem_point.waypoint ) return;
-            console.log("Координаты центра", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON));
+            if (!route || !route.problem_point || !route.problem_point.waypoint || !scope.showProblemPoint) return;
+            console.log("Координаты самой проблемной точки", parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON));
             setMapCenter(parseFloat(route.problem_point.waypoint.LAT), parseFloat(route.problem_point.waypoint.LON), 18);
-
+            scope.showProblemPoint = false;
 
         }
 
 
         rootScope.$on('showproblem', function(event, route){
+            scope.showProblemPoint = true;
             showProblemPoint(route);
         });
         //rootScope.$on('receiveproblem', function (event, cache) {
@@ -2277,6 +2287,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         function displayMarkers (globalMarkers) {
+            console.log("Работает функция отображения всех маркеров");
             //console.log("Zoom1", map.getZoom());
             //console.log(globalMarkers);
             if (globalMarkers != undefined && globalMarkers.length > 0) {

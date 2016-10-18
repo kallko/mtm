@@ -228,11 +228,16 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
     scope.checkRoutes = function (){
+        console.log("Check start");
         if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length <1 ) return;
         for (var i=0; i<rootScope.data.routes.length; i++){
+
             var route = rootScope.data.routes[i];
+            console.log("Route", route.uniqueID);
             for (var j=0; j<route.points.length; j++){
+                //console.log(j);
                 if (route.points[j].stopState != undefined) {
+                    //console.log("Сравнение", route.points[j].autofill_service_time , route.points[j].stopState.time)
                     if (route.points[j].autofill_service_time != route.points[j].stopState.time) {
                         console.log("Find Problem ", route.points[j]);
                     }
@@ -247,7 +252,8 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         console.log("begin");
         http.get('./saveData')
             .success(function (data){
-                console.log("Success", data);
+                alert("Saving complete. Result is in console" );
+                console.log("Result of saving", data.mes)
 
             });
 

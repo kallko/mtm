@@ -92,7 +92,7 @@ router.route('/')
         try {
         res.status(200);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -102,7 +102,7 @@ router.route('/currentsrvertime')
         try {
         res.status(200).json(Date.now());
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -111,14 +111,17 @@ router.route('/saveData')
     .get(function(req, res){
         log.info("Start data saving");
         var data = JSON.stringify(cashedDataArr);
+        var mes ='complete'
 
         try {
             fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
-                if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);});
+                if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);
+                mes+= err;
+            });
 
-            res.status(200).json({mes: "complete"});
+            res.status(200).json({mes: mes });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -139,7 +142,7 @@ router.route('/loadData')
 
             res.status(200).json({msg: 'complete'});
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -163,7 +166,7 @@ router.route('/keysoldroutescache')
         }
 
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
 
     });
@@ -174,7 +177,7 @@ router.route('/getoldroute')
         var currentCompany = companyLogins[key];
         res.status(200).json(oldRoutesCache[currentCompany][req.body.date]);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -240,7 +243,7 @@ router.route('/updatetrack')
         //        function(err, results) {log.info("Third", results)});
 
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 });
 
@@ -283,7 +286,7 @@ router.route('/nodeserch')
     //        function(err, results) {log.info("Third", results)});
         res.status(200).json(result);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -298,7 +301,7 @@ router.route('/login')
 
         res.sendFile('index.html', {root: './public/'});
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -653,7 +656,7 @@ router.route('/dailydata')
 
         }
     } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -718,7 +721,7 @@ router.route('/askforroute')
         res.status(200).json({route: result});
 
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
 
     });
@@ -736,7 +739,7 @@ router.route('/checklocks/:itineraryid')
             res.status(200).json({status: 'no_changes'});
         }
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -758,7 +761,7 @@ router.route('/opentask/:itineraryid/:taskid')
                 });
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -773,7 +776,7 @@ router.route('/unlocktask/:itineraryid/:taskid')
             res.status(200).json({status: 'not_yours'});
         }
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -794,7 +797,7 @@ router.route('/lockroute/:itineraryid/:routeid/:tasks')
                 res.status(200).json({status: 'locked', byUser: user});
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -807,7 +810,7 @@ router.route('/unlockroute/:itineraryid/:routeid/:tasks')
         var result = locker.unlockRoute(req.params.itineraryid, tasksArr, req.session.login);
         res.status(200).json(result);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -828,7 +831,7 @@ router.route('/tracks/:gid&:from&:to&:undef_t&:undef_d&:stop_s&:stop_d&:move_s&:
                 res.status(200).json(data);
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -901,7 +904,7 @@ router.route('/trackparts/:start/:end')
                 res.status(200).json(data);
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -918,7 +921,7 @@ router.route('/gettracksbystates')
 
 
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
 
     });
@@ -933,7 +936,7 @@ router.route('/findpath2p/:lat1&:lon1&:lat2&:lon2')
                 res.status(200).json(data);
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -946,7 +949,7 @@ router.route('/findtime2p/:lat1&:lon1&:lat2&:lon2')
                 res.status(200).json(data);
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -960,7 +963,7 @@ router.route('/recalculate')
             res.status(200).json(data);
         });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -979,7 +982,7 @@ router.route('/saveroute/')
             }
         });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1018,7 +1021,7 @@ router.route('/savewaypoint/')
             }
         });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1164,7 +1167,7 @@ router.route('/routerdata')
         log.info('routerdata', routeIndx);
         tracksManager.getRouterData(cData, routeIndx, -1, checkFunc, callback, true);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1178,7 +1181,7 @@ router.route('/getroutermatrix/:points')
             res.status(200).json(data);
         });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1191,7 +1194,7 @@ router.route('/openidspointwindow/:pointId')
         soapManager.openPointWindow(req.session.login, req.params.pointId);
         res.status(200).json({status: 'ok'});
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1248,7 +1251,7 @@ router.route('/closeday')
                 }
             });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1266,7 +1269,7 @@ router.route('/log')
             res.status(200).json({error: err, result: result});
         });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1276,7 +1279,7 @@ router.route('/test')
         log.info(req.session.login);
         res.status(200).json({sessionLogin: req.session.login});
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1291,7 +1294,7 @@ router.route('/currentStops/:gid/:from/:to')
             res.status(200).json(rData);
         });
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1309,7 +1312,7 @@ router.route('/UrgentOrder/')
             res.status(200).json('ок');
 
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1375,7 +1378,7 @@ router.route('/predicate/')
             j++;
         }
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1415,7 +1418,7 @@ router.route('/changedriver/')
 
         res.status(200).json("ok");
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1476,7 +1479,7 @@ router.route('/savetonode/')
 
         res.status(200).json("error");
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1550,7 +1553,7 @@ router.route('/logout')
         log.info("Logout complete");
         res.status(200).json("ok");
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1579,7 +1582,7 @@ router.route('/getServerStatus')
         //log.info("Result ", result);
         res.status(200).json({result :result});
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1795,7 +1798,7 @@ router.route('/askforproblems/:need')
         log.info("Result length", result.routes.length);
         res.status(200).json(result);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1855,7 +1858,7 @@ router.route('/confirmonline')
 
         res.status(200).json(result);
         } catch (e) {
-            console.error( "Ошибка "+ e + e.stack);
+            log.error( "Ошибка "+ e + e.stack);
         }
     });
 
@@ -1903,7 +1906,7 @@ function getTstampAvailabilityWindow(strWindows, currentTime) {
 
     return resWindows;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -1916,7 +1919,7 @@ function cutFIO(fioStr) {
     var parts = fioStr.split(' ');
     return ( (parts[0]) ? parts[0] + ' ' : "" ) + ( (parts[1]) ? parts[1] : "" );
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -1974,7 +1977,7 @@ function strToTstamp(strDate, lockaldata) {
 
     return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -2300,7 +2303,7 @@ function linkDataParts (currentCompany, login) {
     log.info("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
     checkCorrectCalculating(currentCompany);
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -2746,7 +2749,7 @@ function startPeriodicCalculating() {
             }
         }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -2861,7 +2864,7 @@ function dataForPredicate(company, callback){
     //TODO переделать этот костыль. Сюда не должно заходить.
     //Если зашло сюда, значит не было данных для придиката.
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -2926,7 +2929,7 @@ try{
     }
 
 } catch (e) {
-    console.error( "Ошибка "+ e + e.stack);
+    log.error( "Ошибка "+ e + e.stack);
 }
 }
 
@@ -3114,7 +3117,7 @@ try {
 
     }
 } catch (e) {
-    console.error( "Ошибка "+ e + e.stack);
+    log.error( "Ошибка "+ e + e.stack);
 }
     }
 
@@ -3147,7 +3150,7 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
         i++
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3162,7 +3165,7 @@ function timestmpToStr(d) {
             d.getMinutes().padLeft(),
             d.getSeconds().padLeft()].join(':');
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -3173,7 +3176,7 @@ Number.prototype.padLeft = function (base, chr) {
     var len = (String(base || 10).length - String(this).length) + 1;
     return len > 0 ? new Array(len).join(chr || '0') + this : this;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 };
 
@@ -3193,7 +3196,7 @@ function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
     //log.info("lat1", lat1, "lon1", lon1, "lat2", lat2, "lon2", lon2, ' dist', d*1000);
     return d * 1000;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3202,7 +3205,7 @@ function deg2rad(deg) {
     try {
     return deg * (Math.PI / 180)
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3236,7 +3239,7 @@ function checkUncalculateRoute(point, stop, company){
 
     return result;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3302,7 +3305,7 @@ function findBestStop(point, stop){
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3348,7 +3351,7 @@ function  checkOnline(company) {
 
     return result;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3365,7 +3368,7 @@ function checkRealTrackData (company) {
         }
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -3931,7 +3934,7 @@ try {
 
         });
 } catch (e) {
-    console.error( "Ошибка "+ e + e.stack);
+    log.error( "Ошибка "+ e + e.stack);
 }
 }
 
@@ -3962,7 +3965,7 @@ try {
         log.info("PRIORITY", priority[i]);
     }
 } catch (e) {
-    console.error( "Ошибка "+ e + e.stack);
+    log.error( "Ошибка "+ e + e.stack);
 }
 }
 
@@ -4006,7 +4009,7 @@ function choseRouteForOperator(company, login){
         return -1;
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -4108,7 +4111,7 @@ function connectPointsAndPushes(company) {
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -4277,6 +4280,8 @@ function connectStopsAndPoints(company) {
                             tmpPoint.stop_arrival_time = tmpArrival.t1;
                             tmpPoint.real_arrival_time = tmpArrival.t1;
                             tmpPoint.autofill_service_time = tmpPoint.stopState.time;
+                            //if (tmpPoint.autofill_create != undefined) tmpPoint.autofill_change = '4280';
+                            //tmpPoint.autofill_create ='4281' + tmpPoint.stopState.id;
                             //route.points[k]
                             //log.info("route-point-k", route.points[k], "route" , route)
 
@@ -4333,7 +4338,7 @@ function connectStopsAndPoints(company) {
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -4508,7 +4513,7 @@ function findStatusesAndWindows(company) {
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -4543,7 +4548,7 @@ function calculateStatistic (company){
     }
 
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4559,7 +4564,7 @@ function oldDayStatuses(company) {
         }
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4574,7 +4579,7 @@ function oldDayCalculate (company, data) {
     concat1CAndMonitoring (company);
 
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4606,7 +4611,7 @@ function checkUniqueID (company){
         }
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4616,7 +4621,7 @@ function selectRoutes(company) {
     cashedDataArr[company].routes = cashedDataArr[company].routes.concat(cashedDataArr[company].line_routes);
     cashedDataArr[company].line_routes.length=0;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4674,7 +4679,7 @@ function serchInCache(input, company) {
     }
     return hits;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4787,7 +4792,7 @@ function printData(company) {
         "В том числе с разницей более 15 минут " + biger15 + "\n"+
         "Точек с неопределенным статусом " + undefinedCount);
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4808,7 +4813,7 @@ function unblockInData(data){
         }
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -4834,7 +4839,7 @@ function unblockLogin(login) {
     //
     //}
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -4871,7 +4876,7 @@ function cancelTaskPush(push, point, company){
     }
 
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 
@@ -4953,7 +4958,7 @@ function checkCorrectCalculating(company){
             }
         }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5011,7 +5016,7 @@ function createArrivalTime (tPoint, route, controlledWindow, company) {
         tPoint.working_window = tPoint.orderWindows;
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5037,7 +5042,7 @@ function createFilterIdForOldDay(company) {
     }
     log.info("FINISH createFilterIdForOldDay");
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5073,7 +5078,7 @@ function createSeveralAviabilityWindows (point){
         i++;
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -5118,7 +5123,7 @@ function checkOrderSuit (point, stop, company) {
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 };
@@ -5137,7 +5142,7 @@ function predicateTime(company) {
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5303,7 +5308,7 @@ function calculateProblemIndex(company) {
         }
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 
 }
@@ -5341,7 +5346,7 @@ function createProblems(company) {
     log.info("Прошлых незакрытых роутов", cashedDataArr[company].oldRoutes ? cashedDataArr[company].oldRoutes.length:0);
 
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5365,7 +5370,7 @@ function checkServiceTime(company) {
 
             if( cashedDataArr[company].routes[i].points[j].waypoint == undefined ||
                 cashedDataArr[company].routes[i].points[j].TASK_TIME == "0" ||
-                !(cashedDataArr[company].routes[i].points[j].autofill_service_time > 0  || cashedDataArr[company].routes[i].points[j].real_service_time > 0)){
+                !(cashedDataArr[company].routes[i].points[j].stopState   || cashedDataArr[company].routes[i].points[j].real_service_time > 0)){
                 //console.log ("Delta UNDEFINED");
                 continue;
             }
@@ -5373,7 +5378,7 @@ function checkServiceTime(company) {
             if(cashedDataArr[company].routes[i].points[j].real_service_time != undefined) {
                 time = cashedDataArr[company].routes[i].points[j].real_service_time
             } else {
-                time = cashedDataArr[company].routes[i].points[j].autofill_service_time
+                time = cashedDataArr[company].routes[i].points[j].stopState.time
             }
 
             var delta = (time/(parseInt(cashedDataArr[company].routes[i].points[j].TASK_TIME))).toFixed(2);
@@ -5394,7 +5399,7 @@ function checkServiceTime(company) {
         }
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5441,7 +5446,7 @@ function checkeConcatTrack(company, id, data){
         log.info("Получен стейт", newTrack[i]);
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5508,7 +5513,7 @@ function checkSync(company, login, blockedArr) {
 
     return result;
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5559,7 +5564,7 @@ function concat1CAndMonitoring (company) {
         log.info ("outside t == tt", t, " ", tt);
         if (t==0 || t == tt) continueConcat(company);
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5586,7 +5591,7 @@ function loadCoords(company) {
 
     }
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
@@ -5615,7 +5620,7 @@ function startCalculateCompany(company) {
     printData(company); //todo статистическая функция, можно убивать
     if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {
-        console.error( "Ошибка "+ e + e.stack);
+        log.error( "Ошибка "+ e + e.stack);
     }
 }
 
