@@ -227,6 +227,22 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     };
 
 
+    scope.checkRoutes = function (){
+        if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length <1 ) return;
+        for (var i=0; i<rootScope.data.routes.length; i++){
+            var route = rootScope.data.routes[i];
+            for (var j=0; j<route.points.length; j++){
+                if (route.points[j].stopState != undefined) {
+                    if (route.points[j].autofill_service_time != route.points[j].stopState.time) {
+                        console.log("Find Problem ", route.points[j]);
+                    }
+                }
+            }
+        }
+
+    };
+
+
     scope.saveData = function () {
         console.log("begin");
         http.get('./saveData')

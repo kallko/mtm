@@ -1484,6 +1484,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     if (markersArr[i].source.NUMBER==(indx+1)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
+                        //container.remake = true;
                         markersArr[i].source.confirmed=true;
                         markersArr[i].source.rawConfirmed=1;
                         console.log("markersArr[i]", markersArr[i]);
@@ -1501,10 +1502,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var k= container._icon.title.indexOf("Реально обслужено");
             if (k<0){
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
-                container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n';
+                container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n' ;
             } else {
                 container._icon.title=container._icon.title.substring(0,k);
-                container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n';
+                container._icon.title+="Реально обслужено за: " + mmhh(scope.currentDraggingStop.source.time) + '\n' ;
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
             }
         }

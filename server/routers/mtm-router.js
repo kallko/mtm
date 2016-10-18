@@ -181,7 +181,7 @@ router.route('/getoldroute')
 router.route('/updatetrack')
     .post (function(req, res){
     try {
-        log.info ("Получил запрос на поиск", req.body.data);
+        log.info ("Получил запрос на updatetrack", req.body.data);
 
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
@@ -3916,7 +3916,7 @@ try {
                             startServer = true;
                             var timerId = setInterval(function() {
                                 startPeriodicCalculating(currentCompany);
-                            }, 120 * 1000);}
+                            }, 88 * 1000);}
 
                     cashedDataArr[company].oldRoutes=[];
                     log.info("Старые маршрутыб было", cashedDataArr[company].oldRoutes.length, "пришло", oldRoutes.length );
