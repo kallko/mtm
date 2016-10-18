@@ -5023,7 +5023,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //console.log("States 5093", states);
                     //console.log("Перед отправкой запроса", states != undefined , gid != undefined , states[0] != undefined);
                     if (states != undefined && gid != undefined && states[0] != undefined) {
-                        showPopup("Подгрузка трека автомобиля", 3000);
+                        //showPopup("Подгрузка трека автомобиля", 3000);
                         http.post('./gettracksbystates', {states: states, gid: gid, demoTime:false})
                             .success( function  (data) {
                                 console.log("Трек загружен", data);
