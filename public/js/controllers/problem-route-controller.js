@@ -185,9 +185,12 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
      rootScope.showProblem = function(route) {
-         scope.$emit('clearMap');
+            rootScope.redrawProblemRoute = false;
+            scope.$emit("possibleRedraw", route.filterId);
             //alert("Я все вижу" + route.filterId);
-         if (route == undefined || route.filterId == undefined) return;
+         if (route == undefined || route.filterId == undefined || rootScope.redrawProblemRoute) return;
+
+            scope.$emit('clearMap');
             scope.$emit('choseproblem', route.filterId);
             scope.$emit('routeToChange', ('routeToChange', {
                 route: route,

@@ -5087,6 +5087,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
 
+        rootScope.$on("possibleRedraw", function(event, id) {
+            if (id == scope.filters.route) rootScope.redrawProblemRoute = true;
+        });
+
+
+
         rootScope.$on('clearDisplay', function(event) {
             console.log ("Расчищаем коллекцию");
             scope.rowCollection = [];                          // коллекция всех задач дял отображения во вьюшке

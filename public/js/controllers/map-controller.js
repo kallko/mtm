@@ -685,7 +685,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             while (j < markersArr.length) {
                 if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                     if (number == markersArr[j].source.NUMBER) {
-                        var polyline = new L.Polyline([[servicePointsLat, servicePointsLng], [markersArr[j]._latlng.lat, markersArr[j]._latlng.lng]], {
+                        var polyline = new L.Polyline([[parseFloat(servicePointsLat), parseFloat(servicePointsLng)], [parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng)]], {
                             color: '#46b8da',
                             weight: 4,
                             opacity: 0.5,
