@@ -259,8 +259,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         fromPoint = scope.changedRoute.points[i - 1];
                         toPoint = scope.changedRoute.points[i];
                         //console.log("RouterData", i);
-                        cTime = applyTravelTimeToPoint(toPoint,
-                            routerData.timeTable[fromPoint.base_index][toPoint.base_index] / 10, cTime);
+                        cTime = applyTravelTimeToPoint(toPoint, routerData.timeTable[fromPoint.base_index][toPoint.base_index] / 10, cTime);
                     }
 
                     // после пересчета обновляем данные о блоках

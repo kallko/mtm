@@ -33,7 +33,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                     //todo запрос на обнговление трека
 
-                    if (false && rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false){
+                    if ( rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false){
                         var obj =[];
                         for (var i=0; i< rootScope.data.routes.length; i++){
                             if (rootScope.data.routes[i].real_track != undefined
@@ -185,6 +185,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
      rootScope.showProblem = function(route) {
+         scope.$emit('clearMap');
             //alert("Я все вижу" + route.filterId);
          if (route == undefined || route.filterId == undefined) return;
             scope.$emit('choseproblem', route.filterId);

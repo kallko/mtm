@@ -5047,7 +5047,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         rootScope.$on('updateTrack', function(event, data){
-           return;
             if (data == undefined) return;
             for (var i=0; i<data.length; i++) {
                 for(var j=0; j<rootScope.data.routes.length; j++){
@@ -5073,7 +5072,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                             for(var l = 1; l<data[i].state.length; l++) {
-                                rootScope.data.routes[j].real_track.push(data[i].state);
+                                rootScope.data.routes[j].real_track.push(data[i].state[l]);
                             }
                         }
 
@@ -5082,6 +5081,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             }
+
+            console.log("Результат апдэйт трек", rootScope.data);
 
         });
 

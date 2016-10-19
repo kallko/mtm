@@ -417,7 +417,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 if(pushes[i].long_away){
                     pushColor='#e01283';
                 }
-
+                tmpVar.source = 'gps';
 
                 tmpVar.setIcon(getIcon('M', iconIndex, pushColor, 'black'));
                 tmpVar.task_ID=pushes[i].number;
@@ -1087,10 +1087,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log("Clear Map");
             //updateStoredMarkers();
 
+
             var m = map;
             for (i in m._layers) {
-                if (m._layers[i]._path != undefined) {
+                //console.log("Layer", m._layers[i] );
+                if (m._layers[i]._path != undefined || m._layers[i].source != undefined) {
                     try {
+
                         m.removeLayer(m._layers[i]);
                     }
                     catch (e) {
@@ -1114,6 +1117,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 map.removeLayer(gpsPushMarkers[i]);
                 i++;
             }
+
+            markersArr = [];
+            allMarkers =[];
         }
 
 
