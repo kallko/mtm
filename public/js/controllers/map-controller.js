@@ -103,12 +103,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             if (!route || route.real_track == "invalid parameter 'gid'. ") return;
             console.log("I gona draw real route", route);
-            var start = strToTstamp(route.START_TIME);
-            var end = strToTstamp(route.END_TIME);
-            if (end<route.max_arrival_time) end = route.max_arrival_time;
-            // console.log("Start", start, "End", end);
 
 
+            if (route.real_track != undefined && typeof (route.real_track) != 'string') drawStates(route.real_track, route);
+//            var start = strToTstamp(route.START_TIME);
+//            var end = strToTstamp(route.END_TIME);
+//            if (end<route.max_arrival_time) end = route.max_arrival_time;
+//            // console.log("Start", start, "End", end);
+//
+//
             var track = route.real_track,
                 pushes = route.pushes,
                 tmpVar,
@@ -126,270 +129,270 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 drawPushes = true;  // Железно отрисовывать пуши.
 
             //stops=[];
-            markersArr=[];
+            //markersArr=[];
             gpsPushMarkers=[];
-
-            if( track!=undefined) {
-                //todo тестово отладочный блок
-                for ( i = 1; i < track.length; i++) {
-                    if (track[i].t1 != track[i-1].t2){
-
-                        console.log ("Проверка трека показала разрыв", track[i-1] , track[i] );
-                       if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
-                    }
-                }
-
-
-                for (i = 0; i < track.length; i++) {
-                    // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
-                    if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) {
-                        console.log("Это какой то бракованный СТЭЙТ. Я не буду его рисовать", track[i]);
-                        if (rootScope.settings.user == "ids.kalko" || rootScope.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
-                        continue;
-                    }
-                    //console.log(" track[i].time",  track[i].coords);
-
-
-                    //todo снять комментарий, когда правильно рассчитают время финиша
-                   // console.log("Времена", track[i].coords[0].t, start, timeThreshold);
-                    if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
-                        //console.log("Its too early track");
-                        continue
-                    }; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
-                    if( track[i].coords[0].t > end+timeThreshold) {
-                        //console.log("Its too past track");
-                        break;
-                    } //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
-
-
-                    color = '#5cb85c';
-                    // отрисовать движение
-                    if (track[i].state == 'MOVE') {
-                        console.log("draw polyline");
-                        polyline = new L.Polyline(track[i].coords, {
-                            color: color,
-                            weight: 3,
-                            opacity: 0.8,
-                            smoothFactor: 1
-                        });
-                        if (i + 1 == track.length) {
-                            polyline.redrawer = true;
-                            markersArr.push(polyline);
-                       }
-                        polyline.on('click', function (event) {
-                            console.log(event.target);
-                        });
-                        polyline.addTo(map);
-                    } else if (track[i].state == 'ARRIVAL') { // отрисовать стоп
-                        // если отрисовка стопов выключена, пропустить итерацию
-                        //stops.push(track[i]);
-
-// todo раскомментировать когда будет правильно рассчитываться время финиша
-                        if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
-                        if (track[i].coords.t1 > end + rootScope.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
-
-                        if (!drawStops) continue;
-
-
-                        stopIndx = (parseInt(i / 2 + 0.5) - 1);
-                        stopTime = mmhh(track[i].time);
-                        tmpVar = stopTime.split(':');
-                        if (tmpVar[1] != '00') {
-                            stopTime = parseInt(tmpVar[0]) + 1;
-                        } else {
-                            stopTime = parseInt(tmpVar[0]);
-                        }
-
-                        // формирование всплывающей подсказки для стопов
-                        // Закомментирована лишняя информация
-
-                        //tmpTitle = 'Остановка #' + stopIndx + '\n';
-                        tmpTitle = 'Остановка в: ' + formatDate(new Date(track[i].t1 * 1000));
-                        //tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
-                        tmpTitle += ' (' + mmhh(track[i].time) + ')' + '\n';
-
-                        //if (i + 1 < track.length) {
-                        //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
-                        //    polyline = new L.Polyline([track[i].coords[0], track[i].coords[track[i].coords.length - 1]], {
-                        //        color: color,
-                        //        weight: 3,
-                        //        opacity: 0.8,
-                        //        smoothFactor: 1
-                        //    });
-                        //
-                        //    polyline.addTo(map);
-                        //} else if (i + 1 == track.length) {
-                        //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
-                        //}
-
-
-                        //tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon], - заменили эту строку на нижнюю
-                        //чтобы стоп рисовался по усредненным данным, а не по первым. В связи с этим, необходимо добавить линию от конца трека до стопа.
-
-                        tmpVar = L.marker([track[i].lat, track[i].lon],
-                            {
-                                'title': tmpTitle,
-                                'draggable': true
-                            });
-                        tmpVar.source = track[i];
-                        //console.log("tmpVar", tmpVar);
-
-
-                        // удаляем в стейте лишние координаты
-                        if (tmpVar.source.coords.length > 2) {
-                            tmpVar.source.coords.splice(1, tmpVar.source.coords.length - 2);
-                        }
-
-                        tmpVar.stopIndx = stopIndx;
-                        tmpVar.routeRealTrackIndx = i;
-                        tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
-
-                        var LAT = +track[i].coords[0].lat;
-                        var LON = +track[i].coords[0].lon;
-                        var lat = +track[i].lat;
-                        var lon = +track[i].lon;
-
-                        //console.log(" LATLON",LAT, LON, lat, lon );
-
-                        var stopPolyline = new L.Polyline([[LAT, LON], [lat, lon], track[i].coords[track[i].coords.length - 1]], {
-                            color: color,
-                            weight: 3,
-                            opacity: 0.8,
-                            smoothFactor: 1
-                        });
-                        if (i == track.length-1 )stopPolyline.redrawer = true;
-
-
-                        stopPolyline.on('click', function(event) {
-                            console.log(event.target);
-                        });
-                        stopPolyline.addTo(map);
-
-
-                        tmpVar.on('click', function (event) {
-
-                            var localData = event.target;
-                            // if(localData.source.servicePoints == undefined ){
-                            //     return;
-                            // }
-                            var timeData = checkRealServiceTime(localData);
-                            var taskTime = getTaskTime(localData);
-                            console.log(taskTime);
-                            rootScope.$emit('pointEditingPopup', localData, timeData, taskTime);
-
-
-                        });
-
-
-                        tmpVar.on('drag', function (event) {
-
-                            oms.removeMarker(event.target);
-                            scope.currentDraggingStop = event.target;
-                            findNearestPoint(this._latlng.lat, this._latlng.lng);
-
-                        });
-
-
-                        tmpVar.on('dragend', function (event) {
-
-
-                            var container = event.target;
-                            oms.addMarker(container);
-                            container.setLatLng([container.source.lat, container.source.lon]).update();
-
-
-                            try {
-                                map.removeLayer(scope.polyline)
-                            }
-                            catch (e) {
-                                console.log(e);
-                            }
-
-                            try {
-                                scope.spiderMarker.fire('click')
-                            }
-                            catch (e) {
-                                console.log(e);
-                            }
-
-                            //console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
-
-                            scope.baseCurrentWayPoints[scope.minI].stopState = scope.currentDraggingStop.source;// тщательно оттестировать
-
-                            if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time / 60) + " минут с точкой " + (scope.minI + 1) + " ?")) {
-                            } else {
-                                return
-                            }
-                            // console.log(scope.currentDraggingStop, scope.minI);
-
-                            checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
-                            scope.currentDraggingStop = null;
-                            console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
-                            rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
-                            rootScope.$emit('checkInCloseDay');
-
-
-                            var reRoute;
-                            for (var i=0; i< rootScope.data.routes.length; i++){
-                                if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minI].uniqueID){
-                                    reRoute = rootScope.data.routes[i];
-                                }
-                            }
-                            rootScope.showProblem(reRoute);
-
-                        });
-
-                        addMarker(tmpVar);
-
-                    } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
-                        color = '#de5bc0';
-                        polyline = new L.Polyline(track[i].coords, {
-                            color: color,
-                            weight: 3,
-                            opacity: 0.8,
-                            smoothFactor: 1
-                        });
-
-                        polyline.addTo(map);
-                    } else if (track[i].state == 'START') {
-                        color = 'yellow';
-                    }
-
-
-                    if (i + 1 == track.length) {
-                        var indx = track[i].coords.length - 1;
-                        tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
-                            {
-                                'title': 'Последнее известное положение транспортного средства\n' +
-                                'Время сигнала: ' + formatDate(new Date(track[i].t2 * 1000))
-                            });
-                        tmpVar.setIcon(getIcon(i, 7, color, 'black'));
-                        tmpVar.redrawer = true;
-                        tmpVar.on('click', function (event){
-                            //console.log (tmpVar._latlng);
-                            console.log(event.target);
-                            redrawTrac(event.target);
-                        });
-                        addMarker(tmpVar);
-                        //map.addLayer(tmpVar);
-                        //oms.addMarker(tmpVar);
-
-                        //console.log(map.getZoom(), "Zoom", track[i].coords[indx].lat, track[i].coords[indx].lon);
-
-                        //Установить центр карты в текущее положение машины, если оно определено.
-                        if (track[i].coords[indx].lat && track[i].coords[indx].lon && rootScope.carCentre) {
-                            setMapCenter(track[i].coords[indx].lat, track[i].coords[indx].lon, 13);
-                            rootScope.carCentre = false;
-
-                        } else {
-                            console.log("Something wrong with car real coord");
-                        }
-
-                    }
-
-
-                }
-            }
+//
+//            if( track!=undefined) {
+//                //todo тестово отладочный блок
+//                for ( i = 1; i < track.length; i++) {
+//                    if (track[i].t1 != track[i-1].t2){
+//
+//                        console.log ("Проверка трека показала разрыв", track[i-1] , track[i] );
+//                       if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
+//                    }
+//                }
+//
+//
+//                for (i = 0; i < track.length; i++) {
+//                    // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
+//                    if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) {
+//                        console.log("Это какой то бракованный СТЭЙТ. Я не буду его рисовать", track[i]);
+//                        if (rootScope.settings.user == "ids.kalko" || rootScope.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
+//                        continue;
+//                    }
+//                    //console.log(" track[i].time",  track[i].coords);
+//
+//
+//                    //todo снять комментарий, когда правильно рассчитают время финиша
+//                   // console.log("Времена", track[i].coords[0].t, start, timeThreshold);
+//                    if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
+//                        //console.log("Its too early track");
+//                        continue
+//                    }; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
+//                    if( track[i].coords[0].t > end+timeThreshold) {
+//                        //console.log("Its too past track");
+//                        break;
+//                    } //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+//
+//
+//                    color = '#5cb85c';
+//                    // отрисовать движение
+//                    if (track[i].state == 'MOVE') {
+//                        console.log("draw polyline");
+//                        polyline = new L.Polyline(track[i].coords, {
+//                            color: color,
+//                            weight: 3,
+//                            opacity: 0.8,
+//                            smoothFactor: 1
+//                        });
+//                        if (i + 1 == track.length) {
+//                            polyline.redrawer = true;
+//                            markersArr.push(polyline);
+//                       }
+//                        polyline.on('click', function (event) {
+//                            console.log(event.target);
+//                        });
+//                        polyline.addTo(map);
+//                    } else if (track[i].state == 'ARRIVAL') { // отрисовать стоп
+//                        // если отрисовка стопов выключена, пропустить итерацию
+//                        //stops.push(track[i]);
+//
+//// todo раскомментировать когда будет правильно рассчитываться время финиша
+//                        if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
+//                        if (track[i].coords.t1 > end + rootScope.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
+//
+//                        if (!drawStops) continue;
+//
+//
+//                        stopIndx = (parseInt(i / 2 + 0.5) - 1);
+//                        stopTime = mmhh(track[i].time);
+//                        tmpVar = stopTime.split(':');
+//                        if (tmpVar[1] != '00') {
+//                            stopTime = parseInt(tmpVar[0]) + 1;
+//                        } else {
+//                            stopTime = parseInt(tmpVar[0]);
+//                        }
+//
+//                        // формирование всплывающей подсказки для стопов
+//                        // Закомментирована лишняя информация
+//
+//                        //tmpTitle = 'Остановка #' + stopIndx + '\n';
+//                        tmpTitle = 'Остановка в: ' + formatDate(new Date(track[i].t1 * 1000));
+//                        //tmpTitle += 'Время отбытия: ' + formatDate(new Date(track[i].t2 * 1000)) + '\n';
+//                        tmpTitle += ' (' + mmhh(track[i].time) + ')' + '\n';
+//
+//                        //if (i + 1 < track.length) {
+//                        //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist + track[i + 1].dist) + ' метра(ов)';
+//                        //    polyline = new L.Polyline([track[i].coords[0], track[i].coords[track[i].coords.length - 1]], {
+//                        //        color: color,
+//                        //        weight: 3,
+//                        //        opacity: 0.8,
+//                        //        smoothFactor: 1
+//                        //    });
+//                        //
+//                        //    polyline.addTo(map);
+//                        //} else if (i + 1 == track.length) {
+//                        //    tmpTitle += 'Дистанция до следующей остановки: ' + (track[i].dist) + ' метра(ов)';
+//                        //}
+//
+//
+//                        //tmpVar = L.marker([track[i].coords[0].lat, track[i].coords[0].lon], - заменили эту строку на нижнюю
+//                        //чтобы стоп рисовался по усредненным данным, а не по первым. В связи с этим, необходимо добавить линию от конца трека до стопа.
+//
+//                        tmpVar = L.marker([track[i].lat, track[i].lon],
+//                            {
+//                                'title': tmpTitle,
+//                                'draggable': true
+//                            });
+//                        tmpVar.source = track[i];
+//                        //console.log("tmpVar", tmpVar);
+//
+//
+//                        // удаляем в стейте лишние координаты
+//                        if (tmpVar.source.coords.length > 2) {
+//                            tmpVar.source.coords.splice(1, tmpVar.source.coords.length - 2);
+//                        }
+//
+//                        tmpVar.stopIndx = stopIndx;
+//                        tmpVar.routeRealTrackIndx = i;
+//                        tmpVar.setIcon(getIcon(stopTime, 15, 'white', 'black'));
+//
+//                        var LAT = +track[i].coords[0].lat;
+//                        var LON = +track[i].coords[0].lon;
+//                        var lat = +track[i].lat;
+//                        var lon = +track[i].lon;
+//
+//                        //console.log(" LATLON",LAT, LON, lat, lon );
+//
+//                        var stopPolyline = new L.Polyline([[LAT, LON], [lat, lon], track[i].coords[track[i].coords.length - 1]], {
+//                            color: color,
+//                            weight: 3,
+//                            opacity: 0.8,
+//                            smoothFactor: 1
+//                        });
+//                        if (i == track.length-1 )stopPolyline.redrawer = true;
+//
+//
+//                        stopPolyline.on('click', function(event) {
+//                            console.log(event.target);
+//                        });
+//                        stopPolyline.addTo(map);
+//
+//
+//                        tmpVar.on('click', function (event) {
+//
+//                            var localData = event.target;
+//                            // if(localData.source.servicePoints == undefined ){
+//                            //     return;
+//                            // }
+//                            var timeData = checkRealServiceTime(localData);
+//                            var taskTime = getTaskTime(localData);
+//                            console.log(taskTime);
+//                            rootScope.$emit('pointEditingPopup', localData, timeData, taskTime);
+//
+//
+//                        });
+//
+//
+//                        tmpVar.on('drag', function (event) {
+//
+//                            oms.removeMarker(event.target);
+//                            scope.currentDraggingStop = event.target;
+//                            findNearestPoint(this._latlng.lat, this._latlng.lng);
+//
+//                        });
+//
+//
+//                        tmpVar.on('dragend', function (event) {
+//
+//
+//                            var container = event.target;
+//                            oms.addMarker(container);
+//                            container.setLatLng([container.source.lat, container.source.lon]).update();
+//
+//
+//                            try {
+//                                map.removeLayer(scope.polyline)
+//                            }
+//                            catch (e) {
+//                                console.log(e);
+//                            }
+//
+//                            try {
+//                                scope.spiderMarker.fire('click')
+//                            }
+//                            catch (e) {
+//                                console.log(e);
+//                            }
+//
+//                            //console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
+//
+//                            scope.baseCurrentWayPoints[scope.minI].stopState = scope.currentDraggingStop.source;// тщательно оттестировать
+//
+//                            if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time / 60) + " минут с точкой " + (scope.minI + 1) + " ?")) {
+//                            } else {
+//                                return
+//                            }
+//                            // console.log(scope.currentDraggingStop, scope.minI);
+//
+//                            checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
+//                            scope.currentDraggingStop = null;
+//                            console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
+//                            rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
+//                            rootScope.$emit('checkInCloseDay');
+//
+//
+//                            var reRoute;
+//                            for (var i=0; i< rootScope.data.routes.length; i++){
+//                                if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minI].uniqueID){
+//                                    reRoute = rootScope.data.routes[i];
+//                                }
+//                            }
+//                            rootScope.showProblem(reRoute);
+//
+//                        });
+//
+//                        addMarker(tmpVar);
+//
+//                    } else if (track[i].state == 'NO_SIGNAL' || track[i].state == 'NO SIGNAL') {
+//                        color = '#de5bc0';
+//                        polyline = new L.Polyline(track[i].coords, {
+//                            color: color,
+//                            weight: 3,
+//                            opacity: 0.8,
+//                            smoothFactor: 1
+//                        });
+//
+//                        polyline.addTo(map);
+//                    } else if (track[i].state == 'START') {
+//                        color = 'yellow';
+//                    }
+//
+//
+//                    if (i + 1 == track.length) {
+//                        var indx = track[i].coords.length - 1;
+//                        tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
+//                            {
+//                                'title': 'Последнее известное положение транспортного средства\n' +
+//                                'Время сигнала: ' + formatDate(new Date(track[i].t2 * 1000))
+//                            });
+//                        tmpVar.setIcon(getIcon(i, 7, color, 'black'));
+//                        tmpVar.redrawer = true;
+//                        tmpVar.on('click', function (event){
+//                            //console.log (tmpVar._latlng);
+//                            console.log(event.target);
+//                            redrawTrac(event.target);
+//                        });
+//                        addMarker(tmpVar);
+//                        //map.addLayer(tmpVar);
+//                        //oms.addMarker(tmpVar);
+//
+//                        //console.log(map.getZoom(), "Zoom", track[i].coords[indx].lat, track[i].coords[indx].lon);
+//
+//                        //Установить центр карты в текущее положение машины, если оно определено.
+//                        if (track[i].coords[indx].lat && track[i].coords[indx].lon && rootScope.carCentre) {
+//                            setMapCenter(track[i].coords[indx].lat, track[i].coords[indx].lon, 13);
+//                            rootScope.carCentre = false;
+//
+//                        } else {
+//                            console.log("Something wrong with car real coord");
+//                        }
+//
+//                    }
+//
+//
+//                }
+//            }
 
             // тестовоотладочная функция проверки. Выбирает все привязанные стопы и печатает их с обслуженными точками.
             // checkTestStops();
@@ -412,7 +415,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
                 tmpTitle += '№ задания: ' + pushes[i].plan_number;
 
-                tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
+                var tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
                 var pushColor='orange';
                 if(pushes[i].long_away){
                     pushColor='#e01283';
@@ -2344,9 +2347,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     break;
                 }
             }
+
             console.log("Данные стерты, начинаем прорисовку новых элементов");
+            drawStates (states, route);
+
             //теперь прорисовываются новые
-            for (i=0; i<states.length; i++ ) {
+
+
+        }
+
+        function drawStates (states, route) {
+
+            for (var i=0; i<states.length; i++ ) {
                 console.log("I gona redraw real route", route);
                 var start = strToTstamp(route.START_TIME);
                 var end = strToTstamp(route.END_TIME);
@@ -2355,7 +2367,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 var track = states,
-                    //pushes = route.pushes,
+                //pushes = route.pushes,
                     tmpVar,
                     polyline,
                     iconIndex = 14,
@@ -2640,7 +2652,6 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
             }
-
         }
 
     }]);

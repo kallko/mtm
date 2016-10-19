@@ -5047,9 +5047,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         rootScope.$on('updateTrack', function(event, data){
-            if (data == undefined) return;
+            if (data == undefined ) return;
             for (var i=0; i<data.length; i++) {
                 for(var j=0; j<rootScope.data.routes.length; j++){
+                   if (rootScope.data.routes[j].real_track == undefined || typeof (rootScope.data.routes[j].real_track) == 'string') continue;
                     if (rootScope.data.routes[j].transport.gid == data[i].gid) {
                         console.log("Совпадение найдено", rootScope.data.routes[j].filterId , scope.filters.route);
                         if (rootScope.data.routes[j].filterId != scope.filters.route) {

@@ -973,6 +973,7 @@ router.route('/saveroute/')
         try {
         //log.info('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
+            return;
         log.info("Отправляем в SOAP роутов", req.body.routes.length);
         soapManager.saveRoutesTo1C(req.body.routes, function (data) {
             if (!data.error) {
@@ -2382,6 +2383,8 @@ function startPeriodicCalculating() {
 
 
     function callbackDispetcher(companys) {
+
+
         for (var k=0; k<companys.length; k++) {
             middleTime = parseInt(Date.now()/1000);
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length + 2; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
@@ -2696,6 +2699,7 @@ function startPeriodicCalculating() {
                         }
 
                         //log.info("начинаем проверку качества трека", companyAsk);
+                        try{
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
                                 log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
@@ -2725,6 +2729,9 @@ function startPeriodicCalculating() {
 
                             }
 
+                        }
+                        } catch (e) {
+                            log.error( "Ошибка "+ e + e.stack);
                         }
                         //
                         //checkeConcatTrack(companyAsk, 437123);
@@ -3323,7 +3330,7 @@ function  checkOnline(company) {
 
     }
     var result=false;
-    for (var i=0; i<onlineClients.length; i++){
+    for (i=0; i<onlineClients.length; i++){
         log.info("Стоит ли считать компанию ", company, "Если online:", onlineClients[i]);
         if(onlineClients[i].company == company){
             result=true;
