@@ -111,7 +111,7 @@ router.route('/saveData')
     .get(function(req, res){
         log.info("Start data saving");
         var data = JSON.stringify(cashedDataArr);
-        var mes ='complete'
+        var mes ='complete';
 
         try {
             fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
@@ -1683,6 +1683,8 @@ router.route('/askforproblems/:need')
                 result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.currentDay = true;
+                result.drivers = cashedDataArr[currentCompany].drivers;
+                result.transports = cashedDataArr[currentCompany].transports;
                 result.reasons = cashedDataArr[currentCompany].reasons;
             }
             log.info("Need=", need);
@@ -1792,6 +1794,8 @@ router.route('/askforproblems/:need')
 
         result.allRoutes = cashedDataArr[currentCompany].allRoutes;
         result.currentDay = true;
+            result.drivers = cashedDataArr[currentCompany].drivers;
+            result.transports = cashedDataArr[currentCompany].transports;
         //Перед отправкой проверка на задвоенность маршрутов
 
 
@@ -5575,6 +5579,23 @@ function concat1CAndMonitoring (company) {
     }
 }
 
+function autosaveData(){
+    log.info("Start data saving");
+    var data = JSON.stringify(cashedDataArr);
+    var mes ='complete';
+
+    try {
+        fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
+            if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);
+            mes+= err;
+        });
+
+        res.status(200).json({mes: mes });
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
+}
+
 function loadCoords(company) {
     try {
     if (!company) return;
@@ -5625,6 +5646,7 @@ function startCalculateCompany(company) {
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
     printData(company); //todo статистическая функция, можно убивать
+    autosaveData();
     if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);

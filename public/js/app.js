@@ -139,7 +139,14 @@ var myLayout = new GoldenLayout({
                                 title: 'Редактирование маршрута',
                                 componentName: 'template',
                                 componentState: {templateId: 'edit-route'}
+                            },
+                            {
+                                type: 'component',
+                                title: 'Изменение условий',
+                                componentName: 'template',
+                                componentState: {templateId: 'edit-condition'}
                             }
+
                         ]
                     }
                 ]

@@ -170,7 +170,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     rootScope.editing.start = parseInt(Date.now()/1000);
 
                     }).error(function () {
-                        rootScope.waitNotification('Первичный рассчет еще не закончен. Подождите немного');
+                        rootScope.waitNotification('Загрузка данных еще не закончена. Подождите немного');
                     });
 
 

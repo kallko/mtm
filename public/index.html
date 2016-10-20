@@ -75,6 +75,7 @@
 <script src="./js/controllers/setting-controller.js"></script>
 <script src="./js/controllers/point-view-controller.js"></script>
 <script src="./js/controllers/edit-route-controller.js"></script>
+<script src="./js/controllers/edit-condition-controller.js"></script>
 <script src="./js/controllers/problem-route-controller.js"></script>
 <script src="./js/controllers/close-day-controller.js"></script>
 <script src="./js/controllers/point-popup-edit-controller.js"></script>
@@ -540,7 +541,21 @@
 </template>
 
 <!-- панель редактирования маршрута Пока закомментирована -->
+<template type="text/html" id="edit-condition">
+    <div id="condition-panel" ng-controller="EditConditionController">
+           <div>
+               TEST = {{tester}}
+           </div>
 
+        <div>
+            TEST2 = {{nowTime*1000 | date : 'H:mm:ss'}}
+        </div>
+        <div ng-show="false">
+            false
+        </div>
+    </div>
+
+</template>
 
 <template   type="text/html" id="edit-route">
     <div id="edit-panel" ng-controller="EditRouteController">
