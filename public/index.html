@@ -541,17 +541,41 @@
 </template>
 
 <!-- панель редактирования маршрута Пока закомментирована -->
-<template type="text/html" id="edit-condition">
-    <div id="condition-panel" ng-controller="EditConditionController">
-           <div>
-               TEST = {{tester}}
-           </div>
+<template  type="text/html" id="edit-condition">
+    <div ng-show="false" id="condition-panel" ng-controller="EditConditionController">
+        <div id="change-driver"  >
+            <div class="block-title">Замена (Водителя/Машины) на маршруте</div>
+            <div id="change-driver-menu" > Произвести замену: <br>
+                {{route.driver.NAME}} на машине {{route.transport.NAME}} с номером {{route.transport.REGISTRATION_NUMBER}}<br>
 
-        <div>
-            TEST2 = {{nowTime*1000 | date : 'H:mm:ss'}}
-        </div>
-        <div ng-show="false">
-            false
+                <div id="transport-select"> Выберите транспорт:
+                    <select ng-model="selectedTransport"
+                            ng-options=" option.ID as option.NAME for option in allTransports | orderBy: 'NAME'" >
+
+                    </select>
+                    <div id="driver-select"> Выберите  водителя:&nbsp;
+                        <select ng-model="selectedDriver"
+                                ng-options="option.ID as option.NAME for option in allDrivers | orderBy: 'NAME'" >
+
+                        </select>
+
+                        <div id="start-select"> Старотовая точка:&nbsp;&nbsp;&nbsp;&nbsp;
+                            <select ng-model="selectedStart"
+                                    ng-options="option.NUMBER as option.NUMBER for option in route.points | orderBy: 'parseInt(NUMBER)'" >
+
+                            </select>
+                            <div>
+                                <button class="btn btn-info btn-sm" ng-disabled="!selectedTransport || !selectedDriver || !selectedStart" ng-click="changeDriver()" >Заменить</button>
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -586,18 +610,18 @@
         <div ng-show="parent_route.have_attention" style="color: orangered" ng-model="accept" ng-click="accept=true">
             !!!!!!! В этом маршруте сть точки со статусом внимание !!!!!!!
         </div>
-
-        <div ng-show="route !== undefined">
-             Сделано попыток перерасчета  по маршруту {{iteration || 0}} {{route.recalcIter}}
+        <div ng-show="route != undefined">
+            Маршрут для редактирования = {{route.driver.NAME}} {{route.transport.NAME}}
         </div>
+
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
             ng-click="recalculateRoute()">Рассчитать</button>
         </div>
-        <div>
-            Предлагаемое количество новых маршрутов = {{newRoutes}}
-        </div>
 
+        <div ng-show="route !== undefined">
+            Сделано попыток перерасчета  по маршруту {{iteration || 0}}
+        </div>
         <div class="point-table-wrap" style="overflow: auto;height: calc(100% - 92px);" >
             <div id="recalc-table" class="table-holder" >
 
@@ -791,40 +815,7 @@
                 <!--</div>-->
             <!--</div>-->
         <!--</div>-->
-        <div id="change-driver" ng-show="route !== undefined && false" >
-            <div class="block-title">Замена (Водителя/Машины) на маршруте</div>
-            <div id="change-driver-menu" > Произвести замену: <br>
-                {{route.driver.NAME}} на машине {{route.transport.NAME}} с номером {{route.transport.REGISTRATION_NUMBER}}<br>
 
-                <div id="transport-select"> Выберите транспорт:
-                    <select ng-model="selectedTransport"
-                            ng-options=" option.ID as option.NAME for option in allTransports | orderBy: 'NAME'" >
-
-                    </select>
-                    <div id="driver-select"> Выберите  водителя:&nbsp;
-                        <select ng-model="selectedDriver"
-                                ng-options="option.ID as option.NAME for option in allDrivers | orderBy: 'NAME'" >
-
-                        </select>
-
-                        <div id="start-select"> Старотовая точка:&nbsp;&nbsp;&nbsp;&nbsp;
-                            <select ng-model="selectedStart"
-                                    ng-options="option.NUMBER as option.NUMBER for option in route.points | orderBy: 'parseInt(NUMBER)'" >
-
-                            </select>
-                            <div>
-                                <button class="btn btn-info btn-sm" ng-disabled="!selectedTransport || !selectedDriver || !selectedStart" ng-click="changeDriver()" >Заменить</button>
-                            </div>
-
-                </div>
-
-
-
-            </div>
-        </div>
-
-        </div>
-        </div>
 
             </div>
             </div>

@@ -836,10 +836,12 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
             //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
 
             client.getConfig({user: me.login}, function (err, result) {
+            //client.setMobileDeviceToDriver({user: me.login,  idMobileDevice:'355404066184339' ,  idDriver:'6eb8c195-6eb7-11e6-b210-005056a76b49' }, function (err, result) {
                 if (!err) {
 
                     console.log('GET CONFIG OK for', me.login);
                     log.toFLog('config is', result);
+                    //log.toFLog('Mobile', result);
                     //console.log('config is', result);
                     callback(company, result);
                 } else {

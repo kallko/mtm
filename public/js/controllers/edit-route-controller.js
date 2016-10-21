@@ -936,11 +936,18 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 });
 
                 console.log("Big MATH INPUT",mathInput);
+
                 scope.mathInputJson = mathInput;
                 // оптравляем на пересчет
                 http.post('./recalculate/', {input: mathInput}).
                     success(function (data) {
-                    console.log("Recalculate receive DATA",data);
+                    console.log("Recalculate receive DATA", data);
+                        console.log ("надо принять решение, о перезапросе", data);
+                        if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1 || (data.solutions[0].unhandledJobs != undefined && data.solutions[0].unhandledJobs.length>0)) {
+                            console.log("Вызываем перерасчет");
+                            scope.recalculateRoute();
+                            return;
+                        }
                         processModifiedPoints(route, data);
                     })
                 .error(function(data){
@@ -1048,11 +1055,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.changedRoute = undefined;
         });
 
-    scope.changeDriver = function() {
-        //console.log(scope.selectedDriver, scope.selectedTransport, scope.selectedStart);
-        rootScope.$emit('changeDriver', scope.selectedDriver, scope.selectedTransport, scope.selectedStart, scope.route.uniqueID); //эмитируем в поинтиндекс контроллер, чтобы там сделать все изменения в данных
-        scope.selectedStart=false;
-    };
+
 
 
     rootScope.$on('checkInCloseDay', function () {
@@ -1179,8 +1182,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             // оптравляем на пересчет
             http.post('./recalculate/', {input: scope.mathInputJson}).
                 success(function (data) {
-                    console.log("Recalculate receive DATA",data);
-                    processModifiedPoints(route, data);
+                    console.log("Recalculate receive DATA Hand",data);
+                    if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1 || (data.solutions[0].unhandledJobs != undefined && data.solutions[0].unhandledJobs.length>0)) {
+                        scope.$emit('showNotification', {text: 'Автоматический пересчет не удался.'});
+                        } else {
+                        processModifiedPoints(route, data);
+                    }
                 })
                 .error(function(data){
                     console.log("ERROR, data");
@@ -1214,7 +1221,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             var reRoute;
             for (i=0; i<rootScope.data.routes.length;i++){
-                console.log(item.uniqueId,  rootScope.data.routes[i].uniqueID)
+                console.log(item.uniqueId,  rootScope.data.routes[i].uniqueID);
                 if(item.uniqueID == rootScope.data.routes[i].uniqueID){
                     reRoute = rootScope.data.routes[i];
                     console.log("Маршрут для отмены точки найден");

@@ -458,7 +458,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //
 
             rootScope.clickOff=false;
-            scope.$apply;
+           // scope.$apply;
 
         }
 
@@ -625,8 +625,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             rootScope.clickOff=false;
-            scope.$apply;
-
+            //scope.$apply;
+        //
         }
 
         rootScope.$on('eventdrawConnectsActivePoint', function(event, stopState, number, TASK_NUMBER){
@@ -2357,8 +2357,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         function drawStates (states, route) {
-
-            for (var i=0; i<states.length; i++ ) {
+        console.log(" I will draw states");
+   //         for (var i=0; i<states.length; i++ ) {
                 console.log("I gona redraw real route", route);
                 var start = strToTstamp(route.START_TIME);
                 var end = strToTstamp(route.END_TIME);
@@ -2651,7 +2651,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
 
-            }
+    //        }
         }
 
     }]);

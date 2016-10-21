@@ -5054,10 +5054,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (rootScope.data.routes[j].transport.gid == data[i].gid) {
                         console.log("Совпадение найдено", rootScope.data.routes[j].filterId , scope.filters.route);
                         if (rootScope.data.routes[j].filterId != scope.filters.route) {
-                            console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+                            //console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);
 
                         } else {
-                            console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+                           // console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
                             if(data[i].state != undefined && data[i].state.length >1 ) scope.$emit('redrawUpdate', data[i].state, scope.filters.route);
                         }
 
