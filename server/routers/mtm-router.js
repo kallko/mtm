@@ -973,7 +973,6 @@ router.route('/saveroute/')
         try {
         //log.info('saveroute, len', req.body.routes.length);
         var soapManager = new soap(req.session.login);
-            return;
         log.info("Отправляем в SOAP роутов", req.body.routes.length);
         soapManager.saveRoutesTo1C(req.body.routes, function (data) {
             if (!data.error) {
@@ -982,6 +981,27 @@ router.route('/saveroute/')
                 res.status(200).json({error: data.error});
             }
         });
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+router.route('/setmobiledevice/')
+    .post(function (req, res) {
+        try {
+            var key = ""+req.session.login;
+            var currentCompany = companyLogins[key];
+            //log.info('saveroute, len', req.body.routes.length);
+            var soapManager = new soap(req.session.login);
+            log.info("С роутера пытаемся поставить мобильное устройство");
+            soapManager.setMobileDevice(currentCompany, function (data) {
+                if (!data.error) {
+                    res.status(200).json({result: data.result});
+                } else {
+                    res.status(200).json({error: data.error});
+                }
+            });
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
         }
@@ -1383,7 +1403,7 @@ router.route('/predicate/')
         }
     });
 
-// получение треков по переданным стейтам
+// замена водителя
 router.route('/changedriver/')
     .post(function (req, res) {
         try {

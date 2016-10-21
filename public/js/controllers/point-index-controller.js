@@ -4071,7 +4071,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //Найти нового водителя в полной базе
-            var i=0;
+            i=0;
             while(i<rootScope.data.drivers.length){
                 if(rootScope.data.drivers[i].ID == driver) {
                     routeDublicate.DRIVER=driver;
@@ -4129,7 +4129,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //Изменить route_id в новом маршруте во всех точках а также driver transport
-            var i=0;
+            i=0;
             while(i<routeDublicate.points.length){
                 routeDublicate.points[i].transport= routeDublicate.transport;
                 routeDublicate.points[i].driver= routeDublicate.driver;
@@ -4164,6 +4164,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }).error(function(err){
                     console.log(err);
 
+                });
+
+
+
+            http.post('./saveroute/', {routes: [tempRouteDublicate, routeDublicate]})
+                .success(function (data) {
+                    console.log('Save to 1C result >>', data);
+                    for (var i = 0; i < rootScope.data.routes.length; i++) {
+                        //delete rootScope.data.routes[i].toSave;
+                    }
+                }).error(function(err){
+                    console.log(err);
+                    rootScope.errorNotification('/saveroute');
                 });
 
 

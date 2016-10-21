@@ -321,9 +321,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
             route.warehouseEnd =false;
-            if (route.points[lastindx].waypoint != undefined && undefined && route.points[lastindx].waypoint.TYPE == "WAREHOUSE") {
+            if (route.points[lastindx].waypoint != undefined  && route.points[lastindx].waypoint.TYPE == "WAREHOUSE") {
                 route.warehouseEnd =true;
             }
+            console.log("Маршрут заканчивается складом",  route.warehouseEnd)
             //route.warehouseEnd = (route.points[lastindx].waypoint != undfined && route.points[lastindx].waypoint.TYPE == "WAREHOUSE");
             if (route.warehouseEnd) lastTask = route.points.pop();
 
@@ -650,25 +651,26 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     delay,
                     late;
 
-                for (var i = 0; i < route.points.length; i++) {
-                    // если первая задача в маршруте является складом, добавляем его в список складов
-                    if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
-                        timeWindow = TimeConverter.getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS,
-                            serverTime);
-                        mathInput.depotList.push({
-                            "id": "1",
-                            "point": "-2",
-                            "window": {
-                                "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
-                                "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
-                            }
-                        });
-                        break;
-                    }
-                }
+                //for (var i = 0; i < route.points.length; i++) {
+                //    // если первая задача в маршруте является складом, добавляем его в список складов
+                //    if (mathInput.depotList.length == 0 && route.points[i].waypoint.TYPE == 'WAREHOUSE') {
+                //        timeWindow = TimeConverter.getTstampAvailabilityWindow(route.points[i].waypoint.AVAILABILITY_WINDOWS,
+                //            serverTime);
+                //        mathInput.depotList.push({
+                //            "id": "1",
+                //            "point": "-2",
+                //            "window": {
+                //                "start": timeWindow[0].start,  //END_TIME: "30.10.2015 19:50:02"
+                //                "finish": timeWindow[0].finish  //START_TIME: "30.10.2015 06:30:00"
+                //            }
+                //        });
+                //        break;
+                //    }
+                //}
 
                 //Если склад не обнаружен, назначем его - последней подтвержденной точкой на маршруте
                 if(mathInput.depotList.length == 0) {
+                    //todo переделать на текущее положение машины
                     findAlternativeDepot(route, mathInput);
                 }
 
@@ -682,7 +684,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 for (i = 0; i < route.points.length; i++) {
 
                     // добавляет в список задач все невыполненные задачи
-                    if ((route.points[i].status > 3 && route.points[i].status != 8) ) {
+                    if ((route.points[i].status > 3 && route.points[i].status != 8 && (route.points[i].waypoint != undefined && route.points[i].waypoint.TYPE != "WAREHOUSE" )) ) {
                         console.log("Budem brat?", route.points[i].status);
                         pt = route.points[i];
                        // console.log("Dobavlzem tohku v peresschet", pt);
@@ -713,11 +715,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             pvr = pt.NUMBER,
                             rvr =route.NUMBER;
 
-
+                       // console.log("точка", pt);
                         jobWindows = [
                             {
-                                "start": pt.working_window.start,
-                                "finish": pt.working_window.finish
+                                "start": pt.working_window[0].start,
+                                "finish": pt.working_window[0].finish
                             }];
 
 
@@ -728,7 +730,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                                 "start": rootScope.nowTime,
                                 "finish": rootScope.nowTime+60*60
                             }];
-                            console.log("Расширяем окно для точки время вышло", pt, jobWindows[0].start, jobWindows[0].finish);
+                           // console.log("Расширяем окно для точки время вышло", pt, jobWindows[0].start, jobWindows[0].finish);
                         }
 
                         if(late && route.recalcIter>2) {
@@ -737,7 +739,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                                     "start": rootScope.nowTime,
                                     "finish": route.points[route.points.length-1].arrival_time_ts+60*30
                                 }];
-                            console.log("Расширяем окно для точки в последний раз", pt, jobWindows[0].start, jobWindows[0].finish);
+                          //  console.log("Расширяем окно для точки в последний раз", pt, jobWindows[0].start, jobWindows[0].finish);
                         }
 
 
@@ -751,17 +753,17 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                                     "start": rootScope.nowTime,
                                     "finish": tsEndDay/1000
                                 }];
-                            console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
+                            //console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
                         }
 
                         if (delay && route.recalcIter>1 && (pt.change_time == undefined || pt.change_time <1 )) {
 
                             jobWindows = [
                                 {
-                                    "start": pt.working_window.start,
-                                    "finish": pt.working_window.finish+30*60
+                                    "start": pt.working_window[0].start,
+                                    "finish": pt.working_window[0].finish+30*60
                                 }];
-                            console.log("Расширяем окно для точки опаздывает", pt, jobWindows[0].start, jobWindows[0].finish);
+                           // console.log("Расширяем окно для точки опаздывает", pt, jobWindows[0].start, jobWindows[0].finish);
                         }
 
 
@@ -776,7 +778,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                                     "start": rootScope.nowTime,
                                     "finish": tsEndDay/1000
                                 }];
-                            console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
+                            //console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
 
                         }
 
@@ -790,7 +792,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                                     "start": rootScope.nowTime,
                                     "finish": tsEndDay/1000
                                 }];
-                            console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
+                            //console.log("Свободное окно для время вышло", pt, rootScope.nowTime, tsEndDay/1000);
 
                         }
                         // выбор типа пересчета
@@ -865,7 +867,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 mathInput.points.push(point);
 
                 // если маршрут заканчивается складом, то мы отправляем его как точку гаража
-                if (route.warehouseEnd) {
+                console.log("точка", i, route.points.length,  route.points[i-1]);
+                if (route.points[i-1] != undefined && (route.points[i-1].waypoint != undefined && route.points[i-1].waypoint.TYPE == "WAREHOUSE")) {
                     point = {
                         "lat": parseFloat(route.points[route.points.length - 1].LAT),
                         "lon": parseFloat(route.points[route.points.length - 1].LON),
@@ -910,7 +913,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     "weigth_nominal": 0,
                     "time_max": 0,
                     "start_point": "-1",
-                    "finish_point": route.warehouseEnd ? "-3" : "-1",
+                    "finish_point": "-3" ,
                     "points_limit": 0,
                     "road_speed": 1,
                     "point_speed": 1,
@@ -935,7 +938,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     "tr_permits": []
                 });
 
-                console.log("Big MATH INPUT",mathInput);
+                console.log("Big MATH INPUT 938 ",mathInput);
 
                 scope.mathInputJson = mathInput;
                 // оптравляем на пересчет
@@ -964,6 +967,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             console.log('Recalculate READY >>', data);
 
 
+
+
             // в случае если вернуло ошибку, решений ноль или в результате вернуло несколько маршрутов,
             // показываем сообщение об ошибке
             if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1) {
@@ -973,7 +978,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             }
 
 
-
+            for (var i=0; i< data.solutions[0].routes[0].deliveries.length; i++){
+                var toPrint = data.solutions[0].routes[0].deliveries[i];
+                console.log("Пришел ответ", toPrint.pointId, " ", toPrint.arrival);
+            }
 
             if(data.solutions[0] != undefined && data.solutions[0].routes != undefined && data.solutions[0].routes.length != undefined){
                 scope.newRoutes = data.solutions[0].routes.length
@@ -999,6 +1007,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 if (newSolution[i].pointId == -3) {
                     point = changedRoute.points[changedRoute.points.length - 1];
                     point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+                    point.new_arrival_time = newSolution[i].arrival;
                     updatedPoints.push(point);
                     break;
                 }
@@ -1009,7 +1018,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
 
                         point.new_arrival_time = newSolution[i].arrival;
-                        console.log("New arrival.time", point.new_arrival_time);
+                        console.log("New arrival.time",point.waypoint.gIndex, point.new_arrival_time);
                         updatedPoints.push(point);
                     }
                 }
@@ -1147,7 +1156,16 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return a.newArrival - b.newArrival;
             }
 
+            for (i= 0; i<scope.display.length; i++){
+                console.log("scope.display", scope.display[i].gIndex, scope.display[i].newArrival);
+               // if ( scope.display[i].newArrival == undefined );
+
+            }
+
             scope.display.sort(compareArrivalTime);
+
+
+
 
 
             //console.log("Новый вариант маршрута", scope.display);
@@ -1177,7 +1195,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             }
 
-            console.log("NEW Big MATH INPUT",scope.mathInputJson);
+            console.log("NEW Big MATH INPUT 1180 ",scope.mathInputJson);
 
             // оптравляем на пересчет
             http.post('./recalculate/', {input: scope.mathInputJson}).
@@ -1238,7 +1256,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            console.log("NEW Big MATH INPUT",scope.mathInputJson);
+            console.log("NEW Big MATH INPUT 1241 ",scope.mathInputJson);
             scope.$emit('clearMap');
             scope.$emit('drawCombinedTrack', reRoute);
             // оптравляем на пересчет
@@ -1705,7 +1723,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     "weigth_nominal": 0,
                     "time_max": 0,
                     "start_point": "-1",
-                    "finish_point": route.warehouseEnd ? "-3" : "-1",
+                    "finish_point":  "-3" ,
                     "points_limit": 0,
                     "road_speed": 1,
                     "point_speed": 1,
@@ -1730,7 +1748,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     "tr_permits": []
                 });
 
-                console.log("Big MATH INPUT",mathInput);
+                console.log("Big MATH INPUT 1733 ",mathInput);
                 scope.mathInputJson = mathInput;
                 // оптравляем на пересчет
                 http.post('./recalculate/', {input: mathInput}).
