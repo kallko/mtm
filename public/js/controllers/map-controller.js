@@ -2388,7 +2388,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 if( track!=undefined) {
                     //todo тестово отладочный блок
-                    for ( i = 1; i < track.length; i++) {
+                    for (var i = 1; i < track.length; i++) {
                         if (track[i].t1 != track[i-1].t2){
 
                             console.log ("Проверка трека показала разрыв", track[i-1] , track[i] );
