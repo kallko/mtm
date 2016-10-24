@@ -1004,26 +1004,35 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             // обновляем изменяемую копию маршрута
             for (var i = 0; i < newSolution.length; i++) {
                 tmp = newSolution[i].pointId;
-                if (newSolution[i].pointId == -3) {
-                    point = changedRoute.points[changedRoute.points.length - 1];
-                    point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
-                    point.new_arrival_time = newSolution[i].arrival;
-                    updatedPoints.push(point);
-                    break;
-                }
+                //if (newSolution[i].pointId == -3) {
+                //    console.log("Найдена финальная точка");
+                //    point = changedRoute.points[changedRoute.points.length - 1];
+                //    point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
+                //    point.new_arrival_time = newSolution[i].arrival;
+                //    updatedPoints.push(point);
+                //    continue;
+                //}
 
                 for (var j = 0; j < changedRoute.points.length; j++) {
-                    if (newSolution[i].pointId == changedRoute.points[j].waypoint.gIndex) {
+                     if (newSolution[i].pointId == changedRoute.points[j].waypoint.gIndex) {
                         point = changedRoute.points[j];
                         point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
 
                         point.new_arrival_time = newSolution[i].arrival;
-                        console.log("New arrival.time",point.waypoint.gIndex, point.new_arrival_time);
+                        //console.log("New arrival.time",point.waypoint.gIndex, point.new_arrival_time);
                         updatedPoints.push(point);
+                    } else {
+                        if (""+newSolution[i].pointId == "-3") {
+                            point = changedRoute.points[changedRoute.points.length-1];
+                            point.new_arrival_time = newSolution[i].arrival;
+                            newSolution[i].pointId = point.waypoint.gIndex;
+                            //console.log("Especialy New arrival.time",point.waypoint.gIndex, point.new_arrival_time);
+                            updatedPoints.push(point);
+                        }
                     }
                 }
 
-                for (var j = 0; j < scope.changedRoute.points.length; j++) {
+                for ( j = 0; j < scope.changedRoute.points.length; j++) {
                     if (newSolution[i].pointId == scope.changedRoute.points[j].waypoint.gIndex) {
                         point = scope.changedRoute.points[j];
                        // point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
@@ -1155,12 +1164,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             function compareArrivalTime (a, b){
                 return a.newArrival - b.newArrival;
             }
-
-            for (i= 0; i<scope.display.length; i++){
-                console.log("scope.display", scope.display[i].gIndex, scope.display[i].newArrival);
-               // if ( scope.display[i].newArrival == undefined );
-
-            }
+            //
+            //for (i= 0; i<scope.display.length; i++){
+            //    console.log("scope.display", scope.display[i].gIndex, scope.display[i].newArrival);
+            //   // if ( scope.display[i].newArrival == undefined );
+            //
+            //}
 
             scope.display.sort(compareArrivalTime);
 
