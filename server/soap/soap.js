@@ -861,22 +861,19 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
 
 
 
-SoapManager.prototype.setMobileDevice = function (company, callback) {
+SoapManager.prototype.setMobileDevice = function (company, imei, driverID, callback) {
     log.info("Set Mobile Device start");
     var me = this;
     var url  = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
     // сохранение в 1С от имени авторизированного пользователя
     var setMobile = function (company, callback) {
-        //console.log("Try to recieve config", me.login, configData);
-        soap.createClient(url, function (err, client) {
+               soap.createClient(url, function (err, client) {
             if (err) throw err;
-            //console.log('CLIENT', client);
-            // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
             client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
-            //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
-            log.info("Ready to call");
-            //client.getConfig({user: me.login}, function (err, result) {
-            client.setMobileDeviceToDriver({user: me.login,  idMobileDevice:'356246070534580' ,  idDriver:"20564f28-494e-11e2-802b-52540027e502" }, function (err, result) {
+
+            log.info("Ready to call", imei, driverID);
+
+            client.setMobileDeviceToDriver({user: me.login,  idMobileDevice:imei,  idDriver:driverID }, function (err, result) {
                 if (!err) {
 
                     console.log('GET SET Device OK for', me.login);

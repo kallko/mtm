@@ -663,3 +663,7 @@ template {
     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24437', endColorstr='#c62d1f',GradientType=0);
     background-color:#f24437;
 }
+.element-margin{
+    margin-top: 5px;
+    margin-left: 5px;
+}

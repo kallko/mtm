@@ -245,10 +245,7 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
             }
         }
         console.log("Start call");
-        http.post('./setmobiledevice/')
-            .success(function(data) {
-                console.log("Set mobile device complete");
-            })
+
 
     };
 

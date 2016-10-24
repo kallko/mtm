@@ -994,12 +994,14 @@ router.route('/setmobiledevice/')
             var currentCompany = companyLogins[key];
             //log.info('saveroute, len', req.body.routes.length);
             var soapManager = new soap(req.session.login);
+            var imei = req.body.imei;
+            var driverID = req.body.driver;
             log.info("С роутера пытаемся поставить мобильное устройство");
-            soapManager.setMobileDevice(currentCompany, function (data) {
+            soapManager.setMobileDevice(currentCompany, imei, driverID, function (company, data) {
                 if (!data.error) {
-                    res.status(200).json({result: data.result});
+                    res.status(200).json({result: data});
                 } else {
-                    res.status(200).json({error: data.error});
+                    res.status(200).json({error: data});
                 }
             });
         } catch (e) {

@@ -3083,8 +3083,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             function successCallback(res){
                 if(!res.data.error){
                     rootScope.$emit('successOfPusingData');
-                    rootScope.$emit('showNotification', {text: 'Закрыто '+res.data.closeCount+' роутов за '+res.data.CloseDate, duration:2000});
-
+                    //rootScope.$emit('showNotification', {text: 'Закрыто '+res.data.closeCount+' роутов за '+res.data.CloseDate, duration:2000});
+                    rootScope.clickOff = false;
                     if(!outgoingData.update){
                         for(var i = 0; rootScope.data.routes.length > i; i++){
                             for(var j = 0; outgoingData.routesID.length > j; j++){
@@ -3130,6 +3130,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 rootScope.errorNotification('/closeday');
                 rootScope.$emit('serverError');
             }
+
+
 
         }
 
@@ -4577,11 +4579,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         curDay=true;
                     }
                     var data = collectDataForDayClosing(curDay);
-                    alert("Закрываем маршрут, за сегодня " + curDay);
+                    scope.$emit('showNotification', {text: 'Закрываем маршрут', duration: 3000});
+                    //alert("Закрываем маршрут");
                     console.log("предположительная дата", (""+dateOfRoute.getDate()+"."+ dateOfRoute.getMonth() + "." + dateOfRoute.getFullYear()))
                     console.log("Data", data);
                     pushDataToServer(data);
                     result.closed=true;
+                    rootScope.clickOff = false;
                 }
                     if (rootScope.data.currentDay == true) {
                         http.post('./savetonode', {route: result})
@@ -4589,8 +4593,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                 console.log("Сохранено", rId);
                                 for (var j=0; j<rootScope.data.routes.length; j++){
                                     console.log("Входные данные", rootScope.data.routes[j].uniqueID, rId);
-
-
 
 
                                     if(rootScope.data.routes[j].uniqueID == rId){
@@ -4629,7 +4631,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
-            rootScope.clickOff = true;
+            rootScope.clickOff = false;
         //todo очистить display collection
 
 

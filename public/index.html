@@ -542,8 +542,20 @@
 
 <!-- панель редактирования маршрута Пока закомментирована -->
 <template  type="text/html" id="edit-condition">
-    <div  id="condition-panel" ng-controller="EditConditionController">
-        <div id="change-driver"  >
+
+
+    <div ng-show="false" id="condition-panel" ng-controller="EditConditionController">
+        <div id="mode" >
+                    <select
+                            class="element-margin"
+                            ng-model="selectedMode"
+                            ng-options="option.value as option.name for option in mode | orderBy: 'value'">
+
+                    </select>
+
+        </div>
+
+        <div id="change-driver" ng-show="selectedMode==0" class="element-margin">
             <div class="block-title">Замена (Водителя/Машины) на маршруте</div>
             <div id="change-driver-menu" > Произвести замену: <br>
                 {{route.driver.NAME}} на машине {{route.transport.NAME}} с номером {{route.transport.REGISTRATION_NUMBER}}<br>
@@ -576,6 +588,17 @@
                 </div>
 
             </div>
+        </div>
+
+        <div id="set-device" ng-show="selectedMode==1" class="element-margin">
+
+            <select id="set-device-route-select"   ng-model="selectedRouteFilterId"
+                    ng-options="option.filterId as option.driver.NAME   for option in data.routes">
+            </select>
+            <input type="time"
+                   ng-model="changeTime"
+                   id="change-time"/>
+            <input ng-model="iMEI" type="text" size="16"> <button ng-click="setMobileDevice()">Установить</button>
         </div>
     </div>
 

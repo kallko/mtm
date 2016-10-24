@@ -3,7 +3,13 @@
  */
 angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$rootScope', '$http', function (scope, rootScope, http) {
 
-
+    scope.mode=[];
+    scope.mode.push({value:-1, name: "Режим корректировки"});
+    scope.mode.push({value:0, name: "Замена водителя"});
+    scope.mode.push({value:1, name: "Замена устройства"});
+    scope.selectedMode=-1;
+    scope.selectedRouteFilterId =-1;
+    scope.iMEI="";
 
     rootScope.$on('choseproblem', function (event, filterId){
         console.log("В изменение условий пришли данные", filterId);
@@ -28,5 +34,37 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
         rootScope.$emit('changeDriver', scope.selectedDriver, scope.selectedTransport, scope.selectedStart, scope.route.uniqueID); //эмитируем в поинтиндекс контроллер, чтобы там сделать все изменения в данных
         scope.selectedStart=false;
     };
+
+
+    scope.setMobileDevice = function(){
+        if(!scope.selectedRouteFilterId || !scope.changeTime || !scope.iMEI){
+            scope.$emit('showNotification', {text: "Заполните все необходимые поля", duration: 3000});
+            return;
+        }
+        //console.log("Входные данные",  scope.selectedRouteFilterId, scope.changeTime, scope.iMEI, scope.iMEI.length, (parseInt(scope.iMEI)).toString().length, (parseInt(scope.iMEI)).length);
+        if(scope.iMEI.length !=15 || (parseInt(scope.iMEI)).toString().length != 15){
+            scope.$emit('showNotification', {text: "Введен некорректный IMEI", duration: 3000});
+            return;
+        }
+        var route;
+        for(var i=0; i<rootScope.data.routes.length; i++){
+            console.log("Поиск роута", rootScope.data.routes[i].filterId, scope.selectedRouteFilterId )
+            if(rootScope.data.routes[i].filterId == scope.selectedRouteFilterId) {
+                route=rootScope.data.routes[i];
+            }
+        }
+
+        setNewMobileDevice(route, scope.iMEI, scope.changeTime)
+
+    }
+
+
+    function setNewMobileDevice(route, imei, time){
+        console.log("DriverID", route.driver.ID);
+        http.post('./setmobiledevice/', {imei:imei, driver:route.driver.ID})
+            .success(function(data) {
+                console.log("Set mobile device complete", data);
+            })
+    }
 
 }]);
