@@ -5065,18 +5065,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (data == undefined ) return;
             for (var i=0; i<data.length; i++) {
                 for(var j=0; j<rootScope.data.routes.length; j++){
-                   if (rootScope.data.routes[j].real_track == undefined || typeof (rootScope.data.routes[j].real_track) == 'string') continue;
+                   if (rootScope.data.routes[j].real_track == undefined || typeof (rootScope.data.routes[j].real_track) == 'string') rootScope.data.routes[j].real_track=[];
                     if (rootScope.data.routes[j].transport.gid == data[i].gid) {
                         console.log("Совпадение найдено", rootScope.data.routes[j].filterId , scope.filters.route);
                         if (rootScope.data.routes[j].filterId != scope.filters.route) {
-                            //console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+                            console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);
 
                         } else {
-                           // console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+                            console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
                             if(data[i].state != undefined && data[i].state.length >1 ) scope.$emit('redrawUpdate', data[i].state, scope.filters.route);
                         }
 
-                        if (data[i].state != undefined && data[i].state.length > 0) {
+                        var ll=0;
+                        if (data[i].state != undefined && data[i].state.length > 0 && rootScope.data.routes[j].real_track.length>0) {
                             if (data[i].state[0].id != rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].id) console.log("AAAAAAA Большой ошибка, начальника!!!", data[i].state[0]);
                             rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].coords = data[i].state[0].coords;
                             rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].dist = data[i].state[0].dist;
@@ -5085,13 +5086,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t1 = data[i].state[0].t1;
                             rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].t2 = data[i].state[0].t2;
 
-
-
-                            for(var l = 1; l<data[i].state.length; l++) {
-                                rootScope.data.routes[j].real_track.push(data[i].state[l]);
-                            }
+                            ll=1
                         }
 
+
+                        for(var l = ll; l<data[i].state.length; l++) {
+                            rootScope.data.routes[j].real_track.push(data[i].state[l]);
+                        }
                     }
                 }
 

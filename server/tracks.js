@@ -175,9 +175,9 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                             }
 
                         }
-                        //if (data.sensors[jj].GID == 761 || data.sensors[jj].GID =="761"){
-                        //    console.log("Newurl=", newUrl);
-                        //    console.log("   url=", url)}
+                       // if (data.sensors[jj].GID == 759 || data.sensors[jj].GID =="759"){
+                            //console.log("   Newurl=", newUrl);
+                            //console.log("   url=", url)}
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true

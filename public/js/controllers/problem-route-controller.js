@@ -32,14 +32,17 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     }
 
                     //todo запрос на обнговление трека
-
+                    //if(!rootScope.data.routes) rootScope.data.routes=[];
                     if ( rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false){
                         var obj =[];
+                        var lastState={};
                         for (var i=0; i< rootScope.data.routes.length; i++){
-                            if (rootScope.data.routes[i].real_track != undefined
-                            && rootScope.data.routes[i].real_track.length>0
-                            && rootScope.data.routes[i].transport.gid != undefined) {
-                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: rootScope.data.routes[i].real_track[rootScope.data.routes[i].real_track.length-1]}
+                            if (rootScope.data.routes[i].real_track == undefined) rootScope.data.routes[i].real_track =[];
+                            if (rootScope.data.routes[i].transport.gid != undefined ) {
+                                if (rootScope.data.routes[i].real_track.length == 0) lastState.t1=strToTstamp(rootScope.data.routes[i].START_TIME);
+                                console.log("Время запроса", rootScope.data.routes[i].transport.gid, strToTstamp(rootScope.data.routes[i].START_TIME));
+                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState || rootScope.data.routes[i].real_track[rootScope.data.routes[i].real_track.length-1]};
+                                console.log("Res", res);
                                 obj.push(res);
                             }
                         }
@@ -246,6 +249,63 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             }
         })
 
+
+        function strToTstamp(strDate, lockaldata) {
+            try {
+
+                if (lockaldata != undefined) {
+                    var today = new Date();
+                    var day, adding, month, year;
+
+                    if(today.getDate().length<2){
+                        day = "0"+today.getDate();
+                    } else {
+                        day = today.getDate();
+                    }
+
+                    month = parseInt(today.getMonth());
+                    month++;
+
+                    if(month<10){
+                        month = "0"+month;
+                    } else {
+                        month = "" + month;
+
+                    }
+
+                    year = ('' + today.getFullYear()).substring(2);
+                    //log.info("Constructor", day, month, year);
+                    adding = day+'.'+month+'.'+year;
+                    if (strDate.length<10) {
+                        strDate = adding + " " + strDate;
+                        // log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
+                    }
+
+                }
+                var parts = strDate.split(' ');
+                var    _date = parts[0].split('.');
+                var _time;
+                var toPrint=JSON.stringify(strDate);
+                //for (var i=0; i<parts.length;i++){
+                //    log.info("PARTS", parts[i]);
+                //}
+                //log.info("_________________");
+                try {
+                    _time = parts[1].split(':');} catch (exeption) {
+
+
+                    log.info(toPrint, strDate, "Error", exeption, lockaldata);
+                }
+
+
+
+                //log.info(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
+
+                return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+            } catch (e) {
+                log.error( "Ошибка "+ e + e.stack);
+            }
+        }
 
 
     }]);

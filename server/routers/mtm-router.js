@@ -1953,7 +1953,7 @@ function cutFIO(fioStr) {
 // Перевод строковой даты в таймстамп
 function strToTstamp(strDate, lockaldata) {
     try {
-    //log.info(strDate, "#$%^#@^@#%^#$strDate #$&#$&#$&^#");
+
     if (lockaldata != undefined) {
         var today = new Date();
         var day, adding, month, year;
@@ -2574,12 +2574,12 @@ function startPeriodicCalculating() {
                                     //log.info("Полученные данные", data[j].data);
 
                                     if ( data[j].data[0].id+'' == cached.routes[i].real_track[cached.routes[i].real_track.length-1].id+"" ){
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
+                                               if(data[j].data[0].t1) cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
+                                               if (data[j].data[0].t2) cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                                if (data[j].data[0].lat) cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
+                                                if (data[j].data[0].lon) cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
+                                                if (data[j].data[0].dist)cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
+                                                if (data[j].data[0].time) cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
                                         data[j].data.splice(0,1);
                                         if (data[j].data.length >0) {
                                             //log.info("Дописываем стейты", cached.routes[i].driver.NAME, cached.routes[i].real_track.length, data[j].data.length );
@@ -2611,12 +2611,12 @@ function startPeriodicCalculating() {
                                         if(data[j].data.length == 0 || data[j].data == undefined) continue;
                                         // Если уже вручную связали этот стейт с какой либо точкой
                                         if (data[j].data[0])
-                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
-                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
-                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
-                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
-                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
-                                            cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
+                                            if (data[j].data[0].t1) cached.routes[i].real_track[cached.routes[i].real_track.length-1].t1 = data[j].data[0].t1;
+                                            if (data[j].data[0].t2) cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 = data[j].data[0].t2;
+                                            if (data[j].data[0].lat) cached.routes[i].real_track[cached.routes[i].real_track.length-1].lat = data[j].data[0].lat;
+                                            if (data[j].data[0].lon) cached.routes[i].real_track[cached.routes[i].real_track.length-1].lon = data[j].data[0].lon;
+                                            if (data[j].data[0].dist) cached.routes[i].real_track[cached.routes[i].real_track.length-1].dist = data[j].data[0].dist;
+                                            if (data[j].data[0].time) cached.routes[i].real_track[cached.routes[i].real_track.length-1].time = data[j].data[0].time;
 
                                             data[j].data.splice(0,1);
 

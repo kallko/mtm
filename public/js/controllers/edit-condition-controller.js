@@ -56,7 +56,7 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
 
         setNewMobileDevice(route, scope.iMEI, scope.changeTime)
 
-    }
+    };
 
 
     function setNewMobileDevice(route, imei, time){
@@ -64,6 +64,7 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
         http.post('./setmobiledevice/', {imei:imei, driver:route.driver.ID})
             .success(function(data) {
                 console.log("Set mobile device complete", data);
+
             })
     }
 
