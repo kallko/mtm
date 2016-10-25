@@ -4195,7 +4195,7 @@ function connectStopsAndPoints(company) {
 
                         //cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
 
-                        if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit){
+                        if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit || tmpPoint.havePushStop){
                             //log.info("Подтверждена вручную Уходим");
                             continue;
                         }
@@ -4328,14 +4328,14 @@ function connectStopsAndPoints(company) {
                             var ip=0;
                             var sPointExist=false;
                             while(ip<tmpArrival.servicePoints.length){
-                                if(tmpArrival.servicePoints[ip]==k){
+                                if(tmpArrival.servicePoints[ip]==tmpPoint.NUMBER-1){
                                     sPointExist=true;
                                     break;
                                 }
                                 ip++;
                             }
                             if(!sPointExist){
-                                tmpArrival.servicePoints.push(k);}
+                                tmpArrival.servicePoints.push(tmpPoint.NUMBER-1);}
 
                             // tmpPoint.rawConfirmed=0;
 
@@ -4514,6 +4514,11 @@ function findStatusesAndWindows(company) {
             tmpPoint.limit = 0;
             if (tmpPoint.confirmed_by_operator) {
                 tmpPoint.limit = 100;
+
+                continue;
+            }
+            if (tmpPoint.havePushStop) {
+                tmpPoint.limit = 90;
 
                 continue;
             }
@@ -5558,10 +5563,68 @@ function connectPointsPushesStops(company) {
     if (!company) return;
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
        var  route = cashedDataArr[company].routes[i];
+        if (route.real_track == undefined || route.real_track.length == 0) continue;
         for (var j=0; j<route.points.length; j++){
             var point = route.points[j];
             if (!point.havePush) continue;
             var push = point.mobile_push;
+            if(push.lat == null) continue;
+            var tmpDistance = getDistanceFromLatLonInM(parseFloat(point.LAT), parseFloat(point.LON), push.lat, push.lon);
+
+            if (tmpDistance > cashedDataArr[company].settings.mobileRadius) continue;
+
+            //этап 1 найти стоп подходящий по времени
+            for (var k=0; k<route.real_track.length; k++){
+                if (push.gps_time_ts > route.real_track[k].t1 && route.real_track[k].state == "ARRIVAL" && push.gps_time_ts < route.real_track[k].t2 + 180) {
+
+                    var tmpArrival = route.real_track[k];
+                    var tmpTime = Math.abs(point.arrival_time_ts - tmpArrival.t1);
+                    var uniqueId = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
+                    var incorrect_stop = false;
+                    if(point.incorrect_stop != undefined ){
+                        for (var si = 0; si < point.incorrect_stop.length; si++){
+
+                            if (point.incorrect_stop[si] == uniqueId) {
+                                incorrect_stop = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (incorrect_stop){
+                        log.info ("Ура, найден некорректный стоп!!!!!!");
+                        continue;
+                    }
+
+                    point.distanceToStop = tmpDistance;
+                    point.timeToStop = tmpTime;
+                    point.haveStop = true;
+                    point.havePushStop = true;
+                    point.stopState = tmpArrival;
+                    route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                    point.stop_arrival_time = tmpArrival.t1;
+                    point.real_arrival_time = tmpArrival.t1;
+                    point.autofill_service_time = point.stopState.time;
+
+                    if(tmpArrival.servicePoints == undefined) { tmpArrival.servicePoints=[]};
+
+                    // проверка, существует ли уже этот стоп
+                    var ip=0;
+                    var sPointExist=false;
+                    while(ip<tmpArrival.servicePoints.length){
+                        if(tmpArrival.servicePoints[ip]==point.NUMBER-1){
+                            sPointExist=true;
+                            break;
+                        }
+                        ip++;
+                    }
+                    if(!sPointExist){
+                        tmpArrival.servicePoints.push(point.NUMBER-1);}
+
+
+                }
+            }
+
         }
     }
     console.log("Start connectPointsPushesStops ");
