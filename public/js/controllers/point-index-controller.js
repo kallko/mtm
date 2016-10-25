@@ -611,7 +611,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     console.log("Исходные данные до обработки", JSON.parse(JSON.stringify(data)));
                     if ((data == 'wait' || data.routes == undefined) && data.status != 'no plan'  ){
                         console.log("Сервер еще подготавливает данные, надо подождать");
-                        setTimeout(loadDailyData(false, showDate), 60000);
+                        setTimeout(function() {
+                            console.log("Стартует задержка и перезапрос");
+                            loadDailyData(false, showDate)
+                        }, 3000);
                         return;
                     }
 
@@ -5066,7 +5069,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i=0; i<data.length; i++) {
                 for(var j=0; j<rootScope.data.routes.length; j++){
                    if (rootScope.data.routes[j].real_track == undefined || typeof (rootScope.data.routes[j].real_track) == 'string') rootScope.data.routes[j].real_track=[];
-                    if (rootScope.data.routes[j].transport.gid == data[i].gid) {
+                    if (rootScope.data.routes[j].transport.gid == data[i].gid && typeof (data[i]) != "string" ) {
                         console.log("Совпадение найдено", rootScope.data.routes[j].filterId , scope.filters.route);
                         if (rootScope.data.routes[j].filterId != scope.filters.route) {
                             console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);

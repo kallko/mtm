@@ -4617,7 +4617,8 @@ function oldDayCalculate (company, data) {
 }
 
 function continueConcat(company) {
-    connectPointsAndPushes(company);
+    connectPointsAndPushes(company)
+    //connectPointsPushesStops(company);
     connectStopsAndPoints(company);
     findStatusesAndWindows(company);
     calculateStatistic (company);
@@ -5551,6 +5552,21 @@ function checkSync(company, login, blockedArr) {
 }
 
 
+function connectPointsPushesStops(company) {
+    console.log("Start connectPointsPushesStops ");
+
+    if (!company) return;
+    for (var i=0; i<cashedDataArr[company].routes.length; i++){
+       var  route = cashedDataArr[company].routes[i];
+        for (var j=0; j<route.points.length; j++){
+            var point = route.points[j];
+            if (!point.havePush) continue;
+            var push = point.mobile_push;
+        }
+    }
+    console.log("Start connectPointsPushesStops ");
+}
+
 function concat1CAndMonitoring (company) {
     try {
     if (!company || cashedDataArr[company].closedRoutesFrom1C == undefined) {
@@ -5655,6 +5671,7 @@ function startCalculateCompany(company) {
     cashedDataArr[company].recalc_finishing = false;
     selectRoutes(company);
     connectPointsAndPushes(company);
+    connectPointsPushesStops(company);
     connectStopsAndPoints(company);
     checkServiceTime(company);
     predicateTime(company);

@@ -39,9 +39,12 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         for (var i=0; i< rootScope.data.routes.length; i++){
                             if (rootScope.data.routes[i].real_track == undefined) rootScope.data.routes[i].real_track =[];
                             if (rootScope.data.routes[i].transport.gid != undefined ) {
-                                if (rootScope.data.routes[i].real_track.length == 0) lastState.t1=strToTstamp(rootScope.data.routes[i].START_TIME);
+                                if (rootScope.data.routes[i].real_track.length == 0) {
+                                    lastState.t1=strToTstamp(rootScope.data.routes[i].START_TIME);
+                                } else {lastState = rootScope.data.routes[i].real_track[ rootScope.data.routes[i].real_track.length-1]}
+
                                 console.log("Время запроса", rootScope.data.routes[i].transport.gid, strToTstamp(rootScope.data.routes[i].START_TIME));
-                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState || rootScope.data.routes[i].real_track[rootScope.data.routes[i].real_track.length-1]};
+                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState };
                                 console.log("Res", res);
                                 obj.push(res);
                             }
