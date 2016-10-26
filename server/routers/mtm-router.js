@@ -5573,9 +5573,14 @@ function connectPointsPushesStops(company) {
 
             if (tmpDistance > cashedDataArr[company].settings.mobileRadius) continue;
 
+
             //этап 1 найти стоп подходящий по времени
             for (var k=0; k<route.real_track.length; k++){
                 if (push.gps_time_ts > route.real_track[k].t1 && route.real_track[k].state == "ARRIVAL" && push.gps_time_ts < route.real_track[k].t2 + 180) {
+
+                    var tmpDistance1 = getDistanceFromLatLonInM(parseFloat(point.LAT), parseFloat(point.LON), route.real_track[k].lat, route.real_track[k].lon);
+                    if (tmpDistance1 > cashedDataArr[company].settings.stopRadius) continue;
+
 
                     var tmpArrival = route.real_track[k];
                     var tmpTime = Math.abs(point.arrival_time_ts - tmpArrival.t1);

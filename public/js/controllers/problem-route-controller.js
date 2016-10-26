@@ -52,7 +52,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                         http.post ('./updatetrack', {data: obj})
                             .success(function (data) {
-                                console.log("UpdateTrack", data);
+                                console.log("UpdateTrack look in server", data);
                                 for (var j=0; j<data.length; j++){
                                     console.log("Size of states ", data[j].state.length);
                                     if (data[j].state[data[j].state.length-1].id == 0) {

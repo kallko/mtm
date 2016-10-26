@@ -55,6 +55,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
 
 // получение треков по переданным стейтам и гиду машины
 TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, callback) {
+    console.log("Запрос апдейт дошел до треккера");
     if(states == undefined || states[0] == undefined) return;
     var counter = 0,
         me = this,
@@ -473,7 +474,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    //console.log(url, "Track 401");
+    console.log(url+ '&gid=' + gid, "Это сам запрос");
 
 
     request({
@@ -481,7 +482,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log("Track loaded");
+            console.log(" Запрос успешен Track loaded");
             callback(body);
         } else {
             console.log(" Ошибка !!!!!", error);

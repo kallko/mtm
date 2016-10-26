@@ -544,7 +544,7 @@
 <template  type="text/html" id="edit-condition">
 
 
-    <div  ng-show="false" id="condition-panel" ng-controller="EditConditionController">
+    <div   id="condition-panel" ng-controller="EditConditionController">
         <div id="mode" >
                     <select
                             class="element-margin"
@@ -595,7 +595,7 @@
             <select id="set-device-route-select"   ng-model="selectedRouteFilterId"
                     ng-options="option.filterId as option.driver.NAME   for option in data.routes">
             </select>
-            <input type="time"
+            <input ng-show="false" type="time"
                    ng-model="changeTime"
                    id="change-time"/>
             <input ng-model="iMEI" type="text" size="16"> <button ng-click="setMobileDevice()">Установить</button>

@@ -37,7 +37,8 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
 
 
     scope.setMobileDevice = function(){
-        if(!scope.selectedRouteFilterId || !scope.changeTime || !scope.iMEI){
+        console.log(scope.selectedRouteFilterId, scope.changeTime, scope.iMEI);
+        if(scope.selectedRouteFilterId == -1 || scope.selectedRouteFilterId == undefined || !scope.changeTime || !scope.iMEI){
             scope.$emit('showNotification', {text: "Заполните все необходимые поля", duration: 3000});
             return;
         }
@@ -48,7 +49,7 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
         }
         var route;
         for(var i=0; i<rootScope.data.routes.length; i++){
-            console.log("Поиск роута", rootScope.data.routes[i].filterId, scope.selectedRouteFilterId )
+            console.log("Поиск роута", rootScope.data.routes[i].filterId, scope.selectedRouteFilterId );
             if(rootScope.data.routes[i].filterId == scope.selectedRouteFilterId) {
                 route=rootScope.data.routes[i];
             }
@@ -59,11 +60,48 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
     };
 
 
+    function timeCorrection() {
+
+    }
+
+    function changeGid(route, newGid) {
+        route.real_track=[];
+        route.transport.gid = newGid;
+        scope.$emit('clearMap');
+        scope.$emit('drawRealTrack', route);
+
+    }
+
+
     function setNewMobileDevice(route, imei, time){
         console.log("DriverID", route.driver.ID);
         http.post('./setmobiledevice/', {imei:imei, driver:route.driver.ID})
             .success(function(data) {
-                console.log("Set mobile device complete", data);
+                console.log("Set mobile device complete", data, data.result, data.result.return);
+
+
+
+                var r = new RegExp("\x27+", "g");
+                var obj = (data.result.return).replace(r, "\"");
+                console.log("Obj", obj);
+                obj=obj.replace(/\s/ig, "");
+                console.log("Obj", obj , !obj.endsWith("\}"));
+                if (!obj.endsWith("}")) obj+="}";
+                obj=JSON.parse(obj);
+
+                if (obj.result == 'error') {
+                    scope.$emit('showNotification', {text:"Некорректный IMEI", duration: 3000});
+                    return;
+                }
+                var newGid=obj.gid;
+
+
+
+
+
+                //timeCorrection(); //todo функция объединения существующего трека с новым.
+                changeGid(route ,newGid);
+
 
             })
     }
