@@ -38,7 +38,7 @@ angular.module('MTMonitor').controller('EditConditionController', ['$scope', '$r
 
     scope.setMobileDevice = function(){
         console.log(scope.selectedRouteFilterId, scope.changeTime, scope.iMEI);
-        scope.scope.changeTime = rootScope.nowTime;
+        scope.changeTime = rootScope.nowTime;
         if(scope.selectedRouteFilterId == -1 || scope.selectedRouteFilterId == undefined || !scope.changeTime || !scope.iMEI){
             scope.$emit('showNotification', {text: "Заполните все необходимые поля", duration: 3000});
             return;

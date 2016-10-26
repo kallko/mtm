@@ -131,7 +131,7 @@ router.route('/loadData')
         try {
         log.info("Start data loading");
             var oldJson;
-        fs.readFile('./logs' + '/' +'savedData.txt', 'utf8', function (err, data) {
+        fs.readFile('./logs' + '/' +'saved.txt', 'utf8', function (err, data) {
             oldJson = JSON.parse(data);
             console.log("Error in load", err);
             cashedDataArr = oldJson;
