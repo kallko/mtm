@@ -2521,9 +2521,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             if (i == track.length-1 )stopPolyline.redrawer = true;
 
 
-                            stopPolyline.on('click', function(event) {
-                                console.log(event.target);
-                            });
+                            //stopPolyline.on('click', function(event) {
+                            //    console.log(event.target);
+                            //});
                             stopPolyline.addTo(map);
 
 
@@ -2626,11 +2626,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                 });
                             tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                             tmpVar.redrawer = true;
-                            tmpVar.on('click', function (event){
-                                //console.log (tmpVar._latlng);
-                                console.log(event.target);
-                                redrawTrac(event.target);
-                            });
+                            //tmpVar.on('click', function (event){
+                            //    //console.log (tmpVar._latlng);
+                            //    console.log(event.target);
+                            //    redrawTrac(event.target);
+                            //});
                             addMarker(tmpVar);
                             //map.addLayer(tmpVar);
                             //oms.addMarker(tmpVar);

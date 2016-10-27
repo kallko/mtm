@@ -4528,6 +4528,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
                 console.log("rootScope.data", rootScope.data);
                 rootScope.nowTime = cache.server_time;
+
+
             } else {
                 if (rootScope.data != undefined && rootScope.data.routes.length > 0 && cache.routes != undefined && cache.routes.length>0) console.log ("У нас уже есть проблеммы, но мы еще получили", cache);
                 rootScope.nowTime = cache.server_time;
@@ -4543,8 +4545,45 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             }
+            //Создать новый список для отображения
+            recreateAllRoutes()
         });
 
+
+
+        function recreateAllRoutes(){
+            if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) return;
+            console.log("Start recreate");
+            for (var i=0; i<rootScope.data.routes.length; i++){
+                console.log(i);
+                var id = rootScope.data.routes[i].filterId;
+                for (var j=0; j<rootScope.data.allRoutes.length; j++){
+                    console.log(j)
+                    console.log(id, rootScope.data.allRoutes[j].value);
+                    if (id == rootScope.data.allRoutes[j].value && !rootScope.data.allRoutes[j].nameCar.startsWith(" * ")){
+                        rootScope.data.allRoutes[j].nameCar = " * " + rootScope.data.allRoutes[j].nameCar;
+                        rootScope.data.allRoutes[j].nameDriver = " * " + rootScope.data.allRoutes[j].nameDriver;
+                        console.log("Find Aceptness");
+                        break;
+                    }
+                }
+            }
+
+        }
+
+
+        function untiRecreateAllRoutes(id) {
+            if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) return;
+            console.log("Start untirecreate");
+            for(var i=0; i<rootScope.data.allRoutes.length; i++){
+                if (rootScope.data.allRoutes[i].value == id) {
+                    if (rootScope.data.allRoutes[i].nameCar.startsWith(" * ")) rootScope.data.allRoutes[i].nameCar = rootScope.data.allRoutes[i].nameCar.substring(3);
+                    if (rootScope.data.allRoutes[i].nameDriver.startsWith(" * ")) rootScope.data.allRoutes[i].nameDriver = rootScope.data.allRoutes[i].nameDriver.substring(3);
+                    break;
+                }
+            }
+
+        }
 
         rootScope.$on('saveRoute', function( event, id){
             scope.solveProblem(id);
@@ -4553,6 +4592,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.solveProblem = function (id) {
             rootScope.clickOff = true;
+            untiRecreateAllRoutes(id);
             scope.$emit('clearMap');
             console.log("Event", id);
             if (id == -1) alert ("Маршрут для сохранения не выбран");
@@ -4737,6 +4777,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rootScope.displayCollection = scope.displayCollection;
                     rootScope.clickOff =false;
                     //console.log("Точки коллекции", scope.rowCollection.length, scope.displayCollection.length, rootScope.displayCollection.length, data.route.points.length );
+                    recreateAllRoutes();
 
             })
         }
