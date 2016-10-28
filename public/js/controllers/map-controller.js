@@ -1132,10 +1132,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             lat=parseFloat(lat);
             lon=parseFloat(lon);
-            console.log("Работает функция центровки по координате", lat, lon);
+            console.log("!!!!!!Работает функция центровки по координате", lat, lon);
 
-            var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
-                offset = map.getSize(),
+            var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
+                console.log ("Set ZOOM to", zoom);
+            var offset = map.getSize(),
                 tmp = map.project(new L.LatLng(lat, lon), newZoom||zoom).subtract(
                     [
                         position.width / 2 - offset.x / 2 + position.offset.left,
@@ -2305,6 +2306,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
             //console.log("Zoom2", map.getZoom());
             var newZoom = map.getZoom();
+            map.setZoom(newZoom); // Добавка
             //console.log(map.getCenter());
             var centre = map.getCenter();
             var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
@@ -2316,9 +2318,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     ]),
                 target = map.unproject(tmp, zoom);
 
-            //console.log(zoom, offset, tmp, target);
-            setMapCenter(target.lat, target.lng, newZoom);
-            //console.log("Zoom3", map.getZoom());
+            //добавка вместо
+            // setMapCenter(target.lat, target.lng, newZoom);
+           setTimeout(function(){
+               console.log("Before timeout ", target.lat, target.lng, newZoom);
+               map.setView([target.lat, target.lng], newZoom);
+               //map.setZoom(newZoom);
+               console.log("After Timeout", map.getCenter(), map.getZoom());
+           }, 200);
+            //console.log("Zoom3", map.getZoom());om());
         }
 
 

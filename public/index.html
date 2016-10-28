@@ -33,7 +33,7 @@
 <!-- файлы стилей -->
 <link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css"/>
 <link type="text/css" rel="stylesheet" href="./css/goldenlayout-light-theme.css"/>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css"/>
 <link rel="stylesheet" href="./css/font-awesome.min.css"/>
 <link rel="stylesheet" href="./css/application.css"/>
 <link rel="stylesheet" href="./css/columns.css"/>
@@ -49,7 +49,7 @@
 <script src="./js/vendor/goldenlayout.js"></script>
 <script src="./js/vendor/bootstrap-contextmenu.js"></script>
 <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
 <script src="//cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
 <script src="./js/vendor/colResizable-1.5.min.js"></script>
 <script src="./js/vendor/divicon.js"></script>
@@ -544,7 +544,7 @@
 <template  type="text/html" id="edit-condition">
 
 
-    <div   id="condition-panel" ng-controller="EditConditionController">
+    <div   ng-show = "data.currentDay == true" id="condition-panel" ng-controller="EditConditionController">
         <div id="mode" >
                     <select
                             class="element-margin"
@@ -605,7 +605,7 @@
 </template>
 
 <template   type="text/html" id="edit-route">
-    <div id="edit-panel" ng-controller="EditRouteController">
+    <div ng-show ="data.currentDay == true" id="edit-panel" ng-controller="EditRouteController">
         <div ng-show="route == undefined" id="edit-panel-empty">
             Маршрут для редактирования не выбран
         </div>

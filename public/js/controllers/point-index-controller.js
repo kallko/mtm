@@ -4553,17 +4553,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function recreateAllRoutes(){
             if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) return;
-            console.log("Start recreate");
+            //console.log("Start recreate");
             for (var i=0; i<rootScope.data.routes.length; i++){
-                console.log(i);
                 var id = rootScope.data.routes[i].filterId;
                 for (var j=0; j<rootScope.data.allRoutes.length; j++){
-                    console.log(j)
-                    console.log(id, rootScope.data.allRoutes[j].value);
                     if (id == rootScope.data.allRoutes[j].value && !rootScope.data.allRoutes[j].nameCar.startsWith(" * ")){
                         rootScope.data.allRoutes[j].nameCar = " * " + rootScope.data.allRoutes[j].nameCar;
                         rootScope.data.allRoutes[j].nameDriver = " * " + rootScope.data.allRoutes[j].nameDriver;
-                        console.log("Find Aceptness");
                         break;
                     }
                 }
@@ -4574,8 +4570,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         function untiRecreateAllRoutes(id) {
             if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) return;
-            console.log("Start untirecreate");
-            for(var i=0; i<rootScope.data.allRoutes.length; i++){
+              for(var i=0; i<rootScope.data.allRoutes.length; i++){
                 if (rootScope.data.allRoutes[i].value == id) {
                     if (rootScope.data.allRoutes[i].nameCar.startsWith(" * ")) rootScope.data.allRoutes[i].nameCar = rootScope.data.allRoutes[i].nameCar.substring(3);
                     if (rootScope.data.allRoutes[i].nameDriver.startsWith(" * ")) rootScope.data.allRoutes[i].nameDriver = rootScope.data.allRoutes[i].nameDriver.substring(3);
@@ -5112,11 +5107,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                    if (rootScope.data.routes[j].real_track == undefined || typeof (rootScope.data.routes[j].real_track) == 'string') rootScope.data.routes[j].real_track=[];
                     if (rootScope.data.routes[j].transport.gid == data[i].gid && typeof (data[i]) != "string" ) {
                         console.log("Совпадение найдено", rootScope.data.routes[j].filterId , scope.filters.route);
+
                         if (rootScope.data.routes[j].filterId != scope.filters.route) {
                             console.log("Найдено обновление для непрорисованного трека", rootScope.data.routes[j].real_track, data[i]);
-
+                            console.log("Duration of states", rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].time, (data[i].state[0] ? data[i].state[0].time : "нет"));
                         } else {
                             console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
+                            console.log("Duration of states", rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].time, (data[i].state[0] ? data[i].state[0].time : "нет"));
+
                             if(data[i].state != undefined && data[i].state.length >1 ) scope.$emit('redrawUpdate', data[i].state, scope.filters.route);
                         }
 

@@ -191,6 +191,8 @@ router.route('/updatetrack')
         var result = [];
         var data = req.body.data;
         var t=data.length;
+        //console.log ("Разберись с этой data", data);
+        //console.log("Размер этой дата", data.length);
         var tt=0;
         for (var i=0; i<data.length; i++){
 
