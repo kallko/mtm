@@ -27,13 +27,21 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     rootScope.data.statistic = data.statistics;
                     rootScope.nowTime = rootScope.data.server_time;
 
+                    console.log("Receive data", data);
+                    if (data.allRoutes != undefined) {
+                        rootScope.data.allRoutes = data.allRoutes;
+                        console.log("Send data to recreate filters Routes");
+                        scope.$emit('newAllRoutes');
+                    }
+
                     if (data.err != undefined && data.err.length >0) {
                         alert("Произошел сбой связи. Перезайдите в АРМ, пожалуйста");
                     }
 
                     //todo запрос на обнговление трека
                     //if(!rootScope.data.routes) rootScope.data.routes=[];
-                    if ( rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false){
+                    if (rootScope.data.recievedUpdate == undefined) rootScope.data.recievedUpdate = true;
+                    if ( rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false && rootScope.data.recievedUpdate){
                         var obj =[];
                         var lastState={};
                         for (var i=0; i< rootScope.data.routes.length; i++){
@@ -43,25 +51,33 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                                     lastState.t1=strToTstamp(rootScope.data.routes[i].START_TIME);
                                 } else {lastState = rootScope.data.routes[i].real_track[ rootScope.data.routes[i].real_track.length-1]}
 
-                                console.log("Время запроса", rootScope.data.routes[i].transport.gid, strToTstamp(rootScope.data.routes[i].START_TIME));
+                                console.log("Время запроса", rootScope.data.routes[i].transport.gid, lastState.t1);
                                 var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState };
                                 console.log("Res", res);
                                 obj.push(res);
                             }
                         }
+                        rootScope.data.recievedUpdate= false;
 
                         http.post ('./updatetrack', {data: obj})
                             .success(function (data) {
+                                rootScope.data.recievedUpdate=true;
                                 console.log("UpdateTrack look in server", data);
                                 for (var j=0; j<data.length; j++){
+                                    if (data[j].state.length == 0 ) {
+                                        data.splice(j,1);
+                                        j--;
+                                        continue;
+                                    }
                                     console.log("Size of states ", data[j].state.length);
                                     if (data[j].state[data[j].state.length-1].id == 0) {
                                         data[j].state.length = data[j].state.length-2;
                                     }
                                 }
-                                rootScope.$emit('updateTrack', data);
+                                 rootScope.$emit('updateTrack', data);
                             })
                             .error (function (data){
+                            rootScope.data.recievedUpdate = true;
                             console.log("Ошибка", data);
                         })
                     }

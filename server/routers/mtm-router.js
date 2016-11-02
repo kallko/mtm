@@ -1850,6 +1850,7 @@ router.route('/confirmonline')
             result.server_time = parseInt(Date.now() / 1000);
             if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].statistic != undefined) result.statistics = cashedDataArr[currentCompany].statistic;
             result.status = 'ok';
+            result.allRoutes = cashedDataArr[currentCompany].allRoutes;
 
             res.status(200).json(result);
             return;
@@ -1884,6 +1885,7 @@ router.route('/confirmonline')
         result.statistics = cashedDataArr[currentCompany].statistic;
         result.status = 'ok';
         result.err = err;
+            result.allRoutes = cashedDataArr[currentCompany].allRoutes;
 
         res.status(200).json(result);
         } catch (e) {
@@ -3166,7 +3168,7 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     var delta;
     var str = ""+ company;
     //Костыль приводящий пуши разных компаний к единому знаменателю
-    if (str.startsWith("292942")) delta = 4;
+    if (str.startsWith("292942")) delta = 2;
     if (str.startsWith("271389")) delta = 3;
 
     while (i<pushes.length) {
@@ -5294,10 +5296,10 @@ function calculateProblemIndex(company) {
          route = cashedDataArr[company].routes[i];
 
         for ( j=0; j < route.points.length; j++){
-            var point = route.points[j];
+            point = route.points[j];
             var outOfWindows = true;
-            if (point.orderWindows == undefined) {
-                log.info("У точки нет заказанного окна, скорее всего склад");
+            if (point.orderWindows == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
+                //log.info("У точки нет заказанного окна, скорее всего склад");
                 continue;
             }
 
@@ -5310,7 +5312,7 @@ function calculateProblemIndex(company) {
                 }
             }
 
-            if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE"){
+            if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE" && point.waypoint.TYPE !="PARKING"){
                 log.info("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
                 point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
                 point.out_of_ordered = true;
@@ -5327,7 +5329,10 @@ function calculateProblemIndex(company) {
 
     for (var i=0; i<cashedDataArr[company].routes.length; i++) {
         // log.info("Start looking for ready to close");
-        if (cashedDataArr[company].routes[i].closed == true) continue;
+        if (cashedDataArr[company].routes[i].closed == true) {
+            changeNameOfRoute(company, cashedDataArr[company].routes[i].uniqueID);
+            continue;
+        }
 
         //todo прописать функцию закрытия роута с ноды
         if (cashedDataArr[company].routes[i].ready_to_close) {
@@ -5698,10 +5703,34 @@ function autosaveData(){
             mes+= err;
         });
 
-        res.status(200).json({mes: mes });
+
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
     }
+}
+
+function  changeNameOfRoute(company, uniqueID){
+    //try {
+    log.info("changeNameOfRoute recieve", company, uniqueID);
+    if (company == undefined || uniqueID == undefined) return;
+    var res = String.fromCharCode(8660);
+    for (var i=0; i<cashedDataArr[company].allRoutes.length; i++){
+        log.info("Lets check", cashedDataArr[company].allRoutes[i].uniqueID, uniqueID);
+        if (cashedDataArr[company].allRoutes[i].uniqueID == uniqueID && cashedDataArr[company].allRoutes[i].nameCar.indexOf(res) == -1) {
+            log.info("Find closed route And i will change it name");
+
+
+            cashedDataArr[company].allRoutes[i].nameCar = res + " "  + cashedDataArr[company].allRoutes[i].nameCar;
+            cashedDataArr[company].allRoutes[i].nameDriver =  res + " " + cashedDataArr[company].allRoutes[i].nameDriver;
+            log.info("New name", cashedDataArr[company].allRoutes[i].nameCar);
+            log.info("New name", cashedDataArr[company].allRoutes[i].nameDriver);
+        }
+    }
+
+
+    //} catch (e) {
+    //    log.error( "Ошибка "+ e + e.stack);
+    //}
 }
 
 function loadCoords(company) {
@@ -5765,3 +5794,15 @@ function startCalculateCompany(company) {
 
 
 module.exports = router;
+
+//for (i=0; i<rootScope.data.routes.length; i++){
+//    if (rootScope.data.routes[i].closed){
+//        console.log("Найден закрытый маршрут");
+//        //var res = String.fromCharCode(8660);
+//        //var res1 = String.fromCharCode(257);
+//        rootScope.data.allRoutes[j].nameCar = "Закрыт"  + rootScope.data.allRoutes[j].nameCar;
+//        rootScope.data.allRoutes[j].nameDriver =  "Закрыт" + res1 + rootScope.data.allRoutes[j].nameDriver;
+//
+//    }
+//
+//}

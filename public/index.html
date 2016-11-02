@@ -1062,10 +1062,13 @@
             <td class="title">Адрес:</td>
             <td class="row-data">{{point.waypoint.ADDRESS}}</td>
         </tr>
-        <tr>
+        <tr ng-show="false">
+
+        </tr>
+        <tr ng-show="false">
             <td class="title">План. прибытие:</td>
             <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}
-                <div ng-show="false" >
+                <div>
                 <button class="btn btn-primary btn-xs btn-success" >Подтвердить</button>
                 <input type="time" class="promised-text-card" id="promised-start-card"
                        ng-change="changePromisedCard()"
@@ -1083,6 +1086,7 @@
 
 
         </tr>
+
         <tr>
             <td class="title">План. номер:</td>
             <td class="row-data">{{point.NUMBER}}</td>
@@ -1113,22 +1117,7 @@
                 {{point.promised_window.finish * 1000 | date:'HH:mm'}}
             </td>
         </tr>
-        <tr ng-show="false">
-            <td class="title">Контролируемое окно:</td>
-            <td class="row-data">
-                <input type="time" class="promised-text-card" id="altpromised-start-card"
-                       ng-change="changePromisedCard()"
-                       ng-model="promisedStartCard"
-                       enter-event="changePromisedWindow(point)"> -
-                <input type="time" class="promised-text-card" id="altpromised-finish-card"
-                       ng-change="changePromisedCard()"
-                       ng-model="promisedFinishCard"
 
-                       enter-event="changePromisedWindow(point)">
-                <button id="altchange-window-task-btn" class="btn btn-primary btn-xs" ng-disabled="disableConfirmBtn" ng-click="changePromisedWindow(point)">Изменить</button>
-
-            </td>
-        </tr>
         <tr>
             <td class="title">Тел. водителя:</td>
             <td class="row-data">{{point.driver.PHONE}}</td>
