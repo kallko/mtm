@@ -361,12 +361,12 @@
                     </td>
                     <td class="time-left-window-col">{{ ((row.status==4 || row.status==5 ||row.status==7 ||row.status==6) && row.working_window[0] != undefined ) ? (parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.working_window[row.working_window.length-1].finish - nowTime) -(parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
                     <td class="prediction-arrival-time-col">
-                        <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8) && (row.transport.gid!=undefined) && (row.transport.real_track!=undefined) && (nowTime - row.transport.real_track[row.transport.real_track.length-1].t2<60*60)">
-                            {{(nowTime + row.arrival_left_prediction)*1000 | date: 'HH:mm' }}
+                        <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8) && (row.transport.gid!=undefined) ">
+                            {{(row.arrival_prediction)*1000 | date: 'HH:mm' }}
                         </span>
                     </td>
                     <td class="overdue-col">
-                        <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5) && (row.transport.gid!=undefined) && (row.transport.real_track!=undefined) && (nowTime - row.transport.real_track[row.transport.real_track.length-1].t2<60*60)  ">
+                        <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5)">
                              {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }}<!-- |date: 'HH:mm' : 'UTC'-->
                         </span>
                     </td>
@@ -377,7 +377,7 @@
                     </td>
                     <td class="overdue-col">
                         <span ng-if="row.overdue_time > 0">
-                            {{row.overdue_time*1000 |  date: 'HH:mm' : 'UTC' }}
+                            {{(row.arrival_prediction-row.working_window[row.working_window.length-1].finish)*1000 |  date: 'HH:mm' : 'UTC' }}
                         </span>
                     </td>
                     <td class="stop-col">{{row.haveStop ? 'Есть' : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}</td>
@@ -1069,7 +1069,7 @@
             <td class="title">План. прибытие:</td>
             <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}
                 <div>
-                <button class="btn btn-primary btn-xs btn-success" >Подтвердить</button>
+                <button class="btn btn-primary btn-xs btn-success" >Утвердить</button>
                 <input type="time" class="promised-text-card" id="promised-start-card"
                        ng-change="changePromisedCard()"
                        ng-model="promisedStartCard"

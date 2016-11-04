@@ -4451,7 +4451,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         //    }
         //}
 
-        rootScope.$on('receiveproblem', function (event, cache) {
+        rootScope.$on('receiveproblem', function (event, cache, settings) {
             if (cache == undefined ) {
                 console.log("!!!!!! ОШИБКА В ДАННЫХ");
                 return;
@@ -4512,6 +4512,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (rootScope.data == undefined) {
 
                     rootScope.data = cache;
+                    rootScope.data.settings = settings;
                     console.log("PIC 4521", cache);
                 }else {
                     console.log("PIC 4523", cache);
@@ -5179,6 +5180,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         });
 
 
+        function createNewScopeFilters(){
+            scope.filters.routes.length=1;
+            for (var i=0; i<rootScope.data.allRoutes.length; i++){
+                scope.filters.routes.push(rootScope.data.allRoutes[i]);
+            }
+        }
+
 
         function solveTrackConfrontation (real_track, states){
 
@@ -5210,11 +5218,37 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         });
 
+        rootScope.$on('changeBlockedRoutes', function(event,data) {
+            var symbol = String.fromCharCode(8595);
+            mark5: for (var j=0; j<scope.filters.routes.length; j++){
+                        for (var i=0; i<data.length; i++){
+                            if (data[i] == scope.filters.routes[j].uniqueID){
+                                //console.log("Find blocked route", scope.filters.routes[j].nameCar.indexOf(symbol));
+                                if (scope.filters.routes[j].nameCar.indexOf(symbol) == -1){
+                                    scope.filters.routes[j].nameCar = symbol + " " + scope.filters.routes[j].nameCar;
+                                    scope.filters.routes[j].nameDriver =  symbol + " " + scope.filters.routes[j].nameDriver;
+                                }
+                                continue mark5;
+                            }
+
+                            if (scope.filters.routes[j].nameCar.indexOf(symbol)>0){
+                                scope.filters.routes[j].nameCar = "" +  scope.filters.routes[j].nameCar.substring(2);
+                                scope.filters.routes[j].nameDriver = "" +  scope.filters.routes[j].nameDriver.substring(2);
+                            }
+
+                        }
+            }
+        });
+
 
         rootScope.$on('newAllRoutes', function( ) {
+
+            console.log("Check size filters", scope.filters.routes.length, rootScope.data.allRoutes.length);
+            if (scope.filters.routes.length - 1 != rootScope.data.allRoutes.length) createNewScopeFilters();
             var res = String.fromCharCode(8660);
             for (var i = 0; i< rootScope.data.allRoutes.length; i++){
                 for(var j = 0; j<scope.filters.routes.length; j++){
+                    if (rootScope.data.allRoutes[i].nameCar.indexOf("*")<2 && rootScope.data.allRoutes[i].nameCar.indexOf("*") != -1 ) continue; // проверка не является ли этот маршрут сейчас выбранным
                     //console.log("Check allRoutes", rootScope.data.allRoutes[i].uniqueID, scope.filters.routes[j].uniqueID);
                     if (rootScope.data.allRoutes[i].nameCar.indexOf(res) !=-1 &&  rootScope.data.allRoutes[i].uniqueID == scope.filters.routes[j].uniqueID && !scope.filters.routes[j].nameCar.startsWith(" * ")) {
                         scope.filters.routes[j].nameCar = rootScope.data.allRoutes[i].nameCar;
@@ -5226,33 +5260,6 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
         });
 
-        //function createSeveralAviabilityWindows (point){
-        //
-        //    point.orderWindows=[];
-        //    //console.log("Start checkUncalculate");
-        //
-        //    var parts=point.AVAILABILITY_WINDOWS.split(";");
-        //    var size=parts.length;
-        //    var i=0;
-        //    while(i<size){
-        //        var date=point.ARRIVAL_TIME.substr(0,11);
-        //        var temp=parts[i].trim();
-        //        var before=temp.substr(0,5);
-        //        before=date+before+":00";
-        //        //console.log("before=", before);
-        //        var begin=strToTstamp(before, point);
-        //
-        //        var after=temp.slice(-5);
-        //        after=date+after+":00";
-        //        var end=strToTstamp(after, point);
-        //        point.orderWindows.push({start: begin, finish: end });
-        //
-        //
-        //        i++;
-        //    }
-        //
-        //
-        //}
 
     }]);
 

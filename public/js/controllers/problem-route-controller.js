@@ -8,7 +8,16 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         rootScope.asking = false;                                                   // Запущен ли процесс запрсов
         rootScope.tempDecision;
 
-        interval(confirmOnline, 60 * 1000);
+        interval(confirmOnline, 60 * 1000); // опрос на обновление трека, и подтверждение онлайна оператора
+        interval(askBlocked, 3 * 1000); //опрос на "занятость маршрутов"
+
+
+        function askBlocked(){
+            http.post('./askblocked')
+                .success(function(data){
+                   if (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
+                });
+        }
 
         function confirmOnline() {
             console.log("confirmOnline in process", rootScope.settings, rootScope.data.server_time);
@@ -52,12 +61,19 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                                 } else {lastState = rootScope.data.routes[i].real_track[ rootScope.data.routes[i].real_track.length-1]}
 
                                 console.log("Время запроса", rootScope.data.routes[i].transport.gid, lastState.t1);
-                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState };
+                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState, uniqueID : rootScope.data.routes[i].uniqueID };
                                 console.log("Res", res);
                                 obj.push(res);
                             }
                         }
                         rootScope.data.recievedUpdate= false;
+
+                        http.post('./updatepushes', {data: obj})
+                            .success(function(data){
+                               console.log("Result updatepushes", data);
+
+                                rootScope.$emit('updatePush', data);
+                            });
 
                         http.post ('./updatetrack', {data: obj})
                             .success(function (data) {
@@ -114,8 +130,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
 
-        //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
-        // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
+
+
         function checkProblem() {
             checkTimeForEditing();
 
@@ -137,6 +153,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     settings = rootScope.data.settings;
                 } else {
                     settings=rootScope.settings;
+
                 }
                 for(var i=0; i<settings.userRoles.length; i++){
                     if (settings.userRoles[i] == 'operator') need = parseInt(settings.problems_to_operator) - exist;
@@ -171,7 +188,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.reasons=data.reasons;
                             //console.log("причины отказа", data.reasons);
-                            rootScope.$emit('receiveproblem', rootScope.tempDecision);
+                            rootScope.$emit('receiveproblem', rootScope.tempDecision, settings);
 
                             if (rootScope.tempDecision.statistic != undefined) rootScope.$emit('holestatistic', rootScope.tempDecision.statistic);
                         } else

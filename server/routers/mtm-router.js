@@ -181,6 +181,54 @@ router.route('/getoldroute')
         }
     });
 
+
+router.route('/askblocked')
+    .post(function(req, res){
+        try {
+            var key = ""+req.session.login;
+            var currentCompany = companyLogins[key];
+            var result=[];
+            for (var i=0; i<blockedRoutes.length; i++){
+                //log.info(blockedRoutes[i]);
+                if (blockedRoutes[i].company == currentCompany && blockedRoutes[i].login != key) {
+                    result.push(blockedRoutes[i].id);
+                }
+            }
+
+            res.status(200).json(result);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+
+router.route('/updatepushes')
+    .post (function(req, res){
+    try {
+        log.info("Получил запрос на updatepushes", req.body.data);
+
+        var key = "" + req.session.login;
+        var currentCompany = companyLogins[key];
+        var result = req.body.data;
+        var data = req.body.data;
+
+
+
+
+        for (var i = 0; i < data.length; i++) {
+
+            result = addPushesToUpdateTrack(currentCompany, result);
+
+        }
+        res.status(200).json(result);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
+});
+
+
+
 router.route('/updatetrack')
     .post (function(req, res){
     try {
@@ -472,7 +520,11 @@ router.route('/dailydata')
                         log.info("Данные по этой компани на сегодня уже получены");
                             //todo мина замедленного действия. Переписать, чтобы настройки записывались сразу при получении/ или явно передавались не оставаясь в области  глобальной видимости.
                             cashedDataArr[currentCompany].settings = settings;
-                        res.status(200).json(cashedDataArr[currentCompany].settings);
+                            var result = cashedDataArr[currentCompany].settings;
+
+                            result.user = req.session.login;
+
+                        res.status(200).json(result);
                         return;
                         } else {
 
@@ -489,6 +541,7 @@ router.route('/dailydata')
                                 if (!cashedDataArr[currentCompany].ready) {
                                     oldDayCalculate(currentCompany, data);
                                 } else {
+
                                     res.status(200).json(cashedDataArr[currentCompany]);
                                     return;
                                 }
@@ -498,6 +551,7 @@ router.route('/dailydata')
                             }
 
                             if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].ready) {
+
                                 res.status(200).json(cashedDataArr[currentCompany]);
                                 return;
                             }
@@ -648,6 +702,7 @@ router.route('/dailydata')
                     //    clearInterval(timerId);
                     //    alert( 'стоп' );
                     //}, 5000);
+                    data.settings.user = req.session.login;
 
                     res.status(200).json(data.settings);
                 }
@@ -2744,6 +2799,7 @@ function startPeriodicCalculating() {
 
                                     ) {
                                         log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Трек разорван !!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l-1], cached.routes[k].real_track[l] );
+                                        //repearTrackTry(cached.routes[k]);
                                     } else {
                                         cached.routes[k].real_track.splice(l-1, 1);
                                         l--;
@@ -2910,7 +2966,6 @@ function dataForPredicate(company, callback){
 
 function uncalcPredication(route, company) {
 try{
-    //log.info("This is uncalc route");
     var now = parseInt(Date.now()/1000);
 
 
@@ -2974,7 +3029,6 @@ try{
 function calcPredication(route, company) {
 
 try {
-    log.info("This is calculated route");
 
     var point,
         tmpPred,
@@ -3016,15 +3070,18 @@ try {
                 if (cashedDataArr[company].dataForPredicate[k].id == route.uniqueID) {
 
                     singleTimeMatrix = cashedDataArr[company].dataForPredicate.time;
-                    break;
+                    //break;
                 }
 
                 k++;
             }
+
+
         } else {
             //Рассчитываем статусы по фактическому времени, если у нас нет трека или предсказания;
 
             for (var i= 0; i<route.points.length; i++ ){
+
                 if (route.points[i].working_window[0] == undefined) {
 
                     log.info ('Скорее всего это склад'.green);
@@ -3069,9 +3126,8 @@ try {
             singleTimeMatrix != undefined ? nextPointTime = parseInt(singleTimeMatrix[lastPoint] / 10): nextPointTime = 0;
 
         for (var j = 0; j < route.points.length; j++) {
-            //if(route.driver.NAME =="Зінчук Віталій") {
-            //    log.info("Считаем точку Зинчука", lastPoint, route.points[j]);
-            //}
+
+
             if (j <= lastPoint || route.real_track == undefined) {
                 // все точки до последней выполненной проверяются по факту
                 //log.info("Try to change status for point", _route.points[j] );
@@ -3094,6 +3150,8 @@ try {
                 } else if (route.points[j].status == 3) {
                     totalWorkTime = parseInt(route.points[j].TASK_TIME) - (now - route.points[j].real_arrival_time);
                 }
+
+
             } else {
                 // точки ниже последней выполненной считаются ниже
                 //  log.info (j, "Point for Route", route);
@@ -3109,6 +3167,8 @@ try {
 
 
                 route.points[j].arrival_prediction = now + nextPointTime + totalWorkTime + totalTravelTime;
+
+
 
                 // log.info("In route", route, "Predication for point ", j, "==", route.points[j].arrival_prediction);
 
@@ -3133,13 +3193,10 @@ try {
                     if (route.points[j].overdue_time > 0) {
                         if (minus < now) {
                             route.points[j].status = 4;
-                            //log.info("Присваиваем статус 4");
-                            //route.points[j].variantus = 3005;
-                            //log.info("_route.points[j].status = STATUS.TIME_OUT;");
+
                         } else {
                             route.points[j].status = 5;
-                            //route.points[j].variant = 2937;
-                            //log.info("_route.points[j].status = STATUS.DELAY;");
+
                         }
                     }
 
@@ -4095,6 +4152,7 @@ function connectPointsAndPushes(company) {
                 if (mobilePushes[i].number == tmpPoint.TASK_NUMBER) {
 
                     mobilePushes[i].plan_number = tmpPoint.NUMBER;
+                    mobilePushes[i].uniqueID = tmpPoint.uniqueID;
 
                     //TODO написать функцию обработки пуша-отмены
                     if (mobilePushes[i].canceled) {
@@ -5235,7 +5293,7 @@ function calculateProblemIndex(company) {
 
 
             // log.info("point.problem_index", point.problem_index);
-            if (point.overdue_time > 0) {
+
                 if (point.status == 4) {
                     var koef;
                     if (point.working_window[0] == undefined) {
@@ -5278,8 +5336,8 @@ function calculateProblemIndex(company) {
 
                 }
 
+                // Calculate problem index for delay points
 
-            }
 
 
         }
@@ -5731,6 +5789,64 @@ function  changeNameOfRoute(company, uniqueID){
     //} catch (e) {
     //    log.error( "Ошибка "+ e + e.stack);
     //}
+}
+
+
+function repearTrackTry(route) {
+
+    var result;
+
+    tracksManager.getTrack(
+        route.transport.gid,
+        route.real_track[0].t1,
+        parseInt(Date.now()/1000), "", "", "", "", "", "", function (newData, newGid) {
+            newData.length=newData.length-1;
+
+            tracksManager.getTrackByStates(newData, newGid, false, function(data, sNewGid){
+
+                ///log.info ("NEWNEWNEW DATA", t, " ", tt);
+                result.push({gid:sNewGid, state: data});
+
+                console.log( "!!!!!UPDATE TRACK REPAIRE!!!! START", result);
+
+            });
+            //log.info(newGid, "NEW DATA", newData);
+
+        })
+
+
+}
+
+
+function addPushesToUpdateTrack(company, result){
+    if (company == undefined || result == undefined || result.length == 0) return;
+    for (var i=0; i<result.length; i++){
+        for (var j=0; j<cashedDataArr[company].blocked_routes.length; j++){
+            if (result[i].gid == cashedDataArr[company].blocked_routes[j].transport.gid) {
+                result[i].uniqueID = cashedDataArr[company].blocked_routes[j].uniqueID;
+                result[i].points_tasks = [];
+                for (var l=0; l<cashedDataArr[company].blocked_routes[j].points.length; l++){
+                    result[i].points_tasks.push(cashedDataArr[company].blocked_routes[j].points[l].TASK_NUMBER);
+                }
+            }
+        }
+    }
+
+    for (var k=0; k<result.length; k++) {
+        result[k].pushes=[];
+        for (i=0; i<result[k].points_tasks.length; i++){
+            for (j=0; j<cashedDataArr[company].allPushes.length; j++){
+                if (result[k].points_tasks[i] == cashedDataArr[company].allPushes[j].number){
+
+                    if (cashedDataArr[company].allPushes[j].time == undefined) checkPushesTimeGMTZone(cashedDataArr[company].allPushes[j], company, cashedDataArr[company].COMPANY_NAME);
+                    result[k].pushes.push(cashedDataArr[company].allPushes[j]);
+
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 function loadCoords(company) {

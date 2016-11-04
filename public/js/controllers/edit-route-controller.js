@@ -103,6 +103,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             point.promised_window.start = point.promised_window_changed.start;
             point.promised_window.finish = point.promised_window_changed.finish;
 
+
+            console.log("RootScope" ,rootScope.data);
             if (rootScope.data.settings.workingWindowType === 1) {
                 point.working_window = point.promised_window;
                // scope.changedRoute = sendRoute;
@@ -1425,7 +1427,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
             }
 
-            if(route.car_position == undefined || route.car_position.lat == undefined || route.car_position.lon ) {
+            if (route.real_track != undefined && route.real_track.length >0 ){
+                route.car_position ={};
+                route.car_position.lat = route.real_track[route.real_track.length-1].coords[route.real_track[route.real_track.length-1].coords.length-1].lat;
+                route.car_position.lon = route.real_track[route.real_track.length-1].coords[route.real_track[route.real_track.length-1].coords.length-1].lon;
+            }
+            console.log("route.car_position", route.car_position);
+            if(route.car_position == undefined || route.car_position.lat == undefined || route.car_position.lon == undefined ) {
                 alert("Неизвестно расположение машины");
                 return;
 

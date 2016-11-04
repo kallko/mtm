@@ -2335,6 +2335,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             redrawTrac (states, id)
         });
 
+
+        rootScope.$on('updatePush', function (event, data) {
+
+        });
+
+
         function redrawTrac(states, id) {
             //для начала стираются старые данные
             var m = map;
@@ -2421,7 +2427,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         //todo снять комментарий, когда правильно рассчитают время финиша
                         // console.log("Времена", track[i].coords[0].t, start, timeThreshold);
-                        if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
+                        if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold-60*90) {
                             //console.log("Its too early track");
                             continue
                         }; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
@@ -2454,7 +2460,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             //stops.push(track[i]);
 
 // todo раскомментировать когда будет правильно рассчитываться время финиша
-                            if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
+                            if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60 - 60*90) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
                             if (track[i].coords.t1 > end + rootScope.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
                             if (!drawStops) continue;
