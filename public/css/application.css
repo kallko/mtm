@@ -163,6 +163,7 @@ template {
 
 .titles-tr {
     border-top: 1px solid grey;
+    font-size: medium;
 }
 
 .leaflet-top, .leaflet-bottom, .leaflet-left, .leaflet-right {
@@ -523,6 +524,9 @@ template {
 /*}*/
 .card-title{
     width:100%;
+}
+.element-select {
+    margin-bottom: 5px;
 }
 #btn-close{
     padding: 2px 5px 2px 9px;

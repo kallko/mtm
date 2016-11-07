@@ -18,8 +18,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             baseRoute;                          // базовый неизмененный маршрут
 
         scope.iteration;                         // Количество попыток пересчетов
-        scope.newStart;
-        scope.newFinish;
+        scope.routeToEdit;
 
         scope.newRoutes = 0;                        // todo Временно показывает количество предлагаемых маршрутов
 
@@ -56,6 +55,23 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
              });
         }
 
+
+        scope.selectEditRoute = function(){
+            console.log("filterId", scope.routeToEdit);
+            for (var i=0; rootScope.data.routes[i].filterId != scope.routeToEdit; i++){}
+            console.log("Find route", rootScope.data.routes[i].driver.NAME );
+            scope.$emit('routeToChange', {
+                route: rootScope.data.routes[i],
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+
+
+        };
         // пересчет ширины боксов при изменении размеров панельки
         //function onResize(e) {
         //    maxWidth = editPanelJ.width() - 30;
@@ -143,6 +159,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.allDrivers=data.allDrivers;
             scope.allTransports=data.allTransports;
             scope.id = data.route.filterId;
+            scope.routeToEdit = data.route.filterId;
             for (var i=0; i<rootScope.data.routes.length; i++){
                 if(rootScope.data.routes[i].filterId == scope.id ) scope.parent_route = rootScope.data.routes[i];
             }
@@ -326,7 +343,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             if (route.points[lastindx].waypoint != undefined  && route.points[lastindx].waypoint.TYPE == "WAREHOUSE") {
                 route.warehouseEnd =true;
             }
-            console.log("Маршрут заканчивается складом",  route.warehouseEnd)
+            console.log("Маршрут заканчивается складом",  route.warehouseEnd);
             //route.warehouseEnd = (route.points[lastindx].waypoint != undfined && route.points[lastindx].waypoint.TYPE == "WAREHOUSE");
             if (route.warehouseEnd) lastTask = route.points.pop();
 
@@ -1147,8 +1164,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             exNumber: scope.route.points[i].NUMBER,
                             status: getTextStatuses(scope.route.points[i].status).name,
                             changes: scope.change_time || 0,
-                            startKOK:scope.route.points[i].working_window.start,
-                            endKOK: scope.route.points[i].working_window.finish,
+                            startKOK:scope.route.points[i].promised_window_changed.start,
+                            endKOK: scope.route.points[i].promised_window_changed.finish,
                             startZOK : scope.route.points[i].windows != undefined ? scope.route.points[i].windows[0].start : 0, //todo подумать, как заменить 0 по уму
                             endZOK : scope.route.points[i].windows != undefined ? scope.route.points[i].windows[0].finish : 0,
                             exArrival: scope.route.points[i].arrival_time_ts,

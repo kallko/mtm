@@ -164,6 +164,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+
         };
 
         scope.cancelPush = function () {
