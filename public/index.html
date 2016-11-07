@@ -1062,14 +1062,14 @@
             <td class="title">Адрес:</td>
             <td class="row-data">{{point.waypoint.ADDRESS}}</td>
         </tr>
-        <tr ng-show="false">
+        <!--<tr ng-show="true">-->
 
-        </tr>
-        <tr ng-show="false">
+        <!--</tr>-->
+        <tr ng-show="true">
             <td class="title">План. прибытие:</td>
             <td class="row-data">{{point.arrival_time_ts * 1000 | date:'HH:mm'}}
                 <div>
-                <button class="btn btn-primary btn-xs btn-success" >Утвердить</button>
+
                 <input type="time" class="promised-text-card" id="promised-start-card"
                        ng-change="changePromisedCard()"
                        ng-model="promisedStartCard"
@@ -1080,6 +1080,7 @@
 
                        enter-event="changePromisedWindow(point)">
                 <button id="change-window-task-btn" class="btn btn-primary btn-xs"  ng-click="changePromisedWindow({point:point, parent:'editRoute'})">Рассчитать</button>
+                    <button class="btn btn-primary btn-xs btn-success" >Утвердить</button>
                 </div>
             </td>
 
@@ -1132,9 +1133,14 @@
                 {{point.textStatus}}
         </tr>
         <tr>
-            <td>Подтверждение</td>
+            <td>Подтверждение доставки</td>
             <td>
+
                 <div ng-show="showHideReasonButtons">
+                    <div ng-show="point.stop_arrival_time != undefined">Стоп в {{point.stop_arrival_time * 1000 | date:'HH:mm' }}</div>
+                    <div ng-show="point.mobile_arrival_time != undefined">Нажатие в {{point.mobile_arrival_time * 1000 | date:'HH:mm' }}</div>
+
+                    <input type="time" class="promised-text-card" ng-model="operator_time_show"/>
                         <button id="confirm-status-task-btn"
                                 ng-disabled="selectReasonList"
                                 class="btn btn-primary btn-xs btn-success" ng-click="confirmStatus()">Подтвердить

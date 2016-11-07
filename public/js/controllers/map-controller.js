@@ -594,10 +594,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         console.log('this is waypoint ', event.target);
                     })
                     .on('mouseover', function(event){
-                        rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
-                        var source = event.target.source;
-                        //console.log(source);
-                        scope.drawConnectsActivePoint(source.stopState, source.NUMBER, source.TASK_NUMBER);
+                        scope.mousein = true;
+                        setTimeout (function() {
+                            if (scope.mousein) {
+                            rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
+                            var source = event.target.source;
+                            //console.log(source);
+                            scope.drawConnectsActivePoint(source.stopState, source.NUMBER, source.TASK_NUMBER);}
+                        }, 500);
+
+                    })
+                    .on('mouseout', function(event){
+                        scope.mousein = false;
                     });
 
 
@@ -688,6 +696,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             while (j < markersArr.length) {
                 if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                     if (number == markersArr[j].source.NUMBER) {
+                        console.log("Before error", parseFloat(servicePointsLat), parseFloat(servicePointsLng), parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng));
                         var polyline = new L.Polyline([[parseFloat(servicePointsLat), parseFloat(servicePointsLng)], [parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng)]], {
                             color: '#46b8da',
                             weight: 4,
@@ -1153,14 +1162,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // Проверка на добавление в остановку обслуживания точки, которая уже обслуживается этим стопом.
         function checkAndAddNewWaypointToStop(stop, indx){
-
+            console.log("checkAndAddNewWaypointToStop", stop, indx, markersArr.length);
 
             //Нахождение маркера соответсвующего найденному waypoint
             var i=0;
             while(i<markersArr.length){
+                if (markersArr[i].source != undefined) console.log(markersArr[i].source.NUMBER, indx+1);
+
                 if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==(indx+1))){
                     var marker=markersArr[i];
-                    //console.log('marker for waypoint', marker)
+                    console.log('marker for waypoint', marker);
                     break;
                 }
                 i++;
@@ -2397,8 +2408,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     drawPushes = true;  // Железно отрисовывать пуши.
 
                 //stops=[];
-                markersArr=[];
-                gpsPushMarkers=[];
+                //markersArr=[];
+                //gpsPushMarkers=[];
 
                 if( track!=undefined) {
                     //todo тестово отладочный блок

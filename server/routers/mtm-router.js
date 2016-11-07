@@ -972,7 +972,7 @@ router.route('/gettracksbystates')
         try{
         //log.info("Запрашиваем стейты для прошлого маршрута", req.body.states, req.body.gid, req.body.demoTime);
         tracksManager.getTrackByStates(req.body.states, req.body.gid, req.body.demoTime, function (data) {
-            log.info("Трек для прошлого маршрута получен");
+            //log.info("Трек для прошлого маршрута получен");
             res.status(200).json(data);
         });
 
@@ -2799,7 +2799,7 @@ function startPeriodicCalculating() {
 
                                     ) {
                                         log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Найдена ошибка в треках Трек разорван !!!!!!!!!!!!!!!!!", cached.routes[k].driver.NAME, cached.routes[k].real_track[l-1], cached.routes[k].real_track[l] );
-                                        //repearTrackTry(cached.routes[k]);
+                                        repearTrackTry(cached.routes[k]);
                                     } else {
                                         cached.routes[k].real_track.splice(l-1, 1);
                                         l--;
@@ -5794,7 +5794,7 @@ function  changeNameOfRoute(company, uniqueID){
 
 function repearTrackTry(route) {
 
-    var result;
+    var result=[];
 
     tracksManager.getTrack(
         route.transport.gid,
@@ -5807,7 +5807,7 @@ function repearTrackTry(route) {
                 ///log.info ("NEWNEWNEW DATA", t, " ", tt);
                 result.push({gid:sNewGid, state: data});
 
-                console.log( "!!!!!UPDATE TRACK REPAIRE!!!! START", result);
+                console.log( "!!!!!UPDATE TRACK REPAIRE", result);
 
             });
             //log.info(newGid, "NEW DATA", newData);

@@ -34,8 +34,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // показать окно с точкой
         function show(event, data) {
+            scope.operator_time = null;
             scope.point = data.point;
-            console.log("Это ДАТА", data);
+            if (scope.point.stop_arrival_time != undefined )scope.operator_time = scope.point.stop_arrival_time;
+            if (scope.operator_time == null && scope.point.stop_arrival_time == undefined) scope.operator_time = scope.point.mobile_arrival_time;
+            if (scope.operator_time == null) scope.operator_time = rootScope.nowTime;
+                console.log("Это ДАТА", data);
+            scope.operator_time_show = new Date(scope.operator_time *1000);
             scope.promisedStartCard = new Date(data.point.promised_window_changed.start * 1000);
             scope.promisedFinishCard = new Date(data.point.promised_window_changed.finish * 1000);
            // scope.promisedStartCard = filter('date')(data.point.promised_window_changed.start * 1000, 'HH/mm');
@@ -91,11 +96,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // подтверждение статуса (генерирует событие, которое принимается в PointIndexController
         // и подтверждает сомнительный статус
         scope.confirmStatus = function () {
+            //console.log("Operator Show", parseInt(scope.operator_time_show.getTime()/1000));
             scope.showHideReasonButtons = false;
             console.log('confirmStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,
-                option: 'confirm-status'
+                option: 'confirm-status',
+                time: parseInt(scope.operator_time_show.getTime()/1000)
             });
 
             var reRoute;

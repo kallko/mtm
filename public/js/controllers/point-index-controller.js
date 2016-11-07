@@ -2042,9 +2042,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
 
-             rawPoint.real_arrival_time = rootScope.settings.server_time;
-             if (rawPoint.mobile_arrival_time ) rawPoint.real_arrival_time =  rawPoint.mobile_arrival_time;
-             if (rawPoint.stop_arrival_time ) rawPoint.real_arrival_time =  rawPoint.stop_arrival_time;
+             rawPoint.real_arrival_time = data.time;
+             //if (rawPoint.mobile_arrival_time ) rawPoint.real_arrival_time =  rawPoint.mobile_arrival_time;
+             //if (rawPoint.stop_arrival_time ) rawPoint.real_arrival_time =  rawPoint.stop_arrival_time;
 
             rawPoint.changeConfirmation=true;
 
@@ -5086,7 +5086,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     var states =  rootScope.data.routes[i].real_track;
                     var gid = rootScope.data.routes[i].transport.gid;
                     if (gid == undefined) {
-                        scope.$emit('showNotification', {text: 'У этого автомобиля нет трека', duration: 3000});
+                        //scope.$emit('showNotification', {text: 'У этого автомобиля нет трека', duration: 3000});
                         console.log("FilterId прошлого маршрута", scope.filters.route );
                         scope.drawRoute(scope.filters.route, false, false);
                     }
