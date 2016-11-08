@@ -646,7 +646,9 @@
 
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
-            ng-click="recalculateRoute()">Рассчитать</button>
+            ng-click="recalculateRoute()"
+            ng-show = "!changedRoute.reCalc>0"
+                    >Рассчитать</button>
         </div>
 
         <div ng-show="route !== undefined">
@@ -676,10 +678,14 @@
 
 
                         <td>{{item.exNumber}}</td>
+
                         <td>{{item.status}}</td>
                         <td>{{item.startZOK* 1000 | date:'HH:mm'}}-{{item.endZOK* 1000 | date:'HH:mm'}}</td>
                         <td>{{item.startKOK* 1000 | date:'HH:mm'}}-{{item.endKOK* 1000 | date:'HH:mm'}}</td>
-                        <td>{{item.newArrival* 1000 | date:'HH:mm'}}</td>
+                        <td class="element" ng-class="{
+                                 'element-red': item.newArrival != null && item.newArrival > item.endZOK,
+                                 'element-bold' : item.newArrival != null && item.newArrival > item.endKOK && item.newArrival < item.endZOK
+                                }">{{item.newArrival* 1000 | date:'HH:mm'}}</td>
                         <td>{{item.changes}}</td>
                         <td>
                             <button ng-click="showWindow(item)">ред.окно</button>

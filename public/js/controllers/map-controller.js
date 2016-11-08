@@ -2317,10 +2317,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
             //console.log("Zoom2", map.getZoom());
             var newZoom = map.getZoom();
-            map.setZoom(newZoom); // Добавка
+            //map.setZoom(newZoom); // Добавка
             //console.log(map.getCenter());
             var centre = map.getCenter();
-            var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
+            var zoom = map.getZoom(), //> 15 ? map.getZoom() : 15,
                 offset = map.getSize(),
                 tmp = map.project(new L.LatLng(centre.lat, centre.lng), zoom).subtract(
                     [

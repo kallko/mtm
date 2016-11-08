@@ -671,3 +671,16 @@ template {
     margin-top: 5px;
     margin-left: 5px;
 }
+
+.element-red{
+    color: red;
+    font-weight: bold;
+}
+
+.element-bold{
+    font-weight: bold;
+}
+
+.element {
+
+}
