@@ -605,7 +605,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (force)  url += '?force=true';
           //  if (showDate)   url += (force ? '&' : '?') + 'showDate=' + 1464132000000;
             if (showDate)   url += (force ? '&' : '?') + 'showDate=' + showDate;
-            //console.log('waiting for data');
+            console.log('waiting for data', url);
 
             http.get(url, {})
                 .success(function (data) {
@@ -615,7 +615,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         setTimeout(function() {
                             console.log("Стартует задержка и перезапрос");
                             loadDailyData(false, showDate)
-                        }, 3000);
+                        }, 20000);
                         return;
                     }
 
@@ -1739,7 +1739,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
             if (tmpPoint.rawConfirmed !== -1) {
-                if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window-1].finish) {
+                if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
                 } else if (tmpPoint.real_arrival_time < tmpPoint[0].working_window.start) {
                     tmpPoint.status = 2;
@@ -2677,7 +2677,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         // сохранить маршрут
-        function saveRoutes() {
+        rootScope.saveRoutes = function () {
             var routes = [],
                 route,
                 point,
@@ -4406,7 +4406,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (point.overdue_time < 0) point.overdue_time = 0;
                 }
 
-                findStatusAndWindowForPoint(point);
+                if (point.real_arrival_time) {
+                    findStatusAndWindowForPoint(point);}
+                else {
+                    if (point.overdue_time>0) {
+                        point.status=4;
+
+                    } else {
+                        //todo по большому счету тут может быть или 5 или 7 статус, но для 5 нужно проводить рассчеты
+                        point.status=7;
+                    }
+                    scope.$emit('newTextStatus', scope.getTextStatus(point))
+                }
             //Находим роут, соответсвующий этой точке
                 var i=0;
                 var route;
@@ -4434,6 +4445,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     ki++;
                 }
+
+                scope.$emit('routeToChange', {
+                    route: route,
+                    serverTime: rootScope.nowTime,
+                    demoMode: false,
+                    workingWindow: rootScope.settings.workingWindowType,
+                    allDrivers: rootScope.data.drivers,
+                    allTransports: rootScope.data.transports
+
+                });
+
+
         };
 
         //scope.$on("$locationChangeStart", function(){

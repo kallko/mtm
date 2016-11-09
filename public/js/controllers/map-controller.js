@@ -1420,11 +1420,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             if (gpsPushMarkers !=undefined) {
-                var k=0;
+                 k=0;
 
                 while(k<gpsPushMarkers.length){
                     var mobilePush=gpsPushMarkers[k];
-                    var i=0;
+                    i=0;
                     while (i<markersArr.length) {
                         if (markersArr[i].source != undefined && markersArr[i].source.TASK_NUMBER!=  undefined && markersArr[i].source.TASK_NUMBER==mobilePush.task_ID){
                             break;
@@ -1489,7 +1489,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             i=0;
             // добавляем новые координаты для spider объектов. берем из omsPoints
             while (i<omsPoints.length) {
+                if (omsPoints[i].source.NUMBER == undefined) {
+                    i++;
+                    continue;
+                }
                 var N=omsPoints[i].source.NUMBER;
+                console.log("Before error N", N, "omsPoints[i].source", omsPoints[i].source);
                 scope.tempCurrentWayPoints[N-1].LAT=omsPoints[i]._latlng.lat;
                 scope.tempCurrentWayPoints[N-1].LON=omsPoints[i]._latlng.lng;
                 i++

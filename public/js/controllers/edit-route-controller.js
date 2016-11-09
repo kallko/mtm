@@ -60,6 +60,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             rootScope.$emit('clearMap');
 
             console.log("filterId", scope.routeToEdit);
+            if (rootScope.data.routes == undefined || rootScope.data.routes.length==0) return;
             for (var i=0; rootScope.data.routes[i].filterId != scope.routeToEdit; i++){}
             console.log("Find route", rootScope.data.routes[i].driver.NAME );
             scope.$emit('choseproblem', rootScope.data.routes[i].filterId);
@@ -1387,14 +1388,15 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     if(rootRoute.points[i].change_time == undefined) rootRoute.points[i].change_time=0;
                     rootRoute.points[i].change_time++;
                     //изменение обещанного окна. Последнее утвержденное и пересчитанное окно есть  в mathinput
-                    for(var j=0; j<scope.mathInputJson.jobList.length; j++){
-                        if (rootRoute.points[i].waypoint.gIndex == scope.mathInputJson.jobList[j].point){
-                            rootRoute.points[i].promised_window_changed.start=scope.mathInputJson.jobList[j].windows[0].start;
-                            rootRoute.points[i].promised_window_changed.finish=scope.mathInputJson.jobList[j].windows[0].finish;
-                            console.log("Изменили обещанное окно", scope.mathInputJson.jobList[j].windows[0].finish);
+                    if (scope.mathInputJson != undefined) {
+                        for(var j=0; j<scope.mathInputJson.jobList.length; j++){
+                            if (rootRoute.points[i].waypoint.gIndex == scope.mathInputJson.jobList[j].point){
+                                rootRoute.points[i].promised_window_changed.start=scope.mathInputJson.jobList[j].windows[0].start;
+                                rootRoute.points[i].promised_window_changed.finish=scope.mathInputJson.jobList[j].windows[0].finish;
+                                console.log("Изменили обещанное окно", scope.mathInputJson.jobList[j].windows[0].finish);
+                            }
                         }
                     }
-
                 }
 
             }
@@ -1404,6 +1406,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             rootRoute.toSave = true;
             rootRoute.DISTANCE = 100;
             rootRoute.VALUE = 100;
+            rootScope.saveRoutes();
 
             console.log("Перед сохранением на 1С", rootRoute.data, "Маршрут", rootRoute);
 
