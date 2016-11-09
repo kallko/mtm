@@ -13,6 +13,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         function askBlocked(){
+            if(!rootScope.data.currentDay) return;
             http.post('./askblocked')
                 .success(function(data){
                    if (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
