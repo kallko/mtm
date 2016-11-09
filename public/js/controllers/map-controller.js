@@ -573,7 +573,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         rootScope.gpsConfirm=false;// подтверждена ли точка по GPS
                         scope.dragendPoint = event.target;// объект события при драге  маркера-point
-                        rootScope.$emit('askGPSConfirmPoint', {point: event.target.source.waypoint});//point index controller
+                        rootScope.$emit('askGPSConfirmPoint', {point: event.target.source.waypoint, uniqueID : event.target.source.uniqueID});//point index controller
                         if(rootScope.gpsConfirm){
                              message="Эта точка ранее уже была подтверждена GPS данными. Вы уверены, что хотите изменить ее координаты?";
                             if (!confirm(message)){
@@ -749,14 +749,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         rootScope.$on('ResChengeCoord', function(event, bool, confirm){
             var newMarker = scope.dragendPoint;
-            if (bool == 'true'){
+            if (bool ){
 
                 changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8), confirm);
                 console.log("New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
                 newMarker.source.waypoint.CONFIRMBYGPS="true";
                 console.log("NEW New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
                 rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
-                rootScope.$emit('statusUpdate');
+                //rootScope.$emit('statusUpdate');
                 $('#notification_wrapper').css('opacity', '1');
                 //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
                 //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
@@ -1828,7 +1828,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         //Слушатель, который меняет данные на карте, после вызова карточки остановки
         rootScope.$on('confirmViewPointEditing', function(event, data, stop){
-            //console.log("Recieve data", data);
+            console.log("Recieve data", data);
             var i=0;
             while(i<data.length){
                 if (data[i].stopTime<0){
@@ -1989,7 +1989,20 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log(lat, lng );
             //Сформировать soap data и soap запрос
             rootScope.$emit('pushWaypointTo1С', newMarker.source.waypoint, confirm);
+            var route;
+            for(var i=0; i<rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == newMarker.source.uniqueID) route = rootScope.data.routes[i];
+            }
 
+            scope.$emit('routeToChange', {
+                route: route,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
 
             //var soapStr=testSoap(newMarker.source);
             //console.log(soapStr);
@@ -2627,6 +2640,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                     }
                                 }
                                 rootScope.showProblem(reRoute);
+                                scope.$emit('routeToChange', {
+                                    route: reRoute,
+                                    serverTime: rootScope.nowTime,
+                                    demoMode: scope.demoMode,
+                                    workingWindow: rootScope.settings.workingWindowType,
+                                    allDrivers: rootScope.data.drivers,
+                                    allTransports: rootScope.data.transports
+
+                                });
+
 
                             });
 

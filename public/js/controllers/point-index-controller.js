@@ -2753,9 +2753,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         rootScope.errorNotification('/saveroute');
                   });
 
-        }
+        };
 
         function updateWaypoint(waypoint, confirm) {
+
+            //for(var i=0; i<rootScope.data.routes.length; i++){
+            //
+            //}
 
             console.log('sending waypoint to save', waypoint, confirm);
             http.post('./savewaypoint/', {waypoint: waypoint, confirm:confirm}).

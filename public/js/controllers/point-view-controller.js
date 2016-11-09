@@ -47,6 +47,19 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
            // scope.promisedFinishCard = filter('date')(data.point.promised_window_changed.finish * 1000, 'HH/mm');
 
             scope.route = data.route;
+            var route;
+            for(var i=0; i<rootScope.data.routes.length; i++){
+                if(data.point.uniqueID == rootScope.data.routes[i].uniqueID ) route = rootScope.data.routes[i];
+            }
+            scope.$emit('routeToChange', {
+                route: route,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
             //console.log ("Назначили Роут", data.point.uniqueID);
             scope.showRouteId = data.point.uniqueID;
             parent = data.parent;
@@ -112,7 +125,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.$emit('displayCollectionToStatistic', reRoute.points);
-            //rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+
         };
 
         // отмена сомнительного статуса
@@ -130,6 +152,17 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+
+
         };
 
         scope.returnStatus = function(){
@@ -145,6 +178,15 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
         };
 
         // отменить задачу
@@ -164,7 +206,15 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
 
+            });
         };
 
         scope.cancelPush = function () {
@@ -312,6 +362,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }else{
                 scope.disableConfirmBtn = false;
             }
+
+
         };
 
         // открывает окно в 1С IDS-овцев

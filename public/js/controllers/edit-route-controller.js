@@ -162,7 +162,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             scope.selectedStart= false;
             scope.accept = false;
             scope.iteration = 0;
-            //console.log("I recieve DATA", data);
+            console.log("I recieve DATA", data);
             scope.allDrivers=data.allDrivers;
             scope.allTransports=data.allTransports;
             scope.id = data.route.filterId;
