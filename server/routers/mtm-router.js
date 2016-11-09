@@ -3383,7 +3383,7 @@ function findBestStop(point, stop){
         //  log.info("I have to remove ", point.NUMBER-1, "from", point.stopState.servicePoints);
         var i=0;
         while (i<point.stopState.servicePoints.length){
-            if(point.stopState.servicePoints[i]==point.NUMBER-1) {
+            if(point.stopState.servicePoints[i]==point.NUMBER) {
                 point.stopState.servicePoints.splice(i,1);
             }
 
@@ -4390,14 +4390,14 @@ function connectStopsAndPoints(company) {
                             var ip=0;
                             var sPointExist=false;
                             while(ip<tmpArrival.servicePoints.length){
-                                if(tmpArrival.servicePoints[ip]==tmpPoint.NUMBER-1){
+                                if(tmpArrival.servicePoints[ip]==tmpPoint.NUMBER){
                                     sPointExist=true;
                                     break;
                                 }
                                 ip++;
                             }
                             if(!sPointExist){
-                                tmpArrival.servicePoints.push(tmpPoint.NUMBER-1);}
+                                tmpArrival.servicePoints.push(tmpPoint.NUMBER);}
 
                             // tmpPoint.rawConfirmed=0;
 
@@ -5682,14 +5682,14 @@ function connectPointsPushesStops(company) {
                     var ip=0;
                     var sPointExist=false;
                     while(ip<tmpArrival.servicePoints.length){
-                        if(tmpArrival.servicePoints[ip]==point.NUMBER-1){
+                        if(tmpArrival.servicePoints[ip]==point.NUMBER){
                             sPointExist=true;
                             break;
                         }
                         ip++;
                     }
                     if(!sPointExist){
-                        tmpArrival.servicePoints.push(point.NUMBER-1);}
+                        tmpArrival.servicePoints.push(point.NUMBER);}
 
 
                 }

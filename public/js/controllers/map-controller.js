@@ -681,7 +681,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             outer:for (var i = 0; markersArr.length > i; i++) {
                 if('source' in markersArr[i] && markersArr[i].source.state == "ARRIVAL" && 'servicePoints' in markersArr[i].source){
                     for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
-                        if(number == markersArr[i].source.servicePoints[j] + 1){
+                        if(number == markersArr[i].source.servicePoints[j]){
                             var servicePointsLat = markersArr[i]._latlng.lat;
                             var servicePointsLng = markersArr[i]._latlng.lng;
                             break outer;
@@ -1395,7 +1395,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         while (j < markersArr.length) {
                             if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                                 for (var k = 0; arrIndexStopPoints.length > k; k++) {
-                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
+                                    if (arrIndexStopPoints[k] == markersArr[j].source.NUMBER) {
                                         if (markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined && servicePointsLat != undefined && servicePointsLng != undefined ){
 
                                             //console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
@@ -1873,9 +1873,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
            ouer: for(var i = 0; markersArr.length > i; i++ ){
                 if('source' in markersArr[i] && 'servicePoints' in markersArr[i].source ){
                     for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
-                        if(markersArr[i].source.servicePoints[j] == row.NUMBER-1){
+                        if(markersArr[i].source.servicePoints[j] == row.NUMBER){
                             uniqueID = markersArr[i].source.uniqueID;
-                            deleteSomePointsFromStop(row.NUMBER -1, markersArr[i].source);
+                            deleteSomePointsFromStop(row.NUMBER, markersArr[i].source);
                             break ouer;
                         }
                     }
@@ -2020,7 +2020,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 var i=0;
                 while (i<data.source.servicePoints.length){
                     //console.log("Hey!", data.source.servicePoints[i]+1);
-                    var number=data.source.servicePoints[i]+1;
+                    var number=data.source.servicePoints[i];
                     var j=0;
                     while(j<markersArr.length){
                         if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
@@ -2048,7 +2048,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 var i=0;
                 while (i<data.source.servicePoints.length){
                     //console.log("Hey!", data.source.servicePoints[i]+1);
-                    var number=data.source.servicePoints[i]+1;
+                    var number=data.source.servicePoints[i];
                     var j=0;
                     while(j<markersArr.length){
                         if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
