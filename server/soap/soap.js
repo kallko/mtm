@@ -535,7 +535,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 data[nIndx].sensors = [];
                 if (sensors == undefined) {
                     console.log('NO SENSORS!');
-                    callback({status: 'no sensors'});
+                    //callback({status: 'no sensors'});
                 }
 
 

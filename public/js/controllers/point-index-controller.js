@@ -57,6 +57,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 console.log("Получен объект", JSON.parse(JSON.stringify(data)));
                 rootScope.settings={};
                 rootScope.settings = JSON.parse(JSON.stringify(data));
+                if (rootScope.settings.status && rootScope.settings.status == 'no sensors') {
+                    alert("Where is sensors?");
+                    return;
+                }
                 rootScope.settings.problems_to_operator = data.problems_to_operator;
                 if (data.currentDay) {
                     rootScope.currentDay = true;
