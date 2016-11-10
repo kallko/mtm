@@ -486,8 +486,17 @@ router.route('/dailydata')
                 endTime = parseInt(Date.now()/1000);
                 if (data.routes != undefined) {
                     log.info('=== dataReadyCallback === send data to client ===', data.routes.length);}
+                else{
+                    log.info('There is no routes. And what we have', data);
+                }
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
                 log.info('send data to client');
+                //if(data.status && data.status === 'no sensors') {
+                //    if (res.statusCode == 304) return;
+                //    console.log("res.status", res.statusCode);
+                //    res.status(200).json(data);
+                //    return
+                //}
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
                     res.status(200).json(data);
                 }else if( data.routes.length == 0){
@@ -704,7 +713,7 @@ router.route('/dailydata')
                     //}, 5000);
                     data.settings.user = req.session.login;
 
-                    res.status(200).json(data.settings);
+                    if (res.statusCode != 304) res.status(200).json(data.settings);
                 }
             }
 
@@ -2787,7 +2796,10 @@ function startPeriodicCalculating() {
                         try{
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
-                                log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                if (!cached.routes[k].driver) {log.info("ОШИБКА У маршрута у которого нет водителя", cached.routes[k].NUMBER, "Нет трека ", cached.routes[k].transport.gid) ;} else{
+                                    log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                }
+
                                 continue;
                             }
 
@@ -3383,7 +3395,7 @@ function findBestStop(point, stop){
         //  log.info("I have to remove ", point.NUMBER-1, "from", point.stopState.servicePoints);
         var i=0;
         while (i<point.stopState.servicePoints.length){
-            if(point.stopState.servicePoints[i]==point.NUMBER-1) {
+            if(point.stopState.servicePoints[i]==point.NUMBER) {
                 point.stopState.servicePoints.splice(i,1);
             }
 
@@ -4390,14 +4402,14 @@ function connectStopsAndPoints(company) {
                             var ip=0;
                             var sPointExist=false;
                             while(ip<tmpArrival.servicePoints.length){
-                                if(tmpArrival.servicePoints[ip]==tmpPoint.NUMBER-1){
+                                if(tmpArrival.servicePoints[ip]==tmpPoint.NUMBER){
                                     sPointExist=true;
                                     break;
                                 }
                                 ip++;
                             }
                             if(!sPointExist){
-                                tmpArrival.servicePoints.push(tmpPoint.NUMBER-1);}
+                                tmpArrival.servicePoints.push(tmpPoint.NUMBER);}
 
                             // tmpPoint.rawConfirmed=0;
 
@@ -5356,7 +5368,7 @@ function calculateProblemIndex(company) {
         for ( j=0; j < route.points.length; j++){
             point = route.points[j];
             var outOfWindows = true;
-            if (point.orderWindows == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
+            if (point.orderWindows == undefined || point.waypoint == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
                 //log.info("У точки нет заказанного окна, скорее всего склад");
                 continue;
             }
@@ -5682,14 +5694,14 @@ function connectPointsPushesStops(company) {
                     var ip=0;
                     var sPointExist=false;
                     while(ip<tmpArrival.servicePoints.length){
-                        if(tmpArrival.servicePoints[ip]==point.NUMBER-1){
+                        if(tmpArrival.servicePoints[ip]==point.NUMBER){
                             sPointExist=true;
                             break;
                         }
                         ip++;
                     }
                     if(!sPointExist){
-                        tmpArrival.servicePoints.push(point.NUMBER-1);}
+                        tmpArrival.servicePoints.push(point.NUMBER);}
 
 
                 }
