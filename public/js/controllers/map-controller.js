@@ -1167,9 +1167,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //Нахождение маркера соответсвующего найденному waypoint
             var i=0;
             while(i<markersArr.length){
-                if (markersArr[i].source != undefined) console.log(markersArr[i].source.NUMBER, indx+1);
+                if (markersArr[i].source != undefined) console.log(markersArr[i].source.NUMBER, indx);
 
-                if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==(indx+1))){
+                if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==indx)){
                     var marker=markersArr[i];
                     console.log('marker for waypoint', marker);
                     break;
@@ -1196,7 +1196,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             // Проверка на аккуратность и внимательность человекаю Не пытается ли он связать уже связанные точку и стоп
             if(typeof(wayPoint.stopState)!='undefined' && typeof(wayPoint.stopState.servicePoints)!='undefined'){
-                var i=0;
+                i=0;
                 var duplicate=false;
 
                 //console.log("Start Duplicate Checkfor wayPoint", wayPoint.stopState.servicePoints, "and indx", indx  );
@@ -1259,6 +1259,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 if(typeof (stop.source.servicePoints)=='undefined'){
+                    console.log('Create 1 first servicePoints');
                     stop.source.servicePoints=[];
                 }
                 stop.source.servicePoints.push(indx);
@@ -1272,6 +1273,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //// если этим стопом не обслужена еще ни одна точка, то создаем массив, закидываем туда точку и уходим.
             if(typeof (typeof(stop.source)!= 'undefined' && stop.source.servicePoints)=='undefined'){
 
+
+                console.log('Create 2 first servicePoints');
                 stop.source.servicePoints=[];
                 stop.source.servicePoints.push(indx);
 
@@ -1299,7 +1302,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     minDist=dist;
                     var  minLAT=LAT;
                     var  minLNG=LNG;
-                    scope.minI=i;
+                    console.log("Set of minI", scope.tempCurrentWayPoints[i]);
+                    scope.minI=scope.tempCurrentWayPoints[i].NUMBER;
+                    scope.minIIndx = i;
                 }
                 i++;
             }
@@ -1322,10 +1327,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     opacity: 0.5,
                     smoothFactor: 1});
                 map.addLayer(scope.polyline);
-                if(scope.tempCurrentWayPoints[scope.minI]==scope.baseCurrentWayPoints[scope.minI]) {
+                if(scope.tempCurrentWayPoints[scope.scope.minIIndx]==scope.baseCurrentWayPoints[scope.minIIndx.minI]) {
 
 
-                    findAndClickMarker(scope.tempCurrentWayPoints[scope.minI]);
+                    findAndClickMarker(scope.tempCurrentWayPoints[scope.minIIndx]);
                 } else{
                     // console.log("!!!!Spider");
                 }
@@ -1511,7 +1516,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var size = markersArr.length;
             while (i<size){
                 if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
-                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                    if (markersArr[i].source.NUMBER==(indx)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
                         //container.remake = true;
@@ -1551,7 +1556,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var size = markersArr.length;
             while (i<size){
                 if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
-                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                    if (markersArr[i].source.NUMBER==(indx)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
                         markersArr[i].source.confirmed=true;
@@ -2230,7 +2235,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var size = markersArr.length;
             while (i<size){
                 if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
-                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                    if (markersArr[i].source.NUMBER==(indx)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
                         markersArr[i].source.confirmed=true;
@@ -2618,9 +2623,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                                 //console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
 
-                                scope.baseCurrentWayPoints[scope.minI].stopState = scope.currentDraggingStop.source;// тщательно оттестировать
+                                scope.baseCurrentWayPoints[scope.minIIndx].stopState = scope.currentDraggingStop.source;// тщательно оттестировать
 
-                                if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time / 60) + " минут с точкой " + (scope.minI + 1) + " ?")) {
+                                if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time / 60) + " минут с точкой " + (scope.minI) + " ?")) {
                                 } else {
                                     return
                                 }
@@ -2628,14 +2633,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                                 checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                                 scope.currentDraggingStop = null;
-                                console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
-                                rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
+                                console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minIIndx].route_id);
+                                rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minIIndx].route_id);// Пересчитать фактический порядок выполнения точек
                                 rootScope.$emit('checkInCloseDay');
 
 
                                 var reRoute;
                                 for (var i=0; i< rootScope.data.routes.length; i++){
-                                    if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minI].uniqueID){
+                                    if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minIIndx].uniqueID){
                                         reRoute = rootScope.data.routes[i];
                                     }
                                 }
