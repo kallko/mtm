@@ -2253,17 +2253,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         rootScope.$on('makeWaypointGreen', function (event, index) {
-            console.log("Send ", (index-1));
-            makeWayPointMarkerGreen(index-1);
+            console.log("Send ", (index));
+            makeWayPointMarkerGreen(index);
         });
         rootScope.$on('makeWaypointBlue', function(event, index){
-            makeWayPointMarkerBlue(index-1);
+            makeWayPointMarkerBlue(index);
         });
 
 
         rootScope.$on('makeWaypointGrey', function (event, index) {
-            console.log("Send ", (index-1));
-            makeWayPointMarkerGrey(index-1);
+            console.log("Send ", (index));
+            makeWayPointMarkerGrey(index);
         });
 
         function strToTstamp(strDate, lockaldata) {
