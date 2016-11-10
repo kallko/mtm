@@ -5806,25 +5806,27 @@ function  changeNameOfRoute(company, uniqueID){
 
 function repearTrackTry(route) {
 
+
+    console.log("!!!!!!!!!!!!!!!!!! $%^#$%^$^#$ NEED REPAIR #$%#%#!!!!!!!!!!!!!!");
     var result=[];
 
-    tracksManager.getTrack(
-        route.transport.gid,
-        route.real_track[0].t1,
-        parseInt(Date.now()/1000), "", "", "", "", "", "", function (newData, newGid) {
-            newData.length=newData.length-1;
-
-            tracksManager.getTrackByStates(newData, newGid, false, function(data, sNewGid){
-
-                ///log.info ("NEWNEWNEW DATA", t, " ", tt);
-                result.push({gid:sNewGid, state: data});
-
-                console.log( "!!!!!UPDATE TRACK REPAIRE", result);
-
-            });
-            //log.info(newGid, "NEW DATA", newData);
-
-        })
+    //tracksManager.getTrack(
+    //    route.transport.gid,
+    //    route.real_track[0].t1,
+    //    parseInt(Date.now()/1000), "", "", "", "", "", "", function (newData, newGid) {
+    //        newData.length=newData.length-1;
+    //
+    //        tracksManager.getTrackByStates(newData, newGid, false, function(data, sNewGid){
+    //
+    //            ///log.info ("NEWNEWNEW DATA", t, " ", tt);
+    //            result.push({gid:sNewGid, state: data});
+    //
+    //            console.log( "!!!!!UPDATE TRACK REPAIRE", result);
+    //
+    //        });
+    //        //log.info(newGid, "NEW DATA", newData);
+    //
+    //    })
 
 
 }
