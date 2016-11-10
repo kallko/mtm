@@ -2787,7 +2787,10 @@ function startPeriodicCalculating() {
                         try{
                         for (var k=0; k<cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
-                                log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                if (!cached.routes[k].driver) {log.info("ОШИБКА У маршрута у которого нет водителя", cached.routes[k].NUMBER, "Нет трека ", cached.routes[k].transport.gid) ;} else{
+                                    log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                }
+
                                 continue;
                             }
 
@@ -5356,7 +5359,7 @@ function calculateProblemIndex(company) {
         for ( j=0; j < route.points.length; j++){
             point = route.points[j];
             var outOfWindows = true;
-            if (point.orderWindows == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
+            if (point.orderWindows == undefined || point.waypoint == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
                 //log.info("У точки нет заказанного окна, скорее всего склад");
                 continue;
             }

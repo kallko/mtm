@@ -1279,7 +1279,7 @@
                 <td>Действие</td>
             </tr>
             <tr ng-repeat="servisPoint in servisPoints">
-                <td>{{servisPoint.wayPoint+1}}</td>
+                <td>{{servisPoint.wayPoint}}</td>
                 <td>{{servisPoint.taskTime}} мин</td>
                 <td>
                     <input ng-model="servisPoint.stopTime" ng-change="chenge($index, $event)" required type="number" class="promised-text-card">

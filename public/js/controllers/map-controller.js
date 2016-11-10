@@ -1849,7 +1849,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             // console.log("I try to change to time", time , "in point", indx, "of stop", stop);
             var i=0;
             while(i<markersArr.length){
-                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
+                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==indx){
                     var container=markersArr[i];
                     // console.log("Find marker", container);
 
@@ -1901,7 +1901,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             // нахождение маркера дя точки, которая отвязывается
             var i=0;
             while(i<markersArr.length){
-                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
+                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==indx){
                     var container=markersArr[i];
                     // console.log("Find marker", container);
 
