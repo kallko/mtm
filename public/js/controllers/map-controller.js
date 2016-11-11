@@ -1327,7 +1327,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     opacity: 0.5,
                     smoothFactor: 1});
                 map.addLayer(scope.polyline);
-                if(scope.tempCurrentWayPoints[scope.scope.minIIndx]==scope.baseCurrentWayPoints[scope.minIIndx.minI]) {
+                if(scope.tempCurrentWayPoints[scope.scope.minIIndx]==scope.baseCurrentWayPoints[scope.minIIndx]) {
 
 
                     findAndClickMarker(scope.tempCurrentWayPoints[scope.minIIndx]);

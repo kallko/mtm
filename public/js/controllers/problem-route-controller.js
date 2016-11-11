@@ -7,20 +7,27 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         var askProblemFromServer = true;                                           //  запрашивать ли проблемы с сервера
         rootScope.asking = false;                                                   // Запущен ли процесс запрсов
         rootScope.tempDecision;
+        rootScope.restart = false;
 
         interval(confirmOnline, 60 * 1000); // опрос на обновление трека, и подтверждение онлайна оператора
         interval(askBlocked, 3 * 1000); //опрос на "занятость маршрутов"
 
 
         function askBlocked(){
-            if(!rootScope.data || !rootScope.data.currentDay) return;
+            if(!rootScope.data || !rootScope.data.currentDay || rootScope.restart) return;
             http.post('./askblocked')
                 .success(function(data){
+                    console.log("askBlocked", data);
+                    if(data[0] != undefined && data[0] == 'restart') {
+                        rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
+                        rootScope.restart = true;
+                    }
                    if (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
                 });
         }
 
         function confirmOnline() {
+            if(rootScope.restart) return;
             console.log("confirmOnline in process", rootScope.settings, rootScope.data.server_time);
             var sync=[];
             if (rootScope.data && rootScope.data.routes && rootScope.data.currentDay == true) {
@@ -166,7 +173,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             //if(need<0) need='';
             //console.log("Данные перед запросом", need, rootScope.settings.problems_to_operator, exist);
             //console.log(" Go to ASK ", !rootScope.data,  need,  rootScope.asking);
-            if(!rootScope.asking) return;
+            if(!rootScope.asking || rootScope.restart) return;
             if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist == 0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 //console.log("Give me", need, "the problem please! ");
 

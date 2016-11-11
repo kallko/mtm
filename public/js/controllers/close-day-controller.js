@@ -227,6 +227,13 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
     };
 
 
+    scope.notify = function(){
+        http.get('./notification')
+            .success(function (data){
+                alert("Notification complete." );
+            });
+    };
+
     scope.checkRoutes = function (){
         console.log("Check start");
         if (rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length <1 ) return;
