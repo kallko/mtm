@@ -3904,6 +3904,7 @@ try {
                         oldRoutes.push(cashedDataArr[company].blocked_routes[k]);
                     }
                 }
+                saveRoutesTo1s(oldRoutes);
                 cashedDataArr[company]={};
 
 
@@ -4000,6 +4001,173 @@ try {
 } catch (e) {
     log.error( "Ошибка "+ e + e.stack);
 }
+}
+
+
+
+function saveRoutesTo1s(routes){
+    return;
+    if (!routes) return;
+
+    try {
+
+
+        collectDataForDayClosing(routes);
+
+
+        function collectDataForDayClosing(currentDay){
+
+            var result = {
+                    routes: []
+                },
+                routeI,
+                pointJ,
+                route,
+                point,
+                startTime,
+                routesOfDate,
+                endTime;
+            var routesID = [];
+
+            for (var i = 0; i < routes.length; i++) {
+
+                routeI = routes[i];
+                routes[i].closed = true;
+                routesOfDate = (routes[i].START_TIME).substr(0,10);
+                routesID.push(routeI.uniqueID);
+                route = {
+                    pointsReady: [],
+                    pointsNotReady: [],
+                    driver: routeI.DRIVER,
+                    transport: routeI.TRANSPORT,
+                    itenereryID: routeI.itineraryID,
+                    number: routeI.NUMBER,
+                    gid: routeI.transport.gid || -1,
+                    uniqueId: routeI.uniqueId,
+                    startTimePlan: strToTstamp(routeI.START_TIME),
+                    endTimePlan: strToTstamp(routeI.END_TIME),
+                    totalPoints: routeI.points.length,
+                    inOrderedLen: 0,
+                    inPromised: 0,
+                    inPlan: 0
+                };
+
+                endTime = 0;
+                startTime = 2000000000;
+                for (var j = 0; j < routeI.points.length; j++) {
+                    pointJ = routeI.points[j];
+                    var taskDay = pointJ.TASK_DATE.split(".");
+
+                    point = {
+                        waypoint: pointJ.END_WAYPOINT,
+                        taskNumber: pointJ.TASK_NUMBER,
+                        taskDay: parseInt(new Date(taskDay[1]+"/"+taskDay[0]+"/"+taskDay[2]).getTime() /1000) + 60*60*3,
+                        plannedNumber: pointJ.NUMBER,
+                        weight: pointJ.WEIGHT,
+                        volume: pointJ.VOLUME,
+                        value: pointJ.VALUE,
+                        windowType: pointJ.windowType,
+                        inPlan: true,
+                        stopState: pointJ.stopState,
+                        moveState: pointJ.moveState
+                    };
+                    if(point.stopState && point.stopState.coords){
+                        delete point.stopState.coords;
+                    }
+
+                    if (pointJ.real_arrival_time && pointJ.real_arrival_time > endTime) endTime = pointJ.real_arrival_time;
+                    if (pointJ.real_arrival_time && pointJ.real_arrival_time < startTime) startTime = pointJ.real_arrival_time;
+
+                    point.real_arrival_time = pointJ.real_arrival_time;
+
+                    point.status = {
+                        promised: false,
+                        ordered: false
+                    };
+
+                    if (point.windowType == "В заказанном") {
+                        point.status.promised = true;
+                        point.status.ordered = true;
+                    } else if (point.windowType == "В обещанном") {
+                        point.status.ordered = true;
+                    }
+
+                    if (point.status.ordered) route.inOrderedLen++;
+                    if (point.status.promised) route.inPromised++;
+                    if (point.inPlan) route.inPlan++;
+                    //console.log(pointJ);
+
+                    if(pointJ.status == 8){
+                        point.reasonDisp = pointJ.reason || '';
+                        point.reasonDriver = '';
+                        if (point.mobile_push != undefined && point.mobile_push.canceled == true) {
+                            point.reasonDriver = point.mobile_push.cancel_reason;
+                        }
+                        route.pointsNotReady.push(point);
+
+                        //console.log("причины отмены", point.reasonDisp, point.reasonDriver);
+                    } else {
+                        route.pointsReady.push(point);
+                    }
+                }
+
+                route.startTimeFact = startTime === 2000000000 ? undefined : startTime;
+                route.endTimeFact = endTime === 0 ? undefined : endTime;
+                if(!route.startTimeFact){
+                    route.startTimeFact = Date.now();
+                }
+                if(!route.endTimeFact){
+                    route.endTimeFact = Date.now();
+                }
+                //TODO REMOVE only for test
+                // route.pointsReady = route.pointsReady.concat(route.pointsUnconfirmed);
+                ///////////////////////////
+
+                for (var k = 0; k < route.pointsReady.length; k++) {
+                    //console.log("Обрабатываем доставленные точки");
+                    point = route.pointsReady[k];
+                    point.arrivalTimeFact = 0;
+                    if (point.stopState) {
+                        point.durationFact = point.stopState.t2 - point.stopState.t1;
+                        point.arrivalTimeFact = point.stopState.t1;
+                        point.id = point.stopState.id;
+                    }else{
+                        point.arrivalTimeFact = point.real_arrival_time || 0;
+                        point.durationFact = 0;
+                        point.id = 0;
+                    }
+
+                    //console.log("Point", point);
+                    if (point.moveState) {
+                        point.moveDuration = point.moveState.t2 - point.moveState.t1;
+                        point.moveDistance = point.moveState.dist;
+                    }else{
+                        point.moveDistance = 0;
+                        point.moveDuration = 0;
+                    }
+                }
+
+
+                result.routes.push(route);
+            }
+
+
+            var xml = '<?xml version="1.0" encoding="UTF-8"?><MESSAGE xmlns="http://sngtrans.com.ua"><CLOSEDAY CLOSEDATA="'+routesOfDate+'"><TEXTDATA>'+ JSON.stringify(result) +'</TEXTDATA></CLOSEDAY></MESSAGE>';
+
+            if( currentDay ){ // проверка сегодняшней даты закрытия дня
+                console.log("UPDATE DAY");
+                //console.log("XML == ", xml);
+                return {closeDayData: xml, routesID: routesID, update:true, closeDayDate: routesOfDate}; // обновляем текущий день
+            }else{
+                return {closeDayData: xml, routesID: routesID, update:false, closeDayDate: routesOfDate}; // дописываем старый день
+            }
+        }
+
+
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
+
 }
 
 function changePriority(id, company, login) {

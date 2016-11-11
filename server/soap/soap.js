@@ -818,6 +818,7 @@ SoapManager.prototype.closeDay = function (closeDayData, callback) {
         });
     };
 
+    log.toFLog("closeRoutes.txt", closeDayData, true);
     saveTo1C(closeDayData); //Снять комментарий и можно записывать
 };
 

@@ -2934,7 +2934,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         }
-        function collectDataForDayClosing( currentDay){
+        function collectDataForDayClosing(currentDay){
 
             var result = {
                     routes: []
