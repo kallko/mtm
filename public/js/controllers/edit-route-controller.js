@@ -972,10 +972,15 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     success(function (data) {
                     console.log("Recalculate receive DATA", data);
                         console.log ("надо принять решение, о перезапросе", data);
-                        if (data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1 || (data.solutions[0].unhandledJobs != undefined && data.solutions[0].unhandledJobs.length>0)) {
+                        if ((data.status == 'error' || data.solutions.length == 0 || data.solutions[0].routes.length != 1 || (data.solutions[0].unhandledJobs != undefined && data.solutions[0].unhandledJobs.length>0)) && scope.iteration<7) {
                             console.log("Вызываем перерасчет");
                             scope.recalculateRoute();
                             return;
+                        } else {
+                            if (scope.iteration>6) {
+                                scope.$emit('showNotification', {text: 'Автоматический пересчет не удался.'});
+
+                            }
                         }
                         processModifiedPoints(route, data);
                     })
