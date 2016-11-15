@@ -5996,21 +5996,38 @@ function loadCoords(company) {
     var states = [],
         gid,
         route = {};
-    if (cashedDataArr[company].line_routes != undefined) {
+        if (cashedDataArr[company].line_routes != undefined) {
 
-        for (var i = 0; i < cashedDataArr[company].line_routes.length; i++) {
-            route = cashedDataArr[company].line_routes[i];
-            states = route.real_track;
-            gid = route.transport.gid;
-            //log.info("Отправляем запрос по гиду", gid);
-            if (gid !=undefined && states != undefined && states.length>0) tracksManager.getTrackByStatesForNode(states, gid, route, function (data, route) {
-                //log.info(data, "MTM 5198");
-                route.real_track=data;
-                //log.info("Закончена подгрузка координат", route.transport.gid);
-            })
+            for (var i = 0; i < cashedDataArr[company].line_routes.length; i++) {
+                route = cashedDataArr[company].line_routes[i];
+                states = route.real_track;
+                gid = route.transport.gid;
+                //log.info("Отправляем запрос по гиду", gid);
+                if (gid !=undefined && states != undefined && states.length>0) tracksManager.getTrackByStatesForNode(states, gid, route, function (data, route) {
+                    //log.info(data, "MTM 5198");
+                    route.real_track=data;
+                    //log.info("Закончена подгрузка координат", route.transport.gid);
+                })
+            }
+
         }
 
-    }
+
+        if (cashedDataArr[company].routes != undefined) {
+
+            for (i = 0; i < cashedDataArr[company].routes.length; i++) {
+                route = cashedDataArr[company].routes[i];
+                states = route.real_track;
+                gid = route.transport.gid;
+                //log.info("Отправляем запрос по гиду", gid);
+                if (gid !=undefined && states != undefined && states.length>0) tracksManager.getTrackByStatesForNode(states, gid, route, function (data, route) {
+                    //log.info(data, "MTM 5198");
+                    route.real_track=data;
+                    //log.info("Закончена подгрузка координат", route.transport.gid);
+                })
+            }
+
+        }
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
     }

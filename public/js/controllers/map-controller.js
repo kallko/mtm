@@ -589,6 +589,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             + 'Новые координаты ' + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
                         rootScope.$emit('ReqChengeCoord', {message: message});
 
+
                     })
                     .on('dblclick', function(event){
                         console.log('this is waypoint ', event.target);
@@ -755,21 +756,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 console.log("New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
                 newMarker.source.waypoint.CONFIRMBYGPS="true";
                 console.log("NEW New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
+                scope.$emit('addPointHistory', newMarker.source, "lat-lon change");
                 rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
-                //rootScope.$emit('statusUpdate');
                 $('#notification_wrapper').css('opacity', '1');
-                //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
-                //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
+
 
             } else {
-
-                //console.log(newMarker, "newMarker");
 
                 newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
             }
         });
 
-        //rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
         // перевести timestamp в строковой формат времени минуты:часы
         function mmhh(time) {
@@ -1193,7 +1190,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //var oldStop= $.extend(true, {}, wayPoint.stopState);
 
             wayPoint.real_service_time = 0;
-
+            scope.$emit('addPointHistory', wayPoint, "connect from map with stop", stop.t1);
 
             // Проверка на аккуратность и внимательность человекаю Не пытается ли он связать уже связанные точку и стоп
             if(typeof(wayPoint.stopState)!='undefined' && typeof(wayPoint.stopState.servicePoints)!='undefined'){
@@ -1885,6 +1882,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 i++;
             }
             container.source.real_service_time=time*60;
+
+            scope.$emit('addPointHistory', container.source, "change service time", time*60);
+
             var symbol= container.options.title.indexOf("Реально");//22
             //console.log("Symb", symbol);
             var title=container.options.title.substring(0,symbol+22);
@@ -1938,7 +1938,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             //В стопе убирается информация о том, что он обслужил эту точку
-            var i=0;
+            i=0;
             while (i<stop.servicePoints.length){
                 //console.log("looking");
                 if (stop.servicePoints[i]==indx){
@@ -1972,7 +1972,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             delete container.source.confirmed_by_operator;
             delete container.source.limit;
 
-            var now =  parseInt(Date.now()/1000);
+            scope.$emit('addPointHistory', container.source, "unbind stop point", stop.t1);
+
+            var now =  rootScope.nowTime;
             container.source.status=5;
 
             var textStatus='опаздывает';
@@ -2472,10 +2474,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
                         if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) {
                             console.log("Это какой то бракованный СТЭЙТ. Я не буду его рисовать", track[i]);
-                            if (track[i].constructor !== Array ) {
-                                console.log("Найден гаденыш, убиваем");
-                                track.splice(i,1);
-                            }
+                            //if (track[i].constructor !== Array ) {
+                            //    console.log("Найден гаденыш, убиваем");
+                            //    track.splice(i,1);
+                            //}
                             //if (rootScope.settings.user == "ids.kalko" || rootScope.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
                             continue;
                         }
@@ -2741,8 +2743,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         function addMiniMarkers(){
+            if(scope.route.real_track == undefined || scope.route.real_track.length == 0) return;
 
-           scope.miniMarkers = new L.layerGroup().addTo(map);
+            scope.miniMarkers = new L.layerGroup().addTo(map);
 
             for (var i = 0; i < scope.route.real_track.length; i++){
                 if (scope.route.real_track[i].state != "MOVE" ||

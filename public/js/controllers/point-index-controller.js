@@ -4981,6 +4981,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
 
+        rootScope.$on('addPointHistory', function(event, point, action, id) {
+           addPointHistory(point, action, id);
+        });
+
+        function  addPointHistory (point, action, id){
+            if(!point || !action) return;
+            if (point.history == undefined) point.history = [];
+            point.history.push({time: rootScope.nowTime, login: rootScope.settings.user, action: action, comment:id});
+
+        }
+
+
         function replaceStopInPoint (route, point, dataForPoint) {
             //удаляем из текущего СтопСтэйта информацию, что он обслуживает эту точку
             var pointNumber = point.NUMBER-1;

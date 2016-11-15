@@ -134,6 +134,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 allTransports: rootScope.data.transports
 
             });
+            scope.$emit('addPointHistory', scope.point, "confirmed from card");
 
         };
 
@@ -162,7 +163,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
             });
 
-
+            scope.$emit('addPointHistory', scope.point, "status canceled from card");
         };
 
         scope.returnStatus = function(){
@@ -187,6 +188,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 allTransports: rootScope.data.transports
 
             });
+            scope.$emit('addPointHistory', scope.point, "return sheduled from card");
         };
 
         // отменить задачу
@@ -215,12 +217,14 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 allTransports: rootScope.data.transports
 
             });
+            scope.$emit('addPointHistory', scope.point, "cancel point from card");
         };
 
         scope.cancelPush = function () {
 
             console.log('cancelPush');
             scope.$emit('cancelPush',  scope.point); //В поинт индекс контроллер
+            scope.$emit('addPointHistory', scope.point, "cancel push from card");
         };
 
         // перекелючить (вкл/выкл) блокировку задачи
