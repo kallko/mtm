@@ -1376,8 +1376,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             } else {
                 if (map.getZoom()<17) {
                    // console.log("try to remove layer" , scope.miniMarkers.length);
-
+                    try{
                     map.removeLayer(scope.miniMarkers);
+                    } catch (e) {
+                        console.log("Error", e);
+                    }
 
                   //  console.log("try to remove 2 layer" , scope.miniMarkers.length);
                     scope.drawMiniMarkers = false;

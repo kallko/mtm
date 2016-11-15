@@ -4501,8 +4501,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (i=0; i<rootScope.data.routes.length;i++){
 
                     console.log(rootScope.data.routes[i].uniqueID , cache.routes[0].uniqueID);
-                    if (rootScope.data.routes[i].uniqueID == cache.routes[0].uniqueID) return;
-
+                    if (rootScope.data.routes[i].uniqueID == cache.routes[0].uniqueID) {
+                        return;
+                    }
                 }
             }
 
@@ -4512,12 +4513,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if ( (cache != undefined || cache != null || cache.length != 0) && (rootScope.data == undefined )) {
 
                 for (var k = 0; k < cache.routes.length; k++){
+
+                    if (cache.routes[k].history == undefined) cache.routes[k].history = [];
+                    if (cache.routes[k].history.length == 0 ||
+                        cache.routes[k].history[cache.routes[k].history.length-1].finish != undefined) {
+                        cache.routes[k].history.push({start:cache.server_time, login: rootScope.settings.user})
+                    }
+
                    for (var l=k+1; l< cache.routes.length; l++) {
                        console.log ("Ищем задвоенность", cache.routes[k].uniqueID, cache.routes[l].uniqueID);
                        if (k != l && cache.routes[k].uniqueID == cache.routes[l].uniqueID || cache.routes[k] == undefined) {
                            console.log ("Решена проблема задвоенности роутов");
-                           cache.routes.splice(k,1);
-                           k--;
+                           cache.routes.splice(l,1);
+                           l--;
                        }
                    }
 
@@ -4642,6 +4650,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             for (var i = 0; i<rootScope.data.routes.length; i++){
                 if(rootScope.data.routes[i].filterId == id){
                     result = rootScope.data.routes[i];
+                    if (result.history != undefined &&
+                        result.history.length > 0) result.history[result.history.length-1].finish = rootScope.nowTime;
 
 
                 //Проверка, закончен ли этот маршрут и если да, то закрываем его.
@@ -4787,6 +4797,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     if (data.route != undefined) {
 
                         checkRouteQuality(data.route);
+                        if (data.route.history == undefined) data.route.history=[];
+                        if (data.route.history.length == 0 ||
+                            data.route.history[data.route.history.length-1].finish != undefined) {
+                            data.route.history.push({start:rootScope.nowTime, login: rootScope.settings.user})
+                        }
+
+
                         rootScope.data.routes.push(data.route);
                         scope.filters.route = data.route.filterId;
                         console.log("Раз два три четыре пять, начинаем рисовать", scope.filters.route );
