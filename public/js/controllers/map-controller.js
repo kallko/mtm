@@ -940,6 +940,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             rootScope.$on('drawRealTrack', function (event, route) {
                 //console.log('i gona  draw real route', route);
+                scope.route = route;
                 drawRealRoute(route);
                 drawAllPoints(route.points)
             });
@@ -1327,7 +1328,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     opacity: 0.5,
                     smoothFactor: 1});
                 map.addLayer(scope.polyline);
-                if(scope.tempCurrentWayPoints[scope.scope.minIIndx]==scope.baseCurrentWayPoints[scope.minIIndx]) {
+                if(scope.tempCurrentWayPoints[scope.minIIndx]==scope.baseCurrentWayPoints[scope.minIIndx]) {
 
 
                     findAndClickMarker(scope.tempCurrentWayPoints[scope.minIIndx]);
@@ -1351,6 +1352,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // При зуме карты в любом направлении все омс маркеры теряют свойствоство spiderfy если они его до этого имели.
 
         scope.drowConnect = false;
+        scope.drawMiniMarkers = false
         map.on('zoomend', function(event){
             scope.tempCurrentWayPoints=[];
             if (map.getZoom() > 17 && markersArr != undefined && !scope.drowConnect) {
@@ -1358,11 +1360,29 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     map.removeLayer(scope.learConnectWithStopsAndPoints);}
                 drowConnectWithStopsAndPoints();
                 scope.drowConnect = true;
+
+
+
             }else if(scope.drowConnect && map.getZoom() <= 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
                 scope.drowConnect = false;
             }
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
+
+            if (map.getZoom()>17 && scope.route && !scope.drawMiniMarkers) {
+                if (scope.miniMarkers != undefined) map.removeLayer(scope.miniMarkers);
+                addMiniMarkers();
+                scope.drawMiniMarkers = true;
+            } else {
+                if (map.getZoom()<17) {
+                   // console.log("try to remove layer" , scope.miniMarkers.length);
+
+                    map.removeLayer(scope.miniMarkers);
+
+                  //  console.log("try to remove 2 layer" , scope.miniMarkers.length);
+                    scope.drawMiniMarkers = false;
+                }
+            }
         });
 
 
@@ -2481,6 +2501,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                 opacity: 0.8,
                                 smoothFactor: 1
                             });
+                            track[i].inRoute = true;
                             if (i + 1 == track.length) {
                                 polyline.redrawer = true;
                                 markersArr.push(polyline);
@@ -2715,6 +2736,41 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
     //        }
         }
+
+        function addMiniMarkers(){
+
+           scope.miniMarkers = new L.layerGroup().addTo(map);
+
+            for (var i = 0; i < scope.route.real_track.length; i++){
+                if (scope.route.real_track[i].state != "MOVE" ||
+                    scope.route.real_track[i].coords == undefined ||
+                    !scope.route.real_track[i].inRoute ||
+                    scope.route.real_track[i].coords.length < 6) continue;
+                for (var j = 5; j < scope.route.real_track[i].coords.length; j = j+5){
+
+                    var circleLocation = new L.LatLng(scope.route.real_track[i].coords[j].lat, scope.route.real_track[i].coords[j].lon),
+                        circleOptions = {
+                            color: 'green',
+                            fillColor: 'green'
+                        };
+
+                    var circle = new L.Circle(circleLocation, 0.2, circleOptions);
+                    circle.source = i*j;
+                    var date = new Date(scope.route.real_track[i].coords[j].t*1000);
+                    var hours = date.getHours();
+                    var minutes = "0" + date.getMinutes();
+                    var seconds = "0" + date.getSeconds();
+                    var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+                    circle.bindPopup("" + formattedTime);
+                    //circle.on('mouseover', function(event) {console.log("mouseover", event.target.source)});
+                    scope.miniMarkers.addLayer(circle)
+                }
+
+                //console.log("Move finded");
+            }
+
+        }
+
 
     }]);
 

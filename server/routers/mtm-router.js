@@ -2490,7 +2490,7 @@ function startPeriodicCalculating() {
 
 
     function callbackDispetcher(companys) {
-
+        if (!company) return;
 
         for (var k=0; k<companys.length; k++) {
             middleTime = parseInt(Date.now()/1000);
