@@ -2614,10 +2614,21 @@ function startPeriodicCalculating() {
                                     }
 
 
-                                    log.info(   "Time in update", cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2,
-                                                data[i].data[data[i].data.length-1].t2,
-                                                "and Difference",
-                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 - data[i].data[data[i].data.length-1].t2);
+                                    //if (data[j].data[0]) log.info(   "Time in update", cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2,
+                                    //            data[j].data[data[j].data.length-1].t2,
+                                    //            "and Difference",
+                                    //            data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2);
+
+
+                                    if (data[j].data[0] &&
+                                        data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 > 360 &&
+                                        data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 < 600 &&
+                                        !cached.routes[i].lostSignal){
+                                        log.info("Lost GPS Signal", cached.routes[i].driver.NAME);
+                                        cached.routes[i].lostSignal = true;
+                                    } else {
+                                        cached.routes[i].lostSignal = false;
+                                    }
 
 
                                     if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length == 0) && (data[j].data[0] != undefined)){
@@ -5434,6 +5445,7 @@ function calculateProblemIndex(company) {
                     route.max_problem = point.problem_index;
                     route.problem_point=point;
                     route.kind_of_problem='внимание';
+                    route.find_problem_ts = parseInt(Date.now()/1000);
                     // log.info("Проблемность равна  1");
                     continue;
                 }
@@ -5484,7 +5496,7 @@ function calculateProblemIndex(company) {
                     route.problem_point=point;
                     if(point.status == 4 ){route.kind_of_problem='время вышло';}
                     if(point.status == 5 ){route.kind_of_problem='опаздывает';}
-
+                    route.find_problem_ts = parseInt(Date.now()/1000);
                 }
 
                 // Calculate problem index for delay points
@@ -5528,6 +5540,7 @@ function calculateProblemIndex(company) {
                 route.max_problem = point.problem_index;
                 route.problem_point = point;
                 route.kind_of_problem = 'вне заказанного';
+                route.find_problem_ts = parseInt(Date.now()/1000);
             }
         }
     }
@@ -5565,6 +5578,7 @@ function calculateProblemIndex(company) {
                 route.max_problem = point.problem_index;
                 route.problem_point = point;
                 route.kind_of_problem = 'стоп не по плану';
+                route.find_problem_ts = parseInt(Date.now()/1000);
             }
 
         }
@@ -5601,6 +5615,7 @@ function calculateProblemIndex(company) {
                 route.max_problem = point.problem_index;
                 route.problem_point = point;
                 route.kind_of_problem = 'не по плану';
+                route.find_problem_ts = parseInt(Date.now()/1000);
             }
 
         }
@@ -5629,6 +5644,14 @@ function calculateProblemIndex(company) {
 
 
     }
+
+        for (i=0; i<cashedDataArr[company].routes.length; i++) {
+           if (cashedDataArr[company].routes[i].lostSignal) {
+               route.max_problem += 100;
+               route.kind_of_problem='потерян GPS';
+               route.find_problem_ts = parseInt(Date.now()/1000);
+           }
+        }
 
     for (i=0; i<cashedDataArr[company].routes.length; i++) {
         if (cashedDataArr[company].routes[i].max_problem == 0 || cashedDataArr[company].routes.max_problem == undefined ) {
