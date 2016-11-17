@@ -242,6 +242,17 @@ router.route('/updatepushes')
 
 
 
+router.route('/testCloseDay')
+    .post(function(req, res){
+        try {
+            log.info ("Получил запрос на testCloseDay");
+            log.toFLog('testCloseDay', req.body.data);
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+        res.status(200).json("TestCloseDay complete");
+    });
+
 router.route('/updatetrack')
     .post (function(req, res){
     try {
@@ -3195,8 +3206,8 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     var delta;
     var str = ""+ company;
     //Костыль приводящий пуши разных компаний к единому знаменателю
-    if (str.startsWith("292942")) delta = 2;
-    if (str.startsWith("271389")) delta = 2;
+    if (str.startsWith("292942")) delta = 0;
+    if (str.startsWith("271389")) delta = 0;
 
     while (i<pushes.length) {
 
@@ -4743,7 +4754,7 @@ function findStatusesAndWindows(company) {
             if (tmpPoint.limit > 0 && tmpPoint.limit < cashedDataArr[company].settings.limit) {
                 tmpPoint.status = 6;
                 cashedDataArr[company].routes[i].ready_to_close=false;
-                tmpPoint.problem_index = 1;
+                tmpPoint.problem_index = 40;
                 //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
             //log.info("И присваиваем ей статус", tmpPoint.status);
@@ -5412,7 +5423,7 @@ function calculateProblemIndex(company) {
             //log.info("Найдена проблемная точка");
 
             if (point.status == 6) {
-                point.problem_index = 1;
+                point.problem_index = 40;
                 if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
                     route.find_problem_ts = parseInt(Date.now()/1000);
                 }
@@ -5439,7 +5450,7 @@ function calculateProblemIndex(company) {
                     } else {
                         koef = point.working_window[point.working_window.length-1].finish;
                     }
-                    point.problem_index += (point.overdue_time) * cashedDataArr[company].settings.factMinutes;
+                    point.problem_index +=100 + (point.overdue_time) * cashedDataArr[company].settings.factMinutes;
 
                     timeCoef = 1;
 
@@ -5510,7 +5521,7 @@ function calculateProblemIndex(company) {
 
             if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE" && point.waypoint.TYPE !="PARKING"){
                 log.info("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
-                point.problem_index = route.max_problem+1; //todo посчитать проблемность для точки вне окна
+                point.problem_index = 25; //todo посчитать проблемность для точки вне окна
                 point.out_of_ordered = true;
                 route.max_problem = point.problem_index;
                 route.problem_point=point;

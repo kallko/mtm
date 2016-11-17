@@ -2726,7 +2726,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             lat: point.END_LAT,
                             lon: point.END_LON
                         },
-                        taskTime: point.ARRIVAL_TIME,
+                        taskTime: point.TASK_TIME,
                         downtime: point.DOWNTIME,
                         travelTime: point.TRAVEL_TIME,
                         distance: point.DISTANCE,
@@ -2934,7 +2934,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         }
-        function collectDataForDayClosing(currentDay){
+        function collectDataForDayClosing(currentDay, testFlag){
 
             var result = {
                     routes: []
@@ -2949,9 +2949,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             var routesID = [];
 
             for (var i = 0; i < rootScope.data.routes.length; i++) {
-                if(rootScope.data.routes[i].ready_to_close != true){
+                if(rootScope.data.routes[i].ready_to_close != true && testFlag == undefined){
                     continue;
                 }
+                console.log("Chose route for closing");
                 routeI = rootScope.data.routes[i];
                 //todo здесь поставлено свойство тру, но на самом деле нужно ставить позже, когда получен успешный результат от 1с. Здесь сделано для тестирования.
                 rootScope.data.routes[i].closed = true;
@@ -2960,6 +2961,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 route = {
                     pointsReady: [],
                     pointsNotReady: [],
+                    pointsUnknown: [],
                     driver: routeI.DRIVER,
                     transport: routeI.TRANSPORT,
                     itenereryID: routeI.itineraryID,
@@ -3029,7 +3031,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                         //console.log("причины отмены", point.reasonDisp, point.reasonDriver);
                     } else {
-                        route.pointsReady.push(point);
+
+                        if (pointJ.status < 3 ) {
+                            route.pointsReady.push(point);
+                        } else {
+                            route.pointsUnknown.push(point);
+                        }
+
                     }
                 }
 
@@ -3090,6 +3098,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             updateWaypoint(data, confirm)
 
         });
+
+        rootScope.$on('CollectNewDataForClosingRoutesTestFunction', function(){
+           var testData = collectDataForDayClosing(true, true);
+            http.post('./testCloseDay', {data : testData})
+                .success(function(data){
+                    console.log("Send and Answer ok");
+                })
+
+
+        });
+
         //console.log(scope.filters.route, ' filters route');
         rootScope.$on('pushCloseDayDataToServer', function(event, data){ // инициализация отправки данных на сервер для закрытия дня
             pushDataToServer(collectDataForDayClosing(data.data, data.currentDay));
@@ -4323,7 +4342,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //Сортируем каждый массив по своему признаку
             // Объединяем массивы
             // Потом проходимся по массиву и в каждую точку в свойство факт заносим ее индекс +1
-            if(route == undefined) return;
+            if(route == undefined || route.points == undefined) return;
             console.log("Пересчитываем фактическое время");
             // Проверка, есть ли еще точки со статусом внимание. Нужно для пересчета роута
             if (route.have_attention == undefined || route.have_attention == true) route.have_attention =false;

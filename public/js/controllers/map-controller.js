@@ -666,7 +666,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         scope.drawConnectsActivePoint = function(stopState, number, TASK_NUMBER){
-            if(stopState == undefined){
+            if(stopState == undefined || !number || !TASK_NUMBER){
                 return;
             }
             if(scope.singleConnect !== undefined){

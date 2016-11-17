@@ -211,6 +211,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             markWarehouses(scope.route);
             // из изменяемого маршрута убираем выполненные точки
             for (var i = 0; i < scope.changedRoute.points.length; i++) {
+                delete scope.changedRoute.points[i].new_arrival_time;
                 if (scope.changedRoute.points[i].status == scope.STATUS.FINISHED ||
                     scope.changedRoute.points[i].status == scope.STATUS.FINISHED_LATE ||
                     scope.changedRoute.points[i].status == scope.STATUS.FINISHED_TOO_EARLY) {
@@ -871,7 +872,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     }
                 }
 
-                if(route.car_position == undefined || route.car_position.lat == undefined || route.car_position.lon ) createNewCarPosition(route);
+                if(route.real_track != undefined && route.real_track.length > 0 ){
+                    route.car_position ={};
+                    route.car_position.lat = route.real_track[route.real_track.length-1].lat;
+                    route.car_position.lon = route.real_track[route.real_track.length-1].lon;
+                    console.log("Create Right Car Position");
+                }
+                if(route.car_position == undefined || route.car_position.lat == undefined || route.car_position.lon == undefined ) createNewCarPosition(route);
 
                 point = {
                     "lat": parseFloat(route.car_position.lat),
@@ -1386,6 +1393,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             //Этап 2 меняем номера заданий, arrival_time_ts promised_window_changed change_time
 
             for (var i=0; i<rootRoute.points.length; i++){
+                console.log(i);
+                rootRoute.points[i].OLDNUMBER = rootRoute.points[i].NUMBER+0;
                 rootRoute.points[i].NUMBER = i+1;
                 delete rootRoute.points[i].fact_number;
                 if (rootRoute.points[i].new_arrival_time != undefined && rootRoute.points[i].new_arrival_time !=rootRoute.points[i].arrival_time_ts ){
@@ -1404,10 +1413,44 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     }
                 }
 
+               // console.log("rootRoute.points[i].servicePoints", rootRoute.points[i].stopState.servicePoints);
+                var stopId;
+                if (rootRoute.points[i].stopState == undefined) continue;
+                    stopId = rootRoute.points[i].stopState.id;
+                        for( var l = 0; l < rootRoute.points[i].stopState.servicePoints.length; l++){
+                            //console.log(stopId, "Find new OLDNAUMBER", rootRoute.points[i].stopState.servicePoints[l], rootRoute.points[i].OLDNUMBER, rootRoute.points[i].NUMBER);
+                            if(rootRoute.points[i].stopState.servicePoints[l] == rootRoute.points[i].OLDNUMBER) rootRoute.points[i].stopState.servicePoints[l] = rootRoute.points[i].NUMBER;
+                        }
+
+                        for (l = 0; l < rootRoute.real_track.length; l++){
+                            if (rootRoute.real_track[l].state != "ARRIVAL" ||
+                                rootRoute.real_track[l].servicePoints == undefined ||
+                                rootRoute.real_track[l].id != stopId) continue;
+
+                                for (var k = 0; k < rootRoute.real_track[l].servicePoints.length; k++){
+                                    if (rootRoute.real_track[l].servicePoints[k] == rootRoute.points[i].OLDNUMBER) rootRoute.real_track[l].servicePoints[k] = rootRoute.points[i].NUMBER;
+                                }
+                        }
+
+                delete rootRoute.points[i].OLDNUMBER;
             }
 
-            //todo !!! костыль для непросчитанных маршрутов.
-            console.log("Новый роут", rootRoute);
+            for (i = 0; i < rootRoute.points.length; i++) {
+                if (!rootRoute.points[i].stopState) continue;
+                stopId = rootRoute.points[i].stopState.id;
+                    for(j = 0; j < rootRoute.real_track.length; j++){
+                        if (stopId == rootRoute.real_track[j].id) {
+                            rootRoute.points[i].stopState = rootRoute.real_track[j];
+                            //console.log("stop in point", rootRoute.points[i].NUMBER, rootRoute.points[i].OLDNUMBER, rootRoute.points[i].stopState.servicePoints, "stop in real Track", rootRoute.real_track[j].servicePoints);
+                        }
+                    }
+            }
+
+
+            //console.log("RootRoute", rootRoute);
+
+            //todo !!! переделать костыль для непросчитанных маршрутов.
+            //console.log("Новый роут", rootRoute);
             rootRoute.toSave = true;
             rootRoute.DISTANCE = 100;
             rootRoute.VALUE = 100;
@@ -1433,6 +1476,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
         function createNewCarPosition(route){
+            console.log("Create Alternative Car Position");
             route.car_position = {};
             route.car_position.lat = route.points[0].LAT;
             route.car_position.lon = route.points[0].LON;

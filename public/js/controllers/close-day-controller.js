@@ -253,6 +253,8 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
         }
         console.log("Start call");
 
+        rootScope.$emit('CollectNewDataForClosingRoutesTestFunction');
+
 
     };
 
