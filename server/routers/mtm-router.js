@@ -2549,6 +2549,8 @@ function startPeriodicCalculating() {
                 function (data, companyAsk) {
                    // if (!first) return;
 
+
+
                     // todo тестово отладочный блок
                     //checkeConcatTrack(companyAsk, 437123, data);
                     //checkeConcatTrack(companyAsk, 437323, data);
@@ -2567,21 +2569,23 @@ function startPeriodicCalculating() {
 
                     for(i=0; i<data.length; i++){
 
-                    if (typeof (data[i].data) == 'string') data[i].data =[];
+
+
+                        if (typeof (data[i].data) == 'string') data[i].data =[];
                             //log.info("Stage 1", i, data[i]);
                         if (data[i] == undefined || data[i].data == undefined || data[i].data.length == 0) continue;
 
 
 
-                        for (j=0; j<data[i].data.length; j++){
-                            //log.info("Stage 2");
-                           // log.info("Time == ", data[i].data[j].time);
-                          if (data[i].data[j].time == 0 || data[i].data[j].time == '0' || data[i].data[j] == "error" ) {
-                              //log.info("delete 0 time state");
-                              data[i].data.splice(j,1);
-                              j--;
-                          }
-                        }
+                            for (j=0; j<data[i].data.length; j++){
+                                //log.info("Stage 2");
+                               // log.info("Time == ", data[i].data[j].time);
+                              if (data[i].data[j].time == 0 || data[i].data[j].time == '0' || data[i].data[j] == "error" ) {
+                                  //log.info("delete 0 time state");
+                                  data[i].data.splice(j,1);
+                                  j--;
+                              }
+                            }
 
                     }
 
@@ -2610,12 +2614,10 @@ function startPeriodicCalculating() {
                                     }
 
 
-                                   // var size = data[j].data.length;
-                                   //log.info("____________________________________")
-                                   // for (var f=data[j].data.length; f>=0; f--){
-                                   //    log.info("New Track", data[j].data[f-1]);
-                                   //     log.info("Old track", cached.sensors[i].real_track[cached.sensors[i].real_track.length-1-(size-f)] );
-                                   // }
+                                    log.info(   "Time in update", cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2,
+                                                data[i].data[data[i].data.length-1].t2,
+                                                "and Difference",
+                                                cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 - data[i].data[data[i].data.length-1].t2);
 
 
                                     if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length == 0) && (data[j].data[0] != undefined)){
@@ -5524,17 +5526,90 @@ function calculateProblemIndex(company) {
                 point.problem_index = 25; //todo посчитать проблемность для точки вне окна
                 point.out_of_ordered = true;
                 route.max_problem = point.problem_index;
-                route.problem_point=point;
-                route.kind_of_problem='вне заказанного';
+                route.problem_point = point;
+                route.kind_of_problem = 'вне заказанного';
             }
         }
     }
 
 
+        // Нахождение маршрутов с незапланированной остановкой
+        // Параметры:  Последний state ARRIVAL длительностью более 180 сек. В радиусе stopRadius от которого нет точек доставки с временным окном +- 1800 сек.
+        // Есть смысл искать только в беспроблемных роутах
 
-    //определение готовых к закрытию маршрутов
 
-    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
+        for (i = 0; i < cashedDataArr[company].routes.length; i++) {
+            if ((cashedDataArr[company].routes[i].max_problem &&
+                cashedDataArr[company].routes[i].max_problem > 0) ||
+                !cashedDataArr[company].routes[i].real_track ||
+                cashedDataArr[company].routes[i].real_track.length == 0 ||
+                cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.length-1].t2 <cashedDataArr[company].routes[i].points[0].arrival_time_ts) continue;
+
+            log.info("Lets look in routes without problem for unauthorized stop");
+
+            route = cashedDataArr[company].routes[i];
+            var stop = cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.lenght-1];
+
+            var isCorrectDuration = stop.time <= 180;
+            var isRightRadius = finndNearestPoints(company, route, stop);
+            var isUnscheduledStop = (!isCorrectDuration && !isRightRadius);
+
+            if (isUnscheduledStop) {
+                for (j = 0; j < route.points.length; j++){
+                    point = route.points[j];
+                    if (point.status > 3) break;
+                }
+
+                log.info("Найден незапланированный стоп", point.driver.NAME, point.NUMBER);
+                point.problem_index = 30;
+                route.max_problem = point.problem_index;
+                route.problem_point = point;
+                route.kind_of_problem = 'стоп не по плану';
+            }
+
+        }
+
+
+        // Нахождение маршрутов с неправильным порядком выполнения
+        // Есть смысл искать только в беспроблемных роутах
+
+
+        for (i=0; i<cashedDataArr[company].routes.length; i++) {
+            if (cashedDataArr[company].routes[i].max_problem &&
+                cashedDataArr[company].routes[i].max_problem > 0) continue;
+
+            log.info("Lets look in routes without problem for broken line");
+
+            route = cashedDataArr[company].routes[i];
+            var isStarted = false;
+            var notBroken = true;
+            var isInline = true;
+            if(route.points[0].status < 3) isStarted=true;
+
+            for (j = 1; j < route.points.length; j++){
+                point = route.points[j];
+                if ((point.status < 3 || point.status == 8)  && isStarted && notBroken) continue;
+                if ((point.status > 2 && point.status < 8) && isStarted && !notBroken) isInline = false;
+                if (point.status < 3 && !isStarted) isInline = false;
+                if (point.status > 2 && point.status < 8) notBroken = false;
+                if (!isInline) break;
+            }
+
+            if (!isInline) {
+                log.info("Найдено нарушение последовательности выполнения", point.driver.NAME, point.NUMBER);
+                point.problem_index = 20;
+                route.max_problem = point.problem_index;
+                route.problem_point = point;
+                route.kind_of_problem = 'не по плану';
+            }
+
+        }
+
+
+
+            //определение готовых к закрытию маршрутов
+
+    for (i=0; i<cashedDataArr[company].routes.length; i++) {
         // log.info("Start looking for ready to close");
         if (cashedDataArr[company].routes[i].closed == true) {
             changeNameOfRoute(company, cashedDataArr[company].routes[i].uniqueID);
@@ -5998,6 +6073,28 @@ function addPushesToUpdateTrack(company, result){
     }
 
     return result;
+}
+
+
+function finndNearestPoints(company, route, stop){
+    if(!company || !route || !stop || !stop.lat || !stop.lon) return true;
+
+
+    for (var i = 0; i < route.points.length; i++){
+        var point = route.points[i];
+        var distance = getDistanceFromLatLonInM(parseFloat(stop.lat), parseFloat(stop.lon), parseFloat(point.LAT), parseFloat(point.LON));
+        if(distance < cashedDataArr[company].settings.stopRadius) {
+            for (var j = 0; j < point.working_window.length; j++){
+                if (stop.t1 < point.working_window[j].finish + 60 * 30 && stop.t2 > point.working_window[j].start - 60 * 30){
+                    return true;
+
+                }
+            }
+        }
+    }
+
+    return false;
+
 }
 
 function loadCoords(company) {
