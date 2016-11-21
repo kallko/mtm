@@ -580,7 +580,7 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log("Данные получены");
+            console.log("Данные для предсказания получены");
             callback(body, pointsStr);
         } else {
 

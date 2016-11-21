@@ -5,6 +5,8 @@ var express = require('express'),
     config = require('../config'),
     soap = require('../soap/soap'),
     tracks = require('../tracks'),
+    modifyRoutes = require('../modifyRoutes'),
+    modifyPoints = require('../modifyPoints'),
     log = new (require('../logging'))('./logs'),
     //colors = require('colors'),
     fs = require('fs'),
@@ -1540,57 +1542,61 @@ router.route('/changedriver/')
 router.route('/savetonode/')
     .post(function (req, res) {
         try {
-        log.info("Приступаем к сохранению роута");
-        var i=0;
-        var id = parseInt(req.body.route.uniqueID);
-        var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
-        log.info("Приступаем к сохранению роута", i, id, currentCompany);
-        while(cashedDataArr[currentCompany].blocked_routes != undefined && i<cashedDataArr[currentCompany].blocked_routes.length){
-                if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
-                    cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
-                    log.info("Overwright Route");
-                    cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
-                    var uniqueId = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
-                    unblockRoute(key, uniqueId);
-                    cashedDataArr[currentCompany].blocked_routes.splice(i,1);
-                    res.status(200).json(id);
-                    return;
+            log.info("Приступаем к сохранению роута");
+            var i=0;
+            var id = parseInt(req.body.route.uniqueID);
+            var key = ""+req.session.login;
+            var updateRoute = new modifyRoutes();
+            updateRoute.ReplaceStopObjectByStopLink (req.body.route);
+            var updatePoints = new modifyPoints ();
+            updatePoints.test("test");
+            var currentCompany = companyLogins[key];
+            log.info("Приступаем к сохранению роута", i, id, currentCompany);
+            while(cashedDataArr[currentCompany].blocked_routes != undefined && i<cashedDataArr[currentCompany].blocked_routes.length){
+                    if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
+                        cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
+                        log.info("Overwright Route");
+                        cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
+                        var uniqueId = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
+                        unblockRoute(key, uniqueId);
+                        cashedDataArr[currentCompany].blocked_routes.splice(i,1);
+                        res.status(200).json(id);
+                        return;
+                }
+
+                i++;
             }
 
-            i++;
-        }
+            function unblockRoute(login, uniqueId) {
+                         for (var i=0; i<blockedRoutes.length; i++) {
+                    if (blockedRoutes[i].id == uniqueId && blockedRoutes[i].login == login) {
+                        log.info("снимаем блокировку с роута", uniqueId);
+                        blockedRoutes.splice(i, 1);
+                    }
 
-        function unblockRoute(login, uniqueId) {
-                     for (var i=0; i<blockedRoutes.length; i++) {
-                if (blockedRoutes[i].id == uniqueId && blockedRoutes[i].login == login) {
-                    log.info("снимаем блокировку с роута", uniqueId);
-                    blockedRoutes.splice(i, 1);
                 }
 
             }
 
-        }
 
+            if (cashedDataArr[currentCompany].oldRoutes != undefined) {
+            while(i<cashedDataArr[currentCompany].oldRoutes.length){
+                if(cashedDataArr[currentCompany].oldRoutes[i].uniqueID == id){
+                    cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
+                    log.info("Overwright OLD Route");
 
-        if (cashedDataArr[currentCompany].oldRoutes != undefined) {
-        while(i<cashedDataArr[currentCompany].oldRoutes.length){
-            if(cashedDataArr[currentCompany].oldRoutes[i].uniqueID == id){
-                cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
-                log.info("Overwright OLD Route");
+                    uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
+                    unblockRoute(key, uniqueId);
 
-                uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
-                unblockRoute(key, uniqueId);
+                    res.status(200).json(id);
+                    return;
+                }
 
-                res.status(200).json(id);
-                return;
+                i++;
+            }
             }
 
-            i++;
-        }
-        }
-
-        res.status(200).json("error");
+            res.status(200).json("error");
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
         }
@@ -2896,14 +2902,14 @@ function dataForPredicate(company, callback){
                 pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
             }
         }
-         //log.info( pointsStr, "PointSTR");
+         log.info( pointsStr, "PointSTR");
 
         //запрос матрицы по одному маршруту с обработкой в колбэке.
        /* log.info("Пытаемся получить предсказание МТМ 2241");*/
-        //log.info("CONT2 PREDICATE FUNCTION");
+        log.info("CONT2 PREDICATE FUNCTION");
         tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
             //log.info(pointsStr);
-         //log.info("SUCCESS PREDICATE FUNCTION");
+         log.info("SUCCESS PREDICATE FUNCTION");
             var timeMatrix=[];
             var i=1;
             // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
@@ -2931,12 +2937,12 @@ function dataForPredicate(company, callback){
             }
             generalResult.push({id:indx, time: timeMatrix});
             // Проверка не является ли этот колбек последним.
-            if(generalResult.length==collection.length)
+            if(generalResult.length == collection.length)
             {
 
-                cashedDataArr[company].dataForPredicate=generalResult;
+                cashedDataArr[company].dataForPredicate = generalResult;
                 cashedDataArr[company].needRequests --;
-                log.info("The Second cickle is finished RESULT LENGTH =", generalResult.length, cashedDataArr[company].needRequests, company );
+                log.info("The Second cickle is finished RESULT LENGTH =", cashedDataArr[company].dataForPredicate.length, cashedDataArr[company].needRequests, company );
                 if(cashedDataArr[company].needRequests == 0) callback(company);
                 return;
             }
@@ -2997,7 +3003,7 @@ try{
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
                 //log.info("Присваиваем статус 5");
-                //points[i].variantus = 2770;
+                points[i].variantus = 3006;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                 //log.info("TIME_OUT for point", points[i]);
             }
@@ -3057,7 +3063,10 @@ try {
 
         var singleTimeMatrix = [];
 
-        if (route.real_track != undefined && cashedDataArr[company].dataForPredicate != undefined && route.real_track.length != 0 && route.real_track != "invalid parameter 'gid'. ") {
+        if (route.real_track != undefined &&
+            cashedDataArr[company].dataForPredicate != undefined &&
+            route.real_track.length != 0 &&
+            route.real_track != "invalid parameter 'gid'. ") {
             var k = 0;
 
             while (k < cashedDataArr[company].dataForPredicate.length) {
@@ -3101,11 +3110,18 @@ try {
                 if(now > route.points[i].arrival_time_ts) {
 
                     route.points[i].status = 5;
-                    //route.points[i].variantus = 2852;
+                    route.points[i].variantus = 3110;
+
+                    //route.points[i].commentus = "1 ";
+                    //route.points[i].commentus+= route.real_track.length + " 2";
+                    //route.points[i].commentus+= " " + (cashedDataArr[company].dataForPredicate != undefined) + " 3";
+                    ////route.points[i].commentus+= route.real_track.length != 0 + " 4";
+                    //route.points[i].commentus+= " " + (route.real_track != "invalid parameter 'gid'. ");
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }
             }
+            route.withoutPredicate = true;
             return;
         }
 
@@ -3190,7 +3206,7 @@ try {
 
                         } else {
                             route.points[j].status = 5;
-
+                            route.points[j].variantus = 3199;
                         }
                     }
 
@@ -4297,6 +4313,8 @@ function connectPointsAndPushes(company) {
 
         for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
 
+            cashedDataArr[company].routes[j].lastPointIndx = 0;
+
 
             for (var k = 0; k < cashedDataArr[company].routes[j].points.length; k++) {
 
@@ -4347,6 +4365,7 @@ function connectPointsAndPushes(company) {
                         tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
 
                         cashedDataArr[company].routes[j].lastPointIndx = k > cashedDataArr[company].routes[j].lastPointIndx ? k : cashedDataArr[company].routes[j].lastPointIndx;
+                        console.log("Reorange lastpointINDX 4366",  cashedDataArr[company].routes[j].lastPointIndx, k );
                         // cashedDataArr[company].routes[j].pushes = cashedDataArr[company].routes[j].pushes || [];
                         if (mobilePushes[i].gps_time_ts < parseInt(Date.now()/1000)) {
                             cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
@@ -4534,6 +4553,7 @@ function connectStopsAndPoints(company) {
                             //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
 
                             route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                            console.log("Reorange lastpointINDX 4553",  route.lastPointIndx, k );
                             tmpPoint.stop_arrival_time = tmpArrival.t1;
                             tmpPoint.real_arrival_time = tmpArrival.t1;
                             tmpPoint.autofill_service_time = tmpPoint.stopState.time;
@@ -5589,27 +5609,24 @@ function calculateProblemIndex(company) {
 
 
         for (i=0; i<cashedDataArr[company].routes.length; i++) {
-            if (cashedDataArr[company].routes[i].max_problem &&
-                cashedDataArr[company].routes[i].max_problem > 0) continue;
+            if ((cashedDataArr[company].routes[i].max_problem &&
+                cashedDataArr[company].routes[i].max_problem > 0) ||
+                !cashedDataArr[company].routes[i].points ||
+                cashedDataArr[company].routes[i].points.length < 2 ) continue;
 
             log.info("Lets look in routes without problem for broken line");
 
             route = cashedDataArr[company].routes[i];
-            var isStarted = false;
-            var notBroken = true;
             var isInline = true;
-            if(route.points[0].status < 3) isStarted=true;
 
-            for (j = 1; j < route.points.length; j++){
-                point = route.points[j];
-                if ((point.status < 3 || point.status == 8)  && isStarted && notBroken) continue;
-                if ((point.status > 2 && point.status < 8) && isStarted && !notBroken) isInline = false;
-                if (point.status < 3 && !isStarted) isInline = false;
-                if (point.status > 2 && point.status < 8) notBroken = false;
-                if (!isInline) break;
+            for ( j = 1; j < route.points.length; j++){
+                isInline = !(route.points[j].status < 4 && (route.points[j-1].status > 3 && route.points[j-1].status != 8));
+                // console.log (isInline, route.points[j].status, route.points[j-1].status)//обнаружение выполненной точки после невыполненной
+                if (!isInline ) break;
             }
 
-            if (!isInline) {
+
+            if (!isInline) { //
                 log.info("Найдено нарушение последовательности выполнения", point.driver.NAME, point.NUMBER);
                 point.problem_index = 20;
                 route.max_problem = point.problem_index;
@@ -5875,6 +5892,7 @@ function connectPointsPushesStops(company) {
     if (!company) return;
     for (var i=0; i<cashedDataArr[company].routes.length; i++){
        var  route = cashedDataArr[company].routes[i];
+        route.lastPointIndx = 0;
         if (route.real_track == undefined || route.real_track.length == 0) continue;
         for (var j=0; j<route.points.length; j++){
             var point = route.points[j];
@@ -5918,7 +5936,8 @@ function connectPointsPushesStops(company) {
                     point.haveStop = true;
                     point.havePushStop = true;
                     point.stopState = tmpArrival;
-                    route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
+                    route.lastPointIndx = j > route.lastPointIndx ? j : route.lastPointIndx;
+                    console.log("Reorange lastpointINDX 5937",  route.lastPointIndx, j );
                     point.stop_arrival_time = tmpArrival.t1;
                     point.real_arrival_time = tmpArrival.t1;
                     point.autofill_service_time = point.stopState.time;
