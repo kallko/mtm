@@ -5581,7 +5581,7 @@ function calculateProblemIndex(company) {
             log.info("Lets look in routes without problem for unauthorized stop");
 
             route = cashedDataArr[company].routes[i];
-            var stop = cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.lenght-1];
+            var stop = cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.length-1];
 
             var isCorrectDuration = stop.time <= 180;
             var isRightRadius = finndNearestPoints(company, route, stop);

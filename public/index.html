@@ -361,7 +361,7 @@
                     </td>
                     <td class="time-left-window-col">{{ ((row.status==4 || row.status==5 ||row.status==7 ||row.status==6) && row.working_window[0] != undefined ) ? (parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.working_window[row.working_window.length-1].finish - nowTime) -(parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
                     <td class="prediction-arrival-time-col">
-                        <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8) && (row.transport.gid!=undefined) ">
+                        <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8 && row.status !=6 ) && (row.transport.gid!=undefined) ">
                             {{(row.arrival_prediction)*1000 | date: 'HH:mm' }}
                         </span>
                     </td>
