@@ -60,7 +60,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             rootScope.$emit('clearMap');
 
             console.log("filterId", scope.routeToEdit);
-            if (rootScope.data.routes == undefined || rootScope.data.routes.length==0) return;
+            if (rootScope.data.routes == undefined || rootScope.data.routes.length == 0 || !scope.routeToEdit) return;
+            console.log("Before ERROR", rootScope.data);
             for (var i=0; rootScope.data.routes[i].filterId != scope.routeToEdit; i++){}
             console.log("Find route", rootScope.data.routes[i].driver.NAME );
             scope.$emit('choseproblem', rootScope.data.routes[i].filterId);

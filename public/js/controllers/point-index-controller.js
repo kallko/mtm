@@ -2118,7 +2118,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     break;
             }
             rawPoint.checkedStatus = row.status;
-            scope.$emit('newTextStatus', scope.getTextStatus(row));
+            scope.$emit('newTextStatus', rootScope.getTextStatus(row));
         }
 
         // сортировать по точке
@@ -2263,7 +2263,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             }else if($event.type == 'dblclick'){
-                row.textStatus = scope.getTextStatus(row);
+                row.textStatus = rootScope.getTextStatus(row);
                 row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
                 row.itineraryID = rootScope.data.ID;
                 scope.$emit('showPoint', {point: row, route: rootScope.data.routes[row.route_indx]});
@@ -2304,7 +2304,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             var row = scope.displayCollection[i];
 
-            row.textStatus = scope.getTextStatus(row);
+            row.textStatus = rootScope.getTextStatus(row);
             row.textWindow = scope.getTextWindow(row.windowType, row.row_id);
             row.itineraryID = rootScope.data.ID;
             scope.$emit('showPoint', {point: row, route: rootScope.data.routes[row.route_indx]});
@@ -2313,7 +2313,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         // получить текстовый статус для задачи с необходимыми css классами
 
-        scope.getTextStatus = function (row) {
+        rootScope.getTextStatus = function (row) {
+            if(!row) return;
             row.class2 = row.out_of_ordered == true ? 'delay-status2' : '';
 
             var statusCode = row.status;
@@ -4443,7 +4444,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         //todo по большому счету тут может быть или 5 или 7 статус, но для 5 нужно проводить рассчеты
                         point.status=7;
                     }
-                    scope.$emit('newTextStatus', scope.getTextStatus(point))
+                    scope.$emit('newTextStatus', rootScope.getTextStatus(point))
                 }
             //Находим роут, соответсвующий этой точке
                 var i=0;
@@ -4551,6 +4552,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 }
 
+
+                if (cache.routes) changeStopObjectByStopLink(cache.routes);
 
                 console.log("Re Display", cache, "First time rotscope.data", rootScope.data );
                 if (cache.routes[0] == undefined) cache.routes = [];
@@ -4815,6 +4818,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     if (data.route != undefined) {
 
+                        changeStopObjectByStopLink(data.route);
                         checkRouteQuality(data.route);
                         if (data.route.history == undefined) data.route.history=[];
                         if (data.route.history.length == 0 ||
@@ -5155,6 +5159,25 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         }
 
+
+        function changeStopObjectByStopLink(routes) {
+            if (!routes) return;
+            console.log("start changeStopObjectByStopLink", routes);
+
+            for (var  i = 0; i < routes.length; i++){
+                for (var j = 0; j < routes[i].points.length; j++){
+
+                    if (!routes[i].points[j].stopState) continue;
+
+                    var stopLink = routes[i].real_track.filter(function(real_track) {
+                        return real_track.id == routes[i].points[j].stopState.id;
+                    });
+                    routes[i].points[j].stopState = stopLink[0];
+
+                }
+            }
+
+        }
 
         function preloadRoute(){
             for (var i = 0; i < rootScope.data.routes.length; i++) {
