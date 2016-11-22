@@ -53,7 +53,19 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                  }
              });
+
+
         }
+
+
+        var timer = setInterval(function(){
+            console.log("Satrt Timeout in recalc", scope.recalcInProgress, scope.recalcTime );
+            if (scope.recalcInProgress){
+                scope.recalcTime += 0.25;
+            } else {
+                scope.recalcTime = 0;
+            }
+        }, 250);
 
 
         scope.selectEditRoute = function(){
@@ -641,6 +653,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // приводит маршрут в необходимый формат и отправляетего на математический сервер для пересчета
         scope.recalculateRoute = function () {
+            scope.recalcInProgress = true;
+            if (scope.recalcTime == undefined) scope.recalcTime = 0;
+            console.log("Recalc in function", scope.recalcInProgress);
+
 
 
             scope.display = [];
@@ -718,7 +734,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
                     // добавляет в список задач все невыполненные задачи
                     if ((route.points[i].status > 3 && route.points[i].status != 8 && (route.points[i].waypoint != undefined && route.points[i].waypoint.TYPE != "WAREHOUSE" )) ) {
-                        console.log("Budem brat?", route.points[i].status);
+                        //console.log("Budem brat?", route.points[i].status);
                         pt = route.points[i];
                        // console.log("Dobavlzem tohku v peresschet", pt);
                         point = {
@@ -996,10 +1012,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             }
                         }
                         processModifiedPoints(route, data);
+                        scope.recalcInProgress = false;
                     })
                 .error(function(data){
                     console.log("ERROR, data");
+                        scope.recalcInProgress = false;
                 });
+
             }
         };
 
@@ -1024,7 +1043,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             for (var i=0; i< data.solutions[0].routes[0].deliveries.length; i++){
                 var toPrint = data.solutions[0].routes[0].deliveries[i];
-                console.log("Пришел ответ", toPrint.pointId, " ", toPrint.arrival);
+                //console.log("Пришел ответ", toPrint.pointId, " ", toPrint.arrival);
             }
 
             if(data.solutions[0] != undefined && data.solutions[0].routes != undefined && data.solutions[0].routes.length != undefined){
@@ -1498,7 +1517,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
         scope.recalculateRouteForOnePoint = function (point, start, finish) {
-
+            scope.recalcInProgress = true;
             console.log("Получены данные", point, start, finish);
 
 
@@ -1873,10 +1892,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     success(function (data) {
                         console.log("Recalculate For One Point receive DATA",data);
                         processModifiedPointsForOnePoint(route, data);
+                        scope.recalcInProgress = false;
                     })
                     .error(function(data){
                         console.log("ERROR, data");
+                        scope.recalcInProgress = false;
                     });
+
             }
         };
 

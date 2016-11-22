@@ -2106,19 +2106,39 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                    // rootScope.$emit('makeWaypointBlue', row.NUMBER);
                     break;
                 case 'cancel-point': // отмена точки
+
+                    console.log("Cancel point");
                     console.log(row);
-                    row.status = STATUS.CANCELED;
+                    row.status = 8;
                     row.confirmed = true;
                     rawPoint.rawConfirmed = 1;
                     row.confirmed_by_operator=true;
                     row.limit=100;
+                    if (row.stopState) {
+                        for (var i=0; i<row.stopState.servicePoints.length; i++){
+                            if (row.stopState.servicePoints[i] == row.NUMBER) {
+                                row.stopState.servicePoints.splice(i, 1);
+                                i--;
+                            }
+                        }
+                    }
+                    delete row.havePush;
+                    delete row.haveStop;
+                    delete row.havePushStop;
+                    delete row.mobile_arrival_time;
+                    delete row.real_arrival_time;
+                    delete row.stopState;
+                    delete row.stop_arrival_time;
+                    delete row.textStatus;
+                    delete row.textWindow;
+
                     //row.reason = row.point.reason;
                     rootScope.$emit('makeWaypointGrey', row.NUMBER );
                     rootScope.$emit('checkInCloseDay');  // проверка для контроллера закрытия дня на предмет появления новых маршрутов, которые можно закрыть
                     break;
             }
             rawPoint.checkedStatus = row.status;
-            scope.$emit('newTextStatus', rootScope.getTextStatus(row));
+            //scope.$emit('newTextStatus', rootScope.getTextStatus(row));
         }
 
         // сортировать по точке

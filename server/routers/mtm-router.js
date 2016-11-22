@@ -39,7 +39,8 @@ cashedDataArr = {},  // глобальный кеш
     blockedRoutes = [], // список заблокированных маршрутов
     startServer = false, // Изначальное состояние периодичности расчетов. Не менять.
     onlineClients = [], // список клиентов онлайн на данный момент
-    restart = false; // флаг сообщение о том что на сервере будут проходить профилактические работы
+    restart = false, // флаг сообщение о том что на сервере будут проходить профилактические работы
+    reload = false; // флаг, активирующий перезагрузку сохраненных данных
 
 //
 //    window_types = [                              // фильтры по типам попадания в окна
@@ -139,15 +140,8 @@ router.route('/saveData')
 router.route('/loadData')
     .get(function(req, res){
         try {
-        log.info("Start data loading");
-            var oldJson;
-        fs.readFile('./logs' + '/' +'saved.txt', 'utf8', function (err, data) {
-            oldJson = JSON.parse(data);
-            console.log("Error in load", err);
-            cashedDataArr = oldJson;
-            log.info( "Type of Data", typeof (oldJson));
+            reload = true;
 
-        });
 
 
             res.status(200).json({msg: 'complete'});
@@ -4321,7 +4315,7 @@ function connectPointsAndPushes(company) {
 
 
                 var tmpPoint = cashedDataArr[company].routes[j].points[k];
-
+                if (tmpPoint.confirmed_by_operator) continue;
 
                 var LAT = parseFloat(tmpPoint.LAT);
                 var LON = parseFloat(tmpPoint.LON);
@@ -6139,6 +6133,22 @@ function finndNearestPoints(company, route, stop){
 
 }
 
+function safeReload (){
+    if (!reload) return;
+
+    log.info("Start data loading");
+    var oldJson;
+    fs.readFile('./logs' + '/' +'saved.txt', 'utf8', function (err, data) {
+        oldJson = JSON.parse(data);
+        console.log("Error in load", err);
+        cashedDataArr = oldJson;
+        log.info( "Type of Data", typeof (oldJson));
+        reload = false;
+
+    });
+
+}
+
 function loadCoords(company) {
     try {
     if (!company) return;
@@ -6207,6 +6217,7 @@ function startCalculateCompany(company) {
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
     printData(company); //todo статистическая функция, можно убивать
+    safeReload()
     autosaveData();
     if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {

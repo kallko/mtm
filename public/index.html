@@ -634,6 +634,7 @@
                     ng-options="option.filterId as option.driver.NAME   for option in data.routes"
                     ng-change = "selectEditRoute()">
             </select>
+            <span ng-show = "recalcInProgress" class = "element-red">  ИДЕТ ПЕРЕСЧЕТ {{recalcTime}} сек.</span>
         </div>
 
         <div ng-show="parent_route.have_attention" style="color: orangered" ng-model="accept" ng-click="accept=true">
@@ -647,7 +648,7 @@
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
             ng-click="recalculateRoute()"
-            ng-show = "!changedRoute.reCalc>0"
+            ng-show = "!changedRoute.reCalc>0 && !recalcInProgress"
                     >Рассчитать</button>
         </div>
 

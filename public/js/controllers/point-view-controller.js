@@ -219,7 +219,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
             rootScope.$emit('startRecalc');
             $('#point-view').popup('hide');
-            scope.$emit('showNotification', {text: 'Маршрут пересчитан', duration: 4000});
+            scope.$emit('showNotification', {text: 'Утвердите пересчитанный маршрут во вкладке Редактирование', duration: 4000});
             scope.$emit('addPointHistory', scope.point, "cancel point from card");
 
 
