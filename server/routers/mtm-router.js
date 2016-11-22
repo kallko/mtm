@@ -1735,7 +1735,7 @@ router.route('/askforproblems/:need')
        // log.info("Проблемных роутов", cashedDataArr[currentCompany].line_routes.length);
         //TODO переписать условие когда начнет правильно формировать очередь проблемных роутов
         if (cashedDataArr[currentCompany].line_routes != undefined) {
-            log.info("Ищем проблемму для для оператора");
+            //log.info("Ищем проблемму для для оператора");
             result = {};
             result.routes = [];
             //Сначала просмотрим в заблокированных роутах. Возможно этот роут уже был выбран оператором и он случайно нажал эскейп, не сохранившись
@@ -1805,7 +1805,7 @@ router.route('/askforproblems/:need')
                 result.transports = cashedDataArr[currentCompany].transports;
                 result.reasons = cashedDataArr[currentCompany].reasons;
             }
-            log.info("Need=", need);
+            //log.info("Need=", need);
             if (need != 1){
 
 
@@ -1918,7 +1918,7 @@ router.route('/askforproblems/:need')
 
 
         result.reasons = cashedDataArr[currentCompany].reasons;
-        log.info("Result length", result.routes.length);
+        //log.info("Result length", result.routes.length);
         res.status(200).json(result);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -2458,7 +2458,7 @@ function startPeriodicCalculating() {
     // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
 
     for(var i=0; i<companysToCalc.length; i++){
-        log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
+        //log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
         if ( !cashedDataArr[companysToCalc[i]].recalc_finishing){
             log.info("Первичный расчет еще не закончен");
             companysToCalc.splice(i,1);
@@ -2469,7 +2469,7 @@ function startPeriodicCalculating() {
     //Удаляем из списка прошлые дни
 
     for( i=0; i<companysToCalc.length; i++){
-        log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].currentDay);
+        //log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].currentDay);
         if (cashedDataArr[companysToCalc[i]].currentDay == false){
             log.info("Это прошлый день");
             companysToCalc.splice(i,1);
@@ -2479,7 +2479,7 @@ function startPeriodicCalculating() {
 
 
     // Не считаем те компании, у которых размер роутов равен 0
-    for(var i=0; i<companysToCalc.length; i++){
+    for( i=0; i<companysToCalc.length; i++){
         if ((cashedDataArr[companysToCalc[i]].routes == undefined || cashedDataArr[companysToCalc[i]].routes.length == 0) && (cashedDataArr[companysToCalc[i]].line_routes == undefined || cashedDataArr[companysToCalc[i]].line_routes.length == 0)){
             log.info("У этой компании нет роутов на пересчет");
             companysToCalc.splice(i,1);
@@ -2495,7 +2495,7 @@ function startPeriodicCalculating() {
 
 
     for(i=0; i<companysToCalc.length; i++){
-            log.info("Компания на пересчет", companysToCalc[i]);
+            //log.info("Компания на пересчет", companysToCalc[i]);
             checkOnline(companysToCalc[i]);
 
     }
@@ -2881,7 +2881,7 @@ function dataForPredicate(company, callback){
     var j=0;
     var generalResult=[];                                                   // преременная собирающая в себе все ответы
         var collection = result;
-    log.info("CONT PREDICATE FUNCTION", !(collection.length==0));
+    //log.info("CONT PREDICATE FUNCTION", !(collection.length==0));
     if (collection.length==0) {
         cashedDataArr[company].needRequests --;
         log.info("The first cickle is finished RESULT LENGTH =", company, generalResult.length, cashedDataArr[company].needRequests );
@@ -2902,14 +2902,14 @@ function dataForPredicate(company, callback){
                 pointsStr += "&loc=" + collection[j].points[i].LAT + "," + collection[j].points[i].LON;
             }
         }
-         log.info( pointsStr, "PointSTR");
+         //log.info( pointsStr, "PointSTR");
 
         //запрос матрицы по одному маршруту с обработкой в колбэке.
        /* log.info("Пытаемся получить предсказание МТМ 2241");*/
-        log.info("CONT2 PREDICATE FUNCTION");
+        //log.info("CONT2 PREDICATE FUNCTION");
         tracksManager.getRouterMatrixByPoints(pointsStr, function (data, pointsStr) {
             //log.info(pointsStr);
-         log.info("SUCCESS PREDICATE FUNCTION");
+         //log.info("SUCCESS PREDICATE FUNCTION");
             var timeMatrix=[];
             var i=1;
             // выбор из всей матрицы только времени от первой точки(каррент позитион) ко всем остальным
@@ -3428,7 +3428,7 @@ function  checkOnline(company) {
     }
     var result=false;
     for (i=0; i<onlineClients.length; i++){
-        log.info("Стоит ли считать компанию ", company, "Если online:", onlineClients[i]);
+        //log.info("Стоит ли считать компанию ", company, "Если online:", onlineClients[i]);
         if(onlineClients[i].company == company){
             result=true;
             return result;
@@ -3437,7 +3437,7 @@ function  checkOnline(company) {
     }
 
 
-    log.info("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
+    //log.info("На данный момент нет никого онлайн из этой компании. Считать нет смысла, но все равно");
 
     //Функция страховка если по каким либо причинам остались заблокированные роуты.
     if (cashedDataArr[company].blocked_routes != undefined && cashedDataArr[company].blocked_routes.length >0){
@@ -4365,7 +4365,7 @@ function connectPointsAndPushes(company) {
                         tmpPoint.confirmed = tmpPoint.confirmed || tmpPoint.haveStop;
 
                         cashedDataArr[company].routes[j].lastPointIndx = k > cashedDataArr[company].routes[j].lastPointIndx ? k : cashedDataArr[company].routes[j].lastPointIndx;
-                        console.log("Reorange lastpointINDX 4366",  cashedDataArr[company].routes[j].lastPointIndx, k );
+                        //console.log("Reorange lastpointINDX 4366",  cashedDataArr[company].routes[j].lastPointIndx, k );
                         // cashedDataArr[company].routes[j].pushes = cashedDataArr[company].routes[j].pushes || [];
                         if (mobilePushes[i].gps_time_ts < parseInt(Date.now()/1000)) {
                             cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
@@ -4553,7 +4553,7 @@ function connectStopsAndPoints(company) {
                             //tmpPoint.rawConfirmed=1; //Подтверждаю точку стопа, раз его нашла автоматика.
 
                             route.lastPointIndx = k > route.lastPointIndx ? k : route.lastPointIndx;
-                            console.log("Reorange lastpointINDX 4553",  route.lastPointIndx, k );
+                            //console.log("Reorange lastpointINDX 4553",  route.lastPointIndx, k );
                             tmpPoint.stop_arrival_time = tmpArrival.t1;
                             tmpPoint.real_arrival_time = tmpArrival.t1;
                             tmpPoint.autofill_service_time = tmpPoint.stopState.time;
@@ -5937,7 +5937,7 @@ function connectPointsPushesStops(company) {
                     point.havePushStop = true;
                     point.stopState = tmpArrival;
                     route.lastPointIndx = j > route.lastPointIndx ? j : route.lastPointIndx;
-                    console.log("Reorange lastpointINDX 5937",  route.lastPointIndx, j );
+                    //console.log("Reorange lastpointINDX 5937",  route.lastPointIndx, j );
                     point.stop_arrival_time = tmpArrival.t1;
                     point.real_arrival_time = tmpArrival.t1;
                     point.autofill_service_time = point.stopState.time;

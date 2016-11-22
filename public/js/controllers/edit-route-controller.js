@@ -634,6 +634,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         //    }
         //};
 
+        rootScope.$on('startRecalc', function() {
+            console.log("start recalc");
+            scope.recalculateRoute();
+        });
+
         // приводит маршрут в необходимый формат и отправляетего на математический сервер для пересчета
         scope.recalculateRoute = function () {
 

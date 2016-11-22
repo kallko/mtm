@@ -55,4 +55,14 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
             }
             console.log("Result is ", scope.statistic);
         });
+
+        //var users = [{type: "admin", name: "Ivanov"}, {type: "moderator", name: "Petrov"}];
+        //
+        //var isAdmin = user => return user.type === 'admin';
+        //
+        //var admins = users.filter(isAdmin);
+        //
+        //console.log("admins", admins);
+
+
     }]);
