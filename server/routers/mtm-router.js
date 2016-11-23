@@ -3925,17 +3925,24 @@ try {
                 var login = cashedDataArr[company].firstLogin;
                 //TODO решить вопрос с обновлением настроек.
                 var settings = cashedDataArr[company].settings;
-                if(cashedDataArr[company].oldRoutes != undefined) {
+
+                if(cashedDataArr[company].line_routes != undefined) {
                     //cashedDataArr[company].line_routes = cashedDataArr[company].line_routes.concat(cashedDataArr[company].oldRoutes);
                     oldRoutes = JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
                 } else {
-                    oldRoutes =JSON.parse(JSON.stringify(cashedDataArr[company].line_routes));
+                    oldRoutes = [];
                 }
 
 
                 if (cashedDataArr[company].blocked_routes != undefined) {
                     for (var k = 0; k < cashedDataArr[company].blocked_routes.length; k++) {
                         oldRoutes.push(cashedDataArr[company].blocked_routes[k]);
+                    }
+                }
+
+                if (cashedDataArr[company].routes != undefined) {
+                    for (k = 0; k < cashedDataArr[company].routes.length; k++) {
+                        oldRoutes.push(cashedDataArr[company].routes[k]);
                     }
                 }
                 saveRoutesTo1s(oldRoutes);
@@ -6217,7 +6224,7 @@ function startCalculateCompany(company) {
     //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
     printData(company); //todo статистическая функция, можно убивать
-    safeReload()
+    safeReload();
     autosaveData();
     if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {
@@ -6229,14 +6236,3 @@ function startCalculateCompany(company) {
 
 module.exports = router;
 
-//for (i=0; i<rootScope.data.routes.length; i++){
-//    if (rootScope.data.routes[i].closed){
-//        console.log("Найден закрытый маршрут");
-//        //var res = String.fromCharCode(8660);
-//        //var res1 = String.fromCharCode(257);
-//        rootScope.data.allRoutes[j].nameCar = "Закрыт"  + rootScope.data.allRoutes[j].nameCar;
-//        rootScope.data.allRoutes[j].nameDriver =  "Закрыт" + res1 + rootScope.data.allRoutes[j].nameDriver;
-//
-//    }
-//
-//}

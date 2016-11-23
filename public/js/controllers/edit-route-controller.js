@@ -58,14 +58,17 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         }
 
 
-        var timer = setInterval(function(){
-            console.log("Satrt Timeout in recalc", scope.recalcInProgress, scope.recalcTime );
-            if (scope.recalcInProgress){
-                scope.recalcTime += 0.25;
-            } else {
-                scope.recalcTime = 0;
-            }
-        }, 250);
+         //function timer()  {
+         //    setInterval(function(){
+         //       console.log("Satrt Timeout in recalc", scope.recalcInProgress, scope.recalcTime );
+         //       if (scope.recalcInProgress){
+         //           scope.recalcTime += 0.25;
+         //       } else {
+         //           scope.recalcTime = 0;
+         //
+         //       }
+         //    }, 250);
+         //}
 
 
         scope.selectEditRoute = function(){
@@ -653,7 +656,20 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // приводит маршрут в необходимый формат и отправляетего на математический сервер для пересчета
         scope.recalculateRoute = function () {
+
             scope.recalcInProgress = true;
+
+            if (scope.recalcInProgress) scope.timer = setInterval(function(){
+                console.log("Start Timeout in recalc", scope.recalcInProgress, scope.recalcTime );
+                if (scope.recalcInProgress){
+                    scope.recalcTime += 0.25;
+                } else {
+                    scope.recalcTime = 0;
+                    clearInterval(scope.timer);
+                }
+            }, 250);
+
+
             if (scope.recalcTime == undefined) scope.recalcTime = 0;
             console.log("Recalc in function", scope.recalcInProgress);
 
@@ -1013,10 +1029,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         }
                         processModifiedPoints(route, data);
                         scope.recalcInProgress = false;
+                        if (scope.timer) clearInterval(scope.timer);
                     })
                 .error(function(data){
                     console.log("ERROR, data");
                         scope.recalcInProgress = false;
+                        if (scope.timer) clearInterval(scope.timer);
                 });
 
             }
@@ -1893,10 +1911,12 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                         console.log("Recalculate For One Point receive DATA",data);
                         processModifiedPointsForOnePoint(route, data);
                         scope.recalcInProgress = false;
+                        if (scope.timer) clearInterval(scope.timer);
                     })
                     .error(function(data){
                         console.log("ERROR, data");
                         scope.recalcInProgress = false;
+                        if (scope.timer) clearInterval(scope.timer);
                     });
 
             }
