@@ -18,7 +18,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             gpsPushMarkers=[];                          // Массив маркеров пушей текущего маршрута
 
 
-        scope.params = {} //scope.params || Settings.load();
+            scope.params = {} //scope.params || Settings.load();
+            scope.opacityMode = false;
         //timeThreshold = scope.params.timeThreshold * 60;
 
         initMap();
@@ -99,6 +100,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // отрисовать фактический трек
         function drawRealRoute(route) {
 
+            scope.opacityMode = false;
 
 
             if (!route || route.real_track == "invalid parameter 'gid'. ") return;
@@ -420,12 +422,27 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 if(pushes[i].long_away){
                     pushColor='#e01283';
                 }
-                tmpVar.source = 'gps';
+                tmpVar.source = pushes[i];
 
                 tmpVar.setIcon(getIcon('M', iconIndex, pushColor, 'black'));
                 tmpVar.task_ID=pushes[i].number;
 
-
+                tmpVar.on('click', function(event){
+                    var m = map;
+                    var targetPoint;
+                    for (var l in m._layers) {
+                        console.log( "Stop serching",l , m._layers[l]);
+                        if (m._layers[l] &&
+                            m._layers[l].source &&
+                            m._layers[l].source.TASK_NUMBER &&
+                            m._layers[l].source.TASK_NUMBER == event.target.source.number) {
+                            targetPoint = m._layers[l];
+                            break;
+                        }
+                    }
+                    console.log(event.target.source.number, targetPoint);
+                    shiftToOpacityMode(targetPoint);
+                });
 
 
                 map.addLayer(tmpVar);
@@ -590,6 +607,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         rootScope.$emit('ReqChengeCoord', {message: message});
 
 
+                    })
+                    .on('click', function(event){
+                        shiftToOpacityMode(event.target);
                     })
                     .on('dblclick', function(event){
                         console.log('this is waypoint ', event.target);
@@ -2503,7 +2523,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             polyline = new L.Polyline(track[i].coords, {
                                 color: color,
                                 weight: 3,
-                                opacity: 0.8,
+                                opacity: 1,
                                 smoothFactor: 1
                             });
                             track[i].inRoute = true;
@@ -2716,6 +2736,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             //    redrawTrac(event.target);
                             //});
                             addMarker(tmpVar);
+                            var opacity;
+                            scope.opacityMode ? opacity = 0.2 : 1;
+                            tmpVar.setOpacity(opacity);
                             //map.addLayer(tmpVar);
                             //oms.addMarker(tmpVar);
 
@@ -2741,6 +2764,98 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
     //        }
         }
+
+        function shiftToOpacityMode(target) {
+            if (!target) return;
+            console.log("TARGET", target);
+            scope.opacityMode = !scope.opacityMode;
+            var localM = map;
+
+            if (scope.opacityMode) {
+                for (var i in localM._layers) {
+                    if (localM._layers[i].source &&
+                        typeof (localM._layers[i].source) == 'object' &&
+                        localM._layers[i].source.number == target.source.TASK_NUMBER) {
+                        localM._layers[i].setOpacity(1);
+                        continue;
+                    }
+
+                    if (target == localM._layers[i]){
+                        localM._layers[i].setOpacity(1);
+                        continue;
+                    }
+
+                    if (target.source.stopState &&
+                        target.source.stopState == localM._layers[i].source){
+                        localM._layers[i].setOpacity(1);
+                        continue;
+                    }
+
+                    if (localM._layers[i].source &&
+                        localM._layers[i].source.lat &&
+                        localM._layers[i].source.lon &&
+                        localM._layers[i].source.state &&
+                        localM._layers[i].source.state == "ARRIVAL"
+                    ) {
+
+                        //console.log(parseFloat(target.source.LAT), parseFloat(target.source.LON), parseFloat(localM._layers[i].source.lat), parseFloat(localM._layers[i].source.lon));
+                        var dist = getDistanceFromLatLonInM(parseFloat(target.source.LAT), parseFloat(target.source.LON), parseFloat(localM._layers[i].source.lat), parseFloat(localM._layers[i].source.lon))
+                        var opacity = 0.1 + rootScope.data.settings.stopRadius * 0.8 / (rootScope.data.settings.stopRadius + dist);
+                        //console.log("stop", localM._layers[i], "dist", dist, "opacity", opacity);
+                        localM._layers[i].setOpacity(parseFloat(opacity));
+                        continue;
+                    }
+
+
+                    try{
+                        if ((localM._layers[i].source && typeof (localM._layers[i].source) != 'number')|| localM._layers[i].redrawer) localM._layers[i].setOpacity(0.3);
+                    } catch(e) {
+                        console.log(e, localM._layers[i]);
+
+                    }
+
+                }
+            } else {
+
+                for (var i in localM._layers) {
+
+                    try{
+                        if ((localM._layers[i].source && typeof (localM._layers[i].source) != 'number')|| localM._layers[i].redrawer)localM._layers[i].setOpacity(1);
+                    } catch(e) {
+                        console.log(e, localM._layers[i]);
+
+                    }
+
+                }
+            }
+
+        }
+
+
+        function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+            try{
+                var R = 6371; // Radius of the earth in km
+                var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+                var dLon = deg2rad(lon2 - lon1);
+                var a =
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                    ;
+                var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                var d = R * c; // Distance in km
+                //console.log("lat1", lat1, "lon1", lon1, "lat2", lat2, "lon2", lon2, ' dist', d*1000);
+                return d * 1000;
+
+                function deg2rad(deg) {
+                    return deg * (Math.PI / 180)
+                }
+
+            } catch (e) {
+                log.error( "Ошибка "+ e + e.stack);
+            }
+        }
+
 
         function addMiniMarkers(){
             if(scope.route.real_track == undefined || scope.route.real_track.length == 0) return;

@@ -13,14 +13,15 @@ var express = require('express'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
-    CronJob = require('cron').CronJob,
+    CronJob = require('cron').CronJob;
     //async = require('async'),
-    //colors = require('colors'),
+    //colors = require('colors');
+    //colors.supportsColor = true;
+    //colors.enabled = true;
 
 
 
-
-cashedDataArr = {},  // глобальный кеш
+var cashedDataArr = {},  // глобальный кеш
     updateCacshe = {}, // Тестовый кэш
     aggregatorError = "invalid parameter 'gid'. ",
     stopUpdateInterval = 120,                       // интервал обновлений стопов
@@ -396,7 +397,11 @@ router.route('/dailydata')
         }
 
         // присвоение лоина для прогрузки интерфейса при запуске вне окна 1С (для отладки)
-        log.info("Prepere for Conflict!!!!!!!!",  req.session.login, new Date());
+
+            //console.log("Lets Start working. Have a good day!".green);
+
+
+            log.info("Prepere for Conflict!!!!!!!!",  req.session.login, new Date());
 
 
         //log.info(colors.green('HELLO'));
@@ -2997,7 +3002,7 @@ try{
             if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
                 points[i].status = 5;
                 //log.info("Присваиваем статус 5");
-                points[i].variantus = 3006;
+                //points[i].variantus = 3006;
                 points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
                 //log.info("TIME_OUT for point", points[i]);
             }
@@ -3081,7 +3086,7 @@ try {
 
                 if (route.points[i].working_window[0] == undefined) {
 
-                    log.info ('Скорее всего это склад'.green);
+                    //console.log ('Скорее всего это склад'.green);
                     //todo решить проблему со складом
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
@@ -3096,7 +3101,7 @@ try {
 
                     route.points[i].status = 4;
                     //log.info("Присваиваем статус 4");
-                    //route.points[i].variantus =2917;
+                    //route.points[i].variantus = 2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }
@@ -3104,7 +3109,7 @@ try {
                 if(now > route.points[i].arrival_time_ts) {
 
                     route.points[i].status = 5;
-                    route.points[i].variantus = 3110;
+                    //route.points[i].variantus = 3110;
 
                     //route.points[i].commentus = "1 ";
                     //route.points[i].commentus+= route.real_track.length + " 2";
@@ -3197,10 +3202,11 @@ try {
                     if (route.points[j].overdue_time > 0) {
                         if (minus < now) {
                             route.points[j].status = 4;
+                            //route.points[j].variantus = 3205;
 
                         } else {
                             route.points[j].status = 5;
-                            route.points[j].variantus = 3199;
+                            //route.points[j].variantus = 3199;
                         }
                     }
 
@@ -3653,6 +3659,7 @@ try {
                                     var len = cashedDataArr[currentCompany].routes[i].real_track.length - 1;
                                     cashedDataArr[currentCompany].routes[i].car_position = cashedDataArr[currentCompany].routes[i].real_track[len]; // определение текущего положения машины
                                     //log.info('data.routes[i]', data.routes[i]);
+                                    //todo Array.isArray(cashedDataArr[currentCompany].routes[i].real_track) правильный синтаксис. Зачем вообще строка внизу?
                                     if (typeof (cashedDataArr[currentCompany].routes[i].real_track) == Array) {
                                         cashedDataArr[currentCompany].routes[i].real_track.splice(len, 1);
                                     } // удаление стейта с текущим положением машины
@@ -4669,15 +4676,18 @@ function findStatusesAndWindows(company) {
             if (cashedDataArr[company].settings.workingWindowType == 1) {
                 //tmpPoint.findStatus = true;
                 if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
-                    //todo Дописать определение статуса для склада
-                    continue;
+                    tmpPoint.working_window = []
+                    tmpPoint.working_window.push({
+                        start : tmpPoint.arrival_time_ts - 60 * 60,
+                        finish : tmpPoint.arrival_time_ts
+                    });
                 }
 
 
 
                 //log.info(tmpPoint, "MTM 4121");
                 //Костыль, если working window неправильно сформирован
-                if (!tmpPoint.working_window.isArray) {
+                if (!Array.isArray(tmpPoint.working_window)) {
                     var transit = tmpPoint.working_window;
                     tmpPoint.working_window =[];
                     tmpPoint.working_window.push(transit)
@@ -4696,9 +4706,14 @@ function findStatusesAndWindows(company) {
             } else{
 
 
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
-                    //todo Дописать определение статуса для склада
-                    continue;
+                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" ){
+                    tmpPoint.working_window = []
+                    tmpPoint.working_window.push({
+                        start : tmpPoint.arrival_time_ts - 60 * 60,
+                        finish : tmpPoint.arrival_time_ts
+                    })
+
+
                 }
 
 
@@ -4789,6 +4804,7 @@ function findStatusesAndWindows(company) {
                 tmpPoint.status = 6;
                 cashedDataArr[company].routes[i].ready_to_close=false;
                 tmpPoint.problem_index = 40;
+                //tmpPoint.last_change = 4807;
                 //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
             //log.info("И присваиваем ей статус", tmpPoint.status);
@@ -5448,48 +5464,60 @@ function calculateProblemIndex(company) {
 
         for (var j = 0; j < route.points.length; j++) {
             point = route.points[j];
+           // if(point.status == 6 || point.status == 8) continue;
+
 
             point.problem_index = 0;
+            //point.last_change = 5471;
 
 
 
-            if(point.status < 4 || point.status == 8) continue;
+            if(point.status < 4 || point.status == 8 || point.status == 7) {
+                point.problem_index = 0;
+                //point.last_change = 5477;
+                continue;
+            }
             //log.info("Найдена проблемная точка");
 
             if (point.status == 6) {
                 point.problem_index = 40;
+                //point.last_change = 5484;
                 if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
                     route.find_problem_ts = parseInt(Date.now()/1000);
                 }
                 // Проверка на максимальную проблемность
                 if(point.problem_index > route.max_problem) {
                     route.max_problem = point.problem_index;
-                    route.problem_point=point;
-                    route.kind_of_problem='внимание';
+                    route.problem_point = point;
+                    route.kind_of_problem ='внимание';
                     route.find_problem_ts = parseInt(Date.now()/1000);
                     // log.info("Проблемность равна  1");
-                    continue;
-                }
 
+                }
+                continue;
             }
 
 
 
 
             // log.info("point.problem_index", point.problem_index);
-
+                var delta;
                 if (point.status == 4) {
+                    delta = 100;
                     var koef;
                     if (point.working_window[0] == undefined) {
-                        koef = point.working_window.finish;
+                        koef = point.arrival_time_ts;
+                        point.overdue_time = parseInt(Date.now()/1000) - point.arrival_time_ts;
                     } else {
                         koef = point.working_window[point.working_window.length-1].finish;
                     }
-                    point.problem_index +=100 + (point.overdue_time) * cashedDataArr[company].settings.factMinutes;
-
+                    point.problem_index += parseInt((point.overdue_time) * cashedDataArr[company].settings.factMinutes);
+                    //point.test_data = "Start" + "100" + parseInt(point.overdue_time) + "*" + cashedDataArr[company].settings.factMinutes;
+                    //point.last_change = 5515;
                     timeCoef = 1;
 
                 } else {
+                    delta = 90;
                     timeCoef = (timeThreshold - point.arrival_left_prediction) / timeThreshold;
                     timeCoef = timeCoef >= timeMin ? timeCoef : timeMin;
 
@@ -5503,12 +5531,19 @@ function calculateProblemIndex(company) {
                 point.problem_index += parseInt(point.WEIGHT) * cashedDataArr[company].settings.weight;
                 point.problem_index += parseInt(point.VOLUME) * cashedDataArr[company].settings.volume;
                 point.problem_index += parseInt(point.VALUE) * cashedDataArr[company].settings.value;
+
+                //point.last_change = 5532;
                 if (point.change_time) {
                     point.problem_index += parseInt(point.change_time) * cashedDataArr[company].settings.changeTime;
+                    //point.last_change = 5535;
                 }
 
+
                 point.problem_index = parseInt(point.problem_index * timeCoef);
-                point.problem_index = parseInt(point.problem_index / 100);
+                //point.last_change = 5539;
+
+
+                point.problem_index =delta + parseInt(point.problem_index / 100);
 
                 // log.info("Проблемность равна  ",  point.problem_index);
                 // Проверка на максимальную проблемность
@@ -5541,8 +5576,18 @@ function calculateProblemIndex(company) {
             point = route.points[j];
             var outOfWindows = true;
             if (point.orderWindows == undefined || point.waypoint == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
-                //log.info("У точки нет заказанного окна, скорее всего склад");
-                continue;
+                if (point.working_window[0] = undefined ||
+                    !Array.isArray(point.working_window) ||
+                    point.working_window.length == 0) {
+                        point.working_window =[];
+                    var obj ={};
+                    obj.finish = point.base_arrival_ts;
+                    obj.start = point.base_arrival_ts - 60 * 60;
+
+                    point.working_window.push(obj);
+                    point.orderWindows = point.working_window;
+                }
+                //continue;
             }
 
             //чисто технически добавляем по минуте к границам заказанного окна
@@ -5550,13 +5595,14 @@ function calculateProblemIndex(company) {
                 var window = point.orderWindows[k];
                 if (point.arrival_time_ts  < window.finish + 60 && point.arrival_time_ts > window.start - 60 ){
                     outOfWindows =false;
-                    break;
+                    continue;
                 }
             }
 
             if (outOfWindows && point.waypoint && point.waypoint.TYPE != "WAREHOUSE" && point.waypoint.TYPE !="PARKING"){
                 log.info("Время прибытия точки запланировано за пределами заказанных окон", point.driver.NAME, point.NUMBER, point.arrival_time_ts, window.finish , window.start );
                 point.problem_index = 25; //todo посчитать проблемность для точки вне окна
+                //point.last_change = 5598;
                 point.out_of_ordered = true;
                 route.max_problem = point.problem_index;
                 route.problem_point = point;
@@ -5596,6 +5642,7 @@ function calculateProblemIndex(company) {
 
                 log.info("Найден незапланированный стоп", point.driver.NAME, point.NUMBER);
                 point.problem_index = 30;
+                //point.last_change = 5638;
                 route.max_problem = point.problem_index;
                 route.problem_point = point;
                 route.kind_of_problem = 'стоп не по плану';
@@ -5630,6 +5677,7 @@ function calculateProblemIndex(company) {
             if (!isInline) { //
                 log.info("Найдено нарушение последовательности выполнения", point.driver.NAME, point.NUMBER);
                 point.problem_index = 20;
+                //point.last_change = 5673;
                 route.max_problem = point.problem_index;
                 route.problem_point = point;
                 route.kind_of_problem = 'не по плану';

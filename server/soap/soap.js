@@ -302,7 +302,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         }
 
 
-            console.log("Запрос dailyPlanXML");
+            console.log("Запрос dailyPlanXML", _xml.dailyPlanXML(date));
             client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
                 if (!err) {
                     console.log('DONE getDailyPlan');

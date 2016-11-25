@@ -662,12 +662,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             if (scope.recalcInProgress) scope.timer = setInterval(function(){
                 console.log("Start Timeout in recalc", scope.recalcInProgress, scope.recalcTime );
                 if (scope.recalcInProgress){
-                    scope.recalcTime += 0.25;
+                    scope.recalcTime += 0.5;
+                    scope.$apply();
                 } else {
                     scope.recalcTime = 0;
                     clearInterval(scope.timer);
                 }
-            }, 250);
+            }, 500);
 
 
             if (scope.recalcTime == undefined) scope.recalcTime = 0;
@@ -744,7 +745,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     jobWindows,
                     timeStep = 600;                                                     // шаг расширения окон
 
-                console.log("Какое то trWindow",trWindow, "and route is", route);
+                //console.log("Какое то trWindow",trWindow, "and route is", route);
 
                 for (i = 0; i < route.points.length; i++) {
 
@@ -780,7 +781,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             pvr = pt.NUMBER,
                             rvr =route.NUMBER;
 
-                       // console.log("точка", pt);
+                        //console.log("точка", pt);
                         jobWindows = [
                             {
                                 "start": pt.working_window[0].start,

@@ -2733,11 +2733,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (var j = 0; j < len; j++) {
                     point = rootScope.data.routes[i].points[j];
+                    var sWaypoint = "";
+                    if (j > 0) sWaypoint = route.points[j-1].endWaypointId;
+                    //console.log("SWayPoint", sWaypoint);
                     route.points.push({
                         taskNumber: point.TASK_NUMBER,
                         stepNumber: point.NUMBER,
                         arrivalTime: point.arrival_time_ts,
-                        startWaypointId: point.origStartWp ? point.origStartWp : point.START_WAYPOINT,
+                        startWaypointId: sWaypoint,  // point.origStartWp ? point.origStartWp : point.START_WAYPOINT,
                         endWaypointId: point.END_WAYPOINT,
                         startLatLon: {
                             lat: point.START_LAT,

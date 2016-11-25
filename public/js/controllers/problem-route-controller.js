@@ -233,7 +233,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
      rootScope.showProblem = function(route) {
             rootScope.redrawProblemRoute = false;
-            scope.$emit("possibleRedraw", route.filterId);
+            if (route.filterId != undefined)scope.$emit("possibleRedraw", route.filterId);
             //alert("Я все вижу" + route.filterId);
          if (route == undefined || route.filterId == undefined || rootScope.redrawProblemRoute) return;
 

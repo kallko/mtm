@@ -366,7 +366,7 @@
                         </span>
                     </td>
                     <td class="overdue-col">
-                        <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5)">
+                        <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5) && (row.transport.gid!=undefined)">
                              {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }}<!-- |date: 'HH:mm' : 'UTC'-->
                         </span>
                     </td>
@@ -376,7 +376,7 @@
                         </span>
                     </td>
                     <td class="overdue-col">
-                        <span ng-if="row.overdue_time > 0">
+                        <span ng-if="row.overdue_time > 0 && (row.transport.gid!=undefined)">
                             {{(row.arrival_prediction-row.working_window[row.working_window.length-1].finish)*1000 |  date: 'HH:mm' : 'UTC' }}
                         </span>
                     </td>
