@@ -657,16 +657,19 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
         // приводит маршрут в необходимый формат и отправляетего на математический сервер для пересчета
         scope.recalculateRoute = function () {
 
-            scope.recalcInProgress = true;
 
-            if (scope.recalcInProgress) scope.timer = setInterval(function(){
-                console.log("Start Timeout in recalc", scope.recalcInProgress, scope.recalcTime );
+
+            if (!scope.recalcInProgress) scope.timer = setInterval(function(){
+                scope.recalcInProgress = true;
+                console.log("Start Timeout in recalc", scope.recalcInProgress, scope.recalcTime, scope.timer);
                 if (scope.recalcInProgress){
                     scope.recalcTime += 0.5;
                     scope.$apply();
                 } else {
+
                     scope.recalcTime = 0;
                     clearInterval(scope.timer);
+                    scope.recalcInProgress = false;
                 }
             }, 500);
 
