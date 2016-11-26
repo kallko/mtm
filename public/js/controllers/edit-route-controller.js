@@ -1004,11 +1004,15 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             // обновляем изменяемую копию маршрута
             for (var i = 0; i < newSolution.length; i++) {
                 tmp = newSolution[i].pointId;
-                if (newSolution[i].pointId == -3) {
+                if (newSolution[i].pointId == '-3' || newSolution[i].pointId == -3) {
+                    console.log("Найдена точка возврата", updatedPoints.length);
+
                     point = changedRoute.points[changedRoute.points.length - 1];
                     point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
                     point.new_arrival_time = newSolution[i].arrival;
                     updatedPoints.push(point);
+                    console.log(point,"закидываем", updatedPoints.length);
+                    newSolution[i].pointId = point.waypoint.gIndex+"";
                     break;
                 }
 
@@ -1024,7 +1028,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 }
 
                 for (var j = 0; j < scope.changedRoute.points.length; j++) {
-                    if (newSolution[i].pointId == scope.changedRoute.points[j].waypoint.gIndex) {
+                    if (newSolution[i].pointId == scope.changedRoute.points[j].waypoint.gIndex || (newSolution[i].pointId+"" == "-3" && j+1 ==scope.changedRoute.points.length )) {
                         point = scope.changedRoute.points[j];
                        // point.ARRIVAL_TIME = filter('date')((newSolution[i].arrival * 1000), 'dd.MM.yyyy HH:mm:ss');
 
