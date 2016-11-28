@@ -4675,12 +4675,17 @@ function findStatusesAndWindows(company) {
             //log.info("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
             if (cashedDataArr[company].settings.workingWindowType == 1) {
                 //tmpPoint.findStatus = true;
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE"){
-                    tmpPoint.working_window = []
-                    tmpPoint.working_window.push({
-                        start : tmpPoint.arrival_time_ts - 60 * 60,
-                        finish : tmpPoint.arrival_time_ts
-                    });
+                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" &&
+                    (tmpPoint.working_window[0] == undefined ||
+                    tmpPoint.working_window[0].finish == undefined)){
+                    tmpPoint.working_window = [];
+
+                    var obj ={};
+                    obj.finish = point.base_arrival_ts;
+                    obj.start = point.base_arrival_ts - 60 * 60;
+
+                    point.working_window.push(obj);
+                    point.orderWindows = point.working_window;
                 }
 
 
@@ -4706,15 +4711,19 @@ function findStatusesAndWindows(company) {
             } else{
 
 
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" ){
-                    tmpPoint.working_window = []
-                    tmpPoint.working_window.push({
-                        start : tmpPoint.arrival_time_ts - 60 * 60,
-                        finish : tmpPoint.arrival_time_ts
-                    })
+                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" &&
+                    (tmpPoint.working_window[0] == undefined ||
+                    tmpPoint.working_window[0].finish == undefined)){
+                    tmpPoint.working_window = [];
 
+                    obj ={};
+                    obj.finish = point.base_arrival_ts;
+                    obj.start = point.base_arrival_ts - 60 * 60;
 
+                    point.working_window.push(obj);
+                    point.orderWindows = point.working_window;
                 }
+
 
 
                 var start, end;
