@@ -2610,7 +2610,7 @@ function startPeriodicCalculating() {
 
                                     if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length < 2 || cached.routes[i].real_track == "invalid parameter 'gid'. ")) {
 
-                                        if (data[j].data.length<2)  continue;
+                                        if (!data[j].data || data[j].data.length<2)  continue;
 
                                         log.info("№;№;№;№;;№;№;№;№;Записываем Первые данные№;№;№;№;№;№;№;№");
                                         cached.routes[i].real_track = data[j].data;
