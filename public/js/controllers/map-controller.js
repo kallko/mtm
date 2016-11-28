@@ -2516,11 +2516,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         } //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
 
-                        color = '#5cb85c';
+                        ;
                         // отрисовать движение
                         if (track[i].state == 'MOVE') {
-                            console.log("draw polyline");
-                            polyline = new L.Polyline(track[i].coords, {
+                                var speed = track[i].dist/track[i].time;
+                                color = getPolylineColor(speed);
+
+                                polyline = new L.Polyline(track[i].coords, {
                                 color: color,
                                 weight: 3,
                                 opacity: 1,
@@ -2531,9 +2533,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                 polyline.redrawer = true;
                                 markersArr.push(polyline);
                             }
-                            polyline.on('click', function (event) {
-                                console.log(event.target);
-                            });
+                            //polyline.on('click', function (event) {
+                            //    console.log(event.target);
+                            //});
                             polyline.addTo(map);
                         } else if (track[i].state == 'ARRIVAL') { // отрисовать стоп
                             // если отрисовка стопов выключена, пропустить итерацию
@@ -2857,6 +2859,18 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
 
+        function getPolylineColor (speed) {
+            var color;
+            if (speed > 13.9) color = "#040acc";
+            if (speed > 11.1 && speed <= 13.9) color = "#28c1e0";
+            if (speed > 8.3 && speed <= 11.1) color = "#02e05b";
+            if (speed > 5.5 && speed <= 8.3) color = "#41e002";
+            if (speed > 2.8 && speed <= 5.5) color = "#e07502";
+            if (speed > 1.4 && speed <= 2.8) color = "#cc4106";
+            if (speed <= 1.4) color = "";
+            return color;
+        }
+
         function addMiniMarkers(){
             if(scope.route.real_track == undefined || scope.route.real_track.length == 0) return;
 
@@ -2867,22 +2881,24 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     scope.route.real_track[i].coords == undefined ||
                     !scope.route.real_track[i].inRoute ||
                     scope.route.real_track[i].coords.length < 6) continue;
+                    var color = getPolylineColor(scope.route.real_track[i].dist/scope.route.real_track[i].time);
                 for (var j = 5; j < scope.route.real_track[i].coords.length; j = j+5){
+
 
                     var circleLocation = new L.LatLng(scope.route.real_track[i].coords[j].lat, scope.route.real_track[i].coords[j].lon),
                         circleOptions = {
-                            color: 'green',
-                            fillColor: 'green'
+                            color: color,
+                            fillColor: scope.route.real_track[i]
                         };
 
-                    var circle = new L.Circle(circleLocation, 0.2, circleOptions);
+                    var circle = new L.Circle(circleLocation, 0.4, circleOptions);
                     circle.source = i*j;
                     var date = new Date(scope.route.real_track[i].coords[j].t*1000);
                     var hours = date.getHours();
                     var minutes = "0" + date.getMinutes();
                     var seconds = "0" + date.getSeconds();
                     var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
-                    circle.bindPopup("" + formattedTime);
+                    circle.bindPopup("" + formattedTime + " скорость " + parseInt((scope.route.real_track[i].dist/scope.route.real_track[i].time)*3.6) + " км/ч");
                     //circle.on('mouseover', function(event) {console.log("mouseover", event.target.source)});
                     scope.miniMarkers.addLayer(circle)
                 }

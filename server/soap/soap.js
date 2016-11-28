@@ -469,7 +469,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
 
                 if (waypoints == undefined) return;
-                console.log('drivers', drivers.length);
+                //console.log('drivers', drivers.length);
                 log.l('waypoints.length = ' + waypoints.length);
                 //console.log(waypoints, "soap.js:344");
 
@@ -684,7 +684,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             loadGeometry(i, j, function () {
                 resXml = _xml.routesXML(routes, me.login);
                 log.toFLog('saveChanges.xml', resXml, false);
-                saveTo1C(resXml);
+                //saveTo1C(resXml);
             });
         }
     }

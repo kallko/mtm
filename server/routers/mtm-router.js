@@ -2201,6 +2201,12 @@ function linkDataParts (currentCompany, login) {
                 cashedDataArr[currentCompany].routes[i].driver = cashedDataArr[currentCompany].drivers[j];
                 break;
             }
+
+            if (cashedDataArr[currentCompany].routes[i].driver == undefined) {
+                cashedDataArr[currentCompany].routes[i].driver = {};
+                cashedDataArr[currentCompany].routes[i].driver.NAME = "Без имени";
+            }
+
         }
         //if(j == data.drivers.length){
         //    log.info(data.routes[i].DRIVER);
@@ -5580,6 +5586,8 @@ function calculateProblemIndex(company) {
 
     for ( i=0; i<cashedDataArr[company].routes.length; i++) {
          route = cashedDataArr[company].routes[i];
+        if (!point.problem_index || point.problem_index == 0) continue;
+
 
         for ( j=0; j < route.points.length; j++){
             point = route.points[j];

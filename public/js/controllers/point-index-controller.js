@@ -2714,6 +2714,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // все маршруты, которые помечены на сохранение, переупаковать на отправку
                 if (!rootScope.data.routes[i].toSave) continue;
 
+                //todo тестовая запись оригинала маршрута
+                routes.push(rootScope.data.routes[i]);
+                console.log("Original data saved", rootScope.data.routes[i]);
+
                 len = rootScope.data.routes[i].points.length;
                 route = {
                     itineraryID: rootScope.data.routes[i].itineraryID,
@@ -2742,8 +2746,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         taskNumber: point.TASK_NUMBER,
                         stepNumber: point.NUMBER,
                         arrivalTime: point.arrival_time_ts,
-                        startWaypointId: point.END_WAYPOINT,  // point.origStartWp ? point.origStartWp : point.START_WAYPOINT,
-                        endWaypointId: point.START_WAYPOINT,
+                        startWaypointId: point.START_WAYPOINT,  // point.origStartWp ? point.origStartWp : point.START_WAYPOINT,
+                        endWaypointId: point.END_WAYPOINT,
                         startLatLon: {
                             lat: point.START_LAT,
                             lon: point.START_LON
@@ -2765,6 +2769,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
 
                 routes.push(route);
+                console.log("Updated Data saved", JSON.parse(JSON.stringify(route)) )
+
             }
 
             if (routes.length == 0) return;
@@ -2773,16 +2779,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             // отправляем переупакованные данныена пересчет
             //todo Снять  комментарий для записи в 1С
-            //http.post('./saveroute/', {routes: routes})
-            //    .success(function (data) {
-            //        console.log('Save to 1C result >>', data);
-            //        for (var i = 0; i < rootScope.data.routes.length; i++) {
-            //            //delete rootScope.data.routes[i].toSave;
-            //        }
-            //    }).error(function(err){
-            //            console.log(err);
-            //            rootScope.errorNotification('/saveroute');
-            //      });
+            http.post('./saveroute/', {routes: routes})
+                .success(function (data) {
+                    console.log('Save to 1C result >>', data);
+                    for (var i = 0; i < rootScope.data.routes.length; i++) {
+                        //delete rootScope.data.routes[i].toSave;
+                    }
+                }).error(function(err){
+                        console.log(err);
+                        rootScope.errorNotification('/saveroute');
+                  });
 
         };
 
