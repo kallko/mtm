@@ -337,7 +337,7 @@
 
                     <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
                     <td class="number-col">{{row.NUMBER}}</td>
-                    <td class="number-col">{{row.fact_number}}</td>
+                    <td class="number-col">{{row.END_WAYPOINT}}</td>
                     <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
                     <td class="status-col" ng-class="row.class" >
                              <span>
@@ -663,6 +663,7 @@
                     <!-- ng-show="newRoutes == 1"-->
                     <tr class="titles-tr">
                         <th>№</th>
+                        <th>ID</th>
                         <th>Статус</th>
                         <th>ЗОК</th>
                         <th>ООК</th>
@@ -680,6 +681,7 @@
 
                         <td>{{item.exNumber}}</td>
 
+                        <td>{{item.END_WAYPOINT}}</td>
                         <td>{{item.status}}</td>
                         <td>{{item.startZOK* 1000 | date:'HH:mm'}}-{{item.endZOK* 1000 | date:'HH:mm'}}</td>
                         <td>{{item.startKOK* 1000 | date:'HH:mm'}}-{{item.endKOK* 1000 | date:'HH:mm'}}</td>

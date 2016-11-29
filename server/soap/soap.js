@@ -684,7 +684,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
             loadGeometry(i, j, function () {
                 resXml = _xml.routesXML(routes, me.login);
                 log.toFLog('saveChanges.xml', resXml, false);
-                //saveTo1C(resXml);
+                saveTo1C(resXml);
             });
         }
     }

@@ -2715,9 +2715,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (!rootScope.data.routes[i].toSave) continue;
 
                 //todo тестовая запись оригинала маршрута
-                routes.push(rootScope.data.routes[i]);
-                console.log("Original data saved", rootScope.data.routes[i]);
 
+
+                return;
                 len = rootScope.data.routes[i].points.length;
                 route = {
                     itineraryID: rootScope.data.routes[i].itineraryID,
@@ -2737,11 +2737,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 for (var j = 0; j < len; j++) {
                     point = rootScope.data.routes[i].points[j];
+                    if (point.status == 8) continue;
 
                     console.log(j, "point", point );
                     var sWaypoint = "";
-                    if (j > 0) sWaypoint = route.points[j-1].startWaypointId;
-                    //console.log("SWayPoint", sWaypoint);
+                    //if (j > 0) sWaypoint = route.points[j-1].startWaypointId;
+                    console.log("Number is", point.NUMBER);
                     route.points.push({
                         taskNumber: point.TASK_NUMBER,
                         stepNumber: point.NUMBER,
