@@ -2714,10 +2714,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 // все маршруты, которые помечены на сохранение, переупаковать на отправку
                 if (!rootScope.data.routes[i].toSave) continue;
 
-                //todo тестовая запись оригинала маршрута
 
-
-                return;
                 len = rootScope.data.routes[i].points.length;
                 route = {
                     itineraryID: rootScope.data.routes[i].itineraryID,
