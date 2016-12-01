@@ -13,11 +13,16 @@ var express = require('express'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
-    CronJob = require('cron').CronJob;
+    //CronJob = require('cron').CronJob,
     //async = require('async'),
-    //colors = require('colors');
-    //colors.supportsColor = true;
-    //colors.enabled = true;
+    develop = false;
+    if (develop) {
+        var
+        colors = require('colors');
+        colors.supportsColor = true;
+        colors.enabled = true;
+    }
+
 
 
 
@@ -401,7 +406,7 @@ router.route('/dailydata')
             //console.log("Lets Start working. Have a good day!".green);
 
 
-            log.info("Prepere for Conflict!!!!!!!!",  req.session.login, new Date());
+            //if (develop) console.log("Prepere for Conflict!!!!!!!!".green,  req.session.login, new Date());
 
 
         //log.info(colors.green('HELLO'));
@@ -502,7 +507,31 @@ router.route('/dailydata')
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
 
+
+
             //Получение дневного плана для конкретной компании
+
+            //if (develop) console.log("Point of decision".blue, "Date", req.query.showDate,  "company", currentCompany);
+            var flag = 0;
+            if (req.query.showDate && currentCompany) flag = isOldDayExist(currentCompany, req.query.showDate);
+            //if (develop) console.log(flag + " Before flag".red);
+
+
+            if (flag == 1) {
+                //if (develop) console.log("Need to wait".blue);
+                res.status(200).json("wait");
+                return;
+                    } else if (flag == 2){{
+
+                        var ts = req.query.showDate;
+                        var date=new Date();
+                        date.setTime(ts);
+                        var stringDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+                        //if (develop) console.log("Ready to send " + currentCompany+stringDate.blue );
+                        res.status(200).json(cashedDataArr[currentCompany+stringDate]);
+                        return;
+                    }}
+            if (develop) console.log(flag + " After flag".red);
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
 
@@ -622,12 +651,14 @@ router.route('/dailydata')
                             cashedDataArr[currentCompany].allPushes = [];
                             soapManager = new soap(req.session.login);
                             for (var k=0; k<cashedDataArr[currentCompany].idArr.length; k++) {
-                            soapManager.getPushes(req.session.itineraryID, parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
+                                //if (develop) console.log("Iten number for pushes request". red, req.session.itineraryID.red );
+                            soapManager.getPushes(cashedDataArr[currentCompany].idArr[k], parseInt(Date.parse(data.date)/1000), compmpanyName, function (company, data) {
                                 log.info("391 receivePUSHES!!!!! for iten", iten);
                                 var obj = JSON.parse(data.return);
                                 log.info("Obj", obj[0], "mtm 336");
                                 //delete cashedDataArr[company].allPushes;
-                                cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);
+                                cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
+                                //if (develop) console.log("Quqntity of pushes is".red, cashedDataArr[company].allPushes.length);
                                 log.info("GetPushes finished for company", company, "получено пушей", cashedDataArr[currentCompany].idArr.length-cashedDataArr[currentCompany].repeat+1, "из", cashedDataArr[currentCompany].idArr.length );
                                 cashedDataArr[currentCompany].repeat--;
                                 if (cashedDataArr[currentCompany].repeat == 0) oldDayCalculate (company, data);
@@ -696,7 +727,7 @@ router.route('/dailydata')
                                 //delete cashedDataArr[company].allPushes;
                                 cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
                             }
-                            log.info("Присоединили", obj.length, "Получили", cashedDataArr[company].allPushes.length);
+                            //if (develop) console.log ("Присоединили".green, obj.length, "Получили", cashedDataArr[company].allPushes.length);
                             log.info("GetPushes finished for company", company, t, tt );
                             if (t==tt) {
                                 //log.toFLog("Summary Pushes" , cashedDataArr[company].allPushes);
@@ -2464,7 +2495,7 @@ function startPeriodicCalculating() {
 
     for(var i=0; i<companysToCalc.length; i++){
         //log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
-        if ( !cashedDataArr[companysToCalc[i]].recalc_finishing){
+        if (cashedDataArr[companysToCalc[i]].currentDay && !cashedDataArr[companysToCalc[i]].recalc_finishing){
             log.info("Первичный расчет еще не закончен");
             companysToCalc.splice(i,1);
             i--;
@@ -2530,7 +2561,7 @@ function startPeriodicCalculating() {
                         //delete cashedDataArr[company].allPushes;
                         cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);}
                         cashedDataArr[company].needRequests--;
-                        if (obj) log.info ("Получили", obj.length, "присоеденеили", cashedDataArr[company].allPushes.length);
+                        //if (obj && develop) console.log ("Получили".blue, obj.length, "присоединили", cashedDataArr[company].allPushes.length);
                         log.info("GetPushes finished for company", company, cashedDataArr[company].needRequests);
                         if(cashedDataArr[company].needRequests == 0) startCalculateCompany(company);
                     });
@@ -4048,7 +4079,7 @@ try {
 
                 }
 
-
+                deleteLoadedOldDay(company);
             }
 
         });
@@ -4687,11 +4718,11 @@ function findStatusesAndWindows(company) {
                     tmpPoint.working_window = [];
 
                     var obj ={};
-                    obj.finish = point.base_arrival_ts;
-                    obj.start = point.base_arrival_ts - 60 * 60;
+                    obj.finish = tmpPoint.base_arrival_ts;
+                    obj.start = tmpPoint.base_arrival_ts - 60 * 60;
 
-                    point.working_window.push(obj);
-                    point.orderWindows = point.working_window;
+                    tmpPoint.working_window.push(obj);
+                    tmpPoint.orderWindows = tmpPoint.working_window;
                 }
 
 
@@ -4723,11 +4754,11 @@ function findStatusesAndWindows(company) {
                     tmpPoint.working_window = [];
 
                     obj ={};
-                    obj.finish = point.base_arrival_ts;
-                    obj.start = point.base_arrival_ts - 60 * 60;
+                    obj.finish = tmpPoint.base_arrival_ts;
+                    obj.start = tmpPoint.base_arrival_ts - 60 * 60;
 
-                    point.working_window.push(obj);
-                    point.orderWindows = point.working_window;
+                    tmpPoint.working_window.push(obj);
+                    tmpPoint.orderWindows = tmpPoint.working_window;
                 }
 
 
@@ -4883,12 +4914,13 @@ function oldDayStatuses(company) {
 }
 
 function oldDayCalculate (company, data) {
+    //if (develop) console.log("Start OldDayCalc".green);
     try {
     // св-во server_time получает истенное время сервера, только если был запрошен день не из календарика, если из - то вернет 23 59 запрошенного дня
     data.current_server_time = parseInt(new Date() / 1000);
     data.currentDay = false;
     cashedDataArr[company].currentDay = false;
-    log.info("Прошлый день готов к рассчету", company);
+        //if (develop) console.log("Прошлый день готов к рассчету", company, "Its a lot of routes in old day".red, cashedDataArr[company].routes.length);
     createFilterIdForOldDay(company);
     concat1CAndMonitoring (company);
 
@@ -4898,7 +4930,7 @@ function oldDayCalculate (company, data) {
 }
 
 function continueConcat(company) {
-    connectPointsAndPushes(company)
+    connectPointsAndPushes(company);
     //connectPointsPushesStops(company);
     connectStopsAndPoints(company);
     findStatusesAndWindows(company);
@@ -4908,7 +4940,7 @@ function continueConcat(company) {
     log.info("Расчет прошлого дня окончен", company);
     log.info("Доставленных точек", cashedDataArr[company].statistic[0]+cashedDataArr[company].statistic[1]+cashedDataArr[company].statistic[2] )
     cashedDataArr[company].ready = true;
-    log.info("Готово к отдаче", cashedDataArr[company].ready);
+    //if (develop) console.log("Готово к отдаче", cashedDataArr[company].ready, "and routes is".red, cashedDataArr[company].routes.length);
 }
 
 function checkUniqueID (company){
@@ -5361,6 +5393,54 @@ function createFilterIdForOldDay(company) {
     }
 }
 
+
+function isOldDayExist(curCompany, showDate) {
+    for (var company in cashedDataArr){
+        if (develop)console.log(company.yellow);
+        if (cashedDataArr[company] && cashedDataArr[company].routes) {
+            if (develop) console.log("In this company routes = ".red, cashedDataArr[company].routes.length)
+        } else {
+            if (develop) console.log ("There is no routes".red)
+        }
+    }
+
+        var ts = showDate;
+        var date=new Date();
+        date.setTime(ts);
+        var stringDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+
+        var isExist = (cashedDataArr[""+curCompany+stringDate] != undefined);
+        if (develop) console.log(isExist+"".red);
+
+        if (!isExist) return 0;
+
+        if (cashedDataArr[""+curCompany+stringDate].ready) {
+
+            return 2;
+
+        } else {
+
+            return 1;
+        }
+
+
+}
+
+
+
+function deleteLoadedOldDay(company){
+    if (!company) return;
+
+    for (var existCompany in cashedDataArr){
+        if (develop) console.log(existCompany.yellow);
+        if (existCompany.startsWith(company) && existCompany.length != company.length){
+            delete cashedDataArr[existCompany];
+        }
+    }
+    for (var existCompany in cashedDataArr){
+        if (develop) console.log(existCompany.green);
+    }
+}
 
 function createSeveralAviabilityWindows (point){
     try {
@@ -6205,6 +6285,32 @@ function finndNearestPoints(company, route, stop){
 
 }
 
+function crutchFunctionMarkWarehouse(company) {
+    //if (develop) console.log("start crutchFunctionMarkWarehouse".green, cashedDataArr[company].routes.length);
+    if(!cashedDataArr[company].currentDay) return;
+
+    cashedDataArr[company].routes.forEach(function(route) {
+        var warehouse;
+        //if (develop) console.log("Looking in route".green, route.driver.NAME);
+        route.points.forEach(function(point) {
+
+            //if (develop) console.log("Looking in point".green, point.NUMBER);
+            if (point.NUMBER && parseInt(point.NUMBER) < 2 && point.waypoint && point.waypoint.TYPE == 'WAREHOUSE'){
+                warehouse = point;
+                point.warehouse = true;
+            }
+            //if (develop && warehouse) console.log("Control WAREHOUSE".red, warehouse.NUMBER, point.NUMBER, point.status  );
+            if (warehouse != undefined && point && point.status && (point.status < 3 || point.status == 6)) {
+                //if (develop) console.log("Company".green , company, "Warehouse", warehouse);
+                warehouse.status = 0;
+                warehouse.limit = 90;
+                warehouse.confirmed_by_operator = true;
+            }
+        })
+    });
+
+}
+
 function safeReload (){
     if (!reload) return;
 
@@ -6274,6 +6380,7 @@ function startCalculateCompany(company) {
     checkCorrectCalculating(company);
     cashedDataArr[company].recalc_finishing = false;
     selectRoutes(company);
+    crutchFunctionMarkWarehouse(company);
     connectPointsAndPushes(company);
     connectPointsPushesStops(company);
     connectStopsAndPoints(company);

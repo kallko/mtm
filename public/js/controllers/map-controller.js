@@ -1477,6 +1477,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         i++;
                     }
 
+                    try{
                     var LAT=mobilePush._latlng.lat;
                     var LON=mobilePush._latlng.lng;
                     var lat=+markersArr[i]._latlng.lat;
@@ -1492,7 +1493,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         smoothFactor: 1
                     });
                     scope.learConnectWithStopsAndPoints.addLayer(scope.pushPolyline);
-
+                    } catch (e) {
+                        console.log(e + "1497")
+                    }
                     k++;
                 }
 

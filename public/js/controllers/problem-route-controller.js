@@ -14,7 +14,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         function askBlocked(){
-            if(!rootScope.data || !rootScope.data.currentDay || rootScope.restart) return;
+            if(!rootScope.data || rootScope.restart) return;
             http.post('./askblocked')
                 .success(function(data){
                     //console.log("askBlocked", data);
@@ -22,7 +22,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
                         rootScope.restart = true;
                     }
-                   if (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
+                    if (!rootScope.data.currentDay) return;
+                   if  (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
                 });
         }
 
@@ -41,11 +42,13 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
                     if (rootScope.data == undefined) rootScope.data = {};
                     rootScope.data.server_time = data.server_time;
-                    rootScope.data.statistic = data.statistics;
-                    rootScope.nowTime = rootScope.data.server_time;
 
+                    rootScope.nowTime = rootScope.data.server_time;
+                    if (!rootScope.data.currentDay) return;
+
+                    rootScope.data.statistic = data.statistics;
                     console.log("Receive data", data);
-                    if (data.allRoutes != undefined) {
+                    if (data.allRoutes != undefined && rootScope.data.currentDay) {
                         rootScope.data.allRoutes = data.allRoutes;
                         console.log("Send data to recreate filters Routes");
                         scope.$emit('newAllRoutes');

@@ -619,7 +619,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         setTimeout(function() {
                             console.log("Стартует задержка и перезапрос");
                             loadDailyData(false, showDate)
-                        }, 20000);
+                        }, 10000);
                         return;
                     }
 
@@ -644,7 +644,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     rootScope.reasons=data.reasons;
                     rootScope.nowTime=data.current_server_time;
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
-                    showPopup("Прошлый день загружен");
+                    showPopup("Прошлый день загружен", 2000);
                     console.log("Loaded DATA", data.date, JSON.parse(JSON.stringify(data)));
                     rootScope.data=data;
                     upgradeOldDateData ();
@@ -652,6 +652,28 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //for(i=0; i< rootScope.data.routes.length)
 
                     scope.rowCollection=[];
+
+                    scope.filters.routes.length = 1;
+                    for (i = 0; i< rootScope.data.routes.length; i++) {
+                        console.log("data.routes[i].transport.NAME", data.routes[i].transport.NAME);
+                        var shift = rootScope.data.routes[i].SHIFT_NAME || "";
+
+                        scope.filters.routes.push({
+                            //name: data.routes[i].transport.NAME,
+
+                            allRoutes: false,
+
+                            nameDriver:  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') + ' - ' + shift + ' - '+ data.routes[i].transport.NAME ,
+                            nameCar:  data.routes[i].transport.NAME  + ' - ' +   shift + ' - ' +  ( ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени') ,
+
+                            value: data.routes[i].filterId,
+
+
+                            car: data.routes[i].transport.NAME,
+                            driver: ( data.routes[i].hasOwnProperty('driver') && data.routes[i].driver.hasOwnProperty('NAME') ) ? data.routes[i].driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                        });
+                    }
+
 
                     var i=0;
                     while (i<data.routes.length){
@@ -2259,7 +2281,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
                     }
                     scope.filters.route = row.route_id;
-                    if (!route.preload) {
+                    if (!route.preload && !rootScope.data.currentDay) {
                         preloadRoute()
                     } else {
                         scope.drawRoute(row.route_id, false);
@@ -4350,9 +4372,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             }
 
 
+            //console.log("Possible statistic", rootScope.data.statistic);
 
-
-            rootScope.data.statistic[4] = rootScope.data.statistic[7] + rootScope.data.statistic[6];
+            rootScope.data.statistic[4] += rootScope.data.statistic[7] + rootScope.data.statistic[6];
             rootScope.data.statistic[6] = 0;
             rootScope.data.statistic[7] = 0;
             rootScope.$emit('holestatistic', rootScope.data.statistic);
@@ -5214,17 +5236,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (scope.filters.route == rootScope.data.routes[i].filterId) {
 
                     console.log("Вы выбрали уже загруженный прошлый маршрут");
+                    rootScope.clickOff = true;
+                    scope.$emit('clearMap');
                     var route = rootScope.data.routes[i];
                     var states =  rootScope.data.routes[i].real_track;
                     var gid = rootScope.data.routes[i].transport.gid;
                     if (gid == undefined) {
                         //scope.$emit('showNotification', {text: 'У этого автомобиля нет трека', duration: 3000});
                         console.log("FilterId прошлого маршрута", scope.filters.route );
+
                         scope.drawRoute(scope.filters.route, false, false);
                     }
                     //console.log("States 5093", states);
                     //console.log("Перед отправкой запроса", states != undefined , gid != undefined , states[0] != undefined);
-                    if (states != undefined && gid != undefined && states[0] != undefined) {
+                    if (states != undefined && gid != undefined && states[0] != undefined && !route.preload) {
                         //showPopup("Подгрузка трека автомобиля", 3000);
                         http.post('./gettracksbystates', {states: states, gid: gid, demoTime:false})
                             .success( function  (data) {
