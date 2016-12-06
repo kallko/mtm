@@ -80,6 +80,7 @@
 <script src="./js/controllers/close-day-controller.js"></script>
 <script src="./js/controllers/point-popup-edit-controller.js"></script>
 <script src="./js/controllers/statistic-controller.js"></script>
+<script src="./js/controllers/auth-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -122,303 +123,304 @@
 
 <!--div id = "test-popup" ng-controller = "CloseDayController" ng-show = "view">Test-popup</div-->
 <!-- таблица точек доставки -->
-<template type="text/html" id="template-point-table">
-    <!-- полупрозрачное окно для затемнения таблицы -->
-    <div class="point-table-wrapper" >
-        <div class="title"  ng-show="clickOff" id="transparent-point-table-window" > <p>Загрузка...</p> </div>
 
-    <div ng-controller="PointIndexController" class="section" id="point-controller-container">
-        <!-- меню -->
-        <!-- Пока не выводим для пользователя, так как не реализован функционал -->
-        <div id="point-menu-panel" >
-            <div class="row row-gutter-5">
-                <div class="col-md-2">
-                    <span>{{nowTime*1000 | date : 'dd.MM.yyyy'}}</span>
+        <template type="text/html" id="template-point-table" >
+            <!-- полупрозрачное окно для затемнения таблицы -->
+            <div class="point-table-wrapper" >
+                <div class="title"  ng-show="clickOff" id="transparent-point-table-window" > <p>Загрузка...</p> </div>
+
+            <div ng-controller="PointIndexController" class="section" id="point-controller-container">
+                <!-- меню -->
+                <!-- Пока не выводим для пользователя, так как не реализован функционал -->
+                <div id="point-menu-panel" >
+                    <div class="row row-gutter-5">
+                        <div class="col-md-2">
+                            <span>{{nowTime*1000 | date : 'dd.MM.yyyy'}}</span>
+                        </div>
+                        <div class="col-sm-3">
+                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Cтатус
+                            </button>
+                            <div class="dropdown-menu">
+                                <ul class="dropdown-statuses">
+                                    <li><input type="checkbox" ng-change="filtersOllstatuses()" ng-model="filters.status['-1']" >{{ filters.statuses[0].name }}</li>
+                                    <li ng-repeat="option in filters.statuses" ng-if="!$first" ><input ng-change="filterOnestatus()" type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <select id="route-select"   ng-model="filters.route" class="group-select heightElement width100"
+                                    ng-options="option.value as option[settings.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', settings.routeListOrderBy]">
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <button  class="btn btn-default btn-sm heightElement width100" ng-class="filters.problem_index == 1 ? 'btn-success' : '' " id="problem-index-btn" ng-click="toggleProblemPoints()">
+                                Проблемные
+                            </button>
+                        </div>
+                        <div class="col-sm-2">
+                            <button  class="btn btn-default btn-sm heightElement width100"  id="problem-solve-btn" ng-show ="filters.route != -1" ng-model ="filters.route" ng-click="solveProblem(filters.route)">
+                                Записать
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="row row-gutter-5">
+                        <div class="col-md-2">
+                            {{nowTime*1000 | date : 'H:mm:ss'}}
+                        </div>
+                        <div class="col-sm-3">
+                            <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text"/>
+                            <button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="setTextFilter()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="false"></span>
+                            </button>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="date"
+                                   class="width100 heightElement"
+                                   ng-model="showDate"
+                                   id="show-date"/>
+                        </div>
+                        <div  class="col-sm-2">
+                            <button ng-show="data.routes.length == 0 || data.currentDay == false" class="btn btn-info btn-sm heightElement width100" ng-click="loadOldDay()" >Загрузить</button>
+                            <!--todo вставить вверх ng-show="data.routes.length == 0"-->
+                        </div>
+                    </div>
                 </div>
-                <div class="col-sm-3">
-                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Cтатус
-                    </button>
-                    <div class="dropdown-menu">
-                        <ul class="dropdown-statuses">
-                            <li><input type="checkbox" ng-change="filtersOllstatuses()" ng-model="filters.status['-1']" >{{ filters.statuses[0].name }}</li>
-                            <li ng-repeat="option in filters.statuses" ng-if="!$first" ><input ng-change="filterOnestatus()" type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>
+
+
+
+                        <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
+                                ng-options='option.value as option.name for option in filters.branches'>
+                        </select>
+
+
+
+
+                        <select ng-show="false" id="draw-mode-select" ng-model="draw_mode" class="group-select"
+                                ng-options='option.value as option.name for option in draw_modes'>
+                        </select>
+
+                        <input ng-show="false" id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
+                        <input ng-show="false" id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
+                        <button ng-show="false" class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
+
+                        <button ng-show="false" class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
+                            загрузить
+                        </button>
+
+
+
+                        <input ng-show="false" id="fast-calc" type="checkbox" value="false" ng-model="fastCalc" checked title="Упрощенный расчет данных">
+
+                        <button ng-show="false" class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
+                            {{params.endWindowSize * 5}} минут до закрытия
+                        </button>
+                        <button ng-show="false" class="btn btn-default btn-sm1"  id="test" ng-click="testbutton()" >
+                             Кнопка ТЕСТ
+                        </button>
+
+
+                        <button ng-show="false" class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
+                            <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="false"></span>
+                        </button>
+
+                    <!-- таблица точек -->
+                <div class="point-table-wrap">
+                <div id="point-table" class="table-holder">
+
+
+                    <table class="table table-striped point-table" id="point-table-tbl"
+                           st-safe-src="rowCollection" st-table="displayCollection">
+                        <thead class="header">
+                        <tr class="titles-tr">
+                            <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
+                            <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
+                            <th ng-show="settings.user == 'ids.kalko'" class="bulled-th"></th>
+                            <th class="status-col"  title="Статус доставки">
+                                <button ng-click="order('status')"  >Статус</button>
+                            </th>
+                            <th ng-show="settings.user == 'ids.kalko'" class="degree" title="Достоверность"></th>
+                            <th class="car-type-col" title="Назавание машины">Машина</th>
+                            <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
+                            <th class="client-name-col" title="Название точки доставки">Название</th>
+                            <th class="address-col" title="Адрес доставки">Адрес</th>
+                            <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                            <th class="plan-arrival-time-col" title="Плановое прибытие на точку">
+                                <button ng-click=" order('arrival_time_ts')">План</button>
+                            </th>
+                            <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
+                            <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
+                                <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                            </th>
+                            <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                            <th class="prediction-arrival-left-col"
+                                title="Осталось до прогнозируемого времени прибытия" >
+                                <button ng-click="order('arrival_left_prediction')">До прибытия</button>
+                            </th>
+                            <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
+                            <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
+                            <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
+                            <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
+                            <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
+                            <th class="service-time-col" title="Сравнение реального и планового времени обслуживания">Сервис</th>
+
+                            <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
+                            <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
+                            <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
+                            <th class="car-number-col" title="Номер машины">Номер</th>
+                            <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
+                            <th class="branch-col" title="Филиал">Филиал</th>
+                            <th class="problem-index-col"  title="Индекс проблемности задания">
+                                <button ng-click="order('problem_index')">Проблемность</button>
+                            </th>
+                            <th class="comment-col" title="Комментарий к точке">Комментарий</th>
+                        </tr>
+                        </thead>
+
+                        <thead class="header-copy">
+                        <tr class="titles-tr">
+                            <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
+                            <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
+                            <th ng-show="settings.user == 'ids.kalko'" class="bulled-th"></th>
+                            <th class="status-col"  title="Статус доставки">
+                                <button ng-click="order('status')"  >Статус</button>
+                            </th>
+                            <th ng-show="settings.user == 'ids.kalko'" class="degree" title="Достоверность">%</th>
+                            <th class="car-type-col" title="Назавание машины">Машина</th>
+                            <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
+                            <th class="client-name-col" title="Название точки доставки">Название</th>
+                            <th class="address-col" title="Адрес доставки">Адрес</th>
+                            <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
+                            <th class="plan-arrival-time-col" title="Плановое прибытие на точку">
+                                <button ng-click=" order('arrival_time_ts')">План</button>
+                            </th>
+                            <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
+                            <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
+                                <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
+                            </th>
+                            <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
+                            <th class="prediction-arrival-left-col"
+                                title="Осталось до прогнозируемого времени прибытия" >
+                                <button ng-click="order('arrival_left_prediction')">До прибытия</button>
+                            </th>
+                            <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
+                            <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
+                            <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
+                            <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
+                            <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
+                            <th class="service-time-col" title="Сравнение реального и планового времени обслуживания">Сервис</th>
+                            <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
+                            <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
+                            <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
+                            <th class="car-number-col" title="Номер машины">Номер</th>
+                            <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
+                            <th class="branch-col" title="Филиал">Филиал</th>
+                            <th class="problem-index-col"  title="Индекс проблемности задания">
+                                <button ng-click="order('problem_index')">Проблемность</button>
+                            </th>
+                            <th class="comment-col" title="Комментарий к точке">Комментарий</th>
+                        </tr>
+                        </thead>
+
+                        <tbody
+                            ng-click="rowClick($event)"
+                            ng-dblclick="dblRowClick($event)"
+                            >
+
+                        <tr ng-repeat="row in displayCollection | orderBy : myFilter"
+                            id="{{::'point-' + row.row_id}}"
+                            on-finish-render="ngRepeatFinished"
+                            ng-if="applyFilter(row)"
+                            ng-class="{'selected-row' : row.selected}"
+                                >
+                            <!--class="delivery-point-row"-->
+
+
+                            <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
+                            <td class="number-col">{{row.NUMBER}}</td>
+                            <td class="number-col">{{row.fact_number}}</td>
+                            <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
+                            <td class="status-col" ng-class="row.class" >
+                                     <span>
+                                        {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status ==1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }}
+                                    </span>
+                            </td>
+                            <td ng-show="settings.user == 'ids.kalko'" class="degree"  >
+                                <span>
+                                  {{row.limit}}
+                                </span>
+                            </td>
+                            <td class="car-type-col" title="{{::row.transport.NAME}}" >{{row.transport.NAME}}</td>
+                            <td class="driver-name-col">{{row.driver.NAME}}</td>
+                            <td class="client-name-col" title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
+                            <td class="address-col" title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
+                            <td class="time-window-col">{{row.AVAILABILITY_WINDOWS}}</td>
+                            <td class="plan-arrival-time-col" ng-class="row.class2">{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
+                            <td class="promised-window-col">
+                                {{row.promised_window_changed.start * 1000 | date:'HH:mm'}} -
+                                {{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}
+                            </td>
+                            <td class="time-left-window-col">{{ ((row.status==4 || row.status==5 ||row.status==7 ||row.status==6) && row.working_window[0] != undefined ) ? (parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.working_window[row.working_window.length-1].finish - nowTime) -(parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
+                            <td class="prediction-arrival-time-col">
+                                <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8 && row.status !=6 ) && (row.transport.gid!=undefined) ">
+                                    {{(row.arrival_prediction)*1000 | date: 'HH:mm' }}
+                                </span>
+                            </td>
+                            <td class="overdue-col">
+                                <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5) && (row.transport.gid!=undefined)">
+                                     {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }}<!-- |date: 'HH:mm' : 'UTC'-->
+                                </span>
+                            </td>
+                            <td class="real-arrival-time-col">
+                                <span ng-if="row.real_arrival_time > 0 && (row.status <=3 || row.status==6)">
+                                    {{row.real_arrival_time*1000 |  date: 'HH:mm' }}
+                                </span>
+                            </td>
+                            <td class="overdue-col">
+                                <span ng-if="row.overdue_time > 0 && (row.transport.gid!=undefined)">
+                                    {{(row.arrival_prediction-row.working_window[row.working_window.length-1].finish)*1000 |  date: 'HH:mm' : 'UTC' }}
+                                </span>
+                            </td>
+                            <td class="stop-col">{{row.haveStop ? 'Есть' : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}</td>
+                            <td id="{{'push-td-' + row.row_id}}" class="mobile-push-col"
+                                title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
+                                        'время gps: ' + row.mobile_push.gps_time + '\n' +
+                                        'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
+                                {{row.mobile_push.gps_time ? (row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')) : 'Нет данных'}}
+                            </td>
+                            <td class="service-time-col" >{{row.service_quality != undefined ? row.service_quality : "Неизвестно"}}</td>
+                            <td class="gps-conf-col" title="{{::row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
+                            <td class="promised-window-changed-col"> {{row.change_time ? row.change_time : ''}}</td>
+                            <td class = "window-type-col" id="{{'window-td-' + row.row_id}}">{{row.windowType}}</td>
+
+                            <td class="car-number-col">{{::row.transport.REGISTRATION_NUMBER}}</td>
+                            <td class="driver-phone-col">{{::row.driver.PHONE}}</td>
+                            <td class="branch-col">{{::row.branchName}}</td>
+                            <td class="problem-index-col">
+                                <span ng-if="row.problem_index > 0">
+                                {{row.problem_index}}
+                                </span>
+                            </td>
+                            <td clas="comment-col" title="{{::row.waypoint.COMMENT}}">{{::row.waypoint.COMMENT}}</td>
+
+
+
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="context-menu">
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" data-menu-option="sort">Вкл/Выкл фильтр по маршруту</a></li>
+                            <li><a tabindex="-1" data-menu-option="edit">Редактировать маршрут</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-sm-3">
-                    <select id="route-select"   ng-model="filters.route" class="group-select heightElement width100"
-                            ng-options="option.value as option[settings.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', settings.routeListOrderBy]">
-                    </select>
-                </div>
-                <div class="col-sm-2">
-                    <button  class="btn btn-default btn-sm heightElement width100" ng-class="filters.problem_index == 1 ? 'btn-success' : '' " id="problem-index-btn" ng-click="toggleProblemPoints()">
-                        Проблемные
-                    </button>
-                </div>
-                <div class="col-sm-2">
-                    <button  class="btn btn-default btn-sm heightElement width100"  id="problem-solve-btn" ng-show ="filters.route != -1" ng-model ="filters.route" ng-click="solveProblem(filters.route)">
-                        Записать
-                    </button>
-                </div>
-
-            </div>
-            <div class="row row-gutter-5">
-                <div class="col-md-2">
-                    {{nowTime*1000 | date : 'H:mm:ss'}}
-                </div>
-                <div class="col-sm-3">
-                    <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text"/>
-                    <button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="setTextFilter()">
-                        <span class="glyphicon glyphicon-search" aria-hidden="false"></span>
-                    </button>
-                </div>
-                <div class="col-sm-3">
-                    <input type="date"
-                           class="width100 heightElement"
-                           ng-model="showDate"
-                           id="show-date"/>
-                </div>
-                <div  class="col-sm-2">
-                    <button ng-show="data.routes.length == 0 || data.currentDay == false" class="btn btn-info btn-sm heightElement width100" ng-click="loadOldDay()" >Загрузить</button>
-                    <!--todo вставить вверх ng-show="data.routes.length == 0"-->
                 </div>
             </div>
-        </div>
-
-
-
-                <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
-                        ng-options='option.value as option.name for option in filters.branches'>
-                </select>
-
-
-
-
-                <select ng-show="false" id="draw-mode-select" ng-model="draw_mode" class="group-select"
-                        ng-options='option.value as option.name for option in draw_modes'>
-                </select>
-
-                <input ng-show="false" id="draw-stops" type="checkbox" checked title="Отображать стопы"/>
-                <input ng-show="false" id="draw-pushes" type="checkbox" title="Отображать моб. нажатия"/>
-                <button ng-show="false" class="btn btn-info btn-sm" ng-click="drawRoute()">отрисовать</button>
-
-                <button ng-show="false" class="btn btn-info btn-sm" id="force-load-btn" ng-click="forceLoad()">
-                    загрузить
-                </button>
-
-
-
-                <input ng-show="false" id="fast-calc" type="checkbox" value="false" ng-model="fastCalc" checked title="Упрощенный расчет данных">
-
-                <button ng-show="false" class="btn btn-default btn-sm" id="promised-15m-btn" ng-click="togglePromised15MPoints()">
-                    {{params.endWindowSize * 5}} минут до закрытия
-                </button>
-                <button ng-show="false" class="btn btn-default btn-sm1"  id="test" ng-click="testbutton()" >
-                     Кнопка ТЕСТ
-                </button>
-
-
-                <button ng-show="false" class="btn btn-info btn-sm filter-btn" id="cancel-filter-btn" ng-click="cancelTextFilter()">
-                    <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="false"></span>
-                </button>
-
-            <!-- таблица точек -->
-        <div class="point-table-wrap">
-        <div id="point-table" class="table-holder">
-
-
-            <table class="table table-striped point-table" id="point-table-tbl"
-                   st-safe-src="rowCollection" st-table="displayCollection">
-                <thead class="header">
-                <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
-                    <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
-                    <th ng-show="settings.user == 'ids.kalko'" class="bulled-th"></th>
-                    <th class="status-col"  title="Статус доставки">
-                        <button ng-click="order('status')"  >Статус</button>
-                    </th>
-                    <th ng-show="settings.user == 'ids.kalko'" class="degree" title="Достоверность"></th>
-                    <th class="car-type-col" title="Назавание машины">Машина</th>
-                    <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
-                    <th class="client-name-col" title="Название точки доставки">Название</th>
-                    <th class="address-col" title="Адрес доставки">Адрес</th>
-                    <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку">
-                        <button ng-click=" order('arrival_time_ts')">План</button>
-                    </th>
-                    <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
-                    <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
-                        <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
-                    </th>
-                    <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
-                    <th class="prediction-arrival-left-col"
-                        title="Осталось до прогнозируемого времени прибытия" >
-                        <button ng-click="order('arrival_left_prediction')">До прибытия</button>
-                    </th>
-                    <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
-                    <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
-                    <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
-                    <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
-                    <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
-                    <th class="service-time-col" title="Сравнение реального и планового времени обслуживания">Сервис</th>
-
-                    <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
-                    <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
-                    <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
-                    <th class="car-number-col" title="Номер машины">Номер</th>
-                    <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
-                    <th class="branch-col" title="Филиал">Филиал</th>
-                    <th class="problem-index-col"  title="Индекс проблемности задания">
-                        <button ng-click="order('problem_index')">Проблемность</button>
-                    </th>
-                    <th class="comment-col" title="Комментарий к точке">Комментарий</th>
-                </tr>
-                </thead>
-
-                <thead class="header-copy">
-                <tr class="titles-tr">
-                    <th class="number-col" title="Плановый номер задания"><button ng-click="order('NUMBER')"  >План</button></th>
-                    <th class="number-col" title="Фактический порядок"><button ng-click="order('fact_number')"  >Факт</button></th>
-                    <th ng-show="settings.user == 'ids.kalko'" class="bulled-th"></th>
-                    <th class="status-col"  title="Статус доставки">
-                        <button ng-click="order('status')"  >Статус</button>
-                    </th>
-                    <th ng-show="settings.user == 'ids.kalko'" class="degree" title="Достоверность">%</th>
-                    <th class="car-type-col" title="Назавание машины">Машина</th>
-                    <th class="driver-name-col" title="Фамилия и имя водителя">Водитель</th>
-                    <th class="client-name-col" title="Название точки доставки">Название</th>
-                    <th class="address-col" title="Адрес доставки">Адрес</th>
-                    <th class="time-window-col" title="Заказанное клиентом окно">Заказанное</th>
-                    <th class="plan-arrival-time-col" title="Плановое прибытие на точку">
-                        <button ng-click=" order('arrival_time_ts')">План</button>
-                    </th>
-                    <th class="promised-window-col" title="Обещанное клиенту окно">Обещ. окно</th>
-                    <th class="time-left-window-col" title="Остаток до конца контролируемого окна" >
-                        <button ng-click=" order('end_time_ts')" >Ост. КОК</button>
-                    </th>
-                    <th class="prediction-arrival-time-col" title="Прогнозируемое время прибытия">Прогноз прибытия</th>
-                    <th class="prediction-arrival-left-col"
-                        title="Осталось до прогнозируемого времени прибытия" >
-                        <button ng-click="order('arrival_left_prediction')">До прибытия</button>
-                    </th>
-                    <!--<th class="promised-window-changed-col" title="Редактируемое обещанное окно">Редакт. окно</th>-->
-                    <th class="real-arrival-time-col" title="Фактическое время прибытия">Факт. прибытие</th>
-                    <th class="overdue-col" title="Размер опоздания от планового времени прибытия">Опазд.</th>
-                    <th class="stop-col" title="Наличие стопа связанного с точкой">Стоп</th>
-                    <th class="mobile-push-col" title="Наличие нажатия с мобильного приложения">Моб.нажатие</th>
-                    <th class="service-time-col" title="Сравнение реального и планового времени обслуживания">Сервис</th>
-                    <th class="gps-conf-col" title="Подтверждение точки GPS">GPS</th>
-                    <th class="promised-window-changed-col" title="Количество переносов">Переносов</th>
-                    <th class="window-type-col" title="Фактическое окно доставки">Факт. окно</th>
-                    <th class="car-number-col" title="Номер машины">Номер</th>
-                    <th class="driver-phone-col" title="Телефон водителя">Тел. водителя</th>
-                    <th class="branch-col" title="Филиал">Филиал</th>
-                    <th class="problem-index-col"  title="Индекс проблемности задания">
-                        <button ng-click="order('problem_index')">Проблемность</button>
-                    </th>
-                    <th class="comment-col" title="Комментарий к точке">Комментарий</th>
-                </tr>
-                </thead>
-
-                <tbody 
-                    ng-click="rowClick($event)"
-                    ng-dblclick="dblRowClick($event)"
-                    >
-
-                <tr ng-repeat="row in displayCollection | orderBy : myFilter" 
-                    id="{{::'point-' + row.row_id}}"
-                    on-finish-render="ngRepeatFinished"
-                    ng-if="applyFilter(row)"
-                    ng-class="{'selected-row' : row.selected}"
-                        >
-                    <!--class="delivery-point-row"-->
-
-
-                    <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
-                    <td class="number-col">{{row.NUMBER}}</td>
-                    <td class="number-col">{{row.fact_number}}</td>
-                    <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
-                    <td class="status-col" ng-class="row.class" >
-                             <span>
-                                {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status ==1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }}
-                            </span>
-                    </td>
-                    <td ng-show="settings.user == 'ids.kalko'" class="degree"  >
-                        <span>
-                          {{row.limit}}
-                        </span>
-                    </td>
-                    <td class="car-type-col" title="{{::row.transport.NAME}}" >{{row.transport.NAME}}</td>
-                    <td class="driver-name-col">{{row.driver.NAME}}</td>
-                    <td class="client-name-col" title="{{::row.waypoint.NAME}}">{{::row.waypoint.NAME}}</td>
-                    <td class="address-col" title="{{::row.waypoint.ADDRESS}}">{{::row.waypoint.ADDRESS}}</td>
-                    <td class="time-window-col">{{row.AVAILABILITY_WINDOWS}}</td>
-                    <td class="plan-arrival-time-col" ng-class="row.class2">{{row.arrival_time_ts * 1000 | date:'HH:mm'}}</td>
-                    <td class="promised-window-col">
-                        {{row.promised_window_changed.start * 1000 | date:'HH:mm'}} -
-                        {{row.promised_window_changed.finish * 1000 | date:'HH:mm'}}
-                    </td>
-                    <td class="time-left-window-col">{{ ((row.status==4 || row.status==5 ||row.status==7 ||row.status==6) && row.working_window[0] != undefined ) ? (parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600) +'ч.' + parseInt((parseInt(((row.working_window[row.working_window.length-1].finish - nowTime) -(parseInt((row.working_window[row.working_window.length-1].finish - nowTime)/3600))*3600 )))/60)) + 'м.' : ""  }}</td>
-                    <td class="prediction-arrival-time-col">
-                        <span ng-if="(row.arrival_prediction >0) && (row.status>3 && row.status<8 && row.status !=6 ) && (row.transport.gid!=undefined) ">
-                            {{(row.arrival_prediction)*1000 | date: 'HH:mm' }}
-                        </span>
-                    </td>
-                    <td class="overdue-col">
-                        <span ng-if="(row.arrival_prediction > 0) && (row.status ==7 || row.status ==4 || row.status==5) && (row.transport.gid!=undefined)">
-                             {{row.arrival_left_prediction*1000 | date: 'HH:mm' : 'UTC'  }}<!-- |date: 'HH:mm' : 'UTC'-->
-                        </span>
-                    </td>
-                    <td class="real-arrival-time-col">
-                        <span ng-if="row.real_arrival_time > 0 && (row.status <=3 || row.status==6)">
-                            {{row.real_arrival_time*1000 |  date: 'HH:mm' }}
-                        </span>
-                    </td>
-                    <td class="overdue-col">
-                        <span ng-if="row.overdue_time > 0 && (row.transport.gid!=undefined)">
-                            {{(row.arrival_prediction-row.working_window[row.working_window.length-1].finish)*1000 |  date: 'HH:mm' : 'UTC' }}
-                        </span>
-                    </td>
-                    <td class="stop-col">{{row.haveStop ? 'Есть' : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}</td>
-                    <td id="{{'push-td-' + row.row_id}}" class="mobile-push-col"
-                        title="{{ row.mobile_push ? ('время: ' + row.mobile_push.time + '\n' +
-                                'время gps: ' + row.mobile_push.gps_time + '\n' +
-                                'расстояние до точки: ' + row.mobile_push.distance + ' м') : ''}}">
-                        {{row.mobile_push.gps_time ? (row.mobile_push ? ((getPushStatus(row)).substr(-8)).substring(0,5) : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')) : 'Нет данных'}}
-                    </td>
-                    <td class="service-time-col" >{{row.service_quality != undefined ? row.service_quality : "Неизвестно"}}</td>
-                    <td class="gps-conf-col" title="{{::row.waypoint.CONFIRMBYGPS}}">{{row.waypoint.CONFIRMBYGPS =="true" ? "Есть":"Нет"}}</td>
-                    <td class="promised-window-changed-col"> {{row.change_time ? row.change_time : ''}}</td>
-                    <td class = "window-type-col" id="{{'window-td-' + row.row_id}}">{{row.windowType}}</td>
-
-                    <td class="car-number-col">{{::row.transport.REGISTRATION_NUMBER}}</td>
-                    <td class="driver-phone-col">{{::row.driver.PHONE}}</td>
-                    <td class="branch-col">{{::row.branchName}}</td>
-                    <td class="problem-index-col">
-                        <span ng-if="row.problem_index > 0">
-                        {{row.problem_index}}
-                        </span>
-                    </td>
-                    <td clas="comment-col" title="{{::row.waypoint.COMMENT}}">{{::row.waypoint.COMMENT}}</td>
-
-
-
-                </tr>
-                </tbody>
-            </table>
-
-            <div id="context-menu">
-                <ul class="dropdown-menu" role="menu">
-                    <li><a tabindex="-1" data-menu-option="sort">Вкл/Выкл фильтр по маршруту</a></li>
-                    <li><a tabindex="-1" data-menu-option="edit">Редактировать маршрут</a></li>
-                </ul>
-            </div>
-        </div>
-        </div>
-    </div>
-        </div>
-</template>
+                </div>
+        </template>
 
 <!-- прозрачное окно для отображения карты -->
 <template type="text/html" id="transparent-map-window">
@@ -976,6 +978,8 @@
             <button ng-show="data != undefined && ((settings.user == 'ids.kalko') || (data.settings.user == 'ids.kalko') || (data.settings.user == 'IDS.kalko')|| (settings.user == 'IDS.kalko'))" ng-click="checkRoutes()"> CHECK</button>
 
             <button ng-show="data != undefined && ((settings.user == 'ids.kalko') || (data.settings.user == 'ids.kalko') || (data.settings.user == 'IDS.kalko')|| (settings.user == 'IDS.kalko'))" ng-click="notify()"> NOTIFICATION</button>
+
+            <button ng-show="data != undefined && ((settings.user == 'ids.kalko') || (data.settings.user == 'ids.kalko') || (data.settings.user == 'IDS.kalko')|| (settings.user == 'IDS.kalko'))" ng-click="analysisIDSpoints()"> AK START</button>
         </div>
         <div class="block-title">
             &nbsp&nbspРезультат поиска:

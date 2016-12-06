@@ -13,9 +13,10 @@ var express = require('express'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
     locker = new (require('../locker'))(),
+    readline = require('readline'),
     //CronJob = require('cron').CronJob,
     //async = require('async'),
-    develop = false;
+    develop = true;
     if (develop) {
         var
         colors = require('colors');
@@ -27,7 +28,8 @@ var express = require('express'),
 
 
 var cashedDataArr = {},  // глобальный кеш
-    updateCacshe = {}, // Тестовый кэш
+    updateCacshe = {},   // Тестовый кэш
+    pointsIDS =[],          // todo переменная одноразовая для анализа геокодирования точек
     aggregatorError = "invalid parameter 'gid'. ",
     stopUpdateInterval = 120,                       // интервал обновлений стопов
     updateTrackInterval = 30,                       // интервал загрузки новых данных при отрисовке треков
@@ -147,6 +149,54 @@ router.route('/loadData')
     .get(function(req, res){
         try {
             reload = true;
+            res.status(200).json({msg: 'complete'});
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+
+router.route('/analysisIDSpoints')
+    .get(function(req, res){
+        if (develop) console.log("Start load data".green);
+
+        try {
+
+
+
+        //    const rl = readline.createInterface({
+        //        input: fs.createReadStream('./logs/point-base-work.txt')
+        //    });
+        //
+        //
+        //    if(develop) console.log(rl.green);
+        //
+        //    rl.on('line', function (line)  {
+        //        pointsIDS.push(line);
+        //});
+            console.log("pointsIDS.length", pointsIDS.length);
+            //setTimeout(function(){
+            //    console.log("pointsIDS.length", pointsIDS.length);
+            //    parseTextFileData();
+            //}, 1000);
+
+            var i = 65;
+
+            readandConcatNextFile(i);
+
+            //fs.readFile('./logs' + '/' +'resultforIDS-1.txt', 'utf8', function (err, data) {
+            //    console.log("Error in load", err);
+            //    var tempPoints = JSON.parse(data);
+            //    allPoints = allPoints.concat(tempPoints);
+            //    fs.readFile('./logs' + '/' +'resultforIDS-2.txt', 'utf8', function (err, data) {
+            //        console.log("Error in load", err);
+            //        var tempPoints = JSON.parse(data);
+            //        allPoints = allPoints.concat(tempPoints);
+            //        console.log(allPoints.length);
+            //    })
+            //
+            //});
 
 
 
@@ -155,6 +205,58 @@ router.route('/loadData')
             log.error( "Ошибка "+ e + e.stack);
         }
     });
+
+function readandConcatNextFile(indx){
+    if (indx>66) return;
+    console.log("indx", indx);
+    var fileName = "resultforIDS-";
+    if(indx<8) {
+        fileName += "" + indx + ".txt";
+    } else {
+        fileName += "" + (indx-7);
+    }
+    console.log(fileName);
+    //if (fileName == "resultforIDS-3" ||
+    //    fileName == "resultforIDS-12" ||
+    //    fileName == "resultforIDS-15" ||
+    //    fileName == "resultforIDS-23" ||
+    //    fileName == "resultforIDS-24" ||
+    //    fileName == "resultforIDS-26" ||
+    //    fileName == "resultforIDS-31" ||
+    //    fileName == "resultforIDS-34" ||
+    //    fileName == "resultforIDS-35" ||
+    //    fileName == "resultforIDS-36" ||
+    //    fileName == "resultforIDS-42" ||
+    //    fileName == "resultforIDS-43" ||
+    //    fileName == "resultforIDS-45" ||
+    //    fileName == "resultforIDS-48" ||
+    //    fileName == "resultforIDS-51" ||
+    //    fileName == "resultforIDS-55" ||
+    //    fileName == "resultforIDS-56" ||
+    //    fileName == "resultforIDS-57"
+    //    ) {
+    //    indx++;
+    //    readandConcatNextFile(indx);
+    //}
+    fs.readFile('./logs' + '/' + fileName, 'utf8', function (err, data) {
+        try {
+            var tempPoints = JSON.parse(data);
+        } catch (e) {
+            console.log(e.red);
+        }
+
+        pointsIDS = tempPoints;
+        console.log(pointsIDS.length);
+        console.log ("start".green, pointsIDS[0].id, " finish".red, pointsIDS[999].id)
+
+        if (indx < 59+7) {
+            indx++;
+            readandConcatNextFile(indx)
+        }
+    });
+
+
+}
 
 // запуск монитора диспетчера в демо-режиме
 //router.route('/demo')
@@ -367,14 +469,18 @@ router.route('/nodeserch')
     });
 
 
+router.route('/auth')
+    .get(function(req, res){
+        res.sendFile('hellow.html', {root: './public/'});
+    });
+
 
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
 router.route('/login')
     .get(function (req, res) {
+        //console.log("req.session.login", req);
         try {
         req.session.login = req.query.curuser;
-
-
         res.sendFile('index.html', {root: './public/'});
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -1747,7 +1853,7 @@ router.route('/askforproblems/:need')
         var login=key;
         var currentCompany = companyLogins[key];
         var need = parseInt((req.params.need).substring(1));
-        log.info("ASk For ", need, "Problem", req.session.login);
+        //log.info("ASk For ", need, "Problem", req.session.login);
         if(need <0){
             res.status(400).json("Need degree zerro");
             return;
@@ -6311,6 +6417,161 @@ function crutchFunctionMarkWarehouse(company) {
 
 }
 
+function parseTextFileData() {
+    var newPoints = [];
+    pointsIDS.forEach(function (item) {
+
+        //console.log(item);
+        var newItemArr = item.split(';');
+        var newHouse = "";
+        var newName = "";
+        if (newItemArr[1]) newName = newItemArr[1].replace(/-/g, '+');
+
+        if (newItemArr[7]) newHouse = newItemArr[7].replace(/-/g, '');
+        var newPoint = "{" +
+                        "\"id\":" + "\"" + newItemArr[0]+ "\"" +
+                        ", \"name\":" + "\"" + newName + "\"" +
+                        ", \"country\":" + "\"" + newItemArr[2] + "\"" +
+                        ", \"region\":" + "\"" + newItemArr[3] + "\"" +
+                        ", \"city\":" + "\"" + newItemArr[4] + "\"" +
+                        ", \"street_type\":" + "\"" + newItemArr[5] + "\"" +
+                        ", \"street_name\":" + "\"" + newItemArr[6] + "\"" +
+                        ", \"house\":" + "\"" + newHouse + "\"" +
+                        "}";
+        var pointJSON = JSON.parse(newPoint);
+        newPoints.push(pointJSON);
+
+    });
+        clearHouseNumber(newPoints);
+        pointsIDS = newPoints;
+        askForStreetId(pointsIDS);
+}
+
+
+
+function clearHouseNumber(points){
+    points.forEach(function(point){
+        if (point.street_name.indexOf("(") != -1) {
+            var begin = point.street_name.indexOf("(");
+            var end = point.street_name.indexOf(")");
+            point.street_name = point.street_name.substring(0,begin) + point.street_name.substring(end+1)
+        }
+    });
+
+    points.forEach(function(point){
+       if (point.house) {
+           var VRegExp = new RegExp("\s+", "g");
+           point.house = point.house.replace(VRegExp, '');
+           point.house = point.house.toUpperCase();
+           //console.log(point.house);
+           if (point.house.indexOf(" ") != -1) {
+               console.log(point.id, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11")
+           }
+       }
+    })
+}
+
+function askForStreetId() {
+        console.log(Date.now());
+        var i = 59000;
+    //console.log("i in askForStreetId", i);
+        requestDispether(i);
+       // createTextForRequest(point);
+
+
+    //var i = 4;
+    //for (var i = 0; i < 50; i++){
+
+
+    //var text ='';
+    //
+    //    if (pointsIDS[i].region) text += pointsIDS[i].region;
+    //    if (pointsIDS[i].city) {
+    //        text += " " + pointsIDS[i].city;
+    //    } else {
+    //        continue;
+    //    }
+    //    if (pointsIDS[i].street_name) {
+    //        text += " " + pointsIDS[i].street_name;
+    //    } else {
+    //        continue;
+    //    }
+
+    //}
+}
+
+
+function requestDispether(i) {
+    console.log("i in requestDispether", i, pointsIDS.length);
+    if (i <pointsIDS.length) {
+        //console.log(i, createTextForRequest(pointsIDS[i]))
+        if (createTextForRequest(pointsIDS[i]) != false) {
+            tracksManager.getObjectID(createTextForRequest (pointsIDS[i]), function (data){
+            console.log ("First etap complete");
+                pointsIDS[i].childs = data;
+
+                if (pointsIDS[i].childs != undefined && pointsIDS[i].childs.length != 0) {
+                    console.log("Start Second");
+                    tracksManager.getAllHouses(pointsIDS[i].childs, function (data){
+                        pointsIDS[i].possibleHouses = data;
+                        partialSave(i);
+                        //log.toFLog("resultForIDS", pointsIDS, true);
+                        i++;
+                        console.log("second etap complete", i);
+                        requestDispether(i);
+
+                });} else {
+                    partialSave(i);
+                    //log.toFLog("resultForIDS", pointsIDS, true);
+                    console.log("third etap complete", i);
+                    i++;
+
+                    requestDispether (i);
+
+                }
+
+        });} else {
+            i++;
+            console.log("forth etap complete", i);
+            requestDispether(i);
+
+        }
+
+    } else {
+
+
+        console.log ("HURA!!! WI Finished");
+        //console.log(Date.now());
+    }
+
+}
+
+function partialSave(indx) {
+    if (!indx || indx < 1000) return;
+    //console.log("Presave", indx%100);
+    if (indx == 59661) indx = 60000;
+    if (indx%1000 != 0) return;
+    var toSave = [];
+    for (var i = indx-1000; i<indx; i++){
+        toSave.push(pointsIDS[i]);
+    }
+    var partName = "" + parseInt(indx/1000);
+    log.toFLog("resultforIDS-"+partName, toSave, true);
+    if (indx == 66661 ){
+        log.toFLog("resultforIDSAll", pointsIDS, true);
+    }
+}
+
+
+function createTextForRequest (point) {
+    if (!point || !point.city || !point.street_name) return false;
+    var result='';
+    var region = '';
+    if (point.region) region += point.region;
+    result = point.city + " " + point.street_name;
+    return result;
+}
+
 function safeReload (){
     if (!reload) return;
 
@@ -6326,6 +6587,9 @@ function safeReload (){
     });
 
 }
+
+
+
 
 function loadCoords(company) {
     try {
