@@ -199,7 +199,7 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 */
 		rootScope.$on('pointEditingPopup', function (event, data, time, taskTime) {
 			$('#point-editing-popup').popup('show');
-			// console.log(data);
+			console.log("Emited", data);
 			// console.log(time);
 			// console.log(taskTime);
 			scope.stopIndx = data.stopIndx;
@@ -240,6 +240,7 @@ angular.module('MTMonitor').controller('PointPopupEditController', ['$scope', '$
 					}
 					scope.disabled = false;
 					for (var i = 0; servisPointsLng > i; i++) {
+						console.log("Scarry servicepoints", scope.data.servicePoints[i]);
 						scope.servisPoints[i] = {};
 						scope.servisPoints[i].error = false;
 						scope.servisPoints[i].wayPoint = (scope.data.servicePoints[i] * 1);

@@ -7,10 +7,27 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         var askProblemFromServer = true;                                           //  запрашивать ли проблемы с сервера
         rootScope.asking = false;                                                   // Запущен ли процесс запрсов
         rootScope.tempDecision;
+        rootScope.restart = false;
 
-        interval(confirmOnline, 60 * 1000);
+        interval(confirmOnline, 60 * 1000); // опрос на обновление трека, и подтверждение онлайна оператора
+        interval(askBlocked, 3 * 1000); //опрос на "занятость маршрутов"
+
+
+        function askBlocked(){
+            if(!rootScope.data || !rootScope.data.currentDay || rootScope.restart) return;
+            http.post('./askblocked')
+                .success(function(data){
+                    //console.log("askBlocked", data);
+                    if(data[0] != undefined && data[0] == 'restart') {
+                        rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
+                        rootScope.restart = true;
+                    }
+                   if (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
+                });
+        }
 
         function confirmOnline() {
+            if(rootScope.restart) return;
             console.log("confirmOnline in process", rootScope.settings, rootScope.data.server_time);
             var sync=[];
             if (rootScope.data && rootScope.data.routes && rootScope.data.currentDay == true) {
@@ -27,35 +44,64 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     rootScope.data.statistic = data.statistics;
                     rootScope.nowTime = rootScope.data.server_time;
 
+                    console.log("Receive data", data);
+                    if (data.allRoutes != undefined) {
+                        rootScope.data.allRoutes = data.allRoutes;
+                        console.log("Send data to recreate filters Routes");
+                        scope.$emit('newAllRoutes');
+                    }
+
                     if (data.err != undefined && data.err.length >0) {
                         alert("Произошел сбой связи. Перезайдите в АРМ, пожалуйста");
                     }
 
                     //todo запрос на обнговление трека
-
-                    if ( rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false){
+                    //if(!rootScope.data.routes) rootScope.data.routes=[];
+                    if (rootScope.data.recievedUpdate == undefined) rootScope.data.recievedUpdate = true;
+                    if ( rootScope.data.routes != undefined && rootScope.data.routes.length>0 && rootScope.data.currentDay != false && rootScope.data.recievedUpdate){
                         var obj =[];
+                        var lastState={};
                         for (var i=0; i< rootScope.data.routes.length; i++){
-                            if (rootScope.data.routes[i].real_track != undefined
-                            && rootScope.data.routes[i].real_track.length>0
-                            && rootScope.data.routes[i].transport.gid != undefined) {
-                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: rootScope.data.routes[i].real_track[rootScope.data.routes[i].real_track.length-1]}
+                            if (rootScope.data.routes[i].real_track == undefined) rootScope.data.routes[i].real_track =[];
+                            if (rootScope.data.routes[i].transport.gid != undefined ) {
+                                if (rootScope.data.routes[i].real_track.length == 0) {
+                                    lastState.t1=strToTstamp(rootScope.data.routes[i].START_TIME);
+                                } else {lastState = rootScope.data.routes[i].real_track[ rootScope.data.routes[i].real_track.length-1]}
+
+                                console.log("Время запроса", rootScope.data.routes[i].transport.gid, lastState.t1);
+                                var res = {gid : rootScope.data.routes[i].transport.gid, lastState: lastState, uniqueID : rootScope.data.routes[i].uniqueID };
+                                console.log("Res", res);
                                 obj.push(res);
                             }
                         }
+                        rootScope.data.recievedUpdate= false;
+
+                        http.post('./updatepushes', {data: obj})
+                            .success(function(data){
+                               console.log("Result updatepushes", data);
+
+                                rootScope.$emit('updatePush', data);
+                            });
 
                         http.post ('./updatetrack', {data: obj})
                             .success(function (data) {
-                                console.log("UpdateTrack", data);
+                                rootScope.data.recievedUpdate=true;
+                                console.log("UpdateTrack look in server", data);
                                 for (var j=0; j<data.length; j++){
+                                    if (data[j].state.length == 0 ) {
+                                        data.splice(j,1);
+                                        j--;
+                                        continue;
+                                    }
                                     console.log("Size of states ", data[j].state.length);
                                     if (data[j].state[data[j].state.length-1].id == 0) {
                                         data[j].state.length = data[j].state.length-2;
                                     }
                                 }
-                                rootScope.$emit('updateTrack', data);
+                                 rootScope.$emit('updateTrack', data);
                             })
                             .error (function (data){
+                            rootScope.data.recievedUpdate = true;
                             console.log("Ошибка", data);
                         })
                     }
@@ -92,8 +138,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
 
-        //todo поставить проверку не запрашивать проблеммы, если у опрератора уже есть нужное количество нерешенных проблем
-        // TODO dhеменно делаем, не запрашивать, если уже есть скачанное решение
+
+
         function checkProblem() {
             checkTimeForEditing();
 
@@ -115,6 +161,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     settings = rootScope.data.settings;
                 } else {
                     settings=rootScope.settings;
+
                 }
                 for(var i=0; i<settings.userRoles.length; i++){
                     if (settings.userRoles[i] == 'operator') need = parseInt(settings.problems_to_operator) - exist;
@@ -126,7 +173,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             //if(need<0) need='';
             //console.log("Данные перед запросом", need, rootScope.settings.problems_to_operator, exist);
             //console.log(" Go to ASK ", !rootScope.data,  need,  rootScope.asking);
-            if(!rootScope.asking) return;
+            if(!rootScope.asking || rootScope.restart) return;
             if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist == 0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 //console.log("Give me", need, "the problem please! ");
 
@@ -149,7 +196,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.reasons=data.reasons;
                             //console.log("причины отказа", data.reasons);
-                            rootScope.$emit('receiveproblem', rootScope.tempDecision);
+                            rootScope.$emit('receiveproblem', rootScope.tempDecision, settings);
 
                             if (rootScope.tempDecision.statistic != undefined) rootScope.$emit('holestatistic', rootScope.tempDecision.statistic);
                         } else
@@ -186,7 +233,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
      rootScope.showProblem = function(route) {
             rootScope.redrawProblemRoute = false;
-            scope.$emit("possibleRedraw", route.filterId);
+            if (route.filterId != undefined)scope.$emit("possibleRedraw", route.filterId);
             //alert("Я все вижу" + route.filterId);
          if (route == undefined || route.filterId == undefined || rootScope.redrawProblemRoute) return;
 
@@ -246,6 +293,63 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             }
         })
 
+
+        function strToTstamp(strDate, lockaldata) {
+            try {
+
+                if (lockaldata != undefined) {
+                    var today = new Date();
+                    var day, adding, month, year;
+
+                    if(today.getDate().length<2){
+                        day = "0"+today.getDate();
+                    } else {
+                        day = today.getDate();
+                    }
+
+                    month = parseInt(today.getMonth());
+                    month++;
+
+                    if(month<10){
+                        month = "0"+month;
+                    } else {
+                        month = "" + month;
+
+                    }
+
+                    year = ('' + today.getFullYear()).substring(2);
+                    //log.info("Constructor", day, month, year);
+                    adding = day+'.'+month+'.'+year;
+                    if (strDate.length<10) {
+                        strDate = adding + " " + strDate;
+                        // log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
+                    }
+
+                }
+                var parts = strDate.split(' ');
+                var    _date = parts[0].split('.');
+                var _time;
+                var toPrint=JSON.stringify(strDate);
+                //for (var i=0; i<parts.length;i++){
+                //    log.info("PARTS", parts[i]);
+                //}
+                //log.info("_________________");
+                try {
+                    _time = parts[1].split(':');} catch (exeption) {
+
+
+                    log.info(toPrint, strDate, "Error", exeption, lockaldata);
+                }
+
+
+
+                //log.info(strDate, "strDate", "convert to", _date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]);
+
+                return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
+            } catch (e) {
+                log.error( "Ошибка "+ e + e.stack);
+            }
+        }
 
 
     }]);

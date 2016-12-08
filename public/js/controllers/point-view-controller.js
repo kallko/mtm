@@ -34,14 +34,32 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // показать окно с точкой
         function show(event, data) {
+            scope.operator_time = null;
             scope.point = data.point;
-            console.log("Это ДАТА", data);
+            if (scope.point.stop_arrival_time != undefined )scope.operator_time = scope.point.stop_arrival_time;
+            if (scope.operator_time == null && scope.point.stop_arrival_time == undefined) scope.operator_time = scope.point.mobile_arrival_time;
+            if (scope.operator_time == null) scope.operator_time = rootScope.nowTime;
+                console.log("Это ДАТА", data);
+            scope.operator_time_show = new Date(scope.operator_time *1000);
             scope.promisedStartCard = new Date(data.point.promised_window_changed.start * 1000);
             scope.promisedFinishCard = new Date(data.point.promised_window_changed.finish * 1000);
            // scope.promisedStartCard = filter('date')(data.point.promised_window_changed.start * 1000, 'HH/mm');
            // scope.promisedFinishCard = filter('date')(data.point.promised_window_changed.finish * 1000, 'HH/mm');
 
             scope.route = data.route;
+            var route;
+            for(var i=0; i<rootScope.data.routes.length; i++){
+                if(data.point.uniqueID == rootScope.data.routes[i].uniqueID ) route = rootScope.data.routes[i];
+            }
+            scope.$emit('routeToChange', {
+                route: route,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
             //console.log ("Назначили Роут", data.point.uniqueID);
             scope.showRouteId = data.point.uniqueID;
             parent = data.parent;
@@ -91,11 +109,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // подтверждение статуса (генерирует событие, которое принимается в PointIndexController
         // и подтверждает сомнительный статус
         scope.confirmStatus = function () {
+            //console.log("Operator Show", parseInt(scope.operator_time_show.getTime()/1000));
             scope.showHideReasonButtons = false;
             console.log('confirmStatus');
             scope.$emit('changeConfirmation', {
                 row: scope.point,
-                option: 'confirm-status'
+                option: 'confirm-status',
+                time: parseInt(scope.operator_time_show.getTime()/1000)
             });
 
             var reRoute;
@@ -105,7 +125,17 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.$emit('displayCollectionToStatistic', reRoute.points);
-            //rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+            scope.$emit('addPointHistory', scope.point, "confirmed from card");
+
         };
 
         // отмена сомнительного статуса
@@ -123,6 +153,17 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+
+            scope.$emit('addPointHistory', scope.point, "status canceled from card");
         };
 
         scope.returnStatus = function(){
@@ -138,6 +179,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+            scope.$emit('addPointHistory', scope.point, "return sheduled from card");
         };
 
         // отменить задачу
@@ -157,12 +208,28 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 }
             }
             rootScope.showProblem(reRoute);
+            scope.$emit('routeToChange', {
+                route: reRoute,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
+            rootScope.$emit('startRecalc');
+            $('#point-view').popup('hide');
+            scope.$emit('showNotification', {text: 'Утвердите пересчитанный маршрут во вкладке Редактирование', duration: 4000});
+            scope.$emit('addPointHistory', scope.point, "cancel point from card");
+
+
         };
 
         scope.cancelPush = function () {
 
             console.log('cancelPush');
             scope.$emit('cancelPush',  scope.point); //В поинт индекс контроллер
+            scope.$emit('addPointHistory', scope.point, "cancel push from card");
         };
 
         // перекелючить (вкл/выкл) блокировку задачи
@@ -304,6 +371,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }else{
                 scope.disableConfirmBtn = false;
             }
+
+
         };
 
         // открывает окно в 1С IDS-овцев

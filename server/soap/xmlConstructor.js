@@ -145,7 +145,7 @@ XMLConstructor.prototype.routesXML = function (routes, login) {
         if (!itineraries[routes[i].itineraryID]) {
             itineraries[routes[i].itineraryID] = {
                 routes: [],
-                change_timestamp: 0
+                change_timestamp: parseInt(new Date()/1000)
             };
         }
 

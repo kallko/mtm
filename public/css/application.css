@@ -163,6 +163,7 @@ template {
 
 .titles-tr {
     border-top: 1px solid grey;
+    font-size: medium;
 }
 
 .leaflet-top, .leaflet-bottom, .leaflet-left, .leaflet-right {
@@ -472,7 +473,7 @@ template {
 .promised-text-card {
     width: 100px;
     height: 20px;
-    padding-left: 3px;
+    padding-left: 5px;
 }
 
 #edit-panel-menu {
@@ -523,6 +524,9 @@ template {
 /*}*/
 .card-title{
     width:100%;
+}
+.element-select {
+    margin-bottom: 5px;
 }
 #btn-close{
     padding: 2px 5px 2px 9px;
@@ -662,4 +666,21 @@ template {
     background:linear-gradient(to bottom, #f24437 5%, #c62d1f 100%);
     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24437', endColorstr='#c62d1f',GradientType=0);
     background-color:#f24437;
+}
+.element-margin{
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+.element-red{
+    color: red;
+    font-weight: bold;
+}
+
+.element-bold{
+    font-weight: bold;
+}
+
+.element {
+
 }

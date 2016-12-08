@@ -55,7 +55,12 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
 
 // получение треков по переданным стейтам и гиду машины
 TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, callback) {
-    if(states == undefined || states[0] == undefined) return;
+    console.log("Запрос апдейт дошел до треккера");
+    if(states == undefined || states[0] == undefined) {
+        //console.log("!!!!The rabbit is out of hat!!!", states);
+        callback(states, gid);
+        return;
+    }
     var counter = 0,
         me = this,
         started = 0,
@@ -67,7 +72,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
         started++;
         (function (ii) {
-            console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
+            //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
             me.getTrackPart(gid, states[ii].t1, states[ii].t2, function (data) {
                 states[ii].coords = data;
                 //console.log('done loading part #', ii);
@@ -175,9 +180,9 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                             }
 
                         }
-                        //if (data.sensors[jj].GID == 761 || data.sensors[jj].GID =="761"){
-                        //    console.log("Newurl=", newUrl);
-                        //    console.log("   url=", url)}
+                       // if (data.sensors[jj].GID == 759 || data.sensors[jj].GID =="759"){
+                            //console.log("   Newurl=", newUrl);
+                            //console.log("   url=", url)}
                         request({
                             url: newUrl + '&gid=' + data.sensors[jj].GID,
                             json: true
@@ -473,7 +478,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
     var url = this.createParamsStr(from, to, this.undef_t, this.undef_d, this.stop_s,
         this.stop_d, this.move_s, this.move_d, 'messages');
 
-    //console.log(url, "Track 401");
+    //console.log(url+ '&gid=' + gid, "Это сам запрос");
 
 
     request({
@@ -481,7 +486,7 @@ TracksManager.prototype.getTrackPart = function (gid, from, to, callback) {
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log("Track loaded");
+            //console.log(" Запрос успешен Track loaded");
             callback(body);
         } else {
             console.log(" Ошибка !!!!!", error);
@@ -575,7 +580,7 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log("Данные получены");
+            //console.log("Данные для предсказания получены");
             callback(body, pointsStr);
         } else {
 

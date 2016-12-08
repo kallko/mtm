@@ -142,7 +142,7 @@ var myLayout = new GoldenLayout({
                             },
                             {
                                 type: 'component',
-                                title: 'Корректировка решения',
+                                title: 'Корректировка',
                                 componentName: 'template',
                                 componentState: {templateId: 'edit-condition'}
                             }

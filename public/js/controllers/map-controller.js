@@ -18,7 +18,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             gpsPushMarkers=[];                          // Массив маркеров пушей текущего маршрута
 
 
-        scope.params = {} //scope.params || Settings.load();
+            scope.params = {} //scope.params || Settings.load();
+            scope.opacityMode = false;
         //timeThreshold = scope.params.timeThreshold * 60;
 
         initMap();
@@ -99,6 +100,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // отрисовать фактический трек
         function drawRealRoute(route) {
 
+            scope.opacityMode = false;
 
 
             if (!route || route.real_track == "invalid parameter 'gid'. ") return;
@@ -420,12 +422,27 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 if(pushes[i].long_away){
                     pushColor='#e01283';
                 }
-                tmpVar.source = 'gps';
+                tmpVar.source = pushes[i];
 
                 tmpVar.setIcon(getIcon('M', iconIndex, pushColor, 'black'));
                 tmpVar.task_ID=pushes[i].number;
 
-
+                tmpVar.on('click', function(event){
+                    var m = map;
+                    var targetPoint;
+                    for (var l in m._layers) {
+                        console.log( "Stop serching",l , m._layers[l]);
+                        if (m._layers[l] &&
+                            m._layers[l].source &&
+                            m._layers[l].source.TASK_NUMBER &&
+                            m._layers[l].source.TASK_NUMBER == event.target.source.number) {
+                            targetPoint = m._layers[l];
+                            break;
+                        }
+                    }
+                    console.log(event.target.source.number, targetPoint);
+                    shiftToOpacityMode(targetPoint);
+                });
 
 
                 map.addLayer(tmpVar);
@@ -573,7 +590,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         rootScope.gpsConfirm=false;// подтверждена ли точка по GPS
                         scope.dragendPoint = event.target;// объект события при драге  маркера-point
-                        rootScope.$emit('askGPSConfirmPoint', {point: event.target.source.waypoint});//point index controller
+                        rootScope.$emit('askGPSConfirmPoint', {point: event.target.source.waypoint, uniqueID : event.target.source.uniqueID});//point index controller
                         if(rootScope.gpsConfirm){
                              message="Эта точка ранее уже была подтверждена GPS данными. Вы уверены, что хотите изменить ее координаты?";
                             if (!confirm(message)){
@@ -589,15 +606,27 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             + 'Новые координаты ' + event.target.getLatLng().lat.toPrecision(8) + " " + event.target.getLatLng().lng.toPrecision(8);
                         rootScope.$emit('ReqChengeCoord', {message: message});
 
+
+                    })
+                    .on('click', function(event){
+                        shiftToOpacityMode(event.target);
                     })
                     .on('dblclick', function(event){
                         console.log('this is waypoint ', event.target);
                     })
                     .on('mouseover', function(event){
-                        rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
-                        var source = event.target.source;
-                        //console.log(source);
-                        scope.drawConnectsActivePoint(source.stopState, source.NUMBER, source.TASK_NUMBER);
+                        scope.mousein = true;
+                        setTimeout (function() {
+                            if (scope.mousein) {
+                            rootScope.$emit('clickOnMarkerWayPiont', event.target.source);
+                            var source = event.target.source;
+                            //console.log(source);
+                            scope.drawConnectsActivePoint(source.stopState, source.NUMBER, source.TASK_NUMBER);}
+                        }, 500);
+
+                    })
+                    .on('mouseout', function(event){
+                        scope.mousein = false;
                     });
 
 
@@ -657,7 +686,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         scope.drawConnectsActivePoint = function(stopState, number, TASK_NUMBER){
-            if(stopState == undefined){
+            if(stopState == undefined || !number || !TASK_NUMBER){
                 return;
             }
             if(scope.singleConnect !== undefined){
@@ -673,7 +702,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             outer:for (var i = 0; markersArr.length > i; i++) {
                 if('source' in markersArr[i] && markersArr[i].source.state == "ARRIVAL" && 'servicePoints' in markersArr[i].source){
                     for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
-                        if(number == markersArr[i].source.servicePoints[j] + 1){
+                        if(number == markersArr[i].source.servicePoints[j]){
                             var servicePointsLat = markersArr[i]._latlng.lat;
                             var servicePointsLng = markersArr[i]._latlng.lng;
                             break outer;
@@ -688,6 +717,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             while (j < markersArr.length) {
                 if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                     if (number == markersArr[j].source.NUMBER) {
+                        console.log("Before error", parseFloat(servicePointsLat), parseFloat(servicePointsLng), parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng));
                         var polyline = new L.Polyline([[parseFloat(servicePointsLat), parseFloat(servicePointsLng)], [parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng)]], {
                             color: '#46b8da',
                             weight: 4,
@@ -740,27 +770,23 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         rootScope.$on('ResChengeCoord', function(event, bool, confirm){
             var newMarker = scope.dragendPoint;
-            if (bool == 'true'){
+            if (bool ){
 
                 changeWaypointCoordinates(newMarker, newMarker.getLatLng().lat.toPrecision(8), newMarker.getLatLng().lng.toPrecision(8), confirm);
                 console.log("New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
                 newMarker.source.waypoint.CONFIRMBYGPS="true";
                 console.log("NEW New MARKER", newMarker.source.waypoint.CONFIRMBYGPS);
+                scope.$emit('addPointHistory', newMarker.source, "lat-lon change");
                 rootScope.$emit('showNotification', {text:'Координаты изменены', duration:2000});
-                rootScope.$emit('statusUpdate');
                 $('#notification_wrapper').css('opacity', '1');
-                //newMarker.source.waypoint.LAT=event.target.getLatLng().lat.toPrecision(8);
-                //newMarker.source.waypoint.LON=event.target.getLatLng().lng.toPrecision(8);
+
 
             } else {
-
-                //console.log(newMarker, "newMarker");
 
                 newMarker.setLatLng([newMarker.source.waypoint.LAT, newMarker.source.waypoint.LON]  ,{draggable:'true'}).update();
             }
         });
 
-        //rootScope.$on('confirmViewPointEditing', function(event, data){}); // прием события от подтвержденной карточки остановки
 
         // перевести timestamp в строковой формат времени минуты:часы
         function mmhh(time) {
@@ -931,6 +957,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             rootScope.$on('drawRealTrack', function (event, route) {
                 //console.log('i gona  draw real route', route);
+                scope.route = route;
                 drawRealRoute(route);
                 drawAllPoints(route.points)
             });
@@ -1132,10 +1159,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
             lat=parseFloat(lat);
             lon=parseFloat(lon);
-            console.log("Работает функция центровки по координате", lat, lon);
+            console.log("!!!!!!Работает функция центровки по координате", lat, lon);
 
-            var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
-                offset = map.getSize(),
+            var zoom = map.getZoom() > 15 ? map.getZoom() : 15;
+                console.log ("Set ZOOM to", zoom);
+            var offset = map.getSize(),
                 tmp = map.project(new L.LatLng(lat, lon), newZoom||zoom).subtract(
                     [
                         position.width / 2 - offset.x / 2 + position.offset.left,
@@ -1152,14 +1180,16 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         // Проверка на добавление в остановку обслуживания точки, которая уже обслуживается этим стопом.
         function checkAndAddNewWaypointToStop(stop, indx){
-
+            console.log("checkAndAddNewWaypointToStop", stop, indx, markersArr.length);
 
             //Нахождение маркера соответсвующего найденному waypoint
             var i=0;
             while(i<markersArr.length){
-                if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==(indx+1))){
+                if (markersArr[i].source != undefined) console.log(markersArr[i].source.NUMBER, indx);
+
+                if((typeof (markersArr[i].source)!='undefined') && (typeof (markersArr[i].source.NUMBER)!='undefined') && (markersArr[i].source.NUMBER==indx)){
                     var marker=markersArr[i];
-                    //console.log('marker for waypoint', marker)
+                    console.log('marker for waypoint', marker);
                     break;
                 }
                 i++;
@@ -1180,11 +1210,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //var oldStop= $.extend(true, {}, wayPoint.stopState);
 
             wayPoint.real_service_time = 0;
-
+            scope.$emit('addPointHistory', wayPoint, "connect from map with stop", stop.t1);
 
             // Проверка на аккуратность и внимательность человекаю Не пытается ли он связать уже связанные точку и стоп
             if(typeof(wayPoint.stopState)!='undefined' && typeof(wayPoint.stopState.servicePoints)!='undefined'){
-                var i=0;
+                i=0;
                 var duplicate=false;
 
                 //console.log("Start Duplicate Checkfor wayPoint", wayPoint.stopState.servicePoints, "and indx", indx  );
@@ -1247,6 +1277,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                 if(typeof (stop.source.servicePoints)=='undefined'){
+                    console.log('Create 1 first servicePoints');
                     stop.source.servicePoints=[];
                 }
                 stop.source.servicePoints.push(indx);
@@ -1260,6 +1291,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //// если этим стопом не обслужена еще ни одна точка, то создаем массив, закидываем туда точку и уходим.
             if(typeof (typeof(stop.source)!= 'undefined' && stop.source.servicePoints)=='undefined'){
 
+
+                console.log('Create 2 first servicePoints');
                 stop.source.servicePoints=[];
                 stop.source.servicePoints.push(indx);
 
@@ -1287,7 +1320,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     minDist=dist;
                     var  minLAT=LAT;
                     var  minLNG=LNG;
-                    scope.minI=i;
+                    console.log("Set of minI", scope.tempCurrentWayPoints[i]);
+                    scope.minI=scope.tempCurrentWayPoints[i].NUMBER;
+                    scope.minIIndx = i;
                 }
                 i++;
             }
@@ -1310,10 +1345,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     opacity: 0.5,
                     smoothFactor: 1});
                 map.addLayer(scope.polyline);
-                if(scope.tempCurrentWayPoints[scope.minI]==scope.baseCurrentWayPoints[scope.minI]) {
+                if(scope.tempCurrentWayPoints[scope.minIIndx]==scope.baseCurrentWayPoints[scope.minIIndx]) {
 
 
-                    findAndClickMarker(scope.tempCurrentWayPoints[scope.minI]);
+                    findAndClickMarker(scope.tempCurrentWayPoints[scope.minIIndx]);
                 } else{
                     // console.log("!!!!Spider");
                 }
@@ -1334,6 +1369,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         // При зуме карты в любом направлении все омс маркеры теряют свойствоство spiderfy если они его до этого имели.
 
         scope.drowConnect = false;
+        scope.drawMiniMarkers = false
         map.on('zoomend', function(event){
             scope.tempCurrentWayPoints=[];
             if (map.getZoom() > 17 && markersArr != undefined && !scope.drowConnect) {
@@ -1341,11 +1377,32 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     map.removeLayer(scope.learConnectWithStopsAndPoints);}
                 drowConnectWithStopsAndPoints();
                 scope.drowConnect = true;
+
+
+
             }else if(scope.drowConnect && map.getZoom() <= 17) {
                 map.removeLayer(scope.learConnectWithStopsAndPoints);
                 scope.drowConnect = false;
             }
             scope.tempCurrentWayPoints=scope.baseCurrentWayPoints;
+
+            if (map.getZoom()>17 && scope.route && !scope.drawMiniMarkers) {
+                if (scope.miniMarkers != undefined) map.removeLayer(scope.miniMarkers);
+                addMiniMarkers();
+                scope.drawMiniMarkers = true;
+            } else {
+                if (map.getZoom()<17) {
+                   // console.log("try to remove layer" , scope.miniMarkers.length);
+                    try{
+                    map.removeLayer(scope.miniMarkers);
+                    } catch (e) {
+                        console.log("Error", e);
+                    }
+
+                  //  console.log("try to remove 2 layer" , scope.miniMarkers.length);
+                    scope.drawMiniMarkers = false;
+                }
+            }
         });
 
 
@@ -1383,7 +1440,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         while (j < markersArr.length) {
                             if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
                                 for (var k = 0; arrIndexStopPoints.length > k; k++) {
-                                    if (arrIndexStopPoints[k] + 1 == markersArr[j].source.NUMBER) {
+                                    if (arrIndexStopPoints[k] == markersArr[j].source.NUMBER) {
                                         if (markersArr[j]._latlng.lat != undefined && markersArr[j]._latlng.lng != undefined && servicePointsLat != undefined && servicePointsLng != undefined ){
 
                                             //console.log(servicePointsLat, servicePointsLng, markersArr[j]._latlng.lat, markersArr[j]._latlng.lng);
@@ -1408,11 +1465,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             if (gpsPushMarkers !=undefined) {
-                var k=0;
+                 k=0;
 
                 while(k<gpsPushMarkers.length){
                     var mobilePush=gpsPushMarkers[k];
-                    var i=0;
+                    i=0;
                     while (i<markersArr.length) {
                         if (markersArr[i].source != undefined && markersArr[i].source.TASK_NUMBER!=  undefined && markersArr[i].source.TASK_NUMBER==mobilePush.task_ID){
                             break;
@@ -1477,7 +1534,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             i=0;
             // добавляем новые координаты для spider объектов. берем из omsPoints
             while (i<omsPoints.length) {
+                if (omsPoints[i].source.NUMBER == undefined) {
+                    i++;
+                    continue;
+                }
                 var N=omsPoints[i].source.NUMBER;
+                console.log("Before error N", N, "omsPoints[i].source", omsPoints[i].source);
                 scope.tempCurrentWayPoints[N-1].LAT=omsPoints[i]._latlng.lat;
                 scope.tempCurrentWayPoints[N-1].LON=omsPoints[i]._latlng.lng;
                 i++
@@ -1494,7 +1556,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var size = markersArr.length;
             while (i<size){
                 if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
-                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                    if (markersArr[i].source.NUMBER==(indx)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
                         //container.remake = true;
@@ -1534,7 +1596,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var size = markersArr.length;
             while (i<size){
                 if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
-                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                    if (markersArr[i].source.NUMBER==(indx)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
                         markersArr[i].source.confirmed=true;
@@ -1811,7 +1873,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         //Слушатель, который меняет данные на карте, после вызова карточки остановки
         rootScope.$on('confirmViewPointEditing', function(event, data, stop){
-            //console.log("Recieve data", data);
+            console.log("Recieve data", data);
             var i=0;
             while(i<data.length){
                 if (data[i].stopTime<0){
@@ -1832,7 +1894,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             // console.log("I try to change to time", time , "in point", indx, "of stop", stop);
             var i=0;
             while(i<markersArr.length){
-                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
+                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==indx){
                     var container=markersArr[i];
                     // console.log("Find marker", container);
 
@@ -1840,6 +1902,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 i++;
             }
             container.source.real_service_time=time*60;
+
+            scope.$emit('addPointHistory', container.source, "change service time", time*60);
+
             var symbol= container.options.title.indexOf("Реально");//22
             //console.log("Symb", symbol);
             var title=container.options.title.substring(0,symbol+22);
@@ -1856,9 +1921,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
            ouer: for(var i = 0; markersArr.length > i; i++ ){
                 if('source' in markersArr[i] && 'servicePoints' in markersArr[i].source ){
                     for(var j = 0; markersArr[i].source.servicePoints.length > j; j++){
-                        if(markersArr[i].source.servicePoints[j] == row.NUMBER-1){
+                        if(markersArr[i].source.servicePoints[j] == row.NUMBER){
                             uniqueID = markersArr[i].source.uniqueID;
-                            deleteSomePointsFromStop(row.NUMBER -1, markersArr[i].source);
+                            deleteSomePointsFromStop(row.NUMBER, markersArr[i].source);
                             break ouer;
                         }
                     }
@@ -1884,7 +1949,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             // нахождение маркера дя точки, которая отвязывается
             var i=0;
             while(i<markersArr.length){
-                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==(indx+1)){
+                if (markersArr[i].source!=undefined && markersArr[i].source.NUMBER==indx){
                     var container=markersArr[i];
                     // console.log("Find marker", container);
 
@@ -1893,7 +1958,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
             //В стопе убирается информация о том, что он обслужил эту точку
-            var i=0;
+            i=0;
             while (i<stop.servicePoints.length){
                 //console.log("looking");
                 if (stop.servicePoints[i]==indx){
@@ -1927,7 +1992,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             delete container.source.confirmed_by_operator;
             delete container.source.limit;
 
-            var now =  parseInt(Date.now()/1000);
+            scope.$emit('addPointHistory', container.source, "unbind stop point", stop.t1);
+
+            var now =  rootScope.nowTime;
             container.source.status=5;
 
             var textStatus='опаздывает';
@@ -1972,7 +2039,20 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log(lat, lng );
             //Сформировать soap data и soap запрос
             rootScope.$emit('pushWaypointTo1С', newMarker.source.waypoint, confirm);
+            var route;
+            for(var i=0; i<rootScope.data.routes.length; i++){
+                if (rootScope.data.routes[i].uniqueID == newMarker.source.uniqueID) route = rootScope.data.routes[i];
+            }
 
+            scope.$emit('routeToChange', {
+                route: route,
+                serverTime: rootScope.nowTime,
+                demoMode: false,
+                workingWindow: rootScope.settings.workingWindowType,
+                allDrivers: rootScope.data.drivers,
+                allTransports: rootScope.data.transports
+
+            });
 
             //var soapStr=testSoap(newMarker.source);
             //console.log(soapStr);
@@ -1990,7 +2070,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 var i=0;
                 while (i<data.source.servicePoints.length){
                     //console.log("Hey!", data.source.servicePoints[i]+1);
-                    var number=data.source.servicePoints[i]+1;
+                    var number=data.source.servicePoints[i];
                     var j=0;
                     while(j<markersArr.length){
                         if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
@@ -2018,7 +2098,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 var i=0;
                 while (i<data.source.servicePoints.length){
                     //console.log("Hey!", data.source.servicePoints[i]+1);
-                    var number=data.source.servicePoints[i]+1;
+                    var number=data.source.servicePoints[i];
                     var j=0;
                     while(j<markersArr.length){
                         if(markersArr[j].source!=undefined && markersArr[j].source.NUMBER!=undefined && markersArr[j].source.NUMBER==number){
@@ -2200,7 +2280,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             var size = markersArr.length;
             while (i<size){
                 if(typeof (markersArr[i].stopIndx)=='undefined' && typeof (markersArr[i].source)!='undefined') {
-                    if (markersArr[i].source.NUMBER==(indx+1)) {
+                    if (markersArr[i].source.NUMBER==(indx)) {
                         num=markersArr[i].source.NUMBER;
                         container=markersArr[i];
                         markersArr[i].source.confirmed=true;
@@ -2218,17 +2298,17 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         rootScope.$on('makeWaypointGreen', function (event, index) {
-            console.log("Send ", (index-1));
-            makeWayPointMarkerGreen(index-1);
+            console.log("Send ", (index));
+            makeWayPointMarkerGreen(index);
         });
         rootScope.$on('makeWaypointBlue', function(event, index){
-            makeWayPointMarkerBlue(index-1);
+            makeWayPointMarkerBlue(index);
         });
 
 
         rootScope.$on('makeWaypointGrey', function (event, index) {
-            console.log("Send ", (index-1));
-            makeWayPointMarkerGrey(index-1);
+            console.log("Send ", (index));
+            makeWayPointMarkerGrey(index);
         });
 
         function strToTstamp(strDate, lockaldata) {
@@ -2305,9 +2385,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
             //console.log("Zoom2", map.getZoom());
             var newZoom = map.getZoom();
+            //map.setZoom(newZoom); // Добавка
             //console.log(map.getCenter());
             var centre = map.getCenter();
-            var zoom = map.getZoom() > 15 ? map.getZoom() : 15,
+            var zoom = map.getZoom(), //> 15 ? map.getZoom() : 15,
                 offset = map.getSize(),
                 tmp = map.project(new L.LatLng(centre.lat, centre.lng), zoom).subtract(
                     [
@@ -2316,9 +2397,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     ]),
                 target = map.unproject(tmp, zoom);
 
-            //console.log(zoom, offset, tmp, target);
-            setMapCenter(target.lat, target.lng, newZoom);
-            //console.log("Zoom3", map.getZoom());
+            //добавка вместо
+            // setMapCenter(target.lat, target.lng, newZoom);
+           setTimeout(function(){
+               console.log("Before timeout ", target.lat, target.lng, newZoom);
+               map.setView([target.lat, target.lng], newZoom);
+               //map.setZoom(newZoom);
+               console.log("After Timeout", map.getCenter(), map.getZoom());
+           }, 200);
+            //console.log("Zoom3", map.getZoom());om());
         }
 
 
@@ -2326,6 +2413,12 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             console.log("Готовимся к прорисовке");
             redrawTrac (states, id)
         });
+
+
+        rootScope.$on('updatePush', function (event, data) {
+
+        });
+
 
         function redrawTrac(states, id) {
             //для начала стираются старые данные
@@ -2383,8 +2476,8 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     drawPushes = true;  // Железно отрисовывать пуши.
 
                 //stops=[];
-                markersArr=[];
-                gpsPushMarkers=[];
+                //markersArr=[];
+                //gpsPushMarkers=[];
 
                 if( track!=undefined) {
                     //todo тестово отладочный блок
@@ -2392,7 +2485,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         if (track[i].t1 != track[i-1].t2){
 
                             console.log ("Проверка трека показала разрыв", track[i-1] , track[i] );
-                            if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
+                            //if (rootScope.data.settings.user == "ids.kalko" || rootScope.data.settings.user == "ids.dsp") alert("Обнаружен разрыв трека! Обратитесь к разработчику");
                         }
                     }
 
@@ -2401,7 +2494,11 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                         // console.log(i, "track", track[i], track[i].coords.constructor !== Array);
                         if (track[i].coords == null || track[i].coords.constructor !== Array || track[i].coords == undefined ) {
                             console.log("Это какой то бракованный СТЭЙТ. Я не буду его рисовать", track[i]);
-                            if (rootScope.settings.user == "ids.kalko" || rootScope.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
+                            //if (track[i].constructor !== Array ) {
+                            //    console.log("Найден гаденыш, убиваем");
+                            //    track.splice(i,1);
+                            //}
+                            //if (rootScope.settings.user == "ids.kalko" || rootScope.settings.user == "ids.dsp") alert("Обнаружен поломаный стейт, обратитесь к разработчику");
                             continue;
                         }
                         //console.log(" track[i].time",  track[i].coords);
@@ -2409,7 +2506,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                         //todo снять комментарий, когда правильно рассчитают время финиша
                         // console.log("Времена", track[i].coords[0].t, start, timeThreshold);
-                        if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold) {
+                        if( track[i].coords[0] == undefined || track[i].coords[0].t < start-timeThreshold-60*90) {
                             //console.log("Its too early track");
                             continue
                         }; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута.
@@ -2426,9 +2523,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             polyline = new L.Polyline(track[i].coords, {
                                 color: color,
                                 weight: 3,
-                                opacity: 0.8,
+                                opacity: 1,
                                 smoothFactor: 1
                             });
+                            track[i].inRoute = true;
                             if (i + 1 == track.length) {
                                 polyline.redrawer = true;
                                 markersArr.push(polyline);
@@ -2442,7 +2540,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             //stops.push(track[i]);
 
 // todo раскомментировать когда будет правильно рассчитываться время финиша
-                            if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
+                            if (track[i].coords.t1 < start - rootScope.settings.timeThreshold*60 - 60*90) continue; //не отрисовываем стопы больше чем за (указано в настройках) минут от начала маршрута
                             if (track[i].coords.t1 > end + rootScope.settings.timeThreshold*60) break; //не отрисовываем стопы больше чем за (указано в настройках) минут после окончания маршрута.
 
                             if (!drawStops) continue;
@@ -2517,9 +2615,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             if (i == track.length-1 )stopPolyline.redrawer = true;
 
 
-                            stopPolyline.on('click', function(event) {
-                                console.log(event.target);
-                            });
+                            //stopPolyline.on('click', function(event) {
+                            //    console.log(event.target);
+                            //});
                             stopPolyline.addTo(map);
 
 
@@ -2571,9 +2669,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                                 //console.log(scope.baseCurrentWayPoints[scope.minI].stopState, "connect", scope.currentDraggingStop.source);
 
-                                scope.baseCurrentWayPoints[scope.minI].stopState = scope.currentDraggingStop.source;// тщательно оттестировать
+                                scope.baseCurrentWayPoints[scope.minIIndx].stopState = scope.currentDraggingStop.source;// тщательно оттестировать
 
-                                if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time / 60) + " минут с точкой " + (scope.minI + 1) + " ?")) {
+                                if (confirm("Хотите связать стоп " + Math.round(scope.currentDraggingStop.source.time / 60) + " минут с точкой " + (scope.minI) + " ?")) {
                                 } else {
                                     return
                                 }
@@ -2581,18 +2679,28 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                                 checkAndAddNewWaypointToStop(scope.currentDraggingStop, scope.minI);
                                 scope.currentDraggingStop = null;
-                                console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minI].route_id);
-                                rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minI].route_id);// Пересчитать фактический порядок выполнения точек
+                                console.log("отправляем на пересчет", scope.baseCurrentWayPoints[scope.minIIndx].route_id);
+                                rootScope.$emit('reFact', scope.baseCurrentWayPoints[scope.minIIndx].route_id);// Пересчитать фактический порядок выполнения точек
                                 rootScope.$emit('checkInCloseDay');
 
 
                                 var reRoute;
                                 for (var i=0; i< rootScope.data.routes.length; i++){
-                                    if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minI].uniqueID){
+                                    if (rootScope.data.routes[i].uniqueID == scope.baseCurrentWayPoints[scope.minIIndx].uniqueID){
                                         reRoute = rootScope.data.routes[i];
                                     }
                                 }
                                 rootScope.showProblem(reRoute);
+                                scope.$emit('routeToChange', {
+                                    route: reRoute,
+                                    serverTime: rootScope.nowTime,
+                                    demoMode: scope.demoMode,
+                                    workingWindow: rootScope.settings.workingWindowType,
+                                    allDrivers: rootScope.data.drivers,
+                                    allTransports: rootScope.data.transports
+
+                                });
+
 
                             });
 
@@ -2622,12 +2730,15 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                 });
                             tmpVar.setIcon(getIcon(i, 7, color, 'black'));
                             tmpVar.redrawer = true;
-                            tmpVar.on('click', function (event){
-                                //console.log (tmpVar._latlng);
-                                console.log(event.target);
-                                redrawTrac(event.target);
-                            });
+                            //tmpVar.on('click', function (event){
+                            //    //console.log (tmpVar._latlng);
+                            //    console.log(event.target);
+                            //    redrawTrac(event.target);
+                            //});
                             addMarker(tmpVar);
+                            var opacity;
+                            scope.opacityMode ? opacity = 0.2 : 1;
+                            tmpVar.setOpacity(opacity);
                             //map.addLayer(tmpVar);
                             //oms.addMarker(tmpVar);
 
@@ -2653,6 +2764,134 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
     //        }
         }
+
+        function shiftToOpacityMode(target) {
+            if (!target) return;
+            console.log("TARGET", target);
+            scope.opacityMode = !scope.opacityMode;
+            var localM = map;
+
+            if (scope.opacityMode) {
+                for (var i in localM._layers) {
+                    if (localM._layers[i].source &&
+                        typeof (localM._layers[i].source) == 'object' &&
+                        localM._layers[i].source.number == target.source.TASK_NUMBER) {
+                        localM._layers[i].setOpacity(1);
+                        continue;
+                    }
+
+                    if (target == localM._layers[i]){
+                        localM._layers[i].setOpacity(1);
+                        continue;
+                    }
+
+                    if (target.source.stopState &&
+                        target.source.stopState == localM._layers[i].source){
+                        localM._layers[i].setOpacity(1);
+                        continue;
+                    }
+
+                    if (localM._layers[i].source &&
+                        localM._layers[i].source.lat &&
+                        localM._layers[i].source.lon &&
+                        localM._layers[i].source.state &&
+                        localM._layers[i].source.state == "ARRIVAL"
+                    ) {
+
+                        //console.log(parseFloat(target.source.LAT), parseFloat(target.source.LON), parseFloat(localM._layers[i].source.lat), parseFloat(localM._layers[i].source.lon));
+                        var dist = getDistanceFromLatLonInM(parseFloat(target.source.LAT), parseFloat(target.source.LON), parseFloat(localM._layers[i].source.lat), parseFloat(localM._layers[i].source.lon))
+                        var opacity = 0.1 + rootScope.data.settings.stopRadius * 0.8 / (rootScope.data.settings.stopRadius + dist);
+                        //console.log("stop", localM._layers[i], "dist", dist, "opacity", opacity);
+                        localM._layers[i].setOpacity(parseFloat(opacity));
+                        continue;
+                    }
+
+
+                    try{
+                        if ((localM._layers[i].source && typeof (localM._layers[i].source) != 'number')|| localM._layers[i].redrawer) localM._layers[i].setOpacity(0.3);
+                    } catch(e) {
+                        console.log(e, localM._layers[i]);
+
+                    }
+
+                }
+            } else {
+
+                for (var i in localM._layers) {
+
+                    try{
+                        if ((localM._layers[i].source && typeof (localM._layers[i].source) != 'number')|| localM._layers[i].redrawer)localM._layers[i].setOpacity(1);
+                    } catch(e) {
+                        console.log(e, localM._layers[i]);
+
+                    }
+
+                }
+            }
+
+        }
+
+
+        function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+            try{
+                var R = 6371; // Radius of the earth in km
+                var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+                var dLon = deg2rad(lon2 - lon1);
+                var a =
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                    ;
+                var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                var d = R * c; // Distance in km
+                //console.log("lat1", lat1, "lon1", lon1, "lat2", lat2, "lon2", lon2, ' dist', d*1000);
+                return d * 1000;
+
+                function deg2rad(deg) {
+                    return deg * (Math.PI / 180)
+                }
+
+            } catch (e) {
+                log.error( "Ошибка "+ e + e.stack);
+            }
+        }
+
+
+        function addMiniMarkers(){
+            if(scope.route.real_track == undefined || scope.route.real_track.length == 0) return;
+
+            scope.miniMarkers = new L.layerGroup().addTo(map);
+
+            for (var i = 0; i < scope.route.real_track.length; i++){
+                if (scope.route.real_track[i].state != "MOVE" ||
+                    scope.route.real_track[i].coords == undefined ||
+                    !scope.route.real_track[i].inRoute ||
+                    scope.route.real_track[i].coords.length < 6) continue;
+                for (var j = 5; j < scope.route.real_track[i].coords.length; j = j+5){
+
+                    var circleLocation = new L.LatLng(scope.route.real_track[i].coords[j].lat, scope.route.real_track[i].coords[j].lon),
+                        circleOptions = {
+                            color: 'green',
+                            fillColor: 'green'
+                        };
+
+                    var circle = new L.Circle(circleLocation, 0.2, circleOptions);
+                    circle.source = i*j;
+                    var date = new Date(scope.route.real_track[i].coords[j].t*1000);
+                    var hours = date.getHours();
+                    var minutes = "0" + date.getMinutes();
+                    var seconds = "0" + date.getSeconds();
+                    var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+                    circle.bindPopup("" + formattedTime);
+                    //circle.on('mouseover', function(event) {console.log("mouseover", event.target.source)});
+                    scope.miniMarkers.addLayer(circle)
+                }
+
+                //console.log("Move finded");
+            }
+
+        }
+
 
     }]);
 
