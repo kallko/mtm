@@ -589,6 +589,104 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
     });
 };
 
+
+TracksManager.prototype.getObjectID = function(text, callback){
+    //console.log(text);
+     var url1 = encodeURIComponent(text);
+     var resUrl = "http://sac.sngtrans.com.ua/search?lang=ua&c=ua&q=" + url1;
+    //console.log(text);
+    //console.log(resUrl);
+    request({
+        url: resUrl,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            //console.log(body);
+            callback(body);
+        }
+    });
+};
+
+TracksManager.prototype.getAllHouses = function(childs, callback){
+    //console.log(childs);
+
+    if(childs.length == undefined) {
+        var obj=JSON.parse(JSON.stringify(childs));
+        childs = [];
+        childs.push(obj);
+    }
+    var responseList = 0;
+    var requestList = 0;
+    var result = [];
+    console.log("Start LatLon serching", childs.length);
+    if(childs.length == 0) callback(result);
+    for (var i = 0; i < childs.length; i++){
+        if (childs[i].childs == undefined && childs.length ==1 ) callback(result);
+        if (childs[i].childs == undefined ) continue;
+        for (var j = 0; j < childs[i].childs.length; j++) {
+            if (childs[i].childs[j] == undefined) continue;
+            requestList++;
+                var resUrl = "http://sac.sngtrans.com.ua/getobj?id=" + childs[i].childs[j].id;
+                console.log(resUrl);
+                request({
+                    url: resUrl,
+                    json: true
+                }, function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        result.push(body);
+                        console.log("adress Recieved");
+                        responseList++;
+                        //console.log("Sucees checout", requestList == responseList, requestList, responseList);
+                        if(requestList == responseList) {
+                            callback(result);
+                        }
+                    } else {
+                        responseList++;
+                        console.log("Error chrckout", requestList == responseList);
+                        if(requestList == responseList) {
+                            callback(result);
+                        }
+                    }
+                })
+
+            }
+
+        }
+
+    };
+
+
+
+TracksManager.prototype.giveMeLatLonByID = function(id, callback){
+    //console.log(childs);
+    var result = {};
+    if(!id) return;
+
+    //console.log("Start Centroid", id);
+            var resUrl = "http://sac.sngtrans.com.ua/getcentroid?id=" + id;
+            //console.log(resUrl);
+            request({
+                url: resUrl,
+                json: true
+            }, function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    result = body;
+                    //console.log(id, "LatLon Recieved");
+                    callback(id, result);
+
+                } else {
+                    console.log ("FIND ERROR IN LATLON");
+                    callback(id, {error : 'error'});
+                }
+            })
+
+
+};
+
+
+
+
+
 // сформировать отчет по пробегам и типам стейтов
 TracksManager.prototype.getStateDataByPeriod = function () {
     var gids = [1086, 900, 758, 709], //[741,708,711,710,712,764,709,715,739,742,753,897,725,714,716,718,701,713,723,746,735,762,812,720,733,814,896,756,721,706,759,757,744,747,760,717,758,719,755,734,809,707,738,736,748,763,749,754,813,811,705,743,899,745,933,900,697,761,810,895],

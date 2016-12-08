@@ -285,4 +285,13 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
     }
 
+
+    scope.analysisIDSpoints = function () {
+        http.get('./analysisIDSpoints')
+            .success(function (data){
+                console.log("Success", data);
+
+            });
+    }
+
 }]);

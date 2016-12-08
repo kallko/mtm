@@ -376,7 +376,8 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             for (var i = 0; i < route.points.length > i && i < route.lastPointIndx + 1 - toMoveArr.length; i++) {
                 if (route.points[i].status != scope.STATUS.FINISHED &&
                     route.points[i].status != scope.STATUS.FINISHED_LATE &&
-                    route.points[i].status != scope.STATUS.FINISHED_TOO_EARLY) {
+                    route.points[i].status != scope.STATUS.FINISHED_TOO_EARLY &&
+                    route.points[i].status != scope.STATUS.CANCELED) {
                     toMoveArr.push(route.points[i]);
                     route.points.splice(i, 1);
                     i--;
@@ -1205,13 +1206,16 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 scope.route.car_position ={};
                 scope.route.car_position.lat = scope.route.real_track[scope.route.real_track.length -1].lat;
                 scope.route.car_position.lon = scope.route.real_track[scope.route.real_track.length -1].lon;
-                return;
+
             }
         }
 
 
         function createDisplayCollection(){
             scope.display = [];
+            scope.routeToConfirm = {};
+            scope.routeToConfirm.points = [];
+            scope.routeToConfirm.uniqueID = scope.route.uniqueID;
             scope.changedRoute.reCalc = "begin";
             for (var  i= 0; i< scope.route.points.length; i++){
                 if (scope.route.points[i].status <4 || scope.route.points[i].status == 8) {
@@ -1231,9 +1235,11 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     if (scope.route.points[i].row_id == scope.changedRoute.points[j].row_id ) {
                        //console.log("Соответствие найдено");
                         //console.log("Создаем и проверяем точку точку", scope.route.points[i]);
+                        scope.routeToConfirm.points.push(scope.route.points[i]);
                         scope.display.push({
                             uniqueID: scope.route.uniqueID,
                             row_id: scope.route.points[i].row_id,
+                            END_WAYPOINT : scope.route.points[i].END_WAYPOINT,
                             exNumber: scope.route.points[i].NUMBER,
                             status: getTextStatuses(scope.route.points[i].status).name,
                             changes: scope.change_time || 0,
@@ -1392,10 +1398,10 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
         scope.confirmEditing = function() {
-            console.log("Существует", rootScope.data.routes, "Отредактировано", scope.changedRoute);
+            console.log("Существует", rootScope.data.routes, "Отредактировано", JSON.parse(JSON.stringify(scope.routeToConfirm)));
             // проверка, всем ли точкам назначено новое время
             for (var i=0; i<scope.changedRoute.points.length; i++){
-                if(scope.changedRoute.points[i].new_arrival_time == undefined) {
+                if(scope.changedRoute.points[i].new_arrival_time == undefined && scope.changedRoute.points[i].status != 8) {
                     alert("Маршут просчитан неправильно. Есть задания без времени прибытия");
                     return;
                 }
@@ -1405,45 +1411,61 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                 return a.new_arrival_time - b.new_arrival_time;
             }
 
-            scope.changedRoute.points.sort(compareNewArrivalTime);
+            scope.routeToConfirm.points.sort(compareNewArrivalTime);
 
             //Этап 0 Определяем, какой роут редактируем
             var rootRoute;
-            for (var i=0; i<rootScope.data.routes.length; i++){
-                if(rootScope.data.routes[i].uniqueID == scope.changedRoute.uniqueID){
+            for (i=0; i<rootScope.data.routes.length; i++){
+                if(rootScope.data.routes[i].uniqueID == scope.routeToConfirm.uniqueID){
                     rootRoute = rootScope.data.routes[i];
                     console.log("Маршрут для редактирования выбран");
                     break;
                 }
             }
-            console.log("До редактирования в роуте точек =", rootRoute.points.length, scope.changedRoute.points.length );
+            console.log("До редактирования в роуте точек =", rootRoute.points.length, scope.routeToConfirm.points.length );
 
 
 
 
             //Этап 1 Убираем все пересчитанные точки из базового роута
 
-            for ( i=0; i<scope.changedRoute.points.length; i++){
-                for (var j=0; j<rootRoute.points.length; j++){
-                    if(scope.changedRoute.points[i].waypoint.gIndex == rootRoute.points[j].waypoint.gIndex){
+            for ( i=0; i<scope.routeToConfirm.points.length; i++){
+                  for (var j=0; j<rootRoute.points.length; j++){
+                    if(scope.routeToConfirm.points[i].waypoint.gIndex == rootRoute.points[j].waypoint.gIndex){
                         rootRoute.points.splice(j,1);
                         break;
                     }
                 }
             }
 
-            console.log("После удаления", rootRoute.points.length, scope.changedRoute.points.length);
-            rootRoute.points=rootRoute.points.concat(scope.changedRoute.points);
-            console.log("После объединения точек в ротуе", rootRoute.points.length);
+            for (i=0; i<rootRoute.points.length; i++){
+                console.log("Looking for status 8", rootRoute.points[i].status);
+                if (rootRoute.points[i].status == 8) {
+                    console.log("!!!! DELETE CANCELED POINT");
+                    rootRoute.points.splice(i,1);
+                    i--;
+                }
+            }
+
+            console.log("После удаления", rootRoute.points.length, scope.routeToConfirm.points.length);
+            rootRoute.points=rootRoute.points.concat(scope.routeToConfirm.points);
+            console.log("После объединения точек в ротуе is", rootRoute.points);
 
 
             //Этап 2 меняем номера заданий, arrival_time_ts promised_window_changed change_time
 
-            for (var i=0; i<rootRoute.points.length; i++){
-                console.log(i);
+            for (i=0; i<rootRoute.points.length; i++){
                 rootRoute.points[i].OLDNUMBER = rootRoute.points[i].NUMBER+0;
                 rootRoute.points[i].NUMBER = i+1;
                 delete rootRoute.points[i].fact_number;
+            }
+
+            console.log("Reorange NUMBER", rootRoute.points);
+           // return;
+
+            for (i=0; i<rootRoute.points.length; i++){
+
+
                 if (rootRoute.points[i].new_arrival_time != undefined && rootRoute.points[i].new_arrival_time !=rootRoute.points[i].arrival_time_ts ){
                     rootRoute.points[i].arrival_time_ts = rootRoute.points[i].new_arrival_time;
                     if(rootRoute.points[i].change_time == undefined) rootRoute.points[i].change_time=0;
@@ -1497,7 +1519,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             //console.log("RootRoute", rootRoute);
 
             //todo !!! переделать костыль для непросчитанных маршрутов.
-            //console.log("Новый роут", rootRoute);
+            console.log("Новый роут", rootRoute);
+            prepareRouteToSave (rootRoute);
+
             rootRoute.toSave = true;
             rootRoute.DISTANCE = 100;
             rootRoute.VALUE = 100;
@@ -1925,6 +1949,25 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
             }
         };
+
+
+function prepareRouteToSave (route) {
+    if (!route || !route.points || route.points.length < 2) return;
+
+    for (var  i = 1; i < route.points.length; i++) {
+        var point = route.points[i];
+        var prePoint = route.points[i-1];
+
+        point.START_LAT = prePoint.END_LAT;
+        point.START_LON = prePoint.START_LON;
+        point.START_WAYPOINT = prePoint.START_WAYPOINT;
+
+    }
+
+
+}
+
+
 
 
 

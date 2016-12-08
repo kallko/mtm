@@ -1673,6 +1673,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             if (routes.length == 0) return;
 
+            //todo тестовое дополнения оригинального маршрута
+
             console.log('sending routes to save', routes);
 
             // отправляем переупакованные данныена пересчет

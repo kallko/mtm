@@ -469,7 +469,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
 
                 if (waypoints == undefined) return;
-                console.log('drivers', drivers.length);
+                //console.log('drivers', drivers.length);
                 log.l('waypoints.length = ' + waypoints.length);
                 //console.log(waypoints, "soap.js:344");
 
