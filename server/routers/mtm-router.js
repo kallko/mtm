@@ -30,6 +30,7 @@ var express = require('express'),
 var cashedDataArr = {},  // глобальный кеш
     updateCacshe = {},   // Тестовый кэш
     pointsIDS =[],          // todo переменная одноразовая для анализа геокодирования точек
+    bigData = [],
     aggregatorError = "invalid parameter 'gid'. ",
     stopUpdateInterval = 120,                       // интервал обновлений стопов
     updateTrackInterval = 30,                       // интервал загрузки новых данных при отрисовке треков
@@ -156,7 +157,7 @@ router.route('/loadData')
     });
 
 
-
+var existData = [];
 router.route('/analysisIDSpoints')
     .get(function(req, res){
         if (develop) console.log("Start load data".green);
@@ -176,14 +177,26 @@ router.route('/analysisIDSpoints')
         //        pointsIDS.push(line);
         //});
             console.log("pointsIDS.length", pointsIDS.length);
-            //setTimeout(function(){
-            //    console.log("pointsIDS.length", pointsIDS.length);
-            //    parseTextFileData();
-            //}, 1000);
+        fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
 
-            var i = 65;
+            existData = JSON.parse(data);
+            console.log("ExistData", existData[0], existData.length);
+            var i = 0;
+            fs.readFile('./logs/bigData2.txt', 'utf8', function (err1, data1) {
+                bigData = [];
+                bigData = JSON.parse(data1);
+                readandConcatNextFile(i);
 
-            readandConcatNextFile(i);
+            });
+        });
+
+
+
+
+
+
+
+
 
             //fs.readFile('./logs' + '/' +'resultforIDS-1.txt', 'utf8', function (err, data) {
             //    console.log("Error in load", err);
@@ -207,37 +220,97 @@ router.route('/analysisIDSpoints')
     });
 
 function readandConcatNextFile(indx){
-    if (indx>66) return;
-    console.log("indx", indx);
-    var fileName = "resultforIDS-";
-    if(indx<8) {
-        fileName += "" + indx + ".txt";
-    } else {
-        fileName += "" + (indx-7);
-    }
-    console.log(fileName);
-    //if (fileName == "resultforIDS-3" ||
-    //    fileName == "resultforIDS-12" ||
-    //    fileName == "resultforIDS-15" ||
-    //    fileName == "resultforIDS-23" ||
-    //    fileName == "resultforIDS-24" ||
-    //    fileName == "resultforIDS-26" ||
-    //    fileName == "resultforIDS-31" ||
-    //    fileName == "resultforIDS-34" ||
-    //    fileName == "resultforIDS-35" ||
-    //    fileName == "resultforIDS-36" ||
-    //    fileName == "resultforIDS-42" ||
-    //    fileName == "resultforIDS-43" ||
-    //    fileName == "resultforIDS-45" ||
-    //    fileName == "resultforIDS-48" ||
-    //    fileName == "resultforIDS-51" ||
-    //    fileName == "resultforIDS-55" ||
-    //    fileName == "resultforIDS-56" ||
-    //    fileName == "resultforIDS-57"
-    //    ) {
-    //    indx++;
-    //    readandConcatNextFile(indx);
+
+    //if (indx > 0) {
+    //    console.log("testFinish".blue);
+    //    log.toFLog('realLatLon.json', realLatLon, true);
+    //    return;
     //}
+
+    var filesNames = [
+        {name : "resultforIDS-1.txt"},
+        {name : "resultforIDS-2.txt"},
+        {name : "resultforIDS-3.txt"},
+        {name : "resultforIDS-4.txt"},
+        {name : "resultforIDS-5.txt"},
+        {name : "resultforIDS-6.txt"},
+        {name : "resultforIDS-7.txt"},
+        {name : "resultforIDS-1"},
+        {name : "resultforIDS-2"},
+        {name : "resultforIDS-4"},
+        {name : "resultforIDS-5"},
+        {name : "resultforIDS-6"},
+        {name : "resultforIDS-7"},
+        {name : "resultforIDS-8"},
+        {name : "resultforIDS-9"},
+        {name : "resultforIDS-10"},
+        {name : "resultforIDS-11"},
+        {name : "resultforIDS-13"},
+        {name : "resultforIDS-14"},
+        {name : "resultforIDS-16"},
+        {name : "resultforIDS-17"},
+        {name : "resultforIDS-18"},
+        {name : "resultforIDS-19"},
+        {name : "resultforIDS-20"},
+        {name : "resultforIDS-21"},
+        {name : "resultforIDS-22"},
+        {name : "resultforIDS-25"},
+        {name : "resultforIDS-27"},
+        {name : "resultforIDS-28"},
+        {name : "resultforIDS-29"},
+        {name : "resultforIDS-30"},
+        {name : "resultforIDS-32"},
+        {name : "resultforIDS-33"},
+        {name : "resultforIDS-37"},
+        {name : "resultforIDS-38"},
+        {name : "resultforIDS-39"},
+        {name : "resultforIDS-40"},
+        {name : "resultforIDS-41"},
+        {name : "resultforIDS-44"},
+        {name : "resultforIDS-46"},
+        {name : "resultforIDS-47"},
+        {name : "resultforIDS-49"},
+        {name : "resultforIDS-50"},
+        {name : "resultforIDS-52"},
+        {name : "resultforIDS-53"},
+        {name : "resultforIDS-54"},
+        {name : "resultforIDS-58"},
+        {name : "resultforIDS-59"},
+        {name : "resultforIDS-101.txt"},
+        {name : "resultforIDS-201.txt"},
+        {name : "resultforIDS-301.txt"},
+        {name : "resultforIDS-501.txt"},
+        {name : "resultforIDS-601.txt"},
+        {name : "resultforIDS-202.txt"},
+        {name : "resultforIDS-402.txt"},
+        {name : "resultforIDS-502.txt"},
+        {name : "resultforIDS-602.txt"},
+        {name : "resultforIDS-702.txt"},
+        {name : "resultforIDS-103.txt"},
+        {name : "resultforIDS-100"},
+        {name : "resultforIDS-200"},
+        {name : "resultforIDS-300"},
+        {name : "resultforIDS-500"},
+        {name : "resultforIDS-600"},
+        {name : "resultforIDS-700"},
+        {name : "resultforIDS-800"},
+        {name : "resultforIDS-1100"},
+        {name : "resultforIDS-1300"},
+        {name : "resultforIDS-1400"},
+        {name : "resultforIDS-1500"},
+        {name : "resultforIDS-1600"},
+        {name : "resultforIDS-1900"},
+
+    ];
+
+    if (indx > filesNames.length-1) return;
+    console.log("indx", indx);
+
+    //var fileName = 'resultForIDS-2000.txt';
+    var fileName = filesNames[indx].name;
+
+    console.log(fileName);
+
     fs.readFile('./logs' + '/' + fileName, 'utf8', function (err, data) {
         try {
             var tempPoints = JSON.parse(data);
@@ -245,16 +318,93 @@ function readandConcatNextFile(indx){
             console.log(e.red);
         }
 
+        //pointsIDS = pointsIDS.concat(tempPoints);
         pointsIDS = tempPoints;
-        console.log(pointsIDS.length);
-        console.log ("start".green, pointsIDS[0].id, " finish".red, pointsIDS[999].id)
+        //startSerchingLatLon();
+        //fillBigData();
+        //console.log(pointsIDS.length);
+        //console.log ( " finish".red, pointsIDS[pointsIDS.length-1].id);
+        createRealLatLon();
 
-        if (indx < 59+7) {
+        console.log("Первый этап обработки 1 тысячи");
+
+        if (indx < filesNames.length-1) {
             indx++;
             readandConcatNextFile(indx)
+        } else {
+            console.log ("FINISH".blue);
+           // startSerchingLatLon();
+            //fillOneObj(0);
+
+
+
         }
+
     });
 
+
+}
+
+var realLatLon = [];
+function createRealLatLon() {
+
+    for(var  i = 0; i < pointsIDS.length; i++) {
+        realLatLon.push({id: pointsIDS[i].id, lat: 0, lon: 0, delta : 2000000000, obj : 0});
+        var indx = realLatLon.length-1;
+        if (pointsIDS[i].possibleHouses) {
+            var streets = pointsIDS[i].possibleHouses;
+            for (var j = 0; j < streets.length; j++){
+                if (streets[j].address == undefined || streets[j].address.length == 0) checkNewLatLon(indx, streets[j].id);
+                if (streets[j].address) {
+                    var adress = streets[j].address;
+                    for (var k = 0; k < adress.length; k++){
+                        checkNewLatLon(indx, adress.id);
+                    }
+                }
+
+            }
+
+        } else {
+            realLatLon[indx].error = "dont found adress";
+        }
+
+        if  (i == 50 ){
+            console.log("Записываю файл".blue, realLatLon.length);
+            console.log(realLatLon);
+            log.toFLog('realLatLon.txt', realLatLon, true);
+            return;
+        }
+    }
+
+
+
+}
+
+function checkNewLatLon(indx, id){
+    var lat = 100;
+    var lon = 100;
+    var possible = undefined;
+    //console.log(indx);
+    possible = bigData.filter(function (item) {
+        return item.id == id;
+    });
+    //console.log(possible);
+    if (possible == undefined || possible.length == 0) return;
+    lat = possible[0].coordinates[0];
+    lon = possible[0].coordinates[1];
+
+    var LAT = realLatLon[indx].lat;
+    var LON = realLatLon[indx].lon;
+    var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
+    //console.log(delta);
+    if (delta < realLatLon[indx].delta) {
+        realLatLon[indx].lat = lat;
+        realLatLon[indx].lon = lon;
+        realLatLon[indx].delta = parseInt(delta);
+        realLatLon[indx].obj = id;
+    }
+
+    console.log(indx, realLatLon[indx].delta);
 
 }
 
@@ -6562,6 +6712,118 @@ function partialSave(indx) {
     }
 }
 
+var globalMax = 0;
+function startSerchingLatLon() {
+    console.log("Start Prepareanig".green);
+
+    var  i = 0;
+    pointsIDS.forEach(function(itemIDS){
+
+        if (itemIDS.childs) {
+                itemIDS.childs.forEach(function(itemStreet) {
+                    if (itemStreet) {
+                        //console.log ("STreet".green, itemStreet.id);
+                        if (parseInt(itemStreet.id) > globalMax ) globalMax = parseInt(itemStreet.id);
+                    }
+                    if(itemStreet.childs) {
+                            itemStreet.childs.forEach(function(itemAdress) {
+                                if (parseInt(itemAdress.id) > globalMax ) globalMax = parseInt(itemAdress.id);
+                                i++;
+                                //console.log(i, "LastItem", itemAdress.id);
+
+                            })
+                    }
+                })
+        }
+    });
+    console.log("finish".red, " max ", globalMax);
+    //fillBigData(max);
+
+}
+
+var qPoints = 0;
+function fillBigData(){
+    bigData.length = 3065361;
+
+    pointsIDS.forEach(function(point) {
+
+        if (point.possibleHouses) {
+
+            point.possibleHouses.forEach(function(street){
+
+                if (street.id) {
+                    if (bigData[parseInt(street.id)] != true) qPoints++;
+                    bigData[parseInt(street.id)] = true;
+
+                }
+                if (street.address) {
+                    street.address.forEach(function(adres) {
+                        if (adres.id) {
+                            if (bigData[parseInt(adres.id)] != true) qPoints++;
+                            bigData[parseInt(adres.id)] = true;
+
+                        }
+                    })
+                }
+            })
+        }
+    });
+
+    var i = 0;
+    console.log("FINISHED BIG DATA", qPoints);
+    //fillOneObj(i);
+
+}
+var recievedLatLon = 0;
+function fillOneObj (i){
+
+    if (i % 200000 == 0)  saveBigData();
+    if (i >= bigData.length) {
+        saveBigData();
+        return;
+    }
+    console.log("Fill for new Object".green, i);
+    console.log ("Recieved latLon", recievedLatLon , "from", qPoints );
+    var indx = 0;
+
+    if (bigData[i] == true) {
+        tracksManager.giveMeLatLonByID(i, function (oldindx, obj){
+            recievedLatLon ++;
+            bigData[oldindx] = obj;
+            //console.log(oldindx, bigData[oldindx]);
+            indx = i+1;
+            oneObjectDispetcher(indx)
+        });
+    } else {
+           indx = i+1;
+           oneObjectDispetcher(indx)
+    }
+
+
+}
+
+
+function oneObjectDispetcher(indx){
+    setTimeout(function(){fillOneObj(indx)}, 0);
+}
+
+function saveBigData(){
+    //var bigDataToSave = bigData.filter(function(item) {
+    //    return (item != undefined && item !='')
+    //});
+
+    //log.toFLog("bigData.txt", bigDataToSave, true);
+
+    var bigDataToSave = bigData.filter(function(item, i) {
+        if (item != undefined && item !='') item.id = i;
+        return (item != undefined && item !='')
+    });
+
+    var secondBigData = bigDataToSave.filter(function(item){
+        return item.id != undefined;
+    });
+    log.toFLog("bigData2.txt", secondBigData, true);
+}
 
 function createTextForRequest (point) {
     if (!point || !point.city || !point.street_name) return false;

@@ -657,6 +657,35 @@ TracksManager.prototype.getAllHouses = function(childs, callback){
 
 
 
+TracksManager.prototype.giveMeLatLonByID = function(id, callback){
+    //console.log(childs);
+    var result = {};
+    if(!id) return;
+
+    //console.log("Start Centroid", id);
+            var resUrl = "http://sac.sngtrans.com.ua/getcentroid?id=" + id;
+            //console.log(resUrl);
+            request({
+                url: resUrl,
+                json: true
+            }, function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    result = body;
+                    //console.log(id, "LatLon Recieved");
+                    callback(id, result);
+
+                } else {
+                    console.log ("FIND ERROR IN LATLON");
+                    callback(id, {error : 'error'});
+                }
+            })
+
+
+};
+
+
+
+
 
 // сформировать отчет по пробегам и типам стейтов
 TracksManager.prototype.getStateDataByPeriod = function () {
