@@ -184,7 +184,9 @@ router.route('/analysisIDSpoints')
             var i = 0;
             fs.readFile('./logs/bigData2.txt', 'utf8', function (err1, data1) {
                 bigData = [];
-                bigData = JSON.parse(data1);
+                bigData.length = 3200000;
+                var prebigData = JSON.parse(data1);
+                indexBigData(prebigData);
                 readandConcatNextFile(i);
 
             });
@@ -218,6 +220,14 @@ router.route('/analysisIDSpoints')
             log.error( "Ошибка "+ e + e.stack);
         }
     });
+
+
+
+function indexBigData(matrix) {
+ matrix.forEach(function(item){
+        bigData[item.id] = item;
+    })
+}
 
 function readandConcatNextFile(indx){
 
@@ -358,7 +368,7 @@ function createRealLatLon() {
                 if (streets[j].address) {
                     var adress = streets[j].address;
                     for (var k = 0; k < adress.length; k++){
-                        checkNewLatLon(indx, adress.id);
+                        checkNewLatLon(indx, adress[k].id);
                     }
                 }
 
@@ -368,15 +378,15 @@ function createRealLatLon() {
             realLatLon[indx].error = "dont found adress";
         }
 
-        if  (i == 50 ){
-            console.log("Записываю файл".blue, realLatLon.length);
-            console.log(realLatLon);
-            log.toFLog('realLatLon.txt', realLatLon, true);
-            return;
-        }
+
+
+        console.log (indx, realLatLon[indx].delta)
+
     }
 
-
+    console.log("Записываю файл".blue, realLatLon.length);
+    //console.log(realLatLon);
+    log.toFLog('realLatLon.txt', realLatLon, true);
 
 }
 
@@ -384,27 +394,31 @@ function checkNewLatLon(indx, id){
     var lat = 100;
     var lon = 100;
     var possible = undefined;
+    possible = bigData[id];
     //console.log(indx);
-    possible = bigData.filter(function (item) {
-        return item.id == id;
-    });
+    //possible = bigData.filter(function (item) {
+    //    return item.id == id;
+    //});
     //console.log(possible);
     if (possible == undefined || possible.length == 0) return;
-    lat = possible[0].coordinates[0];
-    lon = possible[0].coordinates[1];
+    if (possible.coordinates)lat = possible.coordinates[0];
+    if (possible.coordinates) lon = possible.coordinates[1];
 
-    var LAT = realLatLon[indx].lat;
-    var LON = realLatLon[indx].lon;
-    var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
-    //console.log(delta);
-    if (delta < realLatLon[indx].delta) {
-        realLatLon[indx].lat = lat;
-        realLatLon[indx].lon = lon;
-        realLatLon[indx].delta = parseInt(delta);
-        realLatLon[indx].obj = id;
+    if (lat & lon) {
+            var LAT = realLatLon[indx].lat;
+            var LON = realLatLon[indx].lon;
+            var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
+            //console.log(delta);
+            if (delta < realLatLon[indx].delta) {
+                realLatLon[indx].lat = lat;
+                realLatLon[indx].lon = lon;
+                realLatLon[indx].delta = parseInt(delta);
+                realLatLon[indx].obj = id;
+            }
+    } else {
+
     }
-
-    console.log(indx, realLatLon[indx].delta);
+    //console.log(indx, realLatLon[indx].delta);
 
 }
 
