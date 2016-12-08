@@ -12,8 +12,8 @@ var express = require('express'),
     fs = require('fs'),
     math_server = new (require('../math-server'))(),
     db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
-    locker = new (require('../locker'))(),
-    CronJob = require('cron').CronJob;
+    locker = new (require('../locker'))();
+    //CronJob = require('cron').CronJob;
     //async = require('async'),
     //colors = require('colors');
     //colors.supportsColor = true;
@@ -2629,7 +2629,7 @@ function startPeriodicCalculating() {
                                         data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 > 360 &&
                                         data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 < 600 &&
                                         !cached.routes[i].lostSignal){
-                                        log.info("Lost GPS Signal", cached.routes[i].driver.NAME);
+                                        //log.info("Lost GPS Signal", cached.routes[i].driver.NAME);
                                         cached.routes[i].lostSignal = true;
                                     } else {
                                         cached.routes[i].lostSignal = false;
