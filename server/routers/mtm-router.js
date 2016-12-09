@@ -161,28 +161,37 @@ var existData = [];
 router.route('/analysisIDSpoints')
     .get(function(req, res){
         if (develop) console.log("Start load data".green);
-
+        var qInd = 0;
         try {
 
 
 
         //    const rl = readline.createInterface({
-        //        input: fs.createReadStream('./logs/point-base-work.txt')
+        //        input: fs.createReadStream('./logs/hvost')
         //    });
         //
         //
-        //    if(develop) console.log(rl.green);
+        //    if(develop) console.log(rl);
         //
         //    rl.on('line', function (line)  {
+        //        qInd++;
+        //        console.log("Pushing", qInd);
         //        pointsIDS.push(line);
+        //        if ( qInd == 2782) parseTextFileData();
         //});
+
+
+
+
+
             console.log("pointsIDS.length", pointsIDS.length);
         fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
 
             existData = JSON.parse(data);
-            //console.log("ExistData", existData[0], existData.length);
+            console.log("ExistData", existData[0], existData.length);
             var i = 0;
-            fs.readFile('./logs/bigData2.txt', 'utf8', function (err1, data1) {
+            fs.readFile('./logs/bigData2-1-1.txt', 'utf8', function (err1, data1) {
+                console.log("SecondRead Success");
                 bigData = [];
                 bigData.length = 3200000;
                 var prebigData = JSON.parse(data1);
@@ -237,6 +246,7 @@ function readandConcatNextFile(indx){
     //    return;
     //}
 
+
     var filesNames = [
         {name : "resultforIDS-1.txt"},
         {name : "resultforIDS-2.txt"},
@@ -268,7 +278,7 @@ function readandConcatNextFile(indx){
         {name : "resultforIDS-27"},
         {name : "resultforIDS-28"},
         {name : "resultforIDS-29"},
-        {name : "resultforIDS-30"},
+        {name : "additionalIDSData"},
         {name : "resultforIDS-32"},
         {name : "resultforIDS-33"},
         {name : "resultforIDS-37"},
@@ -310,11 +320,15 @@ function readandConcatNextFile(indx){
         {name : "resultforIDS-1500"},
         {name : "resultforIDS-1600"},
         {name : "resultforIDS-1900"},
-
+        {name : "resultforIDSdop-1"},
+        {name : "resultforIDSdop-2"},
+        {name : "resultforIDSdop-3"}
     ];
 
-    if (indx > filesNames.length-1) return;
-    console.log("indx", indx);
+    console.log("indx", indx, filesNames.length-1);
+
+    //if (indx > filesNames.length-1) return;
+
 
     //var fileName = 'resultForIDS-2000.txt';
     var fileName = filesNames[indx].name;
@@ -330,22 +344,27 @@ function readandConcatNextFile(indx){
 
         //pointsIDS = pointsIDS.concat(tempPoints);
         pointsIDS = tempPoints;
+        //askForStreetId(pointsIDS);
+        //askAdditionalData();
         //startSerchingLatLon();
         //fillBigData();
         //console.log(pointsIDS.length);
         //console.log ( " finish".red, pointsIDS[pointsIDS.length-1].id);
         createRealLatLon();
 
-        console.log("Первый этап обработки 1 тысячи");
+        console.log("Первый этап обработки 1 тысячи",indx, filesNames.length);
 
         if (indx < filesNames.length-1) {
+        //if (indx < 50) {
             indx++;
+           console.log("Next File");
             readandConcatNextFile(indx)
         } else {
             console.log ("FINISH".blue);
+            //refillBigData();
            // startSerchingLatLon();
             //fillOneObj(0);
-
+            log.toFLog('realLatLon.txt', realLatLon, true);
 
 
         }
@@ -355,10 +374,54 @@ function readandConcatNextFile(indx){
 
 }
 
+
+function refillBigData() {
+
+    newOneObjectDispetcher(0);
+
+}
+
+var additionalId =[];
+function askAdditionalData () {
+    pointsIDS.forEach(function(point) {
+
+        if (point != null && point.possibleHouses) {
+
+            point.possibleHouses.forEach(function(street){
+
+                if (street.id) {
+                    if (bigData[parseInt(street.id)] == undefined) additionalId.push(street.id);
+
+
+                }
+                if (street.address) {
+                    street.address.forEach(function(adres) {
+                        if (adres.id) {
+                            if (bigData[parseInt(adres.id)] ==  undefined) additionalId.push(adres.id);
+
+                        }
+                    })
+                }
+            })
+        }
+    });
+
+    //console.log(additionalId);
+    console.log("Additional.data".blue, additionalId.length);
+
+}
+
 var realLatLon = [];
 function createRealLatLon() {
 
     for(var  i = 0; i < pointsIDS.length; i++) {
+        if (pointsIDS[i] == null) continue;
+        //console.log(pointsIDS[i].id)
+        //if (pointsIDS[i].id == "025e9a51-2edf-11e5-9ef5-005056a77794"){
+        //    console.log("Find point".red);
+        //    console.log(pointsIDS[i]);
+        //}
+
         realLatLon.push({id: pointsIDS[i].id, lat: 0, lon: 0, delta : 2000000000, obj : 0});
         for (var e = 0; e < existData.length; e++){
             //console.log(i, " ",  e, "Check ID", existData[e].Id, + " " + pointsIDS[i].id);
@@ -388,13 +451,13 @@ function createRealLatLon() {
 
 
 
-        console.log (indx, realLatLon[indx].delta)
+        //console.log (indx, realLatLon[indx].delta)
 
     }
 
-    console.log("Записываю файл".blue, realLatLon.length);
+    //console.log("Записываю файл".blue, realLatLon.length);
     //console.log(realLatLon);
-    log.toFLog('realLatLon.txt', realLatLon, true);
+    //log.toFLog('realLatLon.txt', realLatLon, true);
 
 }
 
@@ -6597,6 +6660,7 @@ function crutchFunctionMarkWarehouse(company) {
 }
 
 function parseTextFileData() {
+    console.log("SatrtParsing".green);
     var newPoints = [];
     pointsIDS.forEach(function (item) {
 
@@ -6618,6 +6682,7 @@ function parseTextFileData() {
                         ", \"house\":" + "\"" + newHouse + "\"" +
                         "}";
         var pointJSON = JSON.parse(newPoint);
+        console.log("Pushing2");
         newPoints.push(pointJSON);
 
     });
@@ -6652,7 +6717,7 @@ function clearHouseNumber(points){
 
 function askForStreetId() {
         console.log(Date.now());
-        var i = 59000;
+        var i = 2000;
     //console.log("i in askForStreetId", i);
         requestDispether(i);
        // createTextForRequest(point);
@@ -6718,8 +6783,8 @@ function requestDispether(i) {
 
     } else {
 
-
-        console.log ("HURA!!! WI Finished");
+        log.toFLog("additionalIDSData2.txt", pointsIDS, true);
+        console.log ("HURA!!! We Finished");
         //console.log(Date.now());
     }
 
@@ -6728,14 +6793,14 @@ function requestDispether(i) {
 function partialSave(indx) {
     if (!indx || indx < 1000) return;
     //console.log("Presave", indx%100);
-    if (indx == 59661) indx = 60000;
+    if (indx == 2781) indx = 3000;
     if (indx%1000 != 0) return;
     var toSave = [];
     for (var i = indx-1000; i<indx; i++){
         toSave.push(pointsIDS[i]);
     }
     var partName = "" + parseInt(indx/1000);
-    log.toFLog("resultforIDS-"+partName, toSave, true);
+    log.toFLog("resultforIDSdop-"+partName, toSave, true);
     if (indx == 66661 ){
         log.toFLog("resultforIDSAll", pointsIDS, true);
     }
@@ -6800,37 +6865,41 @@ function fillBigData(){
 
     var i = 0;
     console.log("FINISHED BIG DATA", qPoints);
-    //fillOneObj(i);
+    fillOneObj(i);
 
 }
 var recievedLatLon = 0;
 function fillOneObj (i){
 
-    if (i % 200000 == 0)  saveBigData();
-    if (i >= bigData.length) {
-        saveBigData();
-        return;
-    }
+    //if (i % 200000 == 0)  saveBigData();
+
+    saveBigData();
+
     console.log("Fill for new Object".green, i);
     console.log ("Recieved latLon", recievedLatLon , "from", qPoints );
     var indx = 0;
 
-    if (bigData[i] == true) {
+    if (bigData[i] == undefined) {
         tracksManager.giveMeLatLonByID(i, function (oldindx, obj){
             recievedLatLon ++;
             bigData[oldindx] = obj;
-            //console.log(oldindx, bigData[oldindx]);
+            console.log(oldindx, bigData[oldindx]);
             indx = i+1;
-            oneObjectDispetcher(indx)
+            newOneObjectDispetcher(recievedLatLon)
         });
     } else {
            indx = i+1;
-           oneObjectDispetcher(indx)
+            newOneObjectDispetcher(recievedLatLon)
     }
 
 
 }
 
+
+function newOneObjectDispetcher(indx){
+    console.log ("Next Index", indx);
+    setTimeout(function(){fillOneObj(additionalId[indx])}, 0);
+}
 
 function oneObjectDispetcher(indx){
     setTimeout(function(){fillOneObj(indx)}, 0);
@@ -6851,7 +6920,7 @@ function saveBigData(){
     var secondBigData = bigDataToSave.filter(function(item){
         return item.id != undefined;
     });
-    log.toFLog("bigData2.txt", secondBigData, true);
+    log.toFLog("bigData2-1-1.txt", secondBigData, true);
 }
 
 function createTextForRequest (point) {

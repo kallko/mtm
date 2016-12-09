@@ -662,7 +662,7 @@ TracksManager.prototype.giveMeLatLonByID = function(id, callback){
     var result = {};
     if(!id) return;
 
-    //console.log("Start Centroid", id);
+    console.log("Start Centroid", id);
             var resUrl = "http://sac.sngtrans.com.ua/getcentroid?id=" + id;
             //console.log(resUrl);
             request({
@@ -671,7 +671,7 @@ TracksManager.prototype.giveMeLatLonByID = function(id, callback){
             }, function (error, response, body) {
                 if (!error && response.statusCode === 200) {
                     result = body;
-                    //console.log(id, "LatLon Recieved");
+                    console.log(id, "LatLon Recieved");
                     callback(id, result);
 
                 } else {
