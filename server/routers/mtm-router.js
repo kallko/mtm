@@ -180,7 +180,7 @@ router.route('/analysisIDSpoints')
         fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
 
             existData = JSON.parse(data);
-            console.log("ExistData", existData[0], existData.length);
+            //console.log("ExistData", existData[0], existData.length);
             var i = 0;
             fs.readFile('./logs/bigData2.txt', 'utf8', function (err1, data1) {
                 bigData = [];
@@ -360,6 +360,14 @@ function createRealLatLon() {
 
     for(var  i = 0; i < pointsIDS.length; i++) {
         realLatLon.push({id: pointsIDS[i].id, lat: 0, lon: 0, delta : 2000000000, obj : 0});
+        for (var e = 0; e < existData.length; e++){
+            //console.log(i, " ",  e, "Check ID", existData[e].Id, + " " + pointsIDS[i].id);
+            if (existData[e].Id == pointsIDS[i].id) {
+                realLatLon[realLatLon.length-1].existLat = existData[e].Lat;
+                realLatLon[realLatLon.length-1].existLon = existData[e].Lon;
+                //console.log("Id Accepted".green, realLatLon[realLatLon.length-1]);
+            }
+        }
         var indx = realLatLon.length-1;
         if (pointsIDS[i].possibleHouses) {
             var streets = pointsIDS[i].possibleHouses;
@@ -401,12 +409,12 @@ function checkNewLatLon(indx, id){
     //});
     //console.log(possible);
     if (possible == undefined || possible.length == 0) return;
-    if (possible.coordinates)lat = possible.coordinates[0];
+    if (possible.coordinates) lat = possible.coordinates[0];
     if (possible.coordinates) lon = possible.coordinates[1];
 
-    if (lat & lon) {
-            var LAT = realLatLon[indx].lat;
-            var LON = realLatLon[indx].lon;
+    if (lat && lon) {
+            var LON = realLatLon[indx].existLat;
+            var LAT = realLatLon[indx].existLon;
             var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
             //console.log(delta);
             if (delta < realLatLon[indx].delta) {
@@ -4624,7 +4632,7 @@ function connectPointsAndPushes(company) {
 //            mobilePushes.gps_time > parseInt(Date.now()/1000)
 //        ) continue;
 
-
+    mark2:
 
         for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
 
@@ -4653,7 +4661,7 @@ function connectPointsAndPushes(company) {
                     if (mobilePushes[i].canceled) {
                         //log.info("НАЙДЕН ПУШ, который отменяет точку!!!!!!!!!!!!!", tmpPoint.driver.NAME, tmpPoint.NUMBER);
                         cancelTaskPush(mobilePushes[i], tmpPoint, company);
-                        continue mark1;
+                        continue mark2;
                     }
 
 
@@ -4753,7 +4761,12 @@ function connectStopsAndPoints(company) {
 
                         //cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
 
-                        if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit || tmpPoint.havePushStop){
+                        if(tmpPoint.confirmed_by_operator == true ||
+                            tmpPoint.limit > cashedDataArr[company].settings.limit ||
+                            tmpPoint.havePushStop ||
+                            (tmpPoint.havePush && tmpPoint.mobile_push.canceled)){
+
+                            tmpPoint.control = 4769;
                             //log.info("Подтверждена вручную Уходим");
                             continue;
                         }
@@ -5480,6 +5493,7 @@ function cancelTaskPush(push, point, company){
     point.limit = 85; //todo отфонарная цифра для тестов.
     point.confirmed = true;
     point.reason = push.cancel_reason;
+    point.real_arrival_time = undefined;
 
     if(push.cancel_reason != undefined && push.cancel_reason.length >0) {
         for (var i=0; i<cashedDataArr[company].reasons.length; i++ ){
@@ -6312,7 +6326,8 @@ function connectPointsPushesStops(company) {
         if (route.real_track == undefined || route.real_track.length == 0) continue;
         for (var j=0; j<route.points.length; j++){
             var point = route.points[j];
-            if (!point.havePush) continue;
+            if (!point.havePush ||
+                (point.mobile_push.canceled)) continue;
             var push = point.mobile_push;
             if(push.lat == null) continue;
             var tmpDistance = getDistanceFromLatLonInM(parseFloat(point.LAT), parseFloat(point.LON), push.lat, push.lon);
