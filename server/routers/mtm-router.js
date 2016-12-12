@@ -339,7 +339,7 @@ function readandConcatNextFile(indx){
         try {
             var tempPoints = JSON.parse(data);
         } catch (e) {
-            console.log(e.red);
+            if (develop) console.log(e.red);
         }
 
         //pointsIDS = pointsIDS.concat(tempPoints);
@@ -354,18 +354,14 @@ function readandConcatNextFile(indx){
 
         console.log("Первый этап обработки 1 тысячи",indx, filesNames.length);
 
-        if (indx < filesNames.length-1) {
+        if (indx < filesNames.length - 1) {
         //if (indx < 50) {
             indx++;
            console.log("Next File");
             readandConcatNextFile(indx)
         } else {
-            console.log ("FINISH".blue);
-            //refillBigData();
-           // startSerchingLatLon();
-            //fillOneObj(0);
+            if (develop) console.log ("FINISH".blue);
             log.toFLog('realLatLon.txt', realLatLon, true);
-
 
         }
 
@@ -407,7 +403,7 @@ function askAdditionalData () {
     });
 
     //console.log(additionalId);
-    console.log("Additional.data".blue, additionalId.length);
+    if (develop) console.log("Additional.data".blue, additionalId.length);
 
 }
 
@@ -6660,7 +6656,7 @@ function crutchFunctionMarkWarehouse(company) {
 }
 
 function parseTextFileData() {
-    console.log("SatrtParsing".green);
+    if (develop) console.log("SatrtParsing".green);
     var newPoints = [];
     pointsIDS.forEach(function (item) {
 
@@ -6808,7 +6804,7 @@ function partialSave(indx) {
 
 var globalMax = 0;
 function startSerchingLatLon() {
-    console.log("Start Prepareanig".green);
+    if (develop) console.log("Start Prepareanig".green);
 
     var  i = 0;
     pointsIDS.forEach(function(itemIDS){
@@ -6830,7 +6826,7 @@ function startSerchingLatLon() {
                 })
         }
     });
-    console.log("finish".red, " max ", globalMax);
+    if (develop) console.log("finish".red, " max ", globalMax);
     //fillBigData(max);
 
 }
@@ -6875,7 +6871,7 @@ function fillOneObj (i){
 
     saveBigData();
 
-    console.log("Fill for new Object".green, i);
+    if (develop) console.log("Fill for new Object".green, i);
     console.log ("Recieved latLon", recievedLatLon , "from", qPoints );
     var indx = 0;
 
