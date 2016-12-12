@@ -16,7 +16,7 @@ var express = require('express'),
     readline = require('readline'),
     //CronJob = require('cron').CronJob,
     //async = require('async'),
-    develop = true;
+    develop = false;
     if (develop) {
         var
         colors = require('colors');
@@ -1872,13 +1872,13 @@ router.route('/changedriver/')
         //log.info("cashedDataArr[req.session.login]", cashedDataArr[req.session.login].routes, "MTM 751");
         // Перезапись в кеше маршрута отредактированного в мониторинге
         var i=0;
-        req.body.routes[0].filterId=null;
+        //req.body.routes[0].filterId = null;
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
-        while(i<cashedDataArr[currentCompany].routes.length){
-            if(cashedDataArr[currentCompany].routes[i].uniqueID == req.body.routes[0].uniqueID){
-                cashedDataArr[currentCompany].routes[i] = req.body.routes[0];
-                cashedDataArr[currentCompany].routes[i].filterId=null;
+        while(i < cashedDataArr[currentCompany].blocked_routes.length){
+            if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == req.body.routes[0].uniqueID){
+                cashedDataArr[currentCompany].blocked_routes[i] = req.body.routes[0];
+                //cashedDataArr[currentCompany].blocked_routes[i].filterId = null;
                 //log.info("Overwright Route");
                 break;
             }
@@ -1894,8 +1894,11 @@ router.route('/changedriver/')
 
         //Если произошло разделение маршрутов, нужно добавить новый к списку.
         if(req.body.routes[1] != undefined){
-            req.body.routes[1].filterId=null;
+            //req.body.routes[1].filterId = null;
             cashedDataArr[currentCompany].routes.push(req.body.routes[1]);
+            cashedDataArr[currentCompany].allRoutes = req.body.routes[1].allRoutes;
+
+
         }
 
         res.status(200).json("ok");
@@ -5080,7 +5083,11 @@ function findStatusesAndWindows(company) {
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
                     //log.info("Присваиваем статус 1");
-                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
+                } else if ((tmpPoint.real_arrival_time < tmpPoint.working_window[0].start
+                        && tmpPoint.TASK_TIME == "0" )||
+                    (  tmpPoint.TASK_TIME
+                       &&  tmpPoint.TASK_TIME != "0"
+                       &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < tmpPoint.working_window[0].start)) {
                     //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 } else {
@@ -5125,7 +5132,11 @@ function findStatusesAndWindows(company) {
 
                 }
 
-                if (tmpPoint.real_arrival_time < start)
+                if ((tmpPoint.real_arrival_time < start
+                    && tmpPoint.TASK_TIME == "0" )||
+                    (  tmpPoint.TASK_TIME
+                    &&  tmpPoint.TASK_TIME != "0"
+                    &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < start))
                 {
                     //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;

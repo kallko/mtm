@@ -235,13 +235,15 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
      rootScope.showProblem = function(route) {
+         console.log("Push show problem");
             rootScope.redrawProblemRoute = false;
-            if (route.filterId != undefined)scope.$emit("possibleRedraw", route.filterId);
+            if (route.filterId != undefined) scope.$emit("possibleRedraw", route.filterId);
             //alert("Я все вижу" + route.filterId);
+         scope.$emit('choseproblem', route.filterId);
          if (route == undefined || route.filterId == undefined || rootScope.redrawProblemRoute) return;
 
             scope.$emit('clearMap');
-            scope.$emit('choseproblem', route.filterId);
+
             scope.$emit('routeToChange', ('routeToChange', {
                 route: route,
                 serverTime: rootScope.data.server_time,
