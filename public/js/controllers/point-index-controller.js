@@ -4154,12 +4154,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             delete routeDublicate.transport; //
             delete routeDublicate.uniqueID; //
             delete routeDublicate.$$hashKey;
+            delete routeDublicate.ID;
 
 
-            routeDublicate.ID = rootScope.data.routes.length;
-            routeDublicate.filterId = rootScope.data.routes.length;
+            routeDublicate.NUMBER =parseInt(routeDublicate.NUMBER) + 1;
+            routeDublicate.ID = rootScope.data.allRoutes.length;
+            routeDublicate.filterId = rootScope.data.allRoutes.length;
             routeDublicate.getCheck = false;
-            routeDublicate.uniqueID = ""+routeDublicate.itineraryID+routeDublicate.NUMBER+routeDublicate.ID;
+            routeDublicate.uniqueID = ""+routeDublicate.itineraryID + routeDublicate.NUMBER + routeDublicate.ID;
 
 
 
@@ -4243,11 +4245,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 nameCar:  routeDublicate.transport.NAME  + ' - ' +   ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') ,
                 value: routeDublicate.filterId,
                 car: routeDublicate.transport.NAME,
-                driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+                uniqueID: routeDublicate.uniqueID
             });
 
             rootScope.data.allRoutes.push({
                 allRoutes: false,
+                uniqueID: routeDublicate.uniqueID,
                 nameDriver:  ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') + ' - ' + routeDublicate.transport.NAME ,
                 nameCar:  routeDublicate.transport.NAME  + ' - ' +   ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') ,
                 value: routeDublicate.filterId,

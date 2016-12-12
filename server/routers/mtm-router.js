@@ -16,7 +16,7 @@ var express = require('express'),
     readline = require('readline'),
     //CronJob = require('cron').CronJob,
     //async = require('async'),
-    develop = false;
+    develop = true;
     if (develop) {
         var
         colors = require('colors');
@@ -1895,9 +1895,15 @@ router.route('/changedriver/')
         //Если произошло разделение маршрутов, нужно добавить новый к списку.
         if(req.body.routes[1] != undefined){
             //req.body.routes[1].filterId = null;
-            cashedDataArr[currentCompany].routes.push(req.body.routes[1]);
+            cashedDataArr[currentCompany].blocked_routes.push(req.body.routes[1]);
             cashedDataArr[currentCompany].allRoutes = req.body.routes[1].allRoutes;
+            if (develop) {
+                console.log("Save route".red);
+                console.log(req.body.routes[1].filterId);
+                console.log(req.body.routes[1].uniqueID);
+                console.log(req.body.routes[1].allRoutes);
 
+            }
 
         }
 
