@@ -15,7 +15,7 @@ var express = require('express'),
     locker = new (require('../locker'))(),
     readline = require('readline'),
     //CronJob = require('cron').CronJob,
-    //async = require('async'),
+    async = require('async'),
     develop = true;
     if (develop) {
         var
@@ -93,7 +93,6 @@ var cashedDataArr = {},  // глобальный кеш
 
 
     var oldRoutes;
-
     var demoLogin = 'demo';
     var tracksManager = new tracks(
         config.aggregator.url,
@@ -123,17 +122,22 @@ router.route('/currentsrvertime')
 
 router.route('/notification')
     .get(function(req, res){
+        try {
         restart = true;
         res.status(200).json('ok');
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 router.route('/saveData')
     .get(function(req, res){
-        log.info("Start data saving");
-        var data = JSON.stringify(cashedDataArr);
-        var mes ='complete';
 
         try {
+            log.info("Start data saving");
+            var data = JSON.stringify(cashedDataArr);
+            var mes ='complete';
+
             fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
                 if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);
                 mes+= err;
@@ -160,10 +164,10 @@ router.route('/loadData')
 var existData = [];
 router.route('/analysisIDSpoints')
     .get(function(req, res){
-        if (develop) console.log("Start load data".green);
-        var qInd = 0;
         try {
 
+        if (develop) console.log("Start load data".green);
+        var qInd = 0;
 
 
         //    const rl = readline.createInterface({
@@ -179,10 +183,6 @@ router.route('/analysisIDSpoints')
         //        pointsIDS.push(line);
         //        if ( qInd == 2782) parseTextFileData();
         //});
-
-
-
-
 
             console.log("pointsIDS.length", pointsIDS.length);
         fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
@@ -200,13 +200,6 @@ router.route('/analysisIDSpoints')
 
             });
         });
-
-
-
-
-
-
-
 
 
             //fs.readFile('./logs' + '/' +'resultforIDS-1.txt', 'utf8', function (err, data) {
@@ -233,20 +226,18 @@ router.route('/analysisIDSpoints')
 
 
 function indexBigData(matrix) {
+    try {
  matrix.forEach(function(item){
         bigData[item.id] = item;
     })
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function readandConcatNextFile(indx){
 
-    //if (indx > 0) {
-    //    console.log("testFinish".blue);
-    //    log.toFLog('realLatLon.json', realLatLon, true);
-    //    return;
-    //}
-
-
+    try {
     var filesNames = [
         {name : "resultforIDS-1.txt"},
         {name : "resultforIDS-2.txt"},
@@ -367,18 +358,25 @@ function readandConcatNextFile(indx){
 
     });
 
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 
 function refillBigData() {
+    try{
 
     newOneObjectDispetcher(0);
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 var additionalId =[];
 function askAdditionalData () {
+    try{
+
     pointsIDS.forEach(function(point) {
 
         if (point != null && point.possibleHouses) {
@@ -404,12 +402,14 @@ function askAdditionalData () {
 
     //console.log(additionalId);
     if (develop) console.log("Additional.data".blue, additionalId.length);
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 var realLatLon = [];
 function createRealLatLon() {
-
+    try {
     for(var  i = 0; i < pointsIDS.length; i++) {
         if (pointsIDS[i] == null) continue;
         //console.log(pointsIDS[i].id)
@@ -454,10 +454,13 @@ function createRealLatLon() {
     //console.log("Записываю файл".blue, realLatLon.length);
     //console.log(realLatLon);
     //log.toFLog('realLatLon.txt', realLatLon, true);
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function checkNewLatLon(indx, id){
+    try{
     var lat = 100;
     var lon = 100;
     var possible = undefined;
@@ -486,7 +489,9 @@ function checkNewLatLon(indx, id){
 
     }
     //console.log(indx, realLatLon[indx].delta);
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 // запуск монитора диспетчера в демо-режиме
@@ -513,6 +518,7 @@ router.route('/keysoldroutescache')
         }
 
     });
+
 router.route('/getoldroute')
     .post(function(req, res){
         try {
@@ -700,10 +706,10 @@ router.route('/nodeserch')
     });
 
 
-router.route('/auth')
-    .get(function(req, res){
-        res.sendFile('hellow.html', {root: './public/'});
-    });
+//router.route('/auth')
+//    .get(function(req, res){
+//        res.sendFile('hellow.html', {root: './public/'});
+//    });
 
 
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
