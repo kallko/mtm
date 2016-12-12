@@ -4048,19 +4048,19 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         rootScope.$on('changeDriver',  function (event, driver, transport, start, routeID) {
-            console.log("PIC recieve and gona work",  driver, transport, start, routeID, rootScope.data);
+            console.log("PIC recieve CHANGE DRIVER and gona work",  driver, transport, start, routeID, rootScope.data);
             changeDriveronRoute(driver, transport, start, routeID)
         });
 
         function changeDriveronRoute(driver, transport, start, routeID) {
 
-
+            var tempRouteDublicate ={};
 
            // определение, какой роут подвергся редактированию
             var i=0;
             while (i<rootScope.data.routes.length) {
                 if(rootScope.data.routes[i].uniqueID==routeID) {
-                    var tempRouteDublicate=rootScope.data.routes[i];
+                    tempRouteDublicate = rootScope.data.routes[i];
                     //console.log("We will change",rootScope.data.routes[i].filterId );
                     //console.log("All route", tempRouteDublicate);
                     break;
@@ -4068,6 +4068,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 i++;
             }
+
+            if (tempRouteDublicate == {}) return;
 
             //частный случай если ничего не поменялось
             if(tempRouteDublicate.TRANSPORT == transport  && tempRouteDublicate.DRIVER == driver){
@@ -4078,12 +4080,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //частный случай, если поменяли только водителя на маршруте, на котором не сделано ни одной точки
-            if(tempRouteDublicate.TRANSPORT == transport && start==1){
+            if(tempRouteDublicate.TRANSPORT == transport && start == 1){
                 console.log("Just driver change");
 
                 tempRouteDublicate.DRIVER=driver;
                 // замена водителя
-                var i=0;
+                i=0;
                 while(i<rootScope.data.drivers.length){
                     if(rootScope.data.drivers[i].ID == driver) {
 
@@ -4097,7 +4099,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                 //Замена поля driver во всех точках маршрута
                 i=0;
-                while(i< tempRouteDublicate.points.length){
+                while(i < tempRouteDublicate.points.length){
                     tempRouteDublicate.points[i].driver=newDriver;
                     i++;
                 }
@@ -4136,7 +4138,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             // создание дубликакта роута
             var routeDublicate={};
-            routeDublicate=JSON.parse(JSON.stringify(tempRouteDublicate));
+            routeDublicate = JSON.parse(JSON.stringify(tempRouteDublicate));
 
 
             //Прописывание в новый роут правильных данных
@@ -4154,7 +4156,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             delete routeDublicate.$$hashKey;
 
 
-            routeDublicate.ID =rootScope.data.routes.length;
+            routeDublicate.ID = rootScope.data.routes.length;
             routeDublicate.filterId = rootScope.data.routes.length;
             routeDublicate.getCheck = false;
             routeDublicate.uniqueID = ""+routeDublicate.itineraryID+routeDublicate.NUMBER+routeDublicate.ID;
@@ -4163,11 +4165,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //Найти нового водителя в полной базе
-            i=0;
+            i = 0;
             while(i<rootScope.data.drivers.length){
                 if(rootScope.data.drivers[i].ID == driver) {
-                    routeDublicate.DRIVER=driver;
-                    routeDublicate.driver=rootScope.data.drivers[i];
+                    routeDublicate.DRIVER = driver;
+                    routeDublicate.driver = rootScope.data.drivers[i];
                     break;
                 }
 
@@ -4180,7 +4182,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if(rootScope.data.transports[i].ID == transport) {
                     routeDublicate.TRANSPORT=transport;
                     routeDublicate.transport=rootScope.data.transports[i];
-                    rootScope.data.transports[i].gid ? routeDublicate.haveSensor=true : routeDublicate.haveSensor=false;
+                    rootScope.data.transports[i].gid ? routeDublicate.haveSensor = true : routeDublicate.haveSensor = false;
                     break;
                 }
 
@@ -4189,29 +4191,29 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
             //Разделить между маршрутами точки, прогнозы, геометрию
 
-            var indx=start-1;// Номер точки на 1 больше чем индекс (если начинать с 1 точки, то это с 0 индекса);
+            var indx = start-1;// Номер точки на 1 больше чем индекс (если начинать с 1 точки, то это с 0 индекса);
 
 
 
             // Разделение точек между маршрутами
             var removed = tempRouteDublicate.points.slice(indx);
-            routeDublicate.points=removed;
-            tempRouteDublicate.points.length= indx;
+            routeDublicate.points = removed;
+            tempRouteDublicate.points.length = indx;
 
             //Разделение plan_geometry между маршрутами
             removed = tempRouteDublicate.plan_geometry.slice(indx);
-            routeDublicate.plan_geometry=removed;
-            tempRouteDublicate.plan_geometry.length= indx;
+            routeDublicate.plan_geometry = removed;
+            tempRouteDublicate.plan_geometry.length = indx;
 
 
             //Разделение данных для предсказания
             removed = tempRouteDublicate.time_matrix.length_table[0].slice(indx);
-            routeDublicate.time_matrix.length_table[0]=removed;
-            tempRouteDublicate.time_matrix.length_table[0].length= indx;
+            routeDublicate.time_matrix.length_table[0] = removed;
+            tempRouteDublicate.time_matrix.length_table[0].length = indx;
 
             removed = tempRouteDublicate.time_matrix.time_table[0].slice(indx);
-            routeDublicate.time_matrix.time_table[0]=removed;
-            tempRouteDublicate.time_matrix.time_table[0].length= indx;
+            routeDublicate.time_matrix.time_table[0] =removed;
+            tempRouteDublicate.time_matrix.time_table[0].length = indx;
 
             console.log("We will change route", routeDublicate , tempRouteDublicate);
             rootScope.data.routes.push(routeDublicate);
@@ -4221,12 +4223,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
             //Изменить route_id в новом маршруте во всех точках а также driver transport
-            i=0;
-            while(i<routeDublicate.points.length){
-                routeDublicate.points[i].transport= routeDublicate.transport;
+            i = 0;
+            while(i < routeDublicate.points.length){
+                routeDublicate.points[i].transport = routeDublicate.transport;
                 routeDublicate.points[i].driver= routeDublicate.driver;
                 routeDublicate.points[i].route_id = routeDublicate.filterId;
                 routeDublicate.points[i].route_indx = routeDublicate.filterId;
+                routeDublicate.points[i].uniqueId = routeDublicate.uniqueID;
                 i++;
             }
 
@@ -4243,8 +4246,16 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
             });
 
+            rootScope.data.allRoutes.push({
+                allRoutes: false,
+                nameDriver:  ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') + ' - ' + routeDublicate.transport.NAME ,
+                nameCar:  routeDublicate.transport.NAME  + ' - ' +   ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') ,
+                value: routeDublicate.filterId,
+                car: routeDublicate.transport.NAME,
+                driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
+            });
 
-
+            routeDublicate.allRoutes = rootScope.data.allRoutes;
             //Сохраняем в кеш измененные данные. Отправляем 2 роута. Первый надо будет перезаписать, второй добавить.
             // отдельно взять точки из первого маршрута и обновить update
             http.post('./changedriver', {

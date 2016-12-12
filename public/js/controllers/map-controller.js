@@ -649,7 +649,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             // console.log('Finish draw markersArr.', markersArr, "points", points, "Only Points", markersArr.length==points.length );
 
             //Если рисовался только трек из точек, то центрировать карту по первой точке.
-            if(markersArr.length==points.length) {
+            if(markersArr.length == points.length && markersArr[0]) {
                 setMapCenter(markersArr[0]._latlng.lat, markersArr[0]._latlng.lng, 13);
             }
 
