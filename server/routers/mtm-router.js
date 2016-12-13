@@ -15,7 +15,7 @@ var express = require('express'),
     locker = new (require('../locker'))(),
     readline = require('readline'),
     //CronJob = require('cron').CronJob,
-    async = require('async'),
+    //async = require('async'),
     develop = true;
     if (develop) {
         var
@@ -560,7 +560,7 @@ router.route('/askblocked')
 router.route('/updatepushes')
     .post (function(req, res){
     try {
-        log.info("Получил запрос на updatepushes", req.body.data);
+        //log.info("Получил запрос на updatepushes", req.body.data);
 
         var key = "" + req.session.login;
         var currentCompany = companyLogins[key];
@@ -597,7 +597,7 @@ router.route('/testCloseDay')
 router.route('/updatetrack')
     .post (function(req, res){
     try {
-        log.info ("Получил запрос на updatetrack", req.body.data);
+        //log.info ("Получил запрос на updatetrack", req.body.data);
 
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
@@ -719,6 +719,26 @@ router.route('/login')
         try {
         req.session.login = req.query.curuser;
         res.sendFile('index.html', {root: './public/'});
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+
+
+router.route('/geosearchCity')
+    .post(function (req, res) {
+        try {
+            var result
+            console.log("req.body.data", req.body.data);
+            tracksManager.getObjectID(req.body.data, function (data){
+                console.log("Searching finished".blue, data);
+
+                res.status(200).json(data)
+            })
+
+
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
         }
@@ -3623,6 +3643,11 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     var i=0;
     var delta;
     var str = ""+ company;
+
+        if ("" + company == "" + 228932) {
+            console.log("Pushes BG".red);
+            console.log(pushes);
+        }
     //Костыль приводящий пуши разных компаний к единому знаменателю
     if (str.startsWith("292942")) delta = 0;
     if (str.startsWith("271389")) delta = 0;
@@ -5069,7 +5094,8 @@ function findStatusesAndWindows(company) {
             //log.info("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
             if (cashedDataArr[company].settings.workingWindowType == 1) {
                 //tmpPoint.findStatus = true;
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" &&
+                if ((tmpPoint.waypoint == undefined ||
+                    tmpPoint.waypoint.TYPE == "WAREHOUSE") &&
                     (tmpPoint.working_window[0] == undefined ||
                     tmpPoint.working_window[0].finish == undefined)){
                     tmpPoint.working_window = [];
@@ -5109,7 +5135,8 @@ function findStatusesAndWindows(company) {
             } else{
 
 
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" &&
+                if ((tmpPoint.waypoint == undefined ||
+                    tmpPoint.waypoint.TYPE == "WAREHOUSE" ) &&
                     (tmpPoint.working_window[0] == undefined ||
                     tmpPoint.working_window[0].finish == undefined)){
                     tmpPoint.working_window = [];
@@ -5193,10 +5220,10 @@ function findStatusesAndWindows(company) {
 
                 continue;
             }
-            if (tmpPoint.haveStop) {
+            if (tmpPoint.haveStop && tmpPoint.stopState) {
                 tmpPoint.limit = 45;
 
-                if (tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start) {
+                if ((tmpPoint.stopState.t1) && (tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start)) {
                     tmpPoint.limit = 60;
                 }
 
@@ -6088,14 +6115,15 @@ function calculateProblemIndex(company) {
                 cashedDataArr[company].routes[i].real_track.length == 0 ||
                 cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.length-1].t2 <cashedDataArr[company].routes[i].points[0].arrival_time_ts) continue;
 
-            log.info("Lets look in routes without problem for unauthorized stop");
+            //log.info("Lets look in routes without problem for unauthorized stop");
 
             route = cashedDataArr[company].routes[i];
             var stop = cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.length-1];
 
+            var isCorrectTime = (stop.t1 > route.points[0].arrival_time_ts && stop.t2 < route.points[route.points.length-1].arrival_time_ts);
             var isCorrectDuration = stop.time <= 180;
             var isRightRadius = finndNearestPoints(company, route, stop);
-            var isUnscheduledStop = (!isCorrectDuration && !isRightRadius);
+            var isUnscheduledStop = (!isCorrectDuration && !isRightRadius && !isCorrectTime);
 
             if (isUnscheduledStop) {
                 for (j = 0; j < route.points.length; j++){
@@ -6552,15 +6580,15 @@ function  changeNameOfRoute(company, uniqueID){
     if (company == undefined || uniqueID == undefined) return;
     var res = String.fromCharCode(8660);
     for (var i=0; i<cashedDataArr[company].allRoutes.length; i++){
-        log.info("Lets check", cashedDataArr[company].allRoutes[i].uniqueID, uniqueID);
+        //log.info("Lets check", cashedDataArr[company].allRoutes[i].uniqueID, uniqueID);
         if (cashedDataArr[company].allRoutes[i].uniqueID == uniqueID && cashedDataArr[company].allRoutes[i].nameCar.indexOf(res) == -1) {
-            log.info("Find closed route And i will change it name");
+            //log.info("Find closed route And i will change it name");
 
 
             cashedDataArr[company].allRoutes[i].nameCar = res + " "  + cashedDataArr[company].allRoutes[i].nameCar;
             cashedDataArr[company].allRoutes[i].nameDriver =  res + " " + cashedDataArr[company].allRoutes[i].nameDriver;
-            log.info("New name", cashedDataArr[company].allRoutes[i].nameCar);
-            log.info("New name", cashedDataArr[company].allRoutes[i].nameDriver);
+            //log.info("New name", cashedDataArr[company].allRoutes[i].nameCar);
+            //log.info("New name", cashedDataArr[company].allRoutes[i].nameDriver);
         }
     }
 
