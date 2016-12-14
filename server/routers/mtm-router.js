@@ -3644,10 +3644,7 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     var delta;
     var str = ""+ company;
 
-        if ("" + company == "" + 228932) {
-            console.log("Pushes BG".red);
-            console.log(pushes);
-        }
+
     //Костыль приводящий пуши разных компаний к единому знаменателю
     if (str.startsWith("292942")) delta = 0;
     if (str.startsWith("271389")) delta = 0;

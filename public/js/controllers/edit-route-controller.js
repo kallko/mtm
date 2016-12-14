@@ -1077,7 +1077,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
 
-            console.log('MATH DATE >> ', new Date(serverTime * 1000));
+            console.log('1080 MATH DATE >> ', new Date(serverTime * 1000));
 
             var newSolution = data.solutions[0].routes[0].deliveries,
                 updatedPoints = [],
@@ -1994,7 +1994,7 @@ function processModifiedPointsForOnePoint(route, data) {
 
 
 
-    console.log('MATH DATE >> ', new Date(serverTime * 1000));
+    console.log('1997 MATH DATE >> ', new Date(serverTime * 1000));
 
     var newSolution = data.solutions[0].routes[0].deliveries,
         updatedPoints = [],

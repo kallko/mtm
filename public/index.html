@@ -1312,11 +1312,11 @@
 
 <!-- див для поиска координат по адресу -->
 <template type="text/html" id="geo-editor">
-    <div ng-show = "false" ng-controller="GeoEditingController" style="align-items: center">
+    <div  ng-controller="GeoEditingController" style="align-items: center">
         <input id = "geo-search" class="heightElement element-margin" type="text"  width="100%" ng-model="searchString" enter-event="startSearchRegion()">
 
         <div class="element-margin">
-            <select  id="refion-select" ng-model="region" class="group-select"
+            <select  id="region-select" ng-model="region" class="group-select"
                      ng-options='option.value as option.name for option in regions'
                      ng-change = "changeRegion(region)">
             </select>
