@@ -39,6 +39,37 @@ Log.prototype.toFLogAppend = function (name, data, toJson) {
         });
 };
 
+Log.prototype.logger = function (name, data, toJson) {
+    console.log("Start Logger");
+    var d = new Date();
+    d.setDate(d.getDate()-2);
+    var me = this;
+    console.log(me, "me");
+    var oldName = 'login-log ' + ("" + d).substring(0,10) + ".txt";
+    console.log("OldName", me.folder);
+    fs.stat(me.folder+'/'+ oldName, function(err, stats){
+        if(err) {
+            console.log (err);
+        }
+        if (stats != undefined && stats.isFile) {
+            console.log("Найден файл логирования 2-х дневной давности");
+            fs.unlink(me.folder+'/'+ name2);
+        }
+    });
+
+
+    toJson = typeof toJson !== 'undefined' ? toJson : true;
+
+    fs.appendFile(me.folder + '/' + name, toJson ? JSON.stringify(data, null, 2) : data,
+        function (err) {
+            if (err) {
+                return console.log(err);
+            }
+
+            console.log("The " + name + " was saved to " + me.folder + "!\n");
+        });
+};
+
 // обычный лог
 Log.prototype.l = function (obj) {
     console.log(obj);
@@ -72,7 +103,7 @@ Log.prototype.info = function () {
 
             }
         } else {
-            preString =''};
+            preString =''}
         //console.log("result ", preString);
         result+= preString+" ";
     }
@@ -83,7 +114,7 @@ Log.prototype.info = function () {
     var today = new Date().getDate();
     if (today != lastUpdate) {
         lastUpdate = today;
-        var d=new Date();
+        var d = new Date();
         d.setDate(d.getDate()-2);
         var name2 = "log_" + d.getDate()+"_" + d.getMonth() + "_" + d.getFullYear();
         fs.stat(me.folder+'/'+ name2, function(err, stats){

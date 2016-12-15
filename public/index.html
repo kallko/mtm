@@ -651,8 +651,14 @@
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
             ng-click="recalculateRoute()"
-            ng-show = "!changedRoute.reCalc>0 && !recalcInProgress && false"
+            ng-show = "!changedRoute.reCalc > 0 && !recalcInProgress && (changedRoute.DISTANCE != '0')"
                     >Рассчитать</button>
+        </div>
+
+        <div class="element-red  element-bold"
+             ng-show="changedRoute && changedRoute.DISTANCE == '0'"   >
+            Этот маршрут не был рассчитан в плане. Нет возможности его пересчитать.
+
         </div>
 
         <div ng-show="route !== undefined">
@@ -662,7 +668,9 @@
             <div id="recalc-table" class="table-holder" >
 
 
-                <table class="table table-striped point-table" id="recalc-table-tbl" >
+                <table class="table table-striped point-table"
+                       id = "recalc-table-tbl"
+                       ng-show="changedRoute && changedRoute.DISTANCE == '0'">
                     <!-- ng-show="newRoutes == 1"-->
                     <tr class="titles-tr">
                         <th>№</th>

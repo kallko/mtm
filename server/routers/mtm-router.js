@@ -715,9 +715,17 @@ router.route('/nodeserch')
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
 router.route('/login')
     .get(function (req, res) {
-        //console.log("req.session.login", req);
+        console.log("req.session.login", req);
         try {
         req.session.login = req.query.curuser;
+            var time = timestmpToStr(new Date());
+            var date = ("" + new Date()).substring(0,10);
+        var obj = {
+            login : req.session.login,
+            date : date,
+            time : time
+        };
+        log.logger('login-log ' + date + ".txt", obj, true);
         res.sendFile('index.html', {root: './public/'});
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -730,7 +738,7 @@ router.route('/login')
 router.route('/geosearchCity')
     .post(function (req, res) {
         try {
-            var result
+            var result;
             console.log("req.body.data", req.body.data);
             tracksManager.getObjectID(req.body.data, function (data){
                 console.log("Searching finished".blue, data);
@@ -6640,8 +6648,8 @@ function addPushesToUpdateTrack(company, result){
 
     for (var k=0; k<result.length; k++) {
         result[k].pushes=[];
-        for (i=0; i<result[k].points_tasks.length; i++){
-            for (j=0; j<cashedDataArr[company].allPushes.length; j++){
+        for (i=0; result[k].points_tasks && i < result[k].points_tasks.length; i++){
+            for (j=0; cashedDataArr[company].allPushes && j<cashedDataArr[company].allPushes.length; j++){
                 if (result[k].points_tasks[i] == cashedDataArr[company].allPushes[j].number){
 
                     if (cashedDataArr[company].allPushes[j].time == undefined) checkPushesTimeGMTZone(cashedDataArr[company].allPushes[j], company, cashedDataArr[company].COMPANY_NAME);

@@ -456,6 +456,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     //console.log("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
+
+
             parseXML(result.return, function (err, res) {
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,   // список всего транспорта по данному клиенту
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
@@ -465,7 +467,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                    // shift_name = res.MESSAGE.SHIFT_NAME;
                 //console.log("полученные сенсоры",sensors, "SOAP345");
 
-
+                //console.log("Answer", waypoints);
 
 
                 if (waypoints == undefined) return;
