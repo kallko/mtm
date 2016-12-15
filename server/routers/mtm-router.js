@@ -715,7 +715,7 @@ router.route('/nodeserch')
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
 router.route('/login')
     .get(function (req, res) {
-        console.log("req.session.login", req);
+        //console.log("req.session.login", req);
         try {
         req.session.login = req.query.curuser;
             var time = timestmpToStr(new Date());

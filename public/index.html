@@ -647,11 +647,12 @@
             Маршрут для редактирования = {{route.driver.NAME}} {{route.transport.NAME}}
         </div>
 
-
+        <!--ng-show = "!changedRoute.reCalc > 0 && !recalcInProgress && (changedRoute.DISTANCE != '0')"-->
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
             ng-click="recalculateRoute()"
-            ng-show = "!changedRoute.reCalc > 0 && !recalcInProgress && (changedRoute.DISTANCE != '0')"
+
+                    ng-show = "!changedRoute.reCalc > 0 && !recalcInProgress && (changedRoute.DISTANCE != '0')"
                     >Рассчитать</button>
         </div>
 
@@ -721,7 +722,7 @@
 
                 </table>
         <button ng-click="confirmEditing()">Утвердить</button>
-        <button>Ручное редактирование</button>
+        <button ng-show="false">Ручное редактирование</button>
 
 
         <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->

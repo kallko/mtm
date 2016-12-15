@@ -1028,11 +1028,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             return;
                         } else {
                             if (scope.iteration>6) {
+                                scope.recalcTime = 0;
                                 scope.$emit('showNotification', {text: 'Автоматический пересчет не удался.'});
 
                             }
                         }
                         processModifiedPoints(route, data);
+                        scope.recalcTime = 0;
                         scope.recalcInProgress = false;
                         if (scope.timer) clearInterval(scope.timer);
                     })

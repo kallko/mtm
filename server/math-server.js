@@ -13,6 +13,7 @@ function MathServer() {
 // запрос на пересчет маршрута
 MathServer.prototype.recalculate = function (route, callback) {
     var me = this;
+    var uniqueId = false;
     console.log(this.mathServerUrl + 'task?action=add&globalID=uniqGuid' + Date.now() + '&task=' + JSON.stringify(route));
     log.toFLog('query.js', this.mathServerUrl + 'task?action=add&globalID=uniqGuid&task=' + JSON.stringify(route));
     request({
@@ -26,7 +27,8 @@ MathServer.prototype.recalculate = function (route, callback) {
             log.toFLog('math_res.js', body);
             var queryID = body.query;
 
-            var intervalID = setInterval(function () {
+            //Раньше здесь был интервал setInterval и это вызывало ошибку;
+            setTimeout(function () {
                 request({
                     url: me.mathServerUrl + 'task?action=getState&queryID=' + queryID + '&lastSID=0',
                     json: true
@@ -34,7 +36,7 @@ MathServer.prototype.recalculate = function (route, callback) {
                     if (error || body.error) {
                         console.log(error);
                         if (body)   console.log(body.error);
-                        clearInterval(intervalID);
+                        //clearInterval(intervalID);
                         callback({status: 'error'});
                     } else {
                         if (body.state.status == 3 || body.state.status == 4 || body.state.status == 5) {
@@ -42,17 +44,20 @@ MathServer.prototype.recalculate = function (route, callback) {
                                 log.toFLog('math_res2.js', body);
                                 console.log('Math ready!');
                                 console.log(body);
-                                clearInterval(intervalID);
+                                uniqueId = body.state.globalID;
+                                console.log("!!!!!!!! " + uniqueId + " !!!!!!!!");
+                                //clearInterval(intervalID);
                                 body.timestamp = parseInt(Date.now() / 1000);
-                                callback(body);
+                                callback(body)
+
                             } else {
-                                clearInterval(intervalID);
+                                //clearInterval(intervalID);
                                 callback({status: 'error'});
                             }
                         }
                     }
                 });
-            }, 1000);
+            }, 2000);
         }
     });
 };

@@ -40,20 +40,17 @@ Log.prototype.toFLogAppend = function (name, data, toJson) {
 };
 
 Log.prototype.logger = function (name, data, toJson) {
-    console.log("Start Logger");
     var d = new Date();
     d.setDate(d.getDate()-2);
     var me = this;
-    console.log(me, "me");
-    var oldName = 'login-log ' + ("" + d).substring(0,10) + ".txt";
-    console.log("OldName", me.folder);
+    var oldName = name + ("" + d).substring(0,10) + ".txt";
     fs.stat(me.folder+'/'+ oldName, function(err, stats){
         if(err) {
             console.log (err);
         }
         if (stats != undefined && stats.isFile) {
             console.log("Найден файл логирования 2-х дневной давности");
-            fs.unlink(me.folder+'/'+ name2);
+            fs.unlink(me.folder+'/'+ oldName);
         }
     });
 
