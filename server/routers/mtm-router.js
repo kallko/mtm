@@ -531,6 +531,39 @@ router.route('/getoldroute')
     });
 
 
+router.route('/getHouses')
+    .post(function(req, res){
+        try {
+          tracksManager.getAllHousesById(req.body.street, function(data){
+              console.log("Houses recieved".blue);
+              console.log(data);
+              res.status(200).json({data: data});
+          })
+
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+router.route('/getObjLatLon')
+    .post(function(req, res){
+        try {
+            console.log("Lokking for LatLon".blue);
+            tracksManager.giveMeLatLonByID(req.body.obj, function(id, data){
+                console.log("Houses recieved".blue);
+                console.log(data);
+                res.status(200).json({data: data});
+            })
+
+        } catch (e) {
+            log.error( "Ошибка " + e + e.stack);
+        }
+    });
+
+
+
+
 router.route('/askblocked')
     .post(function(req, res){
         try {
@@ -2952,7 +2985,7 @@ function startPeriodicCalculating() {
                         var obj = JSON.parse(data.return);
                         //log.info("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
-                        cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);}
+                        if (cashedDataArr[company].allPushes) cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);}
                         cashedDataArr[company].needRequests--;
                         //if (obj && develop) console.log ("Получили".blue, obj.length, "присоединили", cashedDataArr[company].allPushes.length);
                         log.info("GetPushes finished for company", company, cashedDataArr[company].needRequests);
@@ -6808,6 +6841,8 @@ function askForStreetId() {
 
     //}
 }
+
+
 
 
 function requestDispether(i) {

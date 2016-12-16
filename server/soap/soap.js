@@ -40,6 +40,7 @@ SoapManager.prototype.getFullUrl = function () {
 
 // получить все необходимые для интерфейса данные на конкретную дату
 SoapManager.prototype.getAllDailyData = function (callback, date) {
+    if (!date) date = new Date();
     if (!loadFromCache) {
         console.log("Wait for Data from SOAP");
         this.getDailyPlan(callback, date);

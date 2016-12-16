@@ -943,7 +943,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             });
 
             rootScope.$on('setMapCenter', function (event, data) {
-                setMapCenter(data.lat, data.lon);
+                setMapCenter(data.lat, data.lon, data.zoom);
             });
 
             rootScope.$on('drawCombinedTrack', function (event, route, activePoint) {
@@ -2911,6 +2911,24 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         }
 
+        rootScope.$on('clearGeoMarker', function(event){
+            if (scope.geoMarker) {
+                map.removeLayer(scope.geoMarker);
+            }
+        });
+
+
+        rootScope.$on('addGeoMarker', function(event, lat, lon){
+            console.log("Try to Add GeoMarker");
+            if (scope.geoMarker) {
+                map.removeLayer(scope.geoMarker);
+            }
+                console.log("Create Marker");
+                scope.geoMarker = L.marker([lat, lon], {'title': "GeoMarker"});
+                //scope.geomarker.setIcon(getIcon('G', "1", "blue", 'black'));
+                map.addLayer(scope.geoMarker);
+                setMapCenter(lat, lon, 18);
+        })
 
     }]);
 

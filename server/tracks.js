@@ -607,8 +607,31 @@ TracksManager.prototype.getObjectID = function(text, lang, callback){
     });
 };
 
+TracksManager.prototype.getAllHousesById = function(id, callback){
+    var resUrl = "http://sac.sngtrans.com.ua/getobj?id=" + id;
+    var result = [];
+    request({
+        url: resUrl,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            result.push(body);
+            console.log("adress Recieved");
+            callback(result);
+
+        } else {
+            console.log("Error");
+            callback(result);
+
+        }
+    })
+
+};
+
+
+
 TracksManager.prototype.getAllHouses = function(childs, callback){
-    //console.log(childs);
+    console.log(childs);
 
     if(childs.length == undefined) {
         var obj=JSON.parse(JSON.stringify(childs));
@@ -618,7 +641,7 @@ TracksManager.prototype.getAllHouses = function(childs, callback){
     var responseList = 0;
     var requestList = 0;
     var result = [];
-    console.log("Start LatLon serching", childs.length);
+    //console.log("Start LatLon serching", childs.length);
     if(childs.length == 0) callback(result);
     for (var i = 0; i < childs.length; i++){
         if (childs[i].childs == undefined && childs.length ==1 ) callback(result);

@@ -44,13 +44,14 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
     }];
 
     scope.streets =[{
+       fullName : "Выберите улицу",
        name: "Выберите улицу",
-       value : -1
+       id : -1
     }];
 
     scope.houses = [{
         name: "Выберите дом",
-        value : -1
+        id : -1
     }];
 
     scope.searchString = "";
@@ -61,6 +62,11 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
 
 
     scope.startSearchRegion = function() {
+        scope.region = -1;
+        scope.city = -1;
+        scope.street = -1;
+        scope.house = -1;
+        scope.$emit('clearGeoMarker');
         if (scope.searchString.length > 3) {
             console.log("scope.searchString", scope.searchString, scope.lang);
             http.post('./geosearch', {data: scope.searchString, lang: scope.lang})
@@ -79,6 +85,7 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
                     });
                     scope.cities.length = 1;
                     scope.cities = scope.cities.concat(cities);
+                    createUniqueRegion(scope.regions);
 
                 })
 
@@ -92,22 +99,104 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
         //scope.$apply;
     };
 
-    scope.changeCity = function () {
 
-    };
+    scope.$watch('city', function(newValue, oldValue) {
+            if (newValue === oldValue) return;
+            scope.streets.length = 1;
+            scope.street = -1;
+            scope.houses.length = 1;
+            scope.house = -1;
+
+            var cityObj = getObjById(scope.cities, scope.city);
+            scope.region = cityObj.id;
+
+            if (cityObj.childs) {
+                scope.streets = scope.streets.concat(cityObj.childs);
+                scope.streets.forEach(function(item){
+                if (!item.fullName) {
+                    item.fullName = item.type + " " + item.name;
+                    if (item.zone) item.fullName += " (" + item.zone + ")";
+                }
+                });
+                console.log (scope.streets);
+            }
+            http.post('./getObjLatLon', {obj : newValue})
+                .then(function(data){
+                    console.log(data.data.data.coordinates);
+                    var obj = {};
+                    obj.lon = data.data.data.coordinates[0];
+                    obj.lat = data.data.data.coordinates[1];
+                    obj.zoom = 10;
+                    rootScope.$emit('setMapCenter', obj);
+
+                });
+
+        }
+
+    );
 
 
-    scope.changeStreet = function () {
+    scope.$watch('street', function(newValue, oldValue) {
+        if (newValue === oldValue) return;
+        if (newValue == -1) {
+            scope.houses.length = 1;
+            scope.house = -1;
+            return;
+        }
 
-    };
+        http.post('./getObjLatLon', {obj : newValue})
+            .then(function(data){
+                console.log(data.data.data.coordinates);
+                var obj = {};
+                obj.lon = data.data.data.coordinates[0];
+                obj.lat = data.data.data.coordinates[1];
+                obj.zoom = 16;
+                rootScope.$emit('setMapCenter', obj);
 
-    scope.changeHouse = function () {
+            });
 
-    };
+        http.post('./getHouses', {street : newValue})
+            .then(function(data){
+                scope.houses.length = 1;
+                scope.house = -1;
+                scope.houses = scope.houses.concat(data.data.data[0].address);
+            })
 
-    scope.$watch('city', function(newValue, oldValue) {console.log("City was Changed", newValue)}
+    });
 
-    )
 
+    scope.$watch('house', function(newValue, oldValue) {
+        console.log("House changed", newValue, oldValue);
+        if (newValue === oldValue ) return;
+        if (newValue == -1) {
+            return;
+        }
+
+        http.post('./getObjLatLon', {obj : newValue})
+            .then(function(data){
+               console.log(data.data.data.coordinates);
+                var lon = data.data.data.coordinates[0];
+                var lat = data.data.data.coordinates[1];
+                scope.$emit('addGeoMarker', lat, lon);
+            })
+
+
+    });
+
+    //Универсальный метод возвращающий объект по его Id
+    function getObjById(obj, objId) {
+        if (!obj || !objId) return;
+
+        var result = obj.filter(function(item){
+            return item.id == objId;
+        });
+        return result[0];
+    }
+
+
+    function createUniqueRegions(regions) {
+        if (!regions) return;
+        console.log(regions);
+    }
 
 }]);

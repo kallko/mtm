@@ -1321,7 +1321,7 @@
 
 <!-- див для поиска координат по адресу -->
 <template type="text/html" id="geo-editor">
-    <div  ng-controller="GeoEditingController" style="align-items: center" ng-show="false">
+    <div  ng-controller="GeoEditingController" style="align-items: center" ng-show="true">
         <div>
             <input id = "geo-search" class="heightElement element-margin" type="text"  width="100%" ng-model="searchString" enter-event="startSearchRegion()"/>
             <form ng-cloak class="element-margin">
@@ -1345,20 +1345,20 @@
         <div class="element-margin">
             <select id="city-select" ng-model="city" class="group-select"
                     ng-options='option.id as option.name for option in cities'
-                    ng-change = "changeCity()">
+                    >
             </select>
         </div>
         <div class="element-margin">
             <select  id="street-select" ng-model="street" class="group-select"
-                    ng-options='option.value as option.name for option in streets'
-                    ng-change = "changeStreet()">
+                    ng-options='option.id as option.fullName for option in streets'
+                    >
             </select>
         </div>
 
         <div class="element-margin">
             <select  id="house-select" ng-model="house" class="group-select"
-                    ng-options='option.value as option.name for option in houses'
-                    ng-change = "changeHouse()">
+                    ng-options='option.id as option.name for option in houses'
+                   >
             </select>
         </div>
 
