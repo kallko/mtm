@@ -590,10 +590,10 @@ TracksManager.prototype.getRouterMatrixByPoints = function (pointsStr, callback)
 };
 
 
-TracksManager.prototype.getObjectID = function(text, callback){
+TracksManager.prototype.getObjectID = function(text, lang, callback){
     //console.log(text);
      var url1 = encodeURIComponent(text);
-     var resUrl = "http://sac.sngtrans.com.ua/search?lang=ua&c=ua&q=" + url1;
+     var resUrl = "http://sac.sngtrans.com.ua/search?lang=" + lang + "&c=ua&q=" + url1;
     //console.log(text);
     //console.log(resUrl);
     request({
@@ -601,7 +601,7 @@ TracksManager.prototype.getObjectID = function(text, callback){
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            //console.log(body);
+            //console.log("Result of searching in tracks", body);
             callback(body);
         }
     });

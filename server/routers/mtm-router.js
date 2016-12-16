@@ -735,14 +735,14 @@ router.route('/login')
 
 
 
-router.route('/geosearchCity')
+router.route('/geosearch')
     .post(function (req, res) {
         try {
             var result;
-            console.log("req.body.data", req.body.data);
-            tracksManager.getObjectID(req.body.data, function (data){
+            console.log("req.body.data", req.body.data, req.body.lang);
+            tracksManager.getObjectID(req.body.data, req.body.lang, function (data){
                 console.log("Searching finished".blue, data);
-
+                var region = createRegionsList(data);
                 res.status(200).json(data)
             })
 
@@ -902,7 +902,7 @@ router.route('/dailydata')
                         res.status(200).json(cashedDataArr[currentCompany+stringDate]);
                         return;
                     }}
-            if (develop) console.log(flag + " After flag".red);
+            //if (develop) console.log(flag + " After flag".red);
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
 
@@ -1819,8 +1819,21 @@ router.route('/currentStops/:gid/:from/:to')
 
 
 
+// получение сигнала от водителя
+router.route('/signalDriverToDispatcher/')
+    .post(function (req, res) {
+        try {
+
+            log.info("!!!!Recieve SIGNAL from Driver ", req.body);
+            res.status(200).json('ок');
+
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
 // получение срочной заявки
-router.route('/UrgentOrder/')
+router.route('/urgentOrder/')
     .post(function (req, res) {
         try {
 
@@ -6947,6 +6960,24 @@ function fillOneObj (i){
 
 }
 
+
+function createRegionsList (data){
+    if (!data || data.length == 0) return;
+
+    data.sort(function(a, b){
+        return a.level1 == b.level1 ? 0 : (a.level1 < b.level1 || a.level1 == undefined)? -1 : 1;
+    });
+
+    //data.sort(function(a, b){
+    //    return a.level1 == b.level1 ? 0 : a.level1 < b.level1 ? -1 : 1;
+    //});
+
+    console.log("Array Sorted".blue);
+    console.log(data);
+
+    return data;
+
+}
 
 function newOneObjectDispetcher(indx){
     console.log ("Next Index", indx);

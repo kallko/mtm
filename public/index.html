@@ -1321,18 +1321,30 @@
 
 <!-- див для поиска координат по адресу -->
 <template type="text/html" id="geo-editor">
-    <div  ng-controller="GeoEditingController" style="align-items: center">
-        <input id = "geo-search" class="heightElement element-margin" type="text"  width="100%" ng-model="searchString" enter-event="startSearchRegion()">
+    <div  ng-controller="GeoEditingController" style="align-items: center" ng-show="false">
+        <div>
+            <input id = "geo-search" class="heightElement element-margin" type="text"  width="100%" ng-model="searchString" enter-event="startSearchRegion()"/>
+            <form ng-cloak class="element-margin">
 
+                <label>
+                    <input type="radio" ng-model="lang" value="uk">
+                    Украiнська
+                </label>
+                <label>
+                    <input type="radio" ng-model="lang" value="ru">
+                    Русский
+                </label><br/>
+            </form>
+        </div>
         <div class="element-margin">
             <select  id="region-select" ng-model="region" class="group-select"
-                     ng-options='option.value as option.name for option in regions'
+                     ng-options='option.id as option.level1 || option.name for option in regions'
                      ng-change = "changeRegion(region)">
             </select>
         </div >
         <div class="element-margin">
             <select id="city-select" ng-model="city" class="group-select"
-                    ng-options='option.value as option.name for option in cities'
+                    ng-options='option.id as option.name for option in cities'
                     ng-change = "changeCity()">
             </select>
         </div>

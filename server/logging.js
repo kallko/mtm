@@ -46,7 +46,7 @@ Log.prototype.logger = function (name, data, toJson) {
     var oldName = name + ("" + d).substring(0,10) + ".txt";
     fs.stat(me.folder+'/'+ oldName, function(err, stats){
         if(err) {
-            console.log (err);
+            //console.log (err);
         }
         if (stats != undefined && stats.isFile) {
             console.log("Найден файл логирования 2-х дневной давности");
