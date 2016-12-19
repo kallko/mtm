@@ -67,10 +67,11 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
         scope.city = -1;
         scope.street = -1;
         scope.house = -1;
-        scope.region.length = 1;
-        scope.city.length = 1;
-        scope.street.length = 1;
-        scope.house.length = 1;
+        scope.regions.length = 1;
+        scope.cities.length = 1;
+        scope.streets.length = 1;
+        scope.houses.length = 1;
+        scope.miniCities = undefined;
         scope.$emit('clearGeoMarker');
         if (scope.searchString.length > 3) {
             //console.log("scope.searchString", scope.searchString, scope.lang);
@@ -93,7 +94,7 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
                     scope.cities = scope.cities.concat(cities);
                     ////console.log("New cities", scope.cities);
                     createUniqueRegions(scope.regions);
-
+                    //scope.miniCities = getObjById(scope.cities, id).cities;
                 })
 
         }
