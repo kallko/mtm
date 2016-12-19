@@ -4,6 +4,7 @@
 angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$rootScope', '$http', function (scope, rootScope, http) {
 
     scope.lang = "ru";
+    //todo пункты меню на языке, который выбрал пользователь
 
     scope.regions =[
             {id : -1 , level1: "Выберите область/Сброс"}];
@@ -85,7 +86,7 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
                     });
                     scope.cities.length = 1;
                     scope.cities = scope.cities.concat(cities);
-                    createUniqueRegion(scope.regions);
+                    createUniqueRegions(scope.regions);
 
                 })
 
@@ -96,6 +97,7 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
     scope.changeRegion = function (id) {
         console.log("id of region", id);
         scope.city = id;
+        scope.miniCities = getObjById(scope.cities, id).cities;
         //scope.$apply;
     };
 
@@ -108,7 +110,8 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
             scope.house = -1;
 
             var cityObj = getObjById(scope.cities, scope.city);
-            scope.region = cityObj.id;
+            console.log("cityObj", cityObj);
+            scope.region = findRegionById(cityObj.id);
 
             if (cityObj.childs) {
                 scope.streets = scope.streets.concat(cityObj.childs);
@@ -123,12 +126,13 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
             http.post('./getObjLatLon', {obj : newValue})
                 .then(function(data){
                     console.log(data.data.data.coordinates);
-                    var obj = {};
-                    obj.lon = data.data.data.coordinates[0];
-                    obj.lat = data.data.data.coordinates[1];
-                    obj.zoom = 10;
-                    rootScope.$emit('setMapCenter', obj);
-
+                    if(data.data.data.coordinates) {
+                        var obj = {};
+                        obj.lon = data.data.data.coordinates[0];
+                        obj.lat = data.data.data.coordinates[1];
+                        obj.zoom = 10;
+                        rootScope.$emit('setMapCenter', obj);
+                    }
                 });
 
         }
@@ -195,8 +199,58 @@ angular.module('MTMonitor').controller('GeoEditingController', ['$scope', '$root
 
 
     function createUniqueRegions(regions) {
-        if (!regions) return;
+        if (!regions || regions.length < 2) return;
         console.log(regions);
+        var result =[];
+        var proba = [];
+        console.log("Start from", regions.length);
+        result.push(scope.regions[0]);
+        for (var i = 1; i < regions.length; i++) {
+            var flag = true;
+            for (var j = 1; j < i; j++){
+                console.log(i, " ",  j, " ", regions[i].level1 , regions[j].level1, regions[i].level1 == regions[j].level1);
+                if (regions[i].level1 == regions[j].level1) {
+                    console.log("Find duplicate");
+                    if (regions[j].cities) {
+                        console.log("cites", regions[j].cities.length);
+                        regions[j].cities.push({id: regions[i].id, level1: regions[i].level1, name: regions[i].name});
+                    }
+                    //regions[i].cities = regions[i].cities || [];
+
+                    regions.splice(i,1);
+                    i--;
+                    flag = false;
+                    //proba.push()
+                    break
+                }
+
+
+            }
+
+            if(flag) {
+                console.log("Create new element", regions[j].level1);
+                regions[j].cities =  [];
+                regions[j].cities.push({id: regions[i].id, level1: regions[i].level1, name: regions[i].name});
+            }
+        }
+
+        result = result.concat(regions);
+        console.log("Result", regions.length, regions);
+
     }
+
+    function findRegionById(id){
+        console.log("findRegion by ID", id);
+        var result = -1;
+        scope.regions.forEach(function(region){
+            if (region.cities) {
+                region.cities.forEach(function(city){
+                    if (city.id == id) result = region.id;
+                })
+            }
+        });
+        return result;
+    }
+
 
 }]);

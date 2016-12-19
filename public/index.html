@@ -1344,7 +1344,8 @@
         </div >
         <div class="element-margin">
             <select id="city-select" ng-model="city" class="group-select"
-                    ng-options='option.id as option.name for option in cities'
+                    ng-options='option.id as option.name for option in miniCities || cities'
+
                     >
             </select>
         </div>
