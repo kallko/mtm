@@ -271,7 +271,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         //     });
         // }
         var data = [];
-        if (loadOldDay) {
+        if (loadOldDay && date != undefined) {
             var dateObj = new Date( date),
             dateYear = dateObj.getFullYear(),
             dateMonth = dateObj.getMonth() + 1,
