@@ -641,8 +641,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     }
                     //var newData=JSON.stringify(data);
                     //var toPrint=JSON.parse(newData);
-                    rootScope.reasons=data.reasons;
-                    rootScope.nowTime=data.current_server_time;
+                    rootScope.reasons = data.reasons;
+                    rootScope.nowTime = data.current_server_time;
                     console.log("!!!!!!!!!!!!Data server time = ", data.server_time );
                     showPopup("Прошлый день загружен", 2000);
                     console.log("Loaded DATA", data.date, JSON.parse(JSON.stringify(data)));
@@ -5350,6 +5350,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             console.log("Результат апдэйт трек", rootScope.data);
 
         });
+
 
 
         function createNewScopeFilters(){

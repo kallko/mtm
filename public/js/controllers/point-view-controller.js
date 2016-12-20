@@ -375,6 +375,23 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         };
 
+
+        scope.reCreateReasonsList = function(item) {
+            console.log("RecreateReasonList", item)
+        }
+
+        scope.addAttributeToPoint = function (id, point){
+
+            console.log("Point", point, "id", id)
+        };
+
+
+        scope.deleteAttributeToPoint = function (id, point){
+            alert("Try to delete attribute to point " + id);
+            console.log("Point", point)
+        };
+
+
         // открывает окно в 1С IDS-овцев
         rootScope.open1CWindow = function () {
             console.log('Point View open1CWindow');
