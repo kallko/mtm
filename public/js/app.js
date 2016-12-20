@@ -1,4 +1,6 @@
 angular.module('MTMonitor', ['smart-table']);
+angular.module('MTMonitor', ['angularjs-dropdown-multiselect']);
+
 
 // инициализация Golden Layout (перемещаемые панельки)
 // var myLayout = new GoldenLayout({

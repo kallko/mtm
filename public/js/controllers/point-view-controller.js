@@ -5,9 +5,30 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             parent; // откуда было открыто окно
             scope.showRouteId;
 
-
+        //console.log("Start poinview");
         init();
 
+        //todo from example
+        scope.reasons = [
+            {id: 1, label: "Опаздал", gender:"F"},
+            {id: 2, label: "Не пришел", gender:"F"},
+            {id: 3, label: "Почесал", gender:"F"},
+            {id: 4, label: "Зачесал", gender:"M"},
+            {id: 5, label: "Начесал", gender:"M"}];
+        scope.selectReasons =[];
+        scope.settings = {
+            enableSearch: true,
+            selectionLimit: 3,
+            smartButtonMaxItems: 3,
+            smartButtonTextConverter: function(itemText, originalItem) {
+                if (itemText === 'Jhon') {
+                    return 'Jhonny!';
+                }
+
+                return itemText;
+            },
+            groupByTextProvider: function(groupValue) { if (groupValue === 'M') { return 'Driver'; } else { return 'Operator'; } }
+        };
 
         // начальная инициализация контроллера
         function init() {

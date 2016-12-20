@@ -1188,25 +1188,38 @@
         </tr>
         <tr>
             <td> Замечания </td>
-            <td>
-                <div ng-repeat="attribute in point.attribute">
-                    <div ng-click="deleteAttributeToPoint(attribute.id, point)">
-                        {{attribute.name}}
-                    </div>
+            <td class="row-multi-select" >
+                <!--<div ng-repeat="attribute in point.attribute">-->
+                    <!--<div ng-click="deleteAttributeToPoint(attribute.id, point)">-->
+                        <!--{{attribute.name}}-->
+                    <!--</div>-->
 
-                </div>
-                <div>
-                    <select ng-model="selectReasonList" class="reason-list"
-                            ng-options="item.ID as item.DESCRIPTION  for item in reasons"
-                            ng-click="reCreateReasonsList(selectReasonList)"
-                            >
-                        <option value="" selected ng-mouseover="reCreateReasonsList(selectReasonList)">
-                           --Причина отказа--
-                        </option>
-                    </select>
-                    <button id="add-attribute-task-btn"
-                            class="btn btn-primary btn-xs btn-warning" ng-click="addAttributeToPoint(selectReasonList, point)">Добавить
-                    </button>
+                <!--</div>-->
+                <div ng-show = 'false'>
+
+                    <div class="element-multi-select"
+                         ng-dropdown-multiselect=""
+                         options="reasons"
+                         selected-model="selectReasons"
+                         extra-settings="settings"
+                         group-by="gender">
+
+
+                    </div>
+                    <!--<button id="add-attribute-task-btn"-->
+                            <!--style="padding-left: 100px"-->
+                            <!--class="btn-warning" ng-click="addAttributeToPoint(selectReasonList, point)">Добавить-->
+                    <!--</button>-->
+                    <!--btn btn-primary btn-xs-->
+                    <!--<select ng-model="selectReasonList" class="reason-list"-->
+                            <!--ng-options="item.ID as item.DESCRIPTION  for item in reasons"-->
+                            <!--ng-click="reCreateReasonsList(selectReasonList)"-->
+                            <!-->
+                        <!--<option value="" selected ng-mouseover="reCreateReasonsList(selectReasonList)">-->
+                           <!--&#45;&#45;Причина отказа&#45;&#45;-->
+                        <!--</option>-->
+                    <!--</select>-->
+
                 </div>
             </td>
         </tr>
