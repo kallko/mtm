@@ -5104,12 +5104,12 @@ function findStatusesAndWindows(company) {
     log.info("Start findStatusesAndWindows", company);
     var tmpPoint;
 
-    for(var i=0; i<cashedDataArr[company].routes.length; i++ ) {
+    for(var i = 0; i < cashedDataArr[company].routes.length; i++ ) {
 
-        cashedDataArr[company].routes[i].ready_to_close=true;
+        cashedDataArr[company].routes[i].ready_to_close = true;
 
         //log.info("1");
-        for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++) {
+        for (var j = 0; j < cashedDataArr[company].routes[i].points.length; j++) {
             //log.info("2");
 
             tmpPoint = cashedDataArr[company].routes[i].points[j];
@@ -5117,8 +5117,7 @@ function findStatusesAndWindows(company) {
 
 
             if (tmpPoint.real_arrival_time == undefined) {
-                cashedDataArr[company].routes[i].ready_to_close=false;
-
+                cashedDataArr[company].routes[i].ready_to_close = false;
                 continue;
             }
             //считаем окна только для доставленного
@@ -5141,6 +5140,9 @@ function findStatusesAndWindows(company) {
                 }
             }
 
+            var oldStatus = tmpPoint.status,
+                oldLimit = tmpPoint.limit
+                oldNotes =[].concat(tmpPoint.notes);
 
             //log.info("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
             if (cashedDataArr[company].settings.workingWindowType == 1) {
@@ -5259,6 +5261,10 @@ function findStatusesAndWindows(company) {
 
             }
 
+
+
+
+
             //корректировка достоверности статусов по процентам.
             tmpPoint.limit = 0;
             if (tmpPoint.confirmed_by_operator) {
@@ -5291,12 +5297,13 @@ function findStatusesAndWindows(company) {
             //log.info("Настройки", cashedDataArr[company].settings.limit);
             if (tmpPoint.limit > 0 && tmpPoint.limit < cashedDataArr[company].settings.limit) {
                 tmpPoint.status = 6;
-                cashedDataArr[company].routes[i].ready_to_close=false;
+                cashedDataArr[company].routes[i].ready_to_close = false;
                 tmpPoint.problem_index = 40;
                 //tmpPoint.last_change = 4807;
                 //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
             //log.info("И присваиваем ей статус", tmpPoint.status);
+            sendHookTo1C(tmpPoint, oldStatus, oldLimit, oldNotes);
         }
 
     }
@@ -5306,7 +5313,14 @@ function findStatusesAndWindows(company) {
 
 }
 
+function sendHookTo1C (point, status, limit, notes){
+    if (point.status != status && point.limit != limit) console.log(
+        "We change status", point.TASK_NUMBER, " from ".green,  status, "to ", point.status,
+        "haveStop ", point.haveStop,
+        "havePush ", point.havePush,
+        "limit ", point.limit, " oldLimit ", limit);
 
+}
 
 function calculateStatistic (company){
     try {
@@ -5345,9 +5359,9 @@ function oldDayStatuses(company) {
     log.info("Заменяем статусы компании", company );
     for (var i=0; i<cashedDataArr[company].routes.length;i++){
         for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
-            if (cashedDataArr[company].routes[i].points[j].status >2 && cashedDataArr[company].routes[i].points[j].status !=8 ) {
+            if (cashedDataArr[company].routes[i].points[j].status > 2 && cashedDataArr[company].routes[i].points[j].status != 8 ) {
                 //log.info("Change Old Day Status");
-                cashedDataArr[company].routes[i].points[j].status == 4;
+                cashedDataArr[company].routes[i].points[j].status = 4;
             }
         }
     }
