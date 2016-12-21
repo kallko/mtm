@@ -271,7 +271,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         //     });
         // }
         var data = [];
-        if (loadOldDay && date != undefined) {
+        if (loadOldDay && !itIsToday) {
             var dateObj = new Date( date),
             dateYear = dateObj.getFullYear(),
             dateMonth = dateObj.getMonth() + 1,
@@ -288,8 +288,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                 try{
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
-                                    console.log(data.closedRoutesFrom1C, "Soap 290");
-                                    log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
+                                    console.log(data.closedRoutesFrom1C.length, "Soap 290");
+                                    //log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
                                 }catch(e){
                                     console.log(e, "SOAP 285");
                                 }

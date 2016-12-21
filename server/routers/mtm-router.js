@@ -2013,8 +2013,8 @@ router.route('/savetonode/')
                         cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                         log.info("Overwright Route");
                         cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
-                        var uniqueId = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
-                        unblockRoute(key, uniqueId);
+                        var uniqueID = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
+                        unblockRoute(key, uniqueID);
                         cashedDataArr[currentCompany].blocked_routes.splice(i,1);
                         res.status(200).json(id);
                         return;
@@ -2023,10 +2023,10 @@ router.route('/savetonode/')
                 i++;
             }
 
-            function unblockRoute(login, uniqueId) {
+            function unblockRoute(login, uniqueID) {
                          for (var i=0; i<blockedRoutes.length; i++) {
-                    if (blockedRoutes[i].id == uniqueId && blockedRoutes[i].login == login) {
-                        log.info("снимаем блокировку с роута", uniqueId);
+                    if (blockedRoutes[i].id == uniqueID && blockedRoutes[i].login == login) {
+                        log.info("снимаем блокировку с роута", uniqueID);
                         blockedRoutes.splice(i, 1);
                     }
 
@@ -2041,8 +2041,8 @@ router.route('/savetonode/')
                     cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
                     log.info("Overwright OLD Route");
 
-                    uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
-                    unblockRoute(key, uniqueId);
+                    uniqueID = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
+                    unblockRoute(key, uniqueID);
 
                     res.status(200).json(id);
                     return;
@@ -2101,10 +2101,10 @@ router.route('/logout')
         while(i<blockedRoutes.length){
             if( ""+blockedRoutes[i].login == ""+req.session.login){
                 log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", req.session.login, "logouting");
-                var uniqueId = blockedRoutes[i].id;
+                var uniqueID = blockedRoutes[i].id;
                 var company = blockedRoutes[i].company;
                 for(var j=0; j<cashedDataArr[company].blocked_routes.length; j++){
-                    if(cashedDataArr[company].blocked_routes[j].uniqueID == uniqueId){
+                    if(cashedDataArr[company].blocked_routes[j].uniqueID == uniqueID){
                         log.info("Возврат роута из заблокированных в нормальные");
                         cashedDataArr[company].routes.push(cashedDataArr[company].blocked_routes[j]);
                         cashedDataArr[company].blocked_routes.splice(j,1);
@@ -2388,10 +2388,11 @@ router.route('/confirmonline')
     .post(function (req, res) {
         try {
         if(req.session.login == undefined) return;
-        log.info("online confirmed", req.session.login, req.body);
-        var blockedArr = req.body;
+        log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
+        var blockedArr = req.body.sync;
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
+        autasaveRoutes(currentCompany, req.body.routes);
         var err = checkSync(currentCompany, req.session.login, blockedArr);
         if (onlineClients.length == 0) {
             var obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
@@ -4556,7 +4557,7 @@ function saveRoutesTo1s(routes){
                     itenereryID: routeI.itineraryID,
                     number: routeI.NUMBER,
                     gid: routeI.transport.gid || -1,
-                    uniqueId: routeI.uniqueId,
+                    uniqueID: routeI.uniqueID,
                     startTimePlan: strToTstamp(routeI.START_TIME),
                     endTimePlan: strToTstamp(routeI.END_TIME),
                     totalPoints: routeI.points.length,
@@ -4998,12 +4999,12 @@ function connectStopsAndPoints(company) {
 
 
                             // Проверяет не является ли данный стоп некорректным и ранее отвязанным вручную оператором
-                            var uniqueId = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
+                            var uniqueID = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
                             var incorrect_stop = false;
                             if(tmpPoint.incorrect_stop != undefined ){
                                 for (var si = 0; si < tmpPoint.incorrect_stop.length; si++){
 
-                                    if (tmpPoint.incorrect_stop[si] == uniqueId) {
+                                    if (tmpPoint.incorrect_stop[si] == uniqueID) {
                                         incorrect_stop = true;
                                         break;
                                     }
@@ -6520,12 +6521,12 @@ function connectPointsPushesStops(company) {
 
                     var tmpArrival = route.real_track[k];
                     var tmpTime = Math.abs(point.arrival_time_ts - tmpArrival.t1);
-                    var uniqueId = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
+                    var uniqueID = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
                     var incorrect_stop = false;
                     if(point.incorrect_stop != undefined ){
                         for (var si = 0; si < point.incorrect_stop.length; si++){
 
-                            if (point.incorrect_stop[si] == uniqueId) {
+                            if (point.incorrect_stop[si] == uniqueID) {
                                 incorrect_stop = true;
                                 break;
                             }
@@ -7080,7 +7081,36 @@ function safeReload (){
 
 }
 
+function autasaveRoutes(company, routes){
+    if (!company || !routes || routes.length == 0) return;
+    try {
+        routes.forEach(function(route){
+            if (cashedDataArr[company].blocked_routes) {
+                cashedDataArr[company].blocked_routes.forEach(function(b_route){
+                    if (b_route.uniqueID == route.uniqueID) {
+                        console.log("Autosave complete".blue);
+                        checkChangeStatusForHook(b_route, route);
+                        b_route = route;
+                    }
+                })
+            }
+        })
 
+    } catch (e) {
+        console.log("ERROR MTM 7089".red);
+        log.error("Ошибка "+ e + e.stack)
+    }
+
+
+}
+
+
+function checkChangeStatusForHook(b_route, route){
+    console.log("start checking", b_route.uniqueID, route.uniqueID);
+    route.points.forEach(function(point, i) {
+     sendHookTo1C(point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes)
+    })
+};
 
 
 function loadCoords(company) {

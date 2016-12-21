@@ -716,7 +716,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //console.log(" UNDEFINED HERE map 617", markersArr );
             while (j < markersArr.length) {
                 if ((typeof (markersArr[j].source) != 'undefined') && (typeof (markersArr[j].source.NUMBER) != 'undefined')) {
-                    if (number == markersArr[j].source.NUMBER) {
+                    if (number == markersArr[j].source.NUMBER && servicePointsLat && servicePointsLng) {
                         console.log("Before error", parseFloat(servicePointsLat), parseFloat(servicePointsLng), parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng));
                         var polyline = new L.Polyline([[parseFloat(servicePointsLat), parseFloat(servicePointsLng)], [parseFloat(markersArr[j]._latlng.lat), parseFloat(markersArr[j]._latlng.lng)]], {
                             color: '#46b8da',

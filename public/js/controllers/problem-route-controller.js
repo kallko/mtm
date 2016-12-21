@@ -16,7 +16,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         function askBlocked(){
             if(!rootScope.data || rootScope.restart) return;
             http.post('./askblocked')
-                .success(function(data){
+                .then(function(data){
                     //console.log("askBlocked", data);
                     if(data[0] != undefined && data[0] == 'restart') {
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
@@ -36,9 +36,9 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                 sync.push(rootScope.data.routes[i].uniqueID);
             }}
 
-            http.post('./confirmonline/', sync)
-                .success(function (data) {
-                    if (data.status != "ok") alert("Отсутсвует связь с сервером ");
+            http.post('./confirmonline/', {sync: sync, routes: rootScope.data.routes})
+                .then(function (data) {
+                    if (data.status != 200) alert("Отсутсвует связь с сервером ");
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
                     if (rootScope.data == undefined) rootScope.data = {};
                     rootScope.data.server_time = data.server_time;
@@ -80,7 +80,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         rootScope.data.recievedUpdate= false;
 
                         http.post('./updatepushes', {data: obj})
-                            .success(function(data){
+                            .then(function(data){
                                console.log("Result updatepushes", data);
 
                                 rootScope.$emit('updatePush', data);
@@ -111,10 +111,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                     //rootScope.$emit('holestatistic', rootScope.data.statistic);
                     //console.log(rootScope.data.server_time, "Статистика такая стала", rootScope.data.statistic);
-                }).error(function () {
-                    //rootScope.errorNotification('Нет связи с сервером');
-                });
-
+                })
 
         }
 
