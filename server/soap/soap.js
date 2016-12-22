@@ -197,6 +197,8 @@ function checkBeforeSend(_data, callback) {
     // сохранение изначального времени прибытия и назначение точкам глобального индекса (для пересчета на математике)
     for (i = 0; i < allData.routes.length; i++) {
         for (var j = 0; j < allData.routes[i].points.length; j++) {
+            allData.routes[i].points[j].notes = [];
+            allData.routes[i].points[j].driverNotes=[];
             allData.routes[i].points[j].base_arrival = allData.routes[i].points[j].ARRIVAL_TIME;
             if (allData.routes[i].points[j].waypoint == undefined) continue;
 

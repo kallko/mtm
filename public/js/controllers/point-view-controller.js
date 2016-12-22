@@ -26,6 +26,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             groupByTextProvider: function(USE_FOR_FAILURE) { if (USE_FOR_FAILURE === 'true') { return 'Доставлено'; } else { return 'Не доставлено'; }
             }
         };
+        scope.buttonText = {buttonDefaultText: 'Добавьте замечания'};
 
         // начальная инициализация контроллера
         function init() {
@@ -58,7 +59,21 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         // показать окно с точкой
         function show(event, data) {
+
             if (rootScope.data && rootScope.data.notes && !rootScope.data.notes.reorange) reorangeNotes();
+            if (scope.point && scope.point.status < 3) {
+                scope.dropdownReasons = rootScope.data.notes.filter(function(item){
+                    return (item.FOR_OPERATOR == 'true' && (item.USE_FOR_SUCCESS == 'true')) ;
+                });
+                } else {
+                scope.dropdownReasons = rootScope.data.notes.filter(function(item){
+                    return (item.FOR_OPERATOR == 'true' && (item.USE_FOR_FAILURE == 'true')) ;
+                });
+            };
+
+
+
+            console.log("dropdownReasons", scope.dropdownReasons);
             scope.selectReasons = [];
 
             scope.operator_time = null;
@@ -434,15 +449,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             });
             //scope.dropdownReasons = rootScope.data.notes;
             scope.onlyDriversNotes = rootScope.data.notes.filter(function(item){
-                return item.FOR_DRIVER == 'true' && item.FOR_OPERATOR == 'false';
+                return item.FOR_DRIVER == 'true';
             });
-            scope.dropdownReasons = rootScope.data.notes.filter(function(item){
-                return item.FOR_OPERATOR == 'true';
-            });
+
             rootScope.data.notes.reorange = true;
 
             console.log("scope.onlyDriversNotes", scope.onlyDriversNotes);
-            console.log("scope.dropdownReasons", scope.dropdownReasons);
+            //console.log("scope.dropdownReasons", scope.dropdownReasons);
 
         };
 

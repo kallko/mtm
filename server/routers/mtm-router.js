@@ -1242,7 +1242,7 @@ router.route('/askforroute')
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
         }
         log.info ("Начинаем запись файла");
-        log.toFLog('logging.txt', JSON.stringify(result));
+        //log.toFLog('logging.txt', JSON.stringify(result));
         log.info("Заканчиваем запись файла");
         res.status(200).json({route: result});
 
@@ -7094,8 +7094,8 @@ function autasaveRoutes(company, routes){
             if (cashedDataArr[company].blocked_routes) {
                 for (var i = 0; i < cashedDataArr[company].blocked_routes.length; i++ ){
                 var b_route = cashedDataArr[company].blocked_routes[i];
-                    if (b_route.uniqueId == route.uniqueId) {
-                        console.log("Autosave complete".blue);
+                    if (b_route.uniqueID == route.uniqueID) {
+                        console.log("Autosave complete".blue, b_route.uniqueID, route.uniqueID);
                         checkChangeStatusForHook(b_route, route);
                         cashedDataArr[company].blocked_routes[i] = route;
                         break;

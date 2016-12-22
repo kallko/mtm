@@ -3047,6 +3047,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         windowType: pointJ.windowType,
                         inPlan: true,
                         notes : pointJ.notes,
+                        driverNotes: pointJ.driverNotes,
                         textStatus : textStatus,
                         stopState: pointJ.stopState,
                         moveState: pointJ.moveState
@@ -3143,6 +3144,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if( currentDay ){ // проверка сегодняшней даты закрытия дня
                 console.log("UPDATE DAY");
                 //console.log("XML == ", xml);
+                //("XML == ", xml);
                 return {closeDayData: xml, routesID: routesID, update:true, closeDayDate: routesOfDate}; // обновляем текущий день
             }else{
                 return {closeDayData: xml, routesID: routesID, update:false, closeDayDate: routesOfDate}; // дописываем старый день
