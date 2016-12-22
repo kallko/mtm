@@ -3034,6 +3034,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 for (var j = 0; j < routeI.points.length; j++) {
                     pointJ = routeI.points[j];
                     var taskDay = pointJ.TASK_DATE.split(".");
+                    var textStatus = rootScope.getTextStatus(pointJ);
 
                     point = {
                         waypoint: pointJ.END_WAYPOINT,
@@ -3045,6 +3046,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         value: pointJ.VALUE,
                         windowType: pointJ.windowType,
                         inPlan: true,
+                        notes : pointJ.notes,
+                        textStatus : textStatus,
                         stopState: pointJ.stopState,
                         moveState: pointJ.moveState
                     };

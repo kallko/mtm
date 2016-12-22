@@ -173,7 +173,7 @@
                             {{nowTime*1000 | date : 'H:mm:ss'}}
                         </div>
                         <div class="col-sm-3">
-                            <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text"/>
+                            <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text" placeholder="поиск"/>
                             <button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="setTextFilter()">
                                 <span class="glyphicon glyphicon-search" aria-hidden="false"></span>
                             </button>
@@ -974,7 +974,13 @@
         </div>
 
         <div class="col-sm-3">
-            <input  id="search-input-on-node" class="heightElement" type="text" size="50" ng-model="forNodeSerch" enter-event="startSerchOnNode()"/>
+            <input  id="search-input-on-node"
+                    class="heightElement"
+                    type="text"
+                    size="50"
+                    placeholder="поиск во всех маршрутах дня"
+                    ng-model="forNodeSerch"
+                    enter-event="startSerchOnNode()"/>
             <!--<button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="startSerchOnNode()">-->
                 <!--<span class="glyphicon glyphicon-search" aria-hidden="false"></span>-->
             <!--</button>-->
@@ -1195,14 +1201,25 @@
                     <!--</div>-->
 
                 <!--</div>-->
-                <div ng-show = 'false'>
+                <div >
+
+                    <!--ng-dropdown-multiselect=""-->
+                    <!--options="dropdownReasons"-->
+                    <!--selected-model="selectReasons"-->
+                    <!--extra-settings="dropdownSettings"-->
+                    <!--group-by="USE_FOR_SUCCESS"-->
 
                     <div class="element-multi-select"
+
                          ng-dropdown-multiselect=""
-                         options="reasons"
+                         options="dropdownReasons"
                          selected-model="selectReasons"
-                         extra-settings="settings"
-                         group-by="gender">
+                         extra-settings="dropdownSettings"
+                         group-by="USE_FOR_FAILURE"
+
+
+                            >
+
 
 
                     </div>
@@ -1355,7 +1372,12 @@
 <template type="text/html" id="geo-editor">
     <div  ng-controller="GeoEditingController" style="align-items: center" ng-show="true">
         <div>
-            <input id = "geo-search" class="heightElement element-margin" type="text"  width="100%" ng-model="searchString" enter-event="startSearchRegion()"/>
+            <input id = "geo-search"
+                   class="heightElement element-margin"
+                   type="text"  width="100%"
+                   ng-model="searchString"
+                   placeholder="поиск по адресу"
+                   enter-event="startSearchRegion()"/>
             <form ng-cloak class="element-margin">
 
                 <label>

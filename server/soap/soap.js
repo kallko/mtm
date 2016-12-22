@@ -41,7 +41,7 @@ SoapManager.prototype.getFullUrl = function () {
 
 // получить все необходимые для интерфейса данные на конкретную дату
 SoapManager.prototype.getAllDailyData = function (callback, date) {
-    if (!date) date = new Date();
+ //   if (!date) date = new Date();
     if (!loadFromCache) {
         console.log("Wait for Data from SOAP");
         this.getDailyPlan(callback, date);
@@ -469,7 +469,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
-                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;// список причин отмены заказа
+                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE,// список причин отмены заказа
                     notes = res.MESSAGE.DELIVERY_NOTES_LIST[0].DELIVERY_NOTE;      //список замечаний
                    // shift_name = res.MESSAGE.SHIFT_NAME;
                 //console.log("полученные сенсоры",res.MESSAGE);

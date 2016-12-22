@@ -3,31 +3,28 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
     function (scope, rootScope, http, Statuses, filter) {
         var STATUS,
             parent; // откуда было открыто окно
-            scope.showRouteId;
+        scope.showRouteId;
+        scope.onlyDriversNotes = [];
 
         //console.log("Start poinview");
         init();
 
         //todo from example
-        scope.reasons = [
-            {id: 1, label: "Опаздал", gender:"F"},
-            {id: 2, label: "Не пришел", gender:"F"},
-            {id: 3, label: "Почесал", gender:"F"},
-            {id: 4, label: "Зачесал", gender:"M"},
-            {id: 5, label: "Начесал", gender:"M"}];
-        scope.selectReasons =[];
-        scope.settings = {
+        //DESCRIPTION FOR_DRIVER FOR_OPERATOR ID IS_FOLDER USE_FOR_FAILURE USE_FOR_SUCCESS
+
+        scope.selectReasons = [];
+        scope.dropdownReasons = [ {id: 0, label: "никого нет дома",  ID : "2", USE_FOR_FAILURE: "true", use: "true" },
+                                {id: 8, label: "нет денег",  ID : "2",  USE_FOR_FAILURE: "true", use: "true"},
+                                {id: 3, label: "не пришел",  ID : "2", USE_FOR_FAILURE: "true", use: "true" },
+                                {id: 4, label: "не подошел",  ID : "2", USE_FOR_FAILURE: "false" , use: "true"},
+                                {id: 5, label: "просто ",  ID : "2", USE_FOR_FAILURE: "false" , use: "true"}
+                            ];
+        scope.dropdownSettings = {
+            smartButtonMaxItems: 3,
             enableSearch: true,
             selectionLimit: 3,
-            smartButtonMaxItems: 3,
-            smartButtonTextConverter: function(itemText, originalItem) {
-                if (itemText === 'Jhon') {
-                    return 'Jhonny!';
-                }
-
-                return itemText;
-            },
-            groupByTextProvider: function(groupValue) { if (groupValue === 'M') { return 'Driver'; } else { return 'Operator'; } }
+            groupByTextProvider: function(USE_FOR_FAILURE) { if (USE_FOR_FAILURE === 'true') { return 'Доставлено'; } else { return 'Не доставлено'; }
+            }
         };
 
         // начальная инициализация контроллера
@@ -41,26 +38,36 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             );
             scope.showHideReasonButtons = true;
 
+
             initStatuses();
 
             rootScope.$on('showPoint', show);
-            rootScope.$on('newTextStatus', newTextStatus);
+            //rootScope.$on('newTextStatus', newTextStatus);
             rootScope.$on('companyName', function (event, data) {
                 scope.companyName = data;
                 console.log(data);
             });
-            rootScope.$on('lockRoute', lockRoute);
-            rootScope.$on('unlockRoute', unlockRoute);
+            //rootScope.$on('lockRoute', lockRoute);
+            //rootScope.$on('unlockRoute', unlockRoute);
         }
+
+        scope.$watch('selectReasons', function(){
+            if (scope.point) scope.point.notes = scope.selectReasons;
+        });
+
 
         // показать окно с точкой
         function show(event, data) {
+            if (rootScope.data && rootScope.data.notes && !rootScope.data.notes.reorange) reorangeNotes();
+            scope.selectReasons = [];
+
             scope.operator_time = null;
             scope.point = data.point;
+            if(scope.point && scope.point.notes && scope.point.notes.length > 0 ) scope.selectReasons = scope.point.notes;
             if (scope.point.stop_arrival_time != undefined )scope.operator_time = scope.point.stop_arrival_time;
             if (scope.operator_time == null && scope.point.stop_arrival_time == undefined) scope.operator_time = scope.point.mobile_arrival_time;
             if (scope.operator_time == null) scope.operator_time = rootScope.nowTime;
-                console.log("Это ДАТА", data);
+                //console.log("Это ДАТА", data);
             scope.operator_time_show = new Date(scope.operator_time *1000);
             scope.promisedStartCard = new Date(data.point.promised_window_changed.start * 1000);
             scope.promisedFinishCard = new Date(data.point.promised_window_changed.finish * 1000);
@@ -402,7 +409,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         scope.reCreateReasonsList = function(item) {
             console.log("RecreateReasonList", item)
-        }
+        };
 
         scope.addAttributeToPoint = function (id, point){
 
@@ -413,6 +420,30 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         scope.deleteAttributeToPoint = function (id, point){
             alert("Try to delete attribute to point " + id);
             console.log("Point", point)
+        };
+
+
+        function reorangeNotes() {
+          if (!rootScope.data.notes || rootScope.data.notes.length < 1) return;
+            console.log("Start reorange notes");
+
+            rootScope.data.notes.forEach(function(item){
+                item.label = item.DESCRIPTION;
+                //item.lable = "Hej";
+                item.id = parseInt(item.ID);
+            });
+            //scope.dropdownReasons = rootScope.data.notes;
+            scope.onlyDriversNotes = rootScope.data.notes.filter(function(item){
+                return item.FOR_DRIVER == 'true' && item.FOR_OPERATOR == 'false';
+            });
+            scope.dropdownReasons = rootScope.data.notes.filter(function(item){
+                return item.FOR_OPERATOR == 'true';
+            });
+            rootScope.data.notes.reorange = true;
+
+            console.log("scope.onlyDriversNotes", scope.onlyDriversNotes);
+            console.log("scope.dropdownReasons", scope.dropdownReasons);
+
         };
 
 

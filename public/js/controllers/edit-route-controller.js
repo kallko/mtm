@@ -317,7 +317,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // применить времена проезда ко всем параметрам задач
         function applyTravelTimeToPoint(point, travelTime, cTime) {
-            //console.log(" Входные данные ", point, travelTime, cTime )
+            //console.log(" Входные данные ", point, travelTime, cTime );
+            //fixme при работе с окном точки, сюда приходит андефайнед данные
+            if (!point || !travelTime ||  !cTime) return;
             point.TRAVEL_TIME = travelTime;
             cTime += travelTime;
             point.DOWNTIME = getDowntime(cTime, point);

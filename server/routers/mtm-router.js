@@ -928,14 +928,14 @@ router.route('/dailydata')
                     } else if (flag == 2){{
 
                         var ts = req.query.showDate;
-                        var date=new Date();
+                        var date = new Date();
                         date.setTime(ts);
                         var stringDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
                         //if (develop) console.log("Ready to send " + currentCompany+stringDate.blue );
                         res.status(200).json(cashedDataArr[currentCompany+stringDate]);
                         return;
                     }}
-            //if (develop) console.log(flag + " After flag".red);
+            console.log(flag + " After flag".red, req.query.showDate);
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
 
