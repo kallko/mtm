@@ -7,6 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
+    testCopy = false, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
@@ -22,7 +23,7 @@ var soap = require('soap'),
 
 // класс для работы с соапом
 function SoapManager(login) {
-    this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
+    testCopy ? this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl" : this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
     this.urlUI = "@sngtrans.com.ua/client/ws/UI/?wsdl";   //
     this.login = login;
@@ -225,6 +226,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     }
 
      date = date ? date : Date.now();
+
+    //fixme
+    //console.log ("Changed date", date);
+    //date = 1473087600000;
 
     console.log('Date >>>', new Date(date));
 
@@ -464,9 +469,10 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
-                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
+                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;// список причин отмены заказа
+                    notes = res.MESSAGE.DELIVERY_NOTES_LIST[0].DELIVERY_NOTE;      //список замечаний
                    // shift_name = res.MESSAGE.SHIFT_NAME;
-                //console.log("полученные сенсоры",sensors, "SOAP345");
+                //console.log("полученные сенсоры",res.MESSAGE);
 
                 //console.log("Answer", waypoints);
 
@@ -499,8 +505,13 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     data[nIndx].waypoints.push(waypoints[i].$);
                 }
 
+                data[nIndx].notes = [];
+                for (i = 0; i < notes.length; i++) {
+                    data[nIndx].notes.push(notes[i].$);
+                }
+
                 data[nIndx].reasons = [];
-                if (reasons== undefined){
+                if (reasons == undefined){
                     console.log("No reasons");
                     callback({status: 'no reasons'});
                 } else {

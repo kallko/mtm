@@ -858,7 +858,7 @@ router.route('/dailydata')
             && cashedDataArr[currentCompany] != null
             && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
-            if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
+            if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length);
 
             var settings={};
 
@@ -943,12 +943,12 @@ router.route('/dailydata')
                 log.info("Загрузка данных из 1C заняла", parseInt(Date.now()/1000)-middleTime);
                 endTime = parseInt(Date.now()/1000);
                 if (data.routes != undefined) {
-                    log.info('=== dataReadyCallback === send data to client ===', data.routes.length);}
+                    log.info('=== dataReadyCallback === send data to client ===', data.routes.length );}
                 else{
                     log.info('There is no routes. And what we have', data);
                 }
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                log.info('send data to client');
+                log.info('send data to client'.green, data.notes);
                 //if(data.status && data.status === 'no sensors') {
                 //    if (res.statusCode == 304) return;
                 //    console.log("res.status", res.statusCode);
@@ -2013,8 +2013,8 @@ router.route('/savetonode/')
                         cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                         log.info("Overwright Route");
                         cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
-                        var uniqueID = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
-                        unblockRoute(key, uniqueID);
+                        var uniqueId = cashedDataArr[currentCompany].blocked_routes[i].uniqueID;
+                        unblockRoute(key, uniqueId);
                         cashedDataArr[currentCompany].blocked_routes.splice(i,1);
                         res.status(200).json(id);
                         return;
@@ -2023,10 +2023,10 @@ router.route('/savetonode/')
                 i++;
             }
 
-            function unblockRoute(login, uniqueID) {
+            function unblockRoute(login, uniqueId) {
                          for (var i=0; i<blockedRoutes.length; i++) {
-                    if (blockedRoutes[i].id == uniqueID && blockedRoutes[i].login == login) {
-                        log.info("снимаем блокировку с роута", uniqueID);
+                    if (blockedRoutes[i].id == uniqueId && blockedRoutes[i].login == login) {
+                        log.info("снимаем блокировку с роута", uniqueId);
                         blockedRoutes.splice(i, 1);
                     }
 
@@ -2041,8 +2041,8 @@ router.route('/savetonode/')
                     cashedDataArr[currentCompany].oldRoutes[i] = req.body.route;
                     log.info("Overwright OLD Route");
 
-                    uniqueID = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
-                    unblockRoute(key, uniqueID);
+                    uniqueId = cashedDataArr[currentCompany].oldRoutes[i].uniqueID;
+                    unblockRoute(key, uniqueId);
 
                     res.status(200).json(id);
                     return;
@@ -2101,10 +2101,10 @@ router.route('/logout')
         while(i<blockedRoutes.length){
             if( ""+blockedRoutes[i].login == ""+req.session.login){
                 log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", req.session.login, "logouting");
-                var uniqueID = blockedRoutes[i].id;
+                var uniqueId = blockedRoutes[i].id;
                 var company = blockedRoutes[i].company;
                 for(var j=0; j<cashedDataArr[company].blocked_routes.length; j++){
-                    if(cashedDataArr[company].blocked_routes[j].uniqueID == uniqueID){
+                    if(cashedDataArr[company].blocked_routes[j].uniqueID == uniqueId){
                         log.info("Возврат роута из заблокированных в нормальные");
                         cashedDataArr[company].routes.push(cashedDataArr[company].blocked_routes[j]);
                         cashedDataArr[company].blocked_routes.splice(j,1);
@@ -2219,6 +2219,7 @@ router.route('/askforproblems/:need')
                     result.allRoutes = [];
                     result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                     result.reasons = cashedDataArr[currentCompany].reasons;
+                    result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
@@ -2260,6 +2261,7 @@ router.route('/askforproblems/:need')
                 result.drivers = cashedDataArr[currentCompany].drivers;
                 result.transports = cashedDataArr[currentCompany].transports;
                 result.reasons = cashedDataArr[currentCompany].reasons;
+                result.notes = cashedDataArr[currentCompany].notes;
             }
             //log.info("Need=", need);
             if (need != 1){
@@ -2288,6 +2290,7 @@ router.route('/askforproblems/:need')
                         result.transports = cashedDataArr[currentCompany].transports;
                         result.settings.user = "" + req.session.login;
                         result.reasons = cashedDataArr[currentCompany].reasons;
+                        result.notes = cashedDataArr[currentCompany].notes;
                         //надо отдать маршрут из старых на закрытие
                         //var existOld = choseRouteForClose(currentCompany);
                         //if (existOld === false) {
@@ -2305,6 +2308,7 @@ router.route('/askforproblems/:need')
                     result.server_time = parseInt(Date.now() / 1000);
                     result.companyName = currentCompany;
                     result.reasons = cashedDataArr[currentCompany].reasons;
+                    result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.settings.user = "" + req.session.login;
                     result.drivers = cashedDataArr[currentCompany].drivers;
@@ -2339,6 +2343,7 @@ router.route('/askforproblems/:need')
                 result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 result.companyName = currentCompany;
                 result.reasons = cashedDataArr[currentCompany].reasons;
+                result.notes = cashedDataArr[currentCompany].notes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
                 result.transports = cashedDataArr[currentCompany].transports;
@@ -2374,6 +2379,7 @@ router.route('/askforproblems/:need')
 
 
         result.reasons = cashedDataArr[currentCompany].reasons;
+        result.notes = cashedDataArr[currentCompany].notes;
         //log.info("Result length", result.routes.length);
         res.status(200).json(result);
         } catch (e) {
@@ -4557,7 +4563,7 @@ function saveRoutesTo1s(routes){
                     itenereryID: routeI.itineraryID,
                     number: routeI.NUMBER,
                     gid: routeI.transport.gid || -1,
-                    uniqueID: routeI.uniqueID,
+                    uniqueId: routeI.uniqueId,
                     startTimePlan: strToTstamp(routeI.START_TIME),
                     endTimePlan: strToTstamp(routeI.END_TIME),
                     totalPoints: routeI.points.length,
@@ -4999,12 +5005,12 @@ function connectStopsAndPoints(company) {
 
 
                             // Проверяет не является ли данный стоп некорректным и ранее отвязанным вручную оператором
-                            var uniqueID = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
+                            var uniqueId = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
                             var incorrect_stop = false;
                             if(tmpPoint.incorrect_stop != undefined ){
                                 for (var si = 0; si < tmpPoint.incorrect_stop.length; si++){
 
-                                    if (tmpPoint.incorrect_stop[si] == uniqueID) {
+                                    if (tmpPoint.incorrect_stop[si] == uniqueId) {
                                         incorrect_stop = true;
                                         break;
                                     }
@@ -6521,12 +6527,12 @@ function connectPointsPushesStops(company) {
 
                     var tmpArrival = route.real_track[k];
                     var tmpTime = Math.abs(point.arrival_time_ts - tmpArrival.t1);
-                    var uniqueID = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
+                    var uniqueId = "" + tmpArrival.lat + tmpArrival.lon + tmpArrival.t1;
                     var incorrect_stop = false;
                     if(point.incorrect_stop != undefined ){
                         for (var si = 0; si < point.incorrect_stop.length; si++){
 
-                            if (point.incorrect_stop[si] == uniqueID) {
+                            if (point.incorrect_stop[si] == uniqueId) {
                                 incorrect_stop = true;
                                 break;
                             }
@@ -7086,13 +7092,15 @@ function autasaveRoutes(company, routes){
     try {
         routes.forEach(function(route){
             if (cashedDataArr[company].blocked_routes) {
-                cashedDataArr[company].blocked_routes.forEach(function(b_route){
-                    if (b_route.uniqueID == route.uniqueID) {
+                for (var i = 0; i < cashedDataArr[company].blocked_routes.length; i++ ){
+                var b_route = cashedDataArr[company].blocked_routes[i];
+                    if (b_route.uniqueId == route.uniqueId) {
                         console.log("Autosave complete".blue);
                         checkChangeStatusForHook(b_route, route);
-                        b_route = route;
+                        cashedDataArr[company].blocked_routes[i] = route;
+                        break;
                     }
-                })
+                }
             }
         })
 
