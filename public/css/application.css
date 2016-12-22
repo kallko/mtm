@@ -681,6 +681,13 @@ template {
     font-weight: bold;
 }
 
-.element {
+.row-multi-select {
+    max-height: 20px;
+    align-items: center;
+    padding: 0px 0px;
 
+}
+.element-multi-select {
+
+    color: red;
 }

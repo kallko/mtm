@@ -93,7 +93,6 @@ var cashedDataArr = {},  // глобальный кеш
 
 
     var oldRoutes;
-
     var demoLogin = 'demo';
     var tracksManager = new tracks(
         config.aggregator.url,
@@ -123,17 +122,22 @@ router.route('/currentsrvertime')
 
 router.route('/notification')
     .get(function(req, res){
+        try {
         restart = true;
         res.status(200).json('ok');
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
     });
 
 router.route('/saveData')
     .get(function(req, res){
-        log.info("Start data saving");
-        var data = JSON.stringify(cashedDataArr);
-        var mes ='complete';
 
         try {
+            log.info("Start data saving");
+            var data = JSON.stringify(cashedDataArr);
+            var mes ='complete';
+
             fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
                 if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);
                 mes+= err;
@@ -160,29 +164,34 @@ router.route('/loadData')
 var existData = [];
 router.route('/analysisIDSpoints')
     .get(function(req, res){
-        if (develop) console.log("Start load data".green);
-
         try {
 
+        if (develop) console.log("Start load data".green);
+        var qInd = 0;
 
 
         //    const rl = readline.createInterface({
-        //        input: fs.createReadStream('./logs/point-base-work.txt')
+        //        input: fs.createReadStream('./logs/hvost')
         //    });
         //
         //
-        //    if(develop) console.log(rl.green);
+        //    if(develop) console.log(rl);
         //
         //    rl.on('line', function (line)  {
+        //        qInd++;
+        //        console.log("Pushing", qInd);
         //        pointsIDS.push(line);
+        //        if ( qInd == 2782) parseTextFileData();
         //});
+
             console.log("pointsIDS.length", pointsIDS.length);
         fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
 
             existData = JSON.parse(data);
             console.log("ExistData", existData[0], existData.length);
             var i = 0;
-            fs.readFile('./logs/bigData2.txt', 'utf8', function (err1, data1) {
+            fs.readFile('./logs/bigData2-1-1.txt', 'utf8', function (err1, data1) {
+                console.log("SecondRead Success");
                 bigData = [];
                 bigData.length = 3200000;
                 var prebigData = JSON.parse(data1);
@@ -191,13 +200,6 @@ router.route('/analysisIDSpoints')
 
             });
         });
-
-
-
-
-
-
-
 
 
             //fs.readFile('./logs' + '/' +'resultforIDS-1.txt', 'utf8', function (err, data) {
@@ -224,19 +226,18 @@ router.route('/analysisIDSpoints')
 
 
 function indexBigData(matrix) {
+    try {
  matrix.forEach(function(item){
         bigData[item.id] = item;
     })
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function readandConcatNextFile(indx){
 
-    //if (indx > 0) {
-    //    console.log("testFinish".blue);
-    //    log.toFLog('realLatLon.json', realLatLon, true);
-    //    return;
-    //}
-
+    try {
     var filesNames = [
         {name : "resultforIDS-1.txt"},
         {name : "resultforIDS-2.txt"},
@@ -268,7 +269,7 @@ function readandConcatNextFile(indx){
         {name : "resultforIDS-27"},
         {name : "resultforIDS-28"},
         {name : "resultforIDS-29"},
-        {name : "resultforIDS-30"},
+        {name : "additionalIDSData"},
         {name : "resultforIDS-32"},
         {name : "resultforIDS-33"},
         {name : "resultforIDS-37"},
@@ -310,11 +311,15 @@ function readandConcatNextFile(indx){
         {name : "resultforIDS-1500"},
         {name : "resultforIDS-1600"},
         {name : "resultforIDS-1900"},
-
+        {name : "resultforIDSdop-1"},
+        {name : "resultforIDSdop-2"},
+        {name : "resultforIDSdop-3"}
     ];
 
-    if (indx > filesNames.length-1) return;
-    console.log("indx", indx);
+    console.log("indx", indx, filesNames.length-1);
+
+    //if (indx > filesNames.length-1) return;
+
 
     //var fileName = 'resultForIDS-2000.txt';
     var fileName = filesNames[indx].name;
@@ -325,41 +330,103 @@ function readandConcatNextFile(indx){
         try {
             var tempPoints = JSON.parse(data);
         } catch (e) {
-            console.log(e.red);
+            if (develop) console.log(e.red);
         }
 
         //pointsIDS = pointsIDS.concat(tempPoints);
         pointsIDS = tempPoints;
+        //askForStreetId(pointsIDS);
+        //askAdditionalData();
         //startSerchingLatLon();
         //fillBigData();
         //console.log(pointsIDS.length);
         //console.log ( " finish".red, pointsIDS[pointsIDS.length-1].id);
         createRealLatLon();
 
-        console.log("Первый этап обработки 1 тысячи");
+        console.log("Первый этап обработки 1 тысячи",indx, filesNames.length);
 
-        if (indx < filesNames.length-1) {
+        if (indx < filesNames.length - 1) {
+        //if (indx < 50) {
             indx++;
+           console.log("Next File");
             readandConcatNextFile(indx)
         } else {
-            console.log ("FINISH".blue);
-           // startSerchingLatLon();
-            //fillOneObj(0);
-
-
+            if (develop) console.log ("FINISH".blue);
+            log.toFLog('realLatLon.txt', realLatLon, true);
 
         }
 
     });
 
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
+}
 
+
+function refillBigData() {
+    try{
+
+    newOneObjectDispetcher(0);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
+}
+
+var additionalId =[];
+function askAdditionalData () {
+    try{
+
+    pointsIDS.forEach(function(point) {
+
+        if (point != null && point.possibleHouses) {
+
+            point.possibleHouses.forEach(function(street){
+
+                if (street.id) {
+                    if (bigData[parseInt(street.id)] == undefined) additionalId.push(street.id);
+
+
+                }
+                if (street.address) {
+                    street.address.forEach(function(adres) {
+                        if (adres.id) {
+                            if (bigData[parseInt(adres.id)] ==  undefined) additionalId.push(adres.id);
+
+                        }
+                    })
+                }
+            })
+        }
+    });
+
+    //console.log(additionalId);
+    if (develop) console.log("Additional.data".blue, additionalId.length);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 var realLatLon = [];
 function createRealLatLon() {
-
+    try {
     for(var  i = 0; i < pointsIDS.length; i++) {
+        if (pointsIDS[i] == null) continue;
+        //console.log(pointsIDS[i].id)
+        //if (pointsIDS[i].id == "025e9a51-2edf-11e5-9ef5-005056a77794"){
+        //    console.log("Find point".red);
+        //    console.log(pointsIDS[i]);
+        //}
+
         realLatLon.push({id: pointsIDS[i].id, lat: 0, lon: 0, delta : 2000000000, obj : 0});
+        for (var e = 0; e < existData.length; e++){
+            //console.log(i, " ",  e, "Check ID", existData[e].Id, + " " + pointsIDS[i].id);
+            if (existData[e].Id == pointsIDS[i].id) {
+                realLatLon[realLatLon.length-1].existLat = existData[e].Lat;
+                realLatLon[realLatLon.length-1].existLon = existData[e].Lon;
+                //console.log("Id Accepted".green, realLatLon[realLatLon.length-1]);
+            }
+        }
         var indx = realLatLon.length-1;
         if (pointsIDS[i].possibleHouses) {
             var streets = pointsIDS[i].possibleHouses;
@@ -380,17 +447,20 @@ function createRealLatLon() {
 
 
 
-        console.log (indx, realLatLon[indx].delta)
+        //console.log (indx, realLatLon[indx].delta)
 
     }
 
-    console.log("Записываю файл".blue, realLatLon.length);
+    //console.log("Записываю файл".blue, realLatLon.length);
     //console.log(realLatLon);
-    log.toFLog('realLatLon.txt', realLatLon, true);
-
+    //log.toFLog('realLatLon.txt', realLatLon, true);
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 function checkNewLatLon(indx, id){
+    try{
     var lat = 100;
     var lon = 100;
     var possible = undefined;
@@ -401,12 +471,12 @@ function checkNewLatLon(indx, id){
     //});
     //console.log(possible);
     if (possible == undefined || possible.length == 0) return;
-    if (possible.coordinates)lat = possible.coordinates[0];
+    if (possible.coordinates) lat = possible.coordinates[0];
     if (possible.coordinates) lon = possible.coordinates[1];
 
-    if (lat & lon) {
-            var LAT = realLatLon[indx].lat;
-            var LON = realLatLon[indx].lon;
+    if (lat && lon) {
+            var LON = realLatLon[indx].existLat;
+            var LAT = realLatLon[indx].existLon;
             var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
             //console.log(delta);
             if (delta < realLatLon[indx].delta) {
@@ -419,7 +489,9 @@ function checkNewLatLon(indx, id){
 
     }
     //console.log(indx, realLatLon[indx].delta);
-
+    } catch (e) {
+        log.error( "Ошибка "+ e + e.stack);
+    }
 }
 
 // запуск монитора диспетчера в демо-режиме
@@ -446,6 +518,7 @@ router.route('/keysoldroutescache')
         }
 
     });
+
 router.route('/getoldroute')
     .post(function(req, res){
         try {
@@ -456,6 +529,39 @@ router.route('/getoldroute')
             log.error( "Ошибка "+ e + e.stack);
         }
     });
+
+
+router.route('/getHouses')
+    .post(function(req, res){
+        try {
+          tracksManager.getAllHousesById(req.body.street, function(data){
+              console.log("Houses recieved".blue);
+              console.log(data);
+              res.status(200).json({data: data});
+          })
+
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+router.route('/getObjLatLon')
+    .post(function(req, res){
+        try {
+            console.log("Lokking for LatLon".blue);
+            tracksManager.giveMeLatLonByID(req.body.obj, function(id, data){
+                console.log("Houses recieved".blue);
+                console.log(data);
+                res.status(200).json({data: data});
+            })
+
+        } catch (e) {
+            log.error( "Ошибка " + e + e.stack);
+        }
+    });
+
+
 
 
 router.route('/askblocked')
@@ -487,7 +593,7 @@ router.route('/askblocked')
 router.route('/updatepushes')
     .post (function(req, res){
     try {
-        log.info("Получил запрос на updatepushes", req.body.data);
+        //log.info("Получил запрос на updatepushes", req.body.data);
 
         var key = "" + req.session.login;
         var currentCompany = companyLogins[key];
@@ -524,7 +630,7 @@ router.route('/testCloseDay')
 router.route('/updatetrack')
     .post (function(req, res){
     try {
-        log.info ("Получил запрос на updatetrack", req.body.data);
+        //log.info ("Получил запрос на updatetrack", req.body.data);
 
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
@@ -633,10 +739,10 @@ router.route('/nodeserch')
     });
 
 
-router.route('/auth')
-    .get(function(req, res){
-        res.sendFile('hellow.html', {root: './public/'});
-    });
+//router.route('/auth')
+//    .get(function(req, res){
+//        res.sendFile('hellow.html', {root: './public/'});
+//    });
 
 
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
@@ -645,7 +751,35 @@ router.route('/login')
         //console.log("req.session.login", req);
         try {
         req.session.login = req.query.curuser;
+            var time = timestmpToStr(new Date());
+            var date = ("" + new Date()).substring(0,10);
+        var obj = {
+            login : req.session.login,
+            date : date,
+            time : time
+        };
+        log.logger('login-log ' + date + ".txt", obj, true);
         res.sendFile('index.html', {root: './public/'});
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
+
+
+
+router.route('/geosearch')
+    .post(function (req, res) {
+        try {
+            var result;
+            console.log("req.body.data", req.body.data, req.body.lang);
+            tracksManager.getObjectID(req.body.data, req.body.lang, function (data){
+                console.log("Searching finished".blue, data);
+                var region = createRegionsList(data);
+                res.status(200).json(data)
+            })
+
+
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
         }
@@ -724,7 +858,7 @@ router.route('/dailydata')
             && cashedDataArr[currentCompany] != null
             && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
-            if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length );
+            if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length);
 
             var settings={};
 
@@ -794,14 +928,14 @@ router.route('/dailydata')
                     } else if (flag == 2){{
 
                         var ts = req.query.showDate;
-                        var date=new Date();
+                        var date = new Date();
                         date.setTime(ts);
                         var stringDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
                         //if (develop) console.log("Ready to send " + currentCompany+stringDate.blue );
                         res.status(200).json(cashedDataArr[currentCompany+stringDate]);
                         return;
                     }}
-            if (develop) console.log(flag + " After flag".red);
+            console.log(flag + " After flag".red, req.query.showDate);
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
 
@@ -809,12 +943,12 @@ router.route('/dailydata')
                 log.info("Загрузка данных из 1C заняла", parseInt(Date.now()/1000)-middleTime);
                 endTime = parseInt(Date.now()/1000);
                 if (data.routes != undefined) {
-                    log.info('=== dataReadyCallback === send data to client ===', data.routes.length);}
+                    log.info('=== dataReadyCallback === send data to client ===', data.routes.length );}
                 else{
                     log.info('There is no routes. And what we have', data);
                 }
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                log.info('send data to client');
+                log.info('send data to client'.green, data.notes);
                 //if(data.status && data.status === 'no sensors') {
                 //    if (res.statusCode == 304) return;
                 //    console.log("res.status", res.statusCode);
@@ -1108,7 +1242,7 @@ router.route('/askforroute')
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
         }
         log.info ("Начинаем запись файла");
-        log.toFLog('logging.txt', JSON.stringify(result));
+        //log.toFLog('logging.txt', JSON.stringify(result));
         log.info("Заканчиваем запись файла");
         res.status(200).json({route: result});
 
@@ -1718,8 +1852,21 @@ router.route('/currentStops/:gid/:from/:to')
 
 
 
+// получение сигнала от водителя
+router.route('/signalDriverToDispatcher/')
+    .post(function (req, res) {
+        try {
+
+            log.info("!!!!Recieve SIGNAL from Driver ", req.body);
+            res.status(200).json('ок');
+
+        } catch (e) {
+            log.error( "Ошибка "+ e + e.stack);
+        }
+    });
+
 // получение срочной заявки
-router.route('/UrgentOrder/')
+router.route('/urgentOrder/')
     .post(function (req, res) {
         try {
 
@@ -1805,13 +1952,13 @@ router.route('/changedriver/')
         //log.info("cashedDataArr[req.session.login]", cashedDataArr[req.session.login].routes, "MTM 751");
         // Перезапись в кеше маршрута отредактированного в мониторинге
         var i=0;
-        req.body.routes[0].filterId=null;
+        //req.body.routes[0].filterId = null;
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
-        while(i<cashedDataArr[currentCompany].routes.length){
-            if(cashedDataArr[currentCompany].routes[i].uniqueID == req.body.routes[0].uniqueID){
-                cashedDataArr[currentCompany].routes[i] = req.body.routes[0];
-                cashedDataArr[currentCompany].routes[i].filterId=null;
+        while(i < cashedDataArr[currentCompany].blocked_routes.length){
+            if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == req.body.routes[0].uniqueID){
+                cashedDataArr[currentCompany].blocked_routes[i] = req.body.routes[0];
+                //cashedDataArr[currentCompany].blocked_routes[i].filterId = null;
                 //log.info("Overwright Route");
                 break;
             }
@@ -1827,8 +1974,17 @@ router.route('/changedriver/')
 
         //Если произошло разделение маршрутов, нужно добавить новый к списку.
         if(req.body.routes[1] != undefined){
-            req.body.routes[1].filterId=null;
-            cashedDataArr[currentCompany].routes.push(req.body.routes[1]);
+            //req.body.routes[1].filterId = null;
+            cashedDataArr[currentCompany].blocked_routes.push(req.body.routes[1]);
+            cashedDataArr[currentCompany].allRoutes = req.body.routes[1].allRoutes;
+            if (develop) {
+                console.log("Save route".red);
+                console.log(req.body.routes[1].filterId);
+                console.log(req.body.routes[1].uniqueID);
+                console.log(req.body.routes[1].allRoutes);
+
+            }
+
         }
 
         res.status(200).json("ok");
@@ -2063,6 +2219,7 @@ router.route('/askforproblems/:need')
                     result.allRoutes = [];
                     result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                     result.reasons = cashedDataArr[currentCompany].reasons;
+                    result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
@@ -2104,6 +2261,7 @@ router.route('/askforproblems/:need')
                 result.drivers = cashedDataArr[currentCompany].drivers;
                 result.transports = cashedDataArr[currentCompany].transports;
                 result.reasons = cashedDataArr[currentCompany].reasons;
+                result.notes = cashedDataArr[currentCompany].notes;
             }
             //log.info("Need=", need);
             if (need != 1){
@@ -2132,6 +2290,7 @@ router.route('/askforproblems/:need')
                         result.transports = cashedDataArr[currentCompany].transports;
                         result.settings.user = "" + req.session.login;
                         result.reasons = cashedDataArr[currentCompany].reasons;
+                        result.notes = cashedDataArr[currentCompany].notes;
                         //надо отдать маршрут из старых на закрытие
                         //var existOld = choseRouteForClose(currentCompany);
                         //if (existOld === false) {
@@ -2149,6 +2308,7 @@ router.route('/askforproblems/:need')
                     result.server_time = parseInt(Date.now() / 1000);
                     result.companyName = currentCompany;
                     result.reasons = cashedDataArr[currentCompany].reasons;
+                    result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.settings.user = "" + req.session.login;
                     result.drivers = cashedDataArr[currentCompany].drivers;
@@ -2183,6 +2343,7 @@ router.route('/askforproblems/:need')
                 result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 result.companyName = currentCompany;
                 result.reasons = cashedDataArr[currentCompany].reasons;
+                result.notes = cashedDataArr[currentCompany].notes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
                 result.transports = cashedDataArr[currentCompany].transports;
@@ -2218,6 +2379,7 @@ router.route('/askforproblems/:need')
 
 
         result.reasons = cashedDataArr[currentCompany].reasons;
+        result.notes = cashedDataArr[currentCompany].notes;
         //log.info("Result length", result.routes.length);
         res.status(200).json(result);
         } catch (e) {
@@ -2232,10 +2394,11 @@ router.route('/confirmonline')
     .post(function (req, res) {
         try {
         if(req.session.login == undefined) return;
-        log.info("online confirmed", req.session.login, req.body);
-        var blockedArr = req.body;
+        log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
+        var blockedArr = req.body.sync;
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
+        autasaveRoutes(currentCompany, req.body.routes);
         var err = checkSync(currentCompany, req.session.login, blockedArr);
         if (onlineClients.length == 0) {
             var obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
@@ -2829,7 +2992,7 @@ function startPeriodicCalculating() {
                         var obj = JSON.parse(data.return);
                         //log.info("Obj", obj[0], "mtm 1497");
                         //delete cashedDataArr[company].allPushes;
-                        cashedDataArr[company].allPushes= cashedDataArr[company].allPushes.concat(obj);}
+                        if (cashedDataArr[company].allPushes) cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);}
                         cashedDataArr[company].needRequests--;
                         //if (obj && develop) console.log ("Получили".blue, obj.length, "присоединили", cashedDataArr[company].allPushes.length);
                         log.info("GetPushes finished for company", company, cashedDataArr[company].needRequests);
@@ -3541,6 +3704,8 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     var i=0;
     var delta;
     var str = ""+ company;
+
+
     //Костыль приводящий пуши разных компаний к единому знаменателю
     if (str.startsWith("292942")) delta = 0;
     if (str.startsWith("271389")) delta = 0;
@@ -4624,7 +4789,7 @@ function connectPointsAndPushes(company) {
 //            mobilePushes.gps_time > parseInt(Date.now()/1000)
 //        ) continue;
 
-
+    mark2:
 
         for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
 
@@ -4653,7 +4818,7 @@ function connectPointsAndPushes(company) {
                     if (mobilePushes[i].canceled) {
                         //log.info("НАЙДЕН ПУШ, который отменяет точку!!!!!!!!!!!!!", tmpPoint.driver.NAME, tmpPoint.NUMBER);
                         cancelTaskPush(mobilePushes[i], tmpPoint, company);
-                        continue mark1;
+                        continue mark2;
                     }
 
 
@@ -4753,7 +4918,12 @@ function connectStopsAndPoints(company) {
 
                         //cashedDataArr[company].settings.limit != undefined ? cashedDataArr[company].settings.limit : cashedDataArr[company].settings.limit = 74;
 
-                        if(tmpPoint.confirmed_by_operator == true || tmpPoint.limit > cashedDataArr[company].settings.limit || tmpPoint.havePushStop){
+                        if(tmpPoint.confirmed_by_operator == true ||
+                            tmpPoint.limit > cashedDataArr[company].settings.limit ||
+                            tmpPoint.havePushStop ||
+                            (tmpPoint.havePush && tmpPoint.mobile_push.canceled)){
+
+                            tmpPoint.control = 4769;
                             //log.info("Подтверждена вручную Уходим");
                             continue;
                         }
@@ -4941,12 +5111,12 @@ function findStatusesAndWindows(company) {
     log.info("Start findStatusesAndWindows", company);
     var tmpPoint;
 
-    for(var i=0; i<cashedDataArr[company].routes.length; i++ ) {
+    for(var i = 0; i < cashedDataArr[company].routes.length; i++ ) {
 
-        cashedDataArr[company].routes[i].ready_to_close=true;
+        cashedDataArr[company].routes[i].ready_to_close = true;
 
         //log.info("1");
-        for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++) {
+        for (var j = 0; j < cashedDataArr[company].routes[i].points.length; j++) {
             //log.info("2");
 
             tmpPoint = cashedDataArr[company].routes[i].points[j];
@@ -4954,8 +5124,7 @@ function findStatusesAndWindows(company) {
 
 
             if (tmpPoint.real_arrival_time == undefined) {
-                cashedDataArr[company].routes[i].ready_to_close=false;
-
+                cashedDataArr[company].routes[i].ready_to_close = false;
                 continue;
             }
             //считаем окна только для доставленного
@@ -4978,11 +5147,15 @@ function findStatusesAndWindows(company) {
                 }
             }
 
+            var oldStatus = tmpPoint.status,
+                oldLimit = tmpPoint.limit
+                oldNotes =[].concat(tmpPoint.notes);
 
             //log.info("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
             if (cashedDataArr[company].settings.workingWindowType == 1) {
                 //tmpPoint.findStatus = true;
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" &&
+                if ((tmpPoint.waypoint == undefined ||
+                    tmpPoint.waypoint.TYPE == "WAREHOUSE") &&
                     (tmpPoint.working_window[0] == undefined ||
                     tmpPoint.working_window[0].finish == undefined)){
                     tmpPoint.working_window = [];
@@ -5008,7 +5181,11 @@ function findStatusesAndWindows(company) {
                 if (tmpPoint.real_arrival_time > tmpPoint.working_window[tmpPoint.working_window.length-1].finish) {
                     tmpPoint.status = 1;
                     //log.info("Присваиваем статус 1");
-                } else if (tmpPoint.real_arrival_time < tmpPoint.working_window[0].start) {
+                } else if ((tmpPoint.real_arrival_time < tmpPoint.working_window[0].start
+                        && tmpPoint.TASK_TIME == "0" )||
+                    (  tmpPoint.TASK_TIME
+                       &&  tmpPoint.TASK_TIME != "0"
+                       &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < tmpPoint.working_window[0].start)) {
                     //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
                 } else {
@@ -5018,7 +5195,8 @@ function findStatusesAndWindows(company) {
             } else{
 
 
-                if (tmpPoint.waypoint.TYPE == "WAREHOUSE" &&
+                if ((tmpPoint.waypoint == undefined ||
+                    tmpPoint.waypoint.TYPE == "WAREHOUSE" ) &&
                     (tmpPoint.working_window[0] == undefined ||
                     tmpPoint.working_window[0].finish == undefined)){
                     tmpPoint.working_window = [];
@@ -5053,7 +5231,11 @@ function findStatusesAndWindows(company) {
 
                 }
 
-                if (tmpPoint.real_arrival_time < start)
+                if ((tmpPoint.real_arrival_time < start
+                    && tmpPoint.TASK_TIME == "0" )||
+                    (  tmpPoint.TASK_TIME
+                    &&  tmpPoint.TASK_TIME != "0"
+                    &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < start))
                 {
                     //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
@@ -5086,6 +5268,10 @@ function findStatusesAndWindows(company) {
 
             }
 
+
+
+
+
             //корректировка достоверности статусов по процентам.
             tmpPoint.limit = 0;
             if (tmpPoint.confirmed_by_operator) {
@@ -5098,10 +5284,10 @@ function findStatusesAndWindows(company) {
 
                 continue;
             }
-            if (tmpPoint.haveStop) {
+            if (tmpPoint.haveStop && tmpPoint.stopState) {
                 tmpPoint.limit = 45;
 
-                if (tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start) {
+                if ((tmpPoint.stopState.t1) && (tmpPoint.stopState.t1 < tmpPoint.promised_window_changed.finish && tmpPoint.stopState.t1 > tmpPoint.promised_window_changed.start)) {
                     tmpPoint.limit = 60;
                 }
 
@@ -5118,12 +5304,13 @@ function findStatusesAndWindows(company) {
             //log.info("Настройки", cashedDataArr[company].settings.limit);
             if (tmpPoint.limit > 0 && tmpPoint.limit < cashedDataArr[company].settings.limit) {
                 tmpPoint.status = 6;
-                cashedDataArr[company].routes[i].ready_to_close=false;
+                cashedDataArr[company].routes[i].ready_to_close = false;
                 tmpPoint.problem_index = 40;
                 //tmpPoint.last_change = 4807;
                 //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
             //log.info("И присваиваем ей статус", tmpPoint.status);
+            sendHookTo1C(tmpPoint, oldStatus, oldLimit, oldNotes);
         }
 
     }
@@ -5133,7 +5320,14 @@ function findStatusesAndWindows(company) {
 
 }
 
+function sendHookTo1C (point, status, limit, notes){
+    if (point.status != status && point.limit != limit) console.log(
+        "We change status", point.TASK_NUMBER, " from ".green,  status, "to ", point.status,
+        "haveStop ", point.haveStop,
+        "havePush ", point.havePush,
+        "limit ", point.limit, " oldLimit ", limit);
 
+}
 
 function calculateStatistic (company){
     try {
@@ -5172,9 +5366,9 @@ function oldDayStatuses(company) {
     log.info("Заменяем статусы компании", company );
     for (var i=0; i<cashedDataArr[company].routes.length;i++){
         for (var j=0; j<cashedDataArr[company].routes[i].points.length; j++){
-            if (cashedDataArr[company].routes[i].points[j].status >2 && cashedDataArr[company].routes[i].points[j].status !=8 ) {
+            if (cashedDataArr[company].routes[i].points[j].status > 2 && cashedDataArr[company].routes[i].points[j].status != 8 ) {
                 //log.info("Change Old Day Status");
-                cashedDataArr[company].routes[i].points[j].status == 4;
+                cashedDataArr[company].routes[i].points[j].status = 4;
             }
         }
     }
@@ -5480,6 +5674,7 @@ function cancelTaskPush(push, point, company){
     point.limit = 85; //todo отфонарная цифра для тестов.
     point.confirmed = true;
     point.reason = push.cancel_reason;
+    point.real_arrival_time = undefined;
 
     if(push.cancel_reason != undefined && push.cancel_reason.length >0) {
         for (var i=0; i<cashedDataArr[company].reasons.length; i++ ){
@@ -5992,14 +6187,15 @@ function calculateProblemIndex(company) {
                 cashedDataArr[company].routes[i].real_track.length == 0 ||
                 cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.length-1].t2 <cashedDataArr[company].routes[i].points[0].arrival_time_ts) continue;
 
-            log.info("Lets look in routes without problem for unauthorized stop");
+            //log.info("Lets look in routes without problem for unauthorized stop");
 
             route = cashedDataArr[company].routes[i];
             var stop = cashedDataArr[company].routes[i].real_track[cashedDataArr[company].routes[i].real_track.length-1];
 
+            var isCorrectTime = (stop.t1 > route.points[0].arrival_time_ts && stop.t2 < route.points[route.points.length-1].arrival_time_ts);
             var isCorrectDuration = stop.time <= 180;
             var isRightRadius = finndNearestPoints(company, route, stop);
-            var isUnscheduledStop = (!isCorrectDuration && !isRightRadius);
+            var isUnscheduledStop = (!isCorrectDuration && !isRightRadius && !isCorrectTime);
 
             if (isUnscheduledStop) {
                 for (j = 0; j < route.points.length; j++){
@@ -6312,7 +6508,8 @@ function connectPointsPushesStops(company) {
         if (route.real_track == undefined || route.real_track.length == 0) continue;
         for (var j=0; j<route.points.length; j++){
             var point = route.points[j];
-            if (!point.havePush) continue;
+            if (!point.havePush ||
+                (point.mobile_push.canceled)) continue;
             var push = point.mobile_push;
             if(push.lat == null) continue;
             var tmpDistance = getDistanceFromLatLonInM(parseFloat(point.LAT), parseFloat(point.LON), push.lat, push.lon);
@@ -6455,15 +6652,15 @@ function  changeNameOfRoute(company, uniqueID){
     if (company == undefined || uniqueID == undefined) return;
     var res = String.fromCharCode(8660);
     for (var i=0; i<cashedDataArr[company].allRoutes.length; i++){
-        log.info("Lets check", cashedDataArr[company].allRoutes[i].uniqueID, uniqueID);
+        //log.info("Lets check", cashedDataArr[company].allRoutes[i].uniqueID, uniqueID);
         if (cashedDataArr[company].allRoutes[i].uniqueID == uniqueID && cashedDataArr[company].allRoutes[i].nameCar.indexOf(res) == -1) {
-            log.info("Find closed route And i will change it name");
+            //log.info("Find closed route And i will change it name");
 
 
             cashedDataArr[company].allRoutes[i].nameCar = res + " "  + cashedDataArr[company].allRoutes[i].nameCar;
             cashedDataArr[company].allRoutes[i].nameDriver =  res + " " + cashedDataArr[company].allRoutes[i].nameDriver;
-            log.info("New name", cashedDataArr[company].allRoutes[i].nameCar);
-            log.info("New name", cashedDataArr[company].allRoutes[i].nameDriver);
+            //log.info("New name", cashedDataArr[company].allRoutes[i].nameCar);
+            //log.info("New name", cashedDataArr[company].allRoutes[i].nameDriver);
         }
     }
 
@@ -6518,8 +6715,8 @@ function addPushesToUpdateTrack(company, result){
 
     for (var k=0; k<result.length; k++) {
         result[k].pushes=[];
-        for (i=0; i<result[k].points_tasks.length; i++){
-            for (j=0; j<cashedDataArr[company].allPushes.length; j++){
+        for (i=0; result[k].points_tasks && i < result[k].points_tasks.length; i++){
+            for (j=0; cashedDataArr[company].allPushes && j<cashedDataArr[company].allPushes.length; j++){
                 if (result[k].points_tasks[i] == cashedDataArr[company].allPushes[j].number){
 
                     if (cashedDataArr[company].allPushes[j].time == undefined) checkPushesTimeGMTZone(cashedDataArr[company].allPushes[j], company, cashedDataArr[company].COMPANY_NAME);
@@ -6582,6 +6779,7 @@ function crutchFunctionMarkWarehouse(company) {
 }
 
 function parseTextFileData() {
+    if (develop) console.log("SatrtParsing".green);
     var newPoints = [];
     pointsIDS.forEach(function (item) {
 
@@ -6603,6 +6801,7 @@ function parseTextFileData() {
                         ", \"house\":" + "\"" + newHouse + "\"" +
                         "}";
         var pointJSON = JSON.parse(newPoint);
+        console.log("Pushing2");
         newPoints.push(pointJSON);
 
     });
@@ -6637,7 +6836,7 @@ function clearHouseNumber(points){
 
 function askForStreetId() {
         console.log(Date.now());
-        var i = 59000;
+        var i = 2000;
     //console.log("i in askForStreetId", i);
         requestDispether(i);
        // createTextForRequest(point);
@@ -6663,6 +6862,8 @@ function askForStreetId() {
 
     //}
 }
+
+
 
 
 function requestDispether(i) {
@@ -6703,8 +6904,8 @@ function requestDispether(i) {
 
     } else {
 
-
-        console.log ("HURA!!! WI Finished");
+        log.toFLog("additionalIDSData2.txt", pointsIDS, true);
+        console.log ("HURA!!! We Finished");
         //console.log(Date.now());
     }
 
@@ -6713,14 +6914,14 @@ function requestDispether(i) {
 function partialSave(indx) {
     if (!indx || indx < 1000) return;
     //console.log("Presave", indx%100);
-    if (indx == 59661) indx = 60000;
+    if (indx == 2781) indx = 3000;
     if (indx%1000 != 0) return;
     var toSave = [];
     for (var i = indx-1000; i<indx; i++){
         toSave.push(pointsIDS[i]);
     }
     var partName = "" + parseInt(indx/1000);
-    log.toFLog("resultforIDS-"+partName, toSave, true);
+    log.toFLog("resultforIDSdop-"+partName, toSave, true);
     if (indx == 66661 ){
         log.toFLog("resultforIDSAll", pointsIDS, true);
     }
@@ -6728,7 +6929,7 @@ function partialSave(indx) {
 
 var globalMax = 0;
 function startSerchingLatLon() {
-    console.log("Start Prepareanig".green);
+    if (develop) console.log("Start Prepareanig".green);
 
     var  i = 0;
     pointsIDS.forEach(function(itemIDS){
@@ -6750,7 +6951,7 @@ function startSerchingLatLon() {
                 })
         }
     });
-    console.log("finish".red, " max ", globalMax);
+    if (develop) console.log("finish".red, " max ", globalMax);
     //fillBigData(max);
 
 }
@@ -6785,37 +6986,59 @@ function fillBigData(){
 
     var i = 0;
     console.log("FINISHED BIG DATA", qPoints);
-    //fillOneObj(i);
+    fillOneObj(i);
 
 }
 var recievedLatLon = 0;
 function fillOneObj (i){
 
-    if (i % 200000 == 0)  saveBigData();
-    if (i >= bigData.length) {
-        saveBigData();
-        return;
-    }
-    console.log("Fill for new Object".green, i);
+    //if (i % 200000 == 0)  saveBigData();
+
+    saveBigData();
+
+    if (develop) console.log("Fill for new Object".green, i);
     console.log ("Recieved latLon", recievedLatLon , "from", qPoints );
     var indx = 0;
 
-    if (bigData[i] == true) {
+    if (bigData[i] == undefined) {
         tracksManager.giveMeLatLonByID(i, function (oldindx, obj){
             recievedLatLon ++;
             bigData[oldindx] = obj;
-            //console.log(oldindx, bigData[oldindx]);
+            console.log(oldindx, bigData[oldindx]);
             indx = i+1;
-            oneObjectDispetcher(indx)
+            newOneObjectDispetcher(recievedLatLon)
         });
     } else {
            indx = i+1;
-           oneObjectDispetcher(indx)
+            newOneObjectDispetcher(recievedLatLon)
     }
 
 
 }
 
+
+function createRegionsList (data){
+    if (!data || data.length == 0) return;
+
+    data.sort(function(a, b){
+        return a.level1 == b.level1 ? 0 : (a.level1 < b.level1 || a.level1 == undefined)? -1 : 1;
+    });
+
+    //data.sort(function(a, b){
+    //    return a.level1 == b.level1 ? 0 : a.level1 < b.level1 ? -1 : 1;
+    //});
+
+    console.log("Array Sorted".blue);
+    console.log(data);
+
+    return data;
+
+}
+
+function newOneObjectDispetcher(indx){
+    console.log ("Next Index", indx);
+    setTimeout(function(){fillOneObj(additionalId[indx])}, 0);
+}
 
 function oneObjectDispetcher(indx){
     setTimeout(function(){fillOneObj(indx)}, 0);
@@ -6836,7 +7059,7 @@ function saveBigData(){
     var secondBigData = bigDataToSave.filter(function(item){
         return item.id != undefined;
     });
-    log.toFLog("bigData2.txt", secondBigData, true);
+    log.toFLog("bigData2-1-1.txt", secondBigData, true);
 }
 
 function createTextForRequest (point) {
@@ -6864,7 +7087,38 @@ function safeReload (){
 
 }
 
+function autasaveRoutes(company, routes){
+    if (!company || !routes || routes.length == 0) return;
+    try {
+        routes.forEach(function(route){
+            if (cashedDataArr[company].blocked_routes) {
+                for (var i = 0; i < cashedDataArr[company].blocked_routes.length; i++ ){
+                var b_route = cashedDataArr[company].blocked_routes[i];
+                    if (b_route.uniqueID == route.uniqueID) {
+                        console.log("Autosave complete".blue, b_route.uniqueID, route.uniqueID);
+                        checkChangeStatusForHook(b_route, route);
+                        cashedDataArr[company].blocked_routes[i] = route;
+                        break;
+                    }
+                }
+            }
+        })
 
+    } catch (e) {
+        console.log("ERROR MTM 7089".red);
+        log.error("Ошибка "+ e + e.stack)
+    }
+
+
+}
+
+
+function checkChangeStatusForHook(b_route, route){
+    console.log("start checking", b_route.uniqueID, route.uniqueID);
+    route.points.forEach(function(point, i) {
+     sendHookTo1C(point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes)
+    })
+};
 
 
 function loadCoords(company) {

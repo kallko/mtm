@@ -50,7 +50,9 @@
 <script src="./js/vendor/bootstrap-contextmenu.js"></script>
 <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+<script type="text/javascript" src="./bower_components/angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js"></script>
 <script src="//cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
+<script src="./bower_components/lodash/dist/lodash.js" type="text/javascript" ></script>
 <script src="./js/vendor/colResizable-1.5.min.js"></script>
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
@@ -82,6 +84,7 @@
 <script src="./js/controllers/point-popup-edit-controller.js"></script>
 <script src="./js/controllers/statistic-controller.js"></script>
 <script src="./js/controllers/auth-controller.js"></script>
+<script src="./js/controllers/geo-editing-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -171,7 +174,7 @@
                             {{nowTime*1000 | date : 'H:mm:ss'}}
                         </div>
                         <div class="col-sm-3">
-                            <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text"/>
+                            <input  id="search-input" class="heightElement" type="text" size="15" ng-model="filters.text" placeholder="поиск"/>
                             <button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="setTextFilter()">
                                 <span class="glyphicon glyphicon-search" aria-hidden="false"></span>
                             </button>
@@ -647,12 +650,19 @@
             Маршрут для редактирования = {{route.driver.NAME}} {{route.transport.NAME}}
         </div>
 
-
+        <!--ng-show = "!changedRoute.reCalc > 0 && !recalcInProgress && (changedRoute.DISTANCE != '0')"-->
         <div ng-show="route !== undefined " >
             <button class="btn btn-info btn-sm"
             ng-click="recalculateRoute()"
-            ng-show = "!changedRoute.reCalc>0 && !recalcInProgress"
+
+                    ng-show = "!changedRoute.reCalc > 0 && !recalcInProgress && (changedRoute.DISTANCE != '0')"
                     >Рассчитать</button>
+        </div>
+
+        <div class="element-red  element-bold"
+             ng-show="changedRoute && changedRoute.DISTANCE == '0'"   >
+            Этот маршрут не был рассчитан в плане. Нет возможности его пересчитать.
+
         </div>
 
         <div ng-show="route !== undefined">
@@ -662,7 +672,9 @@
             <div id="recalc-table" class="table-holder" >
 
 
-                <table class="table table-striped point-table" id="recalc-table-tbl" >
+                <table class="table table-striped point-table"
+                       id = "recalc-table-tbl"
+                       ng-show="changedRoute && changedRoute.DISTANCE == '0'">
                     <!-- ng-show="newRoutes == 1"-->
                     <tr class="titles-tr">
                         <th>№</th>
@@ -713,7 +725,7 @@
 
                 </table>
         <button ng-click="confirmEditing()">Утвердить</button>
-        <button>Ручное редактирование</button>
+        <button ng-show="false">Ручное редактирование</button>
 
 
         <!--<div ng-model="accept" ng-show="route !== undefined && (accept || !parent_route.have_attention)">-->
@@ -963,7 +975,13 @@
         </div>
 
         <div class="col-sm-3">
-            <input  id="search-input-on-node" class="heightElement" type="text" size="50" ng-model="forNodeSerch" enter-event="startSerchOnNode()"/>
+            <input  id="search-input-on-node"
+                    class="heightElement"
+                    type="text"
+                    size="50"
+                    placeholder="поиск во всех маршрутах дня"
+                    ng-model="forNodeSerch"
+                    enter-event="startSerchOnNode()"/>
             <!--<button  class="btn btn-info btn-sm filter-btn searchButton" ng-click="startSerchOnNode()">-->
                 <!--<span class="glyphicon glyphicon-search" aria-hidden="false"></span>-->
             <!--</button>-->
@@ -1176,18 +1194,59 @@
             </td>
         </tr>
         <tr>
+            <td> Замечания </td>
+            <td class="row-multi-select" >
+                <!--<div ng-repeat="attribute in point.attribute">-->
+                    <!--<div ng-click="deleteAttributeToPoint(attribute.id, point)">-->
+                        <!--{{attribute.name}}-->
+                    <!--</div>-->
+
+                <!--</div>-->
+                <div >
+
+                    <!--ng-dropdown-multiselect=""-->
+                    <!--options="dropdownReasons"-->
+                    <!--selected-model="selectReasons"-->
+                    <!--extra-settings="dropdownSettings"-->
+                    <!--group-by="USE_FOR_SUCCESS"-->
+
+                    <div class="element-multi-select"
+
+                         ng-dropdown-multiselect=""
+                         options="dropdownReasons"
+                         selected-model="selectReasons"
+                         extra-settings="dropdownSettings"
+                         group-by="USE_FOR_FAILURE"
+                         translation-texts="buttonText"
+
+                            >
+
+
+
+                    </div>
+                    <!--<button id="add-attribute-task-btn"-->
+                            <!--style="padding-left: 100px"-->
+                            <!--class="btn-warning" ng-click="addAttributeToPoint(selectReasonList, point)">Добавить-->
+                    <!--</button>-->
+                    <!--btn btn-primary btn-xs-->
+                    <!--<select ng-model="selectReasonList" class="reason-list"-->
+                            <!--ng-options="item.ID as item.DESCRIPTION  for item in reasons"-->
+                            <!--ng-click="reCreateReasonsList(selectReasonList)"-->
+                            <!-->
+                        <!--<option value="" selected ng-mouseover="reCreateReasonsList(selectReasonList)">-->
+                           <!--&#45;&#45;Причина отказа&#45;&#45;-->
+                        <!--</option>-->
+                    <!--</select>-->
+
+                </div>
+            </td>
+        </tr>
+        <tr>
             <td>Отмена</td>
             <td>
                 <div class="row" ng-show="showHideReasonButtons">
-                    <div class="col-md-5">
-                        <select ng-model="selectReasonList" class="reason-list"
-                                ng-options="item.ID as item.DESCRIPTION  for item in reasons">
-                            <option value="" selected>--Причина отказа--</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
+                      <div class="col-md-3">
                         <button id="cancel-status-task-btn"
-                                ng-disabled="!selectReasonList"
                                 class="btn btn-primary btn-xs btn-danger" ng-click="cancelTask()">Отменить
                         </button>
                     </div>
@@ -1309,6 +1368,73 @@
         К данному стопу не привязана ни одна точка
     </div>
 </div>
+
+<!-- див для поиска координат по адресу -->
+<template type="text/html" id="geo-editor">
+    <div  ng-controller="GeoEditingController" style="align-items: center" ng-show="true">
+        <div>
+            <input id = "geo-search"
+                   class="heightElement element-margin"
+                   type="text"  width="100%"
+                   ng-model="searchString"
+                   placeholder="поиск по адресу"
+                   enter-event="startSearchRegion()"/>
+            <form ng-cloak class="element-margin">
+
+                <label>
+                    <input type="radio" ng-model="lang" value="uk">
+                    Украiнська
+                </label>
+                <label>
+                    <input type="radio" ng-model="lang" value="ru">
+                    Русский
+                </label><br/>
+            </form>
+        </div>
+        <div class="element-margin">
+            <select  id="region-select" ng-model="region" class="group-select"
+                     ng-options='option.id as option.level1 || option.name for option in regions'
+                     ng-change = "changeRegion(region)">
+            </select>
+        </div >
+        <div class="element-margin">
+            <select id="city-select" ng-model="city" class="group-select"
+                    ng-options='option.id as option.name for option in miniCities || cities'
+
+                    >
+            </select>
+        </div>
+        <div class="element-margin">
+            <select  id="street-select" ng-model="street" class="group-select"
+                    ng-options='option.id as option.fullName for option in streets'
+                    >
+            </select>
+        </div>
+
+        <div class="element-margin">
+            <select  id="house-select" ng-model="house" class="group-select"
+                    ng-options='option.id as option.name for option in houses'
+                   >
+            </select>
+        </div>
+        <br>
+        <br>
+
+        <div class="element-margin">
+            Инструкция по поиску:
+            <br>
+                <ul>
+                <li> Наберите в поле поиска название интересующей Вас улицы и нажмите "ENTER".</li>
+                <li> Выберите интересующую Вас область или населенный пункт. (В одной области может быть несколько населенных пунктов с интересующим Вас результатом. А в одном городе несколько улиц)</li>
+                <li> Выберите улицу и дом. На карте будет отображен найденный объект. </li>
+                </ul>
+
+        </div>
+
+    </div>
+</template>
+
+
 
 
 <!-- див для оповещений -->

@@ -1,4 +1,6 @@
 angular.module('MTMonitor', ['smart-table']);
+angular.module('MTMonitor', ['angularjs-dropdown-multiselect']);
+
 
 // инициализация Golden Layout (перемещаемые панельки)
 // var myLayout = new GoldenLayout({
@@ -127,13 +129,6 @@ var myLayout = new GoldenLayout({
                                 componentName: 'template',
                                 componentState: {templateId: 'close-day'}
                             },
-                            //{
-                            //    type: 'component',
-                            //    title: 'Настройки',
-                            //    componentName: 'template',
-                            //    componentState: {templateId: 'setting-window'}
-                            //}
-                            //,
                             {
                                 type: 'component',
                                 title: 'Редактирование маршрута',
@@ -145,6 +140,12 @@ var myLayout = new GoldenLayout({
                                 title: 'Корректировка',
                                 componentName: 'template',
                                 componentState: {templateId: 'edit-condition'}
+                            },
+                            {
+                                type: 'component',
+                                title: 'GEO кодирование',
+                                componentName: 'template',
+                                componentState: {templateId: 'geo-editor'}
                             }
 
                         ]

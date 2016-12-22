@@ -19,9 +19,12 @@ function XMLConstructor() {
             , drivers: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DRIVERS" />'  // получение списка водителей
             , waypoints: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="WAYPOINTS" />'  // получение расширенного списка точек по маршруту
             , sensors: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="SENSORS" />' // получение списка сенсоров
-            , reasons: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="REASONS_FAILURE" />' //поллучения есписка причин отмены
+            , reasons: '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="REASONS_FAILURE" />'
+            , notes : '<INSTRUCTION NAME="GET_LIST_OF_DATA"><PARAMETER KEY="TARGET" VALUE="DELIVERY_NOTES_LIST" />' // список замечаний//поллучения есписка причин отмены
             , jobs: '<INSTRUCTION NAME="GET_STATUS_OF_TASK">'  //  получить статус задачи
-            , end: '</INSTRUCTION>'
+
+
+        , end: '</INSTRUCTION>'
         }
         , parameter: {
             begin: '<PARAMETER'
@@ -105,6 +108,8 @@ XMLConstructor.prototype.additionalDataXML = function (routeid) {
     str += this.xml.instruction.sensors;
     str += this.xml.instruction.end;
     str += this.xml.instruction.reasons;
+    str += this.xml.instruction.end;
+    str += this.xml.instruction.notes;
     str += this.xml.instruction.end;
 
     str += this.xml.instructions.end;

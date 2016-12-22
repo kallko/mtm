@@ -3,11 +3,30 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
     function (scope, rootScope, http, Statuses, filter) {
         var STATUS,
             parent; // откуда было открыто окно
-            scope.showRouteId;
+        scope.showRouteId;
+        scope.onlyDriversNotes = [];
 
-
+        //console.log("Start poinview");
         init();
 
+        //todo from example
+        //DESCRIPTION FOR_DRIVER FOR_OPERATOR ID IS_FOLDER USE_FOR_FAILURE USE_FOR_SUCCESS
+
+        scope.selectReasons = [];
+        scope.dropdownReasons = [ {id: 0, label: "никого нет дома",  ID : "2", USE_FOR_FAILURE: "true", use: "true" },
+                                {id: 8, label: "нет денег",  ID : "2",  USE_FOR_FAILURE: "true", use: "true"},
+                                {id: 3, label: "не пришел",  ID : "2", USE_FOR_FAILURE: "true", use: "true" },
+                                {id: 4, label: "не подошел",  ID : "2", USE_FOR_FAILURE: "false" , use: "true"},
+                                {id: 5, label: "просто ",  ID : "2", USE_FOR_FAILURE: "false" , use: "true"}
+                            ];
+        scope.dropdownSettings = {
+            smartButtonMaxItems: 3,
+            enableSearch: true,
+            selectionLimit: 3,
+            groupByTextProvider: function(USE_FOR_FAILURE) { if (USE_FOR_FAILURE === 'true') { return 'Доставлено'; } else { return 'Не доставлено'; }
+            }
+        };
+        scope.buttonText = {buttonDefaultText: 'Добавьте замечания'};
 
         // начальная инициализация контроллера
         function init() {
@@ -20,26 +39,50 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             );
             scope.showHideReasonButtons = true;
 
+
             initStatuses();
 
             rootScope.$on('showPoint', show);
-            rootScope.$on('newTextStatus', newTextStatus);
+            //rootScope.$on('newTextStatus', newTextStatus);
             rootScope.$on('companyName', function (event, data) {
                 scope.companyName = data;
                 console.log(data);
             });
-            rootScope.$on('lockRoute', lockRoute);
-            rootScope.$on('unlockRoute', unlockRoute);
+            //rootScope.$on('lockRoute', lockRoute);
+            //rootScope.$on('unlockRoute', unlockRoute);
         }
+
+        scope.$watch('selectReasons', function(){
+            if (scope.point) scope.point.notes = scope.selectReasons;
+        });
+
 
         // показать окно с точкой
         function show(event, data) {
+
+            if (rootScope.data && rootScope.data.notes && !rootScope.data.notes.reorange) reorangeNotes();
+            if (scope.point && scope.point.status < 3) {
+                scope.dropdownReasons = rootScope.data.notes.filter(function(item){
+                    return (item.FOR_OPERATOR == 'true' && (item.USE_FOR_SUCCESS == 'true')) ;
+                });
+                } else {
+                scope.dropdownReasons = rootScope.data.notes.filter(function(item){
+                    return (item.FOR_OPERATOR == 'true' && (item.USE_FOR_FAILURE == 'true')) ;
+                });
+            };
+
+
+
+            console.log("dropdownReasons", scope.dropdownReasons);
+            scope.selectReasons = [];
+
             scope.operator_time = null;
             scope.point = data.point;
+            if(scope.point && scope.point.notes && scope.point.notes.length > 0 ) scope.selectReasons = scope.point.notes;
             if (scope.point.stop_arrival_time != undefined )scope.operator_time = scope.point.stop_arrival_time;
             if (scope.operator_time == null && scope.point.stop_arrival_time == undefined) scope.operator_time = scope.point.mobile_arrival_time;
             if (scope.operator_time == null) scope.operator_time = rootScope.nowTime;
-                console.log("Это ДАТА", data);
+                //console.log("Это ДАТА", data);
             scope.operator_time_show = new Date(scope.operator_time *1000);
             scope.promisedStartCard = new Date(data.point.promised_window_changed.start * 1000);
             scope.promisedFinishCard = new Date(data.point.promised_window_changed.finish * 1000);
@@ -217,10 +260,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 allTransports: rootScope.data.transports
 
             });
+
+            scope.$emit('addPointHistory', scope.point, "cancel point from card");
+            if (reRoute.DISTANCE == 0) return;
             rootScope.$emit('startRecalc');
             $('#point-view').popup('hide');
             scope.$emit('showNotification', {text: 'Утвердите пересчитанный маршрут во вкладке Редактирование', duration: 4000});
-            scope.$emit('addPointHistory', scope.point, "cancel point from card");
+
 
 
         };
@@ -374,6 +420,45 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
 
         };
+
+
+        scope.reCreateReasonsList = function(item) {
+            console.log("RecreateReasonList", item)
+        };
+
+        scope.addAttributeToPoint = function (id, point){
+
+            console.log("Point", point, "id", id)
+        };
+
+
+        scope.deleteAttributeToPoint = function (id, point){
+            alert("Try to delete attribute to point " + id);
+            console.log("Point", point)
+        };
+
+
+        function reorangeNotes() {
+          if (!rootScope.data.notes || rootScope.data.notes.length < 1) return;
+            console.log("Start reorange notes");
+
+            rootScope.data.notes.forEach(function(item){
+                item.label = item.DESCRIPTION;
+                //item.lable = "Hej";
+                item.id = parseInt(item.ID);
+            });
+            //scope.dropdownReasons = rootScope.data.notes;
+            scope.onlyDriversNotes = rootScope.data.notes.filter(function(item){
+                return item.FOR_DRIVER == 'true';
+            });
+
+            rootScope.data.notes.reorange = true;
+
+            console.log("scope.onlyDriversNotes", scope.onlyDriversNotes);
+            //console.log("scope.dropdownReasons", scope.dropdownReasons);
+
+        };
+
 
         // открывает окно в 1С IDS-овцев
         rootScope.open1CWindow = function () {

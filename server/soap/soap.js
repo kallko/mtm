@@ -7,6 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
+    testCopy = false, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
@@ -22,7 +23,7 @@ var soap = require('soap'),
 
 // класс для работы с соапом
 function SoapManager(login) {
-    this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
+    testCopy ? this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl" : this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
     this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
     this.urlUI = "@sngtrans.com.ua/client/ws/UI/?wsdl";   //
     this.login = login;
@@ -40,6 +41,7 @@ SoapManager.prototype.getFullUrl = function () {
 
 // получить все необходимые для интерфейса данные на конкретную дату
 SoapManager.prototype.getAllDailyData = function (callback, date) {
+ //   if (!date) date = new Date();
     if (!loadFromCache) {
         console.log("Wait for Data from SOAP");
         this.getDailyPlan(callback, date);
@@ -195,6 +197,8 @@ function checkBeforeSend(_data, callback) {
     // сохранение изначального времени прибытия и назначение точкам глобального индекса (для пересчета на математике)
     for (i = 0; i < allData.routes.length; i++) {
         for (var j = 0; j < allData.routes[i].points.length; j++) {
+            allData.routes[i].points[j].notes = [];
+            allData.routes[i].points[j].driverNotes=[];
             allData.routes[i].points[j].base_arrival = allData.routes[i].points[j].ARRIVAL_TIME;
             if (allData.routes[i].points[j].waypoint == undefined) continue;
 
@@ -224,6 +228,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
     }
 
      date = date ? date : Date.now();
+
+    //fixme
+    //console.log ("Changed date", date);
+    //date = 1473087600000;
 
     console.log('Date >>>', new Date(date));
 
@@ -270,7 +278,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         //     });
         // }
         var data = [];
-        if (loadOldDay) {
+        if (loadOldDay && !itIsToday) {
             var dateObj = new Date( date),
             dateYear = dateObj.getFullYear(),
             dateMonth = dateObj.getMonth() + 1,
@@ -287,8 +295,8 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                                 try{
                                     if(err) throw err;
                                     data.closedRoutesFrom1C = res.MESSAGE.JSONDATA[0];
-                                    console.log(data.closedRoutesFrom1C, "Soap 290");
-                                    log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
+                                    console.log(data.closedRoutesFrom1C.length, "Soap 290");
+                                    //log.toFLog('oldDay.txt', data.closedRoutesFrom1C);
                                 }catch(e){
                                     console.log(e, "SOAP 285");
                                 }
@@ -456,16 +464,19 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
     //console.log("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
+
+
             parseXML(result.return, function (err, res) {
                 var transports = res.MESSAGE.TRANSPORTS[0].TRANSPORT,   // список всего транспорта по данному клиенту
                     drivers = res.MESSAGE.DRIVERS[0].DRIVER,            // список всех водителей по данному клиенту
                     waypoints = res.MESSAGE.WAYPOINTS[0].WAYPOINT,      // получеине расширенной информации о точках по данному дню
                     sensors = res.MESSAGE.SENSORS[0].SENSOR,            // список всех сенсоров (устройства передающие трек)
-                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE;            // список причин отмены заказа
+                    reasons = res.MESSAGE.REASONS_FAILURE[0].REASON_FAILURE,// список причин отмены заказа
+                    notes = res.MESSAGE.DELIVERY_NOTES_LIST[0].DELIVERY_NOTE;      //список замечаний
                    // shift_name = res.MESSAGE.SHIFT_NAME;
-                //console.log("полученные сенсоры",sensors, "SOAP345");
+                //console.log("полученные сенсоры",res.MESSAGE);
 
-
+                //console.log("Answer", waypoints);
 
 
                 if (waypoints == undefined) return;
@@ -496,8 +507,13 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                     data[nIndx].waypoints.push(waypoints[i].$);
                 }
 
+                data[nIndx].notes = [];
+                for (i = 0; i < notes.length; i++) {
+                    data[nIndx].notes.push(notes[i].$);
+                }
+
                 data[nIndx].reasons = [];
-                if (reasons== undefined){
+                if (reasons == undefined){
                     console.log("No reasons");
                     callback({status: 'no reasons'});
                 } else {

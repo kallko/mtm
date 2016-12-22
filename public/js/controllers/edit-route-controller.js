@@ -317,7 +317,9 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
         // применить времена проезда ко всем параметрам задач
         function applyTravelTimeToPoint(point, travelTime, cTime) {
-            //console.log(" Входные данные ", point, travelTime, cTime )
+            //console.log(" Входные данные ", point, travelTime, cTime );
+            //fixme при работе с окном точки, сюда приходит андефайнед данные
+            if (!point || !travelTime ||  !cTime) return;
             point.TRAVEL_TIME = travelTime;
             cTime += travelTime;
             point.DOWNTIME = getDowntime(cTime, point);
@@ -1028,11 +1030,13 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                             return;
                         } else {
                             if (scope.iteration>6) {
+                                scope.recalcTime = 0;
                                 scope.$emit('showNotification', {text: 'Автоматический пересчет не удался.'});
 
                             }
                         }
                         processModifiedPoints(route, data);
+                        scope.recalcTime = 0;
                         scope.recalcInProgress = false;
                         if (scope.timer) clearInterval(scope.timer);
                     })
@@ -1077,7 +1081,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
 
-            console.log('MATH DATE >> ', new Date(serverTime * 1000));
+            console.log('1080 MATH DATE >> ', new Date(serverTime * 1000));
 
             var newSolution = data.solutions[0].routes[0].deliveries,
                 updatedPoints = [],
@@ -1994,7 +1998,7 @@ function processModifiedPointsForOnePoint(route, data) {
 
 
 
-    console.log('MATH DATE >> ', new Date(serverTime * 1000));
+    console.log('1997 MATH DATE >> ', new Date(serverTime * 1000));
 
     var newSolution = data.solutions[0].routes[0].deliveries,
         updatedPoints = [],
