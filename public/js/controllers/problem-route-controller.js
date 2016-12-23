@@ -22,8 +22,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
                         rootScope.restart = true;
                     }
+
+                    if (data && data.call && data.call != null) showCallNotification(data.call);
                     if (!rootScope.data.currentDay) return;
-                   if  (data != undefined && data.length>0) rootScope.$emit('changeBlockedRoutes', data);
+                   if  (data != undefined && data.length > 0) rootScope.$emit('changeBlockedRoutes', data);
                 });
         }
 
@@ -38,9 +40,12 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
             http.post('./confirmonline/', {sync: sync, routes: rootScope.data.routes})
                 .then(function (data) {
+
                     if (data.status != 200) alert("Отсутсвует связь с сервером ");
+                    data = data.data;
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
                     if (rootScope.data == undefined) rootScope.data = {};
+                    console.log("confirmonline data", data);
                     rootScope.data.server_time = data.server_time;
 
                     rootScope.nowTime = rootScope.data.server_time;
@@ -77,7 +82,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                                 obj.push(res);
                             }
                         }
-                        rootScope.data.recievedUpdate= false;
+                        rootScope.data.recievedUpdate = false;
 
                         http.post('./updatepushes', {data: obj})
                             .then(function(data){
@@ -255,6 +260,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         };
 
 
+
+        function showCallNotification(call){
+            alert("Необходим звонок водителю");
+        }
 
         function checkTimeForEditing (){
             var end = parseInt(Date.now()/1000);

@@ -3083,11 +3083,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     //console.log(pointJ);
 
                     if(pointJ.status == 8){
-                        point.reasonDisp = pointJ.reason || '';
-                        point.reasonDriver = '';
-                        if (point.mobile_push != undefined && point.mobile_push.canceled == true) {
-                            point.reasonDriver = point.mobile_push.cancel_reason;
-                        }
+                        //point.reasonDisp = pointJ.reason || '';
+                        //point.reasonDriver = '';
+                        //if (point.mobile_push != undefined && point.mobile_push.canceled == true) {
+                        //    point.reasonDriver = point.mobile_push.cancel_reason;
+                        //}
                         route.pointsNotReady.push(point);
 
                         //console.log("причины отмены", point.reasonDisp, point.reasonDriver);

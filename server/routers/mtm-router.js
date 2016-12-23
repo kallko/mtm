@@ -570,6 +570,7 @@ router.route('/askblocked')
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
             var result=[];
+            result.call = waitingCallForOperator(key, currentCompany);
             if(restart) {
                 result.push('restart');
                 res.status(200).json(result);
@@ -7113,6 +7114,22 @@ function autasaveRoutes(company, routes){
 
 
 }
+
+function waitingCallForOperator(key, company){
+    if (!key || !company) return;
+    var result={};
+
+    if (cashedDataArr[company].call && cashedDataArr[company].call.length > 0){
+        for (var i = 0; i < cashedDataArr[company].call.length; i++){
+            if (cashedDataArr[company].call[i].login == key ){
+                result = cashedDataArr[company].call[i];
+                cashedDataArr[company].call.splice(i,1);
+                break;
+            }
+        }
+    }
+    return result;
+};
 
 
 function checkChangeStatusForHook(b_route, route){
