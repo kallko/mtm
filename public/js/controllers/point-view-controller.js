@@ -23,7 +23,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             smartButtonMaxItems: 3,
             enableSearch: true,
             selectionLimit: 3,
-            groupByTextProvider: function(USE_FOR_FAILURE) { if (USE_FOR_FAILURE === 'true') { return 'Доставлено'; } else { return 'Не доставлено'; }
+            groupByTextProvider: function(USE_FOR_FAILURE) { if (USE_FOR_FAILURE === 'true') { return 'Не доставлено'; } else { return 'Доставлено'; }
             }
         };
         scope.buttonText = {buttonDefaultText: 'Добавьте замечания'};
@@ -54,6 +54,16 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         scope.$watch('selectReasons', function(){
             if (scope.point) scope.point.notes = scope.selectReasons;
+
+            if (scope.point.status && scope.point.status != 8){
+               var isCancelReasonAdded = scope.point.notes.some(function(item){
+                   return item.USE_FOR_FAILURE == 'true'
+               });
+
+                if (isCancelReasonAdded) scope.showHideReasonButtons = true;
+            }
+
+            if (scope.point.status && scope.point.status == 8) scope.showHideReasonButtons = false;
         });
 
 
@@ -61,23 +71,28 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         function show(event, data) {
 
             if (rootScope.data && rootScope.data.notes && !rootScope.data.notes.reorange) reorangeNotes();
+
+
+
+
+
+            //console.log("dropdownReasons", scope.dropdownReasons);
+
+            scope.selectReasons = [];
+
+            scope.operator_time = null;
+            scope.point = data.point;
+
             if (scope.point && scope.point.status < 3) {
                 scope.dropdownReasons = rootScope.data.notes.filter(function(item){
                     return (item.FOR_OPERATOR == 'true' && (item.USE_FOR_SUCCESS == 'true')) ;
                 });
-                } else {
+            } else {
                 scope.dropdownReasons = rootScope.data.notes.filter(function(item){
                     return (item.FOR_OPERATOR == 'true' && (item.USE_FOR_FAILURE == 'true')) ;
                 });
             };
 
-
-
-            console.log("dropdownReasons", scope.dropdownReasons);
-            scope.selectReasons = [];
-
-            scope.operator_time = null;
-            scope.point = data.point;
             if(scope.point && scope.point.notes && scope.point.notes.length > 0 ) scope.selectReasons = scope.point.notes;
             if (scope.point.stop_arrival_time != undefined )scope.operator_time = scope.point.stop_arrival_time;
             if (scope.operator_time == null && scope.point.stop_arrival_time == undefined) scope.operator_time = scope.point.mobile_arrival_time;
