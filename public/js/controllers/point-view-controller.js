@@ -55,7 +55,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         scope.$watch('selectReasons', function(){
             if (scope.point) scope.point.notes = scope.selectReasons;
 
-            if (scope.point.status && scope.point.status != 8){
+            if (scope.point && scope.point.status && scope.point.status != 8){
                var isCancelReasonAdded = scope.point.notes.some(function(item){
                    return item.USE_FOR_FAILURE == 'true'
                });
@@ -63,7 +63,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
                 if (isCancelReasonAdded) scope.showHideReasonButtons = true;
             }
 
-            if (scope.point.status && scope.point.status == 8) scope.showHideReasonButtons = false;
+            if (scope.point && scope.point.status && scope.point.status == 8) scope.showHideReasonButtons = false;
         });
 
 

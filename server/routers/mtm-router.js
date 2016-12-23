@@ -948,7 +948,7 @@ router.route('/dailydata')
                     log.info('There is no routes. And what we have', data);
                 }
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                log.info('send data to client'.green, data.notes);
+                log.info('send data to client', data.notes);
                 //if(data.status && data.status === 'no sensors') {
                 //    if (res.statusCode == 304) return;
                 //    console.log("res.status", res.statusCode);
@@ -956,9 +956,11 @@ router.route('/dailydata')
                 //    return
                 //}
                 if (data.status && data.status === 'no plan') { // если на сегодня нет планов
+                    data.message = 'no plan';
+
                     res.status(200).json(data);
                 }else if( data.routes.length == 0){
-                    res.status(200).json({status: 'no plan'});
+                    res.status(200).json({message: 'no routes'});
                 }else{
                     //log.info("ReChange SessionLogin", data.CLIENT_ID);
 

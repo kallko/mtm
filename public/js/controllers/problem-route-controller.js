@@ -163,7 +163,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     settings=rootScope.settings;
 
                 }
-                for(var i=0; i<settings.userRoles.length; i++){
+                for(var i=0; i < settings.userRoles.length; i++){
                     if (settings.userRoles[i] == 'operator') need = parseInt(settings.problems_to_operator) - exist;
                 }
 
