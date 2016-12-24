@@ -2727,6 +2727,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
                         if (i + 1 == track.length) {
+                            if ((route.lastPosition && track[i].t2 && track[i].t2 > route.lastPosition) || route.lastPosition == undefined) route.lastPosition = track[i].t2;
                             var indx = track[i].coords.length - 1;
                             tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
                                 {
