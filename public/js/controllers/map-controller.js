@@ -2739,6 +2739,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                             tmpVar.on('click', function (event) {
                                 console.log("Это машина", event.target);
+
                             });
                             tmpVar.redrawer = true;
                             //tmpVar.on('click', function (event){
@@ -2922,6 +2923,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 return item.options.title.startsWith("Последнее известное положение транспортного средства");
             });
             console.log("Найдена машина", marker);
+            console.log("Title", marker.options.title.substring(0, marker.options.title.length-8));
+            marker.options.title = marker.options.title.substring(0, marker.options.title.length-8);
+            marker.options.title += formatDate(time * 1000);
         });
 
         rootScope.$on('clearGeoMarker', function(event){
