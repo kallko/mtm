@@ -2732,7 +2732,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
                                 {
                                     'title': 'Последнее известное положение транспортного средства\n' +
-                                    'Время сигнала: ' + formatDate(new Date(route.lastPosition * 1000) || new Date(track[i].t2 * 1000))
+                                    'Время сигнала: ' + formatDate(new Date(route.lastPosition * 1000))
                                 });
                             console.log("Разница во времени", route.lastPosition, "И ", track[i].t2);
                             tmpVar.setIcon(getIcon(i, 7, color, 'black'));
