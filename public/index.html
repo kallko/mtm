@@ -103,7 +103,10 @@
 
 
 <!-- карта на фоне -->
-<div id="map"></div>
+
+<div id="map" >
+
+</div>
 
 <!-- полупрозрачное окно для отображения карты -->
 
@@ -1067,8 +1070,11 @@
 <div id="problem-route-list" ng-controller="ProblemRouteController" style="position: absolute; bottom: 25%; left: 1%"
      ng-model="data.routes"
      ng-show="!clickOff && data.routesOfDate == undefined">
-
+    <div >
+        <img src='http://cliparts.co/cliparts/ziX/4Rz/ziX4Rzk7T.png' width="60" height="50" alt="Нет уведомлений">
+    </div>
     <div ng-repeat="route in data.routes" ng-click="showProblem(route)">
+
         <div>
             <button class="myButton" >{{settings.routeListOrderBy == 'nameCar' ? route.transport.NAME + " " + route.SHIFT_NAME  : route.driver.NAME + " " + route.SHIFT_NAME}} {{route.max_problem == 0 ? "нет проблем" : route.kind_of_problem }} {{route.max_problem}}</button>
         </div>
@@ -1451,3 +1457,4 @@
         <button ng-click="chengeCoordPoint('false')">Отмена</button>
     </div>
 </div>
+

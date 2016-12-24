@@ -23,6 +23,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             smartButtonMaxItems: 3,
             enableSearch: true,
             selectionLimit: 3,
+            externalIdProp: '',
             groupByTextProvider: function(USE_FOR_FAILURE) { if (USE_FOR_FAILURE === 'true') { return 'Не доставлено'; } else { return 'Доставлено'; }
             }
         };
@@ -53,7 +54,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         }
 
         scope.$watch('selectReasons', function(){
-            if (scope.point) scope.point.notes = scope.selectReasons;
+            //console.log ("First stage ",  scope.point.notes);
 
             if (scope.point && scope.point.status && scope.point.status != 8){
                var isCancelReasonAdded = scope.point.notes.some(function(item){
@@ -64,6 +65,13 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
             }
 
             if (scope.point && scope.point.status && scope.point.status == 8) scope.showHideReasonButtons = false;
+
+            if (scope.point) {
+                scope.point.notes = scope.selectReasons;
+                //console.log(scope.point.notes);
+            };
+
+            //console.log ("Second stage ",  scope.point.notes);
         });
 
 
@@ -435,6 +443,28 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
 
         };
+
+        rootScope.$on('addLoginAndTimeStampToNotes', function(event, routes){
+            addLoginAndTimeStampToNotes(routes);
+        });
+
+
+        function addLoginAndTimeStampToNotes(routes){
+            if (!routes) return;
+            routes.forEach(function(route){
+                route.points.forEach(function(point){
+                    if (point.notes) {
+                        point.notes.forEach(function(note){
+                            if (note.login == undefined){
+                                note.login = rootScope.data.settings.user;
+                                note.time = rootScope.nowTime;
+                            }
+                        })
+                    }
+                })
+            })
+
+        }
 
 
         scope.reCreateReasonsList = function(item) {

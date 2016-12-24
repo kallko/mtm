@@ -570,7 +570,7 @@ router.route('/askblocked')
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
             var result=[];
-            result.call = waitingCallForOperator(key, currentCompany);
+            //result.call = {name : "Andrey", time: 1482404400 }//waitingCallForOperator(key, currentCompany);
             if(restart) {
                 result.push('restart');
                 res.status(200).json(result);
@@ -582,7 +582,7 @@ router.route('/askblocked')
                     result.push(blockedRoutes[i].id);
                 }
             }
-
+            result.call = {name : "Andrey", time: 1482404400 }//waitingCallForOperator(key, currentCompany);
             res.status(200).json(result);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -637,22 +637,25 @@ router.route('/updatetrack')
         var currentCompany = companyLogins[key];
         var result = [];
         var data = req.body.data;
-        var t=data.length;
+        var t = data.length;
         //console.log ("Разберись с этой data", data);
         //console.log("Размер этой дата", data.length);
         var tt=0;
-        for (var i=0; i<data.length; i++){
+        for (var i=0; i< data.length; i++){
 
             tracksManager.getTrack(
                 data[i].gid,
                 data[i].lastState.t1,
                 parseInt(Date.now()/1000), "", "", "", "", "", "", function (newData, newGid) {
-                    newData.length=newData.length-1;
+                    newData.lastPosition = newData[newData.length-1].t2;
+                    newData.length = newData.length-1;
+                    console.log("NEW DATA FOR UPDATE".blue, newData);
 
                     tracksManager.getTrackByStates(newData, newGid, false, function(data, sNewGid){
                         tt++;
-                       log.info ("NEWNEWNEW DATA", t, " ", tt);
-                        result.push({gid:sNewGid, state: data});
+                       log.info ("NEWNEWNEW DATA", t, " ", tt, data.lastPosition);
+                        //console.log("NEWNEWNEW DATA", t, " ", tt, data.lastPosition)
+                        result.push({gid:sNewGid, state: data, lastPosition: data.lastPosition});
                         if (t==tt) {
                             log.info ("Своевременные данные получены, отправляем их на клиент");
                             res.status(200).json(result);
@@ -1860,7 +1863,8 @@ router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
         try {
 
-            log.info("!!!!Recieve SIGNAL from Driver ", req.body);
+            log.info("!!!!Recieve SIGNAL from Driver ", req.body.driverID);
+            choseOperatorForSignal(req.body.driverID);
             res.status(200).json('ок');
 
         } catch (e) {
@@ -6837,6 +6841,12 @@ function clearHouseNumber(points){
     })
 }
 
+
+function choseOperatorForSignal(id){
+
+}
+
+
 function askForStreetId() {
         console.log(Date.now());
         var i = 2000;
@@ -7119,11 +7129,11 @@ function waitingCallForOperator(key, company){
     if (!key || !company) return;
     var result={};
 
-    if (cashedDataArr[company].call && cashedDataArr[company].call.length > 0){
-        for (var i = 0; i < cashedDataArr[company].call.length; i++){
-            if (cashedDataArr[company].call[i].login == key ){
-                result = cashedDataArr[company].call[i];
-                cashedDataArr[company].call.splice(i,1);
+    if (cashedDataArr[company].calls && cashedDataArr[company].calls.length > 0){
+        for (var i = 0; i < cashedDataArr[company].calls.length; i++){
+            if (cashedDataArr[company].calls[i].login == key ){
+                result = cashedDataArr[company].calls[i];
+                cashedDataArr[company].calls.splice(i,1);
                 break;
             }
         }

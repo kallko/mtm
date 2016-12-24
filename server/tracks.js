@@ -47,6 +47,7 @@ TracksManager.prototype.getTrack = function (gid, from, to, undef_t, undef_d,
         }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 //log.toFLog(gid + '_' + 'track.js', body);
+                ///console.log("BODY", body);
                 callback(body, gid);
             }
         });

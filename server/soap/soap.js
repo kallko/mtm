@@ -942,7 +942,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
                     //console.log('GET PUSHES OK');
                     log.toFLog('PUSHES is', result);
                     console.log('!!!!!!!!PUSHES is', JSON.parse(result.return).length);
-                    if (tempCompany == undefined) tempCompany=company;
+                    if (tempCompany == undefined) tempCompany = company;
                     callback(tempCompany, result);
                 } else {
                     if (tempCompany == undefined) tempCompany=company;

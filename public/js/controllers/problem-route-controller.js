@@ -17,7 +17,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             if(!rootScope.data || rootScope.restart) return;
             http.post('./askblocked')
                 .then(function(data){
-                    //console.log("askBlocked", data);
+                    console.log("askBlocked", data);
                     if(data[0] != undefined && data[0] == 'restart') {
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
                         rootScope.restart = true;
@@ -37,15 +37,16 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                 for (var i=0; i<rootScope.data.routes.length; i++){
                 sync.push(rootScope.data.routes[i].uniqueID);
             }}
+            rootScope.$emit('addLoginAndTimeStampToNotes', rootScope.data.routes);
 
             http.post('./confirmonline/', {sync: sync, routes: rootScope.data.routes})
                 .then(function (data) {
 
                     if (data.status != 200) alert("Отсутсвует связь с сервером ");
-                    data = data.data;
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
                     if (rootScope.data == undefined) rootScope.data = {};
-                    console.log("confirmonline data", data);
+                    //console.log("confirmonline data", data);
+                    data = data.data;
                     rootScope.data.server_time = data.server_time;
 
                     rootScope.nowTime = rootScope.data.server_time;

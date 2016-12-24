@@ -4745,13 +4745,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             if (id == -1) alert ("Маршрут для сохранения не выбран");
             console.log("RootScopeData",rootScope.data);
             var result;
-            for (var i = 0; i<rootScope.data.routes.length; i++){
+            for (var i = 0; i < rootScope.data.routes.length; i++){
                 if(rootScope.data.routes[i].filterId == id){
                     result = rootScope.data.routes[i];
                     if (result.history != undefined &&
                         result.history.length > 0) result.history[result.history.length-1].finish = rootScope.nowTime;
 
-
+                rootScope.$emit('addLoginAndTimeStampToNotes', [result]);
                 //Проверка, закончен ли этот маршрут и если да, то закрываем его.
                 result.ready_to_close = true;
                 for (var j=0; j<result.points.length; j++){
@@ -5301,11 +5301,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         rootScope.$on('updateTrack', function(event, data){
             if (data == undefined ) return;
+
             for (var i=0; i<data.length; i++) {
                 for(var j=0; j<rootScope.data.routes.length; j++){
                    if (rootScope.data.routes[j].real_track == undefined || typeof (rootScope.data.routes[j].real_track) == 'string') rootScope.data.routes[j].real_track=[];
                     if (rootScope.data.routes[j].transport.gid != undefined && rootScope.data.routes[j].transport.gid == data[i].gid && typeof (data[i]) != "string" ) {
                         console.log("Совпадение найдено",  rootScope.data.routes[j].transport.gid, data[i].gid);
+                        rootScope.data.routes[j].lastPosition = data[i].lastPosition;
 
 
                         for (var k=0; k<data[i].state.length; k++) {
@@ -5347,7 +5349,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             console.log("найдено обновление для прорисованного трека", rootScope.data.routes[j].real_track, data[i]);
                             console.log("Duration of states", rootScope.data.routes[j].real_track[rootScope.data.routes[j].real_track.length-1].time, (data[i].state[0] ? data[i].state[0].time : "нет"));
 
-                            if(data[i].state != undefined && data[i].state.length >0 ) scope.$emit('redrawUpdate', data[i].state, scope.filters.route);
+                            if(data[i].state != undefined && data[i].state.length > 0 ) {
+                                scope.$emit('redrawUpdate', data[i].state, scope.filters.route);
+                            } else {if (data[i].lastPosition) {
+                                console.log("data[i].lastPosition" , data[i].lastPosition );
+                                scope.$emit('changeCarTitle', data[i].lastPosition);
+                            }}
                         }
 
                     }

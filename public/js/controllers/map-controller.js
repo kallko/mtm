@@ -1577,7 +1577,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //Если подтверждение точки вызвано не перетягиванием стопа, а подтверждением в таблице, то титл с реально обслуженным временем не добавляеться.
             if (scope.currentDraggingStop== null || scope.currentDraggingStop==undefined ) return;
 
-            var k= container._icon.title.indexOf("Реально обслужено");
+            var k = container._icon.title.indexOf("Реально обслужено");
             if (k<0){
                 container.source.autofill_service_time=scope.currentDraggingStop.source.time;
                 //container.source.autofill_change = '1505';
@@ -2731,9 +2731,14 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                             tmpVar = L.marker([track[i].coords[indx].lat, track[i].coords[indx].lon],
                                 {
                                     'title': 'Последнее известное положение транспортного средства\n' +
-                                    'Время сигнала: ' + formatDate(new Date(track[i].t2 * 1000))
+                                    'Время сигнала: ' + formatDate(new Date(route.lastPosition * 1000) || new Date(track[i].t2 * 1000))
                                 });
+                            console.log("Разница во времени", route.lastPosition, "И ", track[i].t2);
                             tmpVar.setIcon(getIcon(i, 7, color, 'black'));
+
+                            tmpVar.on('click', function (event) {
+                                console.log("Это машина", event.target);
+                            });
                             tmpVar.redrawer = true;
                             //tmpVar.on('click', function (event){
                             //    //console.log (tmpVar._latlng);
@@ -2910,6 +2915,13 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             }
 
         }
+
+        rootScope.$on('changeCarTitle', function(event, time){
+            var marker = markersArr.filter(function(item){
+                return item.options.title.startsWith("Последнее известное положение транспортного средства");
+            });
+            console.log("Найдена машина", marker);
+        });
 
         rootScope.$on('clearGeoMarker', function(event){
             if (scope.geoMarker) {
