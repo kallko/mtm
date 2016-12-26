@@ -6928,8 +6928,8 @@ function choseOperatorForSignal(id, company){
 
         var name = driverRoute.driver.NAME || alterDriverRoute.driver.NAME;
         var time = Date.now();
-        var login = currentPrority[3];
-        cashedDataArr[company].calls.push({name : name, time: time,  login : login})
+        var login = currentPrority[0][3];
+        cashedDataArr[company].calls.push({name : name, time: time,  login : login});
 
 
 
