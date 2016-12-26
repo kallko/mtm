@@ -268,7 +268,11 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             console.log("showCallNotification", call);
             scope.redEnvelope = true;
             var time = timestmpToStr(new Date(call.time));
-            scope.calls += call.name + " " + time + '\n';
+            var driverForCall = rootScope.data.drivers.filter(function(driver){
+               return driver.NAME == call.name;
+            });
+
+            scope.calls += call.name + " " + time + " " + driverForCall[0].PHONE || "В базе нет номера водителя" + '\n';
 
         }
 
