@@ -1883,8 +1883,8 @@ router.route('/signalDriverToDispatcher/')
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
-            console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq);
-            choseOperatorForSignal(stringReq, currentCompany);
+            console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq.driverID);
+            choseOperatorForSignal(stringReq.driverID, currentCompany);
             res.status(200).json('ок');
 
         } catch (e) {
