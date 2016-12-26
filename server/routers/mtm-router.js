@@ -1883,7 +1883,7 @@ router.route('/signalDriverToDispatcher/')
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
-            console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq.driverID);
+            console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq.driverID, currentCompany);
             choseOperatorForSignal(stringReq.driverID, currentCompany);
             res.status(200).json('ок');
 
@@ -6869,8 +6869,8 @@ function clearHouseNumber(points){
 
 
 function choseOperatorForSignal(id, company){
-        if (!id || !company) return;
-        console.log("start choseOperatorForSignal ".green);
+        //if (!id || !company) return;
+        console.log("start choseOperatorForSignal ".green, id, company);
         var result ={};
         var tempAllRoutes = [];
         if (cashedDataArr[company].routes) tempAllRoutes = tempAllRoutes.concat(cashedDataArr[company].routes);
