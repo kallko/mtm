@@ -1872,7 +1872,7 @@ router.route('/currentStops/:gid/:from/:to')
 // получение сигнала от водителя
 router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
-        console.log("!!!!Recieve SIGNAL from Driver ".red, req);
+        console.log("!!!!Recieve SIGNAL from Driver ".red, req.body, req.body.driverID);
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
@@ -6863,6 +6863,7 @@ function clearHouseNumber(points){
 
 function choseOperatorForSignal(id, company){
         if (!id || !company) return;
+        console.log("start choseOperatorForSignal ".green);
         var result ={};
         var tempAllRoutes = [];
         if (cashedDataArr[company].routes) tempAllRoutes = tempAllRoutes.concat(cashedDataArr[company].routes);
@@ -6893,6 +6894,7 @@ function choseOperatorForSignal(id, company){
     function findOperatorToDriverCall (company, driverRoute, alterDriverRoute) {
         if (!driverRoute || !company) return;
 
+        console.log("start findOperatorToDriverCall".green);
         cashedDataArr[company].calls = cashedDataArr[company].calls || [];
         cashedDataArr[company].calls.push({name : "Andrey", time: 1482404400,  login :'ids.kalko'});
 
@@ -6924,8 +6926,8 @@ function choseOperatorForSignal(id, company){
 
 
 
-        console.log("cashedDataArr[company].calls", cashedDataArr[company].calls);
-        console.log("cashedDataArr[company].waitingCalls", cashedDataArr[company].waitingCalls);
+        console.log("cashedDataArr[company].calls".blue, cashedDataArr[company].calls);
+        console.log("cashedDataArr[company].waitingCalls".blue, cashedDataArr[company].waitingCalls);
     }
 
 function askForStreetId() {
