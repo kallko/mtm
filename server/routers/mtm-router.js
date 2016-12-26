@@ -1879,11 +1879,12 @@ router.route('/signalDriverToDispatcher/')
         var temp = /'/gi;
         stringReq = stringReq.replace(temp, '"');
         console.log("stringReq".red, stringReq);
+        stringReq = JSON.parse(stringReq);
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
-            console.log("!!!!Recieve SIGNAL from Driver ".red, req.body.driverID);
-            choseOperatorForSignal(req.body.driverID, currentCompany);
+            console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq);
+            choseOperatorForSignal(stringReq, currentCompany);
             res.status(200).json('ок');
 
         } catch (e) {
