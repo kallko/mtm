@@ -1874,7 +1874,7 @@ router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
         console.log("!!!!Recieve SIGNAL from Driver ".red, req.body, req.body.driverID);
         var stringReq = JSON.stringify(req.body);
-        stringReq = stringReq.substring(2, stringReq.length-6);
+        stringReq = stringReq.substring(2, stringReq.length-5);
 
         //var temp = /:/gi;
         //stringReq = stringReq.replace(temp, '&&&');
