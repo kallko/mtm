@@ -1872,6 +1872,7 @@ router.route('/currentStops/:gid/:from/:to')
 // получение сигнала от водителя
 router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
+        console.log("!!!!Recieve SIGNAL from Driver ".red, req);
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
