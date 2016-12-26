@@ -271,8 +271,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             var driverForCall = rootScope.data.drivers.filter(function(driver){
                return driver.NAME == call.name;
             });
-
-            scope.calls += call.name + " " + time + " " + driverForCall[0].PHONE || "В базе нет номера водителя" + '\n';
+            var phone = driverForCall[0].PHONE.length > 0 ? driverForCall[0].PHONE : "В базе нет номера водителя";
+            scope.calls += call.name + " " + time + " " + phone + '\n';
 
         }
 
