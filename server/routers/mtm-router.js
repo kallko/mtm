@@ -1873,7 +1873,7 @@ router.route('/currentStops/:gid/:from/:to')
 router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
         console.log("!!!!Recieve SIGNAL from Driver ".red, req.body, req.body.driverID);
-        var stringReq = JSON.parse(req.body);
+        stringReq = JSON.stringify(req.body);
         //var temp = /:/gi;
         //stringReq = stringReq.replace(temp, '&&&');
         console.log("stringReq".red, stringReq);
