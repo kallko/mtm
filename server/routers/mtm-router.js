@@ -6868,8 +6868,8 @@ function clearHouseNumber(points){
 }
 
 
-function choseOperatorForSignal(id){
-        if (!id) return;
+function choseOperatorForSignal(id, company){
+        if (!id ||! company) return;
         console.log("start choseOperatorForSignal ".green, id);
         var result ={};
         var tempAllRoutes = [];
