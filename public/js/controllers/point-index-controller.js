@@ -59,6 +59,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     showPopup("На сегодня нет утвержденных планов", 5000);
                     return;
                 }
+                //console.log("Первая загрузка", data);
                 rootScope.settings={};
                 rootScope.settings = JSON.parse(JSON.stringify(data));
                 if (rootScope.settings.status && rootScope.settings.status == 'no sensors') {

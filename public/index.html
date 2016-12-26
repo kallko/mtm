@@ -1072,6 +1072,17 @@
      ng-show="!clickOff && data.routesOfDate == undefined">
     <div >
         <!--<img src='http://cliparts.co/cliparts/ziX/4Rz/ziX4Rzk7T.png' width="60" height="50" alt="Нет уведомлений">-->
+        <img ng-src='https://img.clipartfest.com/017c08c371a769279d933b6e7cedb0c2_uploader-savanaprice-envelope-clipart-free_800-800.png'
+             width="60"
+             height="50"
+             alt="Нет уведомлений"
+             ng-show ="!redEnvelope"
+                >
+        <img ng-src='http://www.iconsdb.com/icons/preview/red/email-5-xxl.png'
+             width="60"
+             height="50"
+             alt="Есть уведомления"
+             ng-show ="redEnvelope"   >
         <!--<img src='./images/envelopes1' width="60" height="50" alt="Нет уведомлений">-->
 
     </div>
@@ -1092,7 +1103,7 @@
             <div class="card-title">
                 Карточка задания
                 <button class="btn btn-primary btn-sm"
-                        ng-show="data.companyName == '292942'"
+                        ng-show="data.companyName == '292942' || settings.companyName == '292942'"
                         ng-click="open1CWindow()">Открыть в 1С
                 </button>
             </div>

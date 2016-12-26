@@ -569,20 +569,24 @@ router.route('/askblocked')
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
-            var result=[];
+            var result={};
+            result.data =[];
+            result.call = {};
             //result.call = {name : "Andrey", time: 1482404400 }//waitingCallForOperator(key, currentCompany);
             if(restart) {
-                result.push('restart');
+
+                result.data.push('restart');
                 res.status(200).json(result);
                 return;
             }
             for (var i=0; i<blockedRoutes.length; i++){
                 //log.info(blockedRoutes[i]);
                 if (blockedRoutes[i].company == currentCompany && blockedRoutes[i].login != key) {
-                    result.push(blockedRoutes[i].id);
+                    result.data.push(blockedRoutes[i].id);
                 }
             }
-            result.call = {name : "Andrey", time: 1482404400 }//waitingCallForOperator(key, currentCompany);
+
+            result.call = {name : "Andrey", time: 1482404400 };//waitingCallForOperator(key, currentCompany);
             res.status(200).json(result);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -865,6 +869,7 @@ router.route('/dailydata')
             if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length);
 
             var settings={};
+            settings.companyName = currentCompany;
 
             // Получение настроек для конкретной компании
             soapManager = new soap(req.session.login);
@@ -891,8 +896,10 @@ router.route('/dailydata')
                 //todo Два костыля, пока настройки не прописаны в 1с
                 if(cashedDataArr[currentCompany].settings.limit == undefined ) cashedDataArr[currentCompany].settings.limit = 74;
                 if(cashedDataArr[currentCompany].settings.problems_to_operator == undefined) cashedDataArr[currentCompany].settings.problems_to_operator = 3;
+                //cashedDataArr[currentCompany].settings.companyName = currentCompany;
                 var result = cashedDataArr[currentCompany].settings;
                 result.user = req.session.login;
+                result.companyName = currentCompany;
                 res.status(200).json(result);
             });
 
@@ -906,6 +913,7 @@ router.route('/dailydata')
             soapManager = new soap(req.session.login);
             settings={};
 
+
             // Получение настроек для конкретной компании
             log.info("Запрашиваю настройки 419 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
@@ -914,7 +922,7 @@ router.route('/dailydata')
                 //cashedDataArr[company].settings = settings;
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
-
+            settings.companyName = currentCompany;
 
 
             //Получение дневного плана для конкретной компании
@@ -996,6 +1004,7 @@ router.route('/dailydata')
                             var result = cashedDataArr[currentCompany].settings;
 
                             result.user = req.session.login;
+                            result.companyName = currentCompany;
 
                         res.status(200).json(result);
                         return;
@@ -1041,6 +1050,7 @@ router.route('/dailydata')
 
                                 req.session.itineraryID = data.ID;
                                 data.user = req.session.login;
+                                data.companyName = currentCompany;
                                 data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                             }
                             cashedDataArr[currentCompany] = data;
@@ -1050,7 +1060,7 @@ router.route('/dailydata')
                             cashedDataArr[currentCompany].settings = settings;
                             cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                             cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
-
+                            cashedDataArr[currentCompany].settings.companyName = currentCompany;
                             //Собираем решение из частей в одну кучку
                             linkDataParts(currentCompany, req.session.login);
                             //Мгновенный запуск на пересчет, после загрузки
@@ -1102,6 +1112,7 @@ router.route('/dailydata')
 
                         req.session.itineraryID = data.ID;
                         data.user = req.session.login;
+                        data.companyName = currentCompany;
                         data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                     }
                     cashedDataArr[currentCompany] = data;
@@ -1112,7 +1123,7 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].settings = settings;
                     cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                     cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
-                    cashedDataArr[currentCompany].companyName=currentCompany;
+                    cashedDataArr[currentCompany].companyName = currentCompany;
                     cashedDataArr[currentCompany].recalc_finishing = true;
                     //Собираем решение из частей в одну кучку
                     linkDataParts(currentCompany, req.session.login);
@@ -1178,6 +1189,7 @@ router.route('/dailydata')
                     //    alert( 'стоп' );
                     //}, 5000);
                     data.settings.user = req.session.login;
+                    data.settings.companyName = currentCompany;
 
                     if (res.statusCode != 304) res.status(200).json(data.settings);
                 }
@@ -2233,6 +2245,7 @@ router.route('/askforproblems/:need')
                     result.companyName = currentCompany;
                     result.statistic = cashedDataArr[currentCompany].statistic;
                     result.settings.user = "" + req.session.login;
+                    result.settings.companyName = currentCompany;
                     result.currentDay = true;
 
                     for (i = 0; i < toOperator.length; i++) {
@@ -2296,6 +2309,8 @@ router.route('/askforproblems/:need')
                         result.drivers = cashedDataArr[currentCompany].drivers;
                         result.transports = cashedDataArr[currentCompany].transports;
                         result.settings.user = "" + req.session.login;
+                        result.settings.companyName = currentCompany;
+
                         result.reasons = cashedDataArr[currentCompany].reasons;
                         result.notes = cashedDataArr[currentCompany].notes;
                         //надо отдать маршрут из старых на закрытие
@@ -2318,6 +2333,7 @@ router.route('/askforproblems/:need')
                     result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.settings.user = "" + req.session.login;
+                    result.settings.companyName = currentCompany;
                     result.drivers = cashedDataArr[currentCompany].drivers;
                     result.transports = cashedDataArr[currentCompany].transports;
                     result.statistic = cashedDataArr[currentCompany].statistic;
@@ -2360,6 +2376,7 @@ router.route('/askforproblems/:need')
                 changePriority(cashedDataArr[currentCompany].line_routes[i].uniqueID, currentCompany, login);
                 result.settings = cashedDataArr[currentCompany].settings;
                 result.settings.user = "" + req.session.login;
+                result.settings.companyName = currentCompany;
                 cashedDataArr[currentCompany].line_routes.splice(result, 1);
 
             }
@@ -4483,6 +4500,7 @@ try {
                         cashedDataArr[currentCompany].currentProblems = [];
                         cashedDataArr[currentCompany].allRoutes=[];
                         cashedDataArr[currentCompany].settings = settings;
+                        cashedDataArr[currentCompany].settings.companyName = currentCompany;
                         cashedDataArr[currentCompany].oldRoutes=[];
                         cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
 

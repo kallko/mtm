@@ -11,12 +11,14 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         interval(confirmOnline, 60 * 1000); // опрос на обновление трека, и подтверждение онлайна оператора
         interval(askBlocked, 3 * 1000); //опрос на "занятость маршрутов"
+        scope.redEnvelope = false;
 
 
         function askBlocked(){
             if(!rootScope.data || rootScope.restart) return;
             http.post('./askblocked')
                 .then(function(data){
+                    data = data.data;
                     console.log("askBlocked", data);
                     if(data[0] != undefined && data[0] == 'restart') {
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
@@ -263,7 +265,9 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         function showCallNotification(call){
-            alert("Необходим звонок водителю");
+            console.log("showCallNotification");
+            scope.redEnvelope = true;
+
         }
 
         function checkTimeForEditing (){
