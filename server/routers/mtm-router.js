@@ -1873,6 +1873,9 @@ router.route('/currentStops/:gid/:from/:to')
 router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
         console.log("!!!!Recieve SIGNAL from Driver ".red, req.body, req.body.driverID);
+        var stringReq = req.body;
+        var temp = /:/gi;
+        stringReq = stringReq.replace(temp, '&&&');
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
