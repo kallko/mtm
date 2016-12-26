@@ -6908,9 +6908,9 @@ function choseOperatorForSignal(id, company){
         var disputcherLogin = "";
 
         var currentPrority = priority.filter(function(item){
-            return (item[0] == driverRoute);
+            return (item[0] == driverRoute.uniqueID);
         }) || priority.filter(function(item){
-                return (item[0] == alterDriverRoute);
+                return (item[0] == alterDriverRoute.uniqueID);
             });
         console.log ("Current PRIORITY".blue, currentPrority);
         if (!currentPrority ) {
