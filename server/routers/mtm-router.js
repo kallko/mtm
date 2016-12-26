@@ -6913,14 +6913,14 @@ function choseOperatorForSignal(id, company){
                 return (item[0] == alterDriverRoute.uniqueID);
             });
         console.log ("Current PRIORITY".blue, currentPrority);
-        if (!currentPrority ) {
+        if (currentPrority =[]) {
             var allDisputcher = priority.filter(function(item) {
                 return item[1] == company;
             });
             currentPrority = allDisputcher[0];
         }
 
-        if (!currentPrority) {
+        if (currentPrority =[]) {
             cashedDataArr[company].waitingCalls = cashedDataArr[company].waitingCalls || [];
             cashedDataArr[company].waitingCalls.push(driverRoute);
             return;
