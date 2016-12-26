@@ -7234,8 +7234,8 @@ function waitingCallForOperator(key, company){
         }
     }
 
-    console.log("Checking Waiting calls".blue, result == {} , cashedDataArr[company].waitingCalls , cashedDataArr[company].waitingCalls.length > 0 );
-    if (result == {} && cashedDataArr[company].waitingCalls && cashedDataArr[company].waitingCalls.length > 0){
+    console.log("Checking Waiting calls".blue, result == {} , cashedDataArr[company].waitingCalls != undefined , cashedDataArr[company].waitingCalls.length > 0 );
+    if (result == {} && cashedDataArr[company].waitingCalls != undefined && cashedDataArr[company].waitingCalls.length > 0){
         result = cashedDataArr[company].waitingCalls[0];
         cashedDataArr[company].waitingCalls.splice(0,1);
     }
