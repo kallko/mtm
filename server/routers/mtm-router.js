@@ -6901,7 +6901,7 @@ function choseOperatorForSignal(id, company){
     function findOperatorToDriverCall (company, driverRoute, alterDriverRoute) {
         if (!driverRoute || !company) return;
 
-        console.log("start findOperatorToDriverCall".green);
+        console.log("start findOperatorToDriverCall".green, driverRoute.uniqueID);
         cashedDataArr[company].calls = cashedDataArr[company].calls || [];
         cashedDataArr[company].calls.push({name : "Andrey", time: 1482404400,  login :'ids.kalko'});
 
