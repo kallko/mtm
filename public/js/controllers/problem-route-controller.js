@@ -12,7 +12,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         interval(confirmOnline, 60 * 1000); // опрос на обновление трека, и подтверждение онлайна оператора
         interval(askBlocked, 3 * 1000); //опрос на "занятость маршрутов"
         scope.redEnvelope = false;
-
+        scope.calls ='';
 
         function askBlocked(){
             if(!rootScope.data || rootScope.restart) return;
@@ -25,7 +25,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         rootScope.restart = true;
                     }
 
-                    if (data && data.call && data.call != null) showCallNotification(data.call);
+                    if (data && data.call && data.call != null && data.call.time != undefined) signalCallNotification(data.call);
                     if (!rootScope.data.currentDay) return;
                    if  (data != undefined && data.length > 0) rootScope.$emit('changeBlockedRoutes', data);
                 });
@@ -264,11 +264,31 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
 
-        function showCallNotification(call){
-            console.log("showCallNotification");
+        function signalCallNotification(call){
+            console.log("showCallNotification", call);
             scope.redEnvelope = true;
+            var time = timestmpToStr(new Date(call.time));
+            scope.calls += call.name + " " + time + '\n';
 
         }
+
+
+        function timestmpToStr(d) {
+            try{
+
+                return  [d.getHours().padLeft(),
+                    d.getMinutes().padLeft(),
+                    d.getSeconds().padLeft()].join(':');
+            } catch (e) {
+                log.error( "Ошибка "+ e + e.stack);
+            }
+
+        }
+
+        scope.showMeDriversCals = function (){
+            scope.redEnvelope = false;
+            alert(scope.calls);
+        };
 
         function checkTimeForEditing (){
             var end = parseInt(Date.now()/1000);

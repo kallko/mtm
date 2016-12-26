@@ -90,6 +90,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
             scope.operator_time = null;
             scope.point = data.point;
+            createDisplayCollectionDriverNotes (scope.point);
 
             if (scope.point && scope.point.status < 3) {
                 scope.dropdownReasons = rootScope.data.notes.filter(function(item){
@@ -467,6 +468,34 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         }
 
 
+        function createDisplayCollectionDriverNotes(point){
+            if (!point) return;
+
+            point.mobileNotes = [];
+            if (point.mobile_push && point.mobile_push.delivery_notes){
+                var res ='';
+                var temp = /,/gi;
+                res = point.mobile_push.delivery_notes.replace(temp, '","');
+                res = res.replace('{', '["');
+                res = res.replace('}', '"]');
+                var mobile_notes_id = JSON.parse(res);
+                point.mobile_notes_string =[];
+
+                mobile_notes_id.forEach(function(item){
+                    rootScope.data.notes.forEach(function(note){
+                        if (item == note.ID){
+                            point.mobile_notes_string.push(note.label);
+                        }
+
+                    })
+                })
+
+            }
+
+
+        }
+
+
         scope.reCreateReasonsList = function(item) {
             console.log("RecreateReasonList", item)
         };
@@ -501,6 +530,8 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
             console.log("scope.onlyDriversNotes", scope.onlyDriversNotes);
             //console.log("scope.dropdownReasons", scope.dropdownReasons);
+
+
 
         };
 

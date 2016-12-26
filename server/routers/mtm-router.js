@@ -572,7 +572,6 @@ router.route('/askblocked')
             var result={};
             result.data =[];
             result.call = {};
-            //result.call = {name : "Andrey", time: 1482404400 }//waitingCallForOperator(key, currentCompany);
             if(restart) {
 
                 result.data.push('restart');
@@ -586,7 +585,7 @@ router.route('/askblocked')
                 }
             }
 
-            result.call = {name : "Andrey", time: 1482404400 };//waitingCallForOperator(key, currentCompany);
+            result.call = waitingCallForOperator(key, currentCompany);
             res.status(200).json(result);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -1874,9 +1873,10 @@ router.route('/currentStops/:gid/:from/:to')
 router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
         try {
-
-            log.info("!!!!Recieve SIGNAL from Driver ", req.body.driverID);
-            choseOperatorForSignal(req.body.driverID);
+            var key = ""+req.session.login;
+            var currentCompany = companyLogins[key];
+            console.log("!!!!Recieve SIGNAL from Driver ".red, req.body.driverID);
+            choseOperatorForSignal(req.body.driverID, currentCompany);
             res.status(200).json('ок');
 
         } catch (e) {
@@ -2027,7 +2027,7 @@ router.route('/savetonode/')
             updatePoints.test("test");
             var currentCompany = companyLogins[key];
             log.info("Приступаем к сохранению роута", i, id, currentCompany);
-            while(cashedDataArr[currentCompany].blocked_routes != undefined && i<cashedDataArr[currentCompany].blocked_routes.length){
+            while(cashedDataArr[currentCompany].blocked_routes != undefined && i < cashedDataArr[currentCompany].blocked_routes.length){
                     if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
                         cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                         log.info("Overwright Route");
@@ -6860,15 +6860,77 @@ function clearHouseNumber(points){
 }
 
 
-function choseOperatorForSignal(id){
+function choseOperatorForSignal(id, company){
+        if (!id || !company) return;
+        var result ={};
+        var tempAllRoutes = [];
+        if (cashedDataArr[company].routes) tempAllRoutes = tempAllRoutes.concat(cashedDataArr[company].routes);
+        if (cashedDataArr[company].line_routes) tempAllRoutes = tempAllRoutes.concat(cashedDataArr[company].line_routes);
+        if (cashedDataArr[company].blocked_routes) tempAllRoutes = tempAllRoutes.concat(cashedDataArr[company].blocked_routes);
+        var driverRoutes = tempAllRoutes.filter(function(item){
+            return item.DRIVER == id;
+        });
+
+        if (!driverRoutes || driverRoutes.length < 1) {
+            console.log("Calls from not today driver".red);
+            return;
+        }
+
+        if (driverRoutes &&  driverRoutes.length > 1) driverRoutes.sort(compareuniqueID);
+
+        function compareuniqueID(a, b) {
+            return parseInt(b.uniqueID) - parseInt(a.uniqueID);
+        }
+
+        var driverRoute = driverRoutes[0];
+        var alterDriverRoute = driverRoutes[1] || {};
+        findOperatorToDriverCall(company, driverRoute, alterDriverRoute);
 
 }
 
 
+    function findOperatorToDriverCall (company, driverRoute, alterDriverRoute) {
+        if (!driverRoute || !company) return;
+
+        cashedDataArr[company].calls = cashedDataArr[company].calls || [];
+        cashedDataArr[company].calls.push({name : "Andrey", time: 1482404400,  login :'ids.kalko'});
+
+        var disputcherLogin = "";
+
+        var currentPrority = priority.filter(function(item){
+            return (item[0] == driverRoute);
+        }) || priority.filter(function(item){
+                return (item[0] == alterDriverRoute);
+            });
+        console.log ("Current PRIORITY".blue, currentPrority);
+        if (!currentPrority ) {
+            var allDisputcher = priority.filter(function(item) {
+                return item[1] == company;
+            });
+            currentPrority = allDisputcher[0];
+        }
+
+        if (!currentPrority) {
+            cashedDataArr[company].waitingCalls = cashedDataArr[company].waitingCalls || [];
+            cashedDataArr[company].waitingCalls.push(driverRoute);
+            return;
+        }
+
+        var name = driverRoute.driver.NAME || alterDriverRoute.driver.NAME;
+        var time = Date.now();
+        var login = currentPrority[3];
+        cashedDataArr[company].calls.push({name : name, time: time,  login : login})
+
+
+
+        console.log("cashedDataArr[company].calls", cashedDataArr[company].calls);
+        console.log("cashedDataArr[company].waitingCalls", cashedDataArr[company].waitingCalls);
+    }
+
 function askForStreetId() {
         console.log(Date.now());
         var i = 2000;
-    //console.log("i in askForStreetId", i);
+       //console.log("i in askForStreetId", i);
         requestDispether(i);
        // createTextForRequest(point);
 
@@ -7147,8 +7209,12 @@ function waitingCallForOperator(key, company){
     if (!key || !company) return;
     var result={};
 
+
+
+
     if (cashedDataArr[company].calls && cashedDataArr[company].calls.length > 0){
         for (var i = 0; i < cashedDataArr[company].calls.length; i++){
+
             if (cashedDataArr[company].calls[i].login == key ){
                 result = cashedDataArr[company].calls[i];
                 cashedDataArr[company].calls.splice(i,1);
@@ -7156,6 +7222,14 @@ function waitingCallForOperator(key, company){
             }
         }
     }
+
+    if (result == null && cashedDataArr[company].waitingCalls && cashedDataArr[company].waitingCalls.length > 0){
+        result = cashedDataArr[company].waitingCalls[0];
+        cashedDataArr[company].waitingCalls.splice(0,1);
+    }
+
+    //result = {name : "Andrey", time: 1482404400 };
+    console.log("RESULT".red, result);
     return result;
 };
 
