@@ -6923,6 +6923,7 @@ function choseOperatorForSignal(id, company){
         if (currentPrority =[]) {
             cashedDataArr[company].waitingCalls = cashedDataArr[company].waitingCalls || [];
             cashedDataArr[company].waitingCalls.push(driverRoute);
+            console.log("cashedDataArr[company].waitingCalls".blue, cashedDataArr[company].waitingCalls);
             return;
         }
 
@@ -6934,7 +6935,7 @@ function choseOperatorForSignal(id, company){
 
 
         console.log("cashedDataArr[company].calls".blue, cashedDataArr[company].calls);
-        console.log("cashedDataArr[company].waitingCalls".blue, cashedDataArr[company].waitingCalls);
+
     }
 
 function askForStreetId() {
