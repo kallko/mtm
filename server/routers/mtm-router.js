@@ -1876,8 +1876,8 @@ router.route('/signalDriverToDispatcher/')
         var stringReq = JSON.stringify(req.body);
         stringReq = stringReq.substring(2, stringReq.length-5);
 
-        //var temp = /:/gi;
-        //stringReq = stringReq.replace(temp, '&&&');
+        var temp = /'/gi;
+        stringReq = stringReq.replace(temp, '"');
         console.log("stringReq".red, stringReq);
         try {
             var key = ""+req.session.login;
