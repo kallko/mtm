@@ -6919,16 +6919,16 @@ function choseOperatorForSignal(id, company){
             });
             currentPrority = allDisputcher[0];
         }
-
+        var time = Date.now();
         if (currentPrority =[]) {
             cashedDataArr[company].waitingCalls = cashedDataArr[company].waitingCalls || [];
-            cashedDataArr[company].waitingCalls.push(driverRoute);
+            cashedDataArr[company].waitingCalls.push({name : driverRoute.driver.NAME, time: time});
             console.log("cashedDataArr[company].waitingCalls".blue, cashedDataArr[company].waitingCalls);
             return;
         }
 
         var name = driverRoute.driver.NAME || alterDriverRoute.driver.NAME;
-        var time = Date.now();
+
         var login = currentPrority[0][3];
         cashedDataArr[company].calls.push({name : name, time: time,  login : login});
 
