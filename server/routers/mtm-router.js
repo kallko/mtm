@@ -7234,6 +7234,7 @@ function waitingCallForOperator(key, company){
         }
     }
 
+    console.log("Checking Waiting calls".blue, ashedDataArr[company].waitingCalls, result)
     if (result == {} && cashedDataArr[company].waitingCalls && cashedDataArr[company].waitingCalls.length > 0){
         result = cashedDataArr[company].waitingCalls[0];
         cashedDataArr[company].waitingCalls.splice(0,1);
