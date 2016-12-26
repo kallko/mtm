@@ -1876,6 +1876,7 @@ router.route('/signalDriverToDispatcher/')
         var stringReq = req.body;
         var temp = /:/gi;
         stringReq = stringReq.replace(temp, '&&&');
+        console.log("stringReq".red, stringReq);
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
