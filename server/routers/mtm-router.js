@@ -571,7 +571,7 @@ router.route('/askblocked')
             var currentCompany = companyLogins[key];
             var result={};
             result.data =[];
-            result.call = {};
+            //result.call = {};
             if(restart) {
 
                 result.data.push('restart');
@@ -585,7 +585,7 @@ router.route('/askblocked')
                 }
             }
 
-            result.call = waitingCallForOperator(key, currentCompany);
+            //result.call = waitingCallForOperator(key, currentCompany);
             res.status(200).json(result);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -1872,8 +1872,9 @@ router.route('/currentStops/:gid/:from/:to')
 // получение сигнала от водителя
 router.route('/signalDriverToDispatcher/')
     .post(function (req, res) {
-        console.log("!!!!Recieve SIGNAL from Driver ".red, req.body, req.body.driverID);
+        console.log("!!!!Recieve SIGNAL from Driver ".red, req.body);
         var stringReq = JSON.stringify(req.body);
+
         stringReq = stringReq.substring(2, stringReq.length-5);
 
         var temp = /'/gi;
@@ -1883,9 +1884,10 @@ router.route('/signalDriverToDispatcher/')
         try {
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
-            console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq.driverID, stringReq.company);
+
             //choseOperatorForSignal(stringReq.driverID, stringReq.company);
-            addCallinRoute(stringReq.company, stringReq.driverID, stringReq.client_id)
+            addCallinRoute(stringReq.company, stringReq.driverID, stringReq.client_id);
+            //addCallinRoute("228932", "123", "12525");
             res.status(200).json('ок');
 
         } catch (e) {
@@ -2432,11 +2434,15 @@ router.route('/confirmonline')
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
         autasaveRoutes(currentCompany, req.body.routes);
+            var result={};
+            result.calls =[];
+            result.calls = lookForFreshCalls(currentCompany, blockedArr);
         var err = checkSync(currentCompany, req.session.login, blockedArr);
+
         if (onlineClients.length == 0) {
             var obj = {time: parseInt(Date.now() / 1000), login: req.session.login, company: currentCompany};
             onlineClients.push(obj);
-            var result={};
+
             result.server_time = parseInt(Date.now() / 1000);
             if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].statistic != undefined) result.statistics = cashedDataArr[currentCompany].statistic;
             result.status = 'ok';
@@ -2470,7 +2476,7 @@ router.route('/confirmonline')
 
         }
 
-        result={};
+
         result.server_time = parseInt(Date.now() / 1000);
         result.statistics = cashedDataArr[currentCompany].statistic;
         result.status = 'ok';
@@ -5924,7 +5930,28 @@ function isOldDayExist(curCompany, showDate) {
 
 
 }
+ function lookForFreshCalls(company, blockedArr) {
+     console.log("Etap1".green, company, blockedArr);
+     blockedRoutes.forEach(function(item){
+         console.log("Blocked", item);
+     });
+     if (!company || !blockedArr || blockedArr.length == 0) return;
+     var result = [];
+     console.log("Etap2".green);
+     blockedArr.forEach(function(id){
+         blockedRoutes.forEach(function(blocked){
+             console.log("Etap3".green, id, blocked.id);
+             if (id == blocked.id && blocked.calls && blocked.calls.length != 0){
+                 console.log("Calls finded");
+                 blocked.calls.uniqueID = id;
+                 result = result.concat(blocked.calls);
+                 delete blocked.calls;
+             }
+         })
+     });
 
+     return result;
+ }
 
 
 function deleteLoadedOldDay(company){
@@ -6068,7 +6095,7 @@ function calculateProblemIndex(company) {
 
             if(point.status < 4 || point.status == 8 || point.status == 7) {
                 point.problem_index = 0;
-                //point.last_change = 5477;
+
                 continue;
             }
             //log.info("Найдена проблемная точка");
@@ -7195,12 +7222,14 @@ function safeReload (){
 function addCallinRoute (company, driver, client, phone_number){
     if (!company || !driver || !client) return;
     var routes = [];
-
+    console.log("Start addCallinRoute".red);
     if (cashedDataArr[company].line_routes) routes = routes.concat(cashedDataArr[company].line_routes);
     if (cashedDataArr[company].routes) routes = routes.concat(cashedDataArr[company].routes);
     if (cashedDataArr[company].blocked_routes) routes = routes.concat(cashedDataArr[company].blocked_routes);
+    console.log("Routes".green, routes.length);
     var fRoutes = routes.filter(function(route){
-        return (route.driver == driver && route.points.some(function(point){
+
+        return (route.DRIVER == driver && route.points.some(function(point){
             return point.END_WAYPOINT == client;
         }))
     });
@@ -7212,10 +7241,46 @@ function addCallinRoute (company, driver, client, phone_number){
         return
     }
 
+
     var uniqueID = route.uniqueID;
+    console.log("UniqueID".red, uniqueID);
     if (blockedRoutes && blockedRoutes.some(function(item){
             return item.id == uniqueID;
         })) {
+        if (cashedDataArr[company].blocked_routes) {
+            cashedDataArr[company].blocked_routes.forEach(function(item){
+                if (item.uniqueID == uniqueID){
+                    var phone = phone_number || item.driver.PHONE;
+                    item.calls = item.calls || [];
+                    item.calls.push({
+                        uniqueID : uniqueID,
+                        time : Date.now(),
+                        driver : item.driver.NAME,
+                        phone : phone,
+                        point : client,
+                        finished : false
+                    });
+
+
+                    blockedRoutes.forEach(function(route){
+                        if (route.id == uniqueID) {
+                            route.calls = route.calls || [];
+                            route.calls.push({
+                                time : Date.now(),
+                                uniqueID : uniqueID,
+                                driver : item.driver.NAME,
+                                phone : phone,
+                                point : client,
+                                finished : false
+                            })
+                        }
+                    })
+
+                }
+            })
+        }
+
+
 
     } else {
         console.log("The route for call is unblocked".red);
@@ -7227,9 +7292,11 @@ function addCallinRoute (company, driver, client, phone_number){
                     item.calls = item.calls || [];
                     item.calls.push({
                         time : Date.now(),
+                        uniqueID : uniqueID,
                         driver : item.driver.NAME,
                         phone : phone,
-                        point : client
+                        point : client,
+                        finished : false
                     })
                 }
             })
@@ -7243,9 +7310,11 @@ function addCallinRoute (company, driver, client, phone_number){
                     item.calls = item.calls || [];
                     item.calls.push({
                         time : Date.now(),
+                        uniqueID : uniqueID,
                         driver : item.driver.NAME,
                         phone : phone,
-                        point : client
+                        point : client,
+                        finished : false
                     })
                 }
             })
@@ -7305,7 +7374,7 @@ function waitingCallForOperator(key, company){
     }
 
     //result = {name : "Andrey", time: 1482404400 };
-    console.log("RESULT".red, result);
+    //console.log("RESULT".red, result);
     return result;
 };
 
@@ -7381,12 +7450,9 @@ function startCalculateCompany(company) {
     calculateProblemIndex(company);
     calculateStatistic (company);
     createProblems(company);
-    //checkRealTrackData(company); //todo убрать, после того как починят треккер
     loadCoords(company);
     lookForNewIten(company);
-    //checkUniqueID (company);
     cashedDataArr[company].recalc_finishing = true;
-    printData(company); //todo статистическая функция, можно убивать
     safeReload();
     autosaveData();
     if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );

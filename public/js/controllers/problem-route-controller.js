@@ -57,6 +57,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                     rootScope.data.statistic = data.statistics;
                     console.log("Receive data", data);
+                    if (data.calls && data.calls.length > 0) {
+                        scope.redEnvelope = true;
+                        scope.$emit('newCalls', data.calls)
+                    };
                     if (data.allRoutes != undefined && rootScope.data.currentDay) {
                         rootScope.data.allRoutes = data.allRoutes;
                         console.log("Send data to recreate filters Routes");

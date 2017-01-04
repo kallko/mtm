@@ -1121,9 +1121,9 @@
                 <td>Действие</td>
             </tr>
             <tr ng-repeat="call in calls">
-                <td>{{call.time | date: 'HH:mm' : 'UTC' }}</td>
+                <td>{{call.time | date: 'HH:mm'}}</td>
                 <td>{{call.driver}}</td>
-                <td>{{call.point}}</td>
+                <td>{{call.pointNumber}}</td>
                 <td>{{call.phone}}</td>
                 <td>
                     <button ng-click="confirmCall(call)" ng-show="!call.finished">Звонок сделан</button>

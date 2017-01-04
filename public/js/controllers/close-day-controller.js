@@ -287,11 +287,17 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
     scope.analysisIDSpoints = function () {
-        http.get('./analysisIDSpoints')
-            .success(function (data){
-                console.log("Success", data);
+        //http.post('./signalDriverToDispatcher/', { data: "{ '{\'driverID\':\'123\',\'company\':\'228932\',\'client_id\':\'12525\'}': '' }"})
+        //    .then(function(){
+        //        console.log("SUCCESS");
+        //    });
 
-            });
+
+        //http.get('./analysisIDSpoints')
+        //    .success(function (data){
+        //        console.log("Success", data);
+        //
+        //    });
     }
 
 }]);
