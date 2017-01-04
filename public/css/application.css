@@ -327,13 +327,13 @@ template {
     padding: 0;
 }
 
-#point-view, #point-editing-popup {
+#point-view, #call-view, #point-editing-popup {
     background-color: #D5DBD8;
     border: 2px solid #bdbdbd;
     padding: 8px;
 }
 
-#point-view-table, #stop-info-table, #stop-point-view-table{
+#point-view-table, #call-view-table, #stop-info-table, #stop-point-view-table{
     font-size: 13px;
     border: 2px solid #bdbdbd !important;
     margin: 0;
@@ -342,13 +342,13 @@ template {
 .filter-btn {
     height: 21px;
 }
-#point-view-table td{
+#point-view-table td, #call-view-table td{
     vertical-align: middle;
 }
-#point-view-table td, #stop-info-table td, #stop-point-view-table td {
+#point-view-table td, #stop-info-table td, #stop-point-view-table td, #call-view-table td {
     padding: 4px 8px;
 }
-#point-view-table .title, #stop-info-table .title, #stop-point-view-table .title
+#point-view-table .title, #stop-info-table .title, #stop-point-view-table .title, #call-view-table .title
 {
     width: 160px;
 }
@@ -363,7 +363,7 @@ template {
     text-align: center;
     background-color: #FFFFFF;
 }
-#point-view-table .row-data {
+#point-view-table .row-data, #call-view-table .row-data {
     width: 500px;
 }
 .card-title {
@@ -398,6 +398,11 @@ template {
 .point-view-close-btn {
     float: right;
 }
+
+.calls-view-close-btn {
+    float: none;
+}
+
 #original-route, #changed-route, #changed-driver {
     border: 1px solid grey;
     margin: 3px;
@@ -600,6 +605,11 @@ template {
 }
 .point-view-header {
     margin-bottom: 10px;
+}
+
+.call-view-header {
+    margin-bottom: 10px;
+    padding: 10px;
 }
 .heightElement,
 .searchButton {

@@ -2920,7 +2920,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
         rootScope.$on('changeCarTitle', function(event, time){
             var marker = markersArr.filter(function(item){
-                return item.options.title.startsWith("Последнее известное положение транспортного средства");
+                if (item.options && item.options.title) {
+                    return item.options.title.startsWith("Последнее известное положение транспортного средства");
+                }
             });
             console.log("Найдена машина", marker);
             console.log("Title", marker.options.title.substring(0, marker.options.title.length-8));

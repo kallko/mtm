@@ -1884,7 +1884,8 @@ router.route('/signalDriverToDispatcher/')
             var key = ""+req.session.login;
             var currentCompany = companyLogins[key];
             console.log("!!!!Recieve SIGNAL from Driver ".red, stringReq.driverID, stringReq.company);
-            choseOperatorForSignal(stringReq.driverID, stringReq.company);
+            //choseOperatorForSignal(stringReq.driverID, stringReq.company);
+            addCallinRoute(stringReq.company, stringReq.driverID, stringReq.client_id)
             res.status(200).json('ок');
 
         } catch (e) {
@@ -7188,6 +7189,69 @@ function safeReload (){
         reload = false;
 
     });
+
+}
+
+function addCallinRoute (company, driver, client, phone_number){
+    if (!company || !driver || !client) return;
+    var routes = [];
+
+    if (cashedDataArr[company].line_routes) routes = routes.concat(cashedDataArr[company].line_routes);
+    if (cashedDataArr[company].routes) routes = routes.concat(cashedDataArr[company].routes);
+    if (cashedDataArr[company].blocked_routes) routes = routes.concat(cashedDataArr[company].blocked_routes);
+    var fRoutes = routes.filter(function(route){
+        return (route.driver == driver && route.points.some(function(point){
+            return point.END_WAYPOINT == client;
+        }))
+    });
+    var route;
+    if (fRoutes) {
+        route = fRoutes[0];
+    } else {
+        console.log("Route for call dont finded".red);
+        return
+    }
+
+    var uniqueID = route.uniqueID;
+    if (blockedRoutes && blockedRoutes.some(function(item){
+            return item.id == uniqueID;
+        })) {
+
+    } else {
+        console.log("The route for call is unblocked".red);
+        if (cashedDataArr[company].line_routes) {
+            cashedDataArr[company].line_routes.forEach(function(item){
+                if (item.uniqueID == uniqueID){
+                    var phone = phone_number || item.driver.PHONE;
+
+                    item.calls = item.calls || [];
+                    item.calls.push({
+                        time : Date.now(),
+                        driver : item.driver.NAME,
+                        phone : phone,
+                        point : client
+                    })
+                }
+            })
+        }
+
+        if (cashedDataArr[company].routes) {
+            cashedDataArr[company].routes.forEach(function(item){
+                if (item.uniqueID == uniqueID){
+                    var phone = phone_number || item.driver.PHONE;
+
+                    item.calls = item.calls || [];
+                    item.calls.push({
+                        time : Date.now(),
+                        driver : item.driver.NAME,
+                        phone : phone,
+                        point : client
+                    })
+                }
+            })
+        }
+    }
+
 
 }
 

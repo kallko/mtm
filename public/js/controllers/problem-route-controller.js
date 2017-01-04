@@ -13,6 +13,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
         interval(askBlocked, 3 * 1000); //опрос на "занятость маршрутов"
         scope.redEnvelope = false;
         scope.calls ='';
+        //$('#call-view').popup('hide'); //fixme изначально спрятана менюшка связи диспетчера-водителя
 
         function askBlocked(){
             if(!rootScope.data || rootScope.restart) return;
@@ -291,7 +292,9 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         scope.showMeDriversCals = function (){
             scope.redEnvelope = false;
-            alert(scope.calls);
+            scope.$emit('showCalls');
+            //$('#call-view').popup('show');
+            //alert(scope.calls);
         };
 
         function checkTimeForEditing (){
