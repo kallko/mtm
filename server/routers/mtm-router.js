@@ -6094,10 +6094,30 @@ function calculateProblemIndex(company) {
 
 
 
-            if(point.status < 4 || point.status == 8 || point.status == 7) {
+            if(point.status < 4 || (point.status == 8 && point.recall == true) || point.status == 7) {
                 point.problem_index = 0;
 
                 continue;
+            }
+
+
+            // точка которую отменил водитель и по которой еще не связался оператор
+            if (point.status == 8) {
+                point.problem_index = 45;
+                if (route.find_problem_ts == 0 || route.find_problem_ts == undefined){
+                    route.find_problem_ts = parseInt(Date.now()/1000);
+                }
+                // Проверка на максимальную проблемность
+                if(point.problem_index > route.max_problem) {
+                    route.max_problem = point.problem_index;
+                    route.problem_point = point;
+                    route.kind_of_problem ='звонок по отмене';
+                    route.find_problem_ts = parseInt(Date.now()/1000);
+
+
+                }
+                continue;
+
             }
             //log.info("Найдена проблемная точка");
 

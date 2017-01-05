@@ -353,7 +353,7 @@
                             <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
                             <td class="status-col" ng-class="row.class" >
                                      <span>
-                                        {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status == 1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }} {{(row.status == 8 && row.recall == false) ? "&#9743" : ''}}
+                                        {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status == 1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }} {{(row.status == 8 && row.recall == false) ? "&#9743 &#9743 &#9743" : ''}}
                                     </span>
                             </td>
                             <td ng-show="settings.user == 'ids.kalko'" class="degree"  >
@@ -1078,7 +1078,7 @@
              height="33"
              alt="Нет уведомлений"
 
-             ng-show ="!redEnvelope"
+             ng-show ="data.routes.length > 0 && !redEnvelope"
              ng-click="showMeDriversCals()"
                 >
 
@@ -1086,7 +1086,7 @@
              width="60"
              height="50"
              alt="Есть уведомления"
-             ng-show ="redEnvelope"
+             ng-show ="data.routes.length > 0 && redEnvelope"
              ng-click="showMeDriversCals()">
 
         <!--<img src='./images/envelopes1' width="60" height="50" alt="Нет уведомлений">-->
@@ -1323,7 +1323,7 @@
                     </div>
                     <div>
                         <button ng-show="point.status == 8 && point.recall == false"
-                                class="btn btn-primary btn-xs btn-warning"
+                                class="btn btn-primary btn-xs btn-success"
                                 style="margin-left: 15px"
                                 ng-click="recalling()"> Подтвердить звонок клиенту </button>
                         <div ng-show="point.status == 8 && point.recall == true"
