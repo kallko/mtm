@@ -6217,7 +6217,7 @@ function calculateProblemIndex(company) {
             for (var k =0; k<point.orderWindows.length; k++){
                 var window = point.orderWindows[k];
                 if (point.arrival_time_ts  < window.finish + 60 && point.arrival_time_ts > window.start - 60 ){
-                    outOfWindows =false;
+                    outOfWindows = false;
                     continue;
                 }
             }
@@ -6235,6 +6235,18 @@ function calculateProblemIndex(company) {
         }
     }
 
+        //Добавление проблемности для роутов, у которых есть просьбы о  звонках водителям
+        for (i = 0; i < cashedDataArr[company].routes.length; i++) {
+            if (cashedDataArr[company].routes[i].calls && cashedDataArr[company].routes[i].calls.some(function(call){
+                    return call.finished == false;
+                }) ) {
+                cashedDataArr[company].routes[i].max_problem = cashedDataArr[company].routes[i].max_problem || 0;
+                cashedDataArr[company].routes[i].max_problem += 45;
+                cashedDataArr[company].routes[i].find_problem_ts = cashedDataArr[company].routes[i].find_problem_ts || parseInt(Date.now()/1000);
+                cashedDataArr[company].routes[i].kind_of_problem = cashedDataArr[company].routes[i].kind_of_problem || 'звонок водителю';
+
+            }
+        }
 
         // Нахождение маршрутов с незапланированной остановкой
         // Параметры:  Последний state ARRIVAL длительностью более 180 сек. В радиусе stopRadius от которого нет точек доставки с временным окном +- 1800 сек.
