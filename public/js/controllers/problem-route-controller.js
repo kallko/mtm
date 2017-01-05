@@ -21,7 +21,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                 .then(function(data){
                     data = data.data;
                     console.log("askBlocked", data);
-                    if(data[0] != undefined && data[0] == 'restart') {
+                    if(data.data[0] != undefined && data.data[0] == 'restart') {
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
                         rootScope.restart = true;
                     }
