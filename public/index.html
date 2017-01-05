@@ -353,7 +353,7 @@
                             <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
                             <td class="status-col" ng-class="row.class" >
                                      <span>
-                                        {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status ==1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }}
+                                        {{getTextStatus(row)}} {{ row.status == 2 ? parseInt((row.working_window[0].start - row.real_arrival_time)/60) : row.status == 1 ? parseInt((row.real_arrival_time - row.working_window[row.working_window.length-1].finish)/60) : " " }} {{(row.status == 8 && row.recall == false) ? "&#9743" : ''}}
                                     </span>
                             </td>
                             <td ng-show="settings.user == 'ids.kalko'" class="degree"  >
@@ -1315,13 +1315,24 @@
         <tr>
             <td>Отмена</td>
             <td>
-                <div class="row" ng-show="showHideReasonButtons">
-                      <div class="col-md-3">
+                <div class="row" >
+                      <div class="col-md-3" ng-show="showHideReasonButtons">
                         <button id="cancel-status-task-btn"
                                 class="btn btn-primary btn-xs btn-danger" ng-click="cancelTask()">Отменить
                         </button>
                     </div>
+                    <div>
+                        <button ng-show="point.status == 8 && point.recall == false"
+                                class="btn btn-primary btn-xs btn-warning"
+                                style="margin-left: 15px"
+                                ng-click="recalling()"> Подтвердить звонок клиенту </button>
+                        <div ng-show="point.status == 8 && point.recall == true"
+                             style="margin-left: 15px">
+                             Звонок клиенту выполнен
+                        </div>
+                    </div>
                 </div>
+
             </td>
         </tr>
 

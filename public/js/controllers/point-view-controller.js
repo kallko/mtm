@@ -295,6 +295,10 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         };
 
+        scope.recalling = function(){
+            scope.point.recall = true;
+        }
+
         scope.cancelPush = function () {
 
             console.log('cancelPush');

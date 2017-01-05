@@ -5715,6 +5715,7 @@ function cancelTaskPush(push, point, company){
     point.confirmed = true;
     point.reason = push.cancel_reason;
     point.real_arrival_time = undefined;
+    point.recall = point.recall || false;
 
     if(push.cancel_reason != undefined && push.cancel_reason.length >0) {
         for (var i=0; i<cashedDataArr[company].reasons.length; i++ ){
