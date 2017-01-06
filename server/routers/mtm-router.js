@@ -946,7 +946,7 @@ router.route('/dailydata')
                         res.status(200).json(cashedDataArr[currentCompany+stringDate]);
                         return;
                     }}
-            console.log(flag + " After flag".red, req.query.showDate);
+            //console.log(flag + " After flag".red, req.query.showDate);
             soapManager.getAllDailyData(dataReadyCallback, req.query.showDate);
 
 
@@ -1136,9 +1136,9 @@ router.route('/dailydata')
                     for (var t=0; t< cashedDataArr[currentCompany].idArr.length; t++) {
                         var soapManager = new soap(cashedDataArr[currentCompany].firstLogin);
                         var iten = cashedDataArr[currentCompany].idArr[t];
-                        log.info("Request for Itin", iten);
+                        //log.info("Request for Itin", iten);
                         soapManager.getPushes(iten, parseInt(Date.now() / 1000), currentCompany, function (company, data) {
-                            log.info(" 452 receivePUSHES!!!!! for iten", company);
+                            //log.info(" 452 receivePUSHES!!!!! for iten", company);
                             tt++;
                             //log.toFLog('pushes' + company +tt, data.return);
                             if (data != undefined && data.error == undefined) {
@@ -1148,7 +1148,7 @@ router.route('/dailydata')
                                 cashedDataArr[company].allPushes = cashedDataArr[company].allPushes.concat(obj);
                             }
                             //if (develop) console.log ("Присоединили".green, obj.length, "Получили", cashedDataArr[company].allPushes.length);
-                            log.info("GetPushes finished for company", company, t, tt );
+                            //log.info("GetPushes finished for company", company, t, tt );
                             if (t==tt) {
                                 //log.toFLog("Summary Pushes" , cashedDataArr[company].allPushes);
                                 startCalculateCompany(company);
@@ -3026,7 +3026,7 @@ function startPeriodicCalculating() {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant];
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
-                        log.info("2375 receivePUSHES!!!!! for iten", company);
+                        //log.info("2375 receivePUSHES!!!!! for iten", company);
                         if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //log.info("Obj", obj[0], "mtm 1497");
@@ -3450,7 +3450,7 @@ function dataForPredicate(company, callback){
 
                 cashedDataArr[company].dataForPredicate = generalResult;
                 cashedDataArr[company].needRequests --;
-                log.info("The Second cickle is finished RESULT LENGTH =", cashedDataArr[company].dataForPredicate.length, cashedDataArr[company].needRequests, company );
+                //log.info("The Second cickle is finished RESULT LENGTH =", cashedDataArr[company].dataForPredicate.length, cashedDataArr[company].needRequests, company );
                 if(cashedDataArr[company].needRequests == 0) callback(company);
                 return;
             }
@@ -6319,7 +6319,7 @@ function calculateProblemIndex(company) {
                 !cashedDataArr[company].routes[i].points ||
                 cashedDataArr[company].routes[i].points.length < 2 ) continue;
 
-            log.info("Lets look in routes without problem for broken line");
+            //log.info("Lets look in routes without problem for broken line");
 
             route = cashedDataArr[company].routes[i];
             var isInline = true;

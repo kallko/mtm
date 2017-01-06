@@ -21,7 +21,7 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
         //});
 
         rootScope.$on('holestatistic', function(event, obj) {
-            console.log("Statistic", obj);
+            //console.log("Statistic", obj);
             scope.statistic = {};
             scope.statistic.canceled = obj[8];
             scope.statistic.scheduled = obj[7];
@@ -53,7 +53,7 @@ angular.module('MTMonitor').controller('StatisticController', ['$scope', '$http'
                     case 8: scope.statistic.canceled++; break;
                 }
             }
-            console.log("Result is ", scope.statistic);
+            //console.log("Result is ", scope.statistic);
         });
 
         //var users = [{type: "admin", name: "Ivanov"}, {type: "moderator", name: "Petrov"}];

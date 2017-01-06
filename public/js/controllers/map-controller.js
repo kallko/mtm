@@ -2379,7 +2379,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
 
         function displayMarkers (globalMarkers) {
-            console.log("Работает функция отображения всех маркеров");
+            //console.log("Работает функция отображения всех маркеров");
             //console.log("Zoom1", map.getZoom());
             //console.log(globalMarkers);
             if (globalMarkers != undefined && globalMarkers.length > 0) {
@@ -2403,10 +2403,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
             //добавка вместо
             // setMapCenter(target.lat, target.lng, newZoom);
            setTimeout(function(){
-               console.log("Before timeout ", target.lat, target.lng, newZoom);
+               //console.log("Before timeout ", target.lat, target.lng, newZoom);
                map.setView([target.lat, target.lng], newZoom);
                //map.setZoom(newZoom);
-               console.log("After Timeout", map.getCenter(), map.getZoom());
+               //console.log("After Timeout", map.getCenter(), map.getZoom());
            }, 200);
             //console.log("Zoom3", map.getZoom());om());
         }
@@ -2453,7 +2453,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         }
 
         function drawStates (states, route) {
-        console.log(" I will draw states");
+        //console.log(" I will draw states");
    //         for (var i=0; i<states.length; i++ ) {
                 console.log("I gona redraw real route", route);
                 var start = strToTstamp(route.START_TIME);
@@ -2734,7 +2734,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                                     'title': 'Последнее известное положение транспортного средства\n' +
                                     'Время сигнала: ' + formatDate(new Date(route.lastPosition * 1000))
                                 });
-                            console.log("Разница во времени", route.lastPosition, "И ", track[i].t2);
+                            //console.log("Разница во времени", route.lastPosition, "И ", track[i].t2);
                             tmpVar.setIcon(getIcon(i, 7, color, 'black'));
 
                             tmpVar.on('click', function (event) {
@@ -2924,8 +2924,9 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     return item.options.title.startsWith("Последнее известное положение транспортного средства");
                 }
             });
-            console.log("Найдена машина", marker);
-            console.log("Title", marker.options.title.substring(0, marker.options.title.length-8));
+            //console.log("Найдена машина", marker);
+            if (!marker || !marker.options || !marker.options.title) return;
+            //console.log("Title", marker.options.title.substring(0, marker.options.title.length-8));
             marker.options.title = marker.options.title.substring(0, marker.options.title.length-8);
             marker.options.title += formatDate(time * 1000);
         });

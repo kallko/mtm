@@ -20,7 +20,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             http.post('./askblocked')
                 .then(function(data){
                     data = data.data;
-                    console.log("askBlocked", data);
+                    //console.log("askBlocked", data);
                     if(data.data[0] != undefined && data.data[0] == 'restart') {
                         rootScope.$emit('showNotification', {text: "Вскоре на сервере начнутся профилактические работы. " +'\n' + 'Запишите пожалуйста все изменения в маршрутах', duration: 20000});
                         rootScope.restart = true;
@@ -63,7 +63,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     };
                     if (data.allRoutes != undefined && rootScope.data.currentDay) {
                         rootScope.data.allRoutes = data.allRoutes;
-                        console.log("Send data to recreate filters Routes");
+                        //console.log("Send data to recreate filters Routes");
                         scope.$emit('newAllRoutes');
                     }
 
@@ -130,7 +130,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         function startAsking() {
             if (askProblemFromServer && rootScope.loaded) {
-                console.log("I decide to start Asking");
+                //console.log("I decide to start Asking");
                 rootScope.asking = true;
                 timeout(function () {
                     setProblemUpdate();
@@ -142,7 +142,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         // Запрос у сервера проблем каждые 6 секунд
         function setProblemUpdate() {
-            console.log("I decide i do it!");
+            //console.log("I decide i do it!");
 
             interval(checkProblem, 15 * 1000);
         }
@@ -245,7 +245,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         rootScope.$on('start', function () {
-            console.log("Запускаем опрос сервера");
+            //console.log("Запускаем опрос сервера");
             startAsking();
         });
 

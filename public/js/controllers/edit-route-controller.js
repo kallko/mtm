@@ -47,7 +47,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
             rootScope.$on('checkPoint', onPromisedChanged);
            // myLayout.on('stateChanged', onResize);
              myLayout.on('stateChanged', function(event){
-                 console.log("Выбрали эдит роут", event, myLayout.toConfig());
+                 //console.log("Выбрали эдит роут", event, myLayout.toConfig());
                  if (myLayout.toConfig().content[0].content[1].content[0].activeItemIndex == 2) {
                      console.log("Активный нужный элемент");
 
