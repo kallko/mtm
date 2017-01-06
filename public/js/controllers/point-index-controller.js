@@ -4904,6 +4904,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         }
 
 
+                        if (data.route.calls && data.route.calls.length > 0 && data.route.calls.some(function(call){
+                                return call.finished == false
+                            })) scope.$emit('redEnvelope');
                         rootScope.data.routes.push(data.route);
                         scope.filters.route = data.route.filterId;
                         //console.log("Раз два три четыре пять, начинаем рисовать", scope.filters.route );

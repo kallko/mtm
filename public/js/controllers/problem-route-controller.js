@@ -307,6 +307,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             //alert(scope.calls);
         };
 
+        rootScope.$on('redEnvelope', function(event){
+            scope.redEnvelope = true;
+        });
+
         function checkTimeForEditing (){
             var end = parseInt(Date.now()/1000);
             //console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
