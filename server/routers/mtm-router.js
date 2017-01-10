@@ -1581,6 +1581,13 @@ router.route('/savewaypoint/')
         var soapManager = new soap(req.session.login);
         soapManager.updateWaypointCoordTo1C(req.body, function (data) {
             if (!data.error) {
+                var data = {};
+                data.point = {};
+                data.point.id = req.body.waypoint.ID;
+                data.point.lat = req.body.waypoint.LAT;
+                data.point.lon = req.body.waypoint.LON;
+
+                sendHookTo1C(req.body.company, "changeCoord", data);
                 res.status(200).json({result: data.result});
             } else {
                 res.status(200).json({error: data.error});
@@ -5350,7 +5357,7 @@ function findStatusesAndWindows(company) {
                 //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
             //log.info("И присваиваем ей статус", tmpPoint.status);
-            sendHookTo1C(tmpPoint, oldStatus, oldLimit, oldNotes);
+            changeStatusHookTo1C(company, tmpPoint, oldStatus, oldLimit, oldNotes);
         }
 
     }
@@ -5360,13 +5367,32 @@ function findStatusesAndWindows(company) {
 
 }
 
-function sendHookTo1C (point, status, limit, notes){
-    if (point.status != status && point.limit != limit) console.log(
+function changeStatusHookTo1C (company, point, status, limit, notes){
+    if (point.status != status && point.limit != limit) {
+        console.log(
         "We change status", point.TASK_NUMBER, " from ".green,  status, "to ", point.status,
         "haveStop ", point.haveStop,
         "havePush ", point.havePush,
         "limit ", point.limit, " oldLimit ", limit);
+        var data = {};
 
+
+        //sendHookTo1C(company, 'changeStatus', data)
+    }
+
+
+
+
+
+
+}
+
+function sendHookTo1C (company, type, data){
+    console.log("Try to send  hook")
+    var soapManager = new soap();
+    console.log("Send to soap", company, type, data)
+    soapManager.sendHook(company, type, data, function(){
+        console.log("Success 5387")})
 }
 
 function calculateStatistic (company){
@@ -7366,7 +7392,7 @@ function autasaveRoutes(company, routes){
                 var b_route = cashedDataArr[company].blocked_routes[i];
                     if (b_route.uniqueID == route.uniqueID) {
                         console.log("Autosave complete".blue, b_route.uniqueID, route.uniqueID);
-                        checkChangeStatusForHook(b_route, route);
+                        checkChangeStatusForHook(company, b_route, route);
                         cashedDataArr[company].blocked_routes[i] = route;
                         break;
                     }
@@ -7412,11 +7438,12 @@ function waitingCallForOperator(key, company){
 };
 
 
-function checkChangeStatusForHook(b_route, route){
+function checkChangeStatusForHook(company, b_route, route){
     console.log("start checking", b_route.uniqueID, route.uniqueID);
     route.points.forEach(function(point, i) {
-     sendHookTo1C(point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes)
+     changeStatusHookTo1C(company, point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes)
     })
+
 };
 
 

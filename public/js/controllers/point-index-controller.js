@@ -2824,7 +2824,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             //}
 
             console.log('sending waypoint to save', waypoint, confirm);
-            http.post('./savewaypoint/', {waypoint: waypoint, confirm:confirm}).
+            http.post('./savewaypoint/', {waypoint: waypoint, confirm:confirm, company:rootScope.data.settings.companyName}).
                 success(function (data) {
                     console.log('Save to 1C result >>', data);
                 })
@@ -4915,7 +4915,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         if (!rootScope.showPoint) {
                             rootScope.$emit('showAllMarkers');
                         } else {
-                            rootScope.$emit('showproblem', rootScope.data.routes[i]);
+                            rootScope.$emit('showproblem', rootScope.data.routes[rootScope.data.routes.length-1]);
                             rootScope.showPoint = false;
                         }
 

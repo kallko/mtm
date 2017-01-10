@@ -288,7 +288,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
             setTimeout(function(){
                 console.log("Запрос getOldDay");
 
-                    client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
+                    client.runAsUser({'input_data': _xml.getOldDay(dateDay+'.'+ dateMonth+'.'+dateYear), 'user': me.login}, function (err, result) {
                         try{
                             if(err) throw err;
                             parseXML(result.return, function (err, res) {
@@ -874,6 +874,50 @@ SoapManager.prototype.getNewConfig = function (company, callback) {
 
     receiveConfig(company, callback); //Снять комментарий и можно записывать
 };
+
+
+
+SoapManager.prototype.sendHook = function (company, type, data, callback) {
+    //console.log("Etap 1");
+    var me = this;
+    var url  = 'https://' + this.admin_login + ':' + this.password + this.urlUI;
+    // сохранение в 1С от имени авторизированного пользователя
+    var sendHookOutside = function (company, type, data) {
+        //console.log("Etap 2");
+        soap.createClient(url, function (err, client) {
+            //console.log("Etap 3", client.UI.UISoap.outsideHook);
+            if (err) throw err;
+            //console.log("Etap 4");
+            client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
+            //console.log("Etap 5");
+
+            data.type = type;
+            //data.task={};
+            //data.task.id = 12345;
+            //data.task.date = "11.11.2017";
+            //data.task.status = 5;
+            //data.task.notes = [];
+            //data.task.driverNotes = [];
+            var Ndata = JSON.stringify(data);
+
+            client.outsideHook({data: Ndata,  user: "", company: company, branch: ""}, function (err, result) {
+                console.log("Hook result 6", result);
+                if (!err) {
+
+                    console.log('Send Hook Success');
+
+
+                } else {
+                    console.log('Send Hook Error',  err);
+
+                }
+            });
+        });
+    };
+
+    sendHookOutside(company, type, data); //Снять комментарий и можно записывать
+};
+
 
 
 
