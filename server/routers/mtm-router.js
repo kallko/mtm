@@ -2047,6 +2047,7 @@ router.route('/savetonode/')
             log.info("Приступаем к сохранению роута", i, id, currentCompany);
             while(cashedDataArr[currentCompany].blocked_routes != undefined && i < cashedDataArr[currentCompany].blocked_routes.length){
                     if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
+                        checkChangeStatusForHook(currentCompany, cashedDataArr[currentCompany].blocked_routes[i], req.body.route)
                         cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                         log.info("Overwright Route");
                         cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
@@ -5195,8 +5196,9 @@ function findStatusesAndWindows(company) {
             }
 
             var oldStatus = tmpPoint.status,
-                oldLimit = tmpPoint.limit
-                oldNotes =[].concat(tmpPoint.notes);
+                oldLimit = tmpPoint.limit,
+                oldNotes =[].concat(tmpPoint.notes),
+                oldDriverNotes = [].concat(tmpPoint.driverNotes);
 
             //log.info("cashedDataArr[company].settings.workingWindowTypes", cashedDataArr[company].settings.workingWindowType);
             if (cashedDataArr[company].settings.workingWindowType == 1) {
@@ -5357,7 +5359,7 @@ function findStatusesAndWindows(company) {
                 //log.info("tmpPoint.problem_index", tmpPoint.problem_index);
             }
             //log.info("И присваиваем ей статус", tmpPoint.status);
-            changeStatusHookTo1C(company, tmpPoint, oldStatus, oldLimit, oldNotes);
+            changeStatusHookTo1C(company, tmpPoint, oldStatus, oldLimit, oldNotes, oldDriverNotes);
         }
 
     }
@@ -5367,7 +5369,7 @@ function findStatusesAndWindows(company) {
 
 }
 
-function changeStatusHookTo1C (company, point, status, limit, notes){
+function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes){
     if (point.status != status && point.limit != limit) {
         console.log(
         "We change status", point.TASK_NUMBER, " from ".green,  status, "to ", point.status,
@@ -5375,12 +5377,64 @@ function changeStatusHookTo1C (company, point, status, limit, notes){
         "havePush ", point.havePush,
         "limit ", point.limit, " oldLimit ", limit);
         var data = {};
+        data.task = {};
+        data.task.id = point.TASK_NUMBER;
+        data.task.date = point.TASK_DATE;
+        data.task.status = point.status;
+        data.task.notes = point.notes;
+        data.task.driverNotes = point.driverNotes;
 
 
-        //sendHookTo1C(company, 'changeStatus', data)
+        sendHookTo1C(company, 'changeStatus', data);
+        return;
     }
 
 
+    notes.sort(compareId);
+    point.notes.sort(compareId);
+    notes.stringId ='';
+    point.notes.stringId ='';
+    notes.stringId = notes.reduce(function(sum, current){
+        return sum + "" + current.ID;
+    }, "");
+
+    point.notes.stringId = point.notes.reduce(function(sum, current){
+        return sum + "" + current.ID;
+    }, "");
+
+
+    if (!driverNotes) console.log("Error".red,point, driverNotes);
+    driverNotes.sort(compareId);
+    point.driverNotes.sort(compareId);
+    driverNotes.stringId ='';
+    point.driverNotes.stringId ='';
+    driverNotes.stringId = driverNotes.reduce(function(sum, current){
+        return sum + "" + current.ID;
+    }, "");
+
+    point.driverNotes.stringId = point.driverNotes.reduce(function(sum, current){
+        console.log("In function", sum, " ", current, " ", current.ID);
+        return sum + "" + current.ID;
+    }, "");
+
+
+    if (point.driverNotes.stringId != driverNotes.stringId || point.notes.stringId != notes.stringId){
+            console.log("NOTES".blue, point.notes.stringId, notes.stringId, "DRIVERNOTES".blue, point.driverNotes.stringId, driverNotes.stringId);
+            var data = {};
+            var type = "changeNotes";
+            data.task = {};
+            data.task.id = point.TASK_NUMBER;
+            data.task.date = point.TASK_DATE;
+            data.task.status = point.status;
+            data.task.notes = point.notes;
+            data.task.driverNotes = point.driverNotes;
+            sendHookTo1C(company, type, data);
+
+    }
+
+    function compareId(a, b) {
+        return b.id - a.id;
+    }
 
 
 
@@ -5388,9 +5442,9 @@ function changeStatusHookTo1C (company, point, status, limit, notes){
 }
 
 function sendHookTo1C (company, type, data){
-    console.log("Try to send  hook")
+    console.log("Try to send  hook");
     var soapManager = new soap();
-    console.log("Send to soap", company, type, data)
+    console.log("Send to soap", company, type, data);
     soapManager.sendHook(company, type, data, function(){
         console.log("Success 5387")})
 }
@@ -7441,7 +7495,7 @@ function waitingCallForOperator(key, company){
 function checkChangeStatusForHook(company, b_route, route){
     console.log("start checking", b_route.uniqueID, route.uniqueID);
     route.points.forEach(function(point, i) {
-     changeStatusHookTo1C(company, point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes)
+     changeStatusHookTo1C(company, point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes, b_route.points[i].driverNotes)
     })
 
 };
