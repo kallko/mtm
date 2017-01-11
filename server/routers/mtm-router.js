@@ -5403,7 +5403,7 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
     }, "");
 
 
-    if (!driverNotes) console.log("Error".red,point, driverNotes);
+    //if (!driverNotes) console.log("Error".red,point, driverNotes);
     driverNotes.sort(compareId);
     point.driverNotes.sort(compareId);
     driverNotes.stringId ='';
@@ -5413,13 +5413,13 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
     }, "");
 
     point.driverNotes.stringId = point.driverNotes.reduce(function(sum, current){
-        console.log("In function", sum, " ", current, " ", current.ID);
+        //console.log("In function", sum, " ", current, " ", current.ID);
         return sum + "" + current.ID;
     }, "");
 
 
     if (point.driverNotes.stringId != driverNotes.stringId || point.notes.stringId != notes.stringId){
-            console.log("NOTES".blue, point.notes.stringId, notes.stringId, "DRIVERNOTES".blue, point.driverNotes.stringId, driverNotes.stringId);
+            //console.log("NOTES".blue, point.notes.stringId, notes.stringId, "DRIVERNOTES".blue, point.driverNotes.stringId, driverNotes.stringId);
             var data = {};
             var type = "changeNotes";
             data.task = {};
