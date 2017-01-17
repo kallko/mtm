@@ -892,24 +892,15 @@ SoapManager.prototype.sendHook = function (company, type, data, callback) {
             //console.log("Etap 5");
 
             data.type = type;
-            //data.task={};
-            //data.task.id = 12345;
-            //data.task.date = "11.11.2017";
-            //data.task.status = 5;
-            //data.task.notes = [];
-            //data.task.driverNotes = [];
-            var Ndata = JSON.stringify(data);
 
-            client.outsideHook({data: Ndata,  user: "", company: company, branch: ""}, function (err, result) {
-                console.log("Hook result 6", result);
+            var nData = JSON.stringify(data);
+
+            client.outsideHook({data: nData,  user: "", company: company, branch: ""}, function (err, result) {
+                console.log("Hook result", result);
                 if (!err) {
-
                     console.log('Send Hook Success');
-
-
                 } else {
                     console.log('Send Hook Error',  err);
-
                 }
             });
         });

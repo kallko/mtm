@@ -914,9 +914,9 @@ router.route('/dailydata')
 
 
             // Получение настроек для конкретной компании
-            log.info("Запрашиваю настройки 419 для ", req.session.login);
+            log.info("Запрашиваю настройки 917 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
-                //log.info("receiveConfig", data);
+                log.info("receiveConfig", data);
                 settings = JSON.parse(data.return);
                 //cashedDataArr[company].settings = settings;
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
@@ -3382,6 +3382,7 @@ function dataForPredicate(company, callback){
 
             if (carPos[0].LAT == undefined) {
                 log.info ("НАЙДЕНА ОШИБОЧКА!!!!!!&*&*&*^&^%&*%&", route.real_track);
+                route.real_track.length = 0;
             }
             var obj = {id: indx, points: carPos.concat(route.points)};
             result.push(obj);
@@ -5428,6 +5429,8 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
             data.task.status = point.status;
             data.task.notes = point.notes;
             data.task.driverNotes = point.driverNotes;
+            delete data.notes.stringId
+            delete data.driverNotes.stringId
             sendHookTo1C(company, type, data);
 
     }
@@ -5445,8 +5448,7 @@ function sendHookTo1C (company, type, data){
     console.log("Try to send  hook");
     var soapManager = new soap();
     console.log("Send to soap", company, type, data);
-    soapManager.sendHook(company, type, data, function(){
-        console.log("Success 5387")})
+    soapManager.sendHook(company, type, data)
 }
 
 function calculateStatistic (company){
@@ -5572,9 +5574,9 @@ function serchInCache(input, company) {
     //log.info("Начинаем поиск", routesForSerch.length);
 
 
-    for (var i=0; i< routesForSerch.length; i++){
+    for (var i=0; i < routesForSerch.length; i++){
         //log.info("проверяем Водителя", routesForSerch[i].driver.NAME, " ", input)
-        if(routesForSerch[i].driver.NAME.indexOf(input)>=0){
+        if(routesForSerch[i] && routesForSerch[i].driver.NAME.indexOf(input)>=0){
             //log.info("Найден водитель", routesForSerch[i].driver.NAME);
             hits.push({driverName:routesForSerch[i].driver.NAME, uniqueID: routesForSerch[i].uniqueID, transportName: routesForSerch[i].transport.NAME });
             continue;
@@ -6377,7 +6379,7 @@ function calculateProblemIndex(company) {
                     if (point.status > 3) break;
                 }
 
-                log.info("Найден незапланированный стоп", point.driver.NAME, point.NUMBER);
+                console.log("Найден незапланированный стоп".yellow, point.driver.NAME, "point", point.NUMBER, "duration", stop.time);
                 point.problem_index = 30;
                 //point.last_change = 5638;
                 route.max_problem = point.problem_index;
