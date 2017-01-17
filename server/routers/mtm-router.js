@@ -5448,7 +5448,7 @@ function sendHookTo1C (company, type, data){
     console.log("Try to send  hook");
     var soapManager = new soap();
     console.log("Send to soap", company, type, data);
-    //soapManager.sendHook(company, type, data)
+    soapManager.sendHook(company, type, data)
 }
 
 function calculateStatistic (company){
