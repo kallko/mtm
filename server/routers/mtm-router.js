@@ -5429,8 +5429,8 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
             data.task.status = point.status;
             data.task.notes = point.notes;
             data.task.driverNotes = point.driverNotes;
-            delete data.notes.stringId
-            delete data.driverNotes.stringId
+            if (data.notes && data.notes.stringId)delete data.notes.stringId;
+            if (data.driverNotes && data.driverNotes.stringId)delete data.driverNotes.stringId;
             sendHookTo1C(company, type, data);
 
     }
@@ -5448,7 +5448,7 @@ function sendHookTo1C (company, type, data){
     console.log("Try to send  hook");
     var soapManager = new soap();
     console.log("Send to soap", company, type, data);
-    soapManager.sendHook(company, type, data)
+    //soapManager.sendHook(company, type, data)
 }
 
 function calculateStatistic (company){
