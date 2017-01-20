@@ -4774,7 +4774,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     var data = collectDataForDayClosing(curDay);
                     scope.$emit('showNotification', {text: 'Закрываем маршрут', duration: 3000});
                     //alert("Закрываем маршрут");
-                    console.log("предположительная дата", (""+dateOfRoute.getDate()+"."+ dateOfRoute.getMonth() + "." + dateOfRoute.getFullYear()))
+                    console.log("предположительная дата", (""+dateOfRoute.getDate()+"."+ dateOfRoute.getMonth() + "." + dateOfRoute.getFullYear()));
                     console.log("Data", data);
                     pushDataToServer(data);
                     result.closed=true;

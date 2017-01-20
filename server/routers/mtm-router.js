@@ -875,7 +875,7 @@ router.route('/dailydata')
             log.info("Запрашиваю настройки для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
                 log.info("receiveConfig", data);
-
+                if (data.return == "error:user not correct") return;
                 if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
                 log.info("Settings Recieved",  settings, "mtm 385");
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
@@ -917,6 +917,7 @@ router.route('/dailydata')
             log.info("Запрашиваю настройки 917 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
                 log.info("receiveConfig", data);
+                if (data.return == "error:user not correct") return;
                 settings = JSON.parse(data.return);
                 //cashedDataArr[company].settings = settings;
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
@@ -2047,7 +2048,7 @@ router.route('/savetonode/')
             log.info("Приступаем к сохранению роута", i, id, currentCompany);
             while(cashedDataArr[currentCompany].blocked_routes != undefined && i < cashedDataArr[currentCompany].blocked_routes.length){
                     if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
-                        checkChangeStatusForHook(currentCompany, cashedDataArr[currentCompany].blocked_routes[i], req.body.route)
+                        checkChangeStatusForHook(currentCompany, cashedDataArr[currentCompany].blocked_routes[i], req.body.route);
                         cashedDataArr[currentCompany].blocked_routes[i] = req.body.route;
                         log.info("Overwright Route");
                         cashedDataArr[currentCompany].routes.push(cashedDataArr[currentCompany].blocked_routes[i]);
@@ -5385,6 +5386,12 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
         data.task.notes = point.notes;
         data.task.driverNotes = point.driverNotes;
 
+        if (point.status == 1) {
+            data.task.timeDelta = parseInt((point.real_arrival_time - point.working_window[point.working_window.length-1].finish)/60)
+        }
+        if (point.status == 2) {
+            data.task.timeDelta = parseInt((point.working_window[0].start - point.real_arrival_time)/60)
+        }
 
         sendHookTo1C(company, 'changeStatus', data);
         return;
@@ -5429,8 +5436,8 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
             data.task.status = point.status;
             data.task.notes = point.notes;
             data.task.driverNotes = point.driverNotes;
-            if (data.notes && data.notes.stringId)delete data.notes.stringId;
-            if (data.driverNotes && data.driverNotes.stringId)delete data.driverNotes.stringId;
+            if (data.task.notes && data.task.notes.stringId) delete data.task.notes.stringId;
+            if (data.task.driverNotes && data.task.driverNotes.stringId) delete data.task.driverNotes.stringId;
             sendHookTo1C(company, type, data);
 
     }
@@ -5447,7 +5454,7 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
 function sendHookTo1C (company, type, data){
     console.log("Try to send  hook");
     var soapManager = new soap();
-    console.log("Send to soap", company, type, data);
+    console.log("Send to soap".yellow, company, type, data);
     soapManager.sendHook(company, type, data)
 }
 
