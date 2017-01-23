@@ -600,13 +600,13 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     delete tmpPoint.haveStop;
                     delete tmpPoint.stopState;
                     delete tmpPoint.stop_arrival_time;
-                    delete tmpPoint.real_arrival_time;
+                    //delete tmpPoint.real_arrival_time;
                     delete tmpPoint.windowType;
 
                     delete tmpPoint.mobile_push;
                     delete tmpPoint.mobile_arrival_time;
                     delete tmpPoint.havePush;
-                    delete tmpPoint.real_arrival_time;
+                    //delete tmpPoint.real_arrival_time;
                     delete tmpPoint.confirmed;
 
                     delete tmpPoint.overdue_time;

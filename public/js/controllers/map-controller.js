@@ -1648,7 +1648,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
         //
         function changeFieldsAfterNewConnection(waypoint, marker, stop) {
 
-            waypoint.real_arrival_time=stop.source.t1;
+            waypoint.real_arrival_time = stop.source.t1;
             // Определение и изменение статуса заявки.
             findStatusAndWindowForPoint(waypoint);
 

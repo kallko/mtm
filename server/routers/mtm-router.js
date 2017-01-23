@@ -5239,6 +5239,7 @@ function findStatusesAndWindows(company) {
                        &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < tmpPoint.working_window[0].start)) {
                     //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
+                    tmpPoint.variantus = 5242;
                 } else {
                     //log.info("Присваиваем статус 0");
                     tmpPoint.status = 0;
@@ -5282,15 +5283,28 @@ function findStatusesAndWindows(company) {
 
                 }
 
-                if ((tmpPoint.real_arrival_time < start
-                    && tmpPoint.TASK_TIME == "0" )||
-                    (  tmpPoint.TASK_TIME
-                    &&  tmpPoint.TASK_TIME != "0"
-                    &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < start))
-                {
-                    //log.info("Присваиваем статус 2");
-                    tmpPoint.status = 2;
+                if (tmpPoint.real_arrival_time < start) {
+                    if (tmpPoint.TASK_TIME == "0") {
+                        tmpPoint.status = 2;
+
+                    }
+                    if  ( tmpPoint.real_arrival_time < start
+                        && tmpPoint.TASK_TIME
+                        &&  tmpPoint.TASK_TIME != "0"
+                        && tmpPoint.stopState
+                        &&  tmpPoint.arrival_time_ts + (parseInt(tmpPoint.TASK_TIME))/2 < tmpPoint.stopState.t2) {
+                        tmpPoint.status = 0;
+                        tmpPoint.windowType = 'В заказанном';
+                    }
+
+
+                    if (tmpPoint.status == undefined) {
+                        tmpPoint.status = 2;
+                    }
+
                 }
+
+
 
                 if (tmpPoint.status == undefined) {
                     if (tmpPoint.working_window[0] == undefined) {
