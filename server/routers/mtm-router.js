@@ -5493,7 +5493,7 @@ function calculateStatistic (company){
     //Подсчет общего веса для маршрута, если он не был посчитан ранее
     for (i=0; i<cashedDataArr[company].routes.length; i++){
         if (cashedDataArr[company].routes.weight == undefined) cashedDataArr[company].routes[i].weight = 0;
-        for (var j=0; j<cashedDataArr[company].routes[i].points.length;j++){
+        for ( j=0; j<cashedDataArr[company].routes[i].points.length;j++){
             cashedDataArr[company].routes[i].weight +=parseInt(cashedDataArr[company].routes[i].points[j].WEIGHT);
 
         }

@@ -315,7 +315,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             var end = parseInt(Date.now()/1000);
             //console.log("Check for timeout", rootScope.editing.start, end, end-rootScope.editing.start);
 
-            if(rootScope.editing.start + 600 < end && end < rootScope.editing.start +1200 ) {
+            if(rootScope.editing.start + 600 < end && end < rootScope.editing.start + 1200) {
 
                 http.post('./logout')
                     .success(function (data) {
@@ -348,7 +348,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             } else {
                 rootScope.asking = false;
             }
-        })
+        });
 
 
         function strToTstamp(strDate, lockaldata) {

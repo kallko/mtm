@@ -347,7 +347,10 @@
 
                             <!--'row-red': row.locked, 'row-green' : row.lockedByMe,  -->
                             <td class="number-col">{{row.NUMBER}}</td>
-                            <td class="number-col">{{row.fact_number}}</td>
+
+                            <!-- todo Внизу прописано скрытие факт номера для ИДС необходимо сделать универсальным.-->
+
+                            <td class="number-col" >{{((row.status <= 3 || row.status == 6 || row.status == 8) || settings.user.indexOff("ids") == -1 ) ? row.fact_number : ""}}</td>
                             <td ng-show="settings.user == 'ids.kalko'" ng-class="[row.class, row.class2]" class="bulled-th" ><span>&#9899;</span></td>
                             <td class="status-col" ng-class="row.class" >
                                      <span>
