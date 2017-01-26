@@ -3515,21 +3515,23 @@ try{
 
         if (points[i].status == 4 || points[i].status == 5 || points[i].status == 7) {
 
+            var end = point.working_window[point.working_window.length - 1].finish
+
 
             points[i].arrival_left_prediction = time_table[i] / 10 ? time_table[i] / 10 : 15 * 60;//Если у нас нет корректного предсказания времени (нет датчика ДЖПС) точка попадает в опаздывает за 15 минут до конца КОК
             points[i].arrival_prediction = now + points[i].arrival_left_prediction;
-            if (points[i].status == 7 && points[i].arrival_prediction > points[i].arrival_time_ts) {
+            if (points[i].status == 7 && points[i].arrival_prediction > end) {
                 points[i].status = 5;
                 //log.info("Присваиваем статус 5");
-                //points[i].variantus = 3006;
-                points[i].overdue_time = points[i].arrival_prediction - points[i].arrival_time_ts;
+                //points[i].status_model = 3006;
+                points[i].overdue_time = points[i].arrival_prediction - end;
                 //log.info("TIME_OUT for point", points[i]);
             }
-            if ((points[i].status == 7 || points[i].status == 5) && now > points[i].arrival_time_ts) {
+            if ((points[i].status == 7 || points[i].status == 5) && now > end) {
                 points[i].status = 4;
                 //log.info("Присваиваем статус 4");
-                //points[i].variantus = 2836;
-                points[i].overdue_time = now - points[i].arrival_time_ts + points[i].arrival_left_prediction;
+                points[i].status_model = 2836;
+                points[i].overdue_time = now - end + points[i].arrival_left_prediction;
 
                 //log.info("DELAY for point", points[i]);
             }
@@ -3610,7 +3612,7 @@ try {
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
                         //log.info("Присваиваем статус 4");
-                        //route.points[j].variantus = 2910;
+                        route.points[j].status_model = 2910;
                         route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     }
                         continue;
@@ -3620,7 +3622,7 @@ try {
 
                     route.points[i].status = 4;
                     //log.info("Присваиваем статус 4");
-                    //route.points[i].variantus = 2917;
+                    route.points[i].status_model = 2917;
                     route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     continue;
                 }
@@ -3628,7 +3630,7 @@ try {
                 if(now > route.points[i].arrival_time_ts) {
 
                     route.points[i].status = 5;
-                    //route.points[i].variantus = 3110;
+                    //route.points[i].status_model = 3110;
 
                     //route.points[i].commentus = "1 ";
                     //route.points[i].commentus+= route.real_track.length + " 2";
@@ -3671,7 +3673,7 @@ try {
                         //log.info("NOW=", now, "working_window.finish=", _route.points[j].working_window.finish, " controlled_window", _route.points[j].controlled_window.finish);
                         route.points[j].status = 4;
                         //log.info("Присваиваем статус 4");
-                        //route.points[j].variantus = 2960;
+                        route.points[j].status_model = 2960;
                         //log.info("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
                         route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
                     }
@@ -3721,11 +3723,11 @@ try {
                     if (route.points[j].overdue_time > 0) {
                         if (minus < now) {
                             route.points[j].status = 4;
-                            //route.points[j].variantus = 3205;
+                            route.points[j].status_model = 3205;
 
                         } else {
                             route.points[j].status = 5;
-                            //route.points[j].variantus = 3199;
+                            route.points[j].status_model = 3199;
                         }
                     }
 
@@ -5239,7 +5241,7 @@ function findStatusesAndWindows(company) {
                        &&  tmpPoint.real_arrival_time + (parseInt(tmpPoint.TASK_TIME))/2 < tmpPoint.working_window[0].start)) {
                     //log.info("Присваиваем статус 2");
                     tmpPoint.status = 2;
-                    tmpPoint.variantus = 5242;
+                    tmpPoint.status_model = 5242;
                 } else {
                     //log.info("Присваиваем статус 0");
                     tmpPoint.status = 0;
@@ -6159,7 +6161,7 @@ function predicateTime(company) {
     log.info("Start predicateTime");
     for (var i=0; i< cashedDataArr[company].routes.length; i++){
         var route = cashedDataArr[company].routes[i];
-        if (route.DISTANCE == 0) {
+        if (route.DISTANCE == 0 && parseInt(route.VALUE) == 0) {
             uncalcPredication(route, company);
         } else {
             calcPredication(route, company);
