@@ -56,6 +56,8 @@
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
+<!--<script src="./bower_components/socket.io/lib/socket.js"></script>-->
+
 <!--<script src="./bower_components/async/async.js"></script>-->
 
 
@@ -85,6 +87,7 @@
 <script src="./js/controllers/statistic-controller.js"></script>
 <script src="./js/controllers/auth-controller.js"></script>
 <script src="./js/controllers/geo-editing-controller.js"></script>
+<script src="./js/controllers/dispatcher-table-controller.js"></script>
 
 <script src="./js/filters/mtm-unique.js"></script>
 
@@ -1083,7 +1086,7 @@
              ng-click="showMeDriversCals()"
                 >
 
-        <img ng-src='http://www.iconsdb.com/icons/preview/red/email-5-xxl.png'
+        <img ng-src='http://fit-live.ru/images/envelope-2.svg?crc=4089171885'
              width="60"
              height="50"
              alt="Есть уведомления"
@@ -1514,6 +1517,29 @@
 
         </div>
 
+    </div>
+</template>
+
+<template  id="dispatcher-table">
+    <div ng-controller="DispatcherTableController">
+        <div>
+            {{supervisor}}
+            <div>
+                Всего маршрутов 55; Закрыто 11; С проблемами 35; Ср.проблемность 234;
+            </div>
+            <br>
+
+                <div ng-repeat="d in dispatchers" style="margin: 3px; border: dotted">
+                {{d.name}} {{d.sessions[0].start * 1000 | date : 'HH:mm'}}
+                {{d.sessions[d.sessions.length-1].finish * 1000 | date : 'HH:mm'}}
+                <button> Сессии  ({{d.sessions.length}})</button>
+                {{endMethod}}
+                {{d.status}}
+                    <div ng-repeat = "r in d.routes">
+                        {{r.name}} {{parseInt((nowTime - r.start)/60)}} мин. Проблемность:{{r.problem}}
+                    </div>
+            </div>
+        </div>
     </div>
 </template>
 

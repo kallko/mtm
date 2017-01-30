@@ -4963,15 +4963,18 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     point.status=0;
                     if (point.real_arrival_time > end) {
                         point.status = 1;
-                        return;
+
                     }
                     if (point.real_arrival_time < start ) {
                         point.status = 2;
-                        return;
-                    }
 
+                    }
+                    point.working_window =[];
+                    point.working_window.push({start:start, finish:end});
+
+                    return;
                 } else {
-                    point.status=undefined;
+                    point.status = undefined;
                     console.log(start, end , " Границы проверяемого окна");
                     if (point.real_arrival_time > end) {
                         point.status = 1;

@@ -131,7 +131,7 @@ var myLayout = new GoldenLayout({
                             },
                             {
                                 type: 'component',
-                                title: 'Редактирование маршрута',
+                                title: 'Пересчет',
                                 componentName: 'template',
                                 componentState: {templateId: 'edit-route'}
                             },
@@ -143,10 +143,17 @@ var myLayout = new GoldenLayout({
                             },
                             {
                                 type: 'component',
-                                title: 'GEO кодирование',
+                                title: 'GEO поиск',
                                 componentName: 'template',
                                 componentState: {templateId: 'geo-editor'}
                             }
+                            //,
+                            //{
+                            //    type: 'component',
+                            //    title: 'Диспетчеры',
+                            //    componentName: 'template',
+                            //    componentState: {templateId: 'dispatcher-table'}
+                            //}
 
                         ]
                     }
