@@ -147,13 +147,13 @@ var myLayout = new GoldenLayout({
                                 componentName: 'template',
                                 componentState: {templateId: 'geo-editor'}
                             }
-                            //,
-                            //{
-                            //    type: 'component',
-                            //    title: 'Диспетчеры',
-                            //    componentName: 'template',
-                            //    componentState: {templateId: 'dispatcher-table'}
-                            //}
+                            ,
+                            {
+                                type: 'component',
+                                title: 'Диспетчеры',
+                                componentName: 'template',
+                                componentState: {templateId: 'dispatcher-table'}
+                            }
 
                         ]
                     }

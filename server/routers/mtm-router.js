@@ -7,15 +7,17 @@ var express = require('express'),
     tracks = require('../tracks'),
     modifyRoutes = require('../modifyRoutes'),
     modifyPoints = require('../modifyPoints'),
+    sqlUniversal = new (require('../sqlUniversal'))(),
     log = new (require('../logging'))('./logs'),
-    //colors = require('colors'),
     fs = require('fs'),
     math_server = new (require('../math-server'))(),
-    db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
-    locker = new (require('../locker'))(),
-    readline = require('readline'),
-    //CronJob = require('cron').CronJob,
-    //async = require('async'),
+//    db = new (require('../db/DBManager'))('postgres://pg_suser:zxczxc90@localhost/plannary'),
+    locker = new (require('../locker'))();
+
+
+
+
+
     develop = true;
     if (develop) {
         var
@@ -28,7 +30,6 @@ var express = require('express'),
 
 
 var cashedDataArr = {},  // глобальный кеш
-    updateCacshe = {},   // Тестовый кэш
     pointsIDS =[],          // todo переменная одноразовая для анализа геокодирования точек
     bigData = [],
     aggregatorError = "invalid parameter 'gid'. ",
@@ -49,7 +50,8 @@ var cashedDataArr = {},  // глобальный кеш
     startServer = false, // Изначальное состояние периодичности расчетов. Не менять.
     onlineClients = [], // список клиентов онлайн на данный момент
     restart = false, // флаг сообщение о том что на сервере будут проходить профилактические работы
-    reload = false; // флаг, активирующий перезагрузку сохраненных данных
+    reload = false, // флаг, активирующий перезагрузку сохраненных данных
+    connectDB = false; // факт соединения с Базой Данных
 
 //
 //    window_types = [                              // фильтры по типам попадания в окна
@@ -59,37 +61,6 @@ var cashedDataArr = {},  // глобальный кеш
 //];
 
 
-//new CronJob('01 00 00 * * *', function() {
-//    for(var company in cashedDataArr){
-//        if (!oldRoutesCache[company]) {
-//            oldRoutesCache[company] = {};
-//        }
-//        if(company in closeRoutesUniqueID) { // есть ли за сегодня закрытые роуты, если да, то по UniqueID удаляем их из сегодняшних роутов
-//            for (var i = 0; closeRoutesUniqueID[company].length > i; i++) {
-//                for (var j = 0; cashedDataArr[company].routes.length > j; j++) {
-//                    if (cashedDataArr[company].routes[j]['uniqueID'] == closeRoutesUniqueID[company][i]) { // удаляем из кеша все закрытые маршруты
-//                        cashedDataArr[company].routes.splice(j, 1);
-//                        j--;
-//                        break;
-//                    }
-//
-//                }
-//            }
-//        }
-//        if(cashedDataArr[company].routes.length > 0){ // если еще остались роуты то добавляем их к старым в oldRoutesCache
-//            var currentDate = cashedDataArr[company].routes[0].START_TIME.split(' ')[0];
-//            oldRoutesCache[company][currentDate] = {};
-//            oldRoutesCache[company][currentDate] = JSON.parse(JSON.stringify(cashedDataArr[company]));
-//        }
-//    }
-//
-//    log.info('END CRON');
-//
-//    needNewReqto1C = {};
-//    closeRoutesUniqueID = {};
-//
-//
-//}, null, true);
 
 
     var oldRoutes;
@@ -108,6 +79,8 @@ router.route('/')
             log.error( "Ошибка "+ e + e.stack);
         }
     });
+
+
 
 
 router.route('/currentsrvertime')
@@ -797,7 +770,10 @@ router.route('/geosearch')
 router.route('/dailydata')
     .get(function (req, res) {
         try {
-        log.info("Start Loading DailyData");
+            log.info("Start Loading DailyData");
+        if (!connectDB) firstDBConnect();
+
+
         startTime = parseInt(Date.now()/1000);
         req.session.lastLockCheck = 0;
         // проверка на включеннный демо режим
@@ -833,6 +809,7 @@ router.route('/dailydata')
         //today12am = now - (now % day);
         var key = ""+req.session.login;
         var currentCompany = companyLogins[key];
+            console.log("CurrentCompany".red, currentCompany);
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
         //log.info("!!!!!!!req.session.login!!!!!", req.session.login);
@@ -878,6 +855,7 @@ router.route('/dailydata')
                 if (data.return == "error:user not correct") return;
                 if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
                 log.info("Settings Recieved",  settings, "mtm 385");
+                dispatcherLogin(req.session.login, company);
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
                 cashedDataArr[currentCompany].user = req.session.login;
 
@@ -916,9 +894,11 @@ router.route('/dailydata')
             // Получение настроек для конкретной компании
             log.info("Запрашиваю настройки 917 для ", req.session.login);
             soapManager.getNewConfig(req.session.login, function (company, data) {
-                log.info("receiveConfig", data);
+                log.info("receiveConfig 891", data);
+                log.info("!!!", company, "-", currentCompany);
                 if (data.return == "error:user not correct") return;
                 settings = JSON.parse(data.return);
+                dispatcherLogin(req.session.login, company);
                 //cashedDataArr[company].settings = settings;
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
@@ -3515,7 +3495,7 @@ try{
 
         if (points[i].status == 4 || points[i].status == 5 || points[i].status == 7) {
 
-            var end = point.working_window[point.working_window.length - 1].finish
+            var end = points[i].working_window[points[i].working_window.length - 1].finish;
 
 
             points[i].arrival_left_prediction = time_table[i] / 10 ? time_table[i] / 10 : 15 * 60;//Если у нас нет корректного предсказания времени (нет датчика ДЖПС) точка попадает в опаздывает за 15 минут до конца КОК
@@ -3612,7 +3592,7 @@ try {
                     if (route.points[i].arrival_time_ts != undefined && now > route.points[i].arrival_time_ts) {
                         route.points[i].status = 4;
                         //log.info("Присваиваем статус 4");
-                        route.points[j].status_model = 2910;
+                        route.points[i].status_model = 2910;
                         route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
                     }
                         continue;
@@ -5471,7 +5451,7 @@ function sendHookTo1C (company, type, data){
     console.log("Try to send  hook");
     var soapManager = new soap();
     console.log("Send to soap".yellow, company, type, data);
-    soapManager.sendHook(company, type, data)
+    //soapManager.sendHook(company, type, data)
 }
 
 function calculateStatistic (company){
@@ -7511,10 +7491,9 @@ function waitingCallForOperator(key, company){
         cashedDataArr[company].waitingCalls.splice(0,1);
     }
 
-    //result = {name : "Andrey", time: 1482404400 };
-    //console.log("RESULT".red, result);
+
     return result;
-};
+}
 
 
 function checkChangeStatusForHook(company, b_route, route){
@@ -7523,8 +7502,14 @@ function checkChangeStatusForHook(company, b_route, route){
      changeStatusHookTo1C(company, point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes, b_route.points[i].driverNotes)
     })
 
-};
+}
 
+
+function dispatcherLogin(login, company){
+    console.log("Start dispatcher function".yellow, login, company);
+
+
+}
 
 function loadCoords(company) {
     try {
@@ -7571,6 +7556,17 @@ function loadCoords(company) {
 }
 
 
+function firstDBConnect(){
+    console.log ("Begin");
+    //sqlUniversal.firstConnect();
+    connectDB = true;
+
+    //sqlUniversal.simpleLoad (292942, "actions", "if", "id", "==", 4); +++
+    //sqlUniversal.add (292942,"dispatchers", "data", "5", "Горбатенко Михаил Петрович", "292942", "false", "false", "false", "ids.newTest"); +++
+    //sqlUniversal.save(292942,"dispatchers", "id", "==", "2", "set", "is_operator", "=", "false", ",", "login", "=", "CW.kalko"); +++
+    sqlUniversal.lastRowLoad(292942, "sessions", "if", "shift_id", "==", 16423)
+}
+
 function startCalculateCompany(company) {
     try {
     startTime = parseInt(Date.now()/1000);
@@ -7594,12 +7590,16 @@ function startCalculateCompany(company) {
     cashedDataArr[company].recalc_finishing = true;
     safeReload();
     autosaveData();
-    if (middleTime) log.info("От запрсов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
+    if (middleTime) log.info("От запросов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
     }
 }
 
+
+router.prototype.recieveSocketData = function (data){
+    console.log(data);
+}
 
 
 module.exports = router;

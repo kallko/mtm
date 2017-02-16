@@ -229,9 +229,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
      date = date ? date : Date.now();
 
-    //fixme
-    //console.log ("Changed date", date);
-    //date = 1473087600000;
+
 
     console.log('Date >>>', new Date(date));
 
@@ -405,7 +403,10 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             data[nIndx].sended = false;
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
+
             console.log("Запросы СОАП 398");
+            //fixme
+            //return;
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback, res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.SHIFT_NAME);
             me.getAdditionalData(client, data, itIsToday, nIndx, callback, date);
 
@@ -478,6 +479,8 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
                 //console.log("NOTES", notes);
 
+                //fixme чтобы не грузить сервер
+                //return;
 
                 if (waypoints == undefined) return;
                 //console.log('drivers', drivers.length);

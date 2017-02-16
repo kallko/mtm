@@ -3,81 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-
-    <link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css"/>
-    <link type="text/css" rel="stylesheet" href="./css/goldenlayout-light-theme.css"/>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css"/>
-    <link rel="stylesheet" href="./css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="./css/application.css"/>
-    <link rel="stylesheet" href="./css/columns.css"/>
-    <link rel="stylesheet" href="./css/bootstrap.css"/>
-    <!--<link rel="stylesheet" href="./css/learning.css"/>-->
-
-
-    <!-- библиотеки -->
-    <script src="./js/vendor/jquery-2.1.4.min.js"></script>
-    <script src="./js/vendor/jquery-ui.min.js"></script>
-    <script src="./js/vendor/angular.js"></script>
-    <script src="./js/vendor/bootstrap.min.js"></script>
-    <script src="./js/vendor/goldenlayout.js"></script>
-    <script src="./js/vendor/bootstrap-contextmenu.js"></script>
-    <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
-    <script src="//cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
-    <script src="./js/vendor/colResizable-1.5.min.js"></script>
-    <script src="./js/vendor/divicon.js"></script>
-    <script src="./js/vendor/oms.min.js"></script>
-    <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-    <!--<script src="./bower_components/async/async.js"></script>-->
-
-
-
-    <!--Layout-->
-    <script src="./js/vendor/jquery.layout.min.js"></script> <!--include layout-->
-    <script src="./js/vendor/jquery.layout_and_plugins.min.js"></script>
-
-
-    <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-
-    <!-- скрипты Ангуляра  -->
-    <script src="./js/app.js"></script>
-
-    <script src="./js/controllers/point-index-controller.js"></script>
-    <script src="./js/controllers/map-controller.js"></script>
-    <script src="./js/controllers/notification-controller.js"></script>
-    <script src="./js/controllers/setting-controller.js"></script>
-    <script src="./js/controllers/point-view-controller.js"></script>
-    <script src="./js/controllers/edit-route-controller.js"></script>
-    <script src="./js/controllers/edit-condition-controller.js"></script>
-    <script src="./js/controllers/problem-route-controller.js"></script>
-    <script src="./js/controllers/close-day-controller.js"></script>
-    <script src="./js/controllers/point-popup-edit-controller.js"></script>
-    <script src="./js/controllers/statistic-controller.js"></script>
-    <script src="./js/controllers/auth-controller.js"></script>
-
-    <script src="./js/filters/mtm-unique.js"></script>
-
-    <script src="./js/directives/finish-render.js"></script>
-    <script src="./js/directives/right-click.js"></script>
-    <script src="./js/directives/enter-event.js"></script>
-    <script src="./js/directives/tr.js"></script>
-
     <script src="./js/services/settings.js"></script>
-    <script src="./js/services/statuses.js"></script>
-    <script src="./js/services/time-converter.js"></script>
 
 </head>
 <body ng-controller="AuthController">
-
-
         <div>
            {{message}}
         </div>
-
-
         <div>
            userName <input type="text" ng-model="user"> password <input type="password" ng-model="password"> <button ng-click="click()">Push Me!</button>
         </div>
-
 </body>
 </html>

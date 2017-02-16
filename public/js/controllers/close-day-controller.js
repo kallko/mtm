@@ -211,6 +211,8 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
     scope.statuses = function () {
         //console.log("begin");
+
+
         http.get('./getServerStatus' )
             .success(function (data){
                 console.log("Success 2", data.result.online);

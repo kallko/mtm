@@ -3,10 +3,15 @@
  */
 module.exports = ModifyPoints;
 
-function ModifyPoints (){
+var global = 1;
 
-}
+function ModifyPoints (){
+        var local = 10;
+        var global = 100;
+    }
 
 ModifyPoints.prototype.test = function(points) {
-    console.log("TEST");
+    console.log("Global", global);
+    global ++;
+    //local ++;
 };

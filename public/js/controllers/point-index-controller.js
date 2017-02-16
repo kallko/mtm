@@ -44,6 +44,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         setCheckLocksInterval();
        // loadDailyData(false);
 
+
+
+
+
         //TODO
         //console.log("Lets START");
         var url = './dailydata';
