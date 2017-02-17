@@ -1011,7 +1011,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
 
 
-    var date =  Date.now();
+    date = Date.now();
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
 

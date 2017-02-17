@@ -190,8 +190,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             if (((rootScope.data == undefined || rootScope.data.routes == undefined || rootScope.data.routes.length == 0) && (need>0 || exist == 0)) || (need > 0 && need < rootScope.settings.problems_to_operator )) {
                 //console.log("Give me", need, "the problem please! ");
 
-
-                http.get('./askforproblems/:'+need)
+                console.log("need", need);
+                http.get('./askforproblems/:' + need)
                     .success(function (data) {
 
                         if (data == undefined) {

@@ -7,7 +7,7 @@ function ModifyRoutes (){
 
 }
 
-ModifyRoutes.prototype.ReplaceStopObjectByStopLink = function (routes) {
+ModifyRoutes.prototype.ReplaceStopObjectByStopLink = function (routes, cashedDataArr) {
     if (!routes) return;
     console.log("start changeStopObjectByStopLink");
 
