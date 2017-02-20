@@ -589,7 +589,7 @@ router.route('/updatepushes')
 
         for (var i = 0; i < data.length; i++) {
 
-            result = addPushesToUpdateTrack(currentCompany, result);
+            result = addPushesToUpdateTrack(currentCompany, result, cashedDataArr);
 
         }
         _data.setData(cashedDataArr);
@@ -844,7 +844,7 @@ router.route('/dailydata')
             , req.query.force == null
             , req.query.showDate == null
             , req.session.login != null
-            , cashedDataArr
+            //, cashedDataArr
             //, cashedDataArr[currentCompany]
             , currentCompany
             , (currentCompany in needNewReqto1C)
@@ -2555,6 +2555,7 @@ function cutFIO(fioStr) {
 
 // Перевод строковой даты в таймстамп
 function strToTstamp(strDate, lockaldata) {
+    if(strDate == undefined || strDate.length == 0) return;
     try {
 
     if (lockaldata != undefined) {
@@ -2601,6 +2602,7 @@ function strToTstamp(strDate, lockaldata) {
 
     return new Date(_date[2], _date[1] - 1, _date[0], _time[0], _time[1], _time[2]).getTime() / 1000;
     } catch (e) {
+        log.error("input", strDate, lockaldata );
         log.error( "Ошибка "+ e + e.stack);
     }
 }
@@ -2945,7 +2947,7 @@ function startPeriodicCalculating() {
 
     // Удаляем из списка компаний те, получение данных и первичный рассчет по которым еще не закончен
 
-    for(var i=0; i<companysToCalc.length; i++){
+    for(var i = 0; i < companysToCalc.length; i++){
         //log.info("Компания", companysToCalc[i], cashedDataArr[companysToCalc[i]].recalc_finishing);
         if (cashedDataArr[companysToCalc[i]].currentDay && !cashedDataArr[companysToCalc[i]].recalc_finishing){
             log.info("Первичный расчет еще не закончен");
@@ -2982,9 +2984,9 @@ function startPeriodicCalculating() {
     }
 
 
-    for(i=0; i<companysToCalc.length; i++){
+    for(i = 0; i < companysToCalc.length; i++){
             //log.info("Компания на пересчет", companysToCalc[i]);
-            checkOnline(companysToCalc[i], onlineClients);
+            checkOnline(companysToCalc[i], onlineClients, cashedDataArr);
 
     }
 
@@ -3323,6 +3325,9 @@ function startPeriodicCalculating() {
 
             }
         }
+
+        _data.setData(cashedDataArr);
+        _clients.setData(onlineClients);
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
     }
@@ -3909,22 +3914,24 @@ function findBestStop(point, stop){
 
 
 
-function  checkOnline(company, onlineClients) {
+function  checkOnline(company, onlineClients, cashedDataArr) {
     try {
-    for (var i=0; i< onlineClients.length; i++){
+    var blockedRoutes = _routes.getData();
+    for (var i = 0; i < onlineClients.length; i++){
                 if(onlineClients[i].time + 60*3 < parseInt(Date.now()/1000)){
                     log.info(onlineClients[i].login, "Давно не был онлайн, удаляем");
-                    unblockLogin(onlineClients[i].login);
+                    unblockLogin(onlineClients[i].login, blockedRoutes);
                     onlineClients.splice(i,1);
                     i--;
         }
 
     }
-    var result=false;
-    for (i=0; i<onlineClients.length; i++){
+    var result = false;
+    for (i = 0; i < onlineClients.length; i++){
         //log.info("Стоит ли считать компанию ", company, "Если online:", onlineClients[i]);
         if(onlineClients[i].company == company){
             result=true;
+            _clients.setData(onlineClients)
             return result;
         }
 
@@ -3946,6 +3953,9 @@ function  checkOnline(company, onlineClients) {
             i--;
         }
     }
+
+    _clients.setData(onlineClients);
+    -_routes.setData(blockedRoutes);
 
     return result;
     } catch (e) {
@@ -5740,7 +5750,7 @@ function unblockInData(data){
 }
 
 
-function unblockLogin(login) {
+function unblockLogin(login, blockedRoutes) {
     try {
     //log.info("Start unbloking");
     for (var i = 0; i < blockedRoutes.length; i++) {
