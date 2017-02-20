@@ -3594,7 +3594,7 @@ try {
                     route.points[i].status = 4;
                     //log.info("Присваиваем статус 4");
                     route.points[i].status_model = 2917;
-                    route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
+                    route.points[i].overdue_time = now - route.points[i].working_window[route.points[i].working_window.length-1].finish;
                     continue;
                 }
 
@@ -3608,7 +3608,7 @@ try {
                     //route.points[i].commentus+= " " + (cashedDataArr[company].dataForPredicate != undefined) + " 3";
                     ////route.points[i].commentus+= route.real_track.length != 0 + " 4";
                     //route.points[i].commentus+= " " + (route.real_track != "invalid parameter 'gid'. ");
-                    route.points[i].overdue_time = now - route.points[i].arrival_time_ts;
+                    route.points[i].overdue_time = now - route.points[i].working_window[route.points[i].working_window.length-1].finish;
                     continue;
                 }
             }
@@ -3646,7 +3646,7 @@ try {
                         //log.info("Присваиваем статус 4");
                         route.points[j].status_model = 2960;
                         //log.info("_route.points[j].status = STATUS.TIME_OUT;", _route.points[j]);
-                        route.points[j].overdue_time = now - route.points[j].arrival_time_ts;
+                        route.points[j].overdue_time = now - route.points[i].working_window[route.points[i].working_window.length-1].finish;
                     }
                 } else if (route.points[j].status == 3) {
                     totalWorkTime = parseInt(route.points[j].TASK_TIME) - (now - route.points[j].real_arrival_time);

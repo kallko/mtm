@@ -387,8 +387,8 @@
                                 </span>
                             </td>
                             <td class="overdue-col">
-                                <span ng-if="row.overdue_time > 0 && (row.transport.gid!=undefined)">
-                                    {{(row.arrival_prediction-row.working_window[row.working_window.length-1].finish)*1000 |  date: 'HH:mm' : 'UTC' }}
+                                <span ng-if="row.overdue_time > 0 && (row.transport.gid!=undefined) && (row.status == 4 || row.status == 5)">
+                                    {{row.overdue_time*1000 || (row.arrival_prediction-row.working_window[row.working_window.length-1].finish)*1000 |  date: 'HH:mm' : 'UTC' }}
                                 </span>
                             </td>
                             <td class="stop-col">{{row.haveStop ? 'Есть' : ((row.status<3 || row.status==6 || row.status==8) ? 'Нет' : '')}}</td>
@@ -1526,7 +1526,7 @@
             <br>
 
                 <div ng-repeat="d in dispatchers" style="margin: 3px; border: dotted">
-                {{d.name}} {{d.sessions[0].start * 1000 | date : 'HH:mm'}}
+                {{d.name}} {{d.s[0].start * 1000 | date : 'HH:mm'}}
                 {{d.sessions[d.sessions.length-1].finish * 1000 | date : 'HH:mm'}}
                 <button> Сессии  ({{d.sessions.length}})</button>
                 {{endMethod}}
