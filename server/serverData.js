@@ -14,11 +14,10 @@ ServerData.prototype.getData = function (){
 };
 
 ServerData.prototype.setData = function (data){
+    if (!data) {
+        console.log("!!!!!!! Try to save ZERRO Data!!!");
+        return;
+    }
     _data = data;
 };
 
-ServerData.prototype.test = function() {
-    //console.log("Global", _data);
-    //_data ++;
-    //return _data;
-};

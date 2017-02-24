@@ -484,7 +484,7 @@ router.route('/loadData')
 router.route('/keysoldroutescache')
     .get(function(req, res){
         try {
-        var key = ""+req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var currentCompany = companyLogins[key];
         if(currentCompany in oldRoutesCache){
             log.info(Object.keys(oldRoutesCache[currentCompany]));
@@ -502,7 +502,7 @@ router.route('/keysoldroutescache')
 //router.route('/getoldroute')
 //    .post(function(req, res){
 //        try {
-//        var key = ""+req.session.login;
+//        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
 //        var currentCompany = companyLogins[key];
 //        res.status(200).json(oldRoutesCache[currentCompany][req.body.date]);
 //        } catch (e) {
@@ -548,7 +548,8 @@ router.route('/askblocked')
     .post(function(req, res){
         try {
             var blockedRoutes = _routes.getData() ;
-            var key = "" + req.session.login;
+            if (!req.session.login) return;
+            var key = req.session.login.substring(0, req.session.login.indexOf('.'));
             var currentCompany = companyLogins[key];
             var result={};
             result.data =[];
@@ -579,7 +580,7 @@ router.route('/updatepushes')
     try {
         //log.info("Получил запрос на updatepushes", req.body.data);
 
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
         var result = req.body.data;
         var data = req.body.data;
@@ -617,7 +618,7 @@ router.route('/updatetrack')
     try {
         //log.info ("Получил запрос на updatetrack", req.body.data);
 
-        var key = ""+req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var currentCompany = companyLogins[key];
         var result = [];
         var data = req.body.data;
@@ -689,7 +690,7 @@ router.route('/nodeserch')
         try {
         log.info("Получил запрос на поиск", req.body.data);
 
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
         var input = req.body.data;
         var  cashedDataArr = _data.getData();
@@ -820,7 +821,7 @@ router.route('/dailydata')
         var now = Date.now(),
             day = 86400000;
         //today12am = now - (now % day);
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
             console.log("CurrentCompany".red, currentCompany);
 
@@ -861,6 +862,9 @@ router.route('/dailydata')
             && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
             console.log("Need from Cashe 852".yellow);
+            newLogin(req.session.login, currentCompany);
+            //fixme
+            return;
             if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length);
 
             var settings={};
@@ -874,7 +878,7 @@ router.route('/dailydata')
                 if (data.return == "error:user not correct") return;
                 if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
                 log.info("Settings Recieved",  settings, "mtm 385");
-                dispatcherLogin(req.session.login, company);
+                //dispatcherLogin(req.session.login, currentCompany, cashedDataArr);
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
                 cashedDataArr[currentCompany].user = req.session.login;
 
@@ -907,6 +911,7 @@ router.route('/dailydata')
         } else {
             // запрашивает новые данные в случае выключенного кеширования или отсутствия свежего
             console.log("Dont need from Cashe 896".yellow);
+
             middleTime = parseInt(Date.now()/1000);
             soapManager = new soap(req.session.login);
             settings={};
@@ -919,7 +924,9 @@ router.route('/dailydata')
                 log.info("!!!", company, "-", currentCompany);
                 if (data.return == "error:user not correct") return;
                 settings = JSON.parse(data.return);
-                dispatcherLogin(req.session.login, company);
+                createFirstLoginTable(req.session.login, settings);
+
+                //dispatcherLogin(req.session.login, currentCompany, cashedDataArr);
                 //cashedDataArr[company].settings = settings;
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
@@ -978,8 +985,8 @@ router.route('/dailydata')
                     //log.info("ReChange SessionLogin", data.CLIENT_ID);
 
                     var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
-                    var key = "" + req.session.login;
-                    companyLogins[key]=currentCompany;
+                    var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+                    companyLogins[key] = currentCompany;
 
 
                     needNewReqto1C[currentCompany] = true;
@@ -1182,11 +1189,7 @@ router.route('/dailydata')
                         var timerId = setInterval(function() {
                             startPeriodicCalculating();
                         }, 120 * 1000);}
-                    // через 5 сек остановить повторы
-                    //setTimeout(function() {
-                    //    clearInterval(timerId);
-                    //    alert( 'стоп' );
-                    //}, 5000);
+
                     data.settings.user = req.session.login;
                     data.settings.companyName = currentCompany;
                     _data.setData(cashedDataArr);
@@ -1205,7 +1208,7 @@ router.route('/dailydata')
 router.route('/askforroute')
     .post(function(req, res) {
         try {
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
         var uniqueID = req.body.id;
         log.info("Пришел одиночный запрос на роут", uniqueID);
@@ -1389,14 +1392,14 @@ router.route('/trackparts/:start/:end')
         }
 
         var first = true;
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
         var cashedDataArr = _data.getData();
         tracksManager.getRealTrackParts(cashedDataArr[currentCompany], req.params.start, req.params.end,
             function (data) {
                 if (!first) return;
                 first = false;
-                var key = ""+req.session.login;
+                var key = req.session.login.substring(0, req.session.login.indexOf('.'));
                 var currentCompany = companyLogins[key];
                 var cached = cashedDataArr[currentCompany];
                 log.info('getRealTrackParts DONE', currentCompany);
@@ -1532,7 +1535,7 @@ router.route('/saveroute/')
 router.route('/setmobiledevice/')
     .post(function (req, res) {
         try {
-            var key = "" + req.session.login;
+            var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
             var currentCompany = companyLogins[key];
             //log.info('saveroute, len', req.body.routes.length);
             var soapManager = new soap(req.session.login);
@@ -1555,7 +1558,7 @@ router.route('/setmobiledevice/')
 
 //router.route('/existdata/')
 //    .post(function(req, res){
-//        var key = ""+req.session.login;
+//        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
 //        var currentCompany = companyLogins[key];
 //        if(currentCompany in updateCacshe && req.body.date in updateCacshe[currentCompany]){
 //            res.status(200).json(updateCacshe[currentCompany][req.body.date]);
@@ -1606,7 +1609,7 @@ router.route('/savewaypoint/')
 //router.route('/saveupdate/')
 //    .post(function (req, res) {
 //        log.info('saveupdate');
-//        var key = ""+req.session.login;
+//        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
 //        var currentCompany = companyLogins[key];
 //        res.status(200).json({status: 'ok'});
 //        if( !([currentCompany] in updateCacshe) ){
@@ -1716,7 +1719,7 @@ router.route('/savewaypoint/')
 router.route('/routerdata')
     .get(function (req, res) {
         try {
-        var key = ""+req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var currentCompany = companyLogins[key];
         var routeIndx = req.query.routeIndx,
             cashedDataArr = _data.getData(),
@@ -1790,7 +1793,7 @@ router.route('/closeday')
         }
 
         log.info("приняли данные на роутере");
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         //var currentCompany = companyLogins[key];
         log.toFLog("/logging.txt", req.body.closeDayData);
         log.info ("start working");
@@ -1889,7 +1892,7 @@ router.route('/signalDriverToDispatcher/')
         console.log("stringReq".red, stringReq);
         stringReq = JSON.parse(stringReq);
         try {
-            var key = "" + req.session.login;
+            var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
             //var currentCompany = companyLogins[key];
 
             //choseOperatorForSignal(stringReq.driverID, stringReq.company);
@@ -1991,7 +1994,7 @@ router.route('/changedriver/')
         // Перезапись в кеше маршрута отредактированного в мониторинге
         var i = 0;
         //req.body.routes[0].filterId = null;
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
         var cashedDataArr = _data.getData();
         while(i < cashedDataArr[currentCompany].blocked_routes.length){
@@ -2031,7 +2034,7 @@ router.route('/savetonode/')
             log.info("Приступаем к сохранению роута");
             var i=0;
             var id = parseInt(req.body.route.uniqueID);
-            var key = "" + req.session.login;
+            var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
             var updateRoute = new modifyRoutes();
             var cashedDataArr = _data.getData();
             updateRoute.ReplaceStopObjectByStopLink (req.body.route);
@@ -2105,7 +2108,7 @@ router.route('/savetonode/')
 //            //req.session.login = config.soap.defaultClientLogin;
 //        }
 //
-//        var key = ""+req.session.login;
+//        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
 //        var currentCompany = companyLogins[key];
 //        var cache = cashedDataArr[currentCompany];
 //        var existIten = cashedDataArr[currentCompany].idArr.length;
@@ -2175,7 +2178,7 @@ router.route('/getServerStatus')
     .get(function(req, res) {
         try {
         //log.info("Router");
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var login = key;
         var currentCompany = companyLogins[key];
         var result={};
@@ -2205,22 +2208,26 @@ router.route('/getServerStatus')
 router.route('/askforproblems/:need')
     .get(function (req, res) {
         try{
-        log.info("пришел запроc".green, req.params.need);
-        if (req.params.need == NaN) return;
+        if (req.params.need == NaN || !req.session.login) return;
+        console.log ("пришел запроc".green, req.params.need);
         var result = {};
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var login = key;
         var currentCompany = companyLogins[key];
         var need = parseInt((req.params.need).substring(1));
         //log.info("ASk For ", need, "Problem", req.session.login);
         if(  need < 0){
             res.status(400).json("Need degree zerro");
+            console.log("Reply 2218".red);
             return;
         }
 
         var cashedDataArr = _data.getData();
+
         if (!cashedDataArr || !cashedDataArr[currentCompany] || cashedDataArr[currentCompany] == undefined) {
+            console.log("Reply 2225".red, currentCompany);
             res.status(400).json("Company undefined");
+
             return;
         }
 
@@ -2286,6 +2293,7 @@ router.route('/askforproblems/:need')
                     // log.info("Result", result.routes[0].uniqueID);
                     if (result.routes.length == need) {
                         log.info("Все запрашиваемые маршруты уже были заблокированы этим пользователем");
+                        console.log("Reply 2291".red);
                         res.status(200).json(result);
                         return;
                     }
@@ -2316,6 +2324,7 @@ router.route('/askforproblems/:need')
 
                     if (i < 0 &&  result.routes.length > 0){
                         log.info("Нашли проблемм сколько могли");
+                        console.log("Reply 2322".red);
                         res.status(200).json(result);
                         return;
                     }
@@ -2335,6 +2344,7 @@ router.route('/askforproblems/:need')
                         result.reasons = cashedDataArr[currentCompany].reasons;
                         result.notes = cashedDataArr[currentCompany].notes;
                         //надо отдать маршрут из старых на закрытие
+                        console.log("Reply 2342".red);
                         res.status(200).json(result);
                         return;
 
@@ -2373,6 +2383,7 @@ router.route('/askforproblems/:need')
                 i = choseRouteForOperator(currentCompany, login, cashedDataArr);
 
                 if (i < 0) {
+                    console.log("Reply 2381".red);
                     res.status(200).json("All problem routes blocked");
                     return;
                 }
@@ -2406,6 +2417,7 @@ router.route('/askforproblems/:need')
                 result.nowTime = parseInt(Date.now()/1000);
                 result.companyName = currentCompany;
                 _data.setData(cashedDataArr);
+                console.log("Reply 2415".red);
                 res.status(200).json(result);
                 return;
             } else {
@@ -2423,6 +2435,7 @@ router.route('/askforproblems/:need')
         result.notes = cashedDataArr[currentCompany].notes;
         //log.info("Result length", result.routes.length);
         _data.setData(cashedDataArr);
+        console.log("Reply 2432".red);
         res.status(200).json(result);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -2439,7 +2452,7 @@ router.route('/confirmonline')
         if(req.session.login == undefined) return;
         log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
         var blockedArr = req.body.sync;
-        var key = "" + req.session.login;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
         var currentCompany = companyLogins[key];
         var blockedRoutes = _routes.getData();
         var cashedDataArr = _data.getData();
@@ -4476,7 +4489,7 @@ try {
 
                         var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
                         var key=""+login;
-                        companyLogins[key]=currentCompany;
+                        companyLogins[key] = currentCompany;
 
 
                         needNewReqto1C[currentCompany] = true;
@@ -6040,13 +6053,14 @@ function isOldDayExist(curCompany, showDate, cashedDataArr) {
 
 function deleteLoadedOldDay(company){
     if (!company) return;
-
+    var cashedDataArr = _data.getData();
     for (var existCompany in cashedDataArr){
         if (develop) console.log(existCompany.yellow);
         if (existCompany.startsWith(company) && existCompany.length != company.length){
             delete cashedDataArr[existCompany];
         }
     }
+    _data.setData(cashedDataArr);
     for (var existCompany in cashedDataArr){
         if (develop) console.log(existCompany.green);
     }
@@ -7365,6 +7379,7 @@ function addCallinRoute (company, driver, client, phone_number, cashedDataArr){
 
     var uniqueID = route.uniqueID;
     console.log("UniqueID".red, uniqueID);
+    var blockedRoutes = _routes.getData();
     if (blockedRoutes && blockedRoutes.some(function(item){
             return item.id == uniqueID;
         })) {
@@ -7401,6 +7416,7 @@ function addCallinRoute (company, driver, client, phone_number, cashedDataArr){
             })
         }
 
+        _routes.setData(blockedRoutes);
 
 
     } else {
@@ -7445,6 +7461,256 @@ function addCallinRoute (company, driver, client, phone_number, cashedDataArr){
 
 }
 
+var firstLoginTable = [];
+function createFirstLoginTable(login, settings){
+    if (!login) return;
+
+    var dispatcher = {
+        login: login,
+        time: parseInt(Date.now()/1000),
+        settings: settings
+    };
+
+    firstLoginTable.push(dispatcher);
+    console.log(firstLoginTable);
+}
+
+var shifts = [];
+function createMainDispatcherTable (company, cashedDataArr){
+    shifts = shifts || [];
+    if (firstLoginTable && firstLoginTable.length != 0) {
+
+        var loadDate = parseInt(Date.now()/1000) - 100 * 60 * 60; //fixme 100 заменить на 12
+        console.log ("Call SQL 7477".yellow);
+        sqlUniversal.simpleLoad(company, "shifts", "if", "start_time_stamp", ">", loadDate, function (data){
+            if (data == 'error') return;
+            console.log("SHIFTS".yellow, data);
+            shifts = data;
+            concatDispatcherData(company)
+        });
+    }
+
+    console.log ("Call SQL 7486".yellow);
+    sqlUniversal.simpleLoad (company, "dispatchers", "if", "company", "==", company, function(data){
+       if (data == 'error') return;
+       console.log ("All Dispatchers for Company ", company, " ", data);
+       if (data.length != 0) {
+           cashedDataArr[company].dispatchers = cashedDataArr[company].dispatchers || {};
+           cashedDataArr[company].dispatchers.allDispatchers = data;
+           _data.setData(cashedDataArr);
+           concatDispatcherData(company)
+       } else {
+
+       }
+
+
+
+    });
+}
+
+
+function concatDispatcherData(company) {
+    console.log("Start Concat Dispatchers".yellow);
+    var cashedDataArr = _data.getData();
+    if (!shifts ||
+         shifts.length == 0 ||
+        !cashedDataArr[company] ||
+        !cashedDataArr[company].dispatchers ||
+        !cashedDataArr[company].dispatchers.allDispatchers) return;
+
+
+    console.log("Middle Concat Dispatchers".yellow);
+    var companysShifts = [];
+    cashedDataArr[company].dispatchers.shifts = [];
+    for (var i = 0; i < shifts.length - 1; i++){
+            console.log ("i ", i);
+         var isBelong = false;
+            for (var j = 0; j < cashedDataArr[company].dispatchers.allDispatchers.length; j++){
+                console.log ("j ", j);
+                if (shifts[i].dispatcher == cashedDataArr[company].dispatchers.allDispatchers[j].id ) {
+                    console.log ("Finded true");
+                    isBelong = true;
+                    companysShifts.push(shifts[i]);
+                    shifts.splice(i, 1);
+                    i--;
+                    break;
+                }
+            }
+    }
+
+    console.log("Finish Concat Dispatchers".yellow, companysShifts);
+    mark3:
+    for (i = 0; i < companysShifts.length - 1; i++) {
+         j = 0;
+        console.log("companysShifts.length".yellow, companysShifts.length);
+        console.log("i ", i);
+        for (j = i + 1; j < companysShifts.length; j++) {
+            console.log(" i ", i," j ", j);
+                console.log(companysShifts[0]);
+                console.log(companysShifts[1]);
+                console.log(companysShifts[i]);
+                console.log(companysShifts[j]);
+                console.log("j",j);
+
+                if (companysShifts[i].dispatcher == companysShifts[j].dispatcher) {
+                    if (companysShifts[i].start_time_stamp > companysShifts[j].start_time_stamp) {
+                        console.log("SPLICE".red);
+                        companysShifts.splice(j, 1);
+                        j--;
+                    } else {
+                        console.log("SPLICE".red);
+                        companysShifts.splice(i,1);
+                        continue mark3;
+                    }
+                }
+        }
+    }
+    console.log("End strange cikle".yellow, companysShifts);
+    cashedDataArr[company].dispatchers.shifts = companysShifts;
+    _data.setData(cashedDataArr);
+    checkFirstLoginForThisCompany(company);
+    console.log("Checked Concat Dispatchers".yellow, companysShifts);
+
+}
+
+
+function checkFirstLoginForThisCompany(company) {
+
+    var  cashedDataArr = _data.getData();
+    if (!company || !cashedDataArr[company] || !cashedDataArr[company].dispatchers || !cashedDataArr[company].dispatchers.allDispatchers) return;
+    var all = cashedDataArr[company].dispatchers.allDispatchers;
+    var companyPrefix = all[0].login.substring(0, all[0].login.indexOf('.'));
+    console.log("companyPrefix".yellow, companyPrefix);
+    mark4:
+    for (var  i = 0; i < firstLoginTable.length; i++){
+            console.log("IIII".red, i, firstLoginTable.length);
+            if (!firstLoginTable[i].login.startsWith(companyPrefix)) continue;
+                var exist  = false;
+                for (var j = 0; j < all.length; j++){
+                    if (firstLoginTable[i].login == all[j].login) {
+                        createShiftForFirstLogin(all[j], cashedDataArr[company].dispatchers.shifts, company);
+                        exist = true;
+                        firstLoginTable.splice(i, 1);
+                        i--;
+                        console.log("Delete1".red);
+                        continue mark4;
+                    }
+                    if (!exist){
+                        createNewDispatcherInCompany(firstLoginTable[i], company);
+                        firstLoginTable.splice(i, 1);
+                        i--;
+                        console.log("Delete2".red);
+                        continue mark4;
+                    }
+
+                }
+    }
+    _data.setData(cashedDataArr)
+};
+
+
+function createShiftForFirstLogin(dispatcher, shifts, company){
+    shifts = shifts || [];
+    var exist = false;
+    for (var i = 0; i < shifts.length; i++){
+        if (shifts[i].dispatcher == dispatcher.id) {
+           exist = true;
+           addSession(shifts[i], 3)
+        }
+
+        if(!exist) addShift(dispatcher, company);
+    }
+}
+
+
+function addShift(dispatcher, company) {
+    var  cashedDataArr = _data.getData();
+    cashedDataArr[company].dispatchers.shifts = cashedDataArr[company].dispatchers.shifts || [];
+    cashedDataArr[company].dispatchers.shifts.push({dispatcher: dispatcher.id, start_time_stamp: parseInt(Date.now()/1000)});
+    sqlUniversal.add (company,"shifts", "data", dispatcher.id, 100, parseInt(Date.now()/1000), parseInt(Date.now()/1000), '[{}]');
+    console.log("New SHIFT".yellow, cashedDataArr[company].dispatchers.shifts);
+    _data.setData(cashedDataArr);
+}
+
+
+function createNewDispatcherInCompany (dispatcher, company) {
+    var  cashedDataArr = _data.getData();
+    cashedDataArr[company].dispatchers.allDispatchers = cashedDataArr[company].dispatchers.allDispatchers || [];
+    //todo запрос на ID Имя фамилию диспетчера и роли
+    sqlUniversal.lastRowLoad(company,"dispatchers", "id", function(data){
+
+
+        console.log("lastRowLoad recieved ".yellow, data[0].fio);
+
+        if (data[0] != undefined) {
+           var id = ++data[0].id;
+           var is_operator =  dispatcher.settings.userRoles.some(function(item){
+               return item == 'operator';
+           });
+
+           var is_superviser =  dispatcher.settings.userRoles.some(function(item){
+                return item == 'supervisor';
+            });
+
+           var is_logist =  dispatcher.settings.userRoles.some(function(item){
+                return item == 'head';
+            });
+        }
+        var fio = dispatcher.settings.fio || dispatcher.settings.name;
+
+        console.log("disp Settings ".yellow, dispatcher.settings);
+        console.log("New dispatcher in Company".yellow, dispatcher);
+        cashedDataArr[company].dispatchers.allDispatchers.push({id: id, fio: fio, is_operator: is_operator, is_superviser: is_superviser, is_logist: is_logist, login: dispatcher.login});
+        sqlUniversal.add(company, "dispatchers", "data", id, fio, company, is_operator, is_superviser, is_logist, dispatcher.login);
+        console.log("All dispatchers", cashedDataArr[company].dispatchers.allDispatchers);
+        _data.setData(cashedDataArr);
+        addShift({id: id, fio: fio, is_operator: is_operator, is_superviser: is_superviser, is_logist: is_logist, login: dispatcher.login}, company);
+    });
+
+
+}
+
+function addSession (shift, kind){
+    shift.sessions = shift.sessions || [];
+    shift.sessions.push({start_time_stamp: parseInt(Date.now()/1000), start_kind: kind});
+    console.log("Shift".yellow, shift);
+
+}
+
+
+
+function newLogin(login, company) {
+    console.log("NewLogin ".yellow, login, company);
+    var cashedDataArr = _data.getData();
+    var dispatchers = cashedDataArr[company].dispatchers;
+    console.log("SHIFTS 7656".yellow, dispatchers.shifts);
+    var isExist = false;
+    var existShift;
+
+    var dispatcher = dispatchers.allDispatchers.filter(function(disp){
+        return disp.login == login;
+    });
+    if (!dispatcher[0] || dispatcher[0] == []) {
+        createNewDispatcherInCompany ({login:login}, company);
+        return;
+    }
+
+    dispatchers.shifts.forEach(function(shift){
+        if (shift.dispatcher == dispatcher[0].id){
+            console.log ("Shift for this operator is exist".yellow);
+            isExist = true;
+            existShift = shift;
+        }
+    });
+
+    //todo определить kind
+    isExist? addSession(existShift, 5) : addShift(dispatcher[0], company);
+
+    console.log("Shifts after new existing Login".yellow, dispatchers.shifts);
+    _data.setData(cashedDataArr);
+}
+
+
 function autasaveRoutes(company, routes, cashedDataArr ){
     if (!company || !routes || routes.length == 0) return;
     try {
@@ -7470,33 +7736,6 @@ function autasaveRoutes(company, routes, cashedDataArr ){
 
 }
 
-function waitingCallForOperator(key, company){
-    if (!key || !company) return;
-    var result=undefined;
-
-
-
-
-    if (cashedDataArr[company].calls && cashedDataArr[company].calls.length > 0){
-        for (var i = 0; i < cashedDataArr[company].calls.length; i++){
-
-            if (cashedDataArr[company].calls[i].login == key ){
-                result = cashedDataArr[company].calls[i];
-                cashedDataArr[company].calls.splice(i,1);
-                break;
-            }
-        }
-    }
-
-    //console.log("Checking Waiting calls".blue,  cashedDataArr[company].waitingCalls != undefined , cashedDataArr[company].waitingCalls.length > 0 );
-    if (result == undefined && cashedDataArr[company].waitingCalls != undefined && cashedDataArr[company].waitingCalls.length > 0){
-        result = cashedDataArr[company].waitingCalls[0];
-        cashedDataArr[company].waitingCalls.splice(0,1);
-    }
-
-
-    return result;
-}
 
 
 function checkChangeStatusForHook(company, b_route, route){
@@ -7507,12 +7746,82 @@ function checkChangeStatusForHook(company, b_route, route){
 
 }
 
+//var tempFirstLogin =[];
+//function dispatcherLogin(login, company, cashedDataArr){
+//    console.log("Start dispatcher function".yellow, login, company);
+//
+//
+//
+//    if(!cashedDataArr || !cashedDataArr[company] || ! cashedDataArr[company].dispatchers) {
+//        //Блок создания сущности диспетчер
+//        tempFirstLogin.push({login: login, time: Date.now()});
+//        console.log("Need create dispatchers".yellow, login, company);
+//        if (!cashedDataArr || !cashedDataArr[company]) {
+//
+//            setTimeout(function(){createDispatchersInCompanies(login, company)}, 60*1000)
+//
+//        }
+//        //    sqlUniversal.simpleLoad (292942, "dispatchers", "if", "company", "==", 292942, function(data){
+//        //console.log(data);
+//        //    });
+//
+//
+//    } else {
+//        //Сущность диспетчер создана, необходим ее апгрейт.
+//        console.log("Dispatchers already done".blue);
+//
+//    }
+//
+//}
+//
+//function createDispatchersInCompanies (login, company){
+//    console.log("Start Looking Companys".yellow);
+//    var exist = false;
+//    var cashedDataArr = _data.getData();
+//    for (var existCompany in cashedDataArr) {
+//        console.log("Company is", existCompany);
+//        cashedDataArr[existCompany].dispatchers = cashedDataArr[existCompany].dispatchers || {};
+//            sqlUniversal.simpleLoad (existCompany, "dispatchers", "if", "company", "==", existCompany, function(data){
+//                if (data.length > 0) {
+//                    var company = data[0].company;
+//                    cashedDataArr[company].dispatchers.allDispatchers = data;
+//                    _data.setData(cashedDataArr);
+//                    console.log( "MTM REcieved".yellow, data);
+//                    console.log("Create dispatchers complete".blue);
+//
+//                    //Блок проверки и переноса первого темплогина в
+//                    if (tempFirstLogin && tempFirstLogin.length > 0) {
+//                        rePushFirstLogin(tempFirstLogin, company);
+//                    }
+//                } else {
+//                    //todo create new company in DB Dispatchers
+//                    console.log("Need to create first dispatcher in new company");
+//                }
+//
+//            });
+//        exist = true;
+//    }
+//    if (!exist) {
+//        dispatcherLogin(login, company, cashedDataArr);
+//        return;
+//    }
+//
+//
+//
+//
+//}
 
-function dispatcherLogin(login, company){
-    console.log("Start dispatcher function".yellow, login, company);
 
-
-}
+//function rePushFirstLogin(logins, company){
+//    if (!logins || !company || logins.length < 1) return;
+//    console.log ("rePushFirstLogin".yellow, logins, company);
+//    //var dispCompanyName =
+//    var casheDataArray = _data.getData();
+//
+//    casheDataArray.dispatchers.shift = casheDataArray.dispatchers.shift || [];
+//
+//
+//}
 
 function loadCoords(company, cashedDataArr) {
     try {
@@ -7567,9 +7876,11 @@ function firstDBConnect(){
     //sqlUniversal.simpleLoad (292942, "actions", "if", "id", "==", 4); +++
     //sqlUniversal.add (292942,"dispatchers", "data", "5", "Горбатенко Михаил Петрович", "292942", "false", "false", "false", "ids.newTest"); +++
     //sqlUniversal.save(292942,"dispatchers", "id", "==", "2", "set", "is_operator", "=", "false", ",", "login", "=", "CW.kalko"); +++
-    sqlUniversal.lastRowLoad(292942, "sessions", "if", "shift_id", "==", 16423)
+    //sqlUniversal.lastRowLoad(292942, "sessions", "if", "shift_id", "==", 16423)
 }
 
+
+var quant = 0;
 function startCalculateCompany(company, cashedDataArr) {
     try {
     startTime = parseInt(Date.now()/1000);
@@ -7593,6 +7904,10 @@ function startCalculateCompany(company, cashedDataArr) {
     cashedDataArr[company].recalc_finishing = true;
     safeReload();
     autosaveData(cashedDataArr);
+    if (firstLoginTable && firstLoginTable.length > 0 && quant < 1) {
+        console.log("Call for disp function ", ++quant);
+        createMainDispatcherTable(company, cashedDataArr);
+    }
     if (middleTime) log.info("От запросов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);

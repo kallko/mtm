@@ -200,7 +200,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             //console.log("Problems Loaded");
                         }
 
-                        if (data == "wait") {
+                        if (data == "wait" || data == 'Company undefined') {
                             console.log ("Рассчет прошлого дня еще не закончен");
                             return;
                         }

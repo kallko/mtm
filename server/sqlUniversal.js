@@ -7,6 +7,13 @@
 //WHERE shift_id = 16423
 //ORDER BY shift_id DESC
 //LIMIT 1
+    //sqlUniversal.simpleLoad (292942, "actions", "if", "id", "==", 4); +++
+    //sqlUniversal.add (292942,"dispatchers", "data", "5", "Горбатенко Михаил Петрович", "292942", "false", "false", "false", "ids.newTest"); +++
+    //sqlUniversal.save(292942,"dispatchers", "id", "==", "2", "set", "is_operator", "=", "false", ",", "login", "=", "CW.kalko"); +++
+    //sqlUniversal.lastRowLoad(company,"dispatchers", "id", function(data){ ++
+    //sqlUniversal.add (292942,"shifts", "data", 5, 2, parseInt(Date.now()/1000), parseInt(Date.now()/1000), '{"name": "text3", "lName": "text4"}'); ++
+    //sqlUniversal.add (292942,"shifts", "data", 5, 2, parseInt(Date.now()/1000), parseInt(Date.now()/1000), '[{"key": "value"}, {"key": "value"}]'); ++
+    //sqlUniversal.add (292942,"shifts", "data", dispatcher.id, 100, parseInt(Date.now()/1000), parseInt(Date.now()/1000), '[{"start_time": "148", "finish_time":"148", "start_kind":"1", "finish_kind":"2", "problems":[{"qq": "22"},{"bbb":"33"}] }, {"key": "value"}]'); ++
 
 
 "use strict";
@@ -64,9 +71,9 @@ SqlUniversal.prototype.lastRowLoad = function (company){
         request  += adding +" ";
     }
 
-    //request  +="'";
+    request  += "ORDER BY " +  arguments[arguments.length-2] + " DESC LIMIT 1";
     console.log("Request".yellow, request);
-    //execute("simpleLoad", request, callback)
+    execute("lastRowLoad", request, callback)
 
 
 };
@@ -162,12 +169,12 @@ SqlUniversal.prototype.save = function (company){
 function execute (name, request, callbac){
     db.any( request )
         .then(function(data){
-            console.log( name + " ".green, data);
+            console.log( name + " name ".green, data);
             if (callbac) callbac(data);
         })
         .catch(function (error) {
-            console.log( name + "ERROR:".red, error);
-            if(callbac) callbac('error');
+            console.log( name + " !!!!ERROR!!!!: ".red, error, " ", request);
+            //if(callbac) callbac('error');
         });
 }
 

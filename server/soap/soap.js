@@ -94,7 +94,7 @@ function checkBeforeSend(_data, callback) {
 
     //console.log( " Check before send started", _data.iLength);
     if(_data.iLength != 0){
-        //console.log("Рано еще, подпустим поближе!");
+        //console.log("Рано еще, подпустим поближе! 97");
         return;
     }
 
@@ -103,18 +103,21 @@ function checkBeforeSend(_data, callback) {
         data = _data[k];
 
         if (data.sensors == null) {
+            //console.log("Рано еще, подпустим поближе! 106");
             return;
         }
 
         for (var i = 0; i < data.routes.length; i++) {
             if (!data.routes[i].time_matrix_loaded
                 || !data.routes[i].plan_geometry_loaded) {
+                //console.log("Рано еще, подпустим поближе! 113");
                 return;
             }
         }
 
         for (i = 0; i < data.sensors.length; i++) {
             if (data.sensors[i].loading && !data.sensors[i].stops_loaded) {
+
                 return;
             }
         }
@@ -135,7 +138,7 @@ function checkBeforeSend(_data, callback) {
     }
 
     for (i = 0; i < data.length; i++) {
-        for (var j = 0; j < data[i].routes.length; j++) {
+        for (j = 0; j < data[i].routes.length; j++) {
             data[i].routes[j].itineraryID = data[i].ID;
         }
     }
