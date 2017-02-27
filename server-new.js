@@ -7,6 +7,7 @@ var fs = require('fs');
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true, parameterLimit:1000000}));
 
@@ -44,6 +45,7 @@ io.on('connection', function (socket) {
     firstLogin();
 
     function firstLogin() {
+        //socket.broadcast.to('game').emit('eventClient', 'nice game');
         var login = socket.conn.request.headers.referer.substring(socket.conn.request.headers.referer.indexOf("=")+1);
         var key = login.substring(0, login.indexOf('.'));
         console.log("SOCKET", login, " ", key);
@@ -52,8 +54,10 @@ io.on('connection', function (socket) {
         var obj;
         if (company && _data.getData()[company].dispatchers) console.log ("TEST DATA".red, _data.getData()[company].dispatchers.concated);
         if (company && _data.getData()[company] && _data.getData()[company].dispatchers && _data.getData()[company].dispatchers.concated) {
+            var isSuperVisor = askForRole(login, company);
+            console.log("isSuperVisor", isSuperVisor);
             obj = _data.getData()[company].dispatchers;
-            socket.emit('dispatchers', obj);
+            if (isSuperVisor) socket.emit('dispatchers', obj);
         } else {
             obj = { error: 'Wait' } ;
             socket.emit('dispatchers', obj);
@@ -65,15 +69,19 @@ io.on('connection', function (socket) {
 
     console.log("USER CONNECTED");
 
-    //currentServerData.test(1);
-
-    //console.log("SOCKET", socket.conn.request.headers.referer);
-
-
 
     socket.on('my other event', function (data) {
         console.log(data);
     });
 
+
+    function askForRole (login, company){
+        var casheDataArray = _data.getData();
+        var all = casheDataArray[company].dispatchers.allDispatchers;
+        return all.filter(function(item){
+            return item.login == login && item.is_superviser;
+        })
+
+    }
 
 });
