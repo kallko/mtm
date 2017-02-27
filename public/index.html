@@ -70,6 +70,7 @@
 
 
 <script src="./js/controllers/point-index-controller.js"></script>
+<script src="./js/controllers/socket-controller.js"></script>
 <script src="./js/controllers/map-controller.js"></script>
 <script src="./js/controllers/notification-controller.js"></script>
 <script src="./js/controllers/setting-controller.js"></script>
@@ -84,7 +85,6 @@
 <script src="./js/controllers/auth-controller.js"></script>
 <script src="./js/controllers/geo-editing-controller.js"></script>
 <script src="./js/controllers/dispatcher-table-controller.js"></script>
-<script src="./js/controllers/socket-controller.js"></script>
 <script src="./js/filters/mtm-unique.js"></script>
 
 <script src="./js/directives/finish-render.js"></script>
@@ -1519,21 +1519,21 @@
     <div ng-controller="DispatcherTableController" ng-show="true">
         <!--settings.userRoles && settings.userRoles.some(function(item){return item == 'supervisor'})-->
         <div>
-            {{supervisor}} {{settings.userRoles}}
+            <button ng-click="dispTest()"> Тест </button>
+            {{data.supervisor}} {{settings.userRoles}}
             <div>
+                <!--todo вывести статитстику-->
                 Всего маршрутов 55; Закрыто 11; С проблемами 35; Ср.проблемность 234;
             </div>
             <br>
 
-                <div ng-repeat="d in dispatchers" style="margin: 3px; border: dotted">
-                {{d.name}} {{d.s[0].start * 1000 | date : 'HH:mm'}}
-                {{d.sessions[d.sessions.length-1].finish * 1000 | date : 'HH:mm'}}
-                <button> Сессии  ({{d.sessions.length}})</button>
-                {{endMethod}}
-                {{d.status}}
-                    <div ng-repeat = "r in d.routes">
-                        {{r.name}} {{parseInt((nowTime - r.start)/60)}} мин. Проблемность:{{r.problem}}
-                    </div>
+                <div ng-repeat="disp in localDispatchers.shifts" style="margin: 3px; border: solid">
+                    {{disp.fio}} Старт
+                    {{disp.start_time_stamp * 1000 | date : 'HH:mm'}}
+                Финиш {{disp.end_time_stamp * 1000 | date : 'HH:mm'}}
+                <!--{{disp.sessions[disp.sessions.length-1].finish * 1000 | date : 'HH:mm'}}-->
+                <button> Сессии  ({{disp.sessions.length}})</button>
+
             </div>
         </div>
     </div>
@@ -1555,3 +1555,5 @@
     </div>
 </div>
 
+<div ng-controller="SocketController" ng-show="false">
+</div>

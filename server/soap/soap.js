@@ -24,11 +24,12 @@ var soap = require('soap'),
 // класс для работы с соапом
 function SoapManager(login) {
     testCopy ? this.url = "@sngtrans.com.ua/copy/ws/exchange/?wsdl" : this.url = "@sngtrans.com.ua/client/ws/exchange/?wsdl";
-    this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
-    this.urlUI = "@sngtrans.com.ua/client/ws/UI/?wsdl";   //
+    testCopy ? this.urlPda = "@sngtrans.com.ua/copy/ws/pda/?wsdl" : this.urlPda = "@sngtrans.com.ua/client/ws/pda/?wsdl";
+    testCopy ? this.urlUI = "@sngtrans.com.ua/copy/ws/UI/?wsdl" :   this.urlUI = "@sngtrans.com.ua/client/ws/UI/?wsdl";
     this.login = login;
     this.admin_login = config.soap.login;
     this.password = config.soap.password;
+    //console.log("config 32", this);
 }
 
 

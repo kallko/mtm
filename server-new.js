@@ -40,18 +40,40 @@ var _data = new serverData ();
 
 
 io.on('connection', function (socket) {
+
+    firstLogin();
+
+    function firstLogin() {
+        var login = socket.conn.request.headers.referer.substring(socket.conn.request.headers.referer.indexOf("=")+1);
+        var key = login.substring(0, login.indexOf('.'));
+        console.log("SOCKET", login, " ", key);
+        var company = _data.whoAmI(key);
+        console.log ("I know who are you!!!!".red, company);
+        var obj;
+        if (company && _data.getData()[company].dispatchers) console.log ("TEST DATA".red, _data.getData()[company].dispatchers.concated);
+        if (company && _data.getData()[company] && _data.getData()[company].dispatchers && _data.getData()[company].dispatchers.concated) {
+            obj = _data.getData()[company].dispatchers;
+            socket.emit('dispatchers', obj);
+        } else {
+            obj = { error: 'Wait' } ;
+            socket.emit('dispatchers', obj);
+            setTimeout(firstLogin, 5000);
+        }
+
+   }
+
+
     console.log("USER CONNECTED");
 
     //currentServerData.test(1);
 
     //console.log("SOCKET", socket.conn.request.headers.referer);
-    console.log("SOCKET", socket.conn.request.headers);
-    //fs.writeFile('./logs' + '/' +'socket.txt', JSON.stringify(socket), function(err){
-    //    console.log("Save Complete");
-    //    if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);
-    //  });
-    socket.emit('news', { hello: 'world' });
+
+
+
     socket.on('my other event', function (data) {
         console.log(data);
     });
+
+
 });

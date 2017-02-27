@@ -273,7 +273,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                             settings = rootScope.settings;
                         }
 
-                        for (i=0; i<settings.userRoles.length; i++){
+                        for (i = 0; i < settings.userRoles.length; i++){
                             if (settings.userRoles[i] == 'supervisor' ||  settings.userRoles[i] == 'head'){
                                 extra = 100;
                                 break;

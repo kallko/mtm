@@ -21,3 +21,9 @@ ServerData.prototype.setData = function (data){
     _data = data;
 };
 
+ServerData.prototype.whoAmI = function(key){
+    for (var company in _data){
+        if (_data[company].prefix == key) return company;
+    }
+    return false;
+};

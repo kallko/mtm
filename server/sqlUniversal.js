@@ -120,8 +120,7 @@ SqlUniversal.prototype.add = function (company){
             break;
         }
         stringAdd ='';
-        console.log("this is argument", i, " ", arguments[i]);
-        if (
+     if (
             !dict[arguments[i]] &&
             parseInt(arguments[i]) != arguments[i]) stringAdd = "'" + arguments[i] + "',";
         adding = dict[arguments[i]] || (stringAdd) || (arguments[i] + ",");
@@ -144,7 +143,6 @@ SqlUniversal.prototype.save = function (company){
             break;
         }
         var stringAdd ='';
-        console.log("this is argument", i, " ", dict[arguments[i]] || arguments[i]);
         if (!arguments[i+1] &&
             !dict[arguments[i+1]] &&
             dict[arguments[i+1]] != '=' &&

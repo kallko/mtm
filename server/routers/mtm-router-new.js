@@ -986,12 +986,14 @@ router.route('/dailydata')
 
                     var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
                     var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-                    companyLogins[key] = currentCompany;
 
+
+                    companyLogins[key] = currentCompany;
+                    console.log("COMPANY LOGINS ".red, companyLogins);
 
                     needNewReqto1C[currentCompany] = true;
                     //здесь падала программа при длительном использовании.
-
+                    data.prefix = key;
 
                     //TODO Костыль проверка грузили ли мы сегодня уже эти планы для другого юзера и если да, то не перезаписывать данные.
                     //log.info(data, "Data mtm 248");
@@ -1009,6 +1011,7 @@ router.route('/dailydata')
                         log.info("Данные по этой компани на сегодня уже получены");
                             //todo мина замедленного действия. Переписать, чтобы настройки записывались сразу при получении/ или явно передавались не оставаясь в области  глобальной видимости.
                             cashedDataArr[currentCompany].settings = settings;
+
                             var result = cashedDataArr[currentCompany].settings;
 
                             result.user = req.session.login;
@@ -2433,6 +2436,7 @@ router.route('/askforproblems/:need')
 
         result.reasons = cashedDataArr[currentCompany].reasons;
         result.notes = cashedDataArr[currentCompany].notes;
+        result.settings = cashedDataArr[currentCompany].settings;
         //log.info("Result length", result.routes.length);
         _data.setData(cashedDataArr);
         console.log("Reply 2432".red);
@@ -4512,7 +4516,7 @@ try {
                             data.routesOfDate = data.routes[0].START_TIME.split(' ')[0];
                         }
                         cashedDataArr[currentCompany] = data;
-
+                        cashedDataArr[currentCompany].prefix = key;
 
                         cashedDataArr[currentCompany].currentProblems = [];
                         cashedDataArr[currentCompany].allRoutes=[];
@@ -4681,9 +4685,6 @@ function saveRoutesTo1s(routes){
                 if(!route.endTimeFact){
                     route.endTimeFact = Date.now();
                 }
-                //TODO REMOVE only for test
-                // route.pointsReady = route.pointsReady.concat(route.pointsUnconfirmed);
-                ///////////////////////////
 
                 for (var k = 0; k < route.pointsReady.length; k++) {
                     //console.log("Обрабатываем доставленные точки");
@@ -7461,6 +7462,9 @@ function addCallinRoute (company, driver, client, phone_number, cashedDataArr){
 
 }
 
+
+
+
 var firstLoginTable = [];
 function createFirstLoginTable(login, settings){
     if (!login) return;
@@ -7472,7 +7476,6 @@ function createFirstLoginTable(login, settings){
     };
 
     firstLoginTable.push(dispatcher);
-    console.log(firstLoginTable);
 }
 
 var shifts = [];
@@ -7480,7 +7483,7 @@ function createMainDispatcherTable (company, cashedDataArr){
     shifts = shifts || [];
     if (firstLoginTable && firstLoginTable.length != 0) {
 
-        var loadDate = parseInt(Date.now()/1000) - 100 * 60 * 60; //fixme 100 заменить на 12
+        var loadDate = parseInt(Date.now()/1000) - 12 * 60 * 60; //fixme 100 заменить на 12
         console.log ("Call SQL 7477".yellow);
         sqlUniversal.simpleLoad(company, "shifts", "if", "start_time_stamp", ">", loadDate, function (data){
             if (data == 'error') return;
@@ -7518,8 +7521,6 @@ function concatDispatcherData(company) {
         !cashedDataArr[company].dispatchers ||
         !cashedDataArr[company].dispatchers.allDispatchers) return;
 
-
-    console.log("Middle Concat Dispatchers".yellow);
     var companysShifts = [];
     cashedDataArr[company].dispatchers.shifts = [];
     for (var i = 0; i < shifts.length - 1; i++){
@@ -7545,13 +7546,6 @@ function concatDispatcherData(company) {
         console.log("companysShifts.length".yellow, companysShifts.length);
         console.log("i ", i);
         for (j = i + 1; j < companysShifts.length; j++) {
-            console.log(" i ", i," j ", j);
-                console.log(companysShifts[0]);
-                console.log(companysShifts[1]);
-                console.log(companysShifts[i]);
-                console.log(companysShifts[j]);
-                console.log("j",j);
-
                 if (companysShifts[i].dispatcher == companysShifts[j].dispatcher) {
                     if (companysShifts[i].start_time_stamp > companysShifts[j].start_time_stamp) {
                         console.log("SPLICE".red);
@@ -7565,7 +7559,7 @@ function concatDispatcherData(company) {
                 }
         }
     }
-    console.log("End strange cikle".yellow, companysShifts);
+
     cashedDataArr[company].dispatchers.shifts = companysShifts;
     _data.setData(cashedDataArr);
     checkFirstLoginForThisCompany(company);
@@ -7595,39 +7589,47 @@ function checkFirstLoginForThisCompany(company) {
                         console.log("Delete1".red);
                         continue mark4;
                     }
-                    if (!exist){
-                        createNewDispatcherInCompany(firstLoginTable[i], company);
-                        firstLoginTable.splice(i, 1);
-                        i--;
-                        console.log("Delete2".red);
-                        continue mark4;
-                    }
+
 
                 }
+
+        if (!exist){
+            createNewDispatcherInCompany(firstLoginTable[i], company);
+            firstLoginTable.splice(i, 1);
+            i--;
+            console.log("Delete2".red);
+
+        }
+
     }
+    cashedDataArr[company].dispatchers.concated = true;
     _data.setData(cashedDataArr)
-};
+}
 
 
 function createShiftForFirstLogin(dispatcher, shifts, company){
     shifts = shifts || [];
+
+    console.log("INPUT DATA ".red, shifts, "dispatcher", dispatcher);
     var exist = false;
     for (var i = 0; i < shifts.length; i++){
         if (shifts[i].dispatcher == dispatcher.id) {
            exist = true;
            addSession(shifts[i], 3)
         }
-
-        if(!exist) addShift(dispatcher, company);
     }
+
+    if(!exist) addShift(dispatcher, company);
 }
 
 
 function addShift(dispatcher, company) {
     var  cashedDataArr = _data.getData();
     cashedDataArr[company].dispatchers.shifts = cashedDataArr[company].dispatchers.shifts || [];
-    cashedDataArr[company].dispatchers.shifts.push({dispatcher: dispatcher.id, start_time_stamp: parseInt(Date.now()/1000)});
-    sqlUniversal.add (company,"shifts", "data", dispatcher.id, 100, parseInt(Date.now()/1000), parseInt(Date.now()/1000), '[{}]');
+    cashedDataArr[company].dispatchers.shifts.push({dispatcher: dispatcher.id, start_time_stamp: parseInt(Date.now()/1000), fio: dispatcher.fio});
+    addSession( cashedDataArr[company].dispatchers.shifts[cashedDataArr[company].dispatchers.shifts.length-1], 101);
+
+    sqlUniversal.add (company,"shifts", "data", dispatcher.id, 100, parseInt(Date.now()/1000), parseInt(Date.now()/1000), JSON.stringify(cashedDataArr[company].dispatchers.shifts[cashedDataArr[company].dispatchers.shifts.length-1].sessions));
     console.log("New SHIFT".yellow, cashedDataArr[company].dispatchers.shifts);
     _data.setData(cashedDataArr);
 }
@@ -7656,10 +7658,11 @@ function createNewDispatcherInCompany (dispatcher, company) {
                 return item == 'head';
             });
         }
-        var fio = dispatcher.settings.fio || dispatcher.settings.name;
+        var fio = dispatcher.settings.userName || "Нет данных";
 
         console.log("disp Settings ".yellow, dispatcher.settings);
         console.log("New dispatcher in Company".yellow, dispatcher);
+
         cashedDataArr[company].dispatchers.allDispatchers.push({id: id, fio: fio, is_operator: is_operator, is_superviser: is_superviser, is_logist: is_logist, login: dispatcher.login});
         sqlUniversal.add(company, "dispatchers", "data", id, fio, company, is_operator, is_superviser, is_logist, dispatcher.login);
         console.log("All dispatchers", cashedDataArr[company].dispatchers.allDispatchers);
@@ -7690,6 +7693,8 @@ function newLogin(login, company) {
     var dispatcher = dispatchers.allDispatchers.filter(function(disp){
         return disp.login == login;
     });
+
+    console.log("Needed Dispatcher finded".yellow, dispatcher[0]);
     if (!dispatcher[0] || dispatcher[0] == []) {
         createNewDispatcherInCompany ({login:login}, company);
         return;
@@ -7704,9 +7709,10 @@ function newLogin(login, company) {
     });
 
     //todo определить kind
-    isExist? addSession(existShift, 5) : addShift(dispatcher[0], company);
+    isExist ? addSession(existShift, 5) : addShift(dispatcher[0], company);
 
     console.log("Shifts after new existing Login".yellow, dispatchers.shifts);
+
     _data.setData(cashedDataArr);
 }
 
