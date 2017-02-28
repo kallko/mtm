@@ -79,6 +79,16 @@ io.on('connection', function (socket) {
     });
 
 
+    socket.on("loadRoutes", function(data){
+        var login = socket.conn.request.headers.referer.substring(socket.conn.request.headers.referer.indexOf("=")+1);
+        var key = login.substring(0, login.indexOf('.'));
+        console.log("SOCKET load Routes".red, login, " ", key);
+        var company = _data.whoAmI(key);
+        var obj = _data.getData()[company].dispatchers;
+        io.sockets.in(company).emit('dispatchers', obj);
+    });
+
+
     function askForRole (login, company){
         var casheDataArray = _data.getData();
         var all = casheDataArray[company].dispatchers.allDispatchers;

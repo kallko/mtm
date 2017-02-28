@@ -71,6 +71,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                     }
 
                     if (data.err != undefined && data.err.length >0) {
+                        console.log("data.err", data.err);
                         alert("Произошел сбой связи. Перезайдите в АРМ, пожалуйста");
                     }
 
@@ -213,6 +214,9 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             rootScope.reasons = data.reasons;
 
                             rootScope.$emit('receiveproblem', rootScope.tempDecision, settings);
+
+                            if (data.routes && data.routes.length > 0) {
+                                rootScope.$emit ('loadRoutes') }
 
                             if (rootScope.data && rootScope.data.routes && rootScope.data.routes.some(function(route){
                                     return route.calls && (route.calls.some(function(call){

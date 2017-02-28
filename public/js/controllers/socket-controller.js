@@ -12,4 +12,11 @@ angular.module('MTMonitor').controller('SocketController', ['$scope', '$rootScop
         //socket.emit('my other event', { my: 'data' });
         scope.$emit('dispatchersLoad');
     });
+
+
+    rootScope.$on("loadRoutes", function(){
+        socket.emit("loadRoutes");
+    })
+
+
 }]);

@@ -1260,11 +1260,11 @@ router.route('/askforroute')
         }
         if (result.error == undefined) {
             changePriority(result.uniqueID, currentCompany, key);
-            blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: key, time: parseInt(Date.now()/1000)})
+            blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: req.session.login, time: parseInt(Date.now()/1000)})
         }
         //log.info ("Начинаем запись файла");
         //log.toFLog('logging.txt', JSON.stringify(result));
-        //log.info("Заканчиваем запись файла");
+        console.log("Write to BlockedRoutes", blockedRoutes);
         _data.setData(cashedDataArr);
         _routes.setData(blockedRoutes);
         res.status(200).json({route: result});
@@ -2367,7 +2367,7 @@ router.route('/askforproblems/:need')
                     result.statistic = cashedDataArr[currentCompany].statistic;
 
                     var indx = cashedDataArr[currentCompany].line_routes[i].filterId;
-                    for (var k=0; k< cashedDataArr[currentCompany].routes.length; k++){
+                    for (var k = 0; k < cashedDataArr[currentCompany].routes.length; k++){
                         if(cashedDataArr[currentCompany].routes[k].filterId == indx){
                             cashedDataArr[currentCompany].routes.splice(k,1);
                             break;
@@ -2455,7 +2455,7 @@ router.route('/confirmonline')
         if(req.session.login == undefined) return;
         log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
         var blockedArr = req.body.sync;
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var currentCompany = companyLogins[key];
         var blockedRoutes = _routes.getData();
         var cashedDataArr = _data.getData();
@@ -4767,9 +4767,10 @@ try {
 // Функция подбирает роут для оператора
 function choseRouteForOperator(company, login, cashedDataArr){
     try{
-    log.info("Start choseRouteForOperator ");
+    var blockedRoutes = _routes.getData();
+    log.info("Start choseRouteForOperator");
     var result = 0;
-    for (;result< cashedDataArr[company].line_routes.length; result++){
+    for (;result < cashedDataArr[company].line_routes.length; result++){
         var route = cashedDataArr[company].line_routes[result];
         //проверяем не заблокирован ли этот роут уже другим оператором
         var blocked = false;
@@ -4782,7 +4783,7 @@ function choseRouteForOperator(company, login, cashedDataArr){
             }
         }
 
-        if(blocked) continue;
+        if (blocked) continue;
         break;
 
 
@@ -4797,6 +4798,8 @@ function choseRouteForOperator(company, login, cashedDataArr){
         cashedDataArr[company].blocked_routes.push(cashedDataArr[company].line_routes[result]);
 
         log.info("Size of blocked Routes is", cashedDataArr[company].blocked_routes.length);
+        _data.setData(cashedDataArr);
+        _routes.setData(blockedRoutes);
         return result;
     } else {
         log.info("Больше проблем не вижу");
@@ -6624,14 +6627,15 @@ function checkeConcatTrack(company, id, data){
 
 function checkSync(company, login, blockedArr, blockedRoutes) {
     try {
+    var cashedDataArr = _data.getData();
     var result=[];
     if (!company || !login || !blockedArr || blockedArr.length == 0) {
         log.info("Неопределенные данные checkSync");
         return result;
     }
-
-    for(var i=0; i<blockedArr.length; i++){
-        for (var j=0; j<blockedRoutes.length; j++){
+    console.log("6636 blockedRoutes", blockedRoutes);
+    for(var i = 0; i < blockedArr.length; i++){
+        for (var j = 0; j<blockedRoutes.length; j++){
             if (blockedRoutes[j].id == blockedArr[i] && blockedRoutes[j].login == login){
                 blockedArr.splice(i,1);
                 i--;
@@ -6643,9 +6647,9 @@ function checkSync(company, login, blockedArr, blockedRoutes) {
     if (result.length == 0) return result;
     // Если так случилось, что существует роут на клиенте, который незаблокирован за пользователем на сервере
     // Блокируем этот маршрут
-    for(i=0; i<result.length; i++){
+    for(i = 0; i < result.length; i++){
         var blocked =false;
-        for (j=0; j<blockedRoutes.length; j++){
+        for (j = 0; j < blockedRoutes.length; j++){
             if (blockedRoutes[j].id == result[i]) {
                 log.info("Этот маршрут заблокирован другим пользователем");
                 blocked =true;
@@ -6656,9 +6660,9 @@ function checkSync(company, login, blockedArr, blockedRoutes) {
                 for (var l=0; l<cashedDataArr[company].line_routes.length; l++){
                     if(result[i] == cashedDataArr[company].line_routes[l].uniqueID ) {
                         if (cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes =[];
-                        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].line_routes[l])
+                        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].line_routes[l]);
                         cashedDataArr[company].line_routes.splice(l,1);
-                        blockedRoutes.push({id: result[i], company:company, login:login, time:parseInt(Date.now()/1000)})
+                        blockedRoutes.push({id: result[i], company:company, login:login, time:parseInt(Date.now()/1000)});
                         changePriority(result[i], company, login);
                         break;
                     }
@@ -6669,9 +6673,9 @@ function checkSync(company, login, blockedArr, blockedRoutes) {
                 for ( l=0; l<cashedDataArr[company].routes.length; l++){
                     if(result[i] == cashedDataArr[company].routes[l].uniqueID ) {
                         if (cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes =[];
-                        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].routes[l])
+                        cashedDataArr[company].blocked_routes.push(cashedDataArr[company].routes[l]);
                         cashedDataArr[company].routes.splice(l,1);
-                        blockedRoutes.push({id: result[i], company:company, login:login, time:parseInt(Date.now()/1000)})
+                        blockedRoutes.push({id: result[i], company:company, login:login, time:parseInt(Date.now()/1000)});
                         changePriority(result[i], company, login);
                         break;
                     }
@@ -6681,6 +6685,8 @@ function checkSync(company, login, blockedArr, blockedRoutes) {
             result.splice(i,1);
         }
     }
+
+    _data.setData(cashedDataArr);
 
     return result;
     } catch (e) {
