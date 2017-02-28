@@ -70,6 +70,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                     alert("Where is sensors?");
                     return;
                 }
+
                 rootScope.settings.problems_to_operator = data.problems_to_operator;
                 if (data.currentDay) {
                     rootScope.currentDay = true;
@@ -4655,6 +4656,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
                     rootScope.data = cache;
                     rootScope.data.settings = settings;
+                    rootScope.data.settings.is_supervisor = rootScope.data.settings.userRoles.some(function(role){
+                        return role == 'supervisor';
+                    });
                     console.log("PIC 4521", cache);
                 }else {
                     console.log("PIC 4523", cache);

@@ -864,7 +864,7 @@ router.route('/dailydata')
             console.log("Need from Cashe 852".yellow);
             newLogin(req.session.login, currentCompany);
             //fixme
-            return;
+            //return;
             if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length);
 
             var settings={};
@@ -2229,8 +2229,7 @@ router.route('/askforproblems/:need')
 
         if (!cashedDataArr || !cashedDataArr[currentCompany] || cashedDataArr[currentCompany] == undefined) {
             console.log("Reply 2225".red, currentCompany);
-            res.status(400).json("Company undefined");
-
+            res.status(200).json("Company undefined");
             return;
         }
 
@@ -2416,7 +2415,7 @@ router.route('/askforproblems/:need')
 
             if (cashedDataArr[currentCompany].line_routes == undefined || cashedDataArr[currentCompany].line_routes.length == 0){
                 result ={};
-                result.statistic=cashedDataArr[currentCompany].statistic;
+                result.statistic = cashedDataArr[currentCompany].statistic;
                 result.nowTime = parseInt(Date.now()/1000);
                 result.companyName = currentCompany;
                 _data.setData(cashedDataArr);
@@ -7478,15 +7477,16 @@ function createFirstLoginTable(login, settings){
     firstLoginTable.push(dispatcher);
 }
 
-var shifts = [];
+var shifts = undefined;
 function createMainDispatcherTable (company, cashedDataArr){
-    shifts = shifts || [];
+
     if (firstLoginTable && firstLoginTable.length != 0) {
 
         var loadDate = parseInt(Date.now()/1000) - 12 * 60 * 60; //fixme 100 заменить на 12
         console.log ("Call SQL 7477".yellow);
         sqlUniversal.simpleLoad(company, "shifts", "if", "start_time_stamp", ">", loadDate, function (data){
             if (data == 'error') return;
+            shifts = shifts || [];
             console.log("SHIFTS".yellow, data);
             shifts = data;
             concatDispatcherData(company)
@@ -7516,7 +7516,7 @@ function concatDispatcherData(company) {
     console.log("Start Concat Dispatchers".yellow);
     var cashedDataArr = _data.getData();
     if (!shifts ||
-         shifts.length == 0 ||
+         //shifts.length == 0 ||
         !cashedDataArr[company] ||
         !cashedDataArr[company].dispatchers ||
         !cashedDataArr[company].dispatchers.allDispatchers) return;

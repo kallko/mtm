@@ -28,7 +28,10 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                     if (data && data.call && data.call != null && data.call.time != undefined) signalCallNotification(data.call);
                     if (!rootScope.data.currentDay) return;
-                   if  (data != undefined && data.length > 0) rootScope.$emit('changeBlockedRoutes', data);
+                   if  (data != undefined && data.length > 0) {
+                       rootScope.$emit('changeBlockedRoutes', data);
+
+                   }
                 });
         }
 
@@ -201,14 +204,14 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                         }
 
                         if (data == "wait" || data == 'Company undefined') {
-                            console.log ("Рассчет прошлого дня еще не закончен");
+                            console.log ("Рассчет дня еще не закончен");
                             return;
                         }
                         if(data.allRoutes != undefined) {
                             //console.log("Отправляем данные на клиент", data, data.routes[0].points.length, data.routes[1].points.length, data.routes[2].points.length);
                             rootScope.tempDecision = JSON.parse(JSON.stringify(data));
                             rootScope.reasons = data.reasons;
-                            //console.log("причины отказа", data.reasons);
+
                             rootScope.$emit('receiveproblem', rootScope.tempDecision, settings);
 
                             if (rootScope.data && rootScope.data.routes && rootScope.data.routes.some(function(route){
