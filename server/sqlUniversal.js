@@ -17,7 +17,11 @@
 
 
 "use strict";
-    var pgp = require("pg-promise")(/*options*/),
+    var promise = require('bluebird');
+    var options = {
+        promiseLib: promise
+    };
+    var pgp = require("pg-promise")(options),
         db = pgp("postgres://postgres:postgres@localhost:5432/test");
     var
         colors = require('colors');

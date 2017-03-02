@@ -28,9 +28,8 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                     if (data && data.call && data.call != null && data.call.time != undefined) signalCallNotification(data.call);
                     if (!rootScope.data.currentDay) return;
-                   if  (data != undefined && data.length > 0) {
+                    if  (data != undefined && data.length > 0) {
                        rootScope.$emit('changeBlockedRoutes', data);
-
                    }
                 });
         }

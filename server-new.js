@@ -55,7 +55,8 @@ io.on('connection', function (socket) {
         if (company && _data.getData()[company].dispatchers) console.log ("TEST DATA".red, _data.getData()[company].dispatchers.concated);
         if (company && _data.getData()[company] && _data.getData()[company].dispatchers && _data.getData()[company].dispatchers.concated) {
             var isSuperVisor = askForRole(login, company);
-            //console.log("isSuperVisor", isSuperVisor);
+
+            console.log("isSuperVisor", isSuperVisor);
 
             obj = _data.getData()[company].dispatchers;
             if (isSuperVisor) {

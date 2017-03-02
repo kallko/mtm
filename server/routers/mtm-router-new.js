@@ -7,6 +7,7 @@ var express = require('express'),
     tracks = require('../tracks'),
     modifyRoutes = require('../modifyRoutes'),
     modifyPoints = require('../modifyPoints'),
+    promise = require('bluebird'),
     sqlUniversal = new (require('../sqlUniversal'))(),
     log = new (require('../logging'))('./logs'),
     fs = require('fs'),
@@ -16,12 +17,17 @@ var express = require('express'),
     var serverData = require('../serverData');
     var newBlockedRoutes = require('../blockedRoutes');
     var newOnlineClients = require('../onlineClients');
+
+
     var _data = new serverData ();
     var _routes = new newBlockedRoutes ();
     var _clients = new newOnlineClients ();
     //currentServerData.test(1);
 
-
+String.prototype.startsWith = function (str)
+{
+    return this.indexOf(str) == 0;
+};
 
 
     var develop = true;
@@ -1211,7 +1217,7 @@ router.route('/dailydata')
 router.route('/askforroute')
     .post(function(req, res) {
         try {
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var currentCompany = companyLogins[key];
         var uniqueID = req.body.id;
         log.info("Пришел одиночный запрос на роут", uniqueID);
@@ -1264,7 +1270,7 @@ router.route('/askforroute')
         }
         //log.info ("Начинаем запись файла");
         //log.toFLog('logging.txt', JSON.stringify(result));
-        console.log("Write to BlockedRoutes", blockedRoutes);
+        addRouteToDispatcher(req.session.login, currentCompany, result);
         _data.setData(cashedDataArr);
         _routes.setData(blockedRoutes);
         res.status(200).json({route: result});
@@ -2250,7 +2256,7 @@ router.route('/askforproblems/:need')
                 log.info("Заблокированные сейчас маршруты");
                 var blockedRoutes = _routes.getData();
                 for(var i = 0; i < blockedRoutes.length;i++){
-                    log.info("Check blocked", blockedRoutes[i]);
+                    //log.info("Check blocked", blockedRoutes[i]);
                 }
 
                 var toOperator = [];
@@ -3746,14 +3752,14 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     if (pushes == undefined || company == undefined) return;
     var i=0;
     var delta;
-    var str = ""+ company;
+    var str = "" + company;
 
 
     //Костыль приводящий пуши разных компаний к единому знаменателю
     if (str.startsWith("292942")) delta = 0;
     if (str.startsWith("271389")) delta = 0;
 
-    while (i<pushes.length) {
+    while (i  <pushes.length) {
 
 
         var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*delta : 0;
@@ -5465,29 +5471,60 @@ function sendHookTo1C (company, type, data){
 
 function calculateStatistic (company, cashedDataArr){
     try {
-    log.info("Start calculate Statistic");
-    var indx;
-    cashedDataArr[company].statistic=[];
-    for (var i=0; i<9; i++) {
+        log.info("Start calculate Statistic");
+        var indx;
+    var dayStat = {};
+    cashedDataArr[company].statistic = [];
+    for (var i = 0; i < 9; i++) {
         cashedDataArr[company].statistic.push(0);
     }
 
 
-    for (i=0; i<cashedDataArr[company].routes.length; i++){
+    for (i = 0; i < cashedDataArr[company].routes.length; i++){
         for (var j=0; j<cashedDataArr[company].routes[i].points.length;j++){
-            indx=parseInt(cashedDataArr[company].routes[i].points[j].status);
+            indx = parseInt(cashedDataArr[company].routes[i].points[j].status);
             cashedDataArr[company].statistic[indx]++;
         }
     }
 
 
     //Подсчет общего веса для маршрута, если он не был посчитан ранее
-    for (i=0; i<cashedDataArr[company].routes.length; i++){
+    for ( i = 0; i < cashedDataArr[company].routes.length; i++){
         if (cashedDataArr[company].routes.weight == undefined) cashedDataArr[company].routes[i].weight = 0;
-        for ( j=0; j<cashedDataArr[company].routes[i].points.length;j++){
-            cashedDataArr[company].routes[i].weight +=parseInt(cashedDataArr[company].routes[i].points[j].WEIGHT);
+        for ( j = 0; j < cashedDataArr[company].routes[i].points.length;j++){
+            cashedDataArr[company].routes[i].weight += parseInt(cashedDataArr[company].routes[i].points[j].WEIGHT);
 
         }
+    }
+
+    if (cashedDataArr[company].allRoutes) dayStat.allRoutes =  cashedDataArr[company].allRoutes.length;
+
+
+    var allProblemSumm = 0;
+    var problemRoutes = 0;
+    var allBlockedProblem = 0;
+    var closed = 0;
+    if (cashedDataArr[company].routes) allProblemSumm = cashedDataArr[company].routes.reduce(function(summ, route){
+        if (route.max_problem) problemRoutes++;
+        if (route.closed) closed++;
+        return summ + route.max_problem;
+    }, 0);
+
+    dayStat.lineRoutes =  problemRoutes;
+    if (cashedDataArr[company].blocked_routes) allBlockedProblem = cashedDataArr[company].blocked_routes.reduce(function(summ, route){
+        if (route.closed) closed++;
+        return summ + route.max_problem;
+    }, 0);
+
+    var blocked_routes;
+    cashedDataArr[company].blocked_routes ? blocked_routes = cashedDataArr[company].blocked_routes.length : blocked_routes = 0;
+    dayStat.averageProblem = parseInt(((allProblemSumm || 0) + (allBlockedProblem || 0))/((problemRoutes + blocked_routes) || 1));
+
+        console.log ("Prestatistic", dayStat.averageProblem, closed);
+
+    if (cashedDataArr[company].dispatchers) cashedDataArr[company].dispatchers.dayStat = dayStat;
+        for (var key in cashedDataArr[company]){
+        console.log("Key".red, key);
     }
 
     } catch (e) {
@@ -5747,6 +5784,7 @@ function printData(company) {
 
 function unblockInData(data){
     try {
+    var cashedDataArr = _data.getData();
     //log.info("Переносим заблокированный роуты в нормальные");
     if (cashedDataArr[data.company].blocked_routes == undefined) return;
     //log.info("Есть заблокированные");
@@ -5760,6 +5798,7 @@ function unblockInData(data){
             break;
         }
     }
+        _data.setData(cashedDataArr);
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
     }
@@ -7581,6 +7620,7 @@ function checkFirstLoginForThisCompany(company) {
     var all = cashedDataArr[company].dispatchers.allDispatchers;
     var companyPrefix = all[0].login.substring(0, all[0].login.indexOf('.'));
     console.log("companyPrefix".yellow, companyPrefix);
+    console.log("true>>>".red ,companyPrefix.indexOf("i"));
     mark4:
     for (var  i = 0; i < firstLoginTable.length; i++){
             console.log("IIII".red, i, firstLoginTable.length);
@@ -7621,7 +7661,7 @@ function createShiftForFirstLogin(dispatcher, shifts, company){
     for (var i = 0; i < shifts.length; i++){
         if (shifts[i].dispatcher == dispatcher.id) {
            exist = true;
-           addSession(shifts[i], 3)
+           //addSession(shifts[i], 103)
         }
     }
 
@@ -7681,7 +7721,7 @@ function createNewDispatcherInCompany (dispatcher, company) {
 
 function addSession (shift, kind){
     shift.sessions = shift.sessions || [];
-    shift.sessions.push({start_time_stamp: parseInt(Date.now()/1000), start_kind: kind});
+    shift.sessions.push({start_time_stamp: parseInt(Date.now()/1000), start_kind: kind,  results:{}, flag:false});
     console.log("Shift".yellow, shift);
 
 }
@@ -7721,6 +7761,33 @@ function newLogin(login, company) {
 
     _data.setData(cashedDataArr);
 }
+
+
+
+function addRouteToDispatcher(login, company, result) {
+    console.log ("Start addRouteToDispatcher".red);
+    var casheDataArray = _data.getData();
+    var dispatchers = casheDataArray[company].dispatchers;
+    var dispIds = dispatchers.allDispatchers.filter(function(disp){
+        return disp.login == login;
+    });
+
+    console.log ("Etap1".red, dispIds);
+    var shifts = dispatchers.shifts.filter(function(shift){
+        return dispIds[0].id == shift.dispatcher;
+    });
+    console.log ("Etap2".red, shifts);
+    var shift = shifts[0];
+    var session = shift.sessions[shift.sessions.length - 1];
+    session.routes = session.routes || [];
+
+    session.routes.push({uniqueID: result.uniqueID, name: result.transport.NAME + " " + result.driver.NAME, problem: result.kind_of_problen, max_problem: result.max_problem, start: parseInt(Date.now()/1000)});
+    session.results = session.results || {};
+    session.results.self_ask_routes = session.results.self_ask_routes || 0;
+    session.results.self_ask_routes++;
+    _data.setData(casheDataArray);
+};
+
 
 
 function autasaveRoutes(company, routes, cashedDataArr ){

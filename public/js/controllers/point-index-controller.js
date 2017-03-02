@@ -37,7 +37,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             scope.parseInt = parseInt;                       //Возможность использовать parseInt во view
         rootScope.editing = {};                          // Контроль времени на блокировку  маршрута
         rootScope.loaded = undefined;
-
+        scope.end_button = "Конец смены";
+        scope.time_out_button = "Перерыв";
 
         setListeners();
         init();
@@ -4902,7 +4903,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
                     if (data.route != undefined) {
-
+                        rootScope.$emit('loadRoutes');
                         changeStopObjectByStopLink(data.route);
                         checkRouteQuality(data.route);
                         if (data.route.history == undefined) data.route.history=[];
@@ -5463,6 +5464,26 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 }
             }
         });
+
+        scope.timeOut = function(){
+            //todo добавить раскраску кнопочек
+            if (scope.time_out_button == "Перерыв") {
+                scope.time_out_button = "Работа"
+            } else {
+                scope.time_out_button = "Перерыв"
+            }
+        };
+
+
+        scope.endShift = function (){
+            //todo добавить раскраску кнопочек
+            if (scope.end_button == "Конец смены") {
+                scope.end_button = "Новая смена"
+            } else {
+                scope.end_button = "Конец смены"
+            }
+        };
+
 
 
     }]);

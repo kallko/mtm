@@ -44,7 +44,7 @@
 <script src="./js/vendor/goldenlayout.js"></script>
 <script src="./js/vendor/bootstrap-contextmenu.js"></script>
 <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
-<script type="text/javascript" src="./bower_components/angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js"></script>
+<!--<script type="text/javascript" src="./bower_components/angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js"></script>-->
 <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
 <script type="text/javascript" src="./bower_components/angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js"></script>
 <script src="//cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.10/jquery.popupoverlay.js"></script>
@@ -53,7 +53,10 @@
 <script src="./js/vendor/divicon.js"></script>
 <script src="./js/vendor/oms.min.js"></script>
 <script src="./js/vendor/leaflet.polylineDecorator.js"></script>
-<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+<!--<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.7/socket.io.js"></script>
+<!--<script type="text/javascript"  src="./node_modules/socket.io/lib/socket.js"></script>-->
+
 
 
 
@@ -160,15 +163,19 @@
                             </select>
                         </div>
                         <div class="col-sm-2">
-                            <button  class="btn btn-default btn-sm heightElement width100" ng-class="filters.problem_index == 1 ? 'btn-success' : '' " id="problem-index-btn" ng-click="toggleProblemPoints()">
-                                Проблемные
-                            </button>
-                        </div>
-                        <div class="col-sm-2">
-                            <button  class="btn btn-default btn-sm heightElement width100"  id="problem-solve-btn" ng-show ="filters.route != -1" ng-model ="filters.route" ng-click="solveProblem(filters.route)">
+                            <!--<button  class="btn btn-default btn-sm heightElement width100" ng-class="filters.problem_index == 1 ? 'btn-success' : '' " id="problem-index-btn" ng-click="toggleProblemPoints()">-->
+                                <!--Проблемные-->
+                            <!--</button>                            -->
+                            <button  class="btn btn-default btn-sm heightElement width100" id="problem-solve-btn" ng-show ="filters.route != -1" ng-model ="filters.route" ng-click="solveProblem(filters.route)">
                                 Записать
                             </button>
                         </div>
+                        <div class="col-sm-2">
+                            <button  class="btn btn-default btn-sm heightElement" style="width: 90%"  id="time-out-btn" ng-click = "timeOut()">
+                                {{time_out_button}}
+                            </button>
+                        </div>
+
 
                     </div>
                     <div class="row row-gutter-5">
@@ -190,6 +197,11 @@
                         <div  class="col-sm-2">
                             <button ng-show="data.routes.length == 0 || data.currentDay == false" class="btn btn-info btn-sm heightElement width100" ng-click="loadOldDay()" >Загрузить</button>
                             <!--todo вставить вверх ng-show="data.routes.length == 0"-->
+                        </div>
+                        <div class="col-sm-2">
+                            <button  class="btn btn-default btn-sm heightElement "  style="width: 90%" id="end-shift-btn" ng-click="endShift()" >
+                                {{end_button}}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1516,24 +1528,30 @@
 </template>
 
 <template  id="dispatcher-table">
-    <div ng-controller="DispatcherTableController" ng-show="true">
+    <div ng-controller="DispatcherTableController" ng-show="data.settings.is_supervisor">
         <!--settings.userRoles && settings.userRoles.some(function(item){return item == 'supervisor'})-->
         <div>
             <button ng-click="dispTest()"> Тест </button>
-            {{data.supervisor}} {{settings.userRoles}}
             <div>
                 <!--todo вывести статитстику-->
-                Всего маршрутов 55; Закрыто 11; С проблемами 35; Ср.проблемность 234;
+                Всего маршрутов {{localDispatchers.dayStat.allRoutes}}; Закрыто {{localDispatchers.dayStat.closed}}; С проблемами {{localDispatchers.dayStat.lineRoutes}}; Ср.проблемность {{localDispatchers.dayStat.averageProblem}};
             </div>
             <br>
 
                 <div ng-repeat="disp in localDispatchers.shifts" style="margin: 3px; border: solid">
                     {{disp.fio}} Старт
-                    {{disp.start_time_stamp * 1000 | date : 'HH:mm'}}
+                    {{disp.start_time_stamp * 1000 | date : 'dd.MM HH:mm'}}
                 Финиш {{disp.end_time_stamp * 1000 | date : 'HH:mm'}}
-                <!--{{disp.sessions[disp.sessions.length-1].finish * 1000 | date : 'HH:mm'}}-->
-                <button> Сессии  ({{disp.sessions.length}})</button>
+                    {{disp.flag}}
 
+                <button ng-click = "disp.flag = !disp.flag" > Сессии  ({{disp.sessions.length}})</button>
+                        <div ng-repeat="session in disp.sessions" ng-show="disp.flag">
+                           Запрошено {{session.results.self_ask_routes || 0}}
+                           Получено  {{session.results.assigned_routes || 0}}
+                           Сред. Проблемность {{session.results.average_problems || 0}}
+                           Среднее время {{session.results.average_time|| 0}}
+                           <button ng-show = "session.end == undefined">Подробнее</button>
+                        </div>
             </div>
         </div>
     </div>
