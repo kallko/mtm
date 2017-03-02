@@ -17,9 +17,18 @@ angular.module('MTMonitor').controller('DispatcherTableController', ['$scope', '
                 return item.dispatcher == disp.id;
             });
             item.fio = result[0].fio;
-        })
+        });
 
-    };
+        var shift = vm.localDispatchers.shifts[vm.localDispatchers.shifts.length - 1];
+        if (!shift) return;
+        var session = shift.sessions[shift.sessions.length - 1];
+        if (!session || !session.routes || !session.routes.length) return;
+        session.results = session.results || {};
+        session.results.average_problems = parseInt(session.routes.reduce(function(summ, item){
+            return summ + item.max_problem;
+        },0)/session.routes.length);
+
+    }
 
 
     if (rootScope && rootScope.data && rootScope.data.settings) vm.supervisor = rootScope.data.settings.userRoles.some(function(item){

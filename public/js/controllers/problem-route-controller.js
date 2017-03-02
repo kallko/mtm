@@ -36,14 +36,15 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         function confirmOnline() {
             if(rootScope.restart) return;
-            console.log("confirmOnline in process", rootScope.settings, rootScope.data.server_time);
+            console.log("confirmOnline in process", rootScope.settings);
             var sync=[];
             if (rootScope.data && rootScope.data.routes && rootScope.data.currentDay == true) {
                 for (var i=0; i<rootScope.data.routes.length; i++){
                 sync.push(rootScope.data.routes[i].uniqueID);
             }}
-            rootScope.$emit('addLoginAndTimeStampToNotes', rootScope.data.routes);
+            if (rootScope.data && rootScope.data.routes) rootScope.$emit('addLoginAndTimeStampToNotes', rootScope.data.routes);
 
+            if (!rootScope.data || !rootScope.data.routes || !rootScope.data.routes.length) return;
             http.post('./confirmonline/', {sync: sync, routes: rootScope.data.routes})
                 .then(function (data) {
 

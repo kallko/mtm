@@ -1547,7 +1547,7 @@
                 <button ng-click = "disp.flag = !disp.flag" > Сессии  ({{disp.sessions.length}})</button>
                         <div ng-repeat="session in disp.sessions" ng-show="disp.flag">
                            Запрошено {{session.results.self_ask_routes || 0}}
-                           Получено  {{session.results.assigned_routes || 0}}
+                           Получено  {{session.results.auto_routes || 0}}
                            Сред. Проблемность {{session.results.average_problems || 0}}
                            Среднее время {{session.results.average_time|| 0}}
                            <button ng-show = "session.end == undefined">Подробнее</button>

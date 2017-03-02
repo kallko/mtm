@@ -4793,6 +4793,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                         http.post('./savetonode', {route: result})
                             .success(function (rId) {
                                 console.log("Сохранено", rId);
+                                scope.$emit("loadRoutes");
                                 for (var j=0; j<rootScope.data.routes.length; j++){
                                     console.log("Входные данные", rootScope.data.routes[j].uniqueID, rId);
 

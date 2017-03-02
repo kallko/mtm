@@ -966,7 +966,7 @@ router.route('/dailydata')
 
 
             function dataReadyCallback(data) {
-                log.info("Загрузка данных из 1C заняла", parseInt(Date.now()/1000)-middleTime);
+                log.info("Загрузка данных из 1C заняла", parseInt(Date.now()/1000)-middleTime, data.BRANCH);
                 endTime = parseInt(Date.now()/1000);
                 if (data.routes != undefined) {
                     log.info('=== dataReadyCallback === send data to client ===', data.routes.length );}
@@ -1270,7 +1270,7 @@ router.route('/askforroute')
         }
         //log.info ("Начинаем запись файла");
         //log.toFLog('logging.txt', JSON.stringify(result));
-        addRouteToDispatcher(req.session.login, currentCompany, result);
+        addRouteToDispatcher(req.session.login, currentCompany, result, 0);
         _data.setData(cashedDataArr);
         _routes.setData(blockedRoutes);
         res.status(200).json({route: result});
@@ -2043,7 +2043,7 @@ router.route('/savetonode/')
             log.info("Приступаем к сохранению роута");
             var i=0;
             var id = parseInt(req.body.route.uniqueID);
-            var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
+            var key = req.session.login.substring(0, req.session.login.indexOf('.'));
             var updateRoute = new modifyRoutes();
             var cashedDataArr = _data.getData();
             updateRoute.ReplaceStopObjectByStopLink (req.body.route);
@@ -2077,6 +2077,7 @@ router.route('/savetonode/')
                     }
 
                 }
+                removeRouteFromSession(cashedDataArr[currentCompany].dispatchers, req.session.login, uniqueId);
                 _routes.setData(blockedRoutes);
             }
 
@@ -2104,6 +2105,31 @@ router.route('/savetonode/')
         }
     });
 
+
+
+function  removeRouteFromSession(dispatchers, login, uniqueId) {
+    console.log("2111", dispatchers, login, uniqueId);
+    if (!dispatchers || !login || !uniqueId) return;
+    var dispIds = dispatchers.allDispatchers.filter(function(disp) {
+        return disp.login == login;
+    });
+
+    var disp = dispIds[0];
+
+    var shifts = dispatchers.shifts.filter(function(item){
+        return item.dispatcher == disp.id;
+    });
+    var shift = shifts[0];
+
+    var session = shift.sessions[shift.sessions.length - 1];
+
+    session.routes.forEach(function(route){
+        if (route.uniqueID == uniqueId){
+            console.log("HAHAHAHAHAHAAHHAHA", route);
+            route.finish = parseInt(Date.now()/1000);
+        }
+    })
+}
 
 //router.route('/checknewiten')
 //    .get(function (req, res) {
@@ -2291,7 +2317,6 @@ router.route('/askforproblems/:need')
                             if ("" + toOperator[i] == "" + cashedDataArr[currentCompany].blocked_routes[j].uniqueID) {
                                 log.info("Добавляем маршрут");
                                 result.routes.push(cashedDataArr[currentCompany].blocked_routes[j]);
-
                             }
                         }
 
@@ -2328,7 +2353,7 @@ router.route('/askforproblems/:need')
                 while (result.routes.length < need) {
                     //Если у оператора нет заблокированного маршрута ищем, что ему дать из проблем
                     log.info("Выбираем новую проблемму");
-                    i = choseRouteForOperator(currentCompany, login, cashedDataArr);
+                    i = choseRouteForOperator(currentCompany, req.session.login, cashedDataArr);
 
                     if (i < 0 &&  result.routes.length > 0){
                         log.info("Нашли проблемм сколько могли");
@@ -2388,8 +2413,8 @@ router.route('/askforproblems/:need')
             } else {
                 log.info("нужна всего одна новая проблемма");
                 log.info("Выбираем новую проблемму");
-                i = choseRouteForOperator(currentCompany, login, cashedDataArr);
-
+                i = choseRouteForOperator(currentCompany, req.session.login, cashedDataArr);
+                console.log ("I Finded".blue, i);
                 if (i < 0) {
                     console.log("Reply 2381".red);
                     res.status(200).json("All problem routes blocked");
@@ -2790,8 +2815,9 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
                     tPoint.arrival_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5) + ":00";
 
                     // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
-                    if (tPoint.ARRIVAL_TIME.length < 1) {
-                        tPoint.ARRIVAL_TIME = cashedDataArr[currentCompany].routes[i].points[j - 1].ARRIVAL_TIME;
+                    if (tPoint.ARRIVAL_TIME == undefined || tPoint.ARRIVAL_TIME.length < 1) {
+                        //tPoint.ARRIVAL_TIME = cashedDataArr[currentCompany].routes[i].points[j - 1].ARRIVAL_TIME;
+                        tPoint.ARRIVAL_TIME = createFakeArrivalTime(tPoint, cashedDataArr[currentCompany].routesOfDate);
                     }
                     var toDay = tPoint.ARRIVAL_TIME.substr(0, 10);
 
@@ -3844,13 +3870,13 @@ function checkUncalculateRoute(point, stop, company, cashedDataArr){
     var parts=point.AVAILABILITY_WINDOWS.split(";");
     var size=parts.length;
     var i=0;
-    while(i<size){
-        var date=point.ARRIVAL_TIME.substr(0,11);
+    while(i < size){
+        var date = point.ARRIVAL_TIME.substr(0,11);
         var temp=parts[i].trim();
         var before=temp.substr(0,5);
         before=date+before+":00";
         //log.info("before=", before);
-        var begin=strToTstamp(before, point);
+        var begin = strToTstamp(before, point);
 
         var after=temp.slice(-5);
         after=date+after+":00";
@@ -4282,8 +4308,9 @@ try {
                                     tPoint.arrival_time_hhmm = tPoint.AVAILABILITY_WINDOWS.slice(-5) + ":00";
 
                                     // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
-                                    if (tPoint.ARRIVAL_TIME.length < 1) {
-                                        tPoint.ARRIVAL_TIME = cashedDataArr[currentCompany].routes[i].points[j - 1].ARRIVAL_TIME;
+                                    if (!tPoint.ARRIVAL_TIME || tPoint.ARRIVAL_TIME.length < 1) {
+                                        //tPoint.ARRIVAL_TIME = cashedDataArr[currentCompany].routes[i].points[j - 1].ARRIVAL_TIME;
+                                        tPoint.ARRIVAL_TIME = createFakeArrivalTime(tPoint, cashedDataArr[currentCompany].routesOfDate);
                                     }
                                     var toDay = tPoint.ARRIVAL_TIME.substr(0, 10);
 
@@ -4487,7 +4514,7 @@ try {
 
 
                 function dataReadyCallback(data) {
-                    log.info("Загрузка данных НОВОГО ДНЯ из 1C заняла", parseInt(Date.now()/1000)-middleTime);
+                    log.info("Загрузка данных НОВОГО ДНЯ из 1C заняла", parseInt(Date.now()/1000)-middleTime, data.BRANCH);
                     endTime = parseInt(Date.now()/1000);
                     if (data.routes != undefined) {
                         log.info('=== dataReadyCallback === send data to client ===', data.routes.length);}
@@ -4773,6 +4800,7 @@ try {
 // Функция подбирает роут для оператора
 function choseRouteForOperator(company, login, cashedDataArr){
     try{
+    console.log ("Incorrect data".blue,  company, login);
     var blockedRoutes = _routes.getData();
     log.info("Start choseRouteForOperator");
     var result = 0;
@@ -4795,8 +4823,9 @@ function choseRouteForOperator(company, login, cashedDataArr){
 
     }
 
-    if(result< cashedDataArr[company].line_routes.length ){
+    if(result < cashedDataArr[company].line_routes.length ){
         log.info("Отдаем оператору маршрут ", result, cashedDataArr[company].line_routes[result].uniqueID );
+        addRouteToDispatcher(login, company, cashedDataArr[company].line_routes[result], 1);
         blockedRoutes.push({id: "" + cashedDataArr[company].line_routes[result].uniqueID, company: company, login: login, time: parseInt(Date.now()/1000)});
 
         if(cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes = [];
@@ -5520,12 +5549,10 @@ function calculateStatistic (company, cashedDataArr){
     cashedDataArr[company].blocked_routes ? blocked_routes = cashedDataArr[company].blocked_routes.length : blocked_routes = 0;
     dayStat.averageProblem = parseInt(((allProblemSumm || 0) + (allBlockedProblem || 0))/((problemRoutes + blocked_routes) || 1));
 
-        console.log ("Prestatistic", dayStat.averageProblem, closed);
+       // console.log ("Prestatistic", dayStat.averageProblem, closed, company, dayStat, !cashedDataArr[company].dispatchers);
 
     if (cashedDataArr[company].dispatchers) cashedDataArr[company].dispatchers.dayStat = dayStat;
-        for (var key in cashedDataArr[company]){
-        console.log("Key".red, key);
-    }
+
 
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
@@ -5924,7 +5951,8 @@ function checkCorrectCalculating(company, cashedDataArr){
         for (i = 0; i < cashedDataArr[company].routes.length; i++) {
             for (j = 0; j<cashedDataArr[company].routes[i].points.length; j++){
                 if(cashedDataArr[company].routes[i].points[j].waypoint == undefined) {
-                    log.info(cashedDataArr[company].routes[i].points[j], "Внимание, найдена точка маршрута без описания!!!");
+                    //todo снять коммент снизу
+                    //log.info(cashedDataArr[company].routes[i].points[j], "Внимание, найдена точка маршрута без описания!!!");
                 }
             }
         }
@@ -5963,10 +5991,12 @@ function createArrivalTime (tPoint, route, controlledWindow, company, cashedData
     // Костыль. Когда в утвержденные маршруты попадает точка с неуказанным временем прибытия
     //todo очень злой костыль, нужно срочно найти правильное решение
 
-    if (tPoint.ARRIVAL_TIME.length < 1) {
-        if(route.points[1] != undefined && route.points[1].ARRIVAL_TIME != undefined && route.points[1].ARRIVAL_TIME.length !='' && route.points[1].ARRIVAL_TIME.length !=0) {
-            tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME
-        }
+    if (!tPoint.ARRIVAL_TIME || tPoint.ARRIVAL_TIME.length < 1) {
+        tPoint.ARRIVAL_TIME = createFakeArrivalTime(tPoint, cashedDataArr[company].routesOfDate);
+
+        //if(route.points[1] != undefined && route.points[1].ARRIVAL_TIME != undefined && route.points[1].ARRIVAL_TIME.length !='' && route.points[1].ARRIVAL_TIME.length !=0) {
+        //    tPoint.ARRIVAL_TIME = route.points[1].ARRIVAL_TIME
+        //}
 
     }
     var toDay = tPoint.ARRIVAL_TIME.substr(0, 10);
@@ -6117,10 +6147,10 @@ function createSeveralAviabilityWindows (point){
     if (point.AVAILABILITY_WINDOWS == undefined || point.AVAILABILITY_WINDOWS.length == 0) return;
 
     var parts=point.AVAILABILITY_WINDOWS.split(";");
-    var size=parts.length;
+    var size = parts.length;
     var i=0;
     while(i<size){
-        var date=point.ARRIVAL_TIME.substr(0,11);
+        var date = point.ARRIVAL_TIME.substr(0,11);
         var temp=parts[i].trim();
         //log.info("Arrival Time", point.ARRIVAL_TIME );
         //log.info("Date", date, temp);
@@ -6217,8 +6247,9 @@ function calculateProblemIndex(company, cashedDataArr) {
         timeThreshold = 3600 * 6,
         timeMin = 0.25,
         timeCoef;
-    for (var i=0; i<cashedDataArr[company].routes.length; i++) {
-        var route = cashedDataArr[company].routes[i];
+    for (var i = 0; i < cashedDataArr[company].routes.length; i++) {
+
+        var route =  cashedDataArr[company].routes[i];
         route.max_problem = 0;
         route.problem_point={};
         route.kind_of_problem='';
@@ -6247,7 +6278,7 @@ function calculateProblemIndex(company, cashedDataArr) {
                     route.find_problem_ts = parseInt(Date.now()/1000);
                 }
                 // Проверка на максимальную проблемность
-                if(point.problem_index > route.max_problem) {
+                if (point.problem_index > route.max_problem) {
                     route.max_problem = point.problem_index;
                     route.problem_point = point;
                     route.kind_of_problem ='звонок по отмене';
@@ -6324,7 +6355,7 @@ function calculateProblemIndex(company, cashedDataArr) {
                 //point.last_change = 5539;
 
 
-                point.problem_index =delta + parseInt(point.problem_index / 100);
+                point.problem_index = delta + parseInt(point.problem_index / 100);
 
                 // log.info("Проблемность равна  ",  point.problem_index);
                 // Проверка на максимальную проблемность
@@ -6338,10 +6369,9 @@ function calculateProblemIndex(company, cashedDataArr) {
 
                 // Calculate problem index for delay points
 
-
-
         }
     }
+
 
 
     //проверка не запланировано ли прибытие в какую либо точку за пределами заказанных окон
@@ -6350,12 +6380,12 @@ function calculateProblemIndex(company, cashedDataArr) {
     // todo хотя по идее при равильной работе диспетчера он увидит эту проблему прямо утром при запуске сервиса первом пересчете
     // todo трудность в том, что оператор может первый раз запустить программу в середине дня
 
-    for ( i=0; i<cashedDataArr[company].routes.length; i++) {
+    for ( i = 0; i<cashedDataArr[company].routes.length; i++) {
          route = cashedDataArr[company].routes[i];
         if (!point.problem_index || point.problem_index == 0) continue;
 
 
-        for ( j=0; j < route.points.length; j++){
+        for ( j = 0; j < route.points.length; j++){
             point = route.points[j];
             var outOfWindows = true;
             if (point.orderWindows == undefined || point.waypoint == undefined || point.waypoint.TYPE == "WAREHOUSE" || point.waypoint.TYPE =="PARKING") {
@@ -6519,6 +6549,12 @@ function calculateProblemIndex(company, cashedDataArr) {
         if (cashedDataArr[company].routes[i].max_problem == 0 || cashedDataArr[company].routes.max_problem == undefined ) {
             cashedDataArr[company].routes[i].find_problem_ts = 0;
         }
+    }
+
+
+    for (i = 0; i < cashedDataArr[company].routes; i++){
+        console.log("Routes max_problem ".blue, cashedDataArr[company].routes[i].max_problem)
+
     }
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);
@@ -7764,8 +7800,8 @@ function newLogin(login, company) {
 
 
 
-function addRouteToDispatcher(login, company, result) {
-    console.log ("Start addRouteToDispatcher".red);
+function addRouteToDispatcher(login, company, result, type) {
+    console.log ("Start addRouteToDispatcher".red, login, company, result, type);
     var casheDataArray = _data.getData();
     var dispatchers = casheDataArray[company].dispatchers;
     var dispIds = dispatchers.allDispatchers.filter(function(disp){
@@ -7784,7 +7820,15 @@ function addRouteToDispatcher(login, company, result) {
     session.routes.push({uniqueID: result.uniqueID, name: result.transport.NAME + " " + result.driver.NAME, problem: result.kind_of_problen, max_problem: result.max_problem, start: parseInt(Date.now()/1000)});
     session.results = session.results || {};
     session.results.self_ask_routes = session.results.self_ask_routes || 0;
-    session.results.self_ask_routes++;
+    session.results.auto_routes = session.results.auto_routes || 0;
+    session.results.reload_routes = session.results.reload_routes || 0;
+    if (type == 0) session.results.self_ask_routes++;
+    if (type == 1) session.results.auto_routes++;
+    if (type == 2) session.results.reload_routes++;
+    session.results.average_problems = parseInt(session.routes.reduce(function(summ, item){
+            return summ + item.max_problem;
+        },0)/session.routes.length);
+
     _data.setData(casheDataArray);
 };
 
@@ -7901,6 +7945,13 @@ function checkChangeStatusForHook(company, b_route, route){
 //
 //
 //}
+
+function createFakeArrivalTime(tPoint, routesOfDate){
+    console.log("Create Fake Arrival Time ".yellow, tPoint.ARRIVAL_TIME, routesOfDate);
+    return "" + routesOfDate + " " + tPoint.AVAILABILITY_WINDOWS.substring(tPoint.AVAILABILITY_WINDOWS.length-5);
+    //console.log("Create Fake Arrival Time ".yellow, tPoint.ARRIVAL_TIME);
+}
+
 
 function loadCoords(company, cashedDataArr) {
     try {

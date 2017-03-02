@@ -481,8 +481,6 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                    // shift_name = res.MESSAGE.SHIFT_NAME;
                 //console.log("полученные сенсоры",res.MESSAGE);
 
-                //console.log("NOTES", notes);
-
                 //fixme чтобы не грузить сервер
                 //return;
 
