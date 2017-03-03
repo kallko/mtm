@@ -23,6 +23,7 @@
     };
     var pgp = require("pg-promise")(options),
         db = pgp("postgres://postgres:postgres@localhost:5432/test");
+
     var
         colors = require('colors');
         colors.supportsColor = true;
