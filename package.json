@@ -9,7 +9,7 @@
   "author": "Andriy Kalko",
   "license": "ISC",
   "dependencies": {
-
+    "bluebird": "~3.4.7",
     "body-parser": "^1.14.1",
     "colors": "^1.1.2",
     "cron": "^1.1.0",
@@ -21,8 +21,7 @@
     "querystring": "^0.2.0",
     "request": "^2.64.0",
     "soap": "^0.9.3",
-    "xml2js": "^0.4.12",
-    "socket.io": "~1.7.3",
-    "bluebird": "~3.4.7"
+    "socket.io": "^1.7.3",
+    "xml2js": "^0.4.12"
   }
 }
