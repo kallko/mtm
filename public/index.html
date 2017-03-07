@@ -172,7 +172,7 @@
                             </button>
                         </div>
                         <div class="col-sm-2">
-                            <button  class="btn btn-default btn-sm heightElement" style="width: 90%"  id="time-out-btn" ng-click = "timeOut()">
+                            <button  ng-show = "false" class="btn btn-default btn-sm heightElement" style="width: 90%"  id="time-out-btn" ng-click = "timeOut()">
                                 {{time_out_button}}
                             </button>
                         </div>
@@ -200,7 +200,7 @@
                             <!--todo вставить вверх ng-show="data.routes.length == 0"-->
                         </div>
                         <div class="col-sm-2">
-                            <button  class="btn btn-default btn-sm heightElement "  style="width: 90%" id="end-shift-btn" ng-click="endShift()" >
+                            <button  ng-show = "false" class="btn btn-default btn-sm heightElement "  style="width: 90%" id="end-shift-btn" ng-click="endShift()" >
                                 {{end_button}}
                             </button>
                         </div>
@@ -1529,7 +1529,7 @@
 </template>
 
 <template  id="dispatcher-table">
-    <div ng-controller="DispatcherTableController" ng-if="data.settings.is_supervisor">
+    <div ng-controller="DispatcherTableController" ng-if="data.settings.is_supervisor" ng-show="false">
         <!--settings.userRoles && settings.userRoles.some(function(item){return item == 'supervisor'})-->
         <div>
             <button ng-click="dispTest()"> Тест </button>

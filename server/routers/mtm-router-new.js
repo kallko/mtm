@@ -495,7 +495,7 @@ router.route('/keysoldroutescache')
     .get(function(req, res){
         try {
         var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         if(currentCompany in oldRoutesCache){
             log.info(Object.keys(oldRoutesCache[currentCompany]));
             res.status(200).json( Object.keys(oldRoutesCache[currentCompany]) );
@@ -560,7 +560,7 @@ router.route('/askblocked')
             var blockedRoutes = _routes.getData() ;
             if (!req.session.login) return;
             var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-            var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             var result={};
             result.data =[];
             //result.call = {};
@@ -590,8 +590,8 @@ router.route('/updatepushes')
     try {
         //log.info("Получил запрос на updatepushes", req.body.data);
 
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
-        var currentCompany = companyLogins[key];
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var result = req.body.data;
         var data = req.body.data;
         var cashedDataArr = _data.getData();
@@ -629,7 +629,7 @@ router.route('/updatetrack')
         //log.info ("Получил запрос на updatetrack", req.body.data);
 
         var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var result = [];
         var data = req.body.data;
         var t = data.length;
@@ -700,8 +700,8 @@ router.route('/nodeserch')
         try {
         log.info("Получил запрос на поиск", req.body.data);
 
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
-        var currentCompany = companyLogins[key];
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var input = req.body.data;
         var  cashedDataArr = _data.getData();
         var result = serchInCache(input, currentCompany, cashedDataArr);
@@ -876,8 +876,9 @@ router.route('/dailydata')
             && (currentCompany in needNewReqto1C)
             /*&& cashedDataArr[req.session.login].lastUpdate == today12am*/ ) {
             console.log("Need from Cashe 852".yellow);
-            newLogin(req.session.login, currentCompany);
             //fixme
+            //newLogin(req.session.login, currentCompany);
+
             //return;
             if (cashedDataArr[currentCompany].routes) log.info('=== loaded from session === send data to client === ROutes =',cashedDataArr[currentCompany].routes.length);
 
@@ -1228,7 +1229,7 @@ router.route('/askforroute')
     .post(function(req, res) {
         try {
         var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var uniqueID = req.body.id;
         log.info("Пришел одиночный запрос на роут", uniqueID);
         var blockedRoutes = _routes.getData();
@@ -1280,7 +1281,8 @@ router.route('/askforroute')
         }
         //log.info ("Начинаем запись файла");
         //log.toFLog('logging.txt', JSON.stringify(result));
-        addRouteToDispatcher(req.session.login, currentCompany, result, 0);
+        //fixme
+            //addRouteToDispatcher(req.session.login, currentCompany, result, 0);
         _data.setData(cashedDataArr);
         _routes.setData(blockedRoutes);
         res.status(200).json({route: result});
@@ -1411,15 +1413,15 @@ router.route('/trackparts/:start/:end')
         }
 
         var first = true;
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
-        var currentCompany = companyLogins[key];
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var cashedDataArr = _data.getData();
         tracksManager.getRealTrackParts(cashedDataArr[currentCompany], req.params.start, req.params.end,
             function (data) {
                 if (!first) return;
                 first = false;
                 var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-                var currentCompany = companyLogins[key];
+                var currentCompany = req.session.company + "-" + req.session.branch;
                 var cached = cashedDataArr[currentCompany];
                 log.info('getRealTrackParts DONE', currentCompany);
 
@@ -1554,8 +1556,8 @@ router.route('/saveroute/')
 router.route('/setmobiledevice/')
     .post(function (req, res) {
         try {
-            var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
-            var currentCompany = companyLogins[key];
+            var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+            var currentCompany = req.session.company + "-" + req.session.branch;
             //log.info('saveroute, len', req.body.routes.length);
             var soapManager = new soap(req.session.login);
             var imei = req.body.imei;
@@ -1739,7 +1741,7 @@ router.route('/routerdata')
     .get(function (req, res) {
         try {
         var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var routeIndx = req.query.routeIndx,
             cashedDataArr = _data.getData(),
             cData = cashedDataArr[currentCompany],
@@ -1812,7 +1814,8 @@ router.route('/closeday')
         }
 
         log.info("приняли данные на роутере");
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+
         //var currentCompany = companyLogins[key];
         log.toFLog("/logging.txt", req.body.closeDayData);
         log.info ("start working");
@@ -2013,8 +2016,8 @@ router.route('/changedriver/')
         // Перезапись в кеше маршрута отредактированного в мониторинге
         var i = 0;
         //req.body.routes[0].filterId = null;
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
-        var currentCompany = companyLogins[key];
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var cashedDataArr = _data.getData();
         while(i < cashedDataArr[currentCompany].blocked_routes.length){
             if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == req.body.routes[0].uniqueID){
@@ -2058,7 +2061,7 @@ router.route('/savetonode/')
             var cashedDataArr = _data.getData();
             updateRoute.ReplaceStopObjectByStopLink (req.body.route);
             var updatePoints = new modifyPoints ();
-            var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             log.info("Приступаем к сохранению роута", i, id, currentCompany);
 
             while(cashedDataArr[currentCompany].blocked_routes != undefined && i < cashedDataArr[currentCompany].blocked_routes.length){
@@ -2221,9 +2224,9 @@ router.route('/getServerStatus')
     .get(function(req, res) {
         try {
         //log.info("Router");
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
+        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var login = key;
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var result={};
         var cashedDataArr = _data.getData();
         result.company = currentCompany;
@@ -2256,7 +2259,7 @@ router.route('/askforproblems/:need')
         var result = {};
         var key = req.session.login.substring(0, req.session.login.indexOf('.'));
         var login = key;
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var need = parseInt((req.params.need).substring(1));
         //log.info("ASk For ", need, "Problem", req.session.login);
         if(  need < 0){
@@ -2495,7 +2498,7 @@ router.route('/confirmonline')
         log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
         var blockedArr = req.body.sync;
         var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         var blockedRoutes = _routes.getData();
         var cashedDataArr = _data.getData();
         autasaveRoutes(currentCompany, req.body.routes, cashedDataArr);
@@ -4531,8 +4534,10 @@ try {
 
                         //log.info("ReChange SessionLogin", data.CLIENT_ID);
 
-                        var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
-                        var key=""+login;
+                        var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID + "-" + data.BRANCH));
+                        console.log("!!!!!!!!!!!!!!!!!!!! CURENTCOMPANY".red, currentCompany, "!!!!!!!!!!!!!!!!!!!!".red)
+
+                        var key=""+req.session.login;
                         companyLogins[key] = currentCompany;
 
 
@@ -4808,7 +4813,7 @@ try {
 // Функция подбирает роут для оператора
 function choseRouteForOperator(company, login, cashedDataArr){
     try{
-    console.log ("Incorrect data".blue,  company, login);
+    //console.log ("Incorrect data".blue,  company, login);
     var blockedRoutes = _routes.getData();
     log.info("Start choseRouteForOperator");
     var result = 0;
@@ -4833,7 +4838,8 @@ function choseRouteForOperator(company, login, cashedDataArr){
 
     if(result < cashedDataArr[company].line_routes.length ){
         log.info("Отдаем оператору маршрут ", result, cashedDataArr[company].line_routes[result].uniqueID );
-        addRouteToDispatcher(login, company, cashedDataArr[company].line_routes[result], 1);
+        //fixme
+        //addRouteToDispatcher(login, company, cashedDataArr[company].line_routes[result], 1);
         blockedRoutes.push({id: "" + cashedDataArr[company].line_routes[result].uniqueID, company: company, login: login, time: parseInt(Date.now()/1000)});
 
         if(cashedDataArr[company].blocked_routes == undefined) cashedDataArr[company].blocked_routes = [];
@@ -7778,11 +7784,12 @@ function addSession (shift, kind, save){
 function newLogin(login, company) {
     console.log("NewLogin ".yellow, login, company);
     var cashedDataArr = _data.getData();
-    var dispatchers = cashedDataArr[company].dispatchers;
+    var dispatchers = cashedDataArr[company].dispatchers || {};
+
     console.log("SHIFTS 7656".yellow, dispatchers.shifts);
     var isExist = false;
     var existShift;
-
+    dispatchers.allDispatchers = dispatchers.allDispatchers || [];
     var dispatcher = dispatchers.allDispatchers.filter(function(disp){
         return disp.login == login;
     });
