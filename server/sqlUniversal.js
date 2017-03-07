@@ -22,8 +22,8 @@
         promiseLib: promise
     };
     var pgp = require("pg-promise")(options),
+        //db = pgp("postgres://postgres:postgres@localhost:5432/test");
         db = pgp("postgres://postgres:postgres@localhost:5432/monitoring");
-        //db = pgp("postgres://postgres:postgres@localhost:5432/monitoring");
 
     var
         colors = require('colors');
