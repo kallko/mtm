@@ -36,7 +36,7 @@
         '||': 'OR',
         'dispatchers': 'public."dispatchers" ',
         'shifts': 'public.shifts',
-        'sessions': 'public.sessions',
+        'sessions': 'sessions',
         'actions': 'public.action_kinds',
         'from': 'FROM',
         'data': 'VALUES (',
@@ -186,3 +186,4 @@ function firstConnect(data){
         companys.push(item.company);
     });
 }
+

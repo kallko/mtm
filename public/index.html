@@ -1529,7 +1529,7 @@
 </template>
 
 <template  id="dispatcher-table">
-    <div ng-controller="DispatcherTableController" ng-show="data.settings.is_supervisor">
+    <div ng-controller="DispatcherTableController" ng-if="data.settings.is_supervisor">
         <!--settings.userRoles && settings.userRoles.some(function(item){return item == 'supervisor'})-->
         <div>
             <button ng-click="dispTest()"> Тест </button>
@@ -1550,7 +1550,7 @@
                            Запрошено {{session.results.self_ask_routes || 0}}
                            Получено  {{session.results.auto_routes || 0}}
                            Сред. Проблемность {{session.results.average_problems || 0}}
-                           Среднее время {{session.results.average_time|| 0}}
+                           Среднее время {{(session.results.average_time * 1000 || 0) | date : 'mm:ss'}}
                            <button ng-show = "session.end == undefined">Подробнее</button>
                         </div>
             </div>

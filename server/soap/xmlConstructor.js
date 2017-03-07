@@ -87,6 +87,7 @@ XMLConstructor.prototype.itineraryXML = function (id, version, newItinerary) {
     str += this.xml.instruction.end;
     str += this.xml.instructions.end;
     str += this.xml.end;
+    console.log(str, "ZAPROS 90");
     return str;
 };
 

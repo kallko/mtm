@@ -18,7 +18,7 @@ var express = require('express'),
 
 
 
-    develop = true;
+    var develop = true;
     if (develop) {
         var
         colors = require('colors');
@@ -113,7 +113,7 @@ router.route('/saveData')
 
             fs.writeFile('./logs' + '/' +'savedData.txt', data, function(err){
                 if (err) log.info("Не могу записать. Начинай ковыряться в коде", err);
-                mes+= err;
+                mes += err;
             });
 
             res.status(200).json({mes: mes });
@@ -134,351 +134,351 @@ router.route('/loadData')
     });
 
 
-var existData = [];
-router.route('/analysisIDSpoints')
-    .get(function(req, res){
-        try {
-
-        if (develop) console.log("Start load data".green);
-        var qInd = 0;
-
-
-        //    const rl = readline.createInterface({
-        //        input: fs.createReadStream('./logs/hvost')
-        //    });
-        //
-        //
-        //    if(develop) console.log(rl);
-        //
-        //    rl.on('line', function (line)  {
-        //        qInd++;
-        //        console.log("Pushing", qInd);
-        //        pointsIDS.push(line);
-        //        if ( qInd == 2782) parseTextFileData();
-        //});
-
-            console.log("pointsIDS.length", pointsIDS.length);
-        fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
-
-            existData = JSON.parse(data);
-            console.log("ExistData", existData[0], existData.length);
-            var i = 0;
-            fs.readFile('./logs/bigData2-1-1.txt', 'utf8', function (err1, data1) {
-                console.log("SecondRead Success");
-                bigData = [];
-                bigData.length = 3200000;
-                var prebigData = JSON.parse(data1);
-                indexBigData(prebigData);
-                readandConcatNextFile(i);
-
-            });
-        });
-
-
-            //fs.readFile('./logs' + '/' +'resultforIDS-1.txt', 'utf8', function (err, data) {
-            //    console.log("Error in load", err);
-            //    var tempPoints = JSON.parse(data);
-            //    allPoints = allPoints.concat(tempPoints);
-            //    fs.readFile('./logs' + '/' +'resultforIDS-2.txt', 'utf8', function (err, data) {
-            //        console.log("Error in load", err);
-            //        var tempPoints = JSON.parse(data);
-            //        allPoints = allPoints.concat(tempPoints);
-            //        console.log(allPoints.length);
-            //    })
-            //
-            //});
-
-
-
-            res.status(200).json({msg: 'complete'});
-        } catch (e) {
-            log.error( "Ошибка "+ e + e.stack);
-        }
-    });
-
-
-
-function indexBigData(matrix) {
-    try {
- matrix.forEach(function(item){
-        bigData[item.id] = item;
-    })
-    } catch (e) {
-        log.error( "Ошибка "+ e + e.stack);
-    }
-}
-
-function readandConcatNextFile(indx){
-
-    try {
-    var filesNames = [
-        {name : "resultforIDS-1.txt"},
-        {name : "resultforIDS-2.txt"},
-        {name : "resultforIDS-3.txt"},
-        {name : "resultforIDS-4.txt"},
-        {name : "resultforIDS-5.txt"},
-        {name : "resultforIDS-6.txt"},
-        {name : "resultforIDS-7.txt"},
-        {name : "resultforIDS-1"},
-        {name : "resultforIDS-2"},
-        {name : "resultforIDS-4"},
-        {name : "resultforIDS-5"},
-        {name : "resultforIDS-6"},
-        {name : "resultforIDS-7"},
-        {name : "resultforIDS-8"},
-        {name : "resultforIDS-9"},
-        {name : "resultforIDS-10"},
-        {name : "resultforIDS-11"},
-        {name : "resultforIDS-13"},
-        {name : "resultforIDS-14"},
-        {name : "resultforIDS-16"},
-        {name : "resultforIDS-17"},
-        {name : "resultforIDS-18"},
-        {name : "resultforIDS-19"},
-        {name : "resultforIDS-20"},
-        {name : "resultforIDS-21"},
-        {name : "resultforIDS-22"},
-        {name : "resultforIDS-25"},
-        {name : "resultforIDS-27"},
-        {name : "resultforIDS-28"},
-        {name : "resultforIDS-29"},
-        {name : "additionalIDSData"},
-        {name : "resultforIDS-32"},
-        {name : "resultforIDS-33"},
-        {name : "resultforIDS-37"},
-        {name : "resultforIDS-38"},
-        {name : "resultforIDS-39"},
-        {name : "resultforIDS-40"},
-        {name : "resultforIDS-41"},
-        {name : "resultforIDS-44"},
-        {name : "resultforIDS-46"},
-        {name : "resultforIDS-47"},
-        {name : "resultforIDS-49"},
-        {name : "resultforIDS-50"},
-        {name : "resultforIDS-52"},
-        {name : "resultforIDS-53"},
-        {name : "resultforIDS-54"},
-        {name : "resultforIDS-58"},
-        {name : "resultforIDS-59"},
-        {name : "resultforIDS-101.txt"},
-        {name : "resultforIDS-201.txt"},
-        {name : "resultforIDS-301.txt"},
-        {name : "resultforIDS-501.txt"},
-        {name : "resultforIDS-601.txt"},
-        {name : "resultforIDS-202.txt"},
-        {name : "resultforIDS-402.txt"},
-        {name : "resultforIDS-502.txt"},
-        {name : "resultforIDS-602.txt"},
-        {name : "resultforIDS-702.txt"},
-        {name : "resultforIDS-103.txt"},
-        {name : "resultforIDS-100"},
-        {name : "resultforIDS-200"},
-        {name : "resultforIDS-300"},
-        {name : "resultforIDS-500"},
-        {name : "resultforIDS-600"},
-        {name : "resultforIDS-700"},
-        {name : "resultforIDS-800"},
-        {name : "resultforIDS-1100"},
-        {name : "resultforIDS-1300"},
-        {name : "resultforIDS-1400"},
-        {name : "resultforIDS-1500"},
-        {name : "resultforIDS-1600"},
-        {name : "resultforIDS-1900"},
-        {name : "resultforIDSdop-1"},
-        {name : "resultforIDSdop-2"},
-        {name : "resultforIDSdop-3"}
-    ];
-
-    console.log("indx", indx, filesNames.length-1);
-
-    //if (indx > filesNames.length-1) return;
-
-
-    //var fileName = 'resultForIDS-2000.txt';
-    var fileName = filesNames[indx].name;
-
-    console.log(fileName);
-
-    fs.readFile('./logs' + '/' + fileName, 'utf8', function (err, data) {
-        try {
-            var tempPoints = JSON.parse(data);
-        } catch (e) {
-            if (develop) console.log(e.red);
-        }
-
-        //pointsIDS = pointsIDS.concat(tempPoints);
-        pointsIDS = tempPoints;
-        //askForStreetId(pointsIDS);
-        //askAdditionalData();
-        //startSerchingLatLon();
-        //fillBigData();
-        //console.log(pointsIDS.length);
-        //console.log ( " finish".red, pointsIDS[pointsIDS.length-1].id);
-        createRealLatLon();
-
-        console.log("Первый этап обработки 1 тысячи",indx, filesNames.length);
-
-        if (indx < filesNames.length - 1) {
-        //if (indx < 50) {
-            indx++;
-           console.log("Next File");
-            readandConcatNextFile(indx)
-        } else {
-            if (develop) console.log ("FINISH".blue);
-            log.toFLog('realLatLon.txt', realLatLon, true);
-
-        }
-
-    });
-
-    } catch (e) {
-        log.error( "Ошибка "+ e + e.stack);
-    }
-}
-
-
-function refillBigData() {
-    try{
-
-    newOneObjectDispetcher(0);
-    } catch (e) {
-        log.error( "Ошибка "+ e + e.stack);
-    }
-}
-
-var additionalId =[];
-function askAdditionalData () {
-    try{
-
-    pointsIDS.forEach(function(point) {
-
-        if (point != null && point.possibleHouses) {
-
-            point.possibleHouses.forEach(function(street){
-
-                if (street.id) {
-                    if (bigData[parseInt(street.id)] == undefined) additionalId.push(street.id);
-
-
-                }
-                if (street.address) {
-                    street.address.forEach(function(adres) {
-                        if (adres.id) {
-                            if (bigData[parseInt(adres.id)] ==  undefined) additionalId.push(adres.id);
-
-                        }
-                    })
-                }
-            })
-        }
-    });
-
-    //console.log(additionalId);
-    if (develop) console.log("Additional.data".blue, additionalId.length);
-    } catch (e) {
-        log.error( "Ошибка "+ e + e.stack);
-    }
-}
-
-var realLatLon = [];
-function createRealLatLon() {
-    try {
-    for(var  i = 0; i < pointsIDS.length; i++) {
-        if (pointsIDS[i] == null) continue;
-        //console.log(pointsIDS[i].id)
-        //if (pointsIDS[i].id == "025e9a51-2edf-11e5-9ef5-005056a77794"){
-        //    console.log("Find point".red);
-        //    console.log(pointsIDS[i]);
-        //}
-
-        realLatLon.push({id: pointsIDS[i].id, lat: 0, lon: 0, delta : 2000000000, obj : 0});
-        for (var e = 0; e < existData.length; e++){
-            //console.log(i, " ",  e, "Check ID", existData[e].Id, + " " + pointsIDS[i].id);
-            if (existData[e].Id == pointsIDS[i].id) {
-                realLatLon[realLatLon.length-1].existLat = existData[e].Lat;
-                realLatLon[realLatLon.length-1].existLon = existData[e].Lon;
-                //console.log("Id Accepted".green, realLatLon[realLatLon.length-1]);
-            }
-        }
-        var indx = realLatLon.length-1;
-        if (pointsIDS[i].possibleHouses) {
-            var streets = pointsIDS[i].possibleHouses;
-            for (var j = 0; j < streets.length; j++){
-                if (streets[j].address == undefined || streets[j].address.length == 0) checkNewLatLon(indx, streets[j].id);
-                if (streets[j].address) {
-                    var adress = streets[j].address;
-                    for (var k = 0; k < adress.length; k++){
-                        checkNewLatLon(indx, adress[k].id);
-                    }
-                }
-
-            }
-
-        } else {
-            realLatLon[indx].error = "dont found adress";
-        }
-
-
-
-        //console.log (indx, realLatLon[indx].delta)
-
-    }
-
-    //console.log("Записываю файл".blue, realLatLon.length);
-    //console.log(realLatLon);
-    //log.toFLog('realLatLon.txt', realLatLon, true);
-    } catch (e) {
-        log.error( "Ошибка "+ e + e.stack);
-    }
-}
-
-function checkNewLatLon(indx, id){
-    try{
-    var lat = 100;
-    var lon = 100;
-    var possible = undefined;
-    possible = bigData[id];
-    //console.log(indx);
-    //possible = bigData.filter(function (item) {
-    //    return item.id == id;
-    //});
-    //console.log(possible);
-    if (possible == undefined || possible.length == 0) return;
-    if (possible.coordinates) lat = possible.coordinates[0];
-    if (possible.coordinates) lon = possible.coordinates[1];
-
-    if (lat && lon) {
-            var LON = realLatLon[indx].existLat;
-            var LAT = realLatLon[indx].existLon;
-            var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
-            //console.log(delta);
-            if (delta < realLatLon[indx].delta) {
-                realLatLon[indx].lat = lat;
-                realLatLon[indx].lon = lon;
-                realLatLon[indx].delta = parseInt(delta);
-                realLatLon[indx].obj = id;
-            }
-    } else {
-
-    }
-    //console.log(indx, realLatLon[indx].delta);
-    } catch (e) {
-        log.error( "Ошибка "+ e + e.stack);
-    }
-}
-
-// запуск монитора диспетчера в демо-режиме
-//router.route('/demo')
-//    .get(function (req, res) {
-//        req.session.login = demoLogin;
-//        res.sendFile('index.html', {root: './public/'});
-//    });
+// var existData = [];
+// router.route('/analysisIDSpoints')
+//     .get(function(req, res){
+//         try {
+//
+//         if (develop) console.log("Start load data".green);
+//         var qInd = 0;
+//
+//
+//         //    const rl = readline.createInterface({
+//         //        input: fs.createReadStream('./logs/hvost')
+//         //    });
+//         //
+//         //
+//         //    if(develop) console.log(rl);
+//         //
+//         //    rl.on('line', function (line)  {
+//         //        qInd++;
+//         //        console.log("Pushing", qInd);
+//         //        pointsIDS.push(line);
+//         //        if ( qInd == 2782) parseTextFileData();
+//         //});
+//
+//             console.log("pointsIDS.length", pointsIDS.length);
+//         fs.readFile('./logs/ID2LatLon.json', 'utf8', function (err, data) {
+//
+//             existData = JSON.parse(data);
+//             console.log("ExistData", existData[0], existData.length);
+//             var i = 0;
+//             fs.readFile('./logs/bigData2-1-1.txt', 'utf8', function (err1, data1) {
+//                 console.log("SecondRead Success");
+//                 bigData = [];
+//                 bigData.length = 3200000;
+//                 var prebigData = JSON.parse(data1);
+//                 indexBigData(prebigData);
+//                 readandConcatNextFile(i);
+//
+//             });
+//         });
+//
+//
+//             //fs.readFile('./logs' + '/' +'resultforIDS-1.txt', 'utf8', function (err, data) {
+//             //    console.log("Error in load", err);
+//             //    var tempPoints = JSON.parse(data);
+//             //    allPoints = allPoints.concat(tempPoints);
+//             //    fs.readFile('./logs' + '/' +'resultforIDS-2.txt', 'utf8', function (err, data) {
+//             //        console.log("Error in load", err);
+//             //        var tempPoints = JSON.parse(data);
+//             //        allPoints = allPoints.concat(tempPoints);
+//             //        console.log(allPoints.length);
+//             //    })
+//             //
+//             //});
+//
+//
+//
+//             res.status(200).json({msg: 'complete'});
+//         } catch (e) {
+//             log.error( "Ошибка "+ e + e.stack);
+//         }
+//     });
+//
+//
+//
+// function indexBigData(matrix) {
+//     try {
+//  matrix.forEach(function(item){
+//         bigData[item.id] = item;
+//     })
+//     } catch (e) {
+//         log.error( "Ошибка "+ e + e.stack);
+//     }
+// }
+//
+// function readandConcatNextFile(indx){
+//
+//     try {
+//     var filesNames = [
+//         {name : "resultforIDS-1.txt"},
+//         {name : "resultforIDS-2.txt"},
+//         {name : "resultforIDS-3.txt"},
+//         {name : "resultforIDS-4.txt"},
+//         {name : "resultforIDS-5.txt"},
+//         {name : "resultforIDS-6.txt"},
+//         {name : "resultforIDS-7.txt"},
+//         {name : "resultforIDS-1"},
+//         {name : "resultforIDS-2"},
+//         {name : "resultforIDS-4"},
+//         {name : "resultforIDS-5"},
+//         {name : "resultforIDS-6"},
+//         {name : "resultforIDS-7"},
+//         {name : "resultforIDS-8"},
+//         {name : "resultforIDS-9"},
+//         {name : "resultforIDS-10"},
+//         {name : "resultforIDS-11"},
+//         {name : "resultforIDS-13"},
+//         {name : "resultforIDS-14"},
+//         {name : "resultforIDS-16"},
+//         {name : "resultforIDS-17"},
+//         {name : "resultforIDS-18"},
+//         {name : "resultforIDS-19"},
+//         {name : "resultforIDS-20"},
+//         {name : "resultforIDS-21"},
+//         {name : "resultforIDS-22"},
+//         {name : "resultforIDS-25"},
+//         {name : "resultforIDS-27"},
+//         {name : "resultforIDS-28"},
+//         {name : "resultforIDS-29"},
+//         {name : "additionalIDSData"},
+//         {name : "resultforIDS-32"},
+//         {name : "resultforIDS-33"},
+//         {name : "resultforIDS-37"},
+//         {name : "resultforIDS-38"},
+//         {name : "resultforIDS-39"},
+//         {name : "resultforIDS-40"},
+//         {name : "resultforIDS-41"},
+//         {name : "resultforIDS-44"},
+//         {name : "resultforIDS-46"},
+//         {name : "resultforIDS-47"},
+//         {name : "resultforIDS-49"},
+//         {name : "resultforIDS-50"},
+//         {name : "resultforIDS-52"},
+//         {name : "resultforIDS-53"},
+//         {name : "resultforIDS-54"},
+//         {name : "resultforIDS-58"},
+//         {name : "resultforIDS-59"},
+//         {name : "resultforIDS-101.txt"},
+//         {name : "resultforIDS-201.txt"},
+//         {name : "resultforIDS-301.txt"},
+//         {name : "resultforIDS-501.txt"},
+//         {name : "resultforIDS-601.txt"},
+//         {name : "resultforIDS-202.txt"},
+//         {name : "resultforIDS-402.txt"},
+//         {name : "resultforIDS-502.txt"},
+//         {name : "resultforIDS-602.txt"},
+//         {name : "resultforIDS-702.txt"},
+//         {name : "resultforIDS-103.txt"},
+//         {name : "resultforIDS-100"},
+//         {name : "resultforIDS-200"},
+//         {name : "resultforIDS-300"},
+//         {name : "resultforIDS-500"},
+//         {name : "resultforIDS-600"},
+//         {name : "resultforIDS-700"},
+//         {name : "resultforIDS-800"},
+//         {name : "resultforIDS-1100"},
+//         {name : "resultforIDS-1300"},
+//         {name : "resultforIDS-1400"},
+//         {name : "resultforIDS-1500"},
+//         {name : "resultforIDS-1600"},
+//         {name : "resultforIDS-1900"},
+//         {name : "resultforIDSdop-1"},
+//         {name : "resultforIDSdop-2"},
+//         {name : "resultforIDSdop-3"}
+//     ];
+//
+//     console.log("indx", indx, filesNames.length-1);
+//
+//     //if (indx > filesNames.length-1) return;
+//
+//
+//     //var fileName = 'resultForIDS-2000.txt';
+//     var fileName = filesNames[indx].name;
+//
+//     console.log(fileName);
+//
+//     fs.readFile('./logs' + '/' + fileName, 'utf8', function (err, data) {
+//         try {
+//             var tempPoints = JSON.parse(data);
+//         } catch (e) {
+//             if (develop) console.log(e.red);
+//         }
+//
+//         //pointsIDS = pointsIDS.concat(tempPoints);
+//         pointsIDS = tempPoints;
+//         //askForStreetId(pointsIDS);
+//         //askAdditionalData();
+//         //startSerchingLatLon();
+//         //fillBigData();
+//         //console.log(pointsIDS.length);
+//         //console.log ( " finish".red, pointsIDS[pointsIDS.length-1].id);
+//         createRealLatLon();
+//
+//         console.log("Первый этап обработки 1 тысячи",indx, filesNames.length);
+//
+//         if (indx < filesNames.length - 1) {
+//         //if (indx < 50) {
+//             indx++;
+//            console.log("Next File");
+//             readandConcatNextFile(indx)
+//         } else {
+//             if (develop) console.log ("FINISH".blue);
+//             log.toFLog('realLatLon.txt', realLatLon, true);
+//
+//         }
+//
+//     });
+//
+//     } catch (e) {
+//         log.error( "Ошибка "+ e + e.stack);
+//     }
+// }
+//
+//
+// function refillBigData() {
+//     try{
+//
+//     newOneObjectDispetcher(0);
+//     } catch (e) {
+//         log.error( "Ошибка "+ e + e.stack);
+//     }
+// }
+//
+// var additionalId =[];
+// function askAdditionalData () {
+//     try{
+//
+//     pointsIDS.forEach(function(point) {
+//
+//         if (point != null && point.possibleHouses) {
+//
+//             point.possibleHouses.forEach(function(street){
+//
+//                 if (street.id) {
+//                     if (bigData[parseInt(street.id)] == undefined) additionalId.push(street.id);
+//
+//
+//                 }
+//                 if (street.address) {
+//                     street.address.forEach(function(adres) {
+//                         if (adres.id) {
+//                             if (bigData[parseInt(adres.id)] ==  undefined) additionalId.push(adres.id);
+//
+//                         }
+//                     })
+//                 }
+//             })
+//         }
+//     });
+//
+//     //console.log(additionalId);
+//     if (develop) console.log("Additional.data".blue, additionalId.length);
+//     } catch (e) {
+//         log.error( "Ошибка "+ e + e.stack);
+//     }
+// }
+//
+// var realLatLon = [];
+// function createRealLatLon() {
+//     try {
+//     for(var  i = 0; i < pointsIDS.length; i++) {
+//         if (pointsIDS[i] == null) continue;
+//         //console.log(pointsIDS[i].id)
+//         //if (pointsIDS[i].id == "025e9a51-2edf-11e5-9ef5-005056a77794"){
+//         //    console.log("Find point".red);
+//         //    console.log(pointsIDS[i]);
+//         //}
+//
+//         realLatLon.push({id: pointsIDS[i].id, lat: 0, lon: 0, delta : 2000000000, obj : 0});
+//         for (var e = 0; e < existData.length; e++){
+//             //console.log(i, " ",  e, "Check ID", existData[e].Id, + " " + pointsIDS[i].id);
+//             if (existData[e].Id == pointsIDS[i].id) {
+//                 realLatLon[realLatLon.length-1].existLat = existData[e].Lat;
+//                 realLatLon[realLatLon.length-1].existLon = existData[e].Lon;
+//                 //console.log("Id Accepted".green, realLatLon[realLatLon.length-1]);
+//             }
+//         }
+//         var indx = realLatLon.length-1;
+//         if (pointsIDS[i].possibleHouses) {
+//             var streets = pointsIDS[i].possibleHouses;
+//             for (var j = 0; j < streets.length; j++){
+//                 if (streets[j].address == undefined || streets[j].address.length == 0) checkNewLatLon(indx, streets[j].id);
+//                 if (streets[j].address) {
+//                     var adress = streets[j].address;
+//                     for (var k = 0; k < adress.length; k++){
+//                         checkNewLatLon(indx, adress[k].id);
+//                     }
+//                 }
+//
+//             }
+//
+//         } else {
+//             realLatLon[indx].error = "dont found adress";
+//         }
+//
+//
+//
+//         //console.log (indx, realLatLon[indx].delta)
+//
+//     }
+//
+//     //console.log("Записываю файл".blue, realLatLon.length);
+//     //console.log(realLatLon);
+//     //log.toFLog('realLatLon.txt', realLatLon, true);
+//     } catch (e) {
+//         log.error( "Ошибка "+ e + e.stack);
+//     }
+// }
+//
+// function checkNewLatLon(indx, id){
+//     try{
+//     var lat = 100;
+//     var lon = 100;
+//     var possible = undefined;
+//     possible = bigData[id];
+//     //console.log(indx);
+//     //possible = bigData.filter(function (item) {
+//     //    return item.id == id;
+//     //});
+//     //console.log(possible);
+//     if (possible == undefined || possible.length == 0) return;
+//     if (possible.coordinates) lat = possible.coordinates[0];
+//     if (possible.coordinates) lon = possible.coordinates[1];
+//
+//     if (lat && lon) {
+//             var LON = realLatLon[indx].existLat;
+//             var LAT = realLatLon[indx].existLon;
+//             var delta = getDistanceFromLatLonInM(lat,lon,LAT,LON);
+//             //console.log(delta);
+//             if (delta < realLatLon[indx].delta) {
+//                 realLatLon[indx].lat = lat;
+//                 realLatLon[indx].lon = lon;
+//                 realLatLon[indx].delta = parseInt(delta);
+//                 realLatLon[indx].obj = id;
+//             }
+//     } else {
+//
+//     }
+//     //console.log(indx, realLatLon[indx].delta);
+//     } catch (e) {
+//         log.error( "Ошибка "+ e + e.stack);
+//     }
+// }
+//
+// // запуск монитора диспетчера в демо-режиме
+// //router.route('/demo')
+// //    .get(function (req, res) {
+// //        req.session.login = demoLogin;
+// //        res.sendFile('index.html', {root: './public/'});
+// //    });
 
 router.route('/keysoldroutescache')
     .get(function(req, res){
         try {
-        var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var key = req.session.login;
+        var currentCompany = req.session.company + "-" + req.session.branch; //companyLogins[key];
         if(currentCompany in oldRoutesCache){
             log.info(Object.keys(oldRoutesCache[currentCompany]));
             res.status(200).json( Object.keys(oldRoutesCache[currentCompany]) );
@@ -496,7 +496,7 @@ router.route('/getoldroute')
     .post(function(req, res){
         try {
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
         res.status(200).json(oldRoutesCache[currentCompany][req.body.date]);
         } catch (e) {
             log.error( "Ошибка "+ e + e.stack);
@@ -541,7 +541,7 @@ router.route('/askblocked')
     .post(function(req, res){
         try {
             var key = ""+req.session.login;
-            var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             var result={};
             result.data =[];
             //result.call = {};
@@ -573,7 +573,7 @@ router.route('/updatepushes')
         //log.info("Получил запрос на updatepushes", req.body.data);
 
         var key = "" + req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var result = req.body.data;
         var data = req.body.data;
 
@@ -610,7 +610,7 @@ router.route('/updatetrack')
         //log.info ("Получил запрос на updatetrack", req.body.data);
 
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var result = [];
         var data = req.body.data;
         var t = data.length;
@@ -682,7 +682,7 @@ router.route('/nodeserch')
         log.info("Получил запрос на поиск", req.body.data);
 
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var input = req.body.data;
         var result = serchInCache(input, currentCompany);
 
@@ -731,6 +731,9 @@ router.route('/login')
         //console.log("req.session.login", req);
         try {
         req.session.login = req.query.curuser;
+        req.session.company = req.query.idcompany;
+        req.session.branch = req.query.idbranch;
+        console.log("rrquery.", req.query );
             var time = timestmpToStr(new Date());
             var date = ("" + new Date()).substring(0,10);
         var obj = {
@@ -772,11 +775,6 @@ router.route('/dailydata')
 
         //fixme
 
-
-
-
-
-
         try {
             log.info("Start Loading DailyData");
         if (!connectDB) firstDBConnect();
@@ -817,7 +815,7 @@ router.route('/dailydata')
             day = 86400000;
         //today12am = now - (now % day);
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             console.log("CurrentCompany".red, currentCompany);
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
@@ -1199,7 +1197,7 @@ router.route('/askforroute')
     .post(function(req, res) {
         try {
         var key = "" + req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var uniqueID = req.body.id;
         log.info("Пришел одиночный запрос на роут", uniqueID);
 
@@ -1217,7 +1215,7 @@ router.route('/askforroute')
         var result = {error: "Dont Found"};
         if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length >0 ) {
 
-            for (var i = 0; i < cashedDataArr[currentCompany].line_routes.length; i++) {
+            for (i = 0; i < cashedDataArr[currentCompany].line_routes.length; i++) {
                 //log.info("Ищем в проблемных");
                 if (uniqueID == cashedDataArr[currentCompany].line_routes[i].uniqueID) {
                     result = cashedDataArr[currentCompany].line_routes[i];
@@ -1388,7 +1386,7 @@ router.route('/trackparts/:start/:end')
 
                 first = false;
                 var key = ""+req.session.login;
-                var currentCompany = companyLogins[key];
+                var currentCompany = req.session.company + "-" + req.session.branch;
                 var cached = cashedDataArr[currentCompany];
                 log.info('getRealTrackParts DONE', currentCompany);
 
@@ -1524,7 +1522,7 @@ router.route('/setmobiledevice/')
     .post(function (req, res) {
         try {
             var key = ""+req.session.login;
-            var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             //log.info('saveroute, len', req.body.routes.length);
             var soapManager = new soap(req.session.login);
             var imei = req.body.imei;
@@ -1708,7 +1706,7 @@ router.route('/routerdata')
     .get(function (req, res) {
         try {
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var routeIndx = req.query.routeIndx,
             cData = cashedDataArr[currentCompany],
             sended = false,
@@ -1781,7 +1779,7 @@ router.route('/closeday')
 
         log.info("приняли данные на роутере");
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         log.toFLog("/logging.txt", req.body.closeDayData);
         log.info ("start working");
         var soapManager = new soap(req.session.login);
@@ -1880,7 +1878,7 @@ router.route('/signalDriverToDispatcher/')
         stringReq = JSON.parse(stringReq);
         try {
             var key = ""+req.session.login;
-            var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
 
             //choseOperatorForSignal(stringReq.driverID, stringReq.company);
             addCallinRoute(stringReq.company, stringReq.driverID, stringReq.client_id);
@@ -1981,7 +1979,7 @@ router.route('/changedriver/')
         var i=0;
         //req.body.routes[0].filterId = null;
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         while(i < cashedDataArr[currentCompany].blocked_routes.length){
             if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == req.body.routes[0].uniqueID){
                 cashedDataArr[currentCompany].blocked_routes[i] = req.body.routes[0];
@@ -2033,7 +2031,7 @@ router.route('/savetonode/')
             updateRoute.ReplaceStopObjectByStopLink (req.body.route);
             var updatePoints = new modifyPoints ();
             updatePoints.test("test");
-            var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             log.info("Приступаем к сохранению роута", i, id, currentCompany);
             while(cashedDataArr[currentCompany].blocked_routes != undefined && i < cashedDataArr[currentCompany].blocked_routes.length){
                     if(cashedDataArr[currentCompany].blocked_routes[i].uniqueID == id){
@@ -2167,8 +2165,8 @@ router.route('/getServerStatus')
         try {
         //log.info("Router");
         var key = "" + req.session.login;
-        var login=key;
-        var currentCompany = companyLogins[key];
+        var login = key;
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var result={};
         result.company = currentCompany;
         result.routes = cashedDataArr[currentCompany].routes.length;
@@ -2199,7 +2197,7 @@ router.route('/askforproblems/:need')
         var result = {};
         var key = "" + req.session.login;
         var login=key;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         var need = parseInt((req.params.need).substring(1));
         //log.info("ASk For ", need, "Problem", req.session.login);
         if(need <0){
@@ -2430,7 +2428,7 @@ router.route('/confirmonline')
         log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
         var blockedArr = req.body.sync;
         var key = ""+req.session.login;
-        var currentCompany = companyLogins[key];
+        var currentCompany = req.session.company + "-" + req.session.branch;
         autasaveRoutes(currentCompany, req.body.routes);
             var result={};
             result.calls =[];
@@ -5882,7 +5880,7 @@ function checkCorrectCalculating(company){
         for (i = 0; i < cashedDataArr[company].routes.length; i++) {
             for (j = 0; j<cashedDataArr[company].routes[i].points.length; j++){
                 if(cashedDataArr[company].routes[i].points[j].waypoint == undefined) {
-                    log.info(cashedDataArr[company].routes[i].points[j], "Внимание, найдена точка маршрута без описания!!!");
+                    log.info(cashedDataArr[company].routes[i].points[j].NUMBER, "Внимание, найдена точка маршрута без описания!!!");
                 }
             }
         }

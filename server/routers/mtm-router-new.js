@@ -29,6 +29,10 @@ String.prototype.startsWith = function (str)
     return this.indexOf(str) == 0;
 };
 
+Array.prototype.first = function () {
+    return this[0];
+};
+
 
     var develop = true;
     if (develop) {
@@ -744,9 +748,12 @@ router.route('/nodeserch')
 // через этот путь запускается мониторинг при открытии через 1С, при этом сохраняется логин из 1С
 router.route('/login')
     .get(function (req, res) {
-        //console.log("req.session.login", req);
+        console.log("rreq.query", req.query);
         try {
         req.session.login = req.query.curuser;
+        req.session.company = req.query.idcompany;
+        req.session.branch = req.query.idbranch;
+
             var time = timestmpToStr(new Date());
             var date = ("" + new Date()).substring(0,10);
         var obj = {
@@ -827,8 +834,9 @@ router.route('/dailydata')
         var now = Date.now(),
             day = 86400000;
         //today12am = now - (now % day);
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
-        var currentCompany = companyLogins[key];
+        // var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+        // var currentCompany = companyLogins[key];
+            var currentCompany = req.session.company + "-" + req.session.branch;
             console.log("CurrentCompany".red, currentCompany);
 
         //тестово отладочный блок. Проверка повторного обращения за данными в течение дня
@@ -937,7 +945,7 @@ router.route('/dailydata')
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
             settings.companyName = currentCompany;
-
+            console.log("currentCompany II".red, currentCompany);
 
             //Получение дневного плана для конкретной компании
 
@@ -974,7 +982,7 @@ router.route('/dailydata')
                     log.info('There is no routes. And what we have', data);
                 }
                 // Добавления уникального ID для каждого маршрута и этогоже ID для каждой точки на маршруте
-                log.info('send data to client', data.notes);
+                // log.info('send data to client', data.notes);
                 //if(data.status && data.status === 'no sensors') {
                 //    if (res.statusCode == 304) return;
                 //    console.log("res.status", res.statusCode);
@@ -990,10 +998,12 @@ router.route('/dailydata')
                 }else{
                     //log.info("ReChange SessionLogin", data.CLIENT_ID);
 
-                    var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
-                    var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+                    //var currentCompany = JSON.parse(JSON.stringify(data.CLIENT_ID));
+                    //var key = req.session.login.substring(0, req.session.login.indexOf('.'));
 
-
+                    var currentCompany = req.session.company + "-" + req.session.branch;
+                    var key = req.session.login;
+                    console.log("CREATE COMPANY", currentCompany, key, req.session.login, req.session.company, req.session.branch, " Complete".red);
                     companyLogins[key] = currentCompany;
                     console.log("COMPANY LOGINS ".red, companyLogins);
 
@@ -1588,7 +1598,7 @@ router.route('/savewaypoint/')
     .post(function (req, res) {
         try {
         log.info("^^^^^^^^^ router ^^^^^^^^^");
-        log.info('savewaypoint, req.bod', req.body);
+        //log.info('savewaypoint, req.bod', req.body);
         var soapManager = new soap(req.session.login);
         soapManager.updateWaypointCoordTo1C(req.body, function (data) {
             if (!data.error) {
@@ -2108,7 +2118,6 @@ router.route('/savetonode/')
 
 
 function  removeRouteFromSession(dispatchers, login, uniqueId) {
-    console.log("2111", dispatchers, login, uniqueId);
     if (!dispatchers || !login || !uniqueId) return;
     var dispIds = dispatchers.allDispatchers.filter(function(disp) {
         return disp.login == login;
@@ -2125,8 +2134,7 @@ function  removeRouteFromSession(dispatchers, login, uniqueId) {
 
     session.routes.forEach(function(route){
         if (route.uniqueID == uniqueId){
-            console.log("HAHAHAHAHAHAAHHAHA", route);
-            route.finish = parseInt(Date.now()/1000);
+            route.end = parseInt(Date.now()/1000);
         }
     })
 }
@@ -7708,10 +7716,10 @@ function createShiftForFirstLogin(dispatcher, shifts, company){
 function addShift(dispatcher, company) {
     var  cashedDataArr = _data.getData();
     cashedDataArr[company].dispatchers.shifts = cashedDataArr[company].dispatchers.shifts || [];
-    cashedDataArr[company].dispatchers.shifts.push({dispatcher: dispatcher.id, start_time_stamp: parseInt(Date.now()/1000), fio: dispatcher.fio});
-    addSession( cashedDataArr[company].dispatchers.shifts[cashedDataArr[company].dispatchers.shifts.length-1], 101);
+    cashedDataArr[company].dispatchers.shifts.push({dispatcher: dispatcher.id, start_time_stamp: parseInt(Date.now()/1000), fio: dispatcher.fio, end_time_stamp: 0});
+    addSession( cashedDataArr[company].dispatchers.shifts[cashedDataArr[company].dispatchers.shifts.length-1], 101, false);
 
-    sqlUniversal.add (company,"shifts", "data", dispatcher.id, 100, parseInt(Date.now()/1000), parseInt(Date.now()/1000), JSON.stringify(cashedDataArr[company].dispatchers.shifts[cashedDataArr[company].dispatchers.shifts.length-1].sessions));
+    sqlUniversal.add (company,"shifts", "data", dispatcher.id, 144, parseInt(Date.now()/1000), 0, JSON.stringify(cashedDataArr[company].dispatchers.shifts[cashedDataArr[company].dispatchers.shifts.length-1].sessions));
     console.log("New SHIFT".yellow, cashedDataArr[company].dispatchers.shifts);
     _data.setData(cashedDataArr);
 }
@@ -7755,11 +7763,14 @@ function createNewDispatcherInCompany (dispatcher, company) {
 
 }
 
-function addSession (shift, kind){
+function addSession (shift, kind, save){
     shift.sessions = shift.sessions || [];
-    shift.sessions.push({start_time_stamp: parseInt(Date.now()/1000), start_kind: kind,  results:{}, flag:false});
+    shift.sessions.push({start_time_stamp: parseInt(Date.now()/1000), start_kind: kind,  end_time_stamp: 0, results:{}, flag:false});
     console.log("Shift".yellow, shift);
-
+    if (save) {
+        console.log ("A am SAVING!!!".yellow);
+        sqlUniversal.save(company,"shifts", "dispatcher", "==", shift.dispatcher, "&&", "start_time_stamp", "==", shift.start_time_stamp,  "set", "sessions", "=", JSON.stringify(shift.sessions));
+    }
 }
 
 
@@ -7791,7 +7802,7 @@ function newLogin(login, company) {
     });
 
     //todo определить kind
-    isExist ? addSession(existShift, 5) : addShift(dispatcher[0], company);
+    isExist ? addSession(existShift, 5, true) : addShift(dispatcher[0], company);
 
     console.log("Shifts after new existing Login".yellow, dispatchers.shifts);
 
@@ -7801,7 +7812,7 @@ function newLogin(login, company) {
 
 
 function addRouteToDispatcher(login, company, result, type) {
-    console.log ("Start addRouteToDispatcher".red, login, company, result, type);
+    console.log ("Start addRouteToDispatcher".red);
     var casheDataArray = _data.getData();
     var dispatchers = casheDataArray[company].dispatchers;
     var dispIds = dispatchers.allDispatchers.filter(function(disp){
@@ -7828,7 +7839,7 @@ function addRouteToDispatcher(login, company, result, type) {
     session.results.average_problems = parseInt(session.routes.reduce(function(summ, item){
             return summ + item.max_problem;
         },0)/session.routes.length);
-
+    sqlUniversal.save(company,"shifts", "dispatcher", "==", shift.dispatcher, "&&", "start_time_stamp", "==", shift.start_time_stamp,  "set", "sessions", "=", JSON.stringify(shift.sessions));
     _data.setData(casheDataArray);
 };
 

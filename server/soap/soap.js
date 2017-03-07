@@ -331,7 +331,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
                         data.iLength = itineraries.length;
 
-                        //console.log("Решения на сейчас", itineraries[0].$);
+                        console.log("Решения на сейчас", itineraries[0].$);
 
 
                         //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
@@ -365,6 +365,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 // в итоге получено будет только одно решение, т.к. двух решений разных типов по одному id не бывает
 SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
     var me = this;
+    //console.log ("Load ITINERARY", id);
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko')) {
         setTimeout(function () {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
@@ -408,7 +409,9 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
 
-            console.log("Запросы СОАП 398");
+            //console.log(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, "Запросы СОАП 398");
+
+
             //fixme
             //return;
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback, res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.SHIFT_NAME);
@@ -429,6 +432,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
     var tmpRoute;
 
     data[nIndx].routes = [];
+    //console.log("nIndex", nIndx);
     for (var i = 0; i < routes.length; i++) {
         tmpRoute = {};
         tmpRoute = routes[i].$;
