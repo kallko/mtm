@@ -213,7 +213,7 @@
 
 
                         <select ng-show="true" id="branch-select" ng-model="filters.branch" class="group-select"
-                                ng-options='option.value as option.name for option in filters.branches'>
+                                ng-options='option.id as option.name for option in filters.branches'>
                         </select>
 
 
@@ -421,7 +421,7 @@
 
                             <td class="car-number-col">{{::row.transport.REGISTRATION_NUMBER}}</td>
                             <td class="driver-phone-col">{{::row.driver.PHONE}}</td>
-                            <td class="branch-col">{{::row.branchName}}</td>
+                            <td class="branch-col">{{::getBranch(row.branchIndx)}}</td>
                             <td class="problem-index-col">
                                 <span ng-if="row.problem_index > 0">
                                 {{row.problem_index}}

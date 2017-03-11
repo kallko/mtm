@@ -118,12 +118,12 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
             ];
 
             scope.filters.branches = [                                  // фильтры по филиалам
-                {name: 'Все филиалы', value: -1}
+                {name: 'Все филиалы', id: -1}
             ];
 
             scope.filters.route = -1;
 
-            scope.filters.branch = scope.filters.branches[0].value;
+            scope.filters.branch = scope.filters.branches[0].id;
            // scope.filters.status = scope.filters.statuses[0].value;
             scope.filters.status = {};
             for(var i = 0; scope.filters.statuses.length > i; i++){
@@ -188,22 +188,10 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
              }
          });
 
+        scope.$watch('filters.branch', function(){
+            console.log(scope.filters.branch);
+        });
 
-
-        // scope.selectFilterRute = function(){
-        //
-        //     for(var i = 0; _data.routes.length > i; i++ ){
-        //         if(_data.routes[i].filterId == scope.filters.route){
-        //             if(!_data.routes[i].selected){
-        //                 for(var j = 0; _data.routes.length > j; j++){
-        //                     _data.routes[j].selected = false;
-        //                 }
-        //                 _data.routes[i].selected = true;
-        //             }
-        //             break;
-        //         }
-        //     }
-        // };
         scope.$watch('filters.route', function(){
 
             if(rootScope.data != undefined) {
@@ -854,7 +842,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (data.routes[i].moreThanOneSensor) problematicRoutes.push(data.routes[i]);
 
                 //TODO: get real branch office
-                data.routes[i].branch =data.BRANCH;
+                data.routes[i].branch = data.BRANCH;
                     //i % 2 == 0 ? 'Киев ТЕСТ' : 'Одесса ТЕСТ';
 
                 for (var j = 0; j < scope.filters.branches.length; j++) {
@@ -2890,9 +2878,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         }
 
         // фильтр по филлиалам
-        function branchFilter(row) {
-            return (scope.filters.branch == -1 || row.branchIndx == scope.filters.branch);
-        }
+
         scope.applyFilterCount = 0;
         // применить все фильтры
         scope.applyFilter = function (row) {
@@ -2900,11 +2886,17 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 && statusFilter(row)
                 && problemFilter(row)
                 && promise15MFilter(row)
-                && textFilter(row)
-                && branchFilter(row);
+                && textFilter(row);
+
         };
 
-
+        scope.getBranch = function (rowBranch) {
+            console.log(rowBranch);
+            var result = rootScope.data.allBranches.filter(function (branch) {
+                return branch.id == rowBranch;
+            })[0].name;
+            return result;
+        };
 
         var orderBy = filter('orderBy');
         scope.order = function(predicate){
@@ -4261,6 +4253,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 nameCar:  routeDublicate.transport.NAME  + ' - ' +   ( ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени') ,
                 value: routeDublicate.filterId,
                 car: routeDublicate.transport.NAME,
+                branch: routeDublicate.points[0].branch,
                 driver: ( routeDublicate.hasOwnProperty('driver') && routeDublicate.driver.hasOwnProperty('NAME') ) ? routeDublicate.driver.NAME : 'без имени'+i, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
                 uniqueID: routeDublicate.uniqueID
             });
@@ -4639,6 +4632,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                 if (cache.routes) changeStopObjectByStopLink(cache.routes);
 
                 console.log("Re Display", cache, "First time rotscope.data", rootScope.data );
+                scope.filters.branches.length = 1;
+                scope.filters.branches = scope.filters.branches.concat(cache.allBranches);
+                console.log("scope.filters.branches", scope.filters.branches);
                 if (cache.routes[0] == undefined) cache.routes = [];
                 if( scope.rowCollection == undefined) scope.rowCollection = [];                                   // коллекция всех задач дял отображения во вьюшке
                 if (scope.displayCollection == undefined) scope.displayCollection = [].concat(scope.rowCollection);   // копия коллекции для smart table
