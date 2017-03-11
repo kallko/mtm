@@ -7,7 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
-    testCopy = false, // флаг обращения к копии базы
+    testCopy = true, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
@@ -171,7 +171,7 @@ function checkBeforeSend(_data, callback) {
 
     // в случае если дошло до сюда, значит необходимые данные собраны
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
-
+    allData.loadedBranches = allData.loadedBranches || [];
 
     console.log("А теперь пора!");
 
@@ -183,6 +183,7 @@ function checkBeforeSend(_data, callback) {
         allData.VALUE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
         allData.routes = allData.routes.concat(data[i].routes);
         allData.idArr.push(data[i].ID);
+        console.log("#data.loadedBranches", data.loadedBranches);
 
         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
 
@@ -234,7 +235,9 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
      date = date ? date : Date.now();
 
 
-
+    console.log("Date<<", date);
+    //fixme date
+    date = 1489060800000;
     console.log('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {
@@ -312,7 +315,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
         }
 
 
-            console.log("Запрос dailyPlanXML", _xml.dailyPlanXML(date));
+            //console.log("Запрос dailyPlanXML", _xml.dailyPlanXML(date));
             client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
                 if (!err) {
                     console.log('DONE getDailyPlan');
@@ -329,9 +332,15 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         var itineraries = res.MESSAGE.PLANS[0].ITINERARY;
 
 
+
                         data.iLength = itineraries.length;
+                        data.branches = [];
 
                         console.log("Решения на сейчас", itineraries[0].$);
+                        // console.log("Решения на сейчас", itineraries[1].$);
+                        // console.log("Решения на сейчас", itineraries[2].$);
+                        //console.log("BRANCHES FOR TODAY", branches);
+                        //for (var i = 0; )
 
 
                         //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
@@ -340,10 +349,10 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
                         if (!config.loadOnlyItineraryNew) data.iLength *= 2;
 
                         // получение развернутого решения по списку полученных ранее id решений
-                        for (var i = 0; i < itineraries.length; i++) {
+                        for (i = 0; i < itineraries.length; i++) {
                             (function (ii) {
                                 setTimeout(function () {
-                                    me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itIsToday, data, date, callback);
+                                    me.getItinerary(client, itineraries[ii].$.ID, itineraries[ii].$.VERSION, itineraries[ii].$.BRANCH_ID, itineraries[ii].$.BRANCH_NAME, itIsToday, data, date, callback);
                                 }, ii * 5000);
                             })(i);
                         }
@@ -363,26 +372,26 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
 // попытки получить развернутые решения нового и, если  config.loadOnlyItineraryNew = false, старого типа
 // в итоге получено будет только одно решение, т.к. двух решений разных типов по одному id не бывает
-SoapManager.prototype.getItinerary = function (client, id, version, itIsToday, data, date, callback) {
+SoapManager.prototype.getItinerary = function (client, id, version, branchId, branchName, itIsToday, data, date, callback) {
     var me = this;
-    //console.log ("Load ITINERARY", id);
+    console.log ("Load ITINERARY BBBRANCH", branchName);
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko')) {
         setTimeout(function () {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
-            itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
+            itineraryCallback(err, result, me, client, itIsToday, data, date, branchId, branchName, callback);
         })}, 15);
     }
 
     //console.log("Очень очень Очень  Важные данные", id, version, me.login, data, date );
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
-        itineraryCallback(err, result, me, client, itIsToday, data, date, callback);
+        itineraryCallback(err, result, me, client, itIsToday, data, date, branchId, branchName, callback);
     });
 };
 
 // колбек срабатывающий при получении развернутого решения
-function itineraryCallback(err, result, me, client, itIsToday, data, date, callback) {
+function itineraryCallback(err, result, me, client, itIsToday, data, date, branchId, branchName, callback) {
     if (!err) {
-        //console.log(result.return, "soap.js:266")
+        console.log(branchName, "BBBBRANCHsoap.js:393");
         parseXML(result.return, function (err, res) {
             data.iLength--;
 
@@ -401,13 +410,22 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
 
             data.havePlan = true;
             console.log('APPROVED = ' + res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.APPROVED);
+
+
+
             var nIndx = data.push(res.MESSAGE.ITINERARIES[0].ITINERARY[0].$);
 
 
             nIndx--;
-            data[nIndx].sended = false;
+            //data[nIndx].sended = false;
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
+            data[nIndx].branch = {
+                id: branchId,
+                name: branchName
+            };
+            data.loadedBranches = data.loadedBranches || [];
+            //data.loadedBranches.push(branchId);
 
             //console.log(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, "Запросы СОАП 398");
 
@@ -415,7 +433,7 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, callb
             //fixme
             //return;
             me.prepareItinerary(res.MESSAGE.ITINERARIES[0].ITINERARY[0].ROUTES[0].ROUTE, data, itIsToday, nIndx, callback, res.MESSAGE.ITINERARIES[0].ITINERARY[0].$.SHIFT_NAME);
-            me.getAdditionalData(client, data, itIsToday, nIndx, callback, date);
+            me.getAdditionalData(client, data, itIsToday, nIndx, callback, date, branchId);
 
         });
     } else {
@@ -436,7 +454,7 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
     for (var i = 0; i < routes.length; i++) {
         tmpRoute = {};
         tmpRoute = routes[i].$;
-        tmpRoute.SHIFT_NAME=shift;
+        tmpRoute.SHIFT_NAME = shift;
         // создания массива точек доставки
         tmpRoute.points = [];
 
@@ -459,18 +477,18 @@ SoapManager.prototype.prepareItinerary = function (routes, data, itIsToday, nInd
 
             tmpRoute.points.push(routes[i].SECTION[j].$);
         }
-
+        tmpRoute.branch = data[nIndx].branch;
         data[nIndx].routes.push(tmpRoute);
     }
 };
 
 // получение дополнительных данных по полученному решению
-SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback, date) {
+SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIndx, callback, date, branchId) {
     var me = this;
     log.l("getAdditionalData");
     log.l("=== a_data; data.ID = " + data[nIndx].ID + " === \n");
     log.l(_xml.additionalDataXML(data[nIndx].ID));
-    //console.log("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
+    console.log("Запрс на дополнительные данные", _xml.additionalDataXML(data[nIndx].ID));
     client.runAsUser({'input_data': _xml.additionalDataXML(data[nIndx].ID), 'user': me.login}, function (err, result) {
         if (!err) {
 
@@ -487,6 +505,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
 
                 //fixme чтобы не грузить сервер
                 //return;
+                data[nIndx].branch = branchId;
 
                 if (waypoints == undefined) return;
                 //console.log('drivers', drivers.length);
@@ -1102,7 +1121,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     });
 };
 
-
+//fixme branchId, branchName,
 SoapManager.prototype.getNewDayIten = function (id, version, company, callback) {
     var me=this;
     soap.createClient(me.getFullUrl(), function (err, client) {
@@ -1113,7 +1132,7 @@ SoapManager.prototype.getNewDayIten = function (id, version, company, callback) 
             'input_data': _xml.itineraryXML(id, version, true),
             'user': me.login
         }, function (err, result) {
-            itineraryCallback(err, result, me, company, true, data, date, callback);
+            itineraryCallback(err, result, me, company, true, data, date, branchId, branchName, callback);
         });
     });
 };
@@ -1138,7 +1157,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
                 data.iLength = 1;
                 var itIsToday = true;
-                //console.log("Решения на сейчас", itineraries[0].$);
+                console.log("Additional Решения на сейчас", itineraries[0].$);
                 var date = Date.now();
 
                 //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
@@ -1151,7 +1170,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
                     (function (ii) {
                         setTimeout(function () {
                             console.log("Подгружаем из 1с");
-                            me.getItinerary(client, id, version, itIsToday, data, date, callback);
+                            me.getItinerary(client, id, version, itineraries[0].$BRANCH_ID, itineraries[0].$BRANCH_NAME, itIsToday, data, date, callback);
                         }, ii * 5000);
                     })(i);
                 }

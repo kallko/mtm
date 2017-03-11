@@ -49,9 +49,9 @@ io.on('connection', function (socket) {
         //socket.broadcast.to('game').emit('eventClient', 'nice game');
         var login = socket.conn.request.headers.referer.substring(socket.conn.request.headers.referer.indexOf("=")+1);
         var key = login.substring(0, login.indexOf('.'));
-        console.log("SOCKET", login, " ", key);
+        //console.log("SOCKET", login, " ", key);
         var company = _data.whoAmI(key);
-        console.log ("I know who are you!!!!".red, company);
+        //console.log ("I know who are you!!!!".red, company);
         var obj;
         if (company && _data.getData()[company].dispatchers) console.log ("TEST DATA".red, _data.getData()[company].dispatchers.concated);
         if (company && _data.getData()[company] && _data.getData()[company].dispatchers && _data.getData()[company].dispatchers.concated) {
@@ -73,7 +73,7 @@ io.on('connection', function (socket) {
    }
 
 
-    console.log("USER CONNECTED");
+    //console.log("USER CONNECTED");
 
 
     socket.on('my other event', function (data) {

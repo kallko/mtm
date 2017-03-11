@@ -120,7 +120,7 @@ Log.prototype.info = function () {
             }
             if (stats != undefined && stats.isFile) {
                 console.log("Найден файл 2-х дневной давности");
-                fs.unlink(me.folder+'/'+ name2);
+                //fs.unlink(me.folder+'/'+ name2).then(console.log("ok"), console.log("Not ok"));
             }
         });
     }

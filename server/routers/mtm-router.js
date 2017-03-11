@@ -6024,16 +6024,16 @@ function isOldDayExist(curCompany, showDate) {
 
 }
  function lookForFreshCalls(company, blockedArr) {
-     console.log("Etap1".green, company, blockedArr);
+     //console.log("Etap1".green, company, blockedArr);
      blockedRoutes.forEach(function(item){
          console.log("Blocked", item);
      });
      if (!company || !blockedArr || blockedArr.length == 0) return;
      var result = [];
-     console.log("Etap2".green);
+     //console.log("Etap2".green);
      blockedArr.forEach(function(id){
          blockedRoutes.forEach(function(blocked){
-             console.log("Etap3".green, id, blocked.id);
+             //console.log("Etap3".green, id, blocked.id);
              if (id == blocked.id && blocked.calls && blocked.calls.length != 0){
                  console.log("Calls finded");
                  blocked.calls.uniqueID = id;
@@ -7457,7 +7457,7 @@ function autasaveRoutes(company, routes){
                 for (var i = 0; i < cashedDataArr[company].blocked_routes.length; i++ ){
                 var b_route = cashedDataArr[company].blocked_routes[i];
                     if (b_route.uniqueID == route.uniqueID) {
-                        console.log("Autosave complete".blue, b_route.uniqueID, route.uniqueID);
+                        //console.log("Autosave complete".blue, b_route.uniqueID, route.uniqueID);
                         checkChangeStatusForHook(company, b_route, route);
                         cashedDataArr[company].blocked_routes[i] = route;
                         break;
@@ -7504,7 +7504,7 @@ function waitingCallForOperator(key, company){
 
 
 function checkChangeStatusForHook(company, b_route, route){
-    console.log("start checking", b_route.uniqueID, route.uniqueID);
+    //console.log("start checking", b_route.uniqueID, route.uniqueID);
     route.points.forEach(function(point, i) {
      changeStatusHookTo1C(company, point, b_route.points[i].status, b_route.points[i].limit, b_route.points[i].notes, b_route.points[i].driverNotes)
     })

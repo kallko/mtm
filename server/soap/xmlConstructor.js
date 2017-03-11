@@ -66,6 +66,7 @@ XMLConstructor.prototype.dailyPlanXML = function (timestamp) {
     str += this.xml.instruction.end;
     str += this.xml.instructions.end;
     str += this.xml.end;
+    console.log("Daily plan XML", str);
     return str;
 };
 

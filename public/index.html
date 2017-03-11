@@ -159,9 +159,12 @@
                             </div>
                         </div>
                         <div class="col-sm-3">
+
                             <select id="route-select"   ng-model="filters.route" class="group-select heightElement width100"
-                                    ng-options="option.value as option[settings.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', settings.routeListOrderBy]">
+                                    ng-options="option.value as option[settings.routeListOrderBy]   for option in filters.routes | orderBy : ['-allRoutes', settings.routeListOrderBy]"
+                                    ng-if = "true">
                             </select>
+
                         </div>
                         <div class="col-sm-2">
                             <!--<button  class="btn btn-default btn-sm heightElement width100" ng-class="filters.problem_index == 1 ? 'btn-success' : '' " id="problem-index-btn" ng-click="toggleProblemPoints()">-->
@@ -209,7 +212,7 @@
 
 
 
-                        <select ng-show="false" id="branch-select" ng-model="filters.branch" class="group-select"
+                        <select ng-show="true" id="branch-select" ng-model="filters.branch" class="group-select"
                                 ng-options='option.value as option.name for option in filters.branches'>
                         </select>
 
