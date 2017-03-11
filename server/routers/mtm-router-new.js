@@ -2359,6 +2359,7 @@ router.route('/askforproblems/:need')
                     result.allRoutes = [];
                     result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                     result.reasons = cashedDataArr[currentCompany].reasons;
+                    result.allBranches = cashedDataArr[currentCompany].allBranches;
                     result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
@@ -2403,6 +2404,7 @@ router.route('/askforproblems/:need')
                 result.transports = cashedDataArr[currentCompany].transports;
                 result.reasons = cashedDataArr[currentCompany].reasons;
                 result.notes = cashedDataArr[currentCompany].notes;
+                result.allBranches = cashedDataArr[currentCompany].allBranches;
             }
             //log.info("Need=", need);
             if (need != 1){
@@ -2433,6 +2435,7 @@ router.route('/askforproblems/:need')
                         result.settings.user = "" + req.session.login;
                         result.settings.companyName = currentCompany;
                         result.reasons = cashedDataArr[currentCompany].reasons;
+                        result.allBranches = cashedDataArr[currentCompany].allBranches;
                         result.notes = cashedDataArr[currentCompany].notes;
                         //надо отдать маршрут из старых на закрытие
                         console.log("Reply 2342".red);
@@ -2447,6 +2450,7 @@ router.route('/askforproblems/:need')
                     result.server_time = parseInt(Date.now() / 1000);
                     result.companyName = currentCompany;
                     result.reasons = cashedDataArr[currentCompany].reasons;
+                    result.allBranches = cashedDataArr[currentCompany].allBranches;
                     result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.settings.user = "" + req.session.login;
@@ -2484,6 +2488,7 @@ router.route('/askforproblems/:need')
                 result.routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 result.companyName = currentCompany;
                 result.reasons = cashedDataArr[currentCompany].reasons;
+                result.allBranches = cashedDataArr[currentCompany].allBranches;
                 result.notes = cashedDataArr[currentCompany].notes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
@@ -2521,7 +2526,7 @@ router.route('/askforproblems/:need')
             result.transports = cashedDataArr[currentCompany].transports;
         //Перед отправкой проверка на задвоенность маршрутов
 
-
+            result.allBranches = cashedDataArr[currentCompany].allBranches;
         result.reasons = cashedDataArr[currentCompany].reasons;
         result.notes = cashedDataArr[currentCompany].notes;
         result.settings = cashedDataArr[currentCompany].settings;
@@ -2739,6 +2744,15 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
         tmpTaskNumber = -1;
 
     cashedDataArr[currentCompany].firstLogin = login;
+
+    if (cashedDataArr[currentCompany].routes
+        && cashedDataArr[currentCompany].routes[0]
+        && cashedDataArr[currentCompany].settings) {
+        cashedDataArr[currentCompany].allBranches = [];
+        cashedDataArr[currentCompany].allBranches.push(cashedDataArr[currentCompany].routes[0].branch);
+    }
+
+
     cashedDataArr[currentCompany].last_track_update = parseInt(Date.now()/1000);
     cashedDataArr[currentCompany].loadedBranches = [];
     cashedDataArr[currentCompany].loadedBranches.push(cashedDataArr[currentCompany].branch);
@@ -7933,7 +7947,7 @@ function addBranchToCompany(existData, newData) {
     for (var keys in existData) {
         console.log ("existData keys".grey, keys);
     }
-    console.log(existData.line_routes.length);
+    console.log("existData.settings".red);
 
     branchRoutesConcat(existData, newData);
 
@@ -7980,6 +7994,10 @@ function branchRoutesConcat(existData, newData){
     log.info("До объединения", existData.routes.length,  existData.waypoints.length, "получили", newData.routes.length, newData.waypoints.length);
     var newRoutes = JSON.parse(JSON.stringify(newData.routes));
     var newWaypoints = JSON.parse(JSON.stringify(newData.waypoints));
+
+    if (newRoutes && newRoutes[0]){
+        existData.allBranches.push(newRoutes[0].branch);
+    }
 
     var lastFilterId = 0;
     var lastRowId = 0,
