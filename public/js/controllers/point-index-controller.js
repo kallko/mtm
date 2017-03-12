@@ -190,6 +190,20 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         scope.$watch('filters.branch', function(){
             console.log(scope.filters.branch);
+            scope.filters.routes.length = 1;
+            if (scope.filters.branch == -1) {
+                scope.filters.routes = scope.filters.routes.concat(rootScope.data.allRoutes);
+                scope.filters.route = -1;
+                scope.$apply();
+                return
+            }
+            var filtredRoutes = rootScope.data.allRoutes.filter(function (route) {
+                return route.branch == scope.filters.branch;
+            });
+            //console.log(filtredRoutes);
+            scope.filters.routes = scope.filters.routes.concat(filtredRoutes);
+            scope.filters.route = -1;
+            scope.$apply();
         });
 
         scope.$watch('filters.route', function(){

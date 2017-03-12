@@ -1097,9 +1097,9 @@ router.route('/dailydata')
                             if (data.routes !=undefined) {
                                 for (var i = 0; i < data.routes.length; i++) {
                                     if (!data.routes[i]['uniqueID']) {
-                                        data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                        data.routes[i]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                         for (j = 0; j < data.routes[i].points.length; j++) {
-                                            data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                            data.routes[i].points[j]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                         }
                                     }
                                 }
@@ -1168,12 +1168,14 @@ router.route('/dailydata')
                     // console.log("data.branch".blue, data.branch);
                     // console.log("data.BRANCH".blue, data.BRANCH);
 
+
+
                     if (data.routes != undefined) {
                         for ( i = 0; i < data.routes.length; i++) {
                             if (!data.routes[i]['uniqueID']) {
-                                data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                data.routes[i]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 for (var j = 0; j < data.routes[i].points.length; j++) {
-                                    data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                    data.routes[i].points[j]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 }
                             }
                         }
@@ -1275,12 +1277,17 @@ router.route('/dailydata')
 router.route('/askforroute')
     .post(function(req, res) {
         try {
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+
             var currentCompany = req.session.company;
         var uniqueID = req.body.id;
         log.info("Пришел одиночный запрос на роут", uniqueID);
         var blockedRoutes = _routes.getData();
         // проверяем не был ли этот маршрут заблокирован
+
+            blockedRoutes.forEach(function (route) {
+                console.log("blocked ALready", route.id, "in ", route.company);
+            });
+
         for (var i = 0; i < blockedRoutes.length; i++) {
             log.info(blockedRoutes[i]);
             if (blockedRoutes[i].id == uniqueID && currentCompany == blockedRoutes[i].company) {
@@ -1293,6 +1300,12 @@ router.route('/askforroute')
         //log.info("Начинаем поиск", currentCompany, cashedDataArr[currentCompany].line_routes.length);
         var result = {error: "Dont Found"};
         var cashedDataArr = _data.getData();
+
+
+            cashedDataArr[currentCompany].line_routes.forEach(function (route) {
+                console.log("Steel free ALready", route.uniqueID);
+            });
+
         if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length > 0) {
 
             for (i = 0; i < cashedDataArr[currentCompany].line_routes.length; i++) {
@@ -1323,7 +1336,7 @@ router.route('/askforroute')
             }
         }
         if (result.error == undefined) {
-            changePriority(result.uniqueID, currentCompany, key);
+            changePriority(result.uniqueID, currentCompany, req.session.login);
             blockedRoutes.push ({id: result.uniqueID, company: currentCompany, login: req.session.login, time: parseInt(Date.now()/1000)})
         }
         //log.info ("Начинаем запись файла");
@@ -2101,9 +2114,9 @@ router.route('/savetonode/')
     .post(function (req, res) {
         try {
             log.info("Приступаем к сохранению роута");
-            var i=0;
-            var id = parseInt(req.body.route.uniqueID);
-            var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+            var i = 0;
+            var id = req.body.route.uniqueID;
+            var key = req.session.login;
             var updateRoute = new modifyRoutes();
             var cashedDataArr = _data.getData();
             updateRoute.ReplaceStopObjectByStopLink (req.body.route);
@@ -4599,10 +4612,10 @@ try {
                         if (data.routes !=undefined) {
                             for (var i = 0; i < data.routes.length; i++) {
                                 if (!data.routes[i]['uniqueID']) {
-                                    data.routes[i]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                    data.routes[i]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                     log.info("Prisvoeno znahenie", data.routes[i]['uniqueID']);
                                     for (var j = 0; j < data.routes[i].points.length; j++) {
-                                        data.routes[i].points[j]['uniqueID'] = data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                        data.routes[i].points[j]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                     }
                                 }
                             }
@@ -7944,12 +7957,20 @@ function addBranchToCompany(existData, newData) {
     console.log("addBranchToCompany".grey);
     console.log ("existData.loadedBranches",existData.loadedBranches);
     console.log ("data.branch", newData.branch);
-    for (var keys in existData) {
-        console.log ("existData keys".grey, keys);
-    }
-    console.log("existData.settings".red);
 
     branchRoutesConcat(existData, newData);
+
+    existData.line_routes.forEach(function (route) {
+        console.log("line_routes UniqueID = ", route.uniqueID);
+    });
+
+    existData.routes.forEach(function (route) {
+        console.log("routes UniqueID = ", route.uniqueID);
+    });
+
+
+
+
 
     if (existData.BRANCHES_INNFORM === undefined) {
         existData.BRANCHES_INNFORM = [];
@@ -7992,11 +8013,10 @@ function branchRoutesConcat(existData, newData){
     //log.info("Ready to concat", data.routes, "MTM 2750");
     //Добавление новых данных в Кэш
     log.info("До объединения", existData.routes.length,  existData.waypoints.length, "получили", newData.routes.length, newData.waypoints.length);
-    var newRoutes = JSON.parse(JSON.stringify(newData.routes));
-    var newWaypoints = JSON.parse(JSON.stringify(newData.waypoints));
 
-    if (newRoutes && newRoutes[0]){
-        existData.allBranches.push(newRoutes[0].branch);
+
+    if (newData.routes && newData.routes[0]){
+        existData.allBranches.push(newData.routes[0].branch);
     }
 
     var lastFilterId = 0;
@@ -8296,8 +8316,8 @@ function branchRoutesConcat(existData, newData){
     });
 
     existData.allRoutes = existData.allRoutes.concat(newData.allRoutes);
-    existData.routes = existData.routes.concat(newRoutes);
-    existData.waypoints = existData.waypoints.concat(newWaypoints);
+    existData.routes = existData.routes.concat(newData.routes);
+    existData.waypoints = existData.waypoints.concat(newData.waypoints);
     log.info("После объединения", existData.routes.length, existData.waypoints.length);
 }
 
