@@ -2761,6 +2761,8 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients, bra
 
         cashedDataArr[currentCompany].firstLogin = login;
         cashedDataArr[currentCompany].loadedBranches = cashedDataArr[currentCompany].loadedBranches || [];
+
+        //console.log("I gona push ", branch, "or",cashedDataArr[currentCompany].routes[0].branch, "in ", cashedDataArr[currentCompany].loadedBranches = cashedDataArr[currentCompany].loadedBranches)
         cashedDataArr[currentCompany].loadedBranches.push(branch);
 
 
@@ -3512,7 +3514,7 @@ function dataForPredicate(company, cashedDataArr, callback){
         log.info("The first cickle is finished RESULT LENGTH =", company, generalResult.length, cashedDataArr[company].needRequests );
         if(cashedDataArr[company].needRequests == 0) {
             callback(company, cashedDataArr);
-            _data.setData(cashedDataArr);
+            //_data.setData(cashedDataArr);
         }
         return;
     }
@@ -4124,11 +4126,9 @@ try {
         var date = cashedDataArr[company].routesOfDate;
         log.info("Start looking for new ITEN", company);
         var soapManager = new soap(cashedDataArr[company].firstLogin);
-        var existIten;
+        var existIten = [];
         if(cashedDataArr[company].idArr != undefined) {
-            existIten = cashedDataArr[company].idArr.length;
-        } else{
-            existIten = 0;
+            existIten = cashedDataArr[company].idArr;
         }
 
         soapManager.lookAdditionalDailyPlan(date, existIten, company, function (data) {

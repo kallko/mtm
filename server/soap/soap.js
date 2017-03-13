@@ -1044,7 +1044,14 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var date =  new Date();
     var newDay = date.getDate();
     var inTime = (oldDay==newDay);
-    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime);
+    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime, "ExistIten", existIten);
+
+    //Find unique logins
+
+    var logins = findUniqueLogins(existIten);
+    console.log("logins", logins, "existIten", existIten);
+
+
 
 
     date = Date.now();
@@ -1056,8 +1063,23 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
         //console.log(me.login);
         //console.log(_xml.dailyPlanXML(date));
 
+        for (var i = 0; i < logins.length; i++){
+            console.log("Send REQUEST");
+            client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': logins[i].login}, function (err, result) {
+                if (!err) {
+                    console.log("ADD ITIN SERCH", result);
+                } else {
+                    console.log("ERRRRRRRROR", err);
+                }
+            })
+        }
+
+
+        //fixme
+        return;
         // запрос в соап от имени авторизированного пользователя, но с правами администратора
         // получения списка id решений на конкретную дату
+        console.log("me.login", me.login);
         client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': me.login}, function (err, result) {
             if (!err) {
                 //console.log('Its ALL Iten for now:');
@@ -1085,7 +1107,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                     var itineraries = res.MESSAGE.PLANS[0].ITINERARY,
                         data = [];
 
-                    data.itens=itineraries;
+                    data.itens = itineraries;
                     data.iLength = itineraries.length;
                     data.company = company;
                     //console.log("Quantity of Iten is", data.iLength);
@@ -1099,7 +1121,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                     }
 
                     // Появились утвержденные планы на новый день.
-                    if(!inTime && data.iLength>0){
+                    if(!inTime && data.iLength > 0){
                         //console.log("Появились утвержденные планы на новый день");
                         callback({status: 'begin new day', newDayIten: data});
                         return;
@@ -1204,3 +1226,21 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
 
 };
+
+function findUniqueLogins(existIten) {
+    var exist = [].concat(existIten);
+    var result = [].concat(exist[0]);
+    exist.splice(0,1);
+    for (var i = 0; i < exist.length; i++){
+       if (result.some(function (item) {
+               return item.login === exist[i].login
+           })) {
+           exist.splice(i,1);
+           i--;
+       } else {
+           result.push(exist[i]);
+       }
+    }
+
+    return result;
+}
