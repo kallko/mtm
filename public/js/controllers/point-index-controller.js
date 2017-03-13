@@ -189,7 +189,8 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
          });
 
         scope.$watch('filters.branch', function(){
-            console.log(scope.filters.branch);
+            if (!rootScope.data || rootScope.data.allRoutes) return;
+            //console.log(scope.filters.branch);
             scope.filters.routes.length = 1;
             if (scope.filters.branch == -1 && rootScope.data && rootScope.data.allRoutes) {
                 scope.filters.routes = scope.filters.routes.concat(rootScope.data.allRoutes);

@@ -3118,14 +3118,14 @@ function startPeriodicCalculating() {
 
     }
 
-    log.info("Вызов callbackDispetcher из startPeriodicCalculating");
+    log.info("Вызов callbackDispetcher из startPeriodicCalculating", companysToCalc);
 
     callbackDispetcher(companysToCalc, cashedDataArr);
 
 
 
     function callbackDispetcher(companys, cashedDataArr) {
-        if (!company) return;
+        if (!companys) return;
 
         for (var k=0; k<companys.length; k++) {
             middleTime = parseInt(Date.now()/1000);

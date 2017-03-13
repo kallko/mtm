@@ -42,7 +42,8 @@ template {
 
 #point-table {
     overflow-y: scroll;
-    /*overflow: auto;*/
+    /*overflow-x: scroll;*/
+    overflow: auto;
     width: 100%;
 }
 
