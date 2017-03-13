@@ -165,7 +165,13 @@ function checkBeforeSend(_data, callback) {
     //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
     if (allData.idArr == undefined) {allData.idArr = []}
     //allData.idArr = [];
-    allData.idArr.push(data[0].ID);
+
+    console.log("!!!!Создаем массив решений!!!!!", data[0].ID, data[0].branch);
+    allData.idArr.push({id: data[0].ID, login: ""});
+
+    for (var keys in data[0]){
+        console.log("We have this data", keys);
+    }
 
     // в случае если дошло до сюда, значит необходимые данные собраны
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
@@ -180,7 +186,10 @@ function checkBeforeSend(_data, callback) {
         allData.TIME = parseInt(allData.TIME) + parseInt(data[i].TIME);
         allData.VALUE = parseInt(allData.VALUE) + parseInt(data[i].VALUE);
         allData.routes = allData.routes.concat(data[i].routes);
-        allData.idArr.push(data[i].ID);
+
+        console.log("data.firstLogin", data[i].firstLogin);
+        console.log("data.branch", data[i].branch);
+        allData.idArr.push({id: data[i].ID, login: ""});
         console.log("#data.loadedBranches", data.loadedBranches);
 
         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
@@ -380,7 +389,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, branchId, br
         })}, 15);
     }
 
-    //console.log("Очень очень Очень  Важные данные", id, version, me.login, data, date );
+    console.log("Очень очень Очень  Важные данные", branchId, branchName);
     client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
         itineraryCallback(err, result, me, client, itIsToday, data, date, branchId, branchName, callback);
     });
@@ -419,9 +428,12 @@ function itineraryCallback(err, result, me, client, itIsToday, data, date, branc
             data[nIndx].date = new Date(date);
             data[nIndx].server_time = parseInt(date / 1000);
             data[nIndx].branch = {
-                id: branchId,
-                name: branchName
+                id: branchId || 007,
+                name: branchName || "tempBranch"
             };
+            console.log("#data[nIndx].branch", data[nIndx].branch);
+            //console.log("#this.login", this.login);
+            console.log("#branchId", branchId);
             data.loadedBranches = data.loadedBranches || [];
             //data.loadedBranches.push(branchId);
 
@@ -504,6 +516,7 @@ SoapManager.prototype.getAdditionalData = function (client, data, itIsToday, nIn
                 //fixme чтобы не грузить сервер
                 //return;
                 data[nIndx].branch = branchId;
+                console.log("&data[nIndx].branch", data[nIndx].branch);
 
                 if (waypoints == undefined) return;
                 //console.log('drivers', drivers.length);

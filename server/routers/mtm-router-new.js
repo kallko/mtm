@@ -1011,6 +1011,7 @@ router.route('/dailydata')
 
                     var currentCompany = req.session.company;
                     var key = req.session.login;
+                    data.login = req.session.login;
                     console.log("CREATE COMPANY", currentCompany, key, req.session.login, req.session.company, req.session.branch, " Complete".red);
                     companyLogins[key] = currentCompany;
                     console.log("COMPANY LOGINS ".red, companyLogins);
@@ -1026,7 +1027,7 @@ router.route('/dailydata')
 
                     if (cashedDataArr
                         && cashedDataArr[currentCompany] ) {
-                        addBranchToCompany(cashedDataArr[currentCompany], data);
+                        addBranchToCompany(cashedDataArr[currentCompany], data, req.session.login);
                     }
 
 
@@ -1137,7 +1138,7 @@ router.route('/dailydata')
                             soapManager = new soap(req.session.login);
                             for (var k=0; k<cashedDataArr[currentCompany].idArr.length; k++) {
                                 //if (develop) console.log("Iten number for pushes request". red, req.session.itineraryID.red );
-                            soapManager.getPushes(cashedDataArr[currentCompany].idArr[k], parseInt(Date.parse(data.date)/1000), companyName, function (company, data) {
+                            soapManager.getPushes(cashedDataArr[currentCompany].idArr[k].id, parseInt(Date.parse(data.date)/1000), companyName, function (company, data) {
                                 log.info("391 receivePUSHES!!!!! for iten", iten);
                                 var obj = JSON.parse(data.return);
                                 log.info("Obj", obj[0], "mtm 336");
@@ -1213,7 +1214,7 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].allPushes =[];
                     for (var t=0; t < cashedDataArr[currentCompany].idArr.length; t++) {
                         var soapManager = new soap(cashedDataArr[currentCompany].firstLogin);
-                        var iten = cashedDataArr[currentCompany].idArr[t];
+                        var iten = cashedDataArr[currentCompany].idArr[t].id;
                         //log.info("Request for Itin", iten);
                         soapManager.getPushes(iten, parseInt(Date.now() / 1000), currentCompany, function (company, data) {
                             //log.info(" 452 receivePUSHES!!!!! for iten", company);
@@ -2761,7 +2762,7 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients, bra
         cashedDataArr[currentCompany].firstLogin = login;
         cashedDataArr[currentCompany].loadedBranches = cashedDataArr[currentCompany].loadedBranches || [];
         cashedDataArr[currentCompany].loadedBranches.push(branch);
-        console.log(" I MAKE LOADED BRANCH");
+
 
     if (cashedDataArr[currentCompany].routes
         && cashedDataArr[currentCompany].routes[0]
@@ -3036,6 +3037,12 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients, bra
             //log.info("DELETE CURRENT POSITION");
         }
     }
+
+    cashedDataArr[currentCompany].idArr.forEach(function (itin) {
+        if (itin.login == '') itin.login = login;
+    });
+    console.log("cashedDataArr[currentCompany].idArr".red, cashedDataArr[currentCompany].idArr);
+
     //cashedDataArr[currentCompany].routes.length = size;
     log.info("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
     console.log("2cashedDataArr[currentCompany].loadedBranches", cashedDataArr[currentCompany].loadedBranches);
@@ -3132,8 +3139,10 @@ function startPeriodicCalculating() {
             cashedDataArr[companys[k]].needRequests = cashedDataArr[companys[k]].idArr.length + 2; // Количество необходимых запрсов во внешний мир. Только после получения всех ответов, можно запускать пересчет *3 потому что мы просим пушиб треки и данные для предсказания
             log.info ("Готовимся выполнять запросы впереди их", cashedDataArr[companys[k]].needRequests, new Date() );
             cashedDataArr[companys[k]].allPushes=[];
+
+            //fixme выполнять запросы в базу от имени пользователя, который заходил
             for (var itenQuant=0; itenQuant<cashedDataArr[companys[k]].idArr.length; itenQuant++) {
-                    var iten = cashedDataArr[companys[k]].idArr[itenQuant];
+                    var iten = cashedDataArr[companys[k]].idArr[itenQuant].id;
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
                         //log.info("2375 receivePUSHES!!!!! for iten", company);
@@ -3247,7 +3256,7 @@ function startPeriodicCalculating() {
                                     cached.routes[i].lostSignal = (data[j].data[0] &&
                                         data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 > 360 &&
                                         data[j].data[data[j].data.length-1].t2 - cached.routes[i].real_track[cached.routes[i].real_track.length-1].t2 < 600 &&
-                                        !cached.routes[i].lostSignal)
+                                        !cached.routes[i].lostSignal);
 
 
                                     if ((cached.routes[i].real_track == undefined || cached.routes[i].real_track.length == 0) && (data[j].data[0] != undefined)){
@@ -3503,7 +3512,7 @@ function dataForPredicate(company, cashedDataArr, callback){
         log.info("The first cickle is finished RESULT LENGTH =", company, generalResult.length, cashedDataArr[company].needRequests );
         if(cashedDataArr[company].needRequests == 0) {
             callback(company, cashedDataArr);
-            _data.setData();
+            _data.setData(cashedDataArr);
         }
         return;
     }
@@ -4543,7 +4552,7 @@ try {
                         }
                     }
 
-                    cashedDataArr[currentCompany].idArr.push(cashedDataArr[currentCompany].routes[cashedDataArr[currentCompany].routes.length-1].itineraryID);
+                    cashedDataArr[currentCompany].idArr.push({id : cashedDataArr[currentCompany].routes[cashedDataArr[currentCompany].routes.length-1].itineraryID, login: tempLogin});
                     log.info("FINISHING SECOND LINKING");
                     checkCorrectCalculating(currentCompany);
 
@@ -7958,7 +7967,7 @@ function checkChangeStatusForHook(company, b_route, route){
 }
 
 
-function addBranchToCompany(existData, newData) {
+function addBranchToCompany(existData, newData, login) {
     console.log("addBranchToCompany".grey);
     console.log ("existData.loadedBranches",existData.loadedBranches);
     console.log ("data.branch", newData.branch);
@@ -7987,7 +7996,7 @@ function addBranchToCompany(existData, newData) {
 
 
     branchesSimpleConcat(existData, newData);
-    branchesArrayConcat(existData, newData);
+    branchesArrayConcat(existData, newData, login);
     branchesArrayDependencyConcat(existData, newData);
     //fixme currentProblems from new
 
@@ -8350,9 +8359,13 @@ function branchesArrayDependencyConcat(existData, newData){
 }
 
 
-function branchesArrayConcat(existData, newData) {
+function branchesArrayConcat(existData, newData, login) {
+    newData.idArr.forEach(function (itin) {
+        if (itin.login == '') itin.login = login;
+    })
     existData.idArr = existData.idArr.concat(newData.idArr);
     delete newData.idArr;
+    console.log("CONCATED BRANCHES ID ARR", existData.idArr);
 }
 
 
