@@ -1097,9 +1097,9 @@ router.route('/dailydata')
                             if (data.routes !=undefined) {
                                 for (var i = 0; i < data.routes.length; i++) {
                                     if (!data.routes[i]['uniqueID']) {
-                                        data.routes[i]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                        data.routes[i]['uniqueID'] = req.session.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                         for (j = 0; j < data.routes[i].points.length; j++) {
-                                            data.routes[i].points[j]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                            data.routes[i].points[j]['uniqueID'] = req.session.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                         }
                                     }
                                 }
@@ -1119,13 +1119,15 @@ router.route('/dailydata')
                             cashedDataArr[currentCompany] = data;
 
                             cashedDataArr[currentCompany].currentProblems = [];
-                            cashedDataArr[currentCompany].allRoutes=[];
+                            cashedDataArr[currentCompany].allRoutes = [];
+
+
                             cashedDataArr[currentCompany].settings = settings;
                             cashedDataArr[currentCompany].settings.limit = cashedDataArr[currentCompany].settings.limit || 74; //TODO прописать в настройки на 1с параметр лимит
                             cashedDataArr[currentCompany].settings.problems_to_operator = cashedDataArr[currentCompany].settings.problems_to_operator || 3; //TODO прописать в настройки на 1с параметр лимит
                             cashedDataArr[currentCompany].settings.companyName = currentCompany;
                             //Собираем решение из частей в одну кучку
-                            linkDataParts(currentCompany, req.session.login, cashedDataArr, onlineClients);
+                            linkDataParts(currentCompany, req.session.login, cashedDataArr, onlineClients, req.session.branch);
                             //Мгновенный запуск на пересчет, после загрузки
 
                             log.info("Собираемся получать пуши", currentCompany, cashedDataArr[currentCompany].idArr );
@@ -1173,9 +1175,9 @@ router.route('/dailydata')
                     if (data.routes != undefined) {
                         for ( i = 0; i < data.routes.length; i++) {
                             if (!data.routes[i]['uniqueID']) {
-                                data.routes[i]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                data.routes[i]['uniqueID'] = req.session.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 for (var j = 0; j < data.routes[i].points.length; j++) {
-                                    data.routes[i].points[j]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                    data.routes[i].points[j]['uniqueID'] = req.session.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                 }
                             }
                         }
@@ -1201,7 +1203,7 @@ router.route('/dailydata')
                     cashedDataArr[currentCompany].companyName = currentCompany;
                     cashedDataArr[currentCompany].recalc_finishing = true;
                     //Собираем решение из частей в одну кучку
-                    linkDataParts(currentCompany, req.session.login, cashedDataArr, onlineClients);
+                    linkDataParts(currentCompany, req.session.login, cashedDataArr, onlineClients, req.session.branch);
                     //Мгновенный запуск на пересчет, после загрузки
 
 
@@ -2730,7 +2732,7 @@ function strToTstamp(strDate, lockaldata) {
     }
 }
 
-function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
+function linkDataParts (currentCompany, login, cashedDataArr, onlineClients, branch) {
     try {
 //Добавление нового пользователь online, если его раньше не было
     var exist = false;
@@ -2756,7 +2758,10 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
         branchIndx,
         tmpTaskNumber = -1;
 
-    cashedDataArr[currentCompany].firstLogin = login;
+        cashedDataArr[currentCompany].firstLogin = login;
+        cashedDataArr[currentCompany].loadedBranches = cashedDataArr[currentCompany].loadedBranches || [];
+        cashedDataArr[currentCompany].loadedBranches.push(branch);
+        console.log(" I MAKE LOADED BRANCH");
 
     if (cashedDataArr[currentCompany].routes
         && cashedDataArr[currentCompany].routes[0]
@@ -2767,8 +2772,7 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
 
 
     cashedDataArr[currentCompany].last_track_update = parseInt(Date.now()/1000);
-    cashedDataArr[currentCompany].loadedBranches = [];
-    cashedDataArr[currentCompany].loadedBranches.push(cashedDataArr[currentCompany].branch);
+
 
 
     for (i = 0; i < cashedDataArr[currentCompany].sensors.length; i++) {
@@ -2861,7 +2865,7 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
                     nameDriver: ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени') +  " " + cashedDataArr[currentCompany].routes[i].SHIFT_NAME + ' - ' + cashedDataArr[currentCompany].routes[i].transport.NAME,
                     nameCar: cashedDataArr[currentCompany].routes[i].transport.NAME + " " + cashedDataArr[currentCompany].routes[i].SHIFT_NAME + ' - ' + ( ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени'),
 
-                    branch: cashedDataArr[currentCompany].branch,
+                    branch: branch,
 
                     value: cashedDataArr[currentCompany].routes[i].filterId,
                     uniqueID: cashedDataArr[currentCompany].routes[i].uniqueID,
@@ -3034,6 +3038,7 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients) {
     }
     //cashedDataArr[currentCompany].routes.length = size;
     log.info("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
+    console.log("2cashedDataArr[currentCompany].loadedBranches", cashedDataArr[currentCompany].loadedBranches);
     addBranchesInform(cashedDataArr[currentCompany]);
     checkCorrectCalculating(currentCompany, cashedDataArr);
 
@@ -4256,7 +4261,7 @@ try {
                         if (cashedDataArr[currentCompany].routes[i].moreThanOneSensor) cashedDataArr[currentCompany].currentProblems.push([cashedDataArr[currentCompany].routes[i], 'Более одного сенсора']);
 
                         ////TODO: get real branch office
-                        cashedDataArr[currentCompany].routes[i].branch = cashedDataArr[currentCompany].BRANCH;
+                        //cashedDataArr[currentCompany].routes[i].branch = cashedDataArr[currentCompany].BRANCH;
                         //i % 2 == 0 ? 'Киев ТЕСТ' : 'Одесса ТЕСТ';
 
                         //for (var j = 0; j < scope.filters.branches.length; j++) {
@@ -4336,8 +4341,8 @@ try {
                             //
                             if (cashedDataArr[currentCompany].routes[i].filterId == null || cashedDataArr[currentCompany].routes[i].filterId == undefined ) {
                                 cashedDataArr[currentCompany].routes[i].filterId = lastFilterId;
-                                cashedDataArr[currentCompany].routes[i].uniqueID = cashedDataArr.branch +""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID;
-                                log.info("Prisvoen UNIQUE ID", ""+""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID);
+                                cashedDataArr[currentCompany].routes[i].uniqueID = cashedDataArr[currentCompany].branch +""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID;
+                                log.info("Prisvoen UNIQUE ID", ""+cashedDataArr[currentCompany].branch +""+cashedDataArr[currentCompany].routes[i].itineraryID+data.VERSION+cashedDataArr[currentCompany].routes[i].ID);
                                 for( var k =0; k < cashedDataArr[currentCompany].routes[i].points.length; k++){
                                     cashedDataArr[currentCompany].routes[i].points[k].uniqueID = cashedDataArr[currentCompany].routes[i].uniqueID;
                                     cashedDataArr[currentCompany].routes[i].points[k].route_id = cashedDataArr[currentCompany].routes[i].filterId;
@@ -4360,7 +4365,7 @@ try {
                                     value: cashedDataArr[currentCompany].routes[i].filterId,
                                     uniqueID: cashedDataArr[currentCompany].routes[i].uniqueID,
 
-                                    branch: cashedDataArr[currentCompany].branch,
+                                    branch: cashedDataArr[currentCompany].branch || "ERROR 4368",
 
                                     car: cashedDataArr[currentCompany].routes[i].transport.NAME,
                                     driver: ( cashedDataArr[currentCompany].routes[i].hasOwnProperty('driver') && cashedDataArr[currentCompany].routes[i].driver.hasOwnProperty('NAME') ) ? cashedDataArr[currentCompany].routes[i].driver.NAME : 'без имени' + i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
@@ -4612,10 +4617,10 @@ try {
                         if (data.routes !=undefined) {
                             for (var i = 0; i < data.routes.length; i++) {
                                 if (!data.routes[i]['uniqueID']) {
-                                    data.routes[i]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                    data.routes[i]['uniqueID'] = req.session.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                     log.info("Prisvoeno znahenie", data.routes[i]['uniqueID']);
                                     for (var j = 0; j < data.routes[i].points.length; j++) {
-                                        data.routes[i].points[j]['uniqueID'] = data.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
+                                        data.routes[i].points[j]['uniqueID'] = req.session.branch + data.routes[i].itineraryID + data.VERSION + data.routes[i].ID;
                                     }
                                 }
                             }
@@ -8148,7 +8153,7 @@ function branchRoutesConcat(existData, newData){
                 value: route.filterId,
                 uniqueID: route.uniqueID,
 
-                branch: newData.branch,
+                branch: newData.branch || "ERROR 8156",
 
                 car: route.transport.NAME,
                 driver: ( route.hasOwnProperty('driver') && route.driver.hasOwnProperty('NAME') ) ? route.driver.NAME : 'без имени' + i //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!добавили свойство driver для события в closeDriverName
@@ -8556,12 +8561,12 @@ function startCalculateCompany(company, cashedDataArr) {
     //  for (var keyObj in cashedDataArr[company]) {
     //      console.log("KeyObj".grey, keyObj);
     //  }
-    console.log("BRANCH", cashedDataArr[company].BRANCH );
+    //console.log("BRANCH", cashedDataArr[company].BRANCH );
     try {
     startTime = parseInt(Date.now()/1000);
     log.info("Все данные получены, пересчитываем компанию", company);
     //fixme
-    //if (cashedDataArr[company].currentDay == false) return;
+    if (cashedDataArr[company].currentDay == false) return;
     checkCorrectCalculating(company, cashedDataArr);
     cashedDataArr[company].recalc_finishing = false;
     selectRoutes(company, cashedDataArr);
@@ -8577,7 +8582,7 @@ function startCalculateCompany(company, cashedDataArr) {
     createProblems(company, cashedDataArr);
     loadCoords(company, cashedDataArr);
     //fixme
-    //lookForNewIten(company, cashedDataArr);
+    lookForNewIten(company, cashedDataArr);
     cashedDataArr[company].recalc_finishing = true;
     safeReload();
     autosaveData(cashedDataArr);

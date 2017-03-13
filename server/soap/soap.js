@@ -7,18 +7,16 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
-    testCopy = true, // флаг обращения к копии базы
+    testCopy = false, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
         config.aggregator.url,
         config.router.url,
         config.aggregator.login,
-        config.aggregator.password),
+        config.aggregator.password);
 
 
-
-    counter = 0;
 
 
 // класс для работы с соапом
@@ -237,7 +235,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
     console.log("Date<<", date);
     //fixme date
-    date = 1489060800000;
+     //date = 1489060800000;
     console.log('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {
@@ -374,7 +372,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 // в итоге получено будет только одно решение, т.к. двух решений разных типов по одному id не бывает
 SoapManager.prototype.getItinerary = function (client, id, version, branchId, branchName, itIsToday, data, date, callback) {
     var me = this;
-    console.log ("Load ITINERARY BBBRANCH", branchName);
+    console.log ("Load ITINERARY BBBRANCH ", branchId,  branchName);
     if (!config.loadOnlyItineraryNew && (this.login != 'IDS.a.kravchenko')) {
         setTimeout(function () {
         client.runAsUser({'input_data': _xml.itineraryXML(id, version), 'user': me.login}, function (err, result) {
@@ -391,7 +389,7 @@ SoapManager.prototype.getItinerary = function (client, id, version, branchId, br
 // колбек срабатывающий при получении развернутого решения
 function itineraryCallback(err, result, me, client, itIsToday, data, date, branchId, branchName, callback) {
     if (!err) {
-        console.log(branchName, "BBBBRANCHsoap.js:393");
+        console.log(branchName, "BBBBRANCH soap.js:393");
         parseXML(result.return, function (err, res) {
             data.iLength--;
 
