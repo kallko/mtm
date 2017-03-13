@@ -148,15 +148,19 @@
                             <span>{{ nowTime * 1000 | date : 'dd.MM.yyyy'}}</span>
                         </div>
                         <div class="col-sm-3">
-                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Cтатус
-                            </button>
-                            <div class="dropdown-menu">
-                                <ul class="dropdown-statuses">
-                                    <li><input type="checkbox" ng-change="filtersOllstatuses()" ng-model="filters.status['-1']" >{{ filters.statuses[0].name }}</li>
-                                    <li ng-repeat="option in filters.statuses" ng-if="!$first" ><input ng-change="filterOnestatus()" type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>
-                                </ul>
-                            </div>
+                            <select ng-show="true" id="branch-select" ng-model="filters.branch" class="group-select"
+                                    ng-options='option.id as option.name for option in filters.branches'>
+                            </select>
+
+                            <!--<button type="button" class="btn btn-secondary dropdown-toggle dropdown-status" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                                <!--Cтатус-->
+                            <!--</button>-->
+                            <!--<div class="dropdown-menu">-->
+                                <!--<ul class="dropdown-statuses">-->
+                                    <!--<li><input type="checkbox" ng-change="filtersOllstatuses()" ng-model="filters.status['-1']" >{{ filters.statuses[0].name }}</li>-->
+                                    <!--<li ng-repeat="option in filters.statuses" ng-if="!$first" ><input ng-change="filterOnestatus()" type="checkbox" ng-model="filters.status[option.value]"> {{option.name}}</li>-->
+                                <!--</ul>-->
+                            <!--</div>-->
                         </div>
                         <div class="col-sm-3">
 
@@ -208,13 +212,13 @@
                             </button>
                         </div>
                     </div>
+
+
                 </div>
 
 
 
-                        <select ng-show="true" id="branch-select" ng-model="filters.branch" class="group-select"
-                                ng-options='option.id as option.name for option in filters.branches'>
-                        </select>
+
 
 
 
