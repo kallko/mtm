@@ -1,6 +1,8 @@
+//Контроллер по работе с оповещениями от водителей - диспетчерам
+//При наличии сообщения конвертик на рабочем столе становится из черного красным
+//Клик по конвертику открывает окно работы с сообщениям
+
 angular.module('MTMonitor').controller('CallController', ['$scope', '$rootScope', '$filter', '$http', function (scope, rootScope, filter, http) {
-    //{"driverID":"123","company":"228932","client_id":"2254"}
-    // { '{\'driverID\':\'123\',\'company\':\'228932\',\'client_id\':\'12525\'}': '' }
     scope.showCalls = false;
     scope.calls = [];
 
@@ -29,15 +31,8 @@ angular.module('MTMonitor').controller('CallController', ['$scope', '$rootScope'
             scope.title = "Нет списка возможных звонков";
             return
         }
-        scope.title = "Список необходимых звонков";
-        //scope.calls = [{
-        //    time : 1483440515,
-        //    driver: "Петров",
-        //    uniqueID: 546764,
-        //    point : 2,
-        //    phone : "096 06 555 16",
-        //    finished : false
-        //}];
+
+       scope.title = "Список необходимых звонков";
        scope.calls = [];
 
         rootScope.data.routes.forEach(function(route){

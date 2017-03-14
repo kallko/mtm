@@ -1,3 +1,8 @@
+//Контроллер закрытия дня,
+//После изменения архитектуры стал контроллером  поискового запроса по всем маршрутам
+// и разнообразным тестово - статистическим запросам
+
+
 angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootScope', '$filter', '$http', function (scope, rootScope, filter, http) {
 
     scope.disabledBtnCloseDay = true; //на старте обезвреживаем кнопку "Закрыть день"
@@ -82,10 +87,8 @@ angular.module('MTMonitor').controller('CloseDayController', ['$scope', '$rootSc
 
 
     scope.routesFilter = function(item){
-        if(item.getCheck == true || item.oldroute == true){
-            return false;
-        }
-        return true;
+        return !(item.getCheck == true || item.oldroute == true)
+
     };
 
     scope.listOldRoutes = false;

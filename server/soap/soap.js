@@ -162,16 +162,18 @@ function checkBeforeSend(_data, callback) {
     }
 
 
-    //добавлена проверка, перед обнудением массива. Если он уже естьб не обнулять
+    for (var key in allData){
+        console.log("Need  add branch", key);
+    }
+
     if (allData.idArr == undefined) {allData.idArr = []}
     //allData.idArr = [];
 
     console.log("!!!!Создаем массив решений!!!!!", data[0].ID, data[0].branch);
-    allData.idArr.push({id: data[0].ID, login: ""});
 
-    for (var keys in data[0]){
-        console.log("We have this data", keys);
-    }
+    allData.idArr.push({id: data[0].ID, login: "", date: Date.now(), branch: data[0].branch});
+
+
 
     // в случае если дошло до сюда, значит необходимые данные собраны
     // склейка данных из нескольких решений (если их несколько) в одно перед отправкой клиенту
@@ -189,7 +191,7 @@ function checkBeforeSend(_data, callback) {
 
         console.log("data.firstLogin", data[i].firstLogin);
         console.log("data.branch", data[i].branch);
-        allData.idArr.push({id: data[i].ID, login: ""});
+        allData.idArr.push({id: data[i].ID, login: "", date: Date.now(), branch: data[i].branch || data[0].branch});
         console.log("#data.loadedBranches", data.loadedBranches);
 
         allData.waypoints = allData.waypoints.concat(data[i].waypoints);
@@ -244,7 +246,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
     console.log("Date<<", date);
     //fixme date
-     //date = 1489060800000;
+    // date = 1489060800000;
     console.log('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {
@@ -1062,12 +1064,20 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
         //console.log(me.login);
         //console.log(_xml.dailyPlanXML(date));
-
+        var answer = 0;
+        var newItin =[];
         for (var i = 0; i < logins.length; i++){
             console.log("Send REQUEST");
             client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': logins[i].login}, function (err, result) {
+                answer ++;
                 if (!err) {
                     console.log("ADD ITIN SERCH", result);
+                    parseXML(result.return, function (err, res) {
+                       if (!err)  console.log(res.MESSAGE.PLANS);
+                        newItin.push(res.MESSAGE.PLANS);
+                    });
+
+                    if (answer === logins.length) compareItinerary(newItin, existIten)
                 } else {
                     console.log("ERRRRRRRROR", err);
                 }
@@ -1091,7 +1101,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                     // диспетчер, что делать, если изменилось количество решений или дата дня
 
                     // пропало утвержденное решение
-                    if (res.MESSAGE.PLANS == null && inTime && existIten>0) {
+                    if (res.MESSAGE.PLANS == null && inTime && existIten > 0) {
                         //console.log('Проблемма = пропало единственное утвержденное решение');
                         callback({status: ' loose single iten'});
                         return;
@@ -1227,6 +1237,23 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
 };
 
+
+function compareItinerary(newItin, existItin) {
+    console.log("Satrt compareItinerary");
+    console.log("newItin, existItin", newItin, existItin);
+    for (var i = 0; i < newItin.length; i++){
+        if (!existItin.some(function (itin) {
+                return itin.id === newItin[i].id
+            })) {
+            console.log("Find new Itin", newItin[i]);
+            return newItin[i];
+        }
+    }
+    return [];
+}
+
+
+
 function findUniqueLogins(existIten) {
     var exist = [].concat(existIten);
     var result = [].concat(exist[0]);
@@ -1244,3 +1271,4 @@ function findUniqueLogins(existIten) {
 
     return result;
 }
+

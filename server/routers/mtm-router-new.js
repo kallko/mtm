@@ -494,8 +494,8 @@ router.route('/loadData')
 router.route('/keysoldroutescache')
     .get(function(req, res){
         try {
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
-            var currentCompany = req.session.company;
+        //var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+        var currentCompany = req.session.company;
         if(currentCompany in oldRoutesCache){
             log.info(Object.keys(oldRoutesCache[currentCompany]));
             res.status(200).json( Object.keys(oldRoutesCache[currentCompany]) );
@@ -4138,10 +4138,10 @@ try {
                 log.info("Начинаем догружать и объединять новые данные со старым решением " );
                 // Определение ID и версий новых решений
                 var newIten =[];
-                for( var i=0; i<data.addIten.itens.length; i++){
+                for( var i = 0; i < data.addIten.itens.length; i++){
                     log.info(data.addIten.itens[i].$);
-                    var alreadyExistIten=false;
-                    for (var j=0; j<cashedDataArr[company].idArr; j++) {
+                    var alreadyExistIten = false;
+                    for (var j = 0; j < cashedDataArr[company].idArr; j++) {
                          if( ""+cashedDataArr[company].idArr[j] == ""+data.addIten.itens[i].$.ID ) {
                              log.info ("Найдено существующее решение", cashedDataArr[company].idArr[j] );
                              alreadyExistIten=true;
@@ -4552,7 +4552,7 @@ try {
                         }
                     }
 
-                    cashedDataArr[currentCompany].idArr.push({id : cashedDataArr[currentCompany].routes[cashedDataArr[currentCompany].routes.length-1].itineraryID, login: tempLogin});
+                    cashedDataArr[currentCompany].idArr.push({id : cashedDataArr[currentCompany].routes[cashedDataArr[currentCompany].routes.length-1].itineraryID, login: tempLogin, date: Date.now(), branch: tempBranch});
                     log.info("FINISHING SECOND LINKING");
                     checkCorrectCalculating(currentCompany);
 

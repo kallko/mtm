@@ -1,3 +1,6 @@
+//Попытка сделать отдельную страницу и модуль для аутентификации вне 1с
+//Не реализовано
+
 angular.module('MTMonitor').controller('AuthController', ['$scope', '$rootScope', '$filter', '$http', function (scope, rootScope, filter, http) {
 
     scope.message = "Hellow World Again";
