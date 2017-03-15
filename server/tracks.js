@@ -200,7 +200,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
-                                    console.log('Done, loading stops!', company, result);
+                                    //console.log('Done, loading stops!', company, result);
                                     callback(result, company);
 
                                 }

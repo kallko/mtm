@@ -162,9 +162,6 @@ function checkBeforeSend(_data, callback) {
     }
 
 
-    for (var key in allData){
-        console.log("Need  add branch", key);
-    }
 
     if (allData.idArr == undefined) {allData.idArr = []}
     //allData.idArr = [];
@@ -1246,7 +1243,7 @@ function compareItinerary(newItin, existItin) {
                 return itin.id === newItin[i].id
             })) {
             // console.log("Find new Itin", newItin[i]);
-            return newItin[i];
+            //return newItin[i];
         }
     }
     return [];
