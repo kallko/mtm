@@ -60,7 +60,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         http.get(url, {})
             .success(function (data) {
                 console.log("Получен объект", JSON.parse(JSON.stringify(data)));
-                if (data.message == 'no plan') {
+                if (data.message == 'no plan' ) {
                     showPopup("На сегодня нет утвержденных планов", 5000);
                     return;
                 }

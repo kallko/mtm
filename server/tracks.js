@@ -105,7 +105,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         finished = 0,
         j = 0;
 
-    console.log("ME ", me);
+
     for (j = 0; j < states.length;j++){
         if (states[j].coords == undefined || states[j].coords.length < 2) finished++
     }
@@ -137,7 +137,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
                 //console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
-                    console.log('done loading parts ', counter);
+                    //console.log('done loading parts ', counter);
                     callback(states, route);
                 }
             });

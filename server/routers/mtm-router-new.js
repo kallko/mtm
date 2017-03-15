@@ -2287,7 +2287,7 @@ router.route('/getServerStatus')
     .get(function(req, res) {
         try {
         //log.info("Router");
-        var key = req.session.login.substring(0, req.session.login.indexOf('.'));
+        var key = req.session.login;
         var login = key;
             var currentCompany = req.session.company;
         var result={};
