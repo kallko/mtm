@@ -246,7 +246,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
     console.log("Date<<", date);
     //fixme date
-    // date = 1489060800000;
+     //date = 1489492800000;
     console.log('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {

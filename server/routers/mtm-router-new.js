@@ -3147,7 +3147,7 @@ function startPeriodicCalculating() {
                     var iten = cashedDataArr[companys[k]].idArr[itenQuant].id;
                     var soapManager = new soap(cashedDataArr[companys[k]].firstLogin);
                     soapManager.getPushes(iten, parseInt(Date.now() / 1000), companys[k], function (company, data) {
-                        //log.info("2375 receivePUSHES!!!!! for iten", company);
+                        log.info("2375 receivePUSHES!!!!! for company", company);
                         if (data != undefined && data.error == undefined ){
                         var obj = JSON.parse(data.return);
                         //log.info("Obj", obj[0], "mtm 1497");

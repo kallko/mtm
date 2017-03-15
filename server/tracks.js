@@ -93,7 +93,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
 
 TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, callback) {
-    //console.log("Готовимся к запросу в треккер", gid);
+    console.log("Готовимся к запросу в треккер", gid);
     if(states == undefined || states[0] == undefined) {
         console.log("Бракованный стейт", states);
         return;
@@ -104,11 +104,11 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         started = 0,
         finished = 0,
         j=0;
-    for (j=0; j<states.length;j++){
-        if (states[j].coords == undefined || states[j].coords.length <2) finished++
+    for (j = 0; j < states.length;j++){
+        if (states[j].coords == undefined || states[j].coords.length < 2) finished++
     }
         j=0;
-    //console.log("По gid", gid, "Нужно запросить треков", finished+1);
+    console.log("По gid", gid, "Нужно запросить треков", finished+1);
     for (var i = states.length-1; (i >=0 && j < finished+4); i--) {
 
         if (i >= states.length-4 || (states[i].coords == undefined || states[i].coords.length <2) ) {
@@ -116,7 +116,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         } else {
             continue;
         }
-        //console.log("Параметры запрса" , i, j);
+        console.log("Параметры запрса" , i, j);
         started++;
         (function (ii) {
             //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
@@ -127,12 +127,12 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
                    if (states[ii] != undefined && states[ii].coords != undefined) states[ii].coords = [];
                 }
 
-                //console.log (states[ii] != undefined , states[ii]);
+                console.log (states[ii] != undefined , states[ii]);
                 if (states[ii] != undefined && (states[ii].state =="ARRIVAL" || states[ii].state == "START") && states[ii].coords != undefined && states[ii].coords.length >2) {
                     //console.log("Убиваем лишние координаты");
                     states[ii].coords.splice(1, states[ii].coords.length - 2);
                 }
-                //console.log('done loading part #', ii);
+                console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
                     callback(states, route);
@@ -166,8 +166,8 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                     (function (jj) {
                         //console.log("url=", url);
                         // замена стандартного времени на время нужное именно для этого роута
-                        var indxBegin=url.indexOf('&from=');
-                        var indxEnd=url.indexOf('&to=');
+                        var indxBegin = url.indexOf('&from=');
+                        var indxEnd = url.indexOf('&to=');
                         var newUrl='';
                         //if (data.routes[i].real_track != undefined && typeof(data.routes[i].real_track) != 'string') console.log ("Стейтов перед запросом", data.routes[i].real_track.length);
                         if (data.routes[i].real_track != undefined && data.routes[i].real_track[data.routes[i].real_track.length-2] != undefined) {
@@ -197,7 +197,7 @@ TracksManager.prototype.getRealTrackParts = function (data, from, to, callback, 
                                 });
                                 reqCounter++;
                                 if (counter == reqCounter) {
-                                    console.log('Done, first loading stops!');
+                                    console.log('Done, loading stops!', company, result);
                                     callback(result, company);
 
                                 }
