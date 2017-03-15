@@ -1046,12 +1046,12 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var date =  new Date();
     var newDay = date.getDate();
     var inTime = (oldDay==newDay);
-    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime, "ExistIten", existIten);
+    //console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime, "ExistIten", existIten);
 
     //Find unique logins
 
     var logins = findUniqueLogins(existIten);
-    console.log("logins", logins, "existIten", existIten);
+    //console.log("logins", logins, "existIten", existIten);
 
 
 
@@ -1067,11 +1067,11 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
         var answer = 0;
         var newItin =[];
         for (var i = 0; i < logins.length; i++){
-            console.log("Send REQUEST");
+            //console.log("Send REQUEST");
             client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': logins[i].login}, function (err, result) {
                 answer ++;
                 if (!err) {
-                    console.log("ADD ITIN SERCH", result);
+                    //console.log("ADD ITIN SERCH", result);
                     parseXML(result.return, function (err, res) {
                        if (!err)  console.log(res.MESSAGE.PLANS);
                         newItin.push(res.MESSAGE.PLANS);
@@ -1182,7 +1182,7 @@ SoapManager.prototype.getNewDayIten = function (id, version, company, callback) 
 
 SoapManager.prototype.getAdditionalIten = function (id, version, company, callback) {
     var me=this;
-    console.log("Важные данные", id, version, me.login );
+    //console.log("Важные данные", id, version, me.login );
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
@@ -1200,7 +1200,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
                 data.iLength = 1;
                 var itIsToday = true;
-                console.log("Additional Решения на сейчас", itineraries[0].$);
+                // console.log("Additional Решения на сейчас", itineraries[0].$);
                 var date = Date.now();
 
                 //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
@@ -1239,13 +1239,13 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
 
 function compareItinerary(newItin, existItin) {
-    console.log("Satrt compareItinerary");
-    console.log("newItin, existItin", newItin, existItin);
+    // console.log("Satrt compareItinerary");
+    // console.log("newItin, existItin", newItin, existItin);
     for (var i = 0; i < newItin.length; i++){
         if (!existItin.some(function (itin) {
                 return itin.id === newItin[i].id
             })) {
-            console.log("Find new Itin", newItin[i]);
+            // console.log("Find new Itin", newItin[i]);
             return newItin[i];
         }
     }

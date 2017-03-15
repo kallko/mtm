@@ -1306,7 +1306,7 @@ router.route('/askforroute')
 
 
             cashedDataArr[currentCompany].line_routes.forEach(function (route) {
-                console.log("Steel free ALready", route.uniqueID);
+                //console.log("Steel free ALready", route.uniqueID);
             });
 
         if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].line_routes != undefined && cashedDataArr[currentCompany].line_routes.length > 0) {
@@ -3401,8 +3401,10 @@ function startPeriodicCalculating() {
                         try{
                         for (var k = 0; k < cached.routes.length; k++){
                             if (cached.routes[k].real_track == undefined || cached.routes[k].real_track.length == 0 || cached.routes[k].real_track == "invalid parameter 'gid'. ")  {
-                                if (!cached.routes[k].driver) {log.info("ОШИБКА У маршрута у которого нет водителя", cached.routes[k].NUMBER, "Нет трека ", cached.routes[k].transport.gid) ;} else{
-                                    log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
+                                if (!cached.routes[k].driver) {
+                                    //log.info("ОШИБКА У маршрута у которого нет водителя", cached.routes[k].NUMBER, "Нет трека ", cached.routes[k].transport.gid) ;
+                                } else{
+                                    //log.info("ОШИБКА У маршрута", cached.routes[k].driver.NAME, "Нет трека ", cached.routes[k].transport.gid);
                                 }
 
                                 continue;
@@ -4124,7 +4126,7 @@ function lookForNewIten(company, cashedDataArr) {
     var onlineClients = _clients.getData();
 try {
         var date = cashedDataArr[company].routesOfDate;
-        log.info("Start looking for new ITEN", company);
+        //log.info("Start looking for new ITEN", company);
         var soapManager = new soap(cashedDataArr[company].firstLogin);
         var existIten = [];
         if(cashedDataArr[company].idArr != undefined) {
@@ -4132,10 +4134,10 @@ try {
         }
 
         soapManager.lookAdditionalDailyPlan(date, existIten, company, function (data) {
-           log.info("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
+           //log.info("Опрос 1с на предмет новых решений дал результат", data.status, data.addIten);
             // Если присутствуют новые решения в текущем дне
             if(data.addIten != undefined){
-                log.info("Начинаем догружать и объединять новые данные со старым решением " );
+                //log.info("Начинаем догружать и объединять новые данные со старым решением " );
                 // Определение ID и версий новых решений
                 var newIten =[];
                 for( var i = 0; i < data.addIten.itens.length; i++){
@@ -4143,7 +4145,7 @@ try {
                     var alreadyExistIten = false;
                     for (var j = 0; j < cashedDataArr[company].idArr; j++) {
                          if( ""+cashedDataArr[company].idArr[j] == ""+data.addIten.itens[i].$.ID ) {
-                             log.info ("Найдено существующее решение", cashedDataArr[company].idArr[j] );
+                             //log.info ("Найдено существующее решение", cashedDataArr[company].idArr[j] );
                              alreadyExistIten=true;
                              break
                          }
@@ -4155,7 +4157,7 @@ try {
                 }
 
 
-                log.info("Выявлены следующие новые решения", newIten);
+                //log.info("Выявлены следующие новые решения", newIten);
 
 
 
@@ -5506,11 +5508,11 @@ function findStatusesAndWindows(company, cashedDataArr) {
 
 function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes){
     if (point.status != status && point.limit != limit) {
-        console.log(
-        "We change status", point.TASK_NUMBER, " from ".green,  status, "to ", point.status,
-        "haveStop ", point.haveStop,
-        "havePush ", point.havePush,
-        "limit ", point.limit, " oldLimit ", limit);
+        // console.log(
+        // "We change status", point.TASK_NUMBER, " from ".green,  status, "to ", point.status,
+        // "haveStop ", point.haveStop,
+        // "havePush ", point.havePush,
+        // "limit ", point.limit, " oldLimit ", limit);
         var data = {};
         data.task = {};
         data.task.id = point.TASK_NUMBER;
@@ -5561,7 +5563,7 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
 
     if (point.driverNotes.stringId != driverNotes.stringId || point.notes.stringId != notes.stringId){
             //console.log("NOTES".blue, point.notes.stringId, notes.stringId, "DRIVERNOTES".blue, point.driverNotes.stringId, driverNotes.stringId);
-            var data = {};
+            data = {};
             var type = "changeNotes";
             data.task = {};
             data.task.id = point.TASK_NUMBER;

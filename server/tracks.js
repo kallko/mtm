@@ -103,7 +103,9 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         me = this,
         started = 0,
         finished = 0,
-        j=0;
+        j = 0;
+
+    console.log("ME ", me);
     for (j = 0; j < states.length;j++){
         if (states[j].coords == undefined || states[j].coords.length < 2) finished++
     }
@@ -116,7 +118,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         } else {
             continue;
         }
-        console.log("Параметры запрса" , i, j);
+        //console.log("Параметры запрса" , i, j);
         started++;
         (function (ii) {
             //console.log('load part #', ii, "from", states[ii].t1, "to", states[ii].t2);
@@ -132,9 +134,10 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
                     //console.log("Убиваем лишние координаты");
                     states[ii].coords.splice(1, states[ii].coords.length - 2);
                 }
-                console.log('done loading part #', ii);
+                //console.log('done loading part #', ii);
                 counter++;
                 if (counter == started) {
+                    console.log('done loading parts ', counter);
                     callback(states, route);
                 }
             });
