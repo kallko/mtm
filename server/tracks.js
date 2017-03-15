@@ -127,7 +127,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
                    if (states[ii] != undefined && states[ii].coords != undefined) states[ii].coords = [];
                 }
 
-                console.log (states[ii] != undefined , states[ii]);
+                //console.log (states[ii] != undefined , states[ii]);
                 if (states[ii] != undefined && (states[ii].state =="ARRIVAL" || states[ii].state == "START") && states[ii].coords != undefined && states[ii].coords.length >2) {
                     //console.log("Убиваем лишние координаты");
                     states[ii].coords.splice(1, states[ii].coords.length - 2);
