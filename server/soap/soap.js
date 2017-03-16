@@ -7,7 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
-    testCopy = false, // флаг обращения к копии базы
+    testCopy = true, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
@@ -243,7 +243,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
     console.log("Date<<", date);
     //fixme date
-    date = 1489579200000;
+    //date = 1489579200000;
     console.log('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {
@@ -1250,14 +1250,13 @@ SoapManager.prototype.getAdditionalIten = function (id, version, login, branch, 
 function analysAndLoadnewITIN(toLoad, existItin, callback) {
     console.log("Start analysAndLoadnewITIN");
 
-    existItin.forEach(function (itin) {
-        //fixme тестово отладочное убрать
-        itin.date = itin.date - 24*60*60*1000;
-        console.log("Date of ITIN", new Date(itin.date).getDate());
-    });
 
     var toDelete = existItin.map(function (itin) {
        if ((toLoad.BRANCH_ID == itin.branch) && (new Date(itin.date).getDate() !== new Date().getDate())) return itin;
+    });
+    existItin.forEach(function (itin) {
+        //fixme тестово отладочное убрать
+        console.log("Date of ITIN", new Date(itin.date).getDate());
     });
 
     console.log("1262 toDelete", toDelete);

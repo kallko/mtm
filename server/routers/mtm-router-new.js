@@ -4257,11 +4257,18 @@ try {
                         branchIndx,
                         tmpTaskNumber = -1;
 
-                    if (lastFilterId > 10000 || rowId > 10000){
+                    if (lastFilterId > 10000 ){
                         lastFilterId = 0;
+
+                    }
+
+                    if (rowId > 1000000 ){
                         rowId = 0;
                         lastRowId = 0;
+
                     }
+
+
 
                     var currentCompany = company;
 
@@ -4573,11 +4580,15 @@ try {
                     checkCorrectCalculating(currentCompany, cashedDataArr);
 
 
-                    for (var keys in data){
-                        console.log("This is keys", keys);
-                    }
+
+
                     if (data.oldDayItin != undefined) {
-                        console.log("Delete old itin");
+
+
+
+                        console.log("Delete old itin", data.oldDayItin);
+                        deleteOldItin(currentCompany, cashedDataArr, data.oldDayItin);
+
                     }
                 }
 
@@ -4712,7 +4723,7 @@ try {
             //
             //     deleteLoadedOldDay(company);
             // }
-
+            _data.setData(cashedDataArr);
         });
 } catch (e) {
     log.error( "Ошибка "+ e + e.stack);
@@ -4721,7 +4732,69 @@ try {
 
 
 
+function deleteOldItin(currentCompany, cashedDataArr, oldDayItin){
+    console.log("Before", cashedDataArr[currentCompany].allRoutes.length, cashedDataArr[currentCompany].line_routes.length);
+    console.log("4730Before", cashedDataArr[currentCompany].idArr);
+    var oldRoutes = [];
+
+
+
+    oldDayItin.forEach(function (itin) {
+
+        if (cashedDataArr[currentCompany].routes) oldRoutes = oldRoutes.concat(cashedDataArr[currentCompany].routes.filter(function (route) {
+            return route.uniqueID.indexOf(""+itin.branch+itin.id) == 0;
+        }));
+
+        if (cashedDataArr[currentCompany].line_routes) oldRoutes = oldRoutes.concat(cashedDataArr[currentCompany].line_routes.filter(function (route) {
+            return route.uniqueID.indexOf(""+itin.branch+itin.id) == 0;
+        }));
+
+        if (cashedDataArr[currentCompany].blocked_routes) oldRoutes = oldRoutes.concat(cashedDataArr[currentCompany].blocked_routes.filter(function (route) {
+            return route.uniqueID.indexOf(""+itin.branch+itin.id) == 0;
+        }));
+
+
+        if (cashedDataArr[currentCompany].allRoutes) cashedDataArr[currentCompany].allRoutes = cashedDataArr[currentCompany].allRoutes.filter(function (allRoute) {
+            return allRoute.uniqueID.indexOf(""+itin.branch+itin.id) != 0;
+        });
+
+
+        if (cashedDataArr[currentCompany].routes) cashedDataArr[currentCompany].routes = cashedDataArr[currentCompany].routes.filter(function (route) {
+            return route.uniqueID.indexOf(""+itin.branch+itin.id) != 0;
+        });
+
+        if (cashedDataArr[currentCompany].line_routes) cashedDataArr[currentCompany].line_routes = cashedDataArr[currentCompany].line_routes.filter(function (route) {
+            return route.uniqueID.indexOf(""+itin.branch+itin.id) != 0;
+        });
+
+        if (cashedDataArr[currentCompany].blocked_routes)cashedDataArr[currentCompany].blocked_routes = cashedDataArr[currentCompany].blocked_routes.filter(function (route) {
+            return route.uniqueID.indexOf(""+itin.branch+itin.id) != 0;
+        });
+
+
+        for (var i = 0; i < cashedDataArr[currentCompany].idArr.length; i++){
+            if (cashedDataArr[currentCompany].idArr[i].id == itin.id
+            && cashedDataArr[currentCompany].idArr[i].branch == itin.branch){
+               cashedDataArr[currentCompany].idArr.splice(i, 1);
+                i--;
+            }
+        }
+
+
+    });
+
+    console.log("OLD ROUTES ", oldRoutes.length);
+    console.log("ID ARR", cashedDataArr[currentCompany].idArr);
+    saveRoutesTo1s(oldRoutes);
+    console.log("After", cashedDataArr[currentCompany].allRoutes.length, cashedDataArr[currentCompany].line_routes.length);
+
+}
+
+
+
+
 function saveRoutesTo1s(routes){
+    //fixme
     return;
     if (!routes) return;
 
