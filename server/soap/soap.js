@@ -7,7 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
-    testCopy = true, // флаг обращения к копии базы
+    testCopy = false, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
@@ -1043,7 +1043,7 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var oldDay = serverDate.substr(0,2);
     var date =  new Date();
     var newDay = date.getDate();
-    var inTime = (oldDay==newDay);
+    var inTime = (oldDay == newDay);
     console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime, "ExistIten", existIten);
 
     //Find unique logins
@@ -1071,8 +1071,8 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
                 if (!err) {
                     console.log("ADD ITIN SERCH", result);
                     parseXML(result.return, function (err, res) {
-                       if (!err)  console.log("1074 FIND ITIN", res.MESSAGE.PLANS[0].ITINERARY);
-                        newItin.push(res.MESSAGE.PLANS[0].ITINERARY);
+                       if (!err)  if (res && res.MESSAGE && res.MESSAGE.PLANS && res.MESSAGE.PLANS[0].ITINERARY) { console.log("1074 FIND ITIN", res.MESSAGE.PLANS[0].ITINERARY);
+                           newItin.push(res.MESSAGE.PLANS[0].ITINERARY);}
                     });
 
                     if (answer === logins.length) {
@@ -1249,18 +1249,22 @@ SoapManager.prototype.getAdditionalIten = function (id, version, login, branch, 
 
 function analysAndLoadnewITIN(toLoad, existItin, callback) {
     console.log("Start analysAndLoadnewITIN");
+    console.log("toLoad", toLoad);
+    console.log();
+    console.log("existItin", existItin);
 
 
-    var toDelete = existItin.map(function (itin) {
-       if ((toLoad.BRANCH_ID == itin.branch) && (new Date(itin.date).getDate() !== new Date().getDate())) return itin;
-    });
+    var toDelete = [];
+
     existItin.forEach(function (itin) {
-        //fixme тестово отладочное убрать
-        console.log("Date of ITIN", new Date(itin.date).getDate());
+        console.log("Date of ITIN", new Date(itin.date).getDate(), "and now ", new Date().getDate());
+        if (toLoad.BRANCH_ID == itin.branch && new Date(itin.date).getDate() != new Date().getDate()) {
+            toDelete.push(itin);
+        };
     });
 
     console.log("1262 toDelete", toDelete);
-    if (toDelete || toDelete.lenght !== 0) {
+    if (toDelete || toDelete.length !== 0) {
         callback({status: 'begin new day', addIten: toLoad, oldDayItin: toDelete});
     } else {
         callback({status: 'exist additional Iten', addIten:toLoad});
@@ -1275,12 +1279,17 @@ function compareItinerary(newItin, existItin) {
     var clearNewItin = [];
 
     newItin.forEach(function(itin){
-        clearNewItin.push(itin[0].$);
+        itin.forEach(function (itinVer) {
+            clearNewItin.push(itinVer.$)
+        });
+
     });
+
+    console.log("ClearNewItin", clearNewItin);
 
     for (var i = 0; i < clearNewItin.length; i++){
         if (!existItin.some(function (itin) {
-                return itin.id === clearNewItin[i].id
+                return itin.id === clearNewItin[i].ID
             })) {
             console.log("Find new Itin", clearNewItin[i]);
             return clearNewItin[i];
