@@ -93,7 +93,7 @@ TracksManager.prototype.getTrackByStates = function (states, gid, demoTime, call
 
 
 TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, callback) {
-    console.log("Готовимся к запросу в треккер", gid);
+    //console.log("Готовимся к запросу в треккер", gid);
     if(states == undefined || states[0] == undefined) {
         console.log("Бракованный стейт", states);
         return;
@@ -110,7 +110,7 @@ TracksManager.prototype.getTrackByStatesForNode = function (states, gid, route, 
         if (states[j].coords == undefined || states[j].coords.length < 2) finished++
     }
         j=0;
-    console.log("По gid", gid, "Нужно запросить треков", finished+1);
+    //console.log("По gid", gid, "Нужно запросить треков", finished+1);
     for (var i = states.length-1; (i >=0 && j < finished+4); i--) {
 
         if (i >= states.length-4 || (states[i].coords == undefined || states[i].coords.length <2) ) {
@@ -426,7 +426,7 @@ TracksManager.prototype.findPath = function (lat1, lon1, lat2, lon2, callback) {
 // получить от роутера время проезда между двумя точками
 TracksManager.prototype.findTime = function (lat1, lon1, lat2, lon2, callback) {
 
-    console.log("Запрос на время/расстояние между точками", lat1, lon1, lat2, lon2);
+    //console.log("Запрос на время/расстояние между точками", lat1, lon1, lat2, lon2);
     request({
         url: this.routerUrl + 'table?'
         + '&loc=' + lat1

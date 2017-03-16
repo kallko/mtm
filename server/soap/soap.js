@@ -7,7 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
-    testCopy = true, // флаг обращения к копии базы
+    testCopy = false, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
@@ -243,7 +243,7 @@ SoapManager.prototype.getDailyPlan = function (callback, date) {
 
     console.log("Date<<", date);
     //fixme date
-    //date = 1489053600000;
+    date = 1489579200000;
     console.log('Date >>>', new Date(date));
 
     // soap.createClient(me.getFullUrl(), function (err, client) {
@@ -745,7 +745,7 @@ SoapManager.prototype.saveRoutesTo1C = function (routes, callback) {
 };
 
 // открытие окна точки в 1С клиента IDS (заточенно строго под него)
-SoapManager.prototype.openPointWindow = function (user, pointId) {
+SoapManager.prototype.openPointWindow = function (user, pointId, guid) {
     // соотношения наших логинов с их гуидами (по человечски получать их мы пока не можем)
     var userIds = {
         'IDS.fedorets': '2d61f1b4-16f2-11e3-925c-005056a74894',
@@ -759,7 +759,8 @@ SoapManager.prototype.openPointWindow = function (user, pointId) {
     //user = 'IDS.a.kravchenko';
 
     console.log('user', user, 'pointId', pointId);
-    console.log('userIds[user]', userIds[user]);
+    console.log('userIds[user]', userIds[user], "Recieving GUID", guid, " ", guid == userIds[user]);
+
 
     if (!userIds[user]) {
         console.log('openPointWindow >> can not find user');
@@ -1043,12 +1044,12 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
     var date =  new Date();
     var newDay = date.getDate();
     var inTime = (oldDay==newDay);
-    //console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime, "ExistIten", existIten);
+    console.log("Old DAY = ", oldDay, "And new Day", newDay , inTime, "ExistIten", existIten);
 
     //Find unique logins
 
     var logins = findUniqueLogins(existIten);
-    //console.log("logins", logins, "existIten", existIten);
+    console.log("logins", logins, "existIten", existIten);
 
 
 
@@ -1064,17 +1065,27 @@ SoapManager.prototype.lookAdditionalDailyPlan = function (serverDate, existIten,
         var answer = 0;
         var newItin =[];
         for (var i = 0; i < logins.length; i++){
-            //console.log("Send REQUEST");
+            console.log("Send REQUEST");
             client.runAsUser({'input_data': _xml.dailyPlanXML(date), 'user': logins[i].login}, function (err, result) {
                 answer ++;
                 if (!err) {
-                    //console.log("ADD ITIN SERCH", result);
+                    console.log("ADD ITIN SERCH", result);
                     parseXML(result.return, function (err, res) {
-                       if (!err)  console.log(res.MESSAGE.PLANS);
-                        newItin.push(res.MESSAGE.PLANS);
+                       if (!err)  console.log("1074 FIND ITIN", res.MESSAGE.PLANS[0].ITINERARY);
+                        newItin.push(res.MESSAGE.PLANS[0].ITINERARY);
                     });
 
-                    if (answer === logins.length) compareItinerary(newItin, existIten)
+                    if (answer === logins.length) {
+                        var toLoad = compareItinerary(newItin, existIten);
+                        console.log("toLoad", toLoad);
+                        if (toLoad !== null) {
+                            analysAndLoadnewITIN(toLoad, existIten, callback);
+                        } else {
+                            console.log("NEW ITIN DOESNOT DISCOVERED");
+                            return;
+                        }
+
+                    }
                 } else {
                     console.log("ERRRRRRRROR", err);
                 }
@@ -1177,13 +1188,13 @@ SoapManager.prototype.getNewDayIten = function (id, version, company, callback) 
     });
 };
 
-SoapManager.prototype.getAdditionalIten = function (id, version, company, callback) {
+SoapManager.prototype.getAdditionalIten = function (id, version, login, branch, branchName, company, callback) {
     var me=this;
-    //console.log("Важные данные", id, version, me.login );
+    console.log("1193 Важные данные", id, version, login, company );
     soap.createClient(me.getFullUrl(), function (err, client) {
         if (err) throw err;
         client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));
-        client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': me.login}, function (err, result) {
+        client.runAsUser({'input_data': _xml.itineraryXML(id, version, true), 'user': login}, function (err, result) {
 
             parseXML(result.return, function (err, res) {
                 //if (res.MESSAGE.PLANS == null) {
@@ -1197,7 +1208,7 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 
                 data.iLength = 1;
                 var itIsToday = true;
-                // console.log("Additional Решения на сейчас", itineraries[0].$);
+
                 var date = Date.now();
 
                 //console.log("Looking for keys", res.MESSAGE.PLANS[0].CLIENT_ID);
@@ -1206,11 +1217,12 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
                 //if (!config.loadOnlyItineraryNew) data.iLength *= 2;
 
                 // получение развернутого решения по списку полученных ранее id решений
-                for (var i = 0; i < itineraries.length; i++) {
+                for (var i = 0; i < 1; i++) {
                     (function (ii) {
                         setTimeout(function () {
-                            console.log("Подгружаем из 1с");
-                            me.getItinerary(client, id, version, itineraries[0].$BRANCH_ID, itineraries[0].$BRANCH_NAME, itIsToday, data, date, callback);
+
+                            console.log("Подгружаем из 1с", id, version, branch, branchName);
+                            me.getItinerary(client, id, version, branch, branchName, itIsToday, data, date, callback);
                         }, ii * 5000);
                     })(i);
                 }
@@ -1235,18 +1247,47 @@ SoapManager.prototype.getAdditionalIten = function (id, version, company, callba
 };
 
 
+function analysAndLoadnewITIN(toLoad, existItin, callback) {
+    console.log("Start analysAndLoadnewITIN");
+
+    existItin.forEach(function (itin) {
+        //fixme тестово отладочное убрать
+        itin.date = itin.date - 24*60*60*1000;
+        console.log("Date of ITIN", new Date(itin.date).getDate());
+    });
+
+    var toDelete = existItin.map(function (itin) {
+       if ((toLoad.BRANCH_ID == itin.branch) && (new Date(itin.date).getDate() !== new Date().getDate())) return itin;
+    });
+
+    console.log("1262 toDelete", toDelete);
+    if (toDelete || toDelete.lenght !== 0) {
+        callback({status: 'begin new day', addIten: toLoad, oldDayItin: toDelete});
+    } else {
+        callback({status: 'exist additional Iten', addIten:toLoad});
+    }
+
+}
+
+
 function compareItinerary(newItin, existItin) {
-    // console.log("Satrt compareItinerary");
-    // console.log("newItin, existItin", newItin, existItin);
-    for (var i = 0; i < newItin.length; i++){
+    console.log("Satrt compareItinerary");
+    console.log("newItin, existItin", newItin, existItin);
+    var clearNewItin = [];
+
+    newItin.forEach(function(itin){
+        clearNewItin.push(itin[0].$);
+    });
+
+    for (var i = 0; i < clearNewItin.length; i++){
         if (!existItin.some(function (itin) {
-                return itin.id === newItin[i].id
+                return itin.id === clearNewItin[i].id
             })) {
-            // console.log("Find new Itin", newItin[i]);
-            //return newItin[i];
+            console.log("Find new Itin", clearNewItin[i]);
+            return clearNewItin[i];
         }
     }
-    return [];
+    return null;
 }
 
 

@@ -297,7 +297,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
 
         scope.recalling = function(){
             scope.point.recall = true;
-        }
+        };
 
         scope.cancelPush = function () {
 
@@ -543,7 +543,7 @@ angular.module('MTMonitor').controller('PointViewController', ['$scope', '$rootS
         // открывает окно в 1С IDS-овцев
         rootScope.open1CWindow = function () {
             console.log('Point View open1CWindow');
-            http.get('./openidspointwindow/' + scope.point.waypoint.ID)
+            http.get('./openidspointwindow/' + scope.point.waypoint.ID + rootScope.settings.guid)
             //http.get('./openidspointwindow/' + 12)
                 .success(function (data) {
                     console.log(data);
