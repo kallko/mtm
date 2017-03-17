@@ -413,9 +413,26 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
 
                 //console.log("Start drawing Pushes");
 
-                tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
+                if (pushes[i].is_start) {
+                    tmpTitle = 'НАЧАЛО МАРШРУТА: '+ '\n';
+                    tmpTitle += 'Время нажатия: ' + pushes[i].time + '\n';
+                } else {
+                    tmpTitle = 'Время нажатия: ' + pushes[i].time + '\n';
+                }
+
                 tmpTitle += 'Время нажатия GPS: ' + pushes[i].gps_time + '\n';
-                tmpTitle += '№ задания: ' + pushes[i].plan_number;
+                if (pushes[i].plan_number) tmpTitle += '№ задания: ' + pushes[i].plan_number;
+                if (pushes[i].is_warehouse) tmpTitle += 'СКЛАД: ' + pushes[i].point_number + '\n';
+                if (pushes[i].canceled
+                    && !pushes[i].is_start
+                    && !pushes[i].is_warehouse) {tmpTitle += 'ОТМЕНЕНО';
+                } else {
+                    if (!pushes[i].is_start && !pushes[i].is_warehouse) {
+                        tmpTitle += 'ВЫПОЛНЕНО';
+                    }
+
+                }
+
 
                 var tmpVar = L.marker([pushes[i].lat, pushes[i].lon], {'title': tmpTitle});
                 var pushColor='orange';
@@ -431,7 +448,7 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                     var m = map;
                     var targetPoint;
                     for (var l in m._layers) {
-                        console.log( "Stop serching",l , m._layers[l]);
+                        //console.log( "Stop serching",l , m._layers[l]);
                         if (m._layers[l] &&
                             m._layers[l].source &&
                             m._layers[l].source.TASK_NUMBER &&

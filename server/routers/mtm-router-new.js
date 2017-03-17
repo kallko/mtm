@@ -5083,6 +5083,7 @@ function connectPointsAndPushes(company, cashedDataArr) {
                        }
                    }
                 });
+                cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
               break;
             }
 
@@ -5096,7 +5097,7 @@ function connectPointsAndPushes(company, cashedDataArr) {
                         updatePoints.makeWarehouse(point, mobilePushes[i]);
                     }
                 });
-
+                cashedDataArr[company].routes[j].pushes.push(mobilePushes[i]);
                 break;
             }
 
