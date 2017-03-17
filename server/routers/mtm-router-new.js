@@ -998,12 +998,14 @@ router.route('/dailydata')
                     log.info('There is no routes. And what we have', data);
                 }
 
-                if (data.status && data.status === 'no plan') { // если на сегодня нет планов
+                if (data.status && data.status == 'no plan') { // если на сегодня нет планов
                     data.message = 'no plan';
 
                     res.status(200).json(data);
+                    return;
                 }else if( data.routes.length == 0){
                     res.status(200).json({message: 'no routes'});
+                    return;
                 }else{
 
                     //ключевой моментю Здесь получены новые данные по компании

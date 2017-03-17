@@ -7,7 +7,7 @@ var soap = require('soap'),
     log = new (require('../logging'))('./logs'),
     parseXML = require('xml2js').parseString,
     loadFromCache = config.cashing.soap,
-    testCopy = false, // флаг обращения к копии базы
+    testCopy = true, // флаг обращения к копии базы
 
     tracks = require('../tracks'),
     tracksManager = new tracks(
