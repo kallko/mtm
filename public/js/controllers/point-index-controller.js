@@ -2906,6 +2906,7 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         };
 
         scope.getBranch = function (rowBranch) {
+            if (!rowBranch) return "Не определен";
             var result = rootScope.data.allBranches.filter(function (branch) {
                 return branch.id == rowBranch;
             })[0].name;

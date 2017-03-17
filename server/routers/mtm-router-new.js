@@ -17,7 +17,8 @@ var express = require('express'),
     var serverData = require('../serverData');
     var newBlockedRoutes = require('../blockedRoutes');
     var newOnlineClients = require('../onlineClients');
-
+    var updatePoints = new modifyPoints ();
+    var updateRoute = new modifyRoutes();
 
     var _data = new serverData ();
     var _routes = new newBlockedRoutes ();
@@ -2122,10 +2123,10 @@ router.route('/savetonode/')
             var i = 0;
             var id = req.body.route.uniqueID;
             var key = req.session.login;
-            var updateRoute = new modifyRoutes();
+
             var cashedDataArr = _data.getData();
             updateRoute.ReplaceStopObjectByStopLink (req.body.route);
-            var updatePoints = new modifyPoints ();
+
             var currentCompany = req.session.company;
             log.info("Приступаем к сохранению роута", i, id, currentCompany);
 
@@ -2701,7 +2702,7 @@ function strToTstamp(strDate, lockaldata) {
         month = parseInt(today.getMonth());
         month++;
 
-        if(month<10){
+        if(month < 10){
             month = "0"+month;
         } else {
             month = "" + month;
@@ -2710,7 +2711,7 @@ function strToTstamp(strDate, lockaldata) {
         year = ('' + today.getFullYear()).substring(2);
         //log.info("Constructor", day, month, year);
         adding = day+'.'+month+'.'+year;
-        if (strDate.length<10) {
+        if (strDate.length < 10) {
             strDate = adding + " " + strDate;
            // log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", strDate);
         }
@@ -3636,6 +3637,8 @@ try{
     var i = 0;
     //log.info("timeTabls",time_table)
     for ( i = 0; i < points.length; i++) {
+
+        if (points[i].confirmed && points[i].warehouse) continue;
         // log.info("START PREDICATE CALCULATING", points[i]);
         if (points[i].real_arrival_time != undefined  || points[i].haveStop) {
 
@@ -3733,6 +3736,8 @@ try {
             //Рассчитываем статусы по фактическому времени, если у нас нет трека или предсказания;
 
             for (var i= 0; i<route.points.length; i++ ){
+
+                if (route.points[i].confirmed && route.points[i].warehouse) continue;
 
                 if (route.points[i].working_window[0] == undefined) {
 
@@ -3881,8 +3886,8 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
     //log.info(colors.green('Start reorange pushes'));
     //log.info('Тестовое сообщение зеленого цвета'.green);
     if (pushes == undefined || company == undefined) return;
-    var i=0;
-    var delta;
+    var i = 0;
+    var delta = 0;
     var str = "" + company;
 
 
@@ -3892,9 +3897,10 @@ function checkPushesTimeGMTZone(pushes, company, companyName){
 
     while (i  <pushes.length) {
 
-
+        //console.log("pushes[i].gps_time".yellow, pushes[i].gps_time);
         var temp = pushes[i].gps_time ? strToTstamp(pushes[i].gps_time)+60*60*delta : 0;
-        pushes[i].gps_time_ts=temp;
+        pushes[i].gps_time_ts = temp;
+        //console.log("pushes[i].gps_time".blue, pushes[i].gps_time_ts);
         if( temp == 0) {
             log.info("Невалидный ПУШ", companyName);
         }
@@ -5065,19 +5071,32 @@ function connectPointsAndPushes(company, cashedDataArr) {
 
         for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
 
-            if (mobilePushes[i].UniqueID == cashedDataArr[company].routes[j].uniqueID
+        //отметка о начале маршрута
+        if (mobilePushes[i].UniqueID == cashedDataArr[company].routes[j].uniqueID
                 && mobilePushes[i].is_start) {
                 cashedDataArr[company].routes[j].started = true;
                 cashedDataArr[company].allRoutes.forEach(function(allRoute){
                    if (allRoute.uniqueID === mobilePushes[i].UniqueID) {
-                       //console.log("LAST SYMBOL".green, allRoute.nameCar.charAt(allRoute.nameCar.length - 1));
-                       if (allRoute.nameCar.charAt(allRoute.nameCar.length - 1) !== "+") {
+                      if (allRoute.nameCar.charAt(allRoute.nameCar.length - 1) !== "+") {
                            allRoute.nameCar += " +";
                            allRoute.nameDriver += " +";
                        }
                    }
                 });
-                //console.log("FIND START FOR ROUTE".green);
+              break;
+            }
+
+            //отметка склада
+            if (mobilePushes[i].UniqueID == cashedDataArr[company].routes[j].uniqueID
+                && mobilePushes[i].is_warehouse) {
+                console.log("Find make Warehouse");
+                cashedDataArr[company].routes[j].points.forEach(function(point){
+
+                    if (point.NUMBER == mobilePushes[i].point_number) {
+                        updatePoints.makeWarehouse(point, mobilePushes[i]);
+                    }
+                });
+
                 break;
             }
 
@@ -5408,7 +5427,8 @@ function findStatusesAndWindows(company, cashedDataArr) {
             //log.info("2");
 
             tmpPoint = cashedDataArr[company].routes[i].points[j];
-
+            // Отмеченные склады пропускаем
+            if (tmpPoint.confirmed && tmpPoint.warehouse) continue;
 
 
             if (tmpPoint.real_arrival_time == undefined) {
