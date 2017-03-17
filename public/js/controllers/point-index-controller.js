@@ -5397,8 +5397,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
 
         function createNewScopeFilters(){
-            scope.filters.routes.length=1;
-            for (var i=0; i<rootScope.data.allRoutes.length; i++){
+            console.log("createNewScopeFilters");
+            scope.filters.routes.length = 1;
+            for (var i=0; i < rootScope.data.allRoutes.length; i++){
                 scope.filters.routes.push(rootScope.data.allRoutes[i]);
             }
         }
@@ -5459,8 +5460,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
 
         rootScope.$on('newAllRoutes', function( ) {
 
-            //console.log("Check size filters", scope.filters.routes.length, rootScope.data.allRoutes.length);
-            if (scope.filters.routes.length - 1 != rootScope.data.allRoutes.length) createNewScopeFilters();
+            console.log("Check size filters", scope.filters.routes.length, rootScope.data.allRoutes.length);
+            //if (scope.filters.routes.length - 1 != rootScope.data.allRoutes.length) createNewScopeFilters();
+            createNewScopeFilters();
             var res = String.fromCharCode(8660);
             for (var i = 0; i< rootScope.data.allRoutes.length; i++){
                 for(var j = 0; j<scope.filters.routes.length; j++){

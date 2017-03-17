@@ -47,17 +47,18 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
             if (!rootScope.data || !rootScope.data.routes || !rootScope.data.routes.length) return;
             http.post('./confirmonline/', {sync: sync, routes: rootScope.data.routes})
                 .then(function (data) {
-
+                    //console.log("confirmonline data", data);
                     if (data.status != 200) alert("Отсутсвует связь с сервером ");
                     //console.log(rootScope.data.statistic,  "Статистика такая была", rootScope.data.server_time);
                     if (rootScope.data == undefined) rootScope.data = {};
-                    //console.log("confirmonline data", data);
+
                     data = data.data;
                     rootScope.data.server_time = data.server_time;
-
+                    console.log("RootScopeData", rootScope.data);
                     rootScope.nowTime = rootScope.data.server_time;
                     if (!rootScope.data.currentDay) return;
 
+                    console.log("RootScopeData", rootScope.data);
                     rootScope.data.statistic = data.statistics;
                     console.log("Receive data", data);
                     if (data.calls && data.calls.length > 0) {
@@ -217,6 +218,14 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
                             if (data.routes && data.routes.length > 0) {
                                 rootScope.$emit ('loadRoutes') }
+
+
+                            console.log("data", data);
+                            if (data.allRoutes != undefined && rootScope.data.currentDay) {
+                                rootScope.data.allRoutes = data.allRoutes;
+                                //console.log("Send data to recreate filters Routes");
+                                scope.$emit('newAllRoutes');
+                            }
 
                             if (rootScope.data && rootScope.data.routes && rootScope.data.routes.some(function(route){
                                     return route.calls && (route.calls.some(function(call){

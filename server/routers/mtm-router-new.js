@@ -2453,6 +2453,7 @@ router.route('/askforproblems/:need')
                         result.settings.user = "" + req.session.login;
                         result.settings.companyName = currentCompany;
                         result.reasons = cashedDataArr[currentCompany].reasons;
+                        result.allRoutes = cashedDataArr[currentCompany].allRoutes;
                         result.allBranches = cashedDataArr[currentCompany].allBranches;
                         result.notes = cashedDataArr[currentCompany].notes;
                         //надо отдать маршрут из старых на закрытие
@@ -2563,7 +2564,7 @@ router.route('/askforproblems/:need')
 router.route('/confirmonline')
     .post(function (req, res) {
         try {
-
+        console.log("/confirmonline".green);
         if(req.session.login == undefined) return;
         log.info("online confirmed", req.session.login, req.body.sync, req.body.routes.length );
         var blockedArr = req.body.sync;
@@ -2585,6 +2586,7 @@ router.route('/confirmonline')
             if (cashedDataArr[currentCompany] != undefined && cashedDataArr[currentCompany].statistic != undefined) result.statistics = cashedDataArr[currentCompany].statistic;
             result.status = 'ok';
             result.allRoutes = cashedDataArr[currentCompany].allRoutes;
+            console.log("cashedDataArr[currentCompany].allRoutes", cashedDataArr[currentCompany].allRoutes[0]);
             _data.setData(cashedDataArr);
             _clients.setData(onlineClients);
             _routes.setData(blockedRoutes);
@@ -5063,7 +5065,23 @@ function connectPointsAndPushes(company, cashedDataArr) {
 
         for (var j = 0; j < cashedDataArr[company].routes.length; j++) {
 
-            cashedDataArr[company].routes[j].lastPointIndx = 0;
+            if (mobilePushes[i].UniqueID == cashedDataArr[company].routes[j].uniqueID
+                && mobilePushes[i].is_start) {
+                cashedDataArr[company].routes[j].started = true;
+                cashedDataArr[company].allRoutes.forEach(function(allRoute){
+                   if (allRoute.uniqueID === mobilePushes[i].UniqueID) {
+                       //console.log("LAST SYMBOL".green, allRoute.nameCar.charAt(allRoute.nameCar.length - 1));
+                       if (allRoute.nameCar.charAt(allRoute.nameCar.length - 1) !== "+") {
+                           allRoute.nameCar += " +";
+                           allRoute.nameDriver += " +";
+                       }
+                   }
+                });
+                //console.log("FIND START FOR ROUTE".green);
+                break;
+            }
+
+                cashedDataArr[company].routes[j].lastPointIndx = 0;
 
 
             for (var k = 0; k < cashedDataArr[company].routes[j].points.length; k++) {

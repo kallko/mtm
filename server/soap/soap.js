@@ -1010,7 +1010,7 @@ SoapManager.prototype.getPushes = function (idArr, time, company, callback, temp
             // client.setSecurity(new soap.BasicAuthSecurity('k00056.0', '123'));
             client.setSecurity(new soap.BasicAuthSecurity(me.admin_login, me.password));//или так или строчкой выше
             //client.runAsUser({'input_data': resXml, 'user': me.login}, function (err, result) {
-            //console.log("STEP 1", idArr, getDateStrFor1C(time * 1000));
+            console.log("!!!!!STEP 1", idArr, getDateStrFor1C(time * 1000));
             client.getDriversActions({'itenId':idArr, 'datestr':getDateStrFor1C(time * 1000), 'user': me.login}, function (err, result) {
                 if (!err) {
                     //console.log('GET PUSHES OK');
