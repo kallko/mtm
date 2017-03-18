@@ -3049,7 +3049,7 @@ function linkDataParts (currentCompany, login, cashedDataArr, onlineClients, bra
         if (itin.login == '') itin.login = login;
     });
     console.log("cashedDataArr[currentCompany].idArr".red, cashedDataArr[currentCompany].idArr);
-
+    cashedDataArr[currentCompany].prefix = login.substring(0, login.indexOf("."));
     //cashedDataArr[currentCompany].routes.length = size;
     log.info("FINISHING LINKING", currentCompany, "маршрутов", cashedDataArr[currentCompany].routes.length, "всего маршрутов", cashedDataArr[currentCompany].allRoutes.length);
     console.log("2cashedDataArr[currentCompany].loadedBranches", cashedDataArr[currentCompany].loadedBranches);
@@ -8721,7 +8721,7 @@ function startCalculateCompany(company, cashedDataArr) {
     startTime = parseInt(Date.now()/1000);
     log.info("Все данные получены, пересчитываем компанию", company);
     //fixme
-    //if (cashedDataArr[company].currentDay == false) return;
+    if (cashedDataArr[company].currentDay == false) return;
     checkCorrectCalculating(company, cashedDataArr);
     cashedDataArr[company].recalc_finishing = false;
     selectRoutes(company, cashedDataArr);

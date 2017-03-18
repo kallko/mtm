@@ -23,6 +23,11 @@ ServerData.prototype.setData = function (data){
 };
 
 ServerData.prototype.whoAmI = function(key){
+    for (var com in _data){
+        console.log("EXIST COMPANY ", com);
+        console.log(_data[com].prefix);
+    }
+
     for (var company in _data){
         if (_data[company].prefix == key) return company;
     }
