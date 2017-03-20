@@ -1074,6 +1074,7 @@ router.route('/dailydata')
                             //Если кто-то запросил данные по прошлому дню
                             var companyName= "" + currentCompany;
                             currentCompany += "" + data.date.substring(0,10);
+                            console.log("Now currentCompany", currentCompany);
                             if (cashedDataArr[currentCompany] && cashedDataArr[currentCompany].closedRoutesFrom1C) log.info("Вторая проверка", cashedDataArr[currentCompany].closedRoutesFrom1C.length);
 
                             if(cashedDataArr[currentCompany] != undefined) {
@@ -1119,7 +1120,7 @@ router.route('/dailydata')
 
 
 
-
+                            console.log("Strange Data 1123", data, "String 1123");
                             cashedDataArr[currentCompany] = data;
 
                             cashedDataArr[currentCompany].currentProblems = [];
