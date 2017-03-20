@@ -105,7 +105,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             });
 
                         http.post ('./updatetrack', {data: obj})
-                            .success(function (data) {
+                            .then(function (data) {
                                 rootScope.data.recievedUpdate=true;
                                 console.log("UpdateTrack look in server", data);
                                 for (var j=0; j<data.length; j++){
@@ -261,8 +261,15 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         rootScope.$on('start', function () {
-            //console.log("Запускаем опрос сервера");
+            console.log("Запускаем опрос сервера");
+            rootScope.asking = true;
             startAsking();
+        });
+
+
+        rootScope.$on('stopAsking', function () {
+            console.log("Останавливаем опрос сервера");
+            rootScope.asking = false;
         });
 
 

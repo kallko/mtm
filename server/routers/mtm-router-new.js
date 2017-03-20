@@ -908,7 +908,7 @@ router.route('/dailydata')
                 if (data.return == "error:user not correct") return;
                 if (data != undefined) {settings = JSON.parse(data.return)} else {settings = {};}
                 //log.info("Settings Recieved",  settings, "mtm 385");
-                //dispatcherLogin(req.session.login, currentCompany, cashedDataArr);
+                dispatcherLogin(req.session.login, currentCompany, cashedDataArr);
                 req.session.itineraryID = cashedDataArr[currentCompany].ID;
                 cashedDataArr[currentCompany].user = req.session.login;
 
@@ -955,9 +955,9 @@ router.route('/dailydata')
                 if (data.return == "error:user not correct") return;
                 settings = JSON.parse(data.return);
                 //fixme streng below need
-                //createFirstLoginTable(req.session.login, settings);
+                createFirstLoginTable(req.session.login, settings);
 
-                //dispatcherLogin(req.session.login, currentCompany, cashedDataArr);
+                dispatcherLogin(req.session.login, currentCompany, cashedDataArr);
                 //cashedDataArr[company].settings = settings;
                 //log.info("Obj",  obj.predictMinutes, "mtm 1192")
             });
@@ -1074,6 +1074,7 @@ router.route('/dailydata')
                             //Если кто-то запросил данные по прошлому дню
                             var companyName= "" + currentCompany;
                             currentCompany += "" + data.date.substring(0,10);
+
                             if (cashedDataArr[currentCompany] && cashedDataArr[currentCompany].closedRoutesFrom1C) log.info("Вторая проверка", cashedDataArr[currentCompany].closedRoutesFrom1C.length);
 
                             if(cashedDataArr[currentCompany] != undefined) {
@@ -1348,7 +1349,7 @@ router.route('/askforroute')
         //log.info ("Начинаем запись файла");
         //log.toFLog('logging.txt', JSON.stringify(result));
         //fixme
-            //addRouteToDispatcher(req.session.login, currentCompany, result, 0);
+        addRouteToDispatcher(req.session.login, currentCompany, result, 0);
         _data.setData(cashedDataArr);
         _routes.setData(blockedRoutes);
         res.status(200).json({route: result});
@@ -3673,7 +3674,8 @@ try{
     }
 
 } catch (e) {
-    log.error( "Ошибка "+ e + e.stack);
+    log.error( "Ошибка "+ e + e.stack + "\n");
+    log.error("Point" + points[i].working_window[0]);
 }
 }
 
@@ -7812,7 +7814,7 @@ function createMainDispatcherTable (company, cashedDataArr){
     //console.log ("Call SQL 7486".yellow);
     sqlUniversal.simpleLoad (company, "dispatchers", "if", "company", "==", company, function(data){
        if (data == 'error') return;
-       //console.log ("All Dispatchers for Company ", company, " ", data);
+       console.log ("All Dispatchers for Company ", company, " ", data);
        if (data.length != 0) {
            cashedDataArr[company].dispatchers = cashedDataArr[company].dispatchers || {};
            cashedDataArr[company].dispatchers.allDispatchers = data;
@@ -8569,82 +8571,82 @@ function addBranchesInform(existData, newData) {
 
 
 }
-//var tempFirstLogin =[];
-//function dispatcherLogin(login, company, cashedDataArr){
-//    console.log("Start dispatcher function".yellow, login, company);
-//
-//
-//
-//    if(!cashedDataArr || !cashedDataArr[company] || ! cashedDataArr[company].dispatchers) {
-//        //Блок создания сущности диспетчер
-//        tempFirstLogin.push({login: login, time: Date.now()});
-//        console.log("Need create dispatchers".yellow, login, company);
-//        if (!cashedDataArr || !cashedDataArr[company]) {
-//
-//            setTimeout(function(){createDispatchersInCompanies(login, company)}, 60*1000)
-//
-//        }
-//        //    sqlUniversal.simpleLoad (292942, "dispatchers", "if", "company", "==", 292942, function(data){
-//        //console.log(data);
-//        //    });
-//
-//
-//    } else {
-//        //Сущность диспетчер создана, необходим ее апгрейт.
-//        console.log("Dispatchers already done".blue);
-//
-//    }
-//
-//}
-//
-//function createDispatchersInCompanies (login, company){
-//    console.log("Start Looking Companys".yellow);
-//    var exist = false;
-//    var cashedDataArr = _data.getData();
-//    for (var existCompany in cashedDataArr) {
-//        console.log("Company is", existCompany);
-//        cashedDataArr[existCompany].dispatchers = cashedDataArr[existCompany].dispatchers || {};
-//            sqlUniversal.simpleLoad (existCompany, "dispatchers", "if", "company", "==", existCompany, function(data){
-//                if (data.length > 0) {
-//                    var company = data[0].company;
-//                    cashedDataArr[company].dispatchers.allDispatchers = data;
-//                    _data.setData(cashedDataArr);
-//                    console.log( "MTM REcieved".yellow, data);
-//                    console.log("Create dispatchers complete".blue);
-//
-//                    //Блок проверки и переноса первого темплогина в
-//                    if (tempFirstLogin && tempFirstLogin.length > 0) {
-//                        rePushFirstLogin(tempFirstLogin, company);
-//                    }
-//                } else {
-//                    //todo create new company in DB Dispatchers
-//                    console.log("Need to create first dispatcher in new company");
-//                }
-//
-//            });
-//        exist = true;
-//    }
-//    if (!exist) {
-//        dispatcherLogin(login, company, cashedDataArr);
-//        return;
-//    }
-//
-//
-//
-//
-//}
+var tempFirstLogin =[];
+function dispatcherLogin(login, company, cashedDataArr){
+   console.log("Start dispatcher function".yellow, login, company);
 
 
-//function rePushFirstLogin(logins, company){
-//    if (!logins || !company || logins.length < 1) return;
-//    console.log ("rePushFirstLogin".yellow, logins, company);
-//    //var dispCompanyName =
-//    var casheDataArray = _data.getData();
-//
-//    casheDataArray.dispatchers.shift = casheDataArray.dispatchers.shift || [];
-//
-//
-//}
+
+   if(!cashedDataArr || !cashedDataArr[company] || ! cashedDataArr[company].dispatchers) {
+       //Блок создания сущности диспетчер
+       tempFirstLogin.push({login: login, time: Date.now()});
+       console.log("Need create dispatchers".yellow, login, company);
+       if (!cashedDataArr || !cashedDataArr[company]) {
+
+           setTimeout(function(){createDispatchersInCompanies(login, company)}, 60*1000)
+
+       }
+       //    sqlUniversal.simpleLoad (292942, "dispatchers", "if", "company", "==", 292942, function(data){
+       //console.log(data);
+       //    });
+
+
+   } else {
+       //Сущность диспетчер создана, необходим ее апгрейт.
+       console.log("Dispatchers already done".blue);
+
+   }
+
+}
+
+function createDispatchersInCompanies (login, company){
+   console.log("Start Looking Companys".yellow);
+   var exist = false;
+   var cashedDataArr = _data.getData();
+   for (var existCompany in cashedDataArr) {
+       console.log("Company is", existCompany);
+       cashedDataArr[existCompany].dispatchers = cashedDataArr[existCompany].dispatchers || {};
+           sqlUniversal.simpleLoad (existCompany, "dispatchers", "if", "company", "==", existCompany, function(data){
+               if (data.length > 0) {
+                   var company = data[0].company;
+                   cashedDataArr[company].dispatchers.allDispatchers = data;
+                   _data.setData(cashedDataArr);
+                   console.log( "MTM REcieved".yellow, data);
+                   console.log("Create dispatchers complete".blue);
+
+                   //Блок проверки и переноса первого темплогина в
+                   if (tempFirstLogin && tempFirstLogin.length > 0) {
+                       rePushFirstLogin(tempFirstLogin, company);
+                   }
+               } else {
+                   //todo create new company in DB Dispatchers
+                   console.log("Need to create first dispatcher in new company");
+               }
+
+           });
+       exist = true;
+   }
+   if (!exist) {
+       dispatcherLogin(login, company, cashedDataArr);
+       return;
+   }
+
+
+
+
+}
+
+
+function rePushFirstLogin(logins, company){
+   if (!logins || !company || logins.length < 1) return;
+   console.log ("rePushFirstLogin".yellow, logins, company);
+   //var dispCompanyName =
+   var casheDataArray = _data.getData();
+
+   casheDataArray[company].dispatchers.shift = casheDataArray[company].dispatchers.shift || [];
+
+
+}
 
 function createFakeArrivalTime(tPoint, routesOfDate){
     console.log("Create Fake Arrival Time ".yellow, tPoint.ARRIVAL_TIME, routesOfDate);
@@ -8721,7 +8723,7 @@ function startCalculateCompany(company, cashedDataArr) {
     startTime = parseInt(Date.now()/1000);
     log.info("Все данные получены, пересчитываем компанию", company);
     //fixme
-    if (cashedDataArr[company].currentDay == false) return;
+    if (cashedDataArr[company].currentDay && cashedDataArr[company].currentDay == false) return;
     checkCorrectCalculating(company, cashedDataArr);
     cashedDataArr[company].recalc_finishing = false;
     selectRoutes(company, cashedDataArr);
@@ -8741,6 +8743,7 @@ function startCalculateCompany(company, cashedDataArr) {
     cashedDataArr[company].recalc_finishing = true;
     safeReload();
     autosaveData(cashedDataArr);
+    console.log("Start Dispatchers", firstLoginTable, quant);
     if (firstLoginTable && firstLoginTable.length > 0 && quant < 1) {
         console.log("Call for disp function ", ++quant);
         createMainDispatcherTable(company, cashedDataArr);

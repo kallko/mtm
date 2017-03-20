@@ -51,6 +51,7 @@ io.on('connection', function (socket) {
         var key = login.substring(0, login.indexOf('.'));
         console.log("SOCKET", login, " ", key);
         var company = _data.whoAmI(key);
+        login = login.substring(0, login.indexOf("&"));
         console.log ("I know who are you!!!!".red, company);
         var obj;
         if (company && _data.getData()[company].dispatchers) console.log ("TEST DATA".red, _data.getData()[company].dispatchers.concated);
@@ -97,21 +98,25 @@ io.on('connection', function (socket) {
         var company = _data.whoAmI(key);
         if (!company) return;
         console.log("SOCKET DISCONNECT".red, login, " ", key," ",  company);
+        login = login.substring(0, login.indexOf("&"));
         var shift = _data.disconnectDispatcher(company, login);
         //fixme
-        //sqlUniversal.save(company, "shifts", "dispatcher", "==", shift.dispatcher, "&&", "start_time_stamp", "==", shift.start_time_stamp,  "set", "sessions", "=", JSON.stringify(shift.sessions));
+        sqlUniversal.save(company, "shifts", "dispatcher", "==", shift.dispatcher, "&&", "start_time_stamp", "==", shift.start_time_stamp,  "set", "sessions", "=", JSON.stringify(shift.sessions));
         var obj = _data.getData()[company].dispatchers ;
         if (obj) io.sockets.in(company).emit('dispatchers', obj);
     });
 
 
     function askForRole (login, company){
+        console.log("Ask for Role ", login);
         var casheDataArray = _data.getData();
         var all = casheDataArray[company].dispatchers.allDispatchers;
-        return all.filter(function(item){
+        console.log( "All dispatatchers ", all);
+        var result = all.some(function(item){
             return item.login == login && item.is_superviser;
-        })
-
+        });
+        console.log("Check for is supervisor ", result);
+        return result;
     }
 
 

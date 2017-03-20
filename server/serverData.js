@@ -23,6 +23,7 @@ ServerData.prototype.setData = function (data){
 };
 
 ServerData.prototype.whoAmI = function(key){
+    console.log("Try to find company by key", key);
     for (var com in _data){
         console.log("EXIST COMPANY ", com);
         console.log(_data[com].prefix);
@@ -35,6 +36,7 @@ ServerData.prototype.whoAmI = function(key){
 };
 
 ServerData.prototype.disconnectDispatcher = function (company, login){
+    //console.log("disconnectDispatcher", company, login);
     if (!_data || !_data[company] || !_data[company].dispatchers) return;
     var dispatchers = _data[company].dispatchers;
     if (!dispatchers) return;
@@ -45,9 +47,10 @@ ServerData.prototype.disconnectDispatcher = function (company, login){
     var shift  = dispatchers.shifts.filter(function (item) {
         return item.dispatcher == dispId;
     }).first();
+    //console.log("SHIFT", shift);
     var session = shift.sessions[shift.sessions.length - 1];
     session.end_time_stamp = parseInt(Date.now()/1000);
-    session.routes.forEach(function(route){
+    if (session.routes && session.routes.length > 0) session.routes.forEach(function(route){
         route.end = route.end || parseInt(Date.now()/1000);
     });
     if (session.routes && session.routes.length > 0) {
