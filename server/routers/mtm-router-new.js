@@ -1981,7 +1981,7 @@ router.route('/signalDriverToDispatcher/')
         console.log("stringReq".red, stringReq);
         stringReq = JSON.parse(stringReq);
         try {
-            var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
+            //var key = req.session.login.substring(0, req.session.login.indexOf('.'));;
             //var currentCompany = companyLogins[key];
 
             //choseOperatorForSignal(stringReq.driverID, stringReq.company);
@@ -2546,7 +2546,6 @@ router.route('/askforproblems/:need')
             result.drivers = cashedDataArr[currentCompany].drivers;
             result.transports = cashedDataArr[currentCompany].transports;
         //Перед отправкой проверка на задвоенность маршрутов
-
             result.allBranches = cashedDataArr[currentCompany].allBranches;
         result.reasons = cashedDataArr[currentCompany].reasons;
         result.notes = cashedDataArr[currentCompany].notes;
@@ -3590,7 +3589,7 @@ function dataForPredicate(company, cashedDataArr, callback){
                 cashedDataArr[company].needRequests --;
                 //log.info("The Second cickle is finished RESULT LENGTH =", cashedDataArr[company].dataForPredicate.length, cashedDataArr[company].needRequests, company );
                 if(cashedDataArr[company].needRequests == 0) {
-                    _data.setData();
+                    _data.setData(cashedDataArr);
                     callback(company, cashedDataArr);
                     }
                 return;
@@ -4797,7 +4796,7 @@ function deleteOldItin(currentCompany, cashedDataArr, oldDayItin){
 
     console.log("OLD ROUTES ", oldRoutes.length);
     console.log("ID ARR", cashedDataArr[currentCompany].idArr);
-    saveRoutesTo1s(oldRoutes);
+    saveRoutesTo1C(oldRoutes);
     console.log("After", cashedDataArr[currentCompany].allRoutes.length, cashedDataArr[currentCompany].line_routes.length);
 
 }
@@ -4805,7 +4804,7 @@ function deleteOldItin(currentCompany, cashedDataArr, oldDayItin){
 
 
 
-function saveRoutesTo1s(routes){
+function saveRoutesTo1C(routes){
     //fixme
     return;
     if (!routes) return;
@@ -5784,7 +5783,7 @@ function calculateStatistic (company, cashedDataArr){
     cashedDataArr[company].blocked_routes ? blocked_routes = cashedDataArr[company].blocked_routes.length : blocked_routes = 0;
     dayStat.averageProblem = parseInt(((allProblemSumm || 0) + (allBlockedProblem || 0))/((problemRoutes + blocked_routes) || 1));
 
-       // console.log ("Prestatistic", dayStat.averageProblem, closed, company, dayStat, !cashedDataArr[company].dispatchers);
+    console.log ("Prestatistic", dayStat.averageProblem, closed, company, dayStat, !cashedDataArr[company].dispatchers);
 
     if (cashedDataArr[company].dispatchers) cashedDataArr[company].dispatchers.dayStat = dayStat;
 
@@ -8506,7 +8505,7 @@ function branchesArrayDependencyConcat(existData, newData){
 function branchesArrayConcat(existData, newData, login) {
     newData.idArr.forEach(function (itin) {
         if (itin.login == '') itin.login = login;
-    })
+    });
     existData.idArr = existData.idArr.concat(newData.idArr);
     delete newData.idArr;
     console.log("CONCATED BRANCHES ID ARR", existData.idArr);
@@ -8699,6 +8698,43 @@ function loadCoords(company, cashedDataArr) {
     }
 }
 
+function deleteOldData(company, cashedDataArr) {
+    //удаление старых решений (с момента загрузки более 2-х дней)
+    console.log ("Looking for old Data".blue);
+    console.log("ITNERARY".yellow, cashedDataArr[company].idArr);
+    var oldDayItin = [];
+    for (var i = 0; i < cashedDataArr[company].idArr.length; i++){
+        if (Date.now() - cashedDataArr[company].idArr[i].date > 48 * 60 * 60 *1000 ) {
+            console.log("Find wery old ITIN. Lets Delete it");
+            oldDayItin.push(cashedDataArr[company].idArr[i]);
+        }
+    }
+    deleteOldItin(company, cashedDataArr, oldDayItin);
+
+    //Удаление старых смен диспетчеров, с момента закрытия больше 12 часов
+
+    console.log("DISPATCHERS".yellow, cashedDataArr[company].dispatchers);
+    if (cashedDataArr[company].dispatchers && cashedDataArr[company].dispatchers.shifts) {
+        console.log("sessions".yellow, cashedDataArr[company].dispatchers.shifts[0].sessions);
+    }
+
+    if (cashedDataArr[company].dispatchers && cashedDataArr[company].dispatchers.shifts) {
+        cashedDataArr[company].dispatchers.shifts.forEach(function (shift) {
+            if (Date.now() - shift.end_time_stamp * 1000 > 16 * 60 * 60 *1000 ||
+                (Date.now() - shift.start_time_stamp * 1000 > 24 * 60 * 60 *1000
+                && shift.end_time_stamp == 0)){
+                closeShift(cashedDataArr, company, shift);
+            }
+        })
+    }//for (i = 0; i <  )
+
+}
+
+
+
+function closeShift(cashedDataArr, company, shift){
+
+}
 
 function firstDBConnect(){
     //console.log ("Begin");
@@ -8748,6 +8784,7 @@ function startCalculateCompany(company, cashedDataArr) {
         console.log("Call for disp function ", ++quant);
         createMainDispatcherTable(company, cashedDataArr);
     }
+    deleteOldData(company, cashedDataArr);
     if (middleTime) log.info("От запросов до конца рассчета прошло", parseInt(Date.now()/1000) - middleTime, "А сам рассчет длился", parseInt(Date.now()/1000) - startTime );
     } catch (e) {
         log.error( "Ошибка "+ e + e.stack);

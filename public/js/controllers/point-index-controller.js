@@ -1,4 +1,5 @@
 // контроллер для работы с таблицей точек и маршрутами в целом
+
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
     , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
     function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {

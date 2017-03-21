@@ -101,10 +101,28 @@ io.on('connection', function (socket) {
         login = login.substring(0, login.indexOf("&"));
         var shift = _data.disconnectDispatcher(company, login);
         //fixme
+        if (!shift || !shift.dispatcher || !shift.start_time_stamp) {
+            console.log( "Ошибка не получена смена");
+            return;
+        }
         sqlUniversal.save(company, "shifts", "dispatcher", "==", shift.dispatcher, "&&", "start_time_stamp", "==", shift.start_time_stamp,  "set", "sessions", "=", JSON.stringify(shift.sessions));
         var obj = _data.getData()[company].dispatchers ;
         if (obj) io.sockets.in(company).emit('dispatchers', obj);
     });
+
+
+    socket.on('askDispatchersForReport', function(data) {
+        console.log("Recieve DATA", data.from, data.to);
+        var login = socket.conn.request.headers.referer.substring(socket.conn.request.headers.referer.indexOf("=")+1);
+        var key = login.substring(0, login.indexOf('.'));
+        console.log("KEY is ", key);
+        var company = _data.whoAmI(key);
+        sqlUniversal.simpleLoad(company, "shifts", "if", "start_time_stamp", ">=", data.from, "&&", "end_time_stamp", "<=", data.to, function (innerData){
+            io.sockets.in(company).emit('sendReport', innerData);
+        });
+
+    });
+
 
 
     function askForRole (login, company){

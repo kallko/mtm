@@ -14,9 +14,18 @@ angular.module('MTMonitor').controller('SocketController', ['$scope', '$rootScop
     });
 
 
+    socket.on('sendReport', function (data) {
+        console.log("Receive REPORT", data);
+    });
+
+
     rootScope.$on("loadRoutes", function(){
         socket.emit("loadRoutes");
-    })
+    });
+
+    rootScope.$on('askDispatchersForReport', function (event, from, to) {
+       socket.emit("askDispatchersForReport", {"from":from, "to":to})
+    });
 
 
 }]);
