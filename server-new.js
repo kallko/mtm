@@ -51,6 +51,7 @@ var sqlUniversal = new sqlUniversalFile();
 
 io.on('connection', function (socket) {
 
+    console.log("Create first connection".blue);
     firstLogin();
 
     function firstLogin() {
