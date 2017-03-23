@@ -5725,10 +5725,10 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
 }
 
 function sendHookTo1C (company, type, data){
-    //console.log("Try to send  hook");
-    //var soapManager = new soap();
-    //console.log("Send to soap".yellow, company, type, data);
-    //soapManager.sendHook(company, type, data)
+    console.log("Try to send  hook");
+    var soapManager = new soap();
+    console.log("Send to soap".yellow, company, type, data);
+    soapManager.sendHook(company, type, data)
 }
 
 function calculateStatistic (company, cashedDataArr){
@@ -7869,10 +7869,20 @@ function clearShiftsData(shifts) {
     var uniqShifts = [];
     console.log("HALF CLEAN DISP", uniqDisp);
     uniqDisp.forEach(function (disp) {
+        var dispShifts = shifts.filter(function(shift){
+            return shift.dispatcher = disp;
+        })
 
+        var mainShift = dispShifts[0];
+        dispShifts.forEach(function (dispShift) {
+            if (dispShift.start_time_stamp > mainShift.start_time_stamp) mainShift = dispShift;
+        })
+        uniqShifts.push(mainShift);
     });
 
-    return shifts;
+    console.log("LAST CLEAN DISP", uniqShifts);
+
+    return uniqShifts;
 }
 
 function concatDispatcherData(company) {
@@ -8794,7 +8804,7 @@ function deleteShift(cashedDataArr, company, shift){
             }, 0)
         }
         console.log("MAX END TIME", max);
-        shift.end_time_stamp = max || Date.now();
+        shift.end_time_stamp = max || parseInt(Date.now()/1000);
     }
 
     //Сохранение в БД обноволенного shift
