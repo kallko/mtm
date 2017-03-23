@@ -10,7 +10,7 @@ var express = require('express'),
     bodyParser = require('body-parser');
 
 
-
+console.log("Credentials", credentials);
 
 var server = require('https').Server(credentials, app);
 var io = require('socket.io')(server);
