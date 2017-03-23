@@ -36,10 +36,10 @@
     var dict = {
         '&&': 'AND',
         '||': 'OR',
-        //'dispatchers': 'public."dispatchers" ',
-        'dispatchers': 'dispatchers',
-        //'shifts': 'public.shifts',
-        'shifts': 'shifts',
+        'dispatchers': 'public."dispatchers" ',
+        //'dispatchers': 'dispatchers',
+        'shifts': 'public.shifts',
+        //'shifts': 'shifts',
         'sessions': 'sessions',
         'actions': 'public.action_kinds',
         'from': 'FROM',
@@ -56,8 +56,8 @@ module.exports = SqlUniversal;
 
 function SqlUniversal (){
     console.log("Establish  DB Connection".green);
-    //if (companys.length == 0) execute("First Load Company", 'SELECT DISTINCT company FROM public."dispatchers" ', firstConnect);
-    if (companys.length == 0) execute("First Load Company", 'SELECT DISTINCT company FROM "dispatchers" ', firstConnect);
+    if (companys.length == 0) execute("First Load Company", 'SELECT DISTINCT company FROM public."dispatchers" ', firstConnect);
+    //if (companys.length == 0) execute("First Load Company", 'SELECT DISTINCT company FROM "dispatchers" ', firstConnect);
 }
 
 SqlUniversal.prototype.lastRowLoad = function (company){
