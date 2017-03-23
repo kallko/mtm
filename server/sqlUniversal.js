@@ -36,8 +36,10 @@
     var dict = {
         '&&': 'AND',
         '||': 'OR',
-        'dispatchers': 'public."dispatchers" ',
-        'shifts': 'public.shifts',
+        //'dispatchers': 'public."dispatchers" ',
+        'dispatchers': 'dispatchers',
+        //'shifts': 'public.shifts',
+        'shifts': 'shifts',
         'sessions': 'sessions',
         'actions': 'public.action_kinds',
         'from': 'FROM',
