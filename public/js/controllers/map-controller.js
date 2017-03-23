@@ -425,10 +425,10 @@ angular.module('MTMonitor').controller('MapController', ['$scope', '$rootScope',
                 if (pushes[i].is_warehouse) tmpTitle += 'СКЛАД: ' + pushes[i].point_number + '\n';
                 if (pushes[i].canceled
                     && !pushes[i].is_start
-                    && !pushes[i].is_warehouse) {tmpTitle += 'ОТМЕНЕНО';
+                    && !pushes[i].is_warehouse) {tmpTitle += ' ОТМЕНЕНО';
                 } else {
                     if (!pushes[i].is_start && !pushes[i].is_warehouse) {
-                        tmpTitle += 'ВЫПОЛНЕНО';
+                        tmpTitle += ' ВЫПОЛНЕНО';
                     }
 
                 }

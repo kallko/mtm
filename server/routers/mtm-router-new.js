@@ -522,35 +522,35 @@ router.route('/keysoldroutescache')
 //    });
 //
 //
-//router.route('/getHouses')
-//    .post(function(req, res){
-//        try {
-//          tracksManager.getAllHousesById(req.body.street, function(data){
-//              console.log("Houses recieved".blue);
-//              console.log(data);
-//              res.status(200).json({data: data});
-//          })
-//
-//        } catch (e) {
-//            log.error( "Ошибка "+ e + e.stack);
-//        }
-//    });
-//
-//
-//router.route('/getObjLatLon')
-//    .post(function(req, res){
-//        try {
-//            console.log("Lokking for LatLon".blue);
-//            tracksManager.giveMeLatLonByID(req.body.obj, function(id, data){
-//                console.log("Houses recieved".blue);
-//                console.log(data);
-//                res.status(200).json({data: data});
-//            })
-//
-//        } catch (e) {
-//            log.error( "Ошибка " + e + e.stack);
-//        }
-//    });
+router.route('/getHouses')
+   .post(function(req, res){
+       try {
+         tracksManager.getAllHousesById(req.body.street, function(data){
+             console.log("Houses recieved".blue);
+             console.log(data);
+             res.status(200).json({data: data});
+         })
+
+       } catch (e) {
+           log.error( "Ошибка "+ e + e.stack);
+       }
+   });
+
+
+router.route('/getObjLatLon')
+   .post(function(req, res){
+       try {
+           console.log("Lokking for LatLon".blue);
+           tracksManager.giveMeLatLonByID(req.body.obj, function(id, data){
+               console.log("Houses recieved".blue);
+               console.log(data);
+               res.status(200).json({data: data});
+           })
+
+       } catch (e) {
+           log.error( "Ошибка " + e + e.stack);
+       }
+   });
 
 
 
@@ -1840,7 +1840,7 @@ router.route('/getroutermatrix/:points')
     .get(function (req, res) {
         try {
         //log.info('getmatrix', req.params.points);
-        log.info('getmatrix for route to recalc');
+        log.info('getmatrix for route to recalc', req.params.points);
         tracksManager.getRouterMatrixByPoints(req.params.points, function (data) {
             res.status(200).json(data);
         });
@@ -2187,27 +2187,7 @@ router.route('/savetonode/')
 
 
 
-function  removeRouteFromSession(dispatchers, login, uniqueId) {
-    if (!dispatchers || !login || !uniqueId) return;
-    var dispIds = dispatchers.allDispatchers.filter(function(disp) {
-        return disp.login == login;
-    });
 
-    var disp = dispIds[0];
-
-    var shifts = dispatchers.shifts.filter(function(item){
-        return item.dispatcher == disp.id;
-    });
-    var shift = shifts[0];
-
-    var session = shift.sessions[shift.sessions.length - 1];
-
-    session.routes.forEach(function(route){
-        if (route.uniqueID == uniqueId){
-            route.end = parseInt(Date.now()/1000);
-        }
-    })
-}
 
 //router.route('/checknewiten')
 //    .get(function (req, res) {
@@ -2383,7 +2363,10 @@ router.route('/askforproblems/:need')
                     result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
-                    result.transports = cashedDataArr[currentCompany].transports;
+                    result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                    result.transports.forEach(function (transport) {
+                        delete transport.real_track;
+                    });
                     result.companyName = currentCompany;
                     result.statistic = cashedDataArr[currentCompany].statistic;
                     result.settings.user = "" + req.session.login;
@@ -2421,7 +2404,10 @@ router.route('/askforproblems/:need')
                 result.server_time = parseInt(Date.now() / 1000);
                 result.currentDay = true;
                 result.drivers = cashedDataArr[currentCompany].drivers;
-                result.transports = cashedDataArr[currentCompany].transports;
+                result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                result.transports.forEach(function (transport) {
+                    delete transport.real_track;
+                });
                 result.reasons = cashedDataArr[currentCompany].reasons;
                 result.notes = cashedDataArr[currentCompany].notes;
                 result.allBranches = cashedDataArr[currentCompany].allBranches;
@@ -2451,7 +2437,10 @@ router.route('/askforproblems/:need')
                         result.companyName = currentCompany;
                         result.settings = cashedDataArr[currentCompany].settings;
                         result.drivers = cashedDataArr[currentCompany].drivers;
-                        result.transports = cashedDataArr[currentCompany].transports;
+                        result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                        result.transports.forEach(function (transport) {
+                            delete transport.real_track;
+                        });
                         result.settings.user = "" + req.session.login;
                         result.settings.companyName = currentCompany;
                         result.reasons = cashedDataArr[currentCompany].reasons;
@@ -2477,7 +2466,10 @@ router.route('/askforproblems/:need')
                     result.settings.user = "" + req.session.login;
                     result.settings.companyName = currentCompany;
                     result.drivers = cashedDataArr[currentCompany].drivers;
-                    result.transports = cashedDataArr[currentCompany].transports;
+                    result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                    result.transports.forEach(function (transport) {
+                        delete transport.real_track;
+                    });
                     result.statistic = cashedDataArr[currentCompany].statistic;
 
                     var indx = cashedDataArr[currentCompany].line_routes[i].filterId;
@@ -2513,7 +2505,10 @@ router.route('/askforproblems/:need')
                 result.notes = cashedDataArr[currentCompany].notes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
-                result.transports = cashedDataArr[currentCompany].transports;
+                result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                result.transports.forEach(function (transport) {
+                    delete transport.real_track;
+                });
                 result.statistic = cashedDataArr[currentCompany].statistic;
                 //cashedDataArr[currentCompany].blocked_routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 //blockedRoutes.push({id: "" + cashedDataArr[currentCompany].line_routes[i].uniqueID, company: currentCompany, login: login, time: parseInt(Date.now()/1000)})
@@ -2544,13 +2539,17 @@ router.route('/askforproblems/:need')
             result.allRoutes = cashedDataArr[currentCompany].allRoutes;
             result.currentDay = true;
             result.drivers = cashedDataArr[currentCompany].drivers;
-            result.transports = cashedDataArr[currentCompany].transports;
+            result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+            result.transports.forEach(function (transport) {
+               delete transport.real_track;
+            });
         //Перед отправкой проверка на задвоенность маршрутов
             result.allBranches = cashedDataArr[currentCompany].allBranches;
         result.reasons = cashedDataArr[currentCompany].reasons;
         result.notes = cashedDataArr[currentCompany].notes;
         result.settings = cashedDataArr[currentCompany].settings;
         //log.info("Result length", result.routes.length);
+        log.toFLog("Need.txt", result);
         _data.setData(cashedDataArr);
         console.log("Reply 2432".red);
         res.status(200).json(result);
@@ -6474,6 +6473,28 @@ function predicateTime(company, cashedDataArr) {
 }
 
 
+function  removeRouteFromSession(dispatchers, login, uniqueId) {
+    if (!dispatchers || !login || !uniqueId) return;
+    var dispIds = dispatchers.allDispatchers.filter(function(disp) {
+        return disp.login == login;
+    });
+
+    var disp = dispIds[0];
+
+    var shifts = dispatchers.shifts.filter(function(item){
+        return item.dispatcher == disp.id;
+    });
+    var shift = shifts[0];
+
+    var session = shift.sessions[shift.sessions.length - 1];
+
+    session.routes.forEach(function(route){
+        if (route.uniqueID == uniqueId){
+            route.end = parseInt(Date.now()/1000);
+        }
+    })
+}
+
 
 function calculateProblemIndex(company, cashedDataArr) {
     try {
@@ -7804,8 +7825,10 @@ function createMainDispatcherTable (company, cashedDataArr){
         sqlUniversal.simpleLoad(company, "shifts", "if", "start_time_stamp", ">", loadDate, function (data){
             if (data == 'error') return;
             shifts = shifts || [];
-            //console.log("SHIFTS".yellow, data);
+            console.log("start_time_stamp", ">", loadDate);
+            console.log("SHIFTS FROM SQL".yellow, data);
             shifts = data;
+            shifts = clearShiftsData(shifts); // очистка смен от лишних данных
             concatDispatcherData(company)
         });
     }
@@ -7829,8 +7852,31 @@ function createMainDispatcherTable (company, cashedDataArr){
 }
 
 
+function clearShiftsData(shifts) {
+    //если у одного и того же диспетчера было несколько смен за крайние 12 часов, оставляем только последнюю
+    if ( shifts.length < 2 ) return;
+    var uniqDisp = [];
+    uniqDisp.push(shifts[0].dispatcher);
+    shifts.forEach(function (shift) {
+       if (!uniqDisp.some(function (disp) {
+               return shift.dispatcher == disp;
+           })) {
+           uniqDisp.push(shift.dispatcher);
+       }
+
+    });
+
+    var uniqShifts = [];
+    console.log("HALF CLEAN DISP", uniqDisp);
+    uniqDisp.forEach(function (disp) {
+
+    });
+
+    return shifts;
+}
+
 function concatDispatcherData(company) {
-    //console.log("Start Concat Dispatchers".yellow);
+    console.log("Start Concat Dispatchers".yellow);
     var cashedDataArr = _data.getData();
     if (!shifts ||
          //shifts.length == 0 ||
@@ -7856,7 +7902,7 @@ function concatDispatcherData(company) {
             }
     }
 
-    //console.log("Finish Concat Dispatchers".yellow, companysShifts);
+    console.log("Finish Concat Dispatchers".yellow, companysShifts);
     mark3:
     for (i = 0; i < companysShifts.length - 1; i++) {
          j = 0;
@@ -7877,6 +7923,7 @@ function concatDispatcherData(company) {
         }
     }
 
+    console.log("LAST STEP".yellow, companysShifts);
     cashedDataArr[company].dispatchers.shifts = companysShifts;
     _data.setData(cashedDataArr);
     checkFirstLoginForThisCompany(company);
@@ -8723,7 +8770,7 @@ function deleteOldData(company, cashedDataArr) {
             if (Date.now() - shift.end_time_stamp * 1000 > 16 * 60 * 60 *1000 ||
                 (Date.now() - shift.start_time_stamp * 1000 > 24 * 60 * 60 *1000
                 && shift.end_time_stamp == 0)){
-                closeShift(cashedDataArr, company, shift);
+                deleteShift(cashedDataArr, company, shift);
             }
         })
     }//for (i = 0; i <  )
@@ -8732,7 +8779,35 @@ function deleteOldData(company, cashedDataArr) {
 
 
 
-function closeShift(cashedDataArr, company, shift){
+function deleteShift(cashedDataArr, company, shift){
+    console.log("Shift to delete".red, shift);
+    if (shift.end_time_stamp == 0) {
+        //Устранение ошибки. Концом смены считается максимальное время из окончаний сессий
+        // Если такого времени нет, ставится время сейчас
+        if (shift.sessions){
+            var max = shift.sessions.reduce(function (max, session) {
+                if (max > session.end_time_stamp) {
+                    return max;
+                } else {
+                    return session.end_time_stamp;
+                }
+            }, 0)
+        }
+        console.log("MAX END TIME", max);
+        shift.end_time_stamp = max || Date.now();
+    }
+
+    //Сохранение в БД обноволенного shift
+    sqlUniversal.save(company, "shifts", "dispatcher", "==", shift.dispatcher, "&&", "start_time_stamp", "==", shift.start_time_stamp, "set", "end_time_stamp", "=", shift.end_time_stamp, ",", "sessions", "=", JSON.stringify(shift.sessions));
+
+    //Удаление смены из оперативной памяти
+    for (var i = 0; i < cashedDataArr[company].dispatchers.shifts; i++){
+        if (cashedDataArr[company].dispatchers.shifts[i].dispatcher == shift.dispatcher &&
+            cashedDataArr[company].dispatchers.shifts[i].start_time_stamp == shift.start_time_stamp) {
+            cashedDataArr[company].dispatchers.shifts.splice(i,1);
+            break;
+        }
+    }
 
 }
 
@@ -8750,11 +8825,6 @@ function firstDBConnect(){
 
 var quant = 0;
 function startCalculateCompany(company, cashedDataArr) {
-    //fixme test block
-    //  for (var keyObj in cashedDataArr[company]) {
-    //      console.log("KeyObj".grey, keyObj);
-    //  }
-    //console.log("BRANCH", cashedDataArr[company].BRANCH );
     try {
     startTime = parseInt(Date.now()/1000);
     log.info("Все данные получены, пересчитываем компанию", company);
