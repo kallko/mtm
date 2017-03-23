@@ -4,7 +4,7 @@ var express = require('express'),
     bodyParser = require('body-parser');
 var fs = require('fs');
 
-var server = require('http').Server(app);
+var server = require('https').Server(app);
 var io = require('socket.io')(server);
 
 
