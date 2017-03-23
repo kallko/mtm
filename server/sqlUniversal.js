@@ -56,7 +56,7 @@ module.exports = SqlUniversal;
 
 function SqlUniversal (){
     console.log("Establish  DB Connection".green);
-    if (companys.length == 0) execute("First Load Company", 'SELECT DISTINCT company FROM public."dispatchers" ', firstConnect);
+    if (companys.length == 0) execute("First Load Company", 'SELECT DISTINCT company FROM "dispatchers" ', firstConnect);
 }
 
 SqlUniversal.prototype.lastRowLoad = function (company){
