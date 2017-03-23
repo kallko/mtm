@@ -22,7 +22,8 @@
         promiseLib: promise
     };
     var pgp = require("pg-promise")(options),
-        db = pgp("postgres://postgres:postgres@localhost:5432/test");
+        //db = pgp("postgres://postgres:postgres@localhost:5432/test");
+        db = pgp("postgres://postgres:postgres@localhost:5432/template1");
         //db = pgp("postgres://postgres:postgres@localhost:5432/monitoring");
 
     var
