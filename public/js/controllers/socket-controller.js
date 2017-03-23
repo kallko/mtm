@@ -3,7 +3,7 @@
  */
 angular.module('MTMonitor').controller('SocketController', ['$scope', '$rootScope', '$filter', function (scope, rootScope, http) {
     console.log("SOCKET.IO");
-    var socket = io('https://sngtrans.com.ua/monitoring/');
+    var socket = io('https://mtmonitor.local:9020/');
     //var socket = io('https://localhost:9020/');
     //var socket = io();
     socket.on('dispatchers', function (data) {
