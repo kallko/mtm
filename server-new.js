@@ -1,10 +1,18 @@
+var fs = require('fs');
+
+var privateKey  = fs.readFileSync('ssl/mtmonitor.key', 'utf8');
+var certificate = fs.readFileSync('ssl/mtmonitor.crt', 'utf8');
+var credentials = {key: privateKey, cert: certificate};
+
 var express = require('express'),
     app = express(),
     session = require('express-session'),
     bodyParser = require('body-parser');
-var fs = require('fs');
 
-var server = require('https').Server(app);
+
+
+
+var server = require('https').Server(credentials, app);
 var io = require('socket.io')(server);
 
 
