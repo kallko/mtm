@@ -5726,10 +5726,10 @@ function changeStatusHookTo1C (company, point, status, limit, notes, driverNotes
 }
 
 function sendHookTo1C (company, type, data){
-    //console.log("Try to send  hook");
-    //var soapManager = new soap();
-    //console.log("Send to soap".yellow, company, type, data);
-    //soapManager.sendHook(company, type, data)
+    console.log("Try to send  hook");
+    var soapManager = new soap();
+    console.log("Send to soap".yellow, company, type, data);
+    soapManager.sendHook(company, type, data)
 }
 
 function calculateStatistic (company, cashedDataArr){
