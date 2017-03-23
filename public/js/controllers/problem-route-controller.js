@@ -105,7 +105,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                             });
 
                         http.post ('./updatetrack', {data: obj})
-                            .success(function (data) {
+                            .then(function successCallback(data) {
                                 rootScope.data.recievedUpdate=true;
                                 console.log("UpdateTrack look in server", data);
                                 for (var j=0; j<data.length; j++){
@@ -120,11 +120,11 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
                                     }
                                 }
                                  rootScope.$emit('updateTrack', data);
-                            })
-                            .error (function (data){
-                            rootScope.data.recievedUpdate = true;
-                            console.log("Ошибка", data);
-                        })
+                            }, function errorCallback(data) {
+                                rootScope.data.recievedUpdate = true;
+                                console.log("Ошибка", data);
+                            });
+
                     }
 
                     //rootScope.$emit('holestatistic', rootScope.data.statistic);
@@ -135,7 +135,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         function startAsking() {
             if (askProblemFromServer && rootScope.loaded) {
-                //console.log("I decide to start Asking");
+                console.log("I decide to start Asking");
                 rootScope.asking = true;
                 timeout(function () {
                     setProblemUpdate();
@@ -147,7 +147,7 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
         // Запрос у сервера проблем каждые 6 секунд
         function setProblemUpdate() {
-            //console.log("I decide i do it!");
+            console.log("I decide i do it!");
 
             interval(checkProblem, 15 * 1000);
         }
@@ -261,8 +261,15 @@ angular.module('MTMonitor').controller('ProblemRouteController', ['$scope', '$ht
 
 
         rootScope.$on('start', function () {
-            //console.log("Запускаем опрос сервера");
+            console.log("Запускаем опрос сервера");
+            rootScope.asking = true;
             startAsking();
+        });
+
+
+        rootScope.$on('stopAsking', function () {
+            console.log("Останавливаем опрос сервера");
+            rootScope.asking = false;
         });
 
 

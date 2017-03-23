@@ -2,7 +2,9 @@ angular.module('MTMonitor').controller('DispatcherTableController', ['$scope', '
     var vm = scope;
     vm.parseInt = parseInt;
     vm.localDispatchers;
-
+    //fixme данные для тестирования и отладки
+    vm.columnList = { keyjson2: 'Header 2', keyjson3: 'Head 3'};
+    vm.toSave = [{"keyjson2":"12", "keyjson3":"15" },{"keyjson2":"14", "keyjson3":"17" },{"keyjson2":"16", "keyjson3":"18" }];
 
     rootScope.$on('dispatchersLoad', init);
 
@@ -28,6 +30,8 @@ angular.module('MTMonitor').controller('DispatcherTableController', ['$scope', '
             return summ + item.max_problem;
         },0)/session.routes.length);
 
+
+
     }
 
 
@@ -40,11 +44,35 @@ angular.module('MTMonitor').controller('DispatcherTableController', ['$scope', '
 
 
     vm.dispTest = function() {
-            console.log(vm.localDispatchers);
-
-    }
 
 
+            //vm.toSave = vm.localDispatchers.shifts[0];
+            console.log("columnList", vm.columnList);
+            console.log("LocalDispatchers", vm.localDispatchers);
+            console.log("To save", vm.toSave);
+
+    };
+
+    vm.createReport = function () {
+        console.log(vm.fromShowDate, vm.toShowDate);
+        if (!vm.fromShowDate){
+            vm.$emit('showNotification', {text:"Введите дату для начала отчета", duration:3000});
+            return
+        }
+        var from_ts, to_ts;
+        if (!vm.toShowDate)  {
+            to_ts = parseInt(Date.now()/1000);
+        } else {
+            to_ts = parseInt(vm.toShowDate.getTime()/1000);
+        }
+        from_ts = parseInt(vm.fromShowDate.getTime()/1000);
+        console.log(from_ts , to_ts, to_ts - from_ts);
+        if (to_ts - from_ts < 0) {
+            vm.$emit('showNotification', {text:"Дата начала отчета должна быть раньше даты окончания", duration:3000});
+            return
+        }
+        vm.$emit('askDispatchersForReport', from_ts, to_ts);
+    };
 
 
 }]);

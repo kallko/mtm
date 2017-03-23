@@ -275,6 +275,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
 
     // получение матриц времени и расстояний
     (function (url) {
+        //console.log("Router request", url);
         request({
             url: url,
             json: true
@@ -293,6 +294,7 @@ TracksManager.prototype.getRouterData = function (_data, index, nIndx, checkBefo
 
     // получение плановых маршрутов
     (function (url) {
+        //console.log("2 Router request", url);
         request({
             url: url,
             json: true

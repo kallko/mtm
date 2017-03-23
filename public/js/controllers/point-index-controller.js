@@ -1,4 +1,5 @@
 // контроллер для работы с таблицей точек и маршрутами в целом
+
 angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http', '$timeout', '$interval'
     , '$filter', '$rootScope', 'Settings', 'Statuses', 'TimeConverter',
     function (scope, http, timeout, interval, filter, rootScope, Settings, Statuses, TimeConverter) {
@@ -4834,6 +4835,9 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
                                     }
                                 }
                                 rootScope.clickOff = false;
+                                //Проверка, была ли команда на конец смены или перерыв
+
+
                             }).error(function(err){
                                 console.log(err);
                                 alert("Произошла ошибка записи");
@@ -5482,9 +5486,11 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.timeOut = function(){
             //todo добавить раскраску кнопочек
             if (scope.time_out_button == "Перерыв") {
-                scope.time_out_button = "Работа"
+                scope.time_out_button = "Работа";
+                scope.$emit('stopAsking');
             } else {
-                scope.time_out_button = "Перерыв"
+                scope.time_out_button = "Перерыв";
+                scope.$emit('start');
             }
         };
 
@@ -5492,11 +5498,14 @@ angular.module('MTMonitor').controller('PointIndexController', ['$scope', '$http
         scope.endShift = function (){
             //todo добавить раскраску кнопочек
             if (scope.end_button == "Конец смены") {
-                scope.end_button = "Новая смена"
+                scope.end_button = "Новая смена";
+                scope.$emit('stopAsking');
+
             } else {
-                scope.end_button = "Конец смены"
+                scope.end_button = "Конец смены";
+                scope.$emit('start');
             }
-        };
+        }
 
 
 

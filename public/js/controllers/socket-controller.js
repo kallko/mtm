@@ -3,7 +3,7 @@
  */
 angular.module('MTMonitor').controller('SocketController', ['$scope', '$rootScope', '$filter', function (scope, rootScope, http) {
     console.log("SOCKET.IO");
-    var socket = io('http://localhost:9020');
+    var socket = io('https://sngtrans.com.ua:9020');
     socket.on('dispatchers', function (data) {
            console.log(data);
         if (data.error) return;
@@ -14,9 +14,18 @@ angular.module('MTMonitor').controller('SocketController', ['$scope', '$rootScop
     });
 
 
+    socket.on('sendReport', function (data) {
+        console.log("Receive REPORT", data);
+    });
+
+
     rootScope.$on("loadRoutes", function(){
         socket.emit("loadRoutes");
-    })
+    });
+
+    rootScope.$on('askDispatchersForReport', function (event, from, to) {
+       socket.emit("askDispatchersForReport", {"from":from, "to":to})
+    });
 
 
 }]);

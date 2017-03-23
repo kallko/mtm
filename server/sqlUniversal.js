@@ -160,12 +160,13 @@ SqlUniversal.prototype.save = function (company){
 
 
     }
-    console.log("Request".yellow, request);
+    //console.log("Request".yellow, request);
     var end = request.substring(request.indexOf("SET"));
     var middle = request.substring(request.indexOf("WHERE"), request.indexOf("SET"));
     var start = request.substring(0, request.indexOf("WHERE"));
-
     request = start + end + middle;
+
+    console.log("Result Request".yellow, request);
 
     execute("save", request, callback);
 };

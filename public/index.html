@@ -44,6 +44,8 @@
 <script src="./js/vendor/goldenlayout.js"></script>
 <script src="./js/vendor/bootstrap-contextmenu.js"></script>
 <script src="./bower_components/angular-smart-table/dist/smart-table.js"></script>
+<script src="./bower_components/json-export-excel/src/json-export-excel.js"></script>
+<script src="./bower_components/file-saver/FileSaver.js"></script>
 <!--<script type="text/javascript" src="./bower_components/angularjs-dropdown-multiselect/src/angularjs-dropdown-multiselect.js"></script>-->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-dropdown-multiselect/1.11.1/angularjs-dropdown-multiselect.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
@@ -179,7 +181,7 @@
                             </button>
                         </div>
                         <div class="col-sm-2">
-                            <button  ng-show = "false" class="btn btn-default btn-sm heightElement" style="width: 90%"  id="time-out-btn" ng-click = "timeOut()">
+                            <button  ng-show = "end_button != 'Новая смена'" class="btn btn-default btn-sm heightElement" style="width: 90%"  id="time-out-btn" ng-click = "timeOut()">
                                 {{time_out_button}}
                             </button>
                         </div>
@@ -207,7 +209,7 @@
                             <!--todo вставить вверх ng-show="data.routes.length == 0"-->
                         </div>
                         <div class="col-sm-2">
-                            <button  ng-show = "false" class="btn btn-default btn-sm heightElement "  style="width: 90%" id="end-shift-btn" ng-click="endShift()" >
+                            <button  ng-show = "time_out_button !=  'Работа'" class="btn btn-default btn-sm heightElement "  style="width: 90%" id="end-shift-btn" ng-click="endShift()" >
                                 {{end_button}}
                             </button>
                         </div>
@@ -699,7 +701,7 @@
 
                 <table class="table table-striped point-table"
                        id = "recalc-table-tbl"
-                       ng-show="changedRoute && changedRoute.DISTANCE == '0'">
+                       ng-show="changedRoute">
                     <!-- ng-show="newRoutes == 1"-->
                     <tr class="titles-tr">
                         <th>№</th>
@@ -1536,10 +1538,11 @@
 </template>
 
 <template  id="dispatcher-table">
-    <div ng-controller="DispatcherTableController" ng-if="data.settings.is_supervisor" ng-show="false">
+    <div ng-controller="DispatcherTableController" ng-if="data.settings.is_supervisor" ng-if="true">
         <!--settings.userRoles && settings.userRoles.some(function(item){return item == 'supervisor'})-->
         <div>
             <button ng-click="dispTest()"> Тест </button>
+
             <div>
                 <!--todo вывести статитстику-->
                 Всего маршрутов {{localDispatchers.dayStat.allRoutes}}; Закрыто {{localDispatchers.dayStat.closed}}; С проблемами {{localDispatchers.dayStat.lineRoutes}}; Ср.проблемность {{localDispatchers.dayStat.averageProblem}};
@@ -1549,8 +1552,8 @@
                 <div ng-repeat="disp in localDispatchers.shifts" style="margin: 3px; border: solid">
                     {{disp.fio}} Старт
                     {{disp.start_time_stamp * 1000 | date : 'dd.MM HH:mm'}}
-                Финиш {{disp.end_time_stamp * 1000 | date : 'HH:mm'}}
-                    {{disp.flag}}
+                Финиш {{disp.end_time_stamp > 0 ? (disp.end_time_stamp * 1000 | date : 'HH:mm' ): "Еще работает"}}
+
 
                 <button ng-click = "disp.flag = !disp.flag" > Сессии  ({{disp.sessions.length}})</button>
                         <div ng-repeat="session in disp.sessions" ng-show="disp.flag">
@@ -1562,6 +1565,19 @@
                         </div>
             </div>
         </div>
+        <div>
+             <input type="date"
+                   class="heightElement"
+                   ng-model="fromShowDate"
+                   id="from-date"/>
+            <input type="date"
+                   class="heightElement"
+                   ng-model="toShowDate"
+                   id="to-date"/>
+            <button ng-click="createReport()"> Сформировать </button>
+            <button ng-json-export-excel data="toSave" report-fields="columnList" filename =" 'dispatcher-data' " >Экспорт EXEL</button>
+        </div>
+
     </div>
 </template>
 

@@ -283,7 +283,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
                     + scope.changedRoute.points[0].LAT + '&'
                     + scope.changedRoute.points[0].LON;
 
-            //console.log("Запрос на расстояние и время между 2 точками URL =", url);
+            console.log("Запрос на расстояние и время между 2 точками URL =", url);
             // получаем расстояние от текущего положения машины и до следующей в плане точки
             http.get(url)
                 .success(function (data) {
@@ -1092,7 +1092,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
             // обновляем изменяемую копию маршрута
-            for (var i = 0; i < newSolution.length; i++) {
+            for (i = 0; i < newSolution.length; i++) {
                 tmp = newSolution[i].pointId;
                 //if (newSolution[i].pointId == -3) {
                 //    console.log("Найдена финальная точка");
@@ -1216,6 +1216,7 @@ angular.module('MTMonitor').controller('EditRouteController', ['$scope', '$rootS
 
 
         function createDisplayCollection(){
+            console.log("Satrt createDisplayCollection");
             scope.display = [];
             scope.routeToConfirm = {};
             scope.routeToConfirm.points = [];

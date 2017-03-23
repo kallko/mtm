@@ -20,6 +20,7 @@
     "bootstrap": "~3.3.5",
     "bootstrap-contextmenu": "~0.3.3",
     "async": "~2.0.1",
-    "colors": "~3.0.0"
+    "colors": "~3.0.0",
+    "json-export-excel": "ng-json-export-excel#^1.0.2"
   }
 }
