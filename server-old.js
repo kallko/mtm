@@ -1,50 +1,29 @@
-var fs = require('fs');
-
-var privateKey  = fs.readFileSync('ssl/mtmonitor.key', 'utf8');
-var certificate = fs.readFileSync('ssl/mtmonitor.crt', 'utf8');
-var credentials = {key: privateKey, cert: certificate};
-
 var express = require('express'),
     app = express(),
     session = require('express-session'),
     bodyParser = require('body-parser');
-
-
-console.log("Credentials", credentials);
-
-var server = require('https').Server(credentials, app);
+var fs = require('fs');
+var server = require('http').Server(app);
 var io = require('socket.io')(server);
-
-
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true, parameterLimit:1000000}));
-
-
-
 app.use(session({
     secret: 'keyboard cat 2',
     resave: true,
     saveUninitialized: true
 }));
-
 app.use(express.static(__dirname + '/public'));
 app.use('/bower_components', express.static(__dirname + '/bower_components'));
-
 var mtmRouter = require('./server/routers/mtm-router-new'), // подключение основного роутера для монитора диспетчера
     acpRouter = require('./server/routers/acp-router'), // подключение роутера для аналитической консоли
     serverData = require('./server/serverData'),
     sqlUniversalFile = require('./server/sqlUniversal'),
-    port = process.argv[2] || 443;
-
+    port = process.argv[2] || 9020;
 console.log(new Date());
-
 app.use('/', mtmRouter);
 app.use('/acp', acpRouter);
-
 //app.listen(process.env.PORT || port);
 server.listen(process.env.PORT || port);
-
-
 console.info('Listening on port ' + (process.env.PORT || port) + '...\n');
 var _data = new serverData ();
 var sqlUniversal = new sqlUniversalFile();
