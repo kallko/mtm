@@ -49,7 +49,7 @@ console.info('Listening on port ' + (process.env.PORT || port) + '...\n');
 var _data = new serverData ();
 var sqlUniversal = new sqlUniversalFile();
 
-io.sockets.on('connection', function (socket) {
+io.on('connection', function (socket) {
 
     console.log("Create first connection".blue);
     firstLogin();
