@@ -15,7 +15,7 @@
 //         scope.$emit('dispatchersLoad');
 //     });
 
-//fixme to local experiment (upper code for true server)
+// fixme to local experiment (upper code for true server)
 
 angular.module('MTMonitor').controller('SocketController', ['$scope', '$rootScope', '$filter', function (scope, rootScope, http) {
     console.log("SOCKET.IO");
