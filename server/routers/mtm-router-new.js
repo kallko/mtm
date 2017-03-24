@@ -2383,7 +2383,10 @@ router.route('/askforproblems/:need')
                     result.notes = cashedDataArr[currentCompany].notes;
                     result.settings = cashedDataArr[currentCompany].settings;
                     result.drivers = cashedDataArr[currentCompany].drivers;
-                    result.transports = cashedDataArr[currentCompany].transports;
+                    result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                    result.transports.forEach(function (transport) {
+                        delete transport.real_track;
+                    });
                     result.companyName = currentCompany;
                     result.statistic = cashedDataArr[currentCompany].statistic;
                     result.settings.user = "" + req.session.login;
@@ -2421,7 +2424,10 @@ router.route('/askforproblems/:need')
                 result.server_time = parseInt(Date.now() / 1000);
                 result.currentDay = true;
                 result.drivers = cashedDataArr[currentCompany].drivers;
-                result.transports = cashedDataArr[currentCompany].transports;
+                result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                result.transports.forEach(function (transport) {
+                    delete transport.real_track;
+                });
                 result.reasons = cashedDataArr[currentCompany].reasons;
                 result.notes = cashedDataArr[currentCompany].notes;
                 result.allBranches = cashedDataArr[currentCompany].allBranches;
@@ -2451,7 +2457,10 @@ router.route('/askforproblems/:need')
                         result.companyName = currentCompany;
                         result.settings = cashedDataArr[currentCompany].settings;
                         result.drivers = cashedDataArr[currentCompany].drivers;
-                        result.transports = cashedDataArr[currentCompany].transports;
+                        result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                        result.transports.forEach(function (transport) {
+                            delete transport.real_track;
+                        });
                         result.settings.user = "" + req.session.login;
                         result.settings.companyName = currentCompany;
                         result.reasons = cashedDataArr[currentCompany].reasons;
@@ -2477,7 +2486,10 @@ router.route('/askforproblems/:need')
                     result.settings.user = "" + req.session.login;
                     result.settings.companyName = currentCompany;
                     result.drivers = cashedDataArr[currentCompany].drivers;
-                    result.transports = cashedDataArr[currentCompany].transports;
+                    result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                    result.transports.forEach(function (transport) {
+                        delete transport.real_track;
+                    });
                     result.statistic = cashedDataArr[currentCompany].statistic;
 
                     var indx = cashedDataArr[currentCompany].line_routes[i].filterId;
@@ -2513,7 +2525,10 @@ router.route('/askforproblems/:need')
                 result.notes = cashedDataArr[currentCompany].notes;
                 result.server_time = parseInt(Date.now() / 1000);
                 result.drivers = cashedDataArr[currentCompany].drivers;
-                result.transports = cashedDataArr[currentCompany].transports;
+                result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+                result.transports.forEach(function (transport) {
+                    delete transport.real_track;
+                });
                 result.statistic = cashedDataArr[currentCompany].statistic;
                 //cashedDataArr[currentCompany].blocked_routes.push(cashedDataArr[currentCompany].line_routes[i]);
                 //blockedRoutes.push({id: "" + cashedDataArr[currentCompany].line_routes[i].uniqueID, company: currentCompany, login: login, time: parseInt(Date.now()/1000)})
@@ -2544,7 +2559,10 @@ router.route('/askforproblems/:need')
             result.allRoutes = cashedDataArr[currentCompany].allRoutes;
             result.currentDay = true;
             result.drivers = cashedDataArr[currentCompany].drivers;
-            result.transports = cashedDataArr[currentCompany].transports;
+            result.transports = JSON.parse(JSON.stringify(cashedDataArr[currentCompany].transports));
+            result.transports.forEach(function (transport) {
+                delete transport.real_track;
+            });
         //Перед отправкой проверка на задвоенность маршрутов
 
             result.allBranches = cashedDataArr[currentCompany].allBranches;
