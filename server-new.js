@@ -34,7 +34,7 @@ var mtmRouter = require('./server/routers/mtm-router-new'), // подключе�
     acpRouter = require('./server/routers/acp-router'), // подключение роутера для аналитической консоли
     serverData = require('./server/serverData'),
     sqlUniversalFile = require('./server/sqlUniversal'),
-    port = process.argv[2] || 443;
+    port = process.argv[2] || 9020;
 
 console.log(new Date());
 
